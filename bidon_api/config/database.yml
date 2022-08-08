@@ -1,0 +1,24 @@
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+
+development:
+  <<: *default
+  database: bidon_api_development
+  username: bidon_api
+  password:
+  host: localhost
+  port: 5432
+test:
+  <<: *default
+  database: bidon_api_test
+  username: bidon_api
+  password:
+  host: localhost
+  port: 5432
+production:
+  <<: *default
+  database: bidon_api_production
+  username: bidon_api
+  password: <%= ENV["BIDON_API_DATABASE_PASSWORD"] %>

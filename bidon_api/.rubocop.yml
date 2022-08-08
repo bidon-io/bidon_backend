@@ -1,0 +1,191 @@
+# Set proper ruby version.
+# Seems like the houndci doesn't have access to the .ruby-version file
+# or the rubocop version is too old. The problem was actually solved by the
+# rubocop developers with that PR:
+# https://github.com/bbatsov/rubocop/issues/2956
+require:
+  - rubocop-rails
+  - rubocop-performance
+  - rubocop-rspec
+
+AllCops:
+  TargetRubyVersion: 3.1
+  TargetRailsVersion: 7.0
+  NewCops: enable
+
+Layout/HashAlignment:
+  EnforcedColonStyle: table
+  EnforcedHashRocketStyle: table
+
+# Indent when as deep as case.
+Layout/CaseIndentation:
+  Enabled: false
+
+# Place the . on the next line, together with the method name.
+Layout/DotPosition:
+  EnforcedStyle: leading
+
+# Extra empty line detected at class body beginning.
+Layout/EmptyLinesAroundClassBody:
+  Enabled: false
+
+# Extra empty line detected at module body beginning.
+Layout/EmptyLinesAroundModuleBody:
+  Enabled: false
+
+# Missing space after #.
+Layout/LeadingCommentSpace:
+  Enabled: false
+
+# Align group with DashboardStatSlave. on line 42.
+Layout/MultilineMethodCallIndentation:
+  Enabled: false
+
+Layout/SpaceBeforeBlockBraces:
+  Enabled: true
+
+# %d trailing blank lines detected.
+Layout/TrailingEmptyLines:
+  Enabled: false
+
+Lint/UselessAccessModifier:
+  Enabled: true
+  Exclude:
+    - 'app/**/concerns/**/*.rb'
+
+Metrics/AbcSize:
+  Enabled: true
+  Exclude:
+    - 'spec/**/*.rb'
+
+# Block has too many lines. [27/25]
+Metrics/BlockLength:
+  Enabled: false
+
+# Class has too many lines. [27/25]
+Metrics/ClassLength:
+  Enabled: false
+
+# максимум 120 сиволов в 1 строке
+Layout/LineLength:
+  Max: 120
+
+Metrics/MethodLength:
+  Enabled: true
+  Max: 20
+  Exclude:
+    - 'spec/**/*.rb'
+    - 'db/data/*.rb'
+
+# Module has too many lines. [27/25]
+Metrics/ModuleLength:
+  Enabled: false
+
+Naming/AccessorMethodName:
+  Enabled: false
+
+Naming/PredicateName:
+  Enabled: false
+
+Style/AccessModifierDeclarations:
+  Enabled: false
+
+Style/AsciiComments:
+  Enabled: false
+
+Lint/AmbiguousBlockAssociation:
+  Enabled: true
+  Exclude:
+    - 'spec/**/*.rb'
+
+# Extra empty line detected at block body beginning.
+Style/BlockDelimiters:
+  Enabled: false
+
+Style/ClassAndModuleChildren:
+  Enabled: false
+
+# Missing top-level class documentation comment.
+Style/Documentation:
+  Enabled: false
+
+# do not freeze strings by default
+Style/FrozenStringLiteralComment:
+  Enabled: true
+  Exclude:
+    - 'db/migrate/*.rb'
+    - 'db/data/*.rb'
+
+# Do not introduce global variables.
+Style/GlobalVars:
+  Enabled: true
+
+Style/IfUnlessModifier:
+  Enabled: false
+
+Style/Lambda:
+  Enabled: false
+
+Style/LambdaCall:
+  Enabled: false
+
+Style/NumericPredicate:
+  Enabled: false
+
+# using [] with %w
+Style/PercentLiteralDelimiters:
+  PreferredDelimiters:
+    "%i": "[]"
+    "%r": "{}"
+    "%w": "[]"
+    "%W": "[]"
+    "%x": "[]"
+
+Style/RescueStandardError:
+  EnforcedStyle: implicit
+
+Style/TrailingCommaInArguments:
+  EnforcedStyleForMultiline: comma
+
+Style/TrailingCommaInArrayLiteral:
+  EnforcedStyleForMultiline: comma
+
+Style/TrailingCommaInHashLiteral:
+  EnforcedStyleForMultiline: comma
+
+Style/OptionalBooleanParameter:
+  Enabled: false
+
+Rails/UnknownEnv:
+  Environments:
+    - production
+    - development
+    - test
+    - staging
+
+Rails/FilePath:
+  Enabled: false
+
+RSpec/AnyInstance:
+  Enabled: false
+
+RSpec/ContextWording:
+  Enabled: false
+
+RSpec/ExampleLength:
+  Enabled: false
+
+RSpec/LeakyConstantDeclaration:
+  Enabled: false
+
+RSpec/MultipleMemoizedHelpers:
+  Enabled: false
+
+RSpec/NestedGroups:
+  Enabled: false
+
+RSpec/SharedExamples:
+  Enabled: false
+
+RSpec/MultipleExpectations:
+  Enabled: false

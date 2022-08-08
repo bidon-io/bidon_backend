@@ -1,0 +1,40 @@
+name: rubocop
+on:
+  pull_request:
+    branches:
+      - "main"
+    paths:
+      - "bidon_api/**"
+jobs:
+  rubocop:
+    name: runner / rubocop
+    runs-on: ubuntu-latest
+    env:
+      RUBOCOP_CACHE_ROOT: $HOME/.rubocop_cache
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+      - name: Set up ruby
+        uses: ruby/setup-ruby@v1
+      - name: Cache rubocop output
+        uses: actions/cache@v2
+        with:
+          key: rubocop-cache-${{ github.head_ref }}-${{ github.sha }}
+          path: ${{ env.RUBOCOP_CACHE_ROOT }}
+          restore-keys: |
+            rubocop-cache-${{ github.head_ref }}-
+            rubocop-cache-
+      - name: Get changed files
+        id: changed-files
+        uses: Ana06/get-changed-files@v1.2
+      - name: Run rubocop
+        uses: reviewdog/action-rubocop@v1
+        with:
+          github_token: ${{ secrets.github_token }}
+          rubocop_flags: ${{ steps.changed-files.outputs.all }} --only-recognized-file-types --force-exclusion
+          rubocop_version: gemfile
+          rubocop_extensions: |
+            rubocop-rails:gemfile
+            rubocop-rspec:gemfile
+            rubocop-performance:gemfile
+
