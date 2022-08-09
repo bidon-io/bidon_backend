@@ -5,17 +5,17 @@ default: &default
 
 development:
   <<: *default
-  database: bidon_api_development
-  username: bidon_api
-  password:
-  host: localhost
+  database: bidon
+  username: bidon
+  password: pass
+  host: postgres
   port: 5432
 test:
   <<: *default
-  database: bidon_api_test
-  username: bidon_api
-  password:
-  host: localhost
+  database: bidon_test
+  username: bidon
+  password: pass
+  host: postgres
   port: 5432
 production:
   <<: *default

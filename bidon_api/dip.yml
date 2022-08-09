@@ -1,0 +1,57 @@
+version: '7.1'
+
+# Define default environment variables to pass
+# to Docker Compose
+environment:
+  RAILS_ENV: development
+
+compose:
+  files:
+    - ./../docker-compose.yml
+  project_name: bidon
+
+interaction:
+  # This command spins up a Rails container with the required dependencies (such as databases),
+  # and opens a terminal within it.
+  runner:
+    description: Open a Bash shell within a Rails container (with dependencies up)
+    service: rails_api
+    command: /bin/bash
+
+  # Run a Rails container without any dependent services (useful for non-Rails scripts)
+  bash:
+    description: Run an arbitrary script within a container (or open a shell without deps)
+    service: rails_api
+    command: /bin/bash
+    compose_run_options: [ no-deps ]
+
+  # A shortcut to run Bundler commands
+  bundle:
+    description: Run Bundler commands
+    service: rails_api
+    command: bundle
+    compose_run_options: [ no-deps ]
+
+  rails:
+    description: Run Rails commands
+    service: rails_api
+    command: bundle exec rails
+    subcommands:
+      s:
+        description: Run Rails server
+        service: web_api
+        compose:
+          run_options: [service-ports, use-aliases]
+
+  'redis-cli':
+    description: Run Redis console
+    service: redis
+    command: redis-cli -h redis
+
+provision:
+  # We need the `|| true` part because some docker-compose versions
+  # cannot down a non-existent container without an error,
+  # see https://github.com/docker/compose/issues/9426
+  - dip compose down --volumes || true
+  - dip compose up -d postgres redis
+  - dip bash -c bin/setup
