@@ -12,6 +12,9 @@ AllCops:
   TargetRubyVersion: 3.1
   TargetRailsVersion: 7.0
   NewCops: enable
+  Exclude:
+    - '.irbrc'
+    - 'db/schema.rb'
 
 Layout/HashAlignment:
   EnforcedColonStyle: table
