@@ -9,16 +9,16 @@
 /.bundle
 
 # Ignore all logfiles and tempfiles.
-/log/*
-/tmp/*
-!/log/.keep
-!/tmp/.keep
+/**/log/*
+/**/tmp/*
+!/**/log/.keep
+!/**/tmp/.keep
 
 # Ignore pidfiles, but keep the directory.
-/tmp/pids/*
-!/tmp/pids/
-!/tmp/pids/.keep
+/**/tmp/pids/*
+!/**/tmp/pids/
+!/**/tmp/pids/.keep
 
 
 # Ignore master key for decrypting credentials and more.
-/config/master.key
+/**/config/master.key

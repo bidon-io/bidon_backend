@@ -7,7 +7,7 @@ on:
       - "bidon_api/**"
 jobs:
   rubocop:
-    name: runner / rubocop
+    name: rubocop
     runs-on: ubuntu-latest
     env:
       RUBOCOP_CACHE_ROOT: $HOME/.rubocop_cache
