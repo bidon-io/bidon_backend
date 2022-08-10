@@ -37,4 +37,13 @@ jobs:
             rubocop-rails:gemfile
             rubocop-rspec:gemfile
             rubocop-performance:gemfile
+  brakeman:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Brakeman
+        uses: devmasx/brakeman-linter-action@master
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          PROJECT_PATH: bidon_api/
 

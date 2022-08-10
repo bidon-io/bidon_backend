@@ -112,12 +112,9 @@ Style/ClassAndModuleChildren:
 Style/Documentation:
   Enabled: false
 
-# do not freeze strings by default
+# Strings frozen globally by default
 Style/FrozenStringLiteralComment:
-  Enabled: true
-  Exclude:
-    - 'db/migrate/*.rb'
-    - 'db/data/*.rb'
+  Enabled: false
 
 # Do not introduce global variables.
 Style/GlobalVars:
