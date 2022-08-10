@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 # https://docs.avohq.io
 Avo.configure do |config|
   ## == Routing ==
