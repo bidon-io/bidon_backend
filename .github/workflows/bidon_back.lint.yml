@@ -28,7 +28,7 @@ jobs:
         id: changed-files
         uses: Ana06/get-changed-files@v1.2
       - name: Run rubocop
-        uses: reviewdog/action-rubocop@v1
+        uses: reviewdog/action-rubocop@v2
         with:
           github_token: ${{ secrets.github_token }}
           rubocop_flags: ${{ steps.changed-files.outputs.all }} --only-recognized-file-types --force-exclusion
