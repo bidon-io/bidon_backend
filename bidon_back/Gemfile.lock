@@ -46,6 +46,9 @@ GEM
       erubi (~> 1.4)
       rails-dom-testing (~> 2.0)
       rails-html-sanitizer (~> 1.1, >= 1.2.0)
+    active_link_to (1.0.5)
+      actionpack
+      addressable
     activejob (7.0.3.1)
       activesupport (= 7.0.3.1)
       globalid (>= 0.3.6)
@@ -66,13 +69,37 @@ GEM
       i18n (>= 1.6, < 2)
       minitest (>= 5.1)
       tzinfo (~> 2.0)
+    addressable (2.8.0)
+      public_suffix (>= 2.0.2, < 5.0)
     ast (2.4.2)
+    avo (2.12.0)
+      active_link_to
+      addressable
+      breadcrumbs_on_rails
+      chartkick
+      countries
+      docile
+      dry-initializer
+      hotwire-rails
+      httparty
+      image_processing
+      meta-tags
+      pagy
+      pundit
+      rails (>= 6.0)
+      view_component (= 2.60)
+      zeitwerk
     benchmark-ips (2.10.0)
     bootsnap (1.13.0)
       msgpack (~> 1.2)
     brakeman (5.3.1)
+    breadcrumbs_on_rails (4.1.0)
+      railties (>= 5.0)
     builder (3.2.4)
+    chartkick (4.2.1)
     concurrent-ruby (1.1.10)
+    countries (5.1.1)
+      sixarm_ruby_unaccent (~> 1.1)
     crass (1.0.6)
     cssbundling-rails (1.1.1)
       railties (>= 6.0.0)
@@ -80,16 +107,29 @@ GEM
     digest (3.1.0)
     digest-crc (0.6.4)
       rake (>= 12.0.0, < 14.0.0)
+    docile (1.4.0)
+    dry-initializer (3.1.1)
     erubi (1.11.0)
     factory_bot (6.2.1)
       activesupport (>= 5.0.0)
     factory_bot_rails (6.2.0)
       factory_bot (~> 6.2.0)
       railties (>= 5.0.0)
+    ffi (1.15.5)
     globalid (1.0.0)
       activesupport (>= 5.0)
+    hotwire-rails (0.1.3)
+      rails (>= 6.0.0)
+      stimulus-rails
+      turbo-rails
+    httparty (0.20.0)
+      mime-types (~> 3.0)
+      multi_xml (>= 0.5.2)
     i18n (1.12.0)
       concurrent-ruby (~> 1.0)
+    image_processing (1.12.2)
+      mini_magick (>= 4.9.5, < 5)
+      ruby-vips (>= 2.0.17, < 3)
     importmap-rails (1.1.5)
       actionpack (>= 6.0.0)
       railties (>= 6.0.0)
@@ -100,10 +140,17 @@ GEM
     mail (2.7.1)
       mini_mime (>= 0.1.1)
     marcel (1.0.2)
+    meta-tags (2.17.0)
+      actionpack (>= 3.2.0, < 7.1)
     method_source (1.0.0)
+    mime-types (3.4.1)
+      mime-types-data (~> 3.2015)
+    mime-types-data (3.2022.0105)
+    mini_magick (4.11.0)
     mini_mime (1.1.2)
     minitest (5.16.2)
     msgpack (1.5.4)
+    multi_xml (0.6.0)
     net-imap (0.2.3)
       digest
       net-protocol
@@ -122,12 +169,17 @@ GEM
     nokogiri (1.13.8-arm64-darwin)
       racc (~> 1.4)
     oj (3.13.20)
+    pagy (5.10.1)
+      activesupport
     parallel (1.22.1)
     parser (3.1.2.1)
       ast (~> 2.4.1)
     pg (1.4.3)
+    public_suffix (4.0.7)
     puma (5.6.4)
       nio4r (~> 2.0)
+    pundit (2.2.0)
+      activesupport (>= 3.0.0)
     racc (1.6.0)
     rack (2.2.4)
     rack-test (2.0.2)
@@ -204,11 +256,14 @@ GEM
     ruby-kafka (1.5.0)
       digest-crc
     ruby-progressbar (1.11.0)
+    ruby-vips (2.1.4)
+      ffi (~> 1.12)
     sentry-rails (5.4.1)
       railties (>= 5.0)
       sentry-ruby (~> 5.4.1)
     sentry-ruby (5.4.1)
       concurrent-ruby (~> 1.0, >= 1.0.2)
+    sixarm_ruby_unaccent (1.2.0)
     sprockets (4.1.1)
       concurrent-ruby (~> 1.0)
       rack (> 1, < 3)
@@ -230,6 +285,9 @@ GEM
     tzinfo (2.0.5)
       concurrent-ruby (~> 1.0)
     unicode-display_width (2.2.0)
+    view_component (2.60.0)
+      activesupport (>= 5.0.0, < 8.0)
+      method_source (~> 1.0)
     websocket-driver (0.7.5)
       websocket-extensions (>= 0.1.0)
     websocket-extensions (0.1.5)
@@ -239,6 +297,7 @@ PLATFORMS
   arm64-darwin-21
 
 DEPENDENCIES
+  avo
   benchmark-ips
   bootsnap
   brakeman

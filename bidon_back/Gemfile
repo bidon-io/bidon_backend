@@ -15,6 +15,7 @@ gem 'sprockets-rails'
 gem 'stimulus-rails'
 gem 'turbo-rails'
 
+gem 'avo'
 gem 'bootsnap', require: false
 gem 'oj'
 gem 'redis'
