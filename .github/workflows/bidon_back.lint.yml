@@ -13,7 +13,7 @@ jobs:
       RUBOCOP_CACHE_ROOT: $HOME/.rubocop_cache
     steps:
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Set up ruby
         uses: ruby/setup-ruby@v1
       - name: Cache rubocop output
@@ -40,7 +40,7 @@ jobs:
   brakeman:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
       - name: Brakeman
         uses: devmasx/brakeman-linter-action@master
         env:
