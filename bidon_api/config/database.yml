@@ -6,7 +6,7 @@ default: &default
   password: <%= ENV.fetch("PG_PASSWORD") %>
   host: <%= ENV.fetch("PG_HOST") %>
   port: <%= ENV.fetch("PG_PORT") %>
-  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  pool: <%= ENV.fetch("RAILS_THREADS_COUNT") { 5 } %>
 
 development:
   <<: *default

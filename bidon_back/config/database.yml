@@ -1,17 +1,29 @@
 default: &default
-  adapter: postgresql
-  encoding: unicode
-  database: <%= ENV.fetch("PG_DATABASE") %>
-  username: <%= ENV.fetch("PG_USERNAME") %>
-  password: <%= ENV.fetch("PG_PASSWORD") %>
-  host: <%= ENV.fetch("PG_HOST") %>
-  port: <%= ENV.fetch("PG_PORT") %>
-  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  primary: &primary
+    adapter: postgresql
+    encoding: unicode
+    database: <%= ENV.fetch("PG_DATABASE") %>
+    username: <%= ENV.fetch("PG_USERNAME") %>
+    password: <%= ENV.fetch("PG_PASSWORD") %>
+    host: <%= ENV.fetch("PG_HOST") %>
+    port: <%= ENV.fetch("PG_PORT") %>
+    pool: <%= ENV.fetch("RAILS_THREADS_COUNT") { 5 } %>
+  appodeal_read_only:
+    adapter: postgresql
+    encoding: unicode
+    database: <%= ENV.fetch("APPODEAL_PG_DATABASE") %>
+    username: <%= ENV.fetch("APPODEAL_PG_USERNAME") %>
+    password: <%= ENV.fetch("APPODEAL_PG_PASSWORD") %>
+    host: <%= ENV.fetch("APPODEAL_PG_HOST") %>
+    port: <%= ENV.fetch("APPODEAL_PG_PORT") %>
+    pool: <%= ENV.fetch("RAILS_THREADS_COUNT") { 5 } %>
+    replica: true
 
 development:
   <<: *default
 test:
-  <<: *default
-  database: <%= [ENV.fetch("PG_DATABASE"), 'test'].join('_') %>
+  primary:
+    <<: *primary
+    database: <%= [ENV.fetch("PG_DATABASE"), 'test'].join('_') %>
 production:
   <<: *default
