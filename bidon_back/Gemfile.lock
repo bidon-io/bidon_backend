@@ -101,8 +101,6 @@ GEM
     countries (5.1.1)
       sixarm_ruby_unaccent (~> 1.1)
     crass (1.0.6)
-    cssbundling-rails (1.1.1)
-      railties (>= 6.0.0)
     diff-lcs (1.5.0)
     digest (3.1.0)
     digest-crc (0.6.4)
@@ -166,6 +164,8 @@ GEM
       net-protocol
       timeout
     nio4r (2.5.8)
+    nokogiri (1.13.8-aarch64-linux)
+      racc (~> 1.4)
     nokogiri (1.13.8-arm64-darwin)
       racc (~> 1.4)
     oj (3.13.20)
@@ -294,6 +294,7 @@ GEM
     zeitwerk (2.6.0)
 
 PLATFORMS
+  aarch64-linux
   arm64-darwin-21
 
 DEPENDENCIES
@@ -301,7 +302,6 @@ DEPENDENCIES
   benchmark-ips
   bootsnap
   brakeman
-  cssbundling-rails
   factory_bot_rails
   importmap-rails (~> 1.1)
   oj

@@ -8,6 +8,8 @@
 # Ignore bundler config.
 /.bundle
 
+/**/public/assets/*
+
 # Ignore all logfiles and tempfiles.
 /**/log/*
 /**/tmp/*
@@ -19,6 +21,7 @@
 !/**/tmp/pids/
 !/**/tmp/pids/.keep
 
+/**/.env
 
 # Ignore master key for decrypting credentials and more.
 /**/config/master.key

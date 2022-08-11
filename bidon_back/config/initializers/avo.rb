@@ -1,7 +1,7 @@
 # https://docs.avohq.io
 Avo.configure do |config|
   ## == Routing ==
-  config.root_path = '/admin'
+  config.root_path = '/'
 
   # Where should the user be redirected when visting the `/avo` url
   # config.home_path = nil
@@ -32,7 +32,7 @@ Avo.configure do |config|
   # config.raise_error_on_missing_policy = false
 
   ## == Localization ==
-  config.locale = 'en-US'
+  config.locale = 'en'
 
   ## == Customization ==
   config.app_name = 'BidON Management Console'

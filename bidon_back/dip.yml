@@ -15,31 +15,31 @@ interaction:
   # and opens a terminal within it.
   runner:
     description: Open a Bash shell within a Rails container (with dependencies up)
-    service: rails_api
+    service: rails_back
     command: /bin/bash
 
   # Run a Rails container without any dependent services (useful for non-Rails scripts)
   bash:
     description: Run an arbitrary script within a container (or open a shell without deps)
-    service: rails_api
+    service: rails_back
     command: /bin/bash
     compose_run_options: [ no-deps ]
 
   # A shortcut to run Bundler commands
   bundle:
     description: Run Bundler commands
-    service: rails_api
+    service: rails_back
     command: bundle
     compose_run_options: [ no-deps ]
 
   rails:
     description: Run Rails commands
-    service: rails_api
+    service: rails_back
     command: bundle exec rails
     subcommands:
       s:
         description: Run Rails server
-        service: web_api
+        service: web_back
         compose:
           run_options: [service-ports, use-aliases]
 
@@ -53,5 +53,5 @@ provision:
   # cannot down a non-existent container without an error,
   # see https://github.com/docker/compose/issues/9426
   - dip compose down --volumes --rmi local || true
-  - dip compose up -d postgres redis --build rails_api
+  - dip compose up -d postgres redis nginx --build rails_back
   - dip bash -c bin/setup

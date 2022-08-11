@@ -1,24 +1,17 @@
 default: &default
   adapter: postgresql
   encoding: unicode
+  database: <%= ENV.fetch("PG_DATABASE") %>
+  username: <%= ENV.fetch("PG_USERNAME") %>
+  password: <%= ENV.fetch("PG_PASSWORD") %>
+  host: <%= ENV.fetch("PG_HOST") %>
+  port: <%= ENV.fetch("PG_PORT") %>
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
 
 development:
   <<: *default
-  database: bidon
-  username: bidon
-  password: pass
-  host: 0.0.0.0
-  port: 5432
 test:
   <<: *default
-  database: bidon_test
-  username: bidon
-  password: pass
-  host: 0.0.0.0
-  port: 5432
+  database: <%= [ENV.fetch("PG_DATABASE"), 'test'].join('_') %>
 production:
   <<: *default
-  database: bidon_api_production
-  username: bidon_api
-  password: <%= ENV["BIDON_API_DATABASE_PASSWORD"] %>
