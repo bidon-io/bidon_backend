@@ -18,6 +18,19 @@ RUN apt-get update -qq \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
   && truncate -s 0 /var/log/*log
 
+#ARG NODE_MAJOR
+#RUN curl -sL https://deb.nodesource.com/setup_$NODE_MAJOR.x | bash -
+#RUN apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get -yq dist-upgrade && \
+#  DEBIAN_FRONTEND=noninteractive apt-get install -yq --no-install-recommends \
+#    nodejs \
+#    && apt-get clean \
+#    && rm -rf /var/cache/apt/archives/* \
+#    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
+#    && truncate -s 0 /var/log/*log
+#
+#ARG YARN_VERSION
+#RUN npm install -g yarn@$YARN_VERSION
+
 # Configure bundler
 ENV LANG=C.UTF-8 \
   BUNDLE_JOBS=4 \
@@ -27,10 +40,11 @@ ENV LANG=C.UTF-8 \
 ENV BUNDLE_APP_CONFIG=.bundle
 
 # Uncomment this line if you want to run binstubs without prefixing with `bin/` or `bundle exec`
-ENV PATH /app/bin:$PATH
+ENV PATH=/app/bin:$PATH
 
 # Upgrade RubyGems and install the latest Bundler version
-RUN gem update --system && gem install bundler
+RUN gem update --system && \
+    gem install bundler
 
 # Create a directory for the app code
 RUN mkdir -p /app
@@ -44,4 +58,4 @@ ENV LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so
 # Document that we're going to expose port 3000
 EXPOSE 3000
 # Use Bash as the default command
-CMD ["/bin/bash"]
+CMD ["/usr/bin/bash"]

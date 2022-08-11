@@ -1,4 +1,4 @@
-name: rubocop
+name: bidon_api
 on:
   pull_request:
     branches:
@@ -38,6 +38,7 @@ jobs:
             rubocop-rspec:gemfile
             rubocop-performance:gemfile
   brakeman:
+    name: brakeman
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
