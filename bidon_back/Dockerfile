@@ -1,6 +1,6 @@
 ARG RUBY_VERSION=3.1.2
 
-FROM ruby:$RUBY_VERSION-slim
+FROM ruby:$RUBY_VERSION-slim AS dev
 
 # Common dependencies
 RUN apt-get update -qq \
@@ -59,3 +59,49 @@ ENV LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so
 EXPOSE 3000
 # Use Bash as the default command
 CMD ["/usr/bin/bash"]
+
+FROM ruby:$RUBY_VERSION-slim AS prod
+
+RUN apt-get update -qq \
+  && DEBIAN_FRONTEND=noninteractive apt-get install -yq --no-install-recommends \
+    build-essential \
+    gnupg2 \
+    libpq-dev \
+    libjemalloc-dev \
+  && apt-get clean \
+  && rm -rf /var/cache/apt/archives/* \
+  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
+  && truncate -s 0 /var/log/*log
+
+RUN useradd -ms /usr/sbin/nologin -u 1000 deploy
+
+# Configure bundler
+ENV LANG=C.UTF-8 \
+  BUNDLE_JOBS=4 \
+  BUNDLE_RETRY=3
+
+USER deploy
+
+WORKDIR /app
+
+COPY --chown=deploy:deploy Gemfile .
+COPY --chown=deploy:deploy Gemfile.lock .
+
+RUN bundle install && rm -rf /data/bundle/cache
+
+COPY --chown=deploy:deploy . .
+
+ENV PG_DATABASE= \
+  PG_DATABASE= \
+  PG_USERNAME= \
+  PG_PASSWORD= \
+  PG_HOST= \
+  PG_PORT= \
+  APPODEAL_PG_DATABASE= \
+  APPODEAL_PG_USERNAME= \
+  APPODEAL_PG_PASSWORD= \
+  APPODEAL_PG_HOST= \
+  APPODEAL_PG_PORT=
+
+# Assets
+RUN bundle exec rails assets:precompile
