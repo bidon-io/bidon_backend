@@ -1,8 +1,9 @@
 class App < ApplicationRecord
   belongs_to :user
 
-  validates :package_name, presence: true, uniqueness: true
-  validates :app_key, presence: true, uniqueness: true
-  validates :platform_id, presence: true
-  validates :human_name, presence: true
+  has_many :app_demand_profiles, dependent: :restrict_with_exception
+  has_many :line_items,          dependent: :restrict_with_exception
+
+  validates :package_name, :app_key,    presence: true, uniqueness: true
+  validates :platform_id,  :human_name, presence: true
 end
