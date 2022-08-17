@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe ConfigController, type: :controller do
+RSpec.describe AuctionController, type: :controller do
   context 'missing X-BidOn-Version header' do
     let(:expected_response) do
       {
@@ -29,13 +29,10 @@ RSpec.describe ConfigController, type: :controller do
     context 'valid response' do
       let(:expected_response) do
         {
-          'init'       => {
-            'tmax'     => 5000,
-            'adapters' => [],
-          },
-          'placements' => [],
+          'rounds'     => [],
+          'line_items' => [],
           'token'      => '{}',
-          'segment_id' => '',
+          'min_price'  => 0,
         }.to_json
       end
 
@@ -55,7 +52,7 @@ RSpec.describe ConfigController, type: :controller do
       end
 
       it 'returns 200 with ok' do
-        allow_any_instance_of(Api::Config::Response).to receive(:present?).and_return(false)
+        allow_any_instance_of(Api::Auction::Response).to receive(:present?).and_return(false)
 
         post :create
 
