@@ -1,4 +1,5 @@
 class ApplicationController < ActionController::API
+  before_action :set_sentry_context
   before_action :validate_bidon_header!
 
   rescue_from StandardError do |_e|
@@ -27,5 +28,9 @@ class ApplicationController < ActionController::API
     ActionController::Parameters.new(JSON.parse(json))
   rescue Zlib::GzipFile::Error, JSON::ParserError
     ActionController::Parameters.new
+  end
+
+  def set_sentry_context
+    Sentry.set_extras(params: params.to_unsafe_h, session: session.to_hash)
   end
 end
