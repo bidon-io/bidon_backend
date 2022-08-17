@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Config
+module Api
   class Request
     attr_reader :params
 

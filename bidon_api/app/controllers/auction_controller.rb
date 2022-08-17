@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
-class ConfigController < ApplicationController
+class AuctionController < ApplicationController
   def create
     api_request = Api::Request.new(params)
 
     if api_request.valid?
-      config_response = Api::Config::Response.new(api_request)
+      auction_response = Api::Auction::Response.new(api_request)
 
-      if config_response.present?
-        render json: config_response.body, status: :ok
+      if auction_response.present?
+        render json: auction_response.body, status: :ok
       else
         render_empty_result
       end
