@@ -48,6 +48,12 @@ interaction:
     service: redis
     command: redis-cli -h redis
 
+  rspec:
+    service: rails_api
+    environment:
+      RAILS_ENV: test
+    command: bundle exec rspec
+
 provision:
   # We need the `|| true` part because some docker-compose versions
   # cannot down a non-existent container without an error,
