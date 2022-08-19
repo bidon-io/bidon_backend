@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_08_16_164019) do
+ActiveRecord::Schema[7.0].define(version: 2022_08_18_160109) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -39,6 +39,18 @@ ActiveRecord::Schema[7.0].define(version: 2022_08_16_164019) do
     t.index ["app_key"], name: "index_apps_on_app_key", unique: true
     t.index ["package_name"], name: "index_apps_on_package_name", unique: true
     t.index ["user_id"], name: "index_apps_on_user_id"
+  end
+
+  create_table "auction_configurations", force: :cascade do |t|
+    t.string "name"
+    t.bigint "app_id", null: false
+    t.integer "ad_type"
+    t.jsonb "rounds"
+    t.integer "status"
+    t.jsonb "settings"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["app_id"], name: "index_auction_configurations_on_app_id"
   end
 
   create_table "countries", force: :cascade do |t|
@@ -115,6 +127,7 @@ ActiveRecord::Schema[7.0].define(version: 2022_08_16_164019) do
   add_foreign_key "app_demand_profiles", "demand_source_accounts", column: "account_id"
   add_foreign_key "app_demand_profiles", "demand_sources"
   add_foreign_key "apps", "users"
+  add_foreign_key "auction_configurations", "apps"
   add_foreign_key "demand_source_accounts", "demand_sources"
   add_foreign_key "line_items", "apps"
   add_foreign_key "line_items", "demand_source_accounts", column: "account_id"
