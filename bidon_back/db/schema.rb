@@ -48,6 +48,7 @@ ActiveRecord::Schema[7.0].define(version: 2022_08_18_160109) do
     t.jsonb "rounds"
     t.integer "status"
     t.jsonb "settings"
+    t.float "pricefloor"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["app_id"], name: "index_auction_configurations_on_app_id"

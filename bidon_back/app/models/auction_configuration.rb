@@ -3,5 +3,5 @@ class AuctionConfiguration < ApplicationRecord
 
   enum ad_type: { interstitial: 1, banner: 2, rewarded_video: 3 }
 
-  validates :name, :ad_type, :rounds, presence: true
+  validates :name, :pricefloor, :ad_type, :rounds, presence: true
 end
