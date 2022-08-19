@@ -1,10 +1,10 @@
 FactoryBot.define do
   factory :auction_configuration do
-    name { "MyString" }
+    name { 'MyString' }
     app { nil }
     ad_type { 1 }
-    rounds { "" }
+    rounds { '' }
     status { 1 }
-    settings { "" }
+    settings { '' }
   end
 end
