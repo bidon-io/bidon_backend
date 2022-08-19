@@ -7,6 +7,7 @@ class CreateAuctionConfigurations < ActiveRecord::Migration[7.0]
       t.jsonb :rounds
       t.integer :status
       t.jsonb :settings
+      t.float :pricefloor
 
       t.timestamps
     end

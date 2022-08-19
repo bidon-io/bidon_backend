@@ -6,5 +6,6 @@ FactoryBot.define do
     rounds { '' }
     status { 1 }
     settings { '' }
+    pricefloor { 1 }
   end
 end
