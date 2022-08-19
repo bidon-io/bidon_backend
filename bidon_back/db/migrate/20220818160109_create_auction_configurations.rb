@@ -3,11 +3,11 @@ class CreateAuctionConfigurations < ActiveRecord::Migration[7.0]
     create_table :auction_configurations do |t|
       t.string :name
       t.references :app, null: false, foreign_key: true
-      t.integer :ad_type
-      t.jsonb :rounds
+      t.integer :ad_type, null: false
+      t.jsonb :rounds, default: []
       t.integer :status
-      t.jsonb :settings
-      t.float :pricefloor
+      t.jsonb :settings, default: {}
+      t.float :pricefloor, null: false
 
       t.timestamps
     end

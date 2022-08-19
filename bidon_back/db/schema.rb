@@ -44,11 +44,11 @@ ActiveRecord::Schema[7.0].define(version: 2022_08_18_160109) do
   create_table "auction_configurations", force: :cascade do |t|
     t.string "name"
     t.bigint "app_id", null: false
-    t.integer "ad_type"
-    t.jsonb "rounds"
+    t.integer "ad_type", null: false
+    t.jsonb "rounds", default: []
     t.integer "status"
-    t.jsonb "settings"
-    t.float "pricefloor"
+    t.jsonb "settings", default: {}
+    t.float "pricefloor", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["app_id"], name: "index_auction_configurations_on_app_id"
