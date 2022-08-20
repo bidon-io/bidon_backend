@@ -27,6 +27,30 @@ ActiveRecord::Schema[7.0].define(version: 2022_08_18_160109) do
     t.index ["demand_source_id"], name: "index_app_demand_profiles_on_demand_source_id"
   end
 
+  create_table "app_mmp_profiles", force: :cascade do |t|
+    t.bigint "app_id", null: false
+    t.date "start_date", null: false
+    t.integer "mmp_platform", default: 0
+    t.bigint "primary_mmp_account"
+    t.bigint "secondary_mmp_account"
+    t.boolean "get_spend_from_secondary_mmp_account", default: false
+    t.integer "primary_mmp_raw_data_source"
+    t.integer "secondary_mmp_raw_data_source"
+    t.string "adjust_app_token"
+    t.string "adjust_s2s_token"
+    t.string "adjust_environment"
+    t.string "appsflyer_dev_key"
+    t.string "appsflyer_app_id"
+    t.string "appsflyer_conversion_keys"
+    t.string "firebase_config_keys"
+    t.integer "firebase_expiration_duration"
+    t.boolean "firebase_tracking", default: false
+    t.boolean "facebook_tracking", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["app_id"], name: "index_app_mmp_profiles_on_app_id"
+  end
+
   create_table "apps", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.integer "platform_id", null: false
@@ -127,6 +151,7 @@ ActiveRecord::Schema[7.0].define(version: 2022_08_18_160109) do
   add_foreign_key "app_demand_profiles", "apps"
   add_foreign_key "app_demand_profiles", "demand_source_accounts", column: "account_id"
   add_foreign_key "app_demand_profiles", "demand_sources"
+  add_foreign_key "app_mmp_profiles", "apps"
   add_foreign_key "apps", "users"
   add_foreign_key "auction_configurations", "apps"
   add_foreign_key "demand_source_accounts", "demand_sources"
