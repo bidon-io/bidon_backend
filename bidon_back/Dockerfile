@@ -103,5 +103,7 @@ ENV PG_DATABASE= \
   APPODEAL_PG_HOST= \
   APPODEAL_PG_PORT=
 
+ENV RUBYOPT="--enable-frozen_string_literal,yjit"
+
 # Assets
 RUN bundle exec rails assets:precompile
