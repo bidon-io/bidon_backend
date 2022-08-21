@@ -9,7 +9,8 @@ class AppMmpProfile < ApplicationRecord
   belongs_to :mmp_account_secondary,
              class_name:  'MmpAccount',
              foreign_key: 'secondary_mmp_account',
-             inverse_of:  :secondary_app_profiles
+             inverse_of:  :secondary_app_profiles,
+             optional:    true
 
   enum mmp_platform: { none: 0, appsflyer: 1, adjust: 2 }, _prefix: 'mmp_platform'
   enum primary_mmp_raw_data_source:   { none: 0, appsflyer: 1, adjust: 2 }, _prefix: 'primary_raw_source'
