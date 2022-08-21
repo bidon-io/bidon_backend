@@ -74,5 +74,6 @@ COPY --chown=deploy:deploy Gemfile .
 COPY --chown=deploy:deploy Gemfile.lock .
 
 RUN bundle install && rm -rf /data/bundle/cache
+ENV RUBYOPT="--enable-frozen_string_literal,yjit"
 
 COPY --chown=deploy:deploy . .

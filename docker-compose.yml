@@ -2,6 +2,7 @@ x-api: &api
   image: 'bidon/bidon_api'
   build:
     context: './bidon_api'
+    target: dev
     args:
       RUBY_VERSION: '3.1.2'
   stdin_open: true
@@ -25,10 +26,9 @@ x-back: &back
   image: 'bidon/bidon_back'
   build:
     context: './bidon_back'
+    target: dev
     args:
       RUBY_VERSION: '3.1.2'
-#      NODE_MAJOR: '18'
-#      YARN_VERSION: '1.22.19'
   stdin_open: true
   tty: true
   volumes:
