@@ -12,8 +12,8 @@ class AppMmpProfile < ApplicationRecord
              inverse_of:  :secondary_app_profiles
 
   enum mmp_platform: { none: 0, appsflyer: 1, adjust: 2 }, _prefix: 'mmp_platform'
-  enum primary_mmp_raw_data_source:   { none: 0, appsflyer: 1, adjust: 2 }
-  enum secondary_mmp_raw_data_source: { none: 0, appsflyer: 1, adjust: 2 }
+  enum primary_mmp_raw_data_source:   { none: 0, appsflyer: 1, adjust: 2 }, _prefix: 'primary_raw_source'
+  enum secondary_mmp_raw_data_source: { none: 0, appsflyer: 1, adjust: 2 }, _prefix: 'secondary_raw_source'
 
   validates :start_date, presence: true
 
