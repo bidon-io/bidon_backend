@@ -23,7 +23,7 @@ RSpec.describe AuctionController, type: :controller do
 
   context 'X-BidOn-Version header present' do
     before do
-      request.env['X-BidOn-Version'] = '1.2.3'
+      request.headers['X-BidOn-Version'] = '1.2.3'
     end
 
     context 'valid response' do
@@ -37,6 +37,8 @@ RSpec.describe AuctionController, type: :controller do
       end
 
       it 'returns 200 with ok' do
+        allow_any_instance_of(Api::Request).to receive(:valid?).and_return(true)
+
         post :create
 
         expect(response).to have_http_status(:ok)
@@ -52,6 +54,7 @@ RSpec.describe AuctionController, type: :controller do
       end
 
       it 'returns 200 with ok' do
+        allow_any_instance_of(Api::Request).to receive(:valid?).and_return(true)
         allow_any_instance_of(Api::Auction::Response).to receive(:present?).and_return(false)
 
         post :create

@@ -4,7 +4,7 @@ require 'rails'
 # Pick the frameworks you want:
 require 'active_model/railtie'
 # require "active_job/railtie"
-require 'active_record/railtie'
+# require 'active_record/railtie'
 # require "active_storage/engine"
 require 'action_controller/railtie'
 # require "action_mailer/railtie"
@@ -30,6 +30,8 @@ module BidonApi
     #
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
+
+    config.autoload_paths << Rails.root.join('lib/services')
 
     # Only loads a smaller set of middleware suitable for API only apps.
     # Middleware like session, flash, cookies can be added back manually.

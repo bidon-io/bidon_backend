@@ -68,5 +68,7 @@ Rails.application.configure do
   config.lograge.formatter = Lograge::Formatters::Json.new
 
   # Do not dump schema after migrations.
-  config.active_record.dump_schema_after_migration = false
+  # config.active_record.dump_schema_after_migration = false
+
+  config.hosts << 'b.appbaqend.com'
 end
