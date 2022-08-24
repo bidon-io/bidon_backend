@@ -15,12 +15,16 @@ module Api
         @body ||= {
           'init'       => {
             'tmax'     => 5000,
-            'adapters' => [],
+            'adapters' => adapters,
           },
           'placements' => [],
           'token'      => '{}',
           'segment_id' => '',
         }
+      end
+
+      def adapters
+        AdaptersFetcher.new(app: config_request.app, config_adapters: config_request.adapters).fetch
       end
     end
   end

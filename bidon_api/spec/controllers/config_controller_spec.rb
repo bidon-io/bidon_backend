@@ -23,7 +23,7 @@ RSpec.describe ConfigController, type: :controller do
 
   context 'X-BidOn-Version header present' do
     before do
-      request.env['X-BidOn-Version'] = '1.2.3'
+      request.headers['X-BidOn-Version'] = '1.2.3'
     end
 
     context 'valid response' do
@@ -31,7 +31,7 @@ RSpec.describe ConfigController, type: :controller do
         {
           'init'       => {
             'tmax'     => 5000,
-            'adapters' => [],
+            'adapters' => {},
           },
           'placements' => [],
           'token'      => '{}',
@@ -40,6 +40,8 @@ RSpec.describe ConfigController, type: :controller do
       end
 
       it 'returns 200 with ok' do
+        allow_any_instance_of(Api::Request).to receive(:valid?).and_return(true)
+
         post :create
 
         expect(response).to have_http_status(:ok)
@@ -56,6 +58,7 @@ RSpec.describe ConfigController, type: :controller do
 
       it 'returns 200 with ok' do
         allow_any_instance_of(Api::Config::Response).to receive(:present?).and_return(false)
+        allow_any_instance_of(Api::Request).to receive(:valid?).and_return(true)
 
         post :create
 

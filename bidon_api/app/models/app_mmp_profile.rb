@@ -1,0 +1,2 @@
+class AppMmpProfile < ApplicationRecord
+end
