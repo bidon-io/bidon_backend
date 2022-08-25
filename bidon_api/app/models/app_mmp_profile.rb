@@ -1,2 +1,2 @@
-class AppMmpProfile < ApplicationRecord
+class AppMmpProfile < Sequel::Model
 end

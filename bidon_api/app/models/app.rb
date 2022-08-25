@@ -1,2 +1,2 @@
-class App < ApplicationRecord
+class App < Sequel::Model
 end

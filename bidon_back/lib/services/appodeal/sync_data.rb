@@ -113,6 +113,7 @@ module Appodeal
     def sync_line_items
       profiles = appodeal_connection.execute <<~SQL.squish
         SELECT id, app_id, bid_floor, account_id, ad_type, code, extra,
+        COALESCE(label, package_name) AS human_name,
         CASE
           WHEN account_type = 'BidmachineAccount' THEN 'DemandSourceAccount::BidMachine'
           WHEN account_type = 'AdmobAccount' THEN 'DemandSourceAccount::Admob'
@@ -123,7 +124,7 @@ module Appodeal
           AND account_type IN ('BidmachineAccount', 'AdmobAccount', 'ApplovinAccount')
       SQL
 
-      build_models(AppDemandProfile, profiles)
+      build_models(LineItem, profiles)
     end
 
     def sync_mmp_accounts
