@@ -4,7 +4,8 @@ class AppMmpProfile < ApplicationRecord
   belongs_to :mmp_account_primary,
              class_name:  'MmpAccount',
              foreign_key: 'primary_mmp_account',
-             inverse_of:  :primary_app_profiles
+             inverse_of:  :primary_app_profiles,
+             optional:    true
 
   belongs_to :mmp_account_secondary,
              class_name:  'MmpAccount',
