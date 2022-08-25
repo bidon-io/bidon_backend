@@ -3,6 +3,8 @@
 module Api
   module Config
     class Response
+      prepend MemoWise
+
       attr_reader :config_request
 
       delegate :present?, to: :body
@@ -12,7 +14,7 @@ module Api
       end
 
       def body
-        @body ||= {
+        {
           'init'       => {
             'tmax'     => 5000,
             'adapters' => adapters,
@@ -22,6 +24,7 @@ module Api
           'segment_id' => '',
         }
       end
+      memo_wise :body
 
       def adapters
         AdaptersFetcher.new(app: config_request.app, config_adapters: config_request.adapters).fetch
