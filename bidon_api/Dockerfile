@@ -12,7 +12,6 @@ RUN apt-get update -qq \
     git \
     vim \
     libpq-dev \
-    libjemalloc-dev \
   && apt-get clean \
   && rm -rf /var/cache/apt/archives/* \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
@@ -37,9 +36,6 @@ RUN mkdir -p /app
 WORKDIR /app
 
 ENV RUBYOPT="--enable-frozen_string_literal,yjit"
-ENV LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so
-# Check that Ruby uses jemalloc
-# MALLOC_CONF=stats_print:true ruby -e "exit"
 
 # Document that we're going to expose port 3000
 EXPOSE 3000
@@ -54,6 +50,7 @@ RUN apt-get update -qq \
     gnupg2 \
     libpq-dev \
     libjemalloc-dev \
+    vim \
   && apt-get clean \
   && rm -rf /var/cache/apt/archives/* \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
@@ -75,5 +72,8 @@ COPY --chown=deploy:deploy Gemfile.lock .
 
 RUN bundle install && rm -rf /data/bundle/cache
 ENV RUBYOPT="--enable-frozen_string_literal,yjit"
+ENV LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so
+# Check that Ruby uses jemalloc
+# MALLOC_CONF=stats_print:true ruby -e "exit"
 
 COPY --chown=deploy:deploy . .
