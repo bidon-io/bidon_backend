@@ -4,6 +4,8 @@ class AuctionController < ApplicationController
   def create
     api_request = Api::Request.new(zipped_params.to_unsafe_h)
 
+    log_params('AUCTION')
+
     if api_request.valid?
       auction_response = Api::Auction::Response.new(api_request)
 
@@ -13,6 +15,8 @@ class AuctionController < ApplicationController
         render_empty_result
       end
     else
+      log_params('INVALID AUCTION')
+
       render_app_key_invalid
     end
   end
