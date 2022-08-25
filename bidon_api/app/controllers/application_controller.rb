@@ -31,6 +31,10 @@ class ApplicationController < ActionController::API
     ActionController::Parameters.new
   end
 
+  def log_params(event_name)
+    Rails.logger.info "[#{event_name}] #{zipped_params.to_unsafe_h.inspect}"
+  end
+
   def set_sentry_context
     Sentry.set_extras(params: params.to_unsafe_h, session: session.to_hash)
   end
