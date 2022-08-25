@@ -2,7 +2,7 @@
 
 class ConfigController < ApplicationController
   def create
-    api_request = Api::Request.new(zipped_params)
+    api_request = Api::Request.new(zipped_params.to_unsafe_h)
 
     if api_request.valid?
       config_response = Api::Config::Response.new(api_request)
