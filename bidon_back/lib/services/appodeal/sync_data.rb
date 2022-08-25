@@ -147,7 +147,7 @@ module Appodeal
     def sync_app_mmp_profiles # rubocop:disable Metrics/MethodLength
       app_mmp_profiles = appodeal_connection.execute <<~SQL.squish
         SELECT ap.id, ap.app_id,
-          aa.date AS start_date,
+          coalesce(aa.date, CURRENT_DATE) AS start_date,
           CASE
             WHEN ap.holistic_solution_attribution_platform = 2 THEN 1
             WHEN ap.holistic_solution_attribution_platform = 1 THEN 2
@@ -158,10 +158,19 @@ module Appodeal
           aa.get_spend_from_secondary_mmp_account,
           aa.primary_mmp_raw_data_source,
           aa.secondary_mmp_raw_data_source,
-          #{decrypt('ap.encrypted_holistic_solution_adjust_app_token')} AS adjust_app_token,
-          #{decrypt('ap.encrypted_holistic_solution_adjust_s2s_token')} AS adjust_s2s_token,
+          CASE
+            WHEN ap.encrypted_holistic_solution_adjust_app_token = '' THEN ''
+            ELSE #{decrypt('ap.encrypted_holistic_solution_adjust_app_token')}
+          END AS adjust_app_token,
+          CASE
+            WHEN ap.encrypted_holistic_solution_adjust_s2s_token = '' THEN ''
+            ELSE #{decrypt('ap.encrypted_holistic_solution_adjust_s2s_token')}
+          END AS adjust_s2s_token,
           ap.holistic_solution_adjust_environment AS adjust_environment,
-          #{decrypt('ap.encrypted_holistic_solution_appsflyer_dev_key')} AS appsflyer_dev_key,
+          CASE
+            WHEN ap.encrypted_holistic_solution_appsflyer_dev_key = '' THEN ''
+            ELSE #{decrypt('ap.encrypted_holistic_solution_appsflyer_dev_key')}
+          END AS appsflyer_dev_key,
           ap.holistic_solution_appsflyer_app_id AS appsflyer_app_id,
           ap.holistic_solution_appsflyer_conversion_keys AS appsflyer_conversion_keys,
           ap.holistic_solution_appsflyer_conversion_keys AS appsflyer_conversion_keys,
