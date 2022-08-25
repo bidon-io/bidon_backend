@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 Sentry.init do |config|
-  config.dsn = ENV.fetch('SENTRY_DSN')
+  config.dsn = ENV.fetch('SENTRY_DSN', nil)
   config.enabled_environments = %w[production staging]
   config.environment = Rails.env
   config.send_modules = false # include module versions in reports
