@@ -70,7 +70,7 @@ Rails.application.configure do
 
   config.lograge.custom_payload do |controller|
     {
-      params:   controller.send(:zipped_params),
+      params:   controller.request.request_parameters,
       response: controller.response.body,
     }
   end
