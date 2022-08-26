@@ -23,7 +23,7 @@ module Api
 
       private
 
-      def fetch_adapter(adapter_name)
+      def fetch_adapter(adapter_name) # rubocop:disable Metrics/MethodLength
         return {} unless app_mmp_profile
 
         case adapter_name.to_s
@@ -36,6 +36,16 @@ module Api
           {
             app_token: app_mmp_profile.adjust_app_token,
             s2s_token: app_mmp_profile.adjust_s2s_token,
+          }
+        when 'bidmachine'
+          {
+            seller_id:        '1',
+            endpoint:         'x.appbaqend.com',
+            mediation_config: %w[meta_audience criteo pangle amazon adcolony my_target vungle tapjoy notsy],
+          }
+        when 'applovin'
+          {
+            app_key: 'example',
           }
         else
           {}
