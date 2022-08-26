@@ -2,7 +2,7 @@
 
 class AuctionController < ApplicationController
   def create
-    api_request = Api::Request.new(zipped_params.to_unsafe_h)
+    api_request = Api::Request.new(zipped_params)
 
     if api_request.valid?
       auction_response = Api::Auction::Response.new(api_request)

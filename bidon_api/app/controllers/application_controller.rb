@@ -1,4 +1,6 @@
 class ApplicationController < ActionController::API
+  prepend MemoWise
+
   before_action :set_sentry_context
   before_action :validate_bidon_header!
 
@@ -26,12 +28,13 @@ class ApplicationController < ActionController::API
 
   def zipped_params
     json = Utils.decode_params(request.raw_post)
-    ActionController::Parameters.new(JSON.parse(json))
+    JSON.parse(json)
   rescue Zlib::GzipFile::Error, JSON::ParserError
     ActionController::Parameters.new
   end
+  memo_wise :zipped_params
 
   def set_sentry_context
-    Sentry.set_extras(params: params.to_unsafe_h, session: session.to_hash)
+    Sentry.set_extras(params:, session: session.to_hash)
   end
 end
