@@ -2,7 +2,7 @@ module Appodeal
   class SyncData
     APP_IDS = [
       454_236, # iOS test app
-      735_351, # Android test app
+      726_191, # Android test app
     ].freeze
 
     DEMANDS = [
@@ -11,10 +11,14 @@ module Appodeal
       1260, # BidMachine
     ].freeze
 
-    attr_reader :appodeal_connection
+    attr_reader :app_ids, :demand_ids, :appodeal_connection
 
+    # @param [Array<Integer>] app_ids
+    # @param [Array<Integer>] demand_ids
     # @param [Class<ActiveRecord::Base>] appodeal_connection
-    def initialize(appodeal_connection: AppodealPg)
+    def initialize(app_ids: APP_IDS, demand_ids: DEMANDS, appodeal_connection: AppodealPg)
+      @app_ids = app_ids
+      @demand_ids = demand_ids
       @appodeal_connection = appodeal_connection
     end
 
@@ -64,7 +68,7 @@ module Appodeal
 
     def sync_demand_sources
       demand_sources = appodeal_connection.execute <<~SQL.squish
-        SELECT id, human_name, api_name AS api_key FROM campaign_types WHERE id IN (#{DEMANDS.join(', ')})
+        SELECT id, human_name, api_name AS api_key FROM campaign_types WHERE id IN (#{demand_ids.join(', ')})
       SQL
 
       build_models(DemandSource, demand_sources)
@@ -103,8 +107,8 @@ module Appodeal
             WHEN network = 50 THEN 'DemandSourceAccount::Applovin'
           ELSE NULL END AS account_type
         FROM app_network_profiles
-        WHERE app_id IN (#{APP_IDS.join(', ')})
-          AND network IN (#{DEMANDS.join(', ')})
+        WHERE app_id IN (#{app_ids.join(', ')})
+          AND network IN (#{demand_ids.join(', ')})
       SQL
 
       build_models(AppDemandProfile, profiles)
@@ -120,7 +124,7 @@ module Appodeal
           WHEN account_type = 'ApplovinAccount' THEN 'DemandSourceAccount::Applovin'
         ELSE NULL END AS account_type
         FROM ad_units
-        WHERE app_id IN (#{APP_IDS.join(', ')})
+        WHERE app_id IN (#{app_ids.join(', ')})
           AND account_type IN ('BidmachineAccount', 'AdmobAccount', 'ApplovinAccount')
       SQL
 
@@ -181,11 +185,11 @@ module Appodeal
         FROM app_profiles ap
         LEFT JOIN (
           SELECT * FROM app_attributions
-          WHERE app_id IN (#{APP_IDS.join(', ')}) AND (app_id, date) IN (
+          WHERE app_id IN (#{app_ids.join(', ')}) AND (app_id, date) IN (
             select app_id, max(date) from app_attributions group by app_id
           )
         ) aa ON ap.app_id = aa.app_id
-        WHERE ap.app_id IN (#{APP_IDS.join(', ')})
+        WHERE ap.app_id IN (#{app_ids.join(', ')})
       SQL
 
       build_models(AppMmpProfile, app_mmp_profiles)
@@ -209,7 +213,7 @@ module Appodeal
     end
 
     def app_ids_filter
-      @app_ids_filter ||= "id IN (#{APP_IDS.join(', ')})"
+      @app_ids_filter ||= "id IN (#{app_ids.join(', ')})"
     end
 
     def decrypt(col)
