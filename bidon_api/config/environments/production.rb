@@ -66,6 +66,14 @@ Rails.application.configure do
   # Logging with LogRage
   config.lograge.enabled = true
   config.lograge.formatter = Lograge::Formatters::Json.new
+  config.lograge.base_controller_class = 'ActionController::API'
+
+  config.lograge.custom_payload do |controller|
+    {
+      params:   controller.send(:zipped_params),
+      response: controller.response.body,
+    }
+  end
 
   # Do not dump schema after migrations.
   # config.active_record.dump_schema_after_migration = false
