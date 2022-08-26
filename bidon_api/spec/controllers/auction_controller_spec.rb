@@ -38,6 +38,7 @@ RSpec.describe AuctionController, type: :controller do
 
       it 'returns 200 with ok' do
         allow_any_instance_of(Api::Request).to receive(:valid?).and_return(true)
+        allow_any_instance_of(Api::Auction::Response).to receive(:body).and_return(expected_response)
 
         post :create
 

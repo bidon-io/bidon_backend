@@ -38,7 +38,7 @@ module Api
           }
         end
       end
-      memo_wise :auction_configuration
+      memo_wise :line_items
     end
   end
 end

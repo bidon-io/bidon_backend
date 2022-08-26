@@ -3,7 +3,7 @@ module Api
     class AdaptersFetcher
       prepend MemoWise
 
-      attr_reader :config_adapters
+      attr_reader :app, :config_adapters
 
       def initialize(app:, config_adapters:)
         @app = app
