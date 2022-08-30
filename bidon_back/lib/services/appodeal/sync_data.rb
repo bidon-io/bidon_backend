@@ -11,6 +11,9 @@ module Appodeal
       1260, # BidMachine
     ].freeze
 
+    APPLOVIN_DEMAND = 50
+    APPLOVIN_ACCOUNT_ID = 4
+
     attr_reader :app_ids, :demand_ids, :appodeal_connection
 
     # @param [Array<Integer>] app_ids
@@ -100,7 +103,8 @@ module Appodeal
 
     def sync_app_demand_profiles
       profiles = appodeal_connection.execute <<~SQL.squish
-        SELECT id, app_id, network AS demand_source_id, data::jsonb, account_id,
+        SELECT DISTINCT ON (app_id, demand_source_id)
+               id, app_id, network AS demand_source_id, data::jsonb, account_id,
           CASE
             WHEN network = 1260 THEN 'DemandSourceAccount::BidMachine'
             WHEN network = 20 THEN 'DemandSourceAccount::Admob'
@@ -108,7 +112,12 @@ module Appodeal
           ELSE NULL END AS account_type
         FROM app_network_profiles
         WHERE app_id IN (#{app_ids.join(', ')})
-          AND network IN (#{demand_ids.join(', ')})
+          AND (
+            (network IN (#{(demand_ids - [APPLOVIN_DEMAND]).join(', ')}))
+            OR
+            (network = #{APPLOVIN_DEMAND} AND account_id = #{APPLOVIN_ACCOUNT_ID})
+          )
+        ORDER BY app_id, demand_source_id, updated_at DESC
       SQL
 
       build_models(AppDemandProfile, profiles)
