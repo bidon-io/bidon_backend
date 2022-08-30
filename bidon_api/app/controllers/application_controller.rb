@@ -1,6 +1,9 @@
 class ApplicationController < ActionController::API
+  prepend MemoWise
+
   before_action :set_sentry_context
   before_action :validate_bidon_header!
+  before_action :validate_app!
 
   wrap_parameters false
 
@@ -18,19 +21,28 @@ class ApplicationController < ActionController::API
            status: :unprocessable_entity
   end
 
-  def render_empty_result
-    render json: { success: true }, status: :ok
+  def validate_app!
+    return if api_request.valid?
+
+    render json:   { error: { code: 422, message: 'App key is invalid' } },
+           status: :unprocessable_entity
   end
 
-  def render_app_key_invalid
-    render json: { error: { code: 422, message: 'App key is invalid' } }, status: :unprocessable_entity
+  def render_empty_result
+    render json: { success: true }, status: :ok
   end
 
   def set_sentry_context
     Sentry.set_extras(params:, session: session.to_hash)
   end
 
-  def permitted_params
-    @permitted_params ||= params.except(:controller, :action).permit!.to_h
+  def api_request
+    Api::Request.new(permitted_params)
   end
+  memo_wise :api_request
+
+  def permitted_params
+    params.except(:controller, :action).permit!.to_h
+  end
+  memo_wise :permitted_params
 end
