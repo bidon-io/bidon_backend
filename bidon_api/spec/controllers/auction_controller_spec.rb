@@ -50,17 +50,20 @@ RSpec.describe AuctionController, type: :controller do
     context 'empty response' do
       let(:expected_response) do
         {
-          success: true,
+          error: {
+            code:    422,
+            message: 'No ads found',
+          },
         }.to_json
       end
 
-      it 'returns 200 with ok' do
+      it 'returns 422 with No ads error' do
         allow_any_instance_of(Api::Request).to receive(:valid?).and_return(true)
         allow_any_instance_of(Api::Auction::Response).to receive(:present?).and_return(false)
 
         post :create
 
-        expect(response).to have_http_status(:ok)
+        expect(response).to have_http_status(:unprocessable_entity)
         expect(response.body).to eq expected_response
       end
     end

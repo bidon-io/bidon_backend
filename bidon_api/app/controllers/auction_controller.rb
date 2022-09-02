@@ -7,7 +7,8 @@ class AuctionController < ApplicationController
     if auction_response.present?
       render json: auction_response.body, status: :ok
     else
-      render_empty_result
+      render json:   { error: { code: 422, message: 'No ads found' } },
+             status: :unprocessable_entity
     end
   end
 end

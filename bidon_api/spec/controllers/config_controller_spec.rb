@@ -49,24 +49,6 @@ RSpec.describe ConfigController, type: :controller do
       end
     end
 
-    context 'empty response' do
-      let(:expected_response) do
-        {
-          success: true,
-        }.to_json
-      end
-
-      it 'returns 200 with ok' do
-        allow_any_instance_of(Api::Config::Response).to receive(:present?).and_return(false)
-        allow_any_instance_of(Api::Request).to receive(:valid?).and_return(true)
-
-        post :create
-
-        expect(response).to have_http_status(:ok)
-        expect(response.body).to eq expected_response
-      end
-    end
-
     context 'invalid request' do
       let(:expected_response) do
         {
