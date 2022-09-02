@@ -18,7 +18,7 @@ module Api
         return unless auction_configuration
 
         {
-          'rounds'                   => auction_configuration.rounds,
+          'rounds'                   => rounds,
           'line_items'               => line_items,
           'token'                    => '{}',
           'min_price'                => auction_configuration.pricefloor,
@@ -28,10 +28,10 @@ module Api
       end
       memo_wise :body
 
-      def auction_configuration
-        AuctionConfiguration.where(app_id: app.id).order(Sequel.desc(:created_at)).first
+      def rounds
+        JSON.parse(auction_configuration.rounds)
       end
-      memo_wise :auction_configuration
+      memo_wise :rounds
 
       def line_items
         LineItem.eager(demand_source_account: :demand_source).where(app_id: app.id).map do |line_item|
@@ -48,6 +48,11 @@ module Api
         SecureRandom.uuid
       end
       memo_wise :auction_id
+
+      def auction_configuration
+        AuctionConfiguration.where(app_id: app.id).order(Sequel.desc(:created_at)).first
+      end
+      memo_wise :auction_configuration
     end
   end
 end
