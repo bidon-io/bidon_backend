@@ -124,9 +124,16 @@ module Appodeal
     end
 
     def sync_line_items
+      legacy_ad_types = { interstitial: 0, banner: 1, rewarded_video: 5 }
+
       profiles = appodeal_connection.execute <<~SQL.squish
-        SELECT id, app_id, bid_floor, account_id, ad_type, code, extra,
+        SELECT id, app_id, bid_floor, account_id, ad_type, code, extra, height, width,
         COALESCE(label, package_name) AS human_name,
+        CASE
+          WHEN ad_type = #{legacy_ad_types[:interstitial]} THEN #{AdType::ENUM[:interstitial]}
+          WHEN ad_type = #{legacy_ad_types[:banner]} THEN #{AdType::ENUM[:banner]}
+          WHEN ad_type = #{legacy_ad_types[:rewarded_video]} THEN #{AdType::ENUM[:rewarded_video]}
+        END AS ad_type,
         CASE
           WHEN account_type = 'BidmachineAccount' THEN 'DemandSourceAccount::BidMachine'
           WHEN account_type = 'AdmobAccount' THEN 'DemandSourceAccount::Admob'
@@ -134,6 +141,7 @@ module Appodeal
         ELSE NULL END AS account_type
         FROM ad_units
         WHERE app_id IN (#{app_ids.join(', ')})
+          AND ad_type IN (#{legacy_ad_types.values.join(', ')})
           AND account_type IN ('BidmachineAccount', 'AdmobAccount', 'ApplovinAccount')
       SQL
 
