@@ -1,5 +1,5 @@
 module Api
-  module Config
+  module Auction
     class LineItemsFetcher
       prepend MemoWise
 
