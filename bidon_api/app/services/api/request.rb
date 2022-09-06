@@ -14,6 +14,14 @@ module Api
       app.present?
     end
 
+    def ad_type
+      params['ad_type'].to_sym
+    end
+
+    def ad_object
+      params['ad_object']
+    end
+
     def adapters
       params['adapters'].presence || []
     end
