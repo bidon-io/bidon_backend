@@ -124,7 +124,7 @@ module Appodeal
     end
 
     def sync_line_items
-      legacy_ad_types = { interstitial: 0, banner: 1, rewarded_video: 5 }
+      legacy_ad_types = { interstitial: 0, banner: 1, rewarded: 5 }
 
       profiles = appodeal_connection.execute <<~SQL.squish
         SELECT id, app_id, bid_floor, account_id, ad_type, code, extra, height, width,
@@ -132,7 +132,7 @@ module Appodeal
         CASE
           WHEN ad_type = #{legacy_ad_types[:interstitial]} THEN #{AdType::ENUM[:interstitial]}
           WHEN ad_type = #{legacy_ad_types[:banner]} THEN #{AdType::ENUM[:banner]}
-          WHEN ad_type = #{legacy_ad_types[:rewarded_video]} THEN #{AdType::ENUM[:rewarded_video]}
+          WHEN ad_type = #{legacy_ad_types[:rewarded]} THEN #{AdType::ENUM[:rewarded]}
         END AS ad_type,
         CASE
           WHEN account_type = 'BidmachineAccount' THEN 'DemandSourceAccount::BidMachine'
