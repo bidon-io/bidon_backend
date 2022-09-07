@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class FinishController < ApplicationController
+class RewardController < ApplicationController
   def create
     render_empty_result
   end
