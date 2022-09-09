@@ -7,5 +7,5 @@ class AuctionConfigurationResource < Avo::BaseResource
   field :name, as: :text, required: true
   field :ad_type, as: :select, required: true, enum: ::AuctionConfiguration.ad_types
   field :pricefloor, as: :number, required: true
-  field :rounds, as: :textarea, required: true
+  field :rounds, as: :code, required: true
 end
