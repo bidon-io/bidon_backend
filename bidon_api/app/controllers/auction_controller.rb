@@ -11,4 +11,10 @@ class AuctionController < ApplicationController
              status: :unprocessable_entity
     end
   end
+
+  private
+
+  def schema_file_name
+    'auction.json'
+  end
 end

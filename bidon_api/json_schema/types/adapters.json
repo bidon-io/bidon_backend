@@ -1,0 +1,85 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Adapters Schema",
+  "type": "object",
+  "required": [
+    "admob",
+    "bidmachine",
+    "applovin",
+    "appsflyer"
+  ],
+  "properties": {
+    "admob": {
+      "title": "The admob Schema",
+      "type": "object",
+      "required": [
+        "version",
+        "sdk_version"
+      ],
+      "properties": {
+        "version": {
+          "title": "The version Schema",
+          "type": "string"
+        },
+        "sdk_version": {
+          "title": "The sdk_version Schema",
+          "type": "string"
+        }
+      }
+    },
+    "bidmachine": {
+      "title": "The bidmachine Schema",
+      "type": "object",
+      "required": [
+        "version",
+        "sdk_version"
+      ],
+      "properties": {
+        "version": {
+          "title": "The version Schema",
+          "type": "string"
+        },
+        "sdk_version": {
+          "title": "The sdk_version Schema",
+          "type": "string"
+        }
+      }
+    },
+    "applovin": {
+      "title": "The applovin Schema",
+      "type": "object",
+      "required": [
+        "version",
+        "sdk_version"
+      ],
+      "properties": {
+        "version": {
+          "title": "The version Schema",
+          "type": "string"
+        },
+        "sdk_version": {
+          "title": "The sdk_version Schema",
+          "type": "string"
+        }
+      }
+    },
+    "appsflyer": {
+      "title": "The appsflyer Schema",
+      "type": "object",
+      "required": [
+        "version",
+        "sdk_version"
+      ],
+      "properties": {
+        "version": {
+          "title": "The version Schema",
+          "type": "string"
+        },
+        "sdk_version": {
+          "title": "The sdk_version Schema",
+          "type": "string"
+        }
+      }
+    }
+  }
+}

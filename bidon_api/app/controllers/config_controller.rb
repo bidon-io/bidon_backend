@@ -6,4 +6,10 @@ class ConfigController < ApplicationController
 
     render json: config_response.body, status: :ok
   end
+
+  private
+
+  def schema_file_name
+    'config.json'
+  end
 end

@@ -4,13 +4,11 @@ class ApplicationController < ActionController::API
   before_action :set_sentry_context
   before_action :validate_bidon_header!
   before_action :validate_app!
+  before_action :validate_request_schema!
+
+  rescue_from StandardError, with: :handle_exception
 
   wrap_parameters false
-
-  rescue_from StandardError do |error|
-    Sentry.capture_exception(error)
-    render json: { error: { code: 500, message: 'Internal Server Error' } }, status: :internal_server_error
-  end
 
   private
 
@@ -26,6 +24,18 @@ class ApplicationController < ActionController::API
 
     render json:   { error: { code: 422, message: 'App key is invalid' } },
            status: :unprocessable_entity
+  end
+
+  def validate_request_schema!
+    return if schemer.valid?(permitted_params)
+
+    render json:   { error: { code: 422, message: 'Invalid request schema' } },
+           status: :unprocessable_entity
+  end
+
+  def handle_exception(error)
+    Sentry.capture_exception(error)
+    render json: { error: { code: 500, message: 'Internal Server Error' } }, status: :internal_server_error
   end
 
   def render_empty_result
@@ -45,4 +55,18 @@ class ApplicationController < ActionController::API
     params.except(:controller, :action).permit!.to_h
   end
   memo_wise :permitted_params
+
+  def schemer
+    Rails.cache.fetch("schemer_#{schema_file_name}") do
+      JSONSchemer.schema(schema_path, ref_resolver: SchemerFileResolver.new)
+    end
+  end
+
+  def schema_path
+    Pathname.new(Rails.root.join('json_schema', schema_file_name))
+  end
+
+  def schema_file_name
+    raise NotImplementedError
+  end
 end
