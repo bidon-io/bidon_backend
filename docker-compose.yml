@@ -45,6 +45,8 @@ x-back: &back
   depends_on:
     - postgres
     - redis
+    - kafka
+    - debezium
 
 services:
   rails_api:
@@ -68,7 +70,7 @@ services:
       - '3200:3000'
 
   postgres:
-    image: postgres:14-alpine
+    image: quay.io/debezium/postgres:14-alpine
     ports:
       - '5434:5432'
     volumes:
@@ -96,7 +98,6 @@ services:
   zookeeper:
     image: confluentinc/cp-zookeeper:7.2.1
     hostname: zookeeper
-    profiles: ["full"]
     healthcheck:
       test: echo srvr | nc zookeeper 2181 || exit 1
       retries: 20
@@ -110,7 +111,6 @@ services:
   kafka:
     image: confluentinc/cp-kafka:7.2.1
     hostname: kafka
-    profiles: ["full"]
     depends_on:
       - zookeeper
     ports:
@@ -130,7 +130,6 @@ services:
   schema-registry:
     image: confluentinc/cp-schema-registry:7.2.1
     hostname: schema-registry
-    profiles: ["full"]
     depends_on:
       - kafka
     ports:
@@ -139,6 +138,21 @@ services:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'kafka:29092'
       SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+
+  debezium:
+    image: quay.io/debezium/connect:1.9
+    ports:
+      - 8083:8083
+    depends_on:
+      - kafka
+      - postgres
+    environment:
+      - BOOTSTRAP_SERVERS=kafka:9092
+      - GROUP_ID=1
+      - CONFIG_STORAGE_TOPIC=connect_configs
+      - OFFSET_STORAGE_TOPIC=connect_offsets
+      - STATUS_STORAGE_TOPIC=source_connect_statuses
+
 volumes:
   pgdata:
   redisdata:

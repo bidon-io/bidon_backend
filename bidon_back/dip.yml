@@ -53,5 +53,5 @@ provision:
   # cannot down a non-existent container without an error,
   # see https://github.com/docker/compose/issues/9426
   - dip compose down --volumes --rmi local || true
-  - dip compose up -d postgres redis --build rails_back
+  - dip compose up -d postgres redis kafka debezium --build rails_back
   - dip bash -c bin/setup
