@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Root Schema",
+  "type": "object",
+  "required": [
+    "idfa",
+    "tracking_authorization_status",
+    "idfv",
+    "idg",
+    "consent",
+    "coppa"
+  ],
+  "properties": {
+    "idfa": {
+      "title": "The idfa Schema",
+      "type": "string"
+    },
+    "tracking_authorization_status": {
+      "title": "The tracking_authorization_status Schema",
+      "type": "string"
+    },
+    "idfv": {
+      "title": "The idfv Schema",
+      "type": "string"
+    },
+    "idg": {
+      "title": "The idg Schema",
+      "type": "string"
+    },
+    "consent": {
+      "title": "The consent Schema",
+      "type": "object",
+      "required": [],
+      "properties": {}
+    },
+    "coppa": {
+      "title": "The coppa Schema",
+      "type": "string"
+    }
+  }
+}

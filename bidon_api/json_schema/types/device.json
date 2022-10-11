@@ -1,0 +1,84 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Device Schema",
+  "type": "object",
+  "required": [
+    "ua",
+    "make",
+    "model",
+    "os",
+    "osv",
+    "hwv",
+    "h",
+    "w",
+    "ppi",
+    "pxratio",
+    "js",
+    "language",
+    "carrier",
+    "mccmnc",
+    "connection_type"
+  ],
+  "properties": {
+    "ua": {
+      "title": "The ua Schema",
+      "type": "string"
+    },
+    "make": {
+      "title": "The make Schema",
+      "type": "string"
+    },
+    "model": {
+      "title": "The model Schema",
+      "type": "string"
+    },
+    "os": {
+      "title": "The os Schema",
+      "type": "string"
+    },
+    "osv": {
+      "title": "The osv Schema",
+      "type": "string"
+    },
+    "hwv": {
+      "title": "The hwv Schema",
+      "type": "string"
+    },
+    "h": {
+      "title": "The h Schema",
+      "type": "string"
+    },
+    "w": {
+      "title": "The w Schema",
+      "type": "string"
+    },
+    "ppi": {
+      "title": "The ppi Schema",
+      "type": "string"
+    },
+    "pxratio": {
+      "title": "The pxratio Schema",
+      "type": "string"
+    },
+    "js": {
+      "title": "The js Schema",
+      "type": "string"
+    },
+    "language": {
+      "title": "The language Schema",
+      "type": "string"
+    },
+    "carrier": {
+      "title": "The carrier Schema",
+      "type": "string"
+    },
+    "mccmnc": {
+      "title": "The mccmnc Schema",
+      "type": "string"
+    },
+    "connection_type": {
+      "title": "The connection_type Schema",
+      "type": "string"
+    }
+  }
+}

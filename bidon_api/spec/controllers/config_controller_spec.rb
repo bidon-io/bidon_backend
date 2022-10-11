@@ -14,7 +14,7 @@ RSpec.describe ConfigController, type: :controller do
     end
 
     it 'returns 422 with error' do
-      post :create
+      post :create, params: config_params
 
       expect(response).to have_http_status(:unprocessable_entity)
       expect(response.body).to eq expected_response
@@ -41,8 +41,9 @@ RSpec.describe ConfigController, type: :controller do
 
       it 'returns 200 with ok' do
         allow_any_instance_of(Api::Request).to receive(:valid?).and_return(true)
+        allow_any_instance_of(Api::Config::AdaptersFetcher).to receive(:fetch).and_return({})
 
-        post :create
+        post :create, params: config_params
 
         expect(response).to have_http_status(:ok)
         expect(response.body).to eq expected_response
@@ -62,7 +63,7 @@ RSpec.describe ConfigController, type: :controller do
       it 'returns 422 with error' do
         allow_any_instance_of(Api::Request).to receive(:valid?).and_return(false)
 
-        post :create
+        post :create, params: config_params
 
         expect(response).to have_http_status(:unprocessable_entity)
         expect(response.body).to eq expected_response
@@ -82,7 +83,7 @@ RSpec.describe ConfigController, type: :controller do
       it 'returns 500 with error' do
         allow(Api::Request).to receive(:new).and_raise(StandardError)
 
-        post :create
+        post :create, params: config_params
 
         expect(response).to have_http_status(:internal_server_error)
         expect(response.body).to eq expected_response

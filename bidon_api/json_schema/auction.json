@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Auction Schema",
+  "type": "object",
+  "required": [
+    "device",
+    "session",
+    "app",
+    "user",
+    "geo",
+    "adapters",
+    "ext",
+    "ad_object",
+    "token",
+    "segment_id"
+  ],
+  "properties": {
+    "device": { "$ref": "./types/device.json" },
+    "session": { "$ref": "./types/session.json" },
+    "app": { "$ref": "./types/app.json" },
+    "user": { "$ref": "./types/user.json" },
+    "geo": { "$ref": "./types/geo.json" },
+    "adapters": { "$ref": "./types/adapters.json" },
+    "ext": {
+      "title": "The ext Schema",
+      "type": "object",
+      "required": [],
+      "properties": {}
+    },
+    "ad_object": {
+      "title": "The ad_object Schema",
+      "type": "object",
+      "required": [],
+      "properties": {}
+    },
+    "token": {
+      "title": "The token Schema",
+      "type": "string"
+    },
+    "segment_id": {
+      "title": "The segment_id Schema",
+      "type": "string"
+    }
+  }
+}

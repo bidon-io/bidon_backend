@@ -12,6 +12,7 @@ dip rails s
 dip bash
 
 cd bidon_api
+dip provision
 dip rails c
 dip rails s
 dip bash
