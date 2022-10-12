@@ -17,12 +17,12 @@ module Api
       end
 
       def app_mmp_profile
-        AppMmpProfile.where(app_id: app.id).order(Sequel.desc(:start_date)).first
+        AppMmpProfile.where(app_id: app.id).order(start_date: :desc).first
       end
       memo_wise :app_mmp_profile
 
       def applovin_demand_profile
-        AppDemandProfile.eager(:demand_source_account)
+        AppDemandProfile.includes(:demand_source_account)
                         .where(app_id: app.id, account_type: 'DemandSourceAccount::Applovin').first
       end
       memo_wise :applovin_demand_profile

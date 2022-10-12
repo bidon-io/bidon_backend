@@ -1,3 +1,3 @@
-class DemandSourceAccount < Sequel::Model
-  many_to_one :demand_source
+class DemandSourceAccount < ApplicationRecord
+  belongs_to :demand_source
 end

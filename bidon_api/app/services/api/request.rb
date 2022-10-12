@@ -32,7 +32,7 @@ module Api
 
       return unless app_key && package_name
 
-      App.find(app_key:, package_name:)
+      App.find_by(app_key:, package_name:)
     end
     memo_wise :app
   end

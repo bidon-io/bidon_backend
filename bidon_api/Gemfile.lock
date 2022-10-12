@@ -222,12 +222,6 @@ GEM
       sentry-ruby (~> 5.4.2)
     sentry-ruby (5.4.2)
       concurrent-ruby (~> 1.0, >= 1.0.2)
-    sequel (5.59.0)
-    sequel-rails (1.2.0)
-      actionpack (>= 4.0.0)
-      activemodel (>= 4.0.0)
-      railties (>= 4.0.0)
-      sequel (>= 3.28, < 6.0)
     strscan (3.0.4)
     sypex_geo (0.2.4)
     thor (1.2.1)
@@ -266,7 +260,6 @@ DEPENDENCIES
   ruby-kafka
   sentry-rails
   sentry-ruby
-  sequel-rails
   sypex_geo
 
 RUBY VERSION
