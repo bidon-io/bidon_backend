@@ -107,6 +107,7 @@ GEM
     mail (2.7.1)
       mini_mime (>= 0.1.1)
     marcel (1.0.2)
+    maxminddb (0.1.22)
     memo_wise (1.7.0)
     method_source (1.0.0)
     mini_mime (1.1.2)
@@ -228,6 +229,7 @@ GEM
       railties (>= 4.0.0)
       sequel (>= 3.28, < 6.0)
     strscan (3.0.4)
+    sypex_geo (0.2.4)
     thor (1.2.1)
     timeout (0.3.0)
     tzinfo (2.0.5)
@@ -249,6 +251,7 @@ DEPENDENCIES
   factory_bot_rails
   json_schemer
   lograge
+  maxminddb
   memo_wise
   oj
   pg (~> 1.1)
@@ -264,6 +267,7 @@ DEPENDENCIES
   sentry-rails
   sentry-ruby
   sequel-rails
+  sypex_geo
 
 RUBY VERSION
    ruby 3.1.2p20

@@ -20,7 +20,7 @@ jobs:
       - name: Checks-out repository
         uses: actions/checkout@v3
 
-      - name: Bild image
+      - name: Build image
         run: make docker-build-prod-back TAG=${{ github.sha }}
 
       - name: Push image

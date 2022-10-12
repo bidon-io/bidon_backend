@@ -20,8 +20,8 @@ jobs:
       - name: Checks-out repository
         uses: actions/checkout@v3
 
-      - name: Bild image
-        run: make docker-build-prod-api TAG=${{ github.sha }}
+      - name: Build image
+        run: make docker-build-prod-api TAG=${{ github.sha }} AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID_GITHUB_ACTIONS }} AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY_GITHUB_ACTIONS }}
 
       - name: Push image
         run: make docker-push-prod-api TAG=${{ github.sha }}

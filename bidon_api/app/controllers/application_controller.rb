@@ -56,6 +56,11 @@ class ApplicationController < ActionController::API
   end
   memo_wise :permitted_params
 
+  def remote_ip
+    request.remote_ip
+  end
+  memo_wise :remote_ip
+
   def schemer
     Rails.cache.fetch("schemer_#{schema_file_name}") do
       JSONSchemer.schema(schema_path, ref_resolver: SchemerFileResolver.new)
