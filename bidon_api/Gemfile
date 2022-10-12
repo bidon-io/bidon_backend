@@ -20,6 +20,9 @@ gem 'sequel-rails'
 gem 'sentry-rails'
 gem 'sentry-ruby'
 
+gem 'maxminddb'
+gem 'sypex_geo'
+
 group :development do
   gem 'benchmark-ips'
 
