@@ -14,7 +14,9 @@ gem 'json_schemer'
 gem 'memo_wise'
 gem 'oj'
 gem 'redis'
+
 gem 'ruby-kafka'
+gem 'karafka'
 
 gem 'sentry-rails'
 gem 'sentry-ruby'
