@@ -2,7 +2,7 @@
 
 class KarafkaApp < Karafka::App
   setup do |config|
-    config.kafka = { 'bootstrap.servers': '127.0.0.1:9092' }
+    config.kafka = { 'bootstrap.servers': 'kafka:9092' }
     config.client_id = 'example_app'
     # Recreate consumers with each batch. This will allow Rails code reload to work in the
     # development mode. Otherwise Karafka process would not be aware of code changes
@@ -20,8 +20,32 @@ class KarafkaApp < Karafka::App
     # Uncomment this if you use Karafka with ActiveJob
     # You ned to define the topic per each queue name you use
     # active_job_topic :default
+    topic 'postgres.public.app_demand_profiles' do
+      consumer AppDemandProfilesConsumer
+    end
+    topic 'postgres.public.app_mmp_profiles' do
+      consumer AppMmpProfilesConsumer
+    end
     topic 'postgres.public.apps' do
       consumer AppsConsumer
+    end
+    topic 'postgres.public.auction_configurations' do
+      consumer AuctionConfigurationsConsumer
+    end
+    topic 'postgres.public.countries' do
+      consumer CountriesConsumer
+    end
+    topic 'postgres.public.demand_source_accounts' do
+      consumer DemandSourceAccountsConsumer
+    end
+    topic 'postgres.public.demand_sources' do
+      consumer DemandSourcesConsumer
+    end
+    topic 'postgres.public.line_items' do
+      consumer LineItemsConsumer
+    end
+    topic 'postgres.public.users' do
+      consumer UsersConsumer
     end
   end
 end

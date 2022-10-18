@@ -9,6 +9,6 @@
     "database.password": "pass",
     "database.dbname": "bidon",
     "database.server.name": "postgres",
-    "table.include.list": "public.apps"
+    "table.include.list": "public.apps, public.app_demand_profiles, public.app_mmp_profiles, public.auction_configurations, public.countries, public.demand_sources, public.demand_source_accounts, public.line_items, public.users"
   }
 }

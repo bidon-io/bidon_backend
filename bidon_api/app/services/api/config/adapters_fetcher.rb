@@ -22,7 +22,7 @@ module Api
       memo_wise :app_mmp_profile
 
       def applovin_demand_profile
-        AppDemandProfile.includes(:demand_source_account)
+        AppDemandProfile.includes(:account)
                         .where(app_id: app.id, account_type: 'DemandSourceAccount::Applovin').first
       end
       memo_wise :applovin_demand_profile
@@ -73,7 +73,7 @@ module Api
       def fetch_applovin_adapter
         return {} unless applovin_demand_profile
 
-        extra = JSON.parse(applovin_demand_profile.demand_source_account.extra)
+        extra = JSON.parse(applovin_demand_profile.account.extra)
 
         {
           app_key: extra['api_key'],
