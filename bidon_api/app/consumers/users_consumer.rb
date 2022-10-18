@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 # Example consumer that prints messages payloads
-class AppsConsumer < ApplicationConsumer
+class UsersConsumer < ApplicationConsumer
   def model
-    App
+    User
   end
 end

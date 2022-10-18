@@ -20,7 +20,7 @@ module Api
       def fetch
         line_items.map do |line_item|
           {
-            id:         line_item.demand_source_account.demand_source.api_key,
+            id:         line_item.account.demand_source.api_key,
             pricefloor: line_item.bid_floor.to_f,
             ad_unit_id: line_item.code,
           }
@@ -30,7 +30,7 @@ module Api
       private
 
       def line_items
-        result = LineItem.eager(demand_source_account: :demand_source)
+        result = LineItem.eager(account: :demand_source)
                          .where(app_id: app.id, ad_type: AdType::ENUM[ad_type])
 
         if ad_type == :banner

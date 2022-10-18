@@ -1,5 +1,5 @@
 class LineItem < ApplicationRecord
-  belongs_to :demand_source_account, key: :account_id
+  belongs_to :account, polymorphic: true, class_name: 'DemandSourceAccount'
 
   enum ad_type: AdType::ENUM
 end
