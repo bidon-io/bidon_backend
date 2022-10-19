@@ -1,5 +1,5 @@
 class CreateAppMmpProfiles < ActiveRecord::Migration[7.0]
-  def change
+  def change # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
     create_table :app_mmp_profiles do |t|
       t.belongs_to :app, null: false, foreign_key: true
       t.date :start_date, null: false

@@ -15,8 +15,8 @@ gem 'memo_wise'
 gem 'oj'
 gem 'redis'
 
-gem 'ruby-kafka'
 gem 'karafka'
+gem 'ruby-kafka'
 
 gem 'sentry-rails'
 gem 'sentry-ruby'
