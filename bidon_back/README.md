@@ -1,24 +1,15 @@
-# README
+# DB sync guide
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+1. **dip provision services**
+2. **CURL debezium connector**
 
-Things you may want to cover:
+   curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" 127.0.0.1:8083/connectors/ --data "@../debezium.json"
 
-* Ruby version
+3. **Start karafka**
 
-* System dependencies
+   dip bundle exec karafka server
 
-* Configuration
+4. **Start sync**
 
-* Database creation
+   dip rails appodeal:sync_test_apps
 
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
