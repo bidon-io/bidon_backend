@@ -15,7 +15,7 @@ RSpec.describe RewardController, type: :controller do
 
       it 'returns 200 with ok' do
         allow_any_instance_of(Api::Request).to receive(:valid?).and_return(true)
-        post :create, params: show_params.merge(ad_type: 'banner')
+        post :create, params: show_params.merge(ad_type: 'banner'), as: :json
 
         expect(response).to have_http_status(:ok)
         expect(response.body).to eq expected_response

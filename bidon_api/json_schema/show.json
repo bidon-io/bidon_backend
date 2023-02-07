@@ -32,7 +32,7 @@
         },
         "auction_configuration_id": {
           "title": "The auction_configuration_id Schema",
-          "type": "string"
+          "type": "integer"
         },
         "imp_id": {
           "title": "The imp_id Schema",
@@ -48,7 +48,7 @@
         },
         "ecpm": {
           "title": "The ecpm Schema",
-          "type": "string"
+          "type": "number"
         },
         "banner": {
           "title": "The banner Schema",

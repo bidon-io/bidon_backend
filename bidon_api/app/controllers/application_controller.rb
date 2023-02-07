@@ -27,6 +27,7 @@ class ApplicationController < ActionController::API
   end
 
   def validate_request_schema!
+    # schemer.validate(permitted_params).to_a
     return if schemer.valid?(permitted_params)
 
     render json:   { error: { code: 422, message: 'Invalid request schema' } },
