@@ -27,7 +27,7 @@
         },
         "auction_configuration_id": {
           "title": "The auction_configuration_id Schema",
-          "type": "string"
+          "type": "integer"
         },
         "rounds": {
           "title": "The rounds Schema",
@@ -49,7 +49,7 @@
               },
               "pricefloor": {
                 "title": "The pricefloor Schema",
-                "type": "string"
+                "type": "number"
               },
               "winner_id": {
                 "title": "The winner_id Schema",
@@ -57,7 +57,7 @@
               },
               "winner_ecpm": {
                 "title": "The winner_ecpm Schema",
-                "type": "string"
+                "type": "number"
               },
               "demands": {
                 "title": "The demands Schema",
@@ -90,23 +90,23 @@
                     },
                     "ecpm": {
                       "title": "The ecpm Schema",
-                      "type": "string"
+                      "type": "number"
                     },
                     "bid_start_ts": {
                       "title": "The bid_start_ts Schema",
-                      "type": "string"
+                      "type": "integer"
                     },
                     "bid_finish_ts": {
                       "title": "The bid_finish_ts Schema",
-                      "type": "string"
+                      "type": "integer"
                     },
                     "fill_start_ts": {
                       "title": "The fill_start_ts Schema",
-                      "type": "string"
+                      "type": "integer"
                     },
                     "fill_finish_ts": {
                       "title": "The fill_finish_ts Schema",
-                      "type": "string"
+                      "type": "integer"
                     }
                   }
                 }

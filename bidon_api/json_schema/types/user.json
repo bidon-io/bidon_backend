@@ -17,7 +17,7 @@
     },
     "tracking_authorization_status": {
       "title": "The tracking_authorization_status Schema",
-      "type": "string"
+      "type": "integer"
     },
     "idfv": {
       "title": "The idfv Schema",
@@ -35,7 +35,7 @@
     },
     "coppa": {
       "title": "The coppa Schema",
-      "type": "string"
+      "type": "boolean"
     }
   }
 }

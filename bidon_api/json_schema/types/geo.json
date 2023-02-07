@@ -15,19 +15,19 @@
   "properties": {
     "lat": {
       "title": "The lat Schema",
-      "type": "string"
+      "type": "number"
     },
     "lon": {
       "title": "The lon Schema",
-      "type": "string"
+      "type": "number"
     },
     "accuracy": {
       "title": "The accuracy Schema",
-      "type": "string"
+      "type": "integer"
     },
     "lastfix": {
       "title": "The lastfix Schema",
-      "type": "string"
+      "type": "integer"
     },
     "country": {
       "title": "The country Schema",
@@ -43,7 +43,7 @@
     },
     "utcoffset": {
       "title": "The utcoffset Schema",
-      "type": "string"
+      "type": "integer"
     }
   }
 }
