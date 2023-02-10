@@ -8,14 +8,14 @@ on:
 
 jobs:
   build-and-debloy:
-    runs-on: [self-hosted, main]
+    runs-on: [self-hosted]
     steps:
       - name: Login registry
         uses: docker/login-action@v2
         with:
-          registry: registry.appodeal.com
-          username: ${{ secrets.REGISTRY_APPODEAL_USERNAME_DEPLOY }}
-          password: ${{ secrets.REGISTRY_APPODEAL_PASSWORD_DEPLOY }}
+          registry: ${{ secrets.REGISTRY_ADDRESS }}
+          username: ${{ secrets.REGISTRY_USERNAME_DEPLOY }}
+          password: ${{ secrets.REGISTRY_PASSWORD_DEPLOY }}
 
       - name: Checks-out repository
         uses: actions/checkout@v3
@@ -29,9 +29,9 @@ jobs:
       - name: Checks-out repository devops
         uses: actions/checkout@v3
         with:
-          repository: appodeal/devops
-          token: ${{ secrets.PAT_APPODEAL_RUNNER }}
+          repository: ${{ secrets.ANSIBLE_SECRET }}/devops
+          token: ${{ secrets.PAT_RUNNER }}
 
       - name: Deploy
-        working-directory: ./appodeal/prod
+        working-directory: ./${{ secrets.ANSIBLE_SECRET }}/prod
         run: make bidon-backend TAG=${{ github.sha }}

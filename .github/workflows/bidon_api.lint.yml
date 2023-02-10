@@ -14,6 +14,8 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - name: Set up ruby
         uses: ruby/setup-ruby@v1
       - name: Cache rubocop output
@@ -26,12 +28,12 @@ jobs:
             rubocop-cache-
       - name: Get changed files
         id: changed-files
-        uses: Ana06/get-changed-files@v2.1.0
+        uses: tj-actions/changed-files@v32
       - name: Run rubocop
         uses: reviewdog/action-rubocop@v2
         with:
           github_token: ${{ secrets.github_token }}
-          rubocop_flags: ${{ steps.changed-files.outputs.all }} --only-recognized-file-types --force-exclusion
+          rubocop_flags: ${{ steps.changed-files.outputs.all_changed_files }} --only-recognized-file-types --force-exclusion
           rubocop_version: gemfile
           rubocop_extensions: |
             rubocop-rails:gemfile
@@ -47,4 +49,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
           PROJECT_PATH: bidon_api/
-
