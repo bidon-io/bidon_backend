@@ -5,9 +5,7 @@
   "required": [
     "idfa",
     "tracking_authorization_status",
-    "idfv",
     "idg",
-    "consent",
     "coppa"
   ],
   "properties": {
@@ -17,7 +15,7 @@
     },
     "tracking_authorization_status": {
       "title": "The tracking_authorization_status Schema",
-      "type": "integer"
+      "type": "string"
     },
     "idfv": {
       "title": "The idfv Schema",

@@ -9,7 +9,6 @@
     "user",
     "geo",
     "adapters",
-    "ext",
     "ad_object",
     "token",
     "segment_id"

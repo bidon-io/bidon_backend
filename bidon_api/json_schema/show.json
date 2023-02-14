@@ -9,7 +9,6 @@
     "app",
     "user",
     "geo",
-    "ext",
     "token",
     "segment_id"
   ],

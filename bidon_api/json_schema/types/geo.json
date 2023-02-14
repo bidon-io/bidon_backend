@@ -23,7 +23,7 @@
     },
     "accuracy": {
       "title": "The accuracy Schema",
-      "type": "integer"
+      "type": "number"
     },
     "lastfix": {
       "title": "The lastfix Schema",
