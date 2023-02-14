@@ -115,8 +115,8 @@ module RequestParams
   def session_params
     {
       id:                           '51acc730-1402-11ed-861d-0242ac120002',
-      launch_ts:                    '1659571550',
-      launch_monotonic_ts:          '1203445',
+      launch_ts:                    1_659_571_550,
+      launch_monotonic_ts:          1_203_445,
       start_ts:                     1_659_571_550,
       monotonic_start_ts:           1_203_445,
       ts:                           1_659_571_594,
@@ -150,7 +150,7 @@ module RequestParams
   def user_params
     {
       idfa:                          'UUID',
-      tracking_authorization_status: 3,
+      tracking_authorization_status: 'AUTHORIZED',
       idfv:                          'UUID',
       idg:                           'UUID',
       consent:                       {

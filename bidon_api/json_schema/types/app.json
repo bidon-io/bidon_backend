@@ -6,9 +6,7 @@
     "bundle",
     "key",
     "framework",
-    "version",
-    "framework_version",
-    "plugin_version"
+    "version"
   ],
   "properties": {
     "bundle": {
