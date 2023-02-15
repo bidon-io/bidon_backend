@@ -15,8 +15,6 @@
     "pxratio",
     "js",
     "language",
-    "carrier",
-    "mccmnc",
     "connection_type"
   ],
   "properties": {
