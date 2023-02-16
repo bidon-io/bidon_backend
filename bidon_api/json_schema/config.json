@@ -20,9 +20,7 @@
     "adapters": { "$ref": "./types/adapters.json" },
     "ext": {
       "title": "The ext Schema",
-      "type": "object",
-      "required": [],
-      "properties": {}
+      "type": "string"
     },
     "token": {
       "title": "The token Schema",

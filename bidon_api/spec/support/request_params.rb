@@ -7,7 +7,7 @@ module RequestParams
       user:     user_params,
       geo:      geo_params,
       adapters: adapter_params,
-      ext:      default_object_params,
+      ext:      '{}',
       token:    '{}',
     }
   end
@@ -20,7 +20,7 @@ module RequestParams
       user:       user_params,
       geo:        geo_params,
       adapters:   adapter_params,
-      ext:        default_object_params,
+      ext:        '{}',
       ad_object:  default_object_params,
       segment_id: 'some segment id',
       token:      '{}',
@@ -58,7 +58,7 @@ module RequestParams
       app:        app_params,
       user:       user_params,
       geo:        geo_params,
-      ext:        default_object_params,
+      ext:        '{}',
       token:      '{}',
       segment_id: 'some segment id',
     }
@@ -86,7 +86,7 @@ module RequestParams
       app:        app_params,
       user:       user_params,
       geo:        geo_params,
-      ext:        default_object_params,
+      ext:        '{}',
       token:      '{}',
       segment_id: 'some segment id',
     }
