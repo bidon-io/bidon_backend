@@ -9,8 +9,7 @@
     "app",
     "user",
     "geo",
-    "token",
-    "segment_id"
+    "token"
   ],
   "properties": {
     "show": {
@@ -21,7 +20,6 @@
         "auction_configuration_id",
         "imp_id",
         "demand_id",
-        "ad_unit_id",
         "ecpm"
       ],
       "properties": {
@@ -83,9 +81,7 @@
     "geo": { "$ref": "./types/geo.json" },
     "ext": {
       "title": "The ext Schema",
-      "type": "object",
-      "required": [],
-      "properties": {}
+      "type": "string"
     },
     "token": {
       "title": "The token Schema",

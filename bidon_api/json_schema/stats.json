@@ -38,8 +38,6 @@
             "required": [
               "id",
               "pricefloor",
-              "winner_id",
-              "winner_ecpm",
               "demands"
             ],
             "properties": {
@@ -67,13 +65,7 @@
                   "type": "object",
                   "required": [
                     "id",
-                    "ad_unit_id",
-                    "status",
-                    "ecpm",
-                    "bid_start_ts",
-                    "bid_finish_ts",
-                    "fill_start_ts",
-                    "fill_finish_ts"
+                    "status"
                   ],
                   "properties": {
                     "id": {
@@ -123,9 +115,7 @@
     "geo": { "$ref": "./types/geo.json" },
     "ext": {
       "title": "The ext Schema",
-      "type": "object",
-      "required": [],
-      "properties": {}
+      "type": "string"
     },
     "token": {
       "title": "The token Schema",
