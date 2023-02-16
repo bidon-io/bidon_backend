@@ -27,10 +27,9 @@ class ApplicationController < ActionController::API
   end
 
   def validate_request_schema!
-    # schemer.validate(permitted_params).to_a
-    return if schemer.valid?(permitted_params)
+    return if schema_errors.none?
 
-    render json:   { error: { code: 422, message: 'Invalid request schema' } },
+    render json:   { error: { code: 422, message: 'Invalid request schema', errors: schema_errors } },
            status: :unprocessable_entity
   end
 
@@ -61,6 +60,13 @@ class ApplicationController < ActionController::API
     request.remote_ip
   end
   memo_wise :remote_ip
+
+  def schema_errors
+    schemer.validate(permitted_params).map do |error|
+      error.slice('data_pointer', 'type', 'details')
+    end
+  end
+  memo_wise :schema_errors
 
   def schemer
     Rails.cache.fetch("schemer_#{schema_file_name}") do
