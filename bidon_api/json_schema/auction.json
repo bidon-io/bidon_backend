@@ -7,10 +7,8 @@
     "session",
     "app",
     "user",
-    "geo",
     "adapters",
-    "ad_object",
-    "token"
+    "ad_object"
   ],
   "properties": {
     "device": { "$ref": "./types/device.json" },
