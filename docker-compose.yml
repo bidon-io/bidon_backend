@@ -21,6 +21,7 @@ x-api: &api
   depends_on:
     - postgres
     - redis
+    - kafka
 
 x-back: &back
   image: 'bidon/bidon_back'

@@ -19,8 +19,8 @@ class KafkaProducer
   delegate :produce, to: :kafka_producer
 
   def kafka_producer
-    delivery_threshold = ENV.fetch('KAFKA_DELIVERY_THRESHOLD')
-    delivery_interval = ENV.fetch('KAFKA_DELIVERY_INTERVAL')
+    delivery_threshold = ENV.fetch('KAFKA_DELIVERY_THRESHOLD').to_i
+    delivery_interval = ENV.fetch('KAFKA_DELIVERY_INTERVAL').to_i
 
     if Rails.env.production?
       producer = kafka.async_producer(delivery_threshold:, delivery_interval:)
