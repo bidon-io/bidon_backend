@@ -89,4 +89,4 @@ ENV LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so
 
 COPY --chown=deploy:deploy . .
 
-COPY --from=geodb /opt/GeoIP/* /opt/apps/appodeal/public/system/
+COPY --from=geodb /opt/GeoIP/* /app/public/system/
