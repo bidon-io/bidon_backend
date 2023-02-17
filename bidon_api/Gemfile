@@ -20,6 +20,7 @@ gem 'sequel-rails'
 gem 'sentry-rails'
 gem 'sentry-ruby'
 
+gem 'flatten'
 gem 'maxminddb'
 gem 'sypex_geo'
 

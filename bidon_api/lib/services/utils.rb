@@ -28,4 +28,12 @@ module Utils
   def unzip(data)
     ActiveSupport::Gzip.decompress(data)
   end
+
+  # @param [Hash] hash
+  #
+  # @return [Hash]
+
+  def smash_hash(hash)
+    Flatten.smash(hash, smash_array: true, separator: '__')
+  end
 end
