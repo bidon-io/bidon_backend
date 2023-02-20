@@ -6,8 +6,7 @@
     "device",
     "session",
     "app",
-    "user",
-    "adapters"
+    "user"
   ],
   "properties": {
     "device": { "$ref": "./types/device.json" },
