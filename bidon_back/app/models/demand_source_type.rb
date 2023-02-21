@@ -1,5 +1,5 @@
 module DemandSourceType
-  ENUM = {
+  OPTIONS = {
     BidmachineAccount: 'DemandSourceAccount::BidMachine',
     AdmobAccount:      'DemandSourceAccount::Admob',
     ApplovinAccount:   'DemandSourceAccount::Applovin',
