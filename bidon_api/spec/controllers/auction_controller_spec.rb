@@ -32,7 +32,7 @@ RSpec.describe AuctionController, type: :controller do
           'rounds'     => [],
           'line_items' => [],
           'token'      => '{}',
-          'min_price'  => 0,
+          'pricefloor' => 0,
         }.to_json
       end
 

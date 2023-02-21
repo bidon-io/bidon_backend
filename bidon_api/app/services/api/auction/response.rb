@@ -21,7 +21,7 @@ module Api
           'rounds'                   => rounds,
           'line_items'               => line_items,
           'token'                    => '{}',
-          'min_price'                => auction_configuration.pricefloor,
+          'pricefloor'               => auction_configuration.pricefloor,
           'auction_id'               => auction_id,
           'auction_configuration_id' => auction_configuration.id,
         }

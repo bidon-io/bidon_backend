@@ -37,8 +37,8 @@
           "title": "The orientation Schema",
           "type": "string"
         },
-        "min_price": {
-          "title": "The min_price Schema",
+        "pricefloor": {
+          "title": "The pricefloor Schema",
           "type": "number"
         },
         "banner": {

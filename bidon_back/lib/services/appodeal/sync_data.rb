@@ -3,6 +3,7 @@ module Appodeal
     APP_IDS = [
       454_236, # iOS test app
       726_191, # Android test app
+      735_351, # Bidon test app
     ].freeze
 
     DEMANDS = [
