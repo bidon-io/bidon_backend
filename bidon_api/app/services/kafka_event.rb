@@ -18,6 +18,7 @@ class KafkaEvent
   private
 
   def fill_geo_data!
+    params['geo'] ||= {}
     params['geo']['ip'] = ip
     params['geo']['country'] = geo_data[:country_code]
     params['geo']['country_id'] = geo_data[:country_id]
