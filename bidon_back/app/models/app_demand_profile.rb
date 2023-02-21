@@ -6,6 +6,6 @@ class AppDemandProfile < ApplicationRecord
   validates :app_id, uniqueness: { scope: :demand_source_id }
 
   def slug
-    "app_#{app_id}_#{DemandSourceType::ENUM.key(account_type).to_s.underscore}_#{account_id}"
+    "app_#{app_id}_#{DemandSourceType::OPTIONS.key(account_type).to_s.underscore}_#{account_id}"
   end
 end

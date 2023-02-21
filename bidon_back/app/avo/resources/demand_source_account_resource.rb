@@ -3,7 +3,7 @@ class DemandSourceAccountResource < Avo::BaseResource
 
   field :id, as: :id
   field :user, as: :belongs_to, required: true
-  field :type, as: :select, required: true, enum: ::DemandSourceType::ENUM
+  field :type, as: :select, required: true, options: ::DemandSourceType::OPTIONS
   field :demand_source, as: :belongs_to, required: true
   field :bidding, as: :boolean, required: true
   field :extra, as: :code
