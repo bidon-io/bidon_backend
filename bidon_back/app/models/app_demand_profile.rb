@@ -8,4 +8,8 @@ class AppDemandProfile < ApplicationRecord
   def slug
     "app_#{app_id}_#{DemandSourceType::OPTIONS.key(account_type).to_s.underscore}_#{account_id}"
   end
+
+  def data=(value)
+    super(JSON.parse(value.gsub('=>', ':')))
+  end
 end
