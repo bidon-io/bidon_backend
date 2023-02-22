@@ -7,4 +7,8 @@ class App < ApplicationRecord
 
   validates :package_name, :app_key,    presence: true, uniqueness: true
   validates :platform_id,  :human_name, presence: true
+
+  def settings=(value)
+    super(JSON.parse(value.gsub('=>', ':')))
+  end
 end
