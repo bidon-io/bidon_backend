@@ -27,6 +27,12 @@ module Api
       end
       memo_wise :applovin_demand_profile
 
+      def bidmachine_demand_profile
+        AppDemandProfile.eager(:demand_source_account)
+                        .where(app_id: app.id, account_type: 'DemandSourceAccount::BidMachine').first
+      end
+      memo_wise :bidmachine_demand_profile
+
       private
 
       def fetch_adapter(adapter_name)
@@ -63,10 +69,14 @@ module Api
       end
 
       def fetch_bidmachine_adapter
+        return {} unless bidmachine_demand_profile
+
+        extra = JSON.parse(bidmachine_demand_profile.demand_source_account.extra)
+
         {
-          seller_id:        '1',
-          endpoint:         'x.appbaqend.com',
-          mediation_config: %w[meta_audience criteo pangle amazon adcolony my_target vungle tapjoy notsy],
+          seller_id:        extra['seller_id'],
+          endpoint:         extra['endpoint'],
+          mediation_config: extra['mediation_config'],
         }
       end
 
