@@ -9,7 +9,7 @@ class LineItemResource < Avo::BaseResource
   field :account, as: :belongs_to, required: true
   field :account_type, as: :select, required: true, options: ::DemandSourceType::OPTIONS
   field :code, as: :text
-  field :height, as: :number
-  field :width, as: :number
-  field :extra, as: :code
+  field :height, as: :number, hide_on: :index
+  field :width, as: :number, hide_on: :index
+  field :extra, as: :code, hide_on: :index
 end
