@@ -9,6 +9,7 @@ class KafkaEvent
   end
 
   def build
+    fill_timestamp!
     fill_geo_data!
 
     params
@@ -16,6 +17,10 @@ class KafkaEvent
   memo_wise :build
 
   private
+
+  def fill_timestamp!
+    params['timestamp'] = Time.zone.now.to_i
+  end
 
   def fill_geo_data!
     params['geo'] ||= {}
