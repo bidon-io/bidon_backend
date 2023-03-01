@@ -33,6 +33,18 @@ module Api
       end
       memo_wise :bidmachine_demand_profile
 
+      def data_exchange_demand_profile
+        AppDemandProfile.eager(:demand_source_account)
+                        .where(app_id: app.id, account_type: 'DemandSourceAccount::DataExchange').first
+      end
+      memo_wise :data_exchange_demand_profile
+
+      def unity_ads_demand_profile
+        AppDemandProfile.eager(:demand_source_account)
+                        .where(app_id: app.id, account_type: 'DemandSourceAccount::UnityAds').first
+      end
+      memo_wise :unity_ads_demand_profile
+
       private
 
       def fetch_adapter(adapter_name)
@@ -45,6 +57,10 @@ module Api
           fetch_bidmachine_adapter
         when 'applovin'
           fetch_applovin_adapter
+        when 'dtexchange'
+          fetch_data_exchange_adapter
+        when 'unityads'
+          fetch_unity_ads_adapter
         else
           {}
         end
@@ -68,6 +84,16 @@ module Api
         }
       end
 
+      def fetch_applovin_adapter
+        return {} unless applovin_demand_profile
+
+        extra = JSON.parse(applovin_demand_profile.demand_source_account.extra)
+
+        {
+          app_key: extra['api_key'],
+        }
+      end
+
       def fetch_bidmachine_adapter
         return {} unless bidmachine_demand_profile
 
@@ -80,14 +106,16 @@ module Api
         }
       end
 
-      def fetch_applovin_adapter
-        return {} unless applovin_demand_profile
+      def fetch_data_exchange_adapter
+        return {} unless data_exchange_demand_profile
 
-        extra = JSON.parse(applovin_demand_profile.demand_source_account.extra)
+        JSON.parse(data_exchange_demand_profile.demand_source_account.extra)
+      end
 
-        {
-          app_key: extra['api_key'],
-        }
+      def fetch_unity_ads_adapter
+        return {} unless unity_ads_demand_profile
+
+        JSON.parse(unity_ads_demand_profile.demand_source_account.extra)
       end
     end
   end

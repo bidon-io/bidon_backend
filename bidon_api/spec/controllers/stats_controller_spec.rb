@@ -3,9 +3,9 @@
 require 'rails_helper'
 
 RSpec.describe StatsController, type: :controller do
-  context 'X-BidOn-Version header present' do
+  context 'X-Bidon-Version header present' do
     before do
-      request.headers['X-BidOn-Version'] = '1.2.3'
+      request.headers['X-Bidon-Version'] = '1.2.3'
     end
 
     context 'valid request' do
