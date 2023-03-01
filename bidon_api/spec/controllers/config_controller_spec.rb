@@ -3,12 +3,12 @@
 require 'rails_helper'
 
 RSpec.describe ConfigController, type: :controller do
-  context 'missing X-BidOn-Version header' do
+  context 'missing X-Bidon-Version header' do
     let(:expected_response) do
       {
         error: {
           code:    422,
-          message: 'Request should contain X-BidOn-Version header',
+          message: 'Request should contain X-Bidon-Version header',
         },
       }.to_json
     end
@@ -21,9 +21,9 @@ RSpec.describe ConfigController, type: :controller do
     end
   end
 
-  context 'X-BidOn-Version header present' do
+  context 'X-Bidon-Version header present' do
     before do
-      request.headers['X-BidOn-Version'] = '1.2.3'
+      request.headers['X-Bidon-Version'] = '1.2.3'
     end
 
     context 'valid response' do

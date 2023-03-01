@@ -74,6 +74,42 @@
           "type": "string"
         }
       }
+    },
+    "dtexchange": {
+      "title": "The dtexchange Schema",
+      "type": "object",
+      "required": [
+        "version",
+        "sdk_version"
+      ],
+      "properties": {
+        "version": {
+          "title": "The version Schema",
+          "type": "string"
+        },
+        "sdk_version": {
+          "title": "The sdk_version Schema",
+          "type": "string"
+        }
+      }
+    },
+    "unityads": {
+      "title": "The unityads Schema",
+      "type": "object",
+      "required": [
+        "version",
+        "sdk_version"
+      ],
+      "properties": {
+        "version": {
+          "title": "The version Schema",
+          "type": "string"
+        },
+        "sdk_version": {
+          "title": "The sdk_version Schema",
+          "type": "string"
+        }
+      }
     }
   }
 }
