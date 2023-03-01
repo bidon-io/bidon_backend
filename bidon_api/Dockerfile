@@ -1,16 +1,5 @@
 ARG RUBY_VERSION=3.1.2
 
-#Copy geodb
-FROM amazon/aws-cli:2.5.4 AS geodb
-ARG AWS_ACCESS_KEY_ID
-ARG AWS_SECRET_ACCESS_KEY
-
-RUN aws configure set aws_access_key_id ${AWS_ACCESS_KEY_ID} \
-    && aws configure set aws_secret_access_key ${AWS_SECRET_ACCESS_KEY}
-
-RUN aws s3 cp s3://appodeal-geo-db/prod/GeoIP2-City_current.mmdb /opt/GeoIP/ \
-    && aws s3 cp s3://appodeal-geo-db/prod/SxGeoCity.dat /opt/GeoIP/
-
 FROM ruby:$RUBY_VERSION-slim AS dev
 
 # Common dependencies
@@ -89,4 +78,3 @@ ENV LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so
 
 COPY --chown=deploy:deploy . .
 
-COPY --from=geodb /opt/GeoIP/* /app/public/system/
