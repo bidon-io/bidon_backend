@@ -44,7 +44,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        component: [api, back]
+        component: [api, backend]
     steps:
       - name: Checks-out repository devops
         uses: actions/checkout@v3
