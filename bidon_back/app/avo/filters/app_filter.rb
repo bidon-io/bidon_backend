@@ -1,5 +1,5 @@
 class AppFilter < Avo::Filters::SelectFilter
-  self.name = "App filter"
+  self.name = 'App filter'
 
   def apply(_request, query, value)
     query = query.where(app_id: value) if value.present?
