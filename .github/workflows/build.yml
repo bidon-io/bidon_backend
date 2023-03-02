@@ -1,0 +1,54 @@
+name: Build
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    name: Build image
+    runs-on: [self-hosted]
+    matrix:
+      fail-fast: false
+      component: [api, back]
+    steps:
+      - name: Login registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ secrets.REGISTRY_ADDRESS }}
+          username: ${{ secrets.REGISTRY_USERNAME_DEPLOY }}
+          password: ${{ secrets.REGISTRY_PASSWORD_DEPLOY }}
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.USER_RUNNER }}
+          password: ${{ secrets.PAT_RUNNER }}
+
+      - name: Checks-out repository
+        uses: actions/checkout@v3
+
+      - name: Build image
+        run: make docker-build-prod-${{ matrix.component }} TAG=${{ github.event.release.tag_name }}
+
+      - name: Push image
+        run: make docker-push-prod-${{ matrix.component }} TAG=${{ github.event.release.tag_name }}
+
+  deploy:
+    name: Deploy
+    runs-on: [self-hosted]
+    if: always() && needs.build.result == 'success'
+    matrix:
+      fail-fast: false
+      component: [api, back]
+    steps:
+      - name: Checks-out repository devops
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ secrets.ANSIBLE_SECRET }}/devops
+          token: ${{ secrets.PAT_RUNNER }}
+
+      - name: Deploy
+        working-directory: ./${{ secrets.ANSIBLE_SECRET }}/prod
+        run: make bidon-${{ matrix.component }} TAG=${{ github.event.release.tag_name }}
