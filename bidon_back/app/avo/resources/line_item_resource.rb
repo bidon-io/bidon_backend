@@ -12,4 +12,7 @@ class LineItemResource < Avo::BaseResource
   field :height, as: :number, hide_on: :index
   field :width, as: :number, hide_on: :index
   field :extra, as: :code, hide_on: :index
+
+  filter AdTypeFilter
+  filter AppFilter
 end
