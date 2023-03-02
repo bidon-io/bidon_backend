@@ -39,6 +39,7 @@ jobs:
   deploy:
     name: Deploy
     runs-on: [self-hosted]
+    needs: build
     if: always() && needs.build.result == 'success'
     strategy:
       fail-fast: false
