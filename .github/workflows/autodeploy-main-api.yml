@@ -1,0 +1,48 @@
+name: Autodeploy main api
+on:
+  push:
+    branches:
+      - 'main'
+      - 'task/DO-1174/autodeploy'
+    paths:
+      - 'bidon_api/**'
+
+jobs:
+  build-and-debloy:
+    runs-on: [self-hosted]
+    steps:
+      - name: Login registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ secrets.REGISTRY_ADDRESS }}
+          username: ${{ secrets.REGISTRY_USERNAME_DEPLOY }}
+          password: ${{ secrets.REGISTRY_PASSWORD_DEPLOY }}
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.USER_RUNNER }}
+          password: ${{ secrets.PAT_RUNNER }}
+
+      - name: Checks-out repository
+        uses: actions/checkout@v3
+
+      - name: Set TAG
+        run: echo TAG=main-`echo ${{ github.sha }} | cut -c1-8` >> $GITHUB_ENV
+
+      - name: Build image
+        run: make docker-build-prod-api TAG=$TAG
+
+      - name: Push image
+        run: make docker-push-prod-api TAG=$TAG
+
+      - name: Checks-out repository devops
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ secrets.ANSIBLE_SECRET }}/devops
+          token: ${{ secrets.PAT_RUNNER }}
+
+      - name: Deploy
+        working-directory: ./${{ secrets.ANSIBLE_SECRET }}/prod
+        run: make bidon-api TAG=$TAG
