@@ -28,7 +28,7 @@ jobs:
             rubocop-cache-
       - name: Get changed files
         id: changed-files
-        uses: tj-actions/changed-files@v32
+        uses: tj-actions/changed-files@v35
       - name: Run rubocop
         uses: reviewdog/action-rubocop@v2
         with:
