@@ -1,17 +1,14 @@
-docker-build-prod-api:
-	cd bidon_api && docker build --target=prod -t registry.appodeal.com/bidon/api:$(TAG) -t registry.appodeal.com/bidon/api:latest -t ghcr.io/bidon-io/bidon-api:latest -t ghcr.io/bidon-io/bidon-api:$(TAG) .
+REGISTRY_EXT = "ghcr.io/bidon-io"
+REGISTRY_INT = "registry.appodeal.com/bidon"
 
-docker-push-prod-api:
-	docker push registry.appodeal.com/bidon/api:$(TAG)
-	docker push registry.appodeal.com/bidon/api:latest
-	docker push ghcr.io/bidon-io/bidon-api:$(TAG)
-	docker push ghcr.io/bidon-io/bidon-api:latest
+docker-build-push-prod-api:
+	cd bidon_api && \
+	docker buildx build --platform linux/amd64,linux/arm64 --provenance=false --target=prod \
+	--build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $(REGISTRY_EXT)/bidon-api:latest \
+	-t $(REGISTRY_INT)/api:$(TAG) -t $(REGISTRY_INT)/api:latest -t $(REGISTRY_EXT)/bidon-api:$(TAG) -t $(REGISTRY_EXT)/bidon-api:latest  --push .
 
-docker-build-prod-back:
-	cd bidon_back && docker build --target=prod -t registry.appodeal.com/bidon/back:$(TAG) -t registry.appodeal.com/bidon/back:latest -t ghcr.io/bidon-io/bidon-back:latest -t ghcr.io/bidon-io/bidon-back:$(TAG) .
-
-docker-push-prod-back:
-	docker push registry.appodeal.com/bidon/back:$(TAG)
-	docker push registry.appodeal.com/bidon/back:latest
-	docker push ghcr.io/bidon-io/bidon-back:$(TAG)
-	docker push ghcr.io/bidon-io/bidon-back:latest
+docker-build-push-prod-back:
+	cd bidon_back && \
+	docker buildx build --platform linux/amd64,linux/arm64 --provenance=false --target=prod \
+	--build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $(REGISTRY_EXT)/bidon-back:latest \
+	-t $(REGISTRY_INT)/back:$(TAG) -t $(REGISTRY_INT)/back:latest -t $(REGISTRY_EXT)/bidon-back:$(TAG) -t $(REGISTRY_EXT)/bidon-back:latest --push .
