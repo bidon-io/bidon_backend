@@ -38,12 +38,12 @@ class OfflineGeocoder
   end
 
   def max_mind_db
-    MaxMindDB.new(Rails.public_path.join('system', 'GeoIP2-City_current.mmdb'))
+    MaxMindDB.new(Utils.fetch_from_env('MAXMIND_GEOIP_FILE_PATH'))
   end
   memo_wise :max_mind_db
 
   def sypex_db
-    SypexGeo::Database.new(Rails.public_path.join('system', 'SxGeoCity.dat'))
+    SypexGeo::Database.new(Utils.fetch_from_env('SYPEX_GEOIP_FILE_PATH'))
   end
   memo_wise :sypex_db
 end
