@@ -24,17 +24,17 @@ jobs:
           username: ${{ secrets.USER_RUNNER }}
           password: ${{ secrets.PAT_RUNNER }}
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
       - name: Checks-out repository
         uses: actions/checkout@v3
 
       - name: Set TAG
         run: echo TAG=main-`echo ${{ github.sha }} | cut -c1-8` >> $GITHUB_ENV
 
-      - name: Build image
-        run: make docker-build-prod-back TAG=$TAG
-
-      - name: Push image
-        run: make docker-push-prod-back TAG=$TAG
+      - name: Build and Push image
+        run: make docker-build-push-prod-back TAG=$TAG
 
       - name: Checks-out repository devops
         uses: actions/checkout@v3

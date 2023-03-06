@@ -30,11 +30,8 @@ jobs:
       - name: Checks-out repository
         uses: actions/checkout@v3
 
-      - name: Build image
-        run: make docker-build-prod-${{ matrix.component }} TAG=${{ github.event.release.tag_name }}
-
-      - name: Push image
-        run: make docker-push-prod-${{ matrix.component }} TAG=${{ github.event.release.tag_name }}
+      - name: Build and Push image
+        run: make docker-build-push-prod-${{ matrix.component }} TAG=${{ github.event.release.tag_name }}
 
   deploy:
     name: Deploy
