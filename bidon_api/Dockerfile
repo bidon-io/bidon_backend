@@ -77,4 +77,3 @@ ENV LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so
 # MALLOC_CONF=stats_print:true ruby -e "exit"
 
 COPY --chown=deploy:deploy . .
-

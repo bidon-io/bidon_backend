@@ -8,6 +8,7 @@ x-logging: &default-logging
     max-file: "5"
   driver: json-file
 x-bidon-environment: &bidon-environment
+  LD_PRELOAD: /usr/lib/x86_64-linux-gnu/libjemalloc.so
   MALLOC_ARENA_MAX: 2
   PIDFILE: /tmp/server.pid
   RAILS_ENV: production
@@ -30,6 +31,8 @@ x-bidon-environment: &bidon-environment
   KAFKA_REWARD_TOPIC: reward
   KAFKA_SHOW_TOPIC: show
   KAFKA_STATS_TOPIC: stats
+  MAXMIND_GEOIP_FILE_PATH: /app/public/system/GeoLite2-City.mmdb
+  SYPEX_GEOIP_FILE_PATH: /app/public/system/SxGeoCity.dat
 
 services:
   geodb-maxmind:
@@ -50,7 +53,7 @@ services:
     volumes:
       - "geodb:/geodb"
     working_dir: /geodb
-    
+
   postgres:
     image: postgres:14.7
     environment:
