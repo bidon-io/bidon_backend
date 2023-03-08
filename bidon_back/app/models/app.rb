@@ -8,6 +8,8 @@ class App < ApplicationRecord
   validates :package_name, :app_key,    presence: true, uniqueness: true
   validates :platform_id,  :human_name, presence: true
 
+  enum platform_id: { ios: 4, android: 1 }
+
   def settings=(value)
     super(JSON.parse(value.gsub('=>', ':')))
   end
