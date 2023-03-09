@@ -1,5 +1,5 @@
 class AppResource < Avo::BaseResource
-  self.title = :package_name
+  self.title = :slug
 
   field :id, as: :id
   field :platform_id, as: :select, required: true, enum: ::App.platform_ids
