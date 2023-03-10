@@ -31,7 +31,11 @@ docker compose -f docker-compose-prod.yml run --rm --no-deps bidon-backend rails
 ```
 Create personal account on https://maxmind.com.
 
-Change `GEOIPUPDATE_ACCOUNT_ID`, `GEOIPUPDATE_LICENSE_KEY`, `SECRET_KEY_BASE` and start Docker Compose:
+Start Docker Compose:
 ```shell
+MAXMIND_ACCOUNT_ID=<CHANGE_ME> \
+MAXMIND_LICENSE_KEY=<CHANGE_ME> \
+SECRET_KEY_BASE=<CHANGE_ME> \
+PG_PASSWORD=<CHANGE_ME> \
 docker compose -f docker-compose-prod.yml up -d
 ```
