@@ -2,22 +2,17 @@
 version: "3.9"
 x-restart-policy: &restart-policy
   restart: unless-stopped
-x-logging: &default-logging
-  options:
-    max-size: "100m"
-    max-file: "5"
-  driver: json-file
 x-bidon-environment: &bidon-environment
   MALLOC_ARENA_MAX: 2
   PIDFILE: /tmp/server.pid
-  RAILS_ENV: production
+  RAILS_ENV: test
   RAILS_LOG_TO_STDOUT: 1
   RAILS_PUMA_WORKER_COUNT: 2
   RAILS_THREADS_COUNT: 2
-  SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+  SECRET_KEY_BASE: 4232a1c84d26f08101987a910b38387e64be09dd2a883634044c994c4d7e456b31286a61b1615606ba0ef71a80129b3e1fc1ba0d87d691a9f01c4d2f3bf5431b
   PG_DATABASE: bidon
   PG_USERNAME: bidon
-  PG_PASSWORD: ${PG_PASSWORD:-password}
+  PG_PASSWORD: pass
   PG_HOST: postgres
   PG_PORT: 5432
   REDIS_URL: redis://redis:6379/0
@@ -41,7 +36,7 @@ services:
       GEOIPUPDATE_LICENSE_KEY: ${MAXMIND_LICENSE_KEY}
       GEOIPUPDATE_EDITION_IDS: GeoLite2-City
     volumes:
-      - "geodb:/usr/share/GeoIP/"
+      - "./geodb/:/usr/share/GeoIP/"
 
   geodb-sx:
     image: bash:latest
@@ -50,23 +45,19 @@ services:
       unzip -o SxGeoCity_utf8.zip &&
       rm SxGeoCity_utf8.zip"
     volumes:
-      - "geodb:/geodb"
+      - "./geodb/:/geodb"
     working_dir: /geodb
 
   postgres:
     image: postgres:14.7
     environment:
-      POSTGRES_PASSWORD: ${PG_PASSWORD:-password}
+      POSTGRES_PASSWORD: pass
       POSTGRES_USER: bidon
       POSTGRES_DB: bidon
-    logging: *default-logging
-    volumes:
-      - "postgres-data:/var/lib/postgresql/data"
     <<: *restart-policy
 
   redis:
     image: redis:7.0.9
-    logging: *default-logging
     <<: *restart-policy
 
   zookeeper:
@@ -76,10 +67,6 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
       CONFLUENT_SUPPORT_METRICS_ENABLE: "false"
       ZOOKEEPER_SNAPSHOT_TRUST_EMPTY: "true"
-    logging: *default-logging
-    volumes:
-      - "zookeeper-data:/var/lib/zookeeper/data"
-      - "zookeeper-log:/var/lib/zookeeper/log"
     <<: *restart-policy
 
   kafka:
@@ -96,10 +83,6 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL: http://schema-registry:8081
-    logging: *default-logging
-    volumes:
-      - "kafka-data:/var/lib/kafka/data"
-      - "kafka-log:/var/lib/kafka/log"
     <<: *restart-policy
 
   schema-registry:
@@ -110,24 +93,22 @@ services:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'kafka:29092'
       SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
-    logging: *default-logging
     <<: *restart-policy
 
   db-migration:
-    image: ghcr.io/bidon-io/bidon-back:latest
+    image: ghcr.io/bidon-io/bidon-back:${BIDON_BACKEND_VERS}
     command: bin/rails db:prepare
     depends_on:
       - postgres
     environment:
       PG_DATABASE: bidon
       PG_USERNAME: bidon
-      PG_PASSWORD: ${PG_PASSWORD:-password}
+      PG_PASSWORD: pass
       PG_HOST: postgres
       PG_PORT: 5432
-    logging: *default-logging
 
   bidon-api:
-    image: ghcr.io/bidon-io/bidon-api:latest
+    image: ghcr.io/bidon-io/bidon-api:${BIDON_BACKEND_VERS}
     command: bundle exec puma -C /app/config/puma.rb -p 3100
     depends_on:
       kafka:
@@ -145,15 +126,13 @@ services:
       geodb-sx:
         condition: service_completed_successfully
     environment: *bidon-environment
-    logging: *default-logging
     volumes:
-      - "geodb:/app/public/system/"
-    ports:
-      - 3100:3100
+      - "./geodb/:/app/public/system/"
+      - "./test/:/app/test/"
     <<: *restart-policy
 
   bidon-backend:
-    image: ghcr.io/bidon-io/bidon-back:latest
+    image: ghcr.io/bidon-io/bidon-back:${BIDON_BACKEND_VERS}
     command: bundle exec puma -C /app/config/puma.rb -p 3200
     depends_on:
       kafka:
@@ -167,14 +146,4 @@ services:
       db-migration:
         condition: service_completed_successfully
     environment: *bidon-environment
-    logging: *default-logging
-    ports:
-      - 3200:3200
     <<: *restart-policy
-volumes:
-  geodb:
-  postgres-data:
-  zookeeper-log:
-  zookeeper-data:
-  kafka-data:
-  kafka-log:

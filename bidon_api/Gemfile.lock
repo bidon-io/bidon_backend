@@ -193,6 +193,7 @@ GEM
       rspec-expectations (~> 3.10)
       rspec-mocks (~> 3.10)
       rspec-support (~> 3.10)
+    rspec_junit_formatter (0.6.0)
     rspec-support (3.11.0)
     rubocop (1.35.1)
       json (~> 2.3)
