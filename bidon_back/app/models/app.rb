@@ -12,7 +12,11 @@ class App < ApplicationRecord
   enum platform_id: { ios: 4, android: 1 }
 
   def settings=(value)
-    super(JSON.parse(value.gsub('=>', ':')))
+    if value.is_a?(Hash)
+      super(value)
+    else
+      super(JSON.parse(value.gsub('=>', ':')))
+    end
   end
 
   def slug
