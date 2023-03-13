@@ -10,6 +10,10 @@ class AppDemandProfile < ApplicationRecord
   end
 
   def data=(value)
-    super(JSON.parse(value.gsub('=>', ':')))
+    if value.is_a?(Hash)
+      super(value)
+    else
+      super(JSON.parse(value.gsub('=>', ':')))
+    end
   end
 end

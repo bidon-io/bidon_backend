@@ -7,8 +7,8 @@ class AppFilter < Avo::Filters::SelectFilter
   end
 
   def options
-    App.select(:id, :package_name).each_with_object({}) do |app, options|
-      options[app.id] = app.package_name
+    App.select(:id, :package_name, :platform_id).each_with_object({}) do |app, options|
+      options[app.id] = app.slug
     end
   end
 end

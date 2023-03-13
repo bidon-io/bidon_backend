@@ -7,6 +7,10 @@ class LineItem < ApplicationRecord
   validates :bid_floor, numericality: { greater_than_or_equal_to: 0 }
 
   def extra=(value)
-    super(JSON.parse(value.gsub('=>', ':')))
+    if value.is_a?(Hash)
+      super(value)
+    else
+      super(JSON.parse(value.gsub('=>', ':')))
+    end
   end
 end
