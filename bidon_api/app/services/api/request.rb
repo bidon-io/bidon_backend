@@ -23,7 +23,7 @@ module Api
     end
 
     def adapters
-      params['adapters'].presence || []
+      params['adapters'].presence || {}
     end
 
     def app
