@@ -4,7 +4,12 @@ class ConfigController < ApplicationController
   def create
     config_response = Api::Config::Response.new(api_request)
 
-    render json: config_response.body, status: :ok
+    if config_response.present?
+      render json: config_response.body, status: :ok
+    else
+      render json:   { error: { code: 422, message: 'No adapters found' } },
+             status: :unprocessable_entity
+    end
   end
 
   private
