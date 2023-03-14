@@ -14,6 +14,8 @@ module Api
       end
 
       def body
+        return if adapters.blank?
+
         {
           'init'       => {
             'tmax'     => 5000,
@@ -29,6 +31,7 @@ module Api
       def adapters
         AdaptersFetcher.new(app: config_request.app, config_adapters: config_request.adapters).fetch
       end
+      memo_wise :adapters
     end
   end
 end

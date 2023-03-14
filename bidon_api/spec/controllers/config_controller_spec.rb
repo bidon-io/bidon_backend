@@ -31,7 +31,7 @@ RSpec.describe ConfigController, type: :controller do
         {
           'init'       => {
             'tmax'     => 5000,
-            'adapters' => {},
+            'adapters' => { 'applovin' => { app_key: 'app_key' } },
           },
           'placements' => [],
           'token'      => '{}',
@@ -41,7 +41,9 @@ RSpec.describe ConfigController, type: :controller do
 
       it 'returns 200 with ok' do
         allow_any_instance_of(Api::Request).to receive(:valid?).and_return(true)
-        allow_any_instance_of(Api::Config::AdaptersFetcher).to receive(:fetch).and_return({})
+        allow_any_instance_of(Api::Config::AdaptersFetcher).to receive(:fetch).and_return(
+          'applovin' => { app_key: 'app_key' },
+        )
 
         post :create, params: config_params, as: :json
 
@@ -86,6 +88,27 @@ RSpec.describe ConfigController, type: :controller do
         post :create, params: config_params, as: :json
 
         expect(response).to have_http_status(:internal_server_error)
+        expect(response.body).to eq expected_response
+      end
+    end
+
+    context 'no adapters request' do
+      let(:expected_response) do
+        {
+          error: {
+            code:    422,
+            message: 'No adapters found',
+          },
+        }.to_json
+      end
+
+      it 'returns 422 with error' do
+        allow_any_instance_of(Api::Request).to receive(:valid?).and_return(true)
+        allow_any_instance_of(Api::Config::AdaptersFetcher).to receive(:fetch).and_return({})
+
+        post :create, params: config_params, as: :json
+
+        expect(response).to have_http_status(:unprocessable_entity)
         expect(response.body).to eq expected_response
       end
     end
