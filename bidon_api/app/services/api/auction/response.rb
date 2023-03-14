@@ -8,7 +8,7 @@ module Api
       attr_reader :auction_request
 
       delegate :present?, to: :body
-      delegate :app, :ad_type, :ad_object, to: :auction_request
+      delegate :app, :ad_type, :ad_object, :adapters, to: :auction_request
 
       def initialize(auction_request)
         @auction_request = auction_request
@@ -29,7 +29,7 @@ module Api
       memo_wise :body
 
       def rounds
-        JSON.parse(auction_configuration.rounds)
+        RoundsFilterer.new(rounds: JSON.parse(auction_configuration.rounds), adapters:).fetch
       end
       memo_wise :rounds
 
