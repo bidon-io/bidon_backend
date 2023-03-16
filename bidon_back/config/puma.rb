@@ -9,7 +9,3 @@ environment ENV.fetch('RAILS_ENV', 'development')
 
 # Allow puma to be restarted by `bin/rails restart` command.
 plugin :tmp_restart
-
-before_fork do
-  Sequel::DATABASES.each(&:disconnect)
-end
