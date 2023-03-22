@@ -125,7 +125,9 @@ services:
         condition: service_completed_successfully
       geodb-sx:
         condition: service_completed_successfully
-    environment: *bidon-environment
+    environment:
+      <<: *bidon-environment
+      ALLOWED_HOSTS: web_api
     volumes:
       - "./geodb/:/app/public/system/"
       - "./test/:/app/test/"
@@ -145,5 +147,7 @@ services:
         condition: service_started
       db-migration:
         condition: service_completed_successfully
-    environment: *bidon-environment
+    environment:
+      <<: *bidon-environment
+      ALLOWED_HOSTS: web_back
     <<: *restart-policy
