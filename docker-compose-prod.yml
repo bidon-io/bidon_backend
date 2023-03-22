@@ -144,7 +144,9 @@ services:
         condition: service_completed_successfully
       geodb-sx:
         condition: service_completed_successfully
-    environment: *bidon-environment
+    environment:
+      <<: *bidon-environment
+      ALLOWED_HOSTS: b.appbaqend.com
     logging: *default-logging
     volumes:
       - "geodb:/app/public/system/"
@@ -166,7 +168,9 @@ services:
         condition: service_started
       db-migration:
         condition: service_completed_successfully
-    environment: *bidon-environment
+    environment:
+      <<: *bidon-environment
+      ALLOWED_HOSTS: bidon.appodeal.com
     logging: *default-logging
     ports:
       - 3200:3200
