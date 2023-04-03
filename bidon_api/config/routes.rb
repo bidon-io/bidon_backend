@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-  get 'up', to: 'health#show'
+  get 'health_checks', to: 'health#show'
 
   post 'config', to: 'config#create'
   post 'auction/:ad_type', to: 'auction#create'
