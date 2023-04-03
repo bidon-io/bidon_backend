@@ -1,3 +1,4 @@
+# TODO: Move to SdkApiController and free up ApplicationController for other stuff
 class ApplicationController < ActionController::API
   prepend MemoWise
 
