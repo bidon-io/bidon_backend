@@ -11,6 +11,7 @@ class KafkaEvent
   def build
     fill_timestamp!
     fill_geo_data!
+    parse_ext!
 
     params
   end
@@ -27,6 +28,15 @@ class KafkaEvent
     params['geo']['ip'] = ip
     params['geo']['country'] = geo_data[:country_code]
     params['geo']['country_id'] = geo_data[:country_id]
+  end
+
+  def parse_ext!
+    return if params['ext'].blank?
+
+    params['ext'] = JSON.parse(params['ext'])
+  rescue JSON::ParserError => e
+    Rails.logger.error("Failed to parse 'ext': #{e.message}")
+    Sentry.capture_exception(e)
   end
 
   def geo_data

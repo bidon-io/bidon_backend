@@ -7,7 +7,7 @@ class ApplicationController < ActionController::API
   before_action :validate_app!
   before_action :validate_request_schema!
 
-  rescue_from StandardError, with: :handle_exception
+  rescue_from StandardError, with: :handle_exception unless Rails.env.development?
 
   wrap_parameters false
 
