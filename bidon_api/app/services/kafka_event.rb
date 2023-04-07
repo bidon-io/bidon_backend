@@ -20,7 +20,7 @@ class KafkaEvent
   private
 
   def fill_timestamp!
-    params['timestamp'] = Time.zone.now.to_i
+    params['timestamp'] = Time.current.to_f
   end
 
   def fill_geo_data!
