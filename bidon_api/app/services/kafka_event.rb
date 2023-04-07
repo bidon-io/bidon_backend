@@ -11,7 +11,9 @@ class KafkaEvent
   def build
     fill_timestamp!
     fill_geo_data!
+
     parse_ext!
+    fill_ext_with_empty_values_if_needed!
 
     params
   end
@@ -31,12 +33,20 @@ class KafkaEvent
   end
 
   def parse_ext!
-    return if params['ext'].blank?
+    return params['ext'] = {} if params['ext'].blank?
 
     params['ext'] = JSON.parse(params['ext'])
   rescue JSON::ParserError => e
     Rails.logger.error("Failed to parse 'ext': #{e.message}")
     Sentry.capture_exception(e)
+  end
+
+  def fill_ext_with_empty_values_if_needed! # rubocop:disable Metrics/AbcSize
+    params['ext']['appodeal_session_id'] ||= ''
+    params['ext']['appodeal_segment_id'] ||= 0
+    params['ext']['appodeal_placement_id'] ||= 0
+    params['ext']['appodeal_token'] ||= {}
+    params['ext']['appodeal_token']['signature'] ||= ''
   end
 
   def geo_data
