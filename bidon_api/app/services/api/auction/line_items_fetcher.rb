@@ -3,10 +3,18 @@ module Api
     class LineItemsFetcher
       prepend MemoWise
 
+      # rubocop:disable Style/MutableConstant
+      BANNER_FORMAT      = 'BANNER'
+      LEADERBOARD_FORMAT = 'LEADERBOARD'
+      MREC_FORMAT        = 'MREC'
+      ADAPTIVE_FORMAT    = 'ADAPTIVE'
+      # rubocop:enable Style/MutableConstant
+
       FORMAT_SIZES = {
-        0 => { width: 320, height: 50 },
-        1 => { width: 728, height: 90 },
-        2 => { width: 300, height: 250 },
+        BANNER_FORMAT      => { width: 320, height: 50 },
+        LEADERBOARD_FORMAT => { width: 728, height: 90 },
+        MREC_FORMAT        => { width: 300, height: 250 },
+        ADAPTIVE_FORMAT    => { width: 0,   height: 50 },
       }.freeze
 
       attr_reader :app, :ad_type, :banner_format
