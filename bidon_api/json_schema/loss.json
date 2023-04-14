@@ -1,0 +1,51 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Show Schema",
+  "type": "object",
+  "required": [
+    "external_winner",
+    "bid",
+    "device",
+    "session",
+    "app",
+    "user"
+  ],
+  "properties": {
+    "external_winner": {
+      "title": "The external_winner Schema",
+      "type": "object",
+      "required": [
+        "demand_id",
+        "ecpm"
+      ],
+      "properties": {
+        "demand_id": {
+          "title": "The demand_id Schema",
+          "type": "string"
+        },
+        "ecpm": {
+          "title": "The ecpm Schema",
+          "type": "number"
+        }
+      }
+    },
+    "bid": { "$ref": "./types/bid.json" },
+    "device": { "$ref": "./types/device.json" },
+    "session": { "$ref": "./types/session.json" },
+    "app": { "$ref": "./types/app.json" },
+    "user": { "$ref": "./types/user.json" },
+    "geo": { "$ref": "./types/geo.json" },
+    "ext": {
+      "title": "The ext Schema",
+      "type": "string"
+    },
+    "token": {
+      "title": "The token Schema",
+      "type": "string"
+    },
+    "segment_id": {
+      "title": "The segment_id Schema",
+      "type": "string"
+    }
+  }
+}
