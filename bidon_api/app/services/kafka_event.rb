@@ -15,6 +15,8 @@ class KafkaEvent
     parse_ext!
     fill_ext_with_empty_values_if_needed!
 
+    alias_bid_to_show!
+
     params
   end
   memo_wise :build
@@ -30,6 +32,12 @@ class KafkaEvent
     params['geo']['ip'] = ip
     params['geo']['country'] = geo_data[:country_code]
     params['geo']['country_id'] = geo_data[:country_id]
+  end
+
+  def alias_bid_to_show!
+    return if params.key?('show')
+
+    params['show'] = params['bid']
   end
 
   def parse_ext!
