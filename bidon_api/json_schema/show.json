@@ -3,75 +3,18 @@
   "title": "Show Schema",
   "type": "object",
   "required": [
-    "show",
     "device",
     "session",
     "app",
     "user"
   ],
+  "oneOf": [
+    { "required": ["show"] },
+    { "required": ["bid"] }
+  ],
   "properties": {
-    "show": {
-      "title": "The show Schema",
-      "type": "object",
-      "required": [
-        "auction_id",
-        "auction_configuration_id",
-        "imp_id",
-        "demand_id",
-        "ecpm"
-      ],
-      "properties": {
-        "auction_id": {
-          "title": "The auction_id Schema",
-          "type": "string"
-        },
-        "auction_configuration_id": {
-          "title": "The auction_configuration_id Schema",
-          "type": "integer"
-        },
-        "imp_id": {
-          "title": "The imp_id Schema",
-          "type": "string"
-        },
-        "demand_id": {
-          "title": "The demand_id Schema",
-          "type": "string"
-        },
-        "ad_unit_id": {
-          "title": "The ad_unit_id Schema",
-          "type": "string"
-        },
-        "ecpm": {
-          "title": "The ecpm Schema",
-          "type": "number"
-        },
-        "banner": {
-          "title": "The banner Schema",
-          "type": "object",
-          "required": [
-            "format"
-          ],
-          "properties": {
-            "format": {
-              "title": "The format Schema",
-              "type": "string"
-            }
-          }
-        },
-        "interstitial": {
-          "title": "The interstitial Schema",
-          "type": "object",
-          "required": [],
-          "properties": {}
-        },
-        "rewarded": {
-          "title": "The rewarded Schema",
-          "type": "object",
-          "required": [],
-          "properties": {}
-        }
-      }
-    },
+    "show": { "$ref": "./types/bid.json" },
+    "bid": { "$ref": "./types/bid.json" },
     "device": { "$ref": "./types/device.json" },
     "session": { "$ref": "./types/session.json" },
     "app": { "$ref": "./types/app.json" },
