@@ -6,6 +6,7 @@ Rails.application.routes.draw do
   post 'stats/:ad_type',   to: 'stats#create'
   post 'click/:ad_type',   to: 'click#create'
   post 'show/:ad_type',    to: 'show#create'
+  post 'loss/:ad_type',    to: 'loss#create'
   post 'reward/rewarded',  to: 'reward#create'
 
   post ':ad_type/auction', to: 'auction#create'
