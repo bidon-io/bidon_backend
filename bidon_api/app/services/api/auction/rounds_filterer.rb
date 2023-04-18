@@ -11,13 +11,11 @@ module Api
       end
 
       def fetch
-        return [] unless adapters_names
+        rounds.filter_map do |round|
+          filtered_demands = round['demands'] & adapters_names
+          next if filtered_demands.empty?
 
-        rounds.each_with_object([]) do |round, result|
-          filtered_demands = round['demands']&.select { |demand| demand.in?(adapters_names) }
-          return result if filtered_demands.blank?
-
-          result << round.merge('demands' => filtered_demands)
+          round.merge('demands' => filtered_demands)
         end
       end
 
