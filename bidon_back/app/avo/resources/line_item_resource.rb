@@ -1,5 +1,6 @@
 class LineItemResource < Avo::BaseResource
   self.title = :human_name
+  self.keep_filters_panel_open = true
 
   field :id, as: :id
   field :human_name, as: :text, required: true

@@ -1,5 +1,8 @@
 class AppFilter < Avo::Filters::SelectFilter
   self.name = 'App filter'
+  self.visible = lambda do
+    !parent_resource.is_a?(AppResource)
+  end
 
   def apply(_request, query, value)
     query = query.where(app_id: value) if value.present?
