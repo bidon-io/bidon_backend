@@ -8,4 +8,6 @@ class AppResource < Avo::BaseResource
   field :user, as: :belongs_to, required: true
   field :app_key, as: :text
   field :settings, as: :code
+
+  field :line_items, as: :has_many
 end
