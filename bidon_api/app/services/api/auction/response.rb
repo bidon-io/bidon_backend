@@ -34,7 +34,7 @@ module Api
       memo_wise :rounds
 
       def line_items
-        LineItemsFetcher.new(app:, ad_type:, banner_format: ad_object.dig('banner', 'format')).fetch
+        LineItemsFetcher.new(app:, ad_type:, adapters:, banner_format: ad_object.dig('banner', 'format')).fetch
       end
       memo_wise :line_items
 
