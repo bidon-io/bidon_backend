@@ -17,18 +17,22 @@ module Api
         ADAPTIVE_FORMAT    => { width: 0,   height: 50 },
       }.freeze
 
-      attr_reader :app, :ad_type, :banner_format
+      attr_reader :app, :ad_type, :adapters, :banner_format
 
-      def initialize(app:, ad_type:, banner_format: 0)
+      def initialize(app:, ad_type:, adapters:, banner_format: 0)
         @app = app
         @ad_type = ad_type
+        @adapters = adapters
         @banner_format = banner_format
       end
 
       def fetch
-        line_items.map do |line_item|
+        line_items.filter_map do |line_item|
+          api_key = line_item.demand_source_account.demand_source.api_key
+          next unless adapters.key?(api_key)
+
           {
-            id:         line_item.demand_source_account.demand_source.api_key,
+            id:         api_key,
             pricefloor: line_item.bid_floor.to_f,
             ad_unit_id: line_item.code,
           }
