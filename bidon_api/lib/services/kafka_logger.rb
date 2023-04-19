@@ -17,6 +17,10 @@ module KafkaLogger
     KafkaProducer.produce(prepare_event(event), topic: ENV.fetch('KAFKA_STATS_TOPIC'))
   end
 
+  def log_loss(event)
+    KafkaProducer.produce(prepare_event(event), topic: ENV.fetch('KAFKA_LOSS_TOPIC'))
+  end
+
   def prepare_event(event)
     JSON.dump(Utils.smash_hash(event))
   end
