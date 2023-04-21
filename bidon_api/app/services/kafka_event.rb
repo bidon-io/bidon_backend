@@ -44,6 +44,12 @@ class KafkaEvent
     return params['ext'] = {} if params['ext'].blank?
 
     params['ext'] = JSON.parse(params['ext'])
+
+    # Android SDK version 2.6.40 sends double escaped JSON
+    # TODO: Remove after SDK fixes this
+    return unless params['ext']['appodeal_token'].is_a?(String)
+
+    params['ext']['appodeal_token'] = JSON.parse(params['ext']['appodeal_token'])
   rescue JSON::ParserError => e
     Rails.logger.error("Failed to parse 'ext': #{e.message}")
     Sentry.capture_exception(e)
