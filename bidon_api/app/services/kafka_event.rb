@@ -12,7 +12,7 @@ class KafkaEvent
     fill_timestamp!
     fill_geo_data!
 
-    parse_ext!
+    params['ext'] = parse_ext(params['ext'])
     fill_ext_with_empty_values_if_needed!
 
     alias_bid_to_show!
@@ -40,19 +40,24 @@ class KafkaEvent
     params['show'] = params['bid']
   end
 
-  def parse_ext!
-    return params['ext'] = {} if params['ext'].blank?
-
-    params['ext'] = JSON.parse(params['ext'])
-
+  def parse_ext(ext)
+    ext = parse_json(ext)
     # Android SDK version 2.6.40 sends double escaped JSON
     # TODO: Remove after SDK fixes this
-    return unless params['ext']['appodeal_token'].is_a?(String)
+    return ext if !ext.key?('appodeal_token') || ext['appodeal_token'].is_a?(Hash)
 
-    params['ext']['appodeal_token'] = JSON.parse(params['ext']['appodeal_token'])
+    ext['appodeal_token'] = parse_json(ext['appodeal_token'])
+
+    ext
   rescue JSON::ParserError => e
     Rails.logger.error("Failed to parse 'ext': #{e.message}")
     Sentry.capture_exception(e)
+  end
+
+  def parse_json(source)
+    return {} if source.blank?
+
+    JSON.parse(source)
   end
 
   def fill_ext_with_empty_values_if_needed! # rubocop:disable Metrics/AbcSize
