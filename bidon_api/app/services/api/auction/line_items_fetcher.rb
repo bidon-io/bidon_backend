@@ -3,23 +3,9 @@ module Api
     class LineItemsFetcher
       prepend MemoWise
 
-      # rubocop:disable Style/MutableConstant
-      BANNER_FORMAT      = 'BANNER'
-      LEADERBOARD_FORMAT = 'LEADERBOARD'
-      MREC_FORMAT        = 'MREC'
-      ADAPTIVE_FORMAT    = 'ADAPTIVE'
-      # rubocop:enable Style/MutableConstant
-
-      FORMAT_SIZES = {
-        BANNER_FORMAT      => { width: 320, height: 50 },
-        LEADERBOARD_FORMAT => { width: 728, height: 90 },
-        MREC_FORMAT        => { width: 300, height: 250 },
-        ADAPTIVE_FORMAT    => { width: 0,   height: 50 },
-      }.freeze
-
       attr_reader :app, :ad_type, :adapters, :banner_format
 
-      def initialize(app:, ad_type:, adapters:, banner_format: 0)
+      def initialize(app:, ad_type:, adapters:, banner_format:)
         @app = app
         @ad_type = ad_type
         @adapters = adapters
@@ -45,11 +31,10 @@ module Api
         result = LineItem.eager(demand_source_account: :demand_source)
                          .where(app_id: app.id, ad_type: AdType::ENUM[ad_type])
 
-        if ad_type == :banner
-          result.where(FORMAT_SIZES[banner_format])
-        else
-          result
-        end
+        return result unless ad_type == :banner
+        return [] unless ::LineItem.formats.value?(banner_format)
+
+        result.where(format: banner_format)
       end
     end
   end
