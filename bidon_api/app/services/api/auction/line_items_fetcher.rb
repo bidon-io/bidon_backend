@@ -3,6 +3,8 @@ module Api
     class LineItemsFetcher
       prepend MemoWise
 
+      FORMATS = %w[BANNER LEADERBOARD MREC ADAPTIVE].freeze
+
       attr_reader :app, :ad_type, :adapters, :banner_format
 
       def initialize(app:, ad_type:, adapters:, banner_format:)
@@ -32,7 +34,7 @@ module Api
                          .where(app_id: app.id, ad_type: AdType::ENUM[ad_type])
 
         return result unless ad_type == :banner
-        return [] unless ::LineItem.formats.value?(banner_format)
+        return [] unless FORMATS.include?(banner_format)
 
         result.where(format: banner_format)
       end
