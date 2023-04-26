@@ -25,6 +25,8 @@ group :development do
   gem 'benchmark-ips'
   gem 'brakeman'
 
+  gem 'good_migrations'
+
   gem 'rubocop', require: false
   gem 'rubocop-performance', require: false
   gem 'rubocop-rails', require: false
