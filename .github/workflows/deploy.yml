@@ -15,40 +15,41 @@ on:
         default: latest
 
 jobs:
-  migration:
-    name: Data migration
-    runs-on: [self-hosted]
-    env:
-      TAG: ${{ inputs.tag }}
-    steps:
-      - name: Checks-out repository devops
-        uses: actions/checkout@v3
-        with:
-          repository: ${{ secrets.ANSIBLE_SECRET }}/devops
-          token: ${{ secrets.PAT_RUNNER }}
-
-      - name: Deploy
-        working-directory: ./${{ secrets.ANSIBLE_SECRET }}/prod
-        run: make bidon-data-migratio TAG=$TAG
-
   deploy:
     name: Deploy
     runs-on: [self-hosted]
-    needs: [migration]
     env:
       TAG: ${{ inputs.tag }}
-    if: always() && needs.migration.result == 'success'
-    strategy:
-      fail-fast: false
-      matrix:
-        component: [api, backend]
     steps:
+      - name: Get latest release
+        if: ${{ inputs.tag == 'latest' }}
+        id: latest-release
+        uses: octokit/request-action@v2.1.7
+        with:
+          route: GET /repos/${{ github.repository }}/releases/latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_APPODEAL_RUNNER }}
+
+      - name: Set TAG
+        if: ${{ inputs.tag == 'latest' }}
+        run: echo "TAG=${{ fromJson(steps.latest-release.outputs.data).tag_name }}" >> $GITHUB_ENV
+
+      - name:
+
       - name: Checks-out repository devops
         uses: actions/checkout@v3
         with:
           repository: ${{ secrets.ANSIBLE_SECRET }}/devops
           token: ${{ secrets.PAT_RUNNER }}
 
+      - name: Data Migratio
+        working-directory: ./${{ secrets.ANSIBLE_SECRET }}/prod
+        run: make bidon-data-migration TAG=$TAG
+
       - name: Deploy
         working-directory: ./${{ secrets.ANSIBLE_SECRET }}/prod
-        run: make bidon-${{ matrix.component }} TAG=$TAG
+        run: make bidon-backend TAG=$TAG
+
+      - name: Deploy
+        working-directory: ./${{ secrets.ANSIBLE_SECRET }}/prod
+        run: make bidon-api TAG=$TAG
