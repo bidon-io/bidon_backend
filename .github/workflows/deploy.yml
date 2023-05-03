@@ -1,0 +1,54 @@
+name: Deploy
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        type: string
+        required: true
+        default: latest
+  workflow_dispatch:
+    inputs:
+      tag:
+        type: string
+        required: true
+        default: latest
+
+jobs:
+  migration:
+    name: Data migration
+    runs-on: [self-hosted]
+    env:
+      TAG: ${{ inputs.tag }}
+    steps:
+      - name: Checks-out repository devops
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ secrets.ANSIBLE_SECRET }}/devops
+          token: ${{ secrets.PAT_RUNNER }}
+
+      - name: Deploy
+        working-directory: ./${{ secrets.ANSIBLE_SECRET }}/prod
+        run: make bidon-data-migratio TAG=$TAG
+
+  deploy:
+    name: Deploy
+    runs-on: [self-hosted]
+    needs: [migration]
+    env:
+      TAG: ${{ inputs.tag }}
+    if: always() && needs.migration.result == 'success'
+    strategy:
+      fail-fast: false
+      matrix:
+        component: [api, backend]
+    steps:
+      - name: Checks-out repository devops
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ secrets.ANSIBLE_SECRET }}/devops
+          token: ${{ secrets.PAT_RUNNER }}
+
+      - name: Deploy
+        working-directory: ./${{ secrets.ANSIBLE_SECRET }}/prod
+        run: make bidon-${{ matrix.component }} TAG=$TAG
