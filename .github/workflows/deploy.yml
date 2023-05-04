@@ -28,7 +28,7 @@ jobs:
         with:
           route: GET /repos/${{ github.repository }}/releases/latest
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT_APPODEAL_RUNNER }}
+          GITHUB_TOKEN: ${{ secrets.PAT_RUNNER }}
 
       - name: Set TAG
         if: ${{ inputs.tag == 'latest' }}
@@ -40,14 +40,14 @@ jobs:
           repository: ${{ secrets.ANSIBLE_SECRET }}/devops
           token: ${{ secrets.PAT_RUNNER }}
 
-      - name: Data Migratio
+      - name: Data migratio
         working-directory: ./${{ secrets.ANSIBLE_SECRET }}/prod
         run: make bidon-data-migration TAG=$TAG
 
-      - name: Deploy
+      - name: Deploy backend
         working-directory: ./${{ secrets.ANSIBLE_SECRET }}/prod
         run: make bidon-backend TAG=$TAG
 
-      - name: Deploy
+      - name: Deploy api
         working-directory: ./${{ secrets.ANSIBLE_SECRET }}/prod
         run: make bidon-api TAG=$TAG
