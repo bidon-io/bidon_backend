@@ -34,8 +34,6 @@ jobs:
         if: ${{ inputs.tag == 'latest' }}
         run: echo "TAG=${{ fromJson(steps.latest-release.outputs.data).tag_name }}" >> $GITHUB_ENV
 
-      - name:
-
       - name: Checks-out repository devops
         uses: actions/checkout@v3
         with:
