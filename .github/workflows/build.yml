@@ -64,7 +64,7 @@ jobs:
 
   deploy:
     name: Deploy
-    needs: [build]
+    needs: [tag, build]
     if: always() && needs.build.result == 'success'
     uses: ./.github/workflows/deploy.yml
     with:
