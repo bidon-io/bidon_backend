@@ -36,7 +36,14 @@ module Api
         return result unless ad_type == :banner
         return [] unless FORMATS.include?(banner_format)
 
-        result.where(format: banner_format)
+        if banner_format == 'ADAPTIVE'
+          # TODO
+          # 1. if a device is a phone, then Line Items with both formats: BANNER and ADAPTIVE should be taken
+          # 2. if a device is a tablet, then Line Items with both formats: LEADERBOARD and ADAPTIVE
+          result.where(format: ['BANNER', banner_format])
+        else
+          result.where(format: banner_format)
+        end
       end
     end
   end
