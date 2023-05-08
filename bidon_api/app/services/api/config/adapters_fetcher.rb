@@ -33,11 +33,11 @@ module Api
       end
       memo_wise :bidmachine_demand_profile
 
-      def data_exchange_demand_profile
+      def dtexchange_demand_profile
         AppDemandProfile.eager(:demand_source_account)
-                        .where(app_id: app.id, account_type: 'DemandSourceAccount::DataExchange').first
+                        .where(app_id: app.id, account_type: 'DemandSourceAccount::DtExchange').first
       end
-      memo_wise :data_exchange_demand_profile
+      memo_wise :dtexchange_demand_profile
 
       def unity_ads_demand_profile
         AppDemandProfile.eager(:demand_source_account)
@@ -58,7 +58,7 @@ module Api
         when 'applovin'
           fetch_applovin_adapter
         when 'dtexchange'
-          fetch_data_exchange_adapter
+          fetch_dtexchange_adapter
         when 'unityads'
           fetch_unity_ads_adapter
         else
@@ -106,10 +106,10 @@ module Api
         }
       end
 
-      def fetch_data_exchange_adapter
-        return {} unless data_exchange_demand_profile
+      def fetch_dtexchange_adapter
+        return {} unless dtexchange_demand_profile
 
-        JSON.parse(data_exchange_demand_profile.demand_source_account.extra)
+        JSON.parse(dtexchange_demand_profile.demand_source_account.extra)
       end
 
       def fetch_unity_ads_adapter
