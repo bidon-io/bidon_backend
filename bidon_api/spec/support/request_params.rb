@@ -109,6 +109,7 @@ module RequestParams
       carrier:         'Orange',
       mccmnc:          '210-102',
       connection_type: 'WIFI',
+      type:            'PHONE',
     }
   end
 
