@@ -77,6 +77,10 @@
     "connection_type": {
       "title": "The connection_type Schema",
       "type": "string"
+    },
+    "type": {
+      "title": "The type Schema",
+      "type": "string"
     }
   }
 }

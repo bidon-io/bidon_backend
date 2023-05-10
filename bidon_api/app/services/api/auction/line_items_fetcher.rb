@@ -5,13 +5,14 @@ module Api
 
       FORMATS = %w[BANNER LEADERBOARD MREC ADAPTIVE].freeze
 
-      attr_reader :app, :ad_type, :adapters, :banner_format
+      attr_reader :app, :ad_type, :adapters, :banner_format, :device_type
 
-      def initialize(app:, ad_type:, adapters:, banner_format:)
+      def initialize(app:, ad_type:, adapters:, banner_format:, device_type:)
         @app = app
         @ad_type = ad_type
         @adapters = adapters
         @banner_format = banner_format
+        @device_type = device_type
       end
 
       def fetch
@@ -37,13 +38,15 @@ module Api
         return [] unless FORMATS.include?(banner_format)
 
         if banner_format == 'ADAPTIVE'
-          # TODO
-          # 1. if a device is a phone, then Line Items with both formats: BANNER and ADAPTIVE should be taken
-          # 2. if a device is a tablet, then Line Items with both formats: LEADERBOARD and ADAPTIVE
-          result.where(format: ['BANNER', banner_format])
+          extra_format = tablet? ? 'LEADERBOARD' : 'BANNER'
+          result.where(format: [extra_format, banner_format])
         else
           result.where(format: banner_format)
         end
+      end
+
+      def tablet?
+        device_type == 'TABLET'
       end
     end
   end
