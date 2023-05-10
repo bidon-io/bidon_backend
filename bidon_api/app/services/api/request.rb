@@ -26,6 +26,10 @@ module Api
       params['adapters'].presence || {}
     end
 
+    def device
+      params['device']
+    end
+
     def app
       app_key = params.dig('app', 'key')
       package_name = params.dig('app', 'bundle')
