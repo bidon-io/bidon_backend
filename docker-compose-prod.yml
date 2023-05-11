@@ -31,6 +31,7 @@ x-bidon-environment: &bidon-environment
   KAFKA_SHOW_TOPIC: show
   KAFKA_STATS_TOPIC: stats
   KAFKA_LOSS_TOPIC: loss
+  KAFKA_CONFIG_TOPIC: bidon-config
   MAXMIND_GEOIP_FILE_PATH: /app/public/system/GeoLite2-City.mmdb
   SYPEX_GEOIP_FILE_PATH: /app/public/system/SxGeoCity.dat
 
