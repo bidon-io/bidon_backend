@@ -1,31 +1,17 @@
 module KafkaLogger
-  module_function
+  extend self
 
-  def log_click(event)
-    KafkaProducer.produce(prepare_event(event), topic: ENV.fetch('KAFKA_CLICK_TOPIC'))
+  def log(message)
+    produce_message(message)
   end
 
-  def log_reward(event)
-    KafkaProducer.produce(prepare_event(event), topic: ENV.fetch('KAFKA_REWARD_TOPIC'))
+  def log_many(messages)
+    messages.each { produce_message(_1) }
   end
 
-  def log_show(event)
-    KafkaProducer.produce(prepare_event(event), topic: ENV.fetch('KAFKA_SHOW_TOPIC'))
-  end
+  private
 
-  def log_stats(event)
-    KafkaProducer.produce(prepare_event(event), topic: ENV.fetch('KAFKA_STATS_TOPIC'))
-  end
-
-  def log_loss(event)
-    KafkaProducer.produce(prepare_event(event), topic: ENV.fetch('KAFKA_LOSS_TOPIC'))
-  end
-
-  def log_config(event)
-    KafkaProducer.produce(prepare_event(event), topic: ENV.fetch('KAFKA_CONFIG_TOPIC'))
-  end
-
-  def prepare_event(event)
-    JSON.dump(Utils.smash_hash(event))
+  def produce_message(message)
+    KafkaProducer.produce(message.to_json, topic: message.topic)
   end
 end

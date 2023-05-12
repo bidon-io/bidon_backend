@@ -2,7 +2,9 @@
 
 class ClickController < ApplicationController
   def create
-    KafkaLogger.log_click(kafka_event)
+    event = Events::Click.new(event_params)
+
+    KafkaLogger.log(event)
 
     render_empty_result
   end

@@ -2,7 +2,9 @@
 
 class ConfigController < ApplicationController
   def create
-    KafkaLogger.log_config(kafka_event)
+    event = Events::Config.new(event_params)
+
+    KafkaLogger.log(event)
 
     config_response = Api::Config::Response.new(api_request)
 
