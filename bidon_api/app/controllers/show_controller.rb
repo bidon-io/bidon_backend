@@ -2,7 +2,9 @@
 
 class ShowController < ApplicationController
   def create
-    KafkaLogger.log_show(kafka_event)
+    event = Events::Show.new(event_params)
+
+    KafkaLogger.log(event)
 
     render_empty_result
   end

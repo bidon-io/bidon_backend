@@ -62,10 +62,10 @@ class ApplicationController < ActionController::API
   end
   memo_wise :remote_ip
 
-  def kafka_event
-    KafkaEvent.new(params: permitted_params, ip: remote_ip).build
+  def event_params
+    EventParams.new(request_params: permitted_params, ip: remote_ip)
   end
-  memo_wise :kafka_event
+  memo_wise :event_params
 
   def schema_errors
     schemer.validate(permitted_params).map do |error|
