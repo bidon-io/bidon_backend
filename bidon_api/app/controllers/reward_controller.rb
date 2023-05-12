@@ -2,7 +2,9 @@
 
 class RewardController < ApplicationController
   def create
-    KafkaLogger.log_reward(kafka_event)
+    event = Events::Reward.new(event_params)
+
+    KafkaLogger.log(event)
 
     render_empty_result
   end
