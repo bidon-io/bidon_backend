@@ -2,7 +2,10 @@
 
 class StatsController < ApplicationController
   def create
-    KafkaLogger.log_stats(kafka_event)
+    event = Events::Stats.new(event_params)
+    auction_events = event.auction_events
+
+    KafkaLogger.log_many([*auction_events, event])
 
     render_empty_result
   end

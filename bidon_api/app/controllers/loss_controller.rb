@@ -2,7 +2,9 @@
 
 class LossController < ApplicationController
   def create
-    KafkaLogger.log_loss(kafka_event)
+    event = Events::Loss.new(event_params)
+
+    KafkaLogger.log(event)
 
     render_empty_result
   end
