@@ -2,6 +2,9 @@ Rails.application.routes.draw do
   get 'health_checks', to: 'health#show'
 
   post 'config', to: 'config#create'
+  post 'openrtb/:ad_type', to: 'rtb#create'
+  post ':ad_type/openrtb', to: 'rtb#create'
+
   post 'auction/:ad_type', to: 'auction#create'
   post 'stats/:ad_type',   to: 'stats#create'
   post 'click/:ad_type',   to: 'click#create'
