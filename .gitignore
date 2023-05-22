@@ -22,9 +22,14 @@
 !/**/tmp/pids/.keep
 
 /**/.env
+/**/.env.test
 
 # Ignore master key for decrypting credentials and more.
 /**/config/master.key
 
 # Ignore rspec test output/
 /**/test
+
+.irb_history
+
+.DS_Store
