@@ -18,7 +18,7 @@ func TestMain(m *testing.M) {
 
 	err = godotenv.Load("../../.env.test")
 	if err != nil {
-		log.Fatalf("Error loading .env.test file: %v", err)
+		log.Printf("Did not load from .env.test file: %v", err)
 	}
 
 	db, err = gorm.Open(postgres.Open(os.Getenv("DATABASE_URL")))
