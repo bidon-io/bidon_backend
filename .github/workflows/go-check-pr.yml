@@ -1,0 +1,19 @@
+name: Go / Check PR
+
+on: pull_request
+
+env:
+  COMPOSE_PROJECT_NAME: go_pr_${{github.run_number}}
+
+jobs:
+  run-tests:
+    runs-on: [self-hosted]
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+
+      - run: docker compose -f docker-compose.go-test.yml run --rm bidon-test
+
+      - run: docker compose -f docker-compose.go-test.yml down --rmi local -v
+        if: always()
