@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - 'main'
-    paths:
-      - 'bidon_api/**'
-      - 'bidon_back/**'
   release:
     types: [published]
 
@@ -37,7 +34,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        component: [api, back]
+        component: [api, back, admin]
     steps:
       - name: Login registry
         uses: docker/login-action@v2
