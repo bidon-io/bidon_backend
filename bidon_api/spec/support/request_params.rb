@@ -92,6 +92,23 @@ module RequestParams
     }
   end
 
+  def iap_params
+    {
+      iap:        {
+        currency: 'USD',
+        amount:   10,
+      },
+      device:     device_params,
+      session:    session_params,
+      app:        app_params,
+      user:       user_params,
+      geo:        geo_params,
+      ext:        '{}',
+      token:      '{}',
+      segment_id: 'some segment id',
+    }
+  end
+
   def device_params
     {
       ua:              'User Agent',

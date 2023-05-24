@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "The iap Schema",
+  "type": "object",
+  "required": [
+    "currency",
+    "amount"
+  ],
+  "properties": {
+    "currency": {
+      "title": "The currency Schema",
+      "type": "string"
+    },
+    "amount": {
+      "title": "The amount Schema",
+      "type": "number"
+    }
+  }
+}
