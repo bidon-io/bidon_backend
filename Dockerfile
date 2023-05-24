@@ -22,10 +22,10 @@ FROM alpine:3.18
 
 ARG BIDON_SERVICE
 
-RUN adduser -D -u 1000 app
-USER app
+RUN adduser -D -u 1000 deploy
+USER deploy
 
-COPY --from=builder --chown=app /$BIDON_SERVICE /bidon-service
+COPY --from=builder --chown=deploy /$BIDON_SERVICE /bidon-service
 
 EXPOSE 1323
 
