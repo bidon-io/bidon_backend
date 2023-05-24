@@ -1,4 +1,4 @@
-FROM golang:alpine AS base
+FROM golang:1.20-alpine AS base
 
 WORKDIR /app
 
@@ -18,7 +18,7 @@ ARG BIDON_SERVICE
 
 RUN go build -o /$BIDON_SERVICE ./cmd/$BIDON_SERVICE
 
-FROM alpine
+FROM alpine:3.18
 
 ARG BIDON_SERVICE
 
