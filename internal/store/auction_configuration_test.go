@@ -15,7 +15,7 @@ func TestAuctionConfigurationRepo_List(t *testing.T) {
 
 	repo := &store.AuctionConfigurationRepo{DB: tx}
 
-	want := []auction.Configuration{
+	configs := []auction.ConfigurationAttrs{
 		{
 			Name:       "Config 1",
 			AppID:      1,
@@ -39,13 +39,14 @@ func TestAuctionConfigurationRepo_List(t *testing.T) {
 		},
 	}
 
-	for i, config := range want {
-		if err := repo.Create(context.Background(), &config); err != nil {
-			t.Fatalf("repo.Create(ctx, %+v) = %q, want %v", &config, err, nil)
+	want := make([]auction.Configuration, len(configs))
+	for i, attrs := range configs {
+		config, err := repo.Create(context.Background(), &attrs)
+		if err != nil {
+			t.Fatalf("repo.Create(ctx, %+v) = %v, %q; want %T, %v", &attrs, nil, err, config, nil)
 		}
 
-		// Set ID of created config
-		want[i].ID = config.ID
+		want[i] = *config
 	}
 
 	got, err := repo.List(context.Background())
@@ -64,7 +65,7 @@ func TestAuctionConfigurationRepo_Find(t *testing.T) {
 
 	repo := &store.AuctionConfigurationRepo{DB: tx}
 
-	want := &auction.Configuration{
+	attrs := &auction.ConfigurationAttrs{
 		Name:       "Config 1",
 		AppID:      1,
 		AdType:     auction.BannerAdType,
@@ -72,8 +73,9 @@ func TestAuctionConfigurationRepo_Find(t *testing.T) {
 		Pricefloor: 0.5,
 	}
 
-	if err := repo.Create(context.Background(), want); err != nil {
-		t.Fatalf("repo.Create(ctx, %+v) = %q, want %v", want, err, nil)
+	want, err := repo.Create(context.Background(), attrs)
+	if err != nil {
+		t.Fatalf("repo.Create(ctx, %+v) = %v, %q; want %T, %v", attrs, nil, err, want, nil)
 	}
 
 	got, err := repo.Find(context.Background(), want.ID)
@@ -92,37 +94,32 @@ func TestAuctionConfigurationRepo_Update(t *testing.T) {
 
 	repo := &store.AuctionConfigurationRepo{DB: tx}
 
-	config := &auction.Configuration{
+	attrs := auction.ConfigurationAttrs{
 		Name:       "Config 1",
 		AppID:      1,
 		AdType:     auction.BannerAdType,
 		Rounds:     []auction.RoundConfiguration{{ID: "1", Demands: []string{"demand1", "demand2"}, Timeout: 10}},
 		Pricefloor: 0.5,
 	}
-	if err := repo.Create(context.Background(), config); err != nil {
-		t.Fatalf("repo.Create(ctx, %+v) = %q, want %v", config, err, nil)
+
+	config, err := repo.Create(context.Background(), &attrs)
+	if err != nil {
+		t.Fatalf("repo.Create(ctx, %+v) = %v, %q; want %T, %v", &attrs, nil, err, config, nil)
 	}
 
-	want := &auction.Configuration{
-		ID:         config.ID,
-		Name:       "Config 2",
-		AppID:      2,
-		AdType:     auction.InterstitialAdType,
-		Rounds:     []auction.RoundConfiguration{{ID: "2", Demands: []string{"demand3", "demand4"}, Timeout: 20}},
-		Pricefloor: 0.75,
-	}
-	err := repo.Update(context.Background(), want)
-	if err != nil {
-		t.Fatalf("repo.Update(ctx, %+v) = %q, want %v", want, err, nil)
-	}
+	want := config
+	want.AppID = 2
 
-	got, err := repo.Find(context.Background(), want.ID)
+	updateParams := &auction.ConfigurationAttrs{
+		AppID: want.AppID,
+	}
+	got, err := repo.Update(context.Background(), config.ID, updateParams)
 	if err != nil {
-		t.Fatalf("repo.Find(ctx) = %v, %q; want %+v, %v", got, err, want, nil)
+		t.Fatalf("repo.Update(ctx, %+v) = %v, %q; want %T, %v", updateParams, nil, err, got, nil)
 	}
 
 	if diff := cmp.Diff(want, got); diff != "" {
-		t.Fatalf("repo.List(ctx) mismatch (-want, +got):\n%s", diff)
+		t.Fatalf("repo.Find(ctx) mismatch (-want, +got):\n%s", diff)
 	}
 }
 
@@ -132,18 +129,19 @@ func TestAuctionConfigurationRepo_Delete(t *testing.T) {
 
 	repo := &store.AuctionConfigurationRepo{DB: tx}
 
-	config := &auction.Configuration{
+	attrs := &auction.ConfigurationAttrs{
 		Name:       "Config 1",
 		AppID:      1,
 		AdType:     auction.BannerAdType,
 		Rounds:     []auction.RoundConfiguration{{ID: "1", Demands: []string{"demand1", "demand2"}, Timeout: 10}},
 		Pricefloor: 0.5,
 	}
-	if err := repo.Create(context.Background(), config); err != nil {
-		t.Fatalf("repo.Create(ctx, %+v) = %q, want %v", config, err, nil)
+	config, err := repo.Create(context.Background(), attrs)
+	if err != nil {
+		t.Fatalf("repo.Create(ctx, %+v) = %v, %q; want %T, %v", attrs, nil, err, config, nil)
 	}
 
-	err := repo.Delete(context.Background(), config.ID)
+	err = repo.Delete(context.Background(), config.ID)
 	if err != nil {
 		t.Fatalf("repo.Delete(ctx, %v) = %q, want %v", config.ID, err, nil)
 	}

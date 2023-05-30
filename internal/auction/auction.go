@@ -5,9 +5,14 @@ package auction
 import "context"
 
 type Configuration struct {
-	ID         uint                 `json:"id"`
+	ID int64 `json:"id"`
+	ConfigurationAttrs
+}
+
+// ConfigurationAttrs is attributes of Configuration. Used to create and update configurations
+type ConfigurationAttrs struct {
 	Name       string               `json:"name"`
-	AppID      uint                 `json:"app_id"`
+	AppID      int64                `json:"app_id"`
 	AdType     AdType               `json:"ad_type"`
 	Rounds     []RoundConfiguration `json:"rounds"`
 	Pricefloor float64              `json:"pricefloor"`
@@ -30,8 +35,8 @@ type RoundConfiguration struct {
 
 type ConfigurationRepo interface {
 	List(ctx context.Context) ([]Configuration, error)
-	Find(ctx context.Context, id uint) (*Configuration, error)
-	Create(ctx context.Context, configuration *Configuration) error
-	Update(ctx context.Context, configuration *Configuration) error
-	Delete(ctx context.Context, id uint) error
+	Find(ctx context.Context, id int64) (*Configuration, error)
+	Create(ctx context.Context, attrs *ConfigurationAttrs) (*Configuration, error)
+	Update(ctx context.Context, id int64, attrs *ConfigurationAttrs) (*Configuration, error)
+	Delete(ctx context.Context, id int64) error
 }

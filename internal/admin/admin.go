@@ -3,10 +3,11 @@ package admin
 
 import (
 	"fmt"
-	"github.com/bidon-io/bidon-backend/internal/auction"
-	"github.com/labstack/echo/v4"
 	"net/http"
 	"strconv"
+
+	"github.com/bidon-io/bidon-backend/internal/auction"
+	"github.com/labstack/echo/v4"
 )
 
 type Handlers struct {
@@ -31,16 +32,17 @@ func (s *Handlers) getAuctionConfigurations(c echo.Context) error {
 }
 
 func (s *Handlers) createAuctionConfiguration(c echo.Context) error {
-	configuration := new(auction.Configuration)
-	if err := c.Bind(configuration); err != nil {
+	attrs := new(auction.ConfigurationAttrs)
+	if err := c.Bind(attrs); err != nil {
 		return err
 	}
 
-	if err := s.AuctionConfigurationRepo.Create(c.Request().Context(), configuration); err != nil {
+	config, err := s.AuctionConfigurationRepo.Create(c.Request().Context(), attrs)
+	if err != nil {
 		return err
 	}
 
-	return c.JSONPretty(http.StatusCreated, configuration, "  ")
+	return c.JSONPretty(http.StatusCreated, config, "  ")
 }
 
 func (s *Handlers) getAuctionConfiguration(c echo.Context) error {
@@ -49,7 +51,7 @@ func (s *Handlers) getAuctionConfiguration(c echo.Context) error {
 		return fmt.Errorf("invalid id: %v", err)
 	}
 
-	configuration, err := s.AuctionConfigurationRepo.Find(c.Request().Context(), uint(id))
+	configuration, err := s.AuctionConfigurationRepo.Find(c.Request().Context(), int64(id))
 	if err != nil {
 		return err
 	}
@@ -63,17 +65,17 @@ func (s *Handlers) updateAuctionConfiguration(c echo.Context) error {
 		return fmt.Errorf("invalid id: %v", err)
 	}
 
-	configuration := new(auction.Configuration)
-	if err := c.Bind(configuration); err != nil {
+	attrs := new(auction.ConfigurationAttrs)
+	if err := c.Bind(attrs); err != nil {
 		return err
 	}
 
-	configuration.ID = uint(id)
-	if err := s.AuctionConfigurationRepo.Update(c.Request().Context(), configuration); err != nil {
+	config, err := s.AuctionConfigurationRepo.Update(c.Request().Context(), int64(id), attrs)
+	if err != nil {
 		return err
 	}
 
-	return c.NoContent(http.StatusNoContent)
+	return c.JSONPretty(http.StatusOK, config, "  ")
 }
 
 func (s *Handlers) deleteAuctionConfiguration(c echo.Context) error {
@@ -82,7 +84,7 @@ func (s *Handlers) deleteAuctionConfiguration(c echo.Context) error {
 		return fmt.Errorf("invalid id: %v", err)
 	}
 
-	if err := s.AuctionConfigurationRepo.Delete(c.Request().Context(), uint(id)); err != nil {
+	if err := s.AuctionConfigurationRepo.Delete(c.Request().Context(), int64(id)); err != nil {
 		return err
 	}
 
