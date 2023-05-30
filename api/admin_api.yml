@@ -1,0 +1,152 @@
+openapi: 3.0.0
+servers:
+  - url: /api
+info:
+  title: Admin API
+  version: 0.1.0
+paths:
+  /auction_configurations:
+    get:
+      summary: List auction configurations
+      responses:
+        '200':
+          description: A list of auction configurations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuctionConfiguration'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    post:
+      summary: Create auction configuration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuctionConfiguration'
+      responses:
+        '201':
+          $ref: '#/components/responses/AuctionConfigurationResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /auction_configurations/{id}:
+    parameters: 
+      - $ref: '#/components/parameters/idParam'
+    get:
+      summary: Get auction configuration
+      responses:
+        '200':
+          $ref: '#/components/responses/AuctionConfigurationResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    patch:
+      summary: Update auction configuration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuctionConfigurationProps'
+      responses:
+        '200':
+          $ref: '#/components/responses/AuctionConfigurationResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    delete:
+      summary: Delete auction configuration
+      responses:
+        '204':
+          description: Auction configuration deleted successfully
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+components:
+  schemas:
+    AuctionConfiguration:
+      allOf:
+        - $ref: '#/components/schemas/AuctionConfigurationProps'
+        - required:
+          - id
+          - name
+          - app_id
+          - ad_type
+          - rounds
+          - pricefloor
+    AuctionConfigurationProps:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/primaryID'
+        name:
+          type: string
+          minLength: 1
+        app_id:
+          $ref: '#/components/schemas/id'
+        ad_type:
+          $ref: '#/components/schemas/adType'
+        rounds:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required:
+              - id
+              - demands
+              - timeout
+            properties:
+              id:
+                type: string
+                minLength: 1
+              demands:
+                type: array
+                minItems: 1
+                items:
+                  type: string
+                  minLength: 1
+              timeout:
+                type: integer
+                minimum: 1
+        pricefloor:
+          type: number
+          minimum: 0
+          exclusiveMinimum: true
+    id:
+      type: integer
+      minimum: 1
+    primaryID:
+      type: integer
+      minimum: 1
+      readOnly: true
+    adType:
+      type: string
+      enum: [banner, interstitial, rewarded]
+    Error:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+  responses:
+    AuctionConfigurationResponse:
+      description: An auction configuration
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AuctionConfiguration'
+    ErrorResponse:
+      description: An error occurred.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  parameters:
+    idParam:
+      name: id
+      in: path
+      required: true
+      description: 'An id of a resource'
+      schema:
+        $ref: '#/components/schemas/id'

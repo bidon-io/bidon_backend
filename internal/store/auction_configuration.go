@@ -2,39 +2,48 @@ package store
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/bidon-io/bidon-backend/internal/auction"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type auctionConfiguration struct {
 	Model
-	Name       *string                      `gorm:"column:name;type:varchar"`
+	Name       sql.NullString               `gorm:"column:name;type:varchar"`
 	AppID      int64                        `gorm:"column:app_id;type:bigint;not null"`
 	AdType     int32                        `gorm:"column:ad_type;type:integer;not null"`
 	Rounds     []auction.RoundConfiguration `gorm:"column:rounds;type:jsonb;default:'[]';serializer:json"`
 	Pricefloor float64                      `gorm:"column:pricefloor;type:double precision;not null"`
 }
 
-func fromAuctionConfiguration(configuration *auction.Configuration) auctionConfiguration {
+func fromAuctionConfigurationAttrs(config *auction.ConfigurationAttrs) auctionConfiguration {
+	name := sql.NullString{}
+	if config.Name != "" {
+		name.String = config.Name
+		name.Valid = true
+	}
+
 	return auctionConfiguration{
-		Model:      Model{ID: int64(configuration.ID)},
-		Name:       &configuration.Name,
-		AppID:      int64(configuration.AppID),
-		AdType:     dbAdType(configuration.AdType),
-		Rounds:     configuration.Rounds,
-		Pricefloor: configuration.Pricefloor,
+		Name:       name,
+		AppID:      config.AppID,
+		AdType:     dbAdType(config.AdType),
+		Rounds:     config.Rounds,
+		Pricefloor: config.Pricefloor,
 	}
 }
 
 func (a *auctionConfiguration) auctionConfiguration() auction.Configuration {
 	return auction.Configuration{
-		ID:         uint(a.ID),
-		Name:       *a.Name,
-		AppID:      uint(a.AppID),
-		AdType:     adType(a.AdType),
-		Rounds:     a.Rounds,
-		Pricefloor: a.Pricefloor,
+		ID: a.ID,
+		ConfigurationAttrs: auction.ConfigurationAttrs{
+			Name:       a.Name.String,
+			AppID:      a.AppID,
+			AdType:     adType(a.AdType),
+			Rounds:     a.Rounds,
+			Pricefloor: a.Pricefloor,
+		},
 	}
 }
 
@@ -43,49 +52,51 @@ type AuctionConfigurationRepo struct {
 }
 
 func (r *AuctionConfigurationRepo) List(ctx context.Context) ([]auction.Configuration, error) {
-	var dbConfigurations []auctionConfiguration
-	if err := r.DB.WithContext(ctx).Find(&dbConfigurations).Error; err != nil {
+	var dbConfigs []auctionConfiguration
+	if err := r.DB.WithContext(ctx).Find(&dbConfigs).Error; err != nil {
 		return nil, err
 	}
 
-	configurations := make([]auction.Configuration, len(dbConfigurations))
-	for i, configuration := range dbConfigurations {
-		configurations[i] = configuration.auctionConfiguration()
+	configs := make([]auction.Configuration, len(dbConfigs))
+	for i, config := range dbConfigs {
+		configs[i] = config.auctionConfiguration()
 	}
 
-	return configurations, nil
+	return configs, nil
 }
 
-func (r *AuctionConfigurationRepo) Find(ctx context.Context, id uint) (*auction.Configuration, error) {
-	var dbConfiguration auctionConfiguration
-	if err := r.DB.WithContext(ctx).First(&dbConfiguration, id).Error; err != nil {
+func (r *AuctionConfigurationRepo) Find(ctx context.Context, id int64) (*auction.Configuration, error) {
+	var dbConfig auctionConfiguration
+	if err := r.DB.WithContext(ctx).First(&dbConfig, id).Error; err != nil {
 		return nil, err
 	}
 
-	configuration := dbConfiguration.auctionConfiguration()
-	return &configuration, nil
+	config := dbConfig.auctionConfiguration()
+	return &config, nil
 }
 
-func (r *AuctionConfigurationRepo) Create(ctx context.Context, configuration *auction.Configuration) error {
-	dbConfiguration := fromAuctionConfiguration(configuration)
-	if err := r.DB.WithContext(ctx).Create(&dbConfiguration).Error; err != nil {
-		return err
+func (r *AuctionConfigurationRepo) Create(ctx context.Context, attrs *auction.ConfigurationAttrs) (*auction.Configuration, error) {
+	dbConfig := fromAuctionConfigurationAttrs(attrs)
+	if err := r.DB.WithContext(ctx).Create(&dbConfig).Error; err != nil {
+		return nil, err
 	}
 
-	configuration.ID = uint(dbConfiguration.ID)
-
-	return nil
+	config := dbConfig.auctionConfiguration()
+	return &config, nil
 }
 
-func (r *AuctionConfigurationRepo) Update(ctx context.Context, configuration *auction.Configuration) error {
-	dbConfiguration := fromAuctionConfiguration(configuration)
-	if err := r.DB.WithContext(ctx).Save(&dbConfiguration).Error; err != nil {
-		return err
+func (r *AuctionConfigurationRepo) Update(ctx context.Context, id int64, attrs *auction.ConfigurationAttrs) (*auction.Configuration, error) {
+	dbConfig := fromAuctionConfigurationAttrs(attrs)
+	dbConfig.ID = id
+
+	if err := r.DB.WithContext(ctx).Model(&dbConfig).Clauses(clause.Returning{}).Updates(&dbConfig).Error; err != nil {
+		return nil, err
 	}
 
-	return nil
+	config := dbConfig.auctionConfiguration()
+	return &config, nil
 }
 
-func (r *AuctionConfigurationRepo) Delete(ctx context.Context, id uint) error {
+func (r *AuctionConfigurationRepo) Delete(ctx context.Context, id int64) error {
 	return r.DB.WithContext(ctx).Delete(&auctionConfiguration{}, id).Error
 }
