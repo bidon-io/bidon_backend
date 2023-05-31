@@ -2,8 +2,10 @@ package main
 
 import (
 	"log"
+	"net/http"
 	"os"
 
+	"github.com/bidon-io/bidon-backend/cmd/bidon-admin/web"
 	"github.com/bidon-io/bidon-backend/internal/admin"
 	"github.com/bidon-io/bidon-backend/internal/store"
 	_ "github.com/joho/godotenv/autoload"
@@ -28,7 +30,11 @@ func main() {
 	e := echo.New()
 	e.Use(middleware.Logger())
 
-	handlers.RegisterRoutes(e)
+	apiGroup := e.Group("/api")
+	handlers.RegisterRoutes(apiGroup)
+
+	webServer := http.FileServer(http.FS(web.FS))
+	e.GET("/*", echo.WrapHandler(webServer))
 
 	e.Logger.Fatal(e.Start(":1323"))
 }

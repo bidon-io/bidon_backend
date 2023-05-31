@@ -8,6 +8,8 @@ paths:
   /auction_configurations:
     get:
       summary: List auction configurations
+      tags:
+        - Auction configurations
       responses:
         '200':
           description: A list of auction configurations
@@ -21,6 +23,8 @@ paths:
           $ref: '#/components/responses/ErrorResponse'
     post:
       summary: Create auction configuration
+      tags:
+        - Auction configurations
       requestBody:
         required: true
         content:
@@ -36,6 +40,8 @@ paths:
     parameters: 
       - $ref: '#/components/parameters/idParam'
     get:
+      tags:
+        - Auction configurations
       summary: Get auction configuration
       responses:
         '200':
@@ -43,6 +49,8 @@ paths:
         default:
           $ref: '#/components/responses/ErrorResponse'
     patch:
+      tags:
+        - Auction configurations
       summary: Update auction configuration
       requestBody:
         required: true
@@ -56,6 +64,8 @@ paths:
         default:
           $ref: '#/components/responses/ErrorResponse'
     delete:
+      tags:
+        - Auction configurations
       summary: Delete auction configuration
       responses:
         '204':

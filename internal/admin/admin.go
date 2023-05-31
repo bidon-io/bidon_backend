@@ -14,12 +14,12 @@ type Handlers struct {
 	AuctionConfigurationRepo auction.ConfigurationRepo
 }
 
-func (s *Handlers) RegisterRoutes(e *echo.Echo) {
-	e.GET("/auction_configurations", s.getAuctionConfigurations)
-	e.POST("/auction_configurations", s.createAuctionConfiguration)
-	e.GET("/auction_configurations/:id", s.getAuctionConfiguration)
-	e.PUT("/auction_configurations/:id", s.updateAuctionConfiguration)
-	e.DELETE("/auction_configurations/:id", s.deleteAuctionConfiguration)
+func (s *Handlers) RegisterRoutes(g *echo.Group) {
+	g.GET("/auction_configurations", s.getAuctionConfigurations)
+	g.POST("/auction_configurations", s.createAuctionConfiguration)
+	g.GET("/auction_configurations/:id", s.getAuctionConfiguration)
+	g.PUT("/auction_configurations/:id", s.updateAuctionConfiguration)
+	g.DELETE("/auction_configurations/:id", s.deleteAuctionConfiguration)
 }
 
 func (s *Handlers) getAuctionConfigurations(c echo.Context) error {
