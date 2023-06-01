@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_05_05_142810) do
+ActiveRecord::Schema[7.0].define(version: 2023_05_30_135323) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -146,6 +146,17 @@ ActiveRecord::Schema[7.0].define(version: 2023_05_05_142810) do
     t.index ["user_id"], name: "index_mmp_accounts_on_user_id"
   end
 
+  create_table "segments", force: :cascade do |t|
+    t.string "name", null: false
+    t.text "description", null: false
+    t.jsonb "filters", default: [], null: false
+    t.boolean "enabled", default: true, null: false
+    t.bigint "app_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["app_id"], name: "index_segments_on_app_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email", null: false
     t.datetime "created_at", null: false
@@ -163,4 +174,5 @@ ActiveRecord::Schema[7.0].define(version: 2023_05_05_142810) do
   add_foreign_key "line_items", "apps"
   add_foreign_key "line_items", "demand_source_accounts", column: "account_id"
   add_foreign_key "mmp_accounts", "users"
+  add_foreign_key "segments", "apps"
 end

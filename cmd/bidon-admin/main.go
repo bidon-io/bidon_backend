@@ -26,6 +26,9 @@ func main() {
 		AuctionConfigurationRepo: &store.AuctionConfigurationRepo{
 			DB: db,
 		},
+		SegmentRepo: &store.SegmentRepo{
+			DB: db,
+		},
 	}
 
 	e := echo.New()
