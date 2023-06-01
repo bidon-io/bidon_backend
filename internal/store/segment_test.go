@@ -2,8 +2,9 @@ package store_test
 
 import (
 	"context"
-	"github.com/bidon-io/bidon-backend/internal/admin"
 	"testing"
+
+	"github.com/bidon-io/bidon-backend/internal/admin"
 
 	"github.com/bidon-io/bidon-backend/internal/store"
 	"github.com/google/go-cmp/cmp"
