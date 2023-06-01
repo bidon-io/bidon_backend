@@ -2,98 +2,31 @@
 package admin
 
 import (
-	"fmt"
-	"net/http"
-	"strconv"
-
-	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/labstack/echo/v4"
 )
 
-type Handlers struct {
-	AuctionConfigurationRepo auction.ConfigurationRepo
-	SegmentRepo              SegmentRepo
+type Service struct {
+	AuctionConfigurations *AuctionConfigurationService
+	Apps                  *AppService
+	Segments              *SegmentService
 }
 
-func (s *Handlers) RegisterRoutes(g *echo.Group) {
-	g.GET("/auction_configurations", s.getAuctionConfigurations)
-	g.POST("/auction_configurations", s.createAuctionConfiguration)
-	g.GET("/auction_configurations/:id", s.getAuctionConfiguration)
-	g.PUT("/auction_configurations/:id", s.updateAuctionConfiguration)
-	g.DELETE("/auction_configurations/:id", s.deleteAuctionConfiguration)
+func (s *Service) RegisterAPIRoutes(g *echo.Group) {
+	g.GET("/auction_configurations", s.AuctionConfigurations.list)
+	g.POST("/auction_configurations", s.AuctionConfigurations.get)
+	g.GET("/auction_configurations/:id", s.AuctionConfigurations.create)
+	g.PATCH("/auction_configurations/:id", s.AuctionConfigurations.update)
+	g.DELETE("/auction_configurations/:id", s.AuctionConfigurations.delete)
 
-	g.GET("/segments", s.getSegments)
-	g.POST("/segments", s.createSegment)
-	g.GET("/segments/:id", s.getSegment)
-	g.PUT("/segments/:id", s.updateSegment)
-	g.DELETE("/segments/:id", s.deleteSegment)
-}
+	g.GET("/apps", s.Apps.list)
+	g.POST("/apps", s.Apps.get)
+	g.GET("/apps/:id", s.Apps.create)
+	g.PATCH("/apps/:id", s.Apps.update)
+	g.DELETE("/apps/:id", s.Apps.delete)
 
-func (s *Handlers) getAuctionConfigurations(c echo.Context) error {
-	configurations, err := s.AuctionConfigurationRepo.List(c.Request().Context())
-	if err != nil {
-		return err
-	}
-
-	return c.JSONPretty(http.StatusOK, configurations, "  ")
-}
-
-func (s *Handlers) createAuctionConfiguration(c echo.Context) error {
-	attrs := new(auction.ConfigurationAttrs)
-	if err := c.Bind(attrs); err != nil {
-		return err
-	}
-
-	config, err := s.AuctionConfigurationRepo.Create(c.Request().Context(), attrs)
-	if err != nil {
-		return err
-	}
-
-	return c.JSONPretty(http.StatusCreated, config, "  ")
-}
-
-func (s *Handlers) getAuctionConfiguration(c echo.Context) error {
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		return fmt.Errorf("invalid id: %v", err)
-	}
-
-	configuration, err := s.AuctionConfigurationRepo.Find(c.Request().Context(), int64(id))
-	if err != nil {
-		return err
-	}
-
-	return c.JSONPretty(http.StatusOK, configuration, "  ")
-}
-
-func (s *Handlers) updateAuctionConfiguration(c echo.Context) error {
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		return fmt.Errorf("invalid id: %v", err)
-	}
-
-	attrs := new(auction.ConfigurationAttrs)
-	if err := c.Bind(attrs); err != nil {
-		return err
-	}
-
-	config, err := s.AuctionConfigurationRepo.Update(c.Request().Context(), int64(id), attrs)
-	if err != nil {
-		return err
-	}
-
-	return c.JSONPretty(http.StatusOK, config, "  ")
-}
-
-func (s *Handlers) deleteAuctionConfiguration(c echo.Context) error {
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		return fmt.Errorf("invalid id: %v", err)
-	}
-
-	if err := s.AuctionConfigurationRepo.Delete(c.Request().Context(), int64(id)); err != nil {
-		return err
-	}
-
-	return c.NoContent(http.StatusNoContent)
+	g.GET("/segments", s.Segments.list)
+	g.POST("/segments", s.Segments.create)
+	g.GET("/segments/:id", s.Segments.get)
+	g.PATCH("/segments/:id", s.Segments.update)
+	g.DELETE("/segments/:id", s.Segments.delete)
 }

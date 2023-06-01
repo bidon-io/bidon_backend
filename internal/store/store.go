@@ -4,7 +4,7 @@ package store
 import (
 	"time"
 
-	"github.com/bidon-io/bidon-backend/internal/auction"
+	"github.com/bidon-io/bidon-backend/internal/admin"
 	"gorm.io/gorm"
 )
 
@@ -13,6 +13,7 @@ func AutoMigrate(db *gorm.DB) error {
 	return db.AutoMigrate(
 		&auctionConfiguration{},
 		&segment{},
+		&app{},
 	)
 }
 
@@ -23,27 +24,49 @@ type Model struct {
 	UpdatedAt time.Time `gorm:"column:updated_at;type:timestamp(6);not null"`
 }
 
-func adType(adType int32) auction.AdType {
+func adType(adType int32) admin.AdType {
 	switch adType {
 	case 1:
-		return auction.InterstitialAdType
+		return admin.InterstitialAdType
 	case 3:
-		return auction.BannerAdType
+		return admin.BannerAdType
 	case 6:
-		return auction.RewardedAdType
+		return admin.RewardedAdType
 	default:
-		return auction.UnknownAdType
+		return admin.UnknownAdType
 	}
 }
 
-func dbAdType(adType auction.AdType) int32 {
+func dbAdType(adType admin.AdType) int32 {
 	switch adType {
-	case auction.InterstitialAdType:
+	case admin.InterstitialAdType:
 		return 1
-	case auction.BannerAdType:
+	case admin.BannerAdType:
 		return 3
-	case auction.RewardedAdType:
+	case admin.RewardedAdType:
 		return 6
+	default:
+		return 0
+	}
+}
+
+func platformID(platformID int32) admin.PlatformID {
+	switch platformID {
+	case 1:
+		return admin.AndroidPlatformID
+	case 4:
+		return admin.IOSPlatformID
+	default:
+		return admin.UnknownPlatformID
+	}
+}
+
+func dbPlatformID(platformID admin.PlatformID) int32 {
+	switch platformID {
+	case admin.AndroidPlatformID:
+		return 1
+	case admin.IOSPlatformID:
+		return 4
 	default:
 		return 0
 	}
