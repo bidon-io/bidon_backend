@@ -89,7 +89,7 @@ GEM
     benchmark-ips (2.10.0)
     bootsnap (1.13.0)
       msgpack (~> 1.2)
-    brakeman (5.3.1)
+    brakeman (5.4.1)
     builder (3.2.4)
     concurrent-ruby (1.2.2)
     crass (1.0.6)
