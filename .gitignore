@@ -27,6 +27,10 @@
 # Ignore master key for decrypting credentials and more.
 /**/config/master.key
 
+# Ignore UI static files, but keep the directory
+/cmd/bidon-admin/web/ui
+!/cmd/bidon-admin/web/ui/index.html
+
 # Ignore rspec test output/
 /**/test
 
