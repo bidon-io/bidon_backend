@@ -12,6 +12,7 @@ import (
 
 type Handlers struct {
 	AuctionConfigurationRepo auction.ConfigurationRepo
+	SegmentRepo              SegmentRepo
 }
 
 func (s *Handlers) RegisterRoutes(g *echo.Group) {
@@ -20,6 +21,12 @@ func (s *Handlers) RegisterRoutes(g *echo.Group) {
 	g.GET("/auction_configurations/:id", s.getAuctionConfiguration)
 	g.PUT("/auction_configurations/:id", s.updateAuctionConfiguration)
 	g.DELETE("/auction_configurations/:id", s.deleteAuctionConfiguration)
+
+	g.GET("/segments", s.getSegments)
+	g.POST("/segments", s.createSegment)
+	g.GET("/segments/:id", s.getSegment)
+	g.PUT("/segments/:id", s.updateSegment)
+	g.DELETE("/segments/:id", s.deleteSegment)
 }
 
 func (s *Handlers) getAuctionConfigurations(c echo.Context) error {
