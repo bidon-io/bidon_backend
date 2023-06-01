@@ -33,3 +33,7 @@ func TestMain(m *testing.M) {
 
 	os.Exit(m.Run())
 }
+
+func ptr[T any](t T) *T {
+	return &t
+}
