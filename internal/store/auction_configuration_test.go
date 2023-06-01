@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/bidon-io/bidon-backend/internal/auction"
+	"github.com/bidon-io/bidon-backend/internal/admin"
 	"github.com/bidon-io/bidon-backend/internal/store"
 	"github.com/google/go-cmp/cmp"
 )
@@ -15,31 +15,31 @@ func TestAuctionConfigurationRepo_List(t *testing.T) {
 
 	repo := &store.AuctionConfigurationRepo{DB: tx}
 
-	configs := []auction.ConfigurationAttrs{
+	configs := []admin.AuctionConfigurationAttrs{
 		{
 			Name:       "Config 1",
 			AppID:      1,
-			AdType:     auction.BannerAdType,
-			Rounds:     []auction.RoundConfiguration{{ID: "1", Demands: []string{"demand1", "demand2"}, Timeout: 10}},
+			AdType:     admin.BannerAdType,
+			Rounds:     []admin.AuctionRoundConfiguration{{ID: "1", Demands: []string{"demand1", "demand2"}, Timeout: 10}},
 			Pricefloor: 0.5,
 		},
 		{
 			Name:       "Config 2",
 			AppID:      2,
-			AdType:     auction.InterstitialAdType,
-			Rounds:     []auction.RoundConfiguration{{ID: "2", Demands: []string{"demand3", "demand4"}, Timeout: 20}},
+			AdType:     admin.InterstitialAdType,
+			Rounds:     []admin.AuctionRoundConfiguration{{ID: "2", Demands: []string{"demand3", "demand4"}, Timeout: 20}},
 			Pricefloor: 0.75,
 		},
 		{
 			Name:       "Config 3",
 			AppID:      3,
-			AdType:     auction.RewardedAdType,
-			Rounds:     []auction.RoundConfiguration{{ID: "3", Demands: []string{"demand5", "demand6"}, Timeout: 30}},
+			AdType:     admin.RewardedAdType,
+			Rounds:     []admin.AuctionRoundConfiguration{{ID: "3", Demands: []string{"demand5", "demand6"}, Timeout: 30}},
 			Pricefloor: 1.0,
 		},
 	}
 
-	want := make([]auction.Configuration, len(configs))
+	want := make([]admin.AuctionConfiguration, len(configs))
 	for i, attrs := range configs {
 		config, err := repo.Create(context.Background(), &attrs)
 		if err != nil {
@@ -65,11 +65,11 @@ func TestAuctionConfigurationRepo_Find(t *testing.T) {
 
 	repo := &store.AuctionConfigurationRepo{DB: tx}
 
-	attrs := &auction.ConfigurationAttrs{
+	attrs := &admin.AuctionConfigurationAttrs{
 		Name:       "Config 1",
 		AppID:      1,
-		AdType:     auction.BannerAdType,
-		Rounds:     []auction.RoundConfiguration{{ID: "1", Demands: []string{"demand1", "demand2"}, Timeout: 10}},
+		AdType:     admin.BannerAdType,
+		Rounds:     []admin.AuctionRoundConfiguration{{ID: "1", Demands: []string{"demand1", "demand2"}, Timeout: 10}},
 		Pricefloor: 0.5,
 	}
 
@@ -94,11 +94,11 @@ func TestAuctionConfigurationRepo_Update(t *testing.T) {
 
 	repo := &store.AuctionConfigurationRepo{DB: tx}
 
-	attrs := auction.ConfigurationAttrs{
+	attrs := admin.AuctionConfigurationAttrs{
 		Name:       "Config 1",
 		AppID:      1,
-		AdType:     auction.BannerAdType,
-		Rounds:     []auction.RoundConfiguration{{ID: "1", Demands: []string{"demand1", "demand2"}, Timeout: 10}},
+		AdType:     admin.BannerAdType,
+		Rounds:     []admin.AuctionRoundConfiguration{{ID: "1", Demands: []string{"demand1", "demand2"}, Timeout: 10}},
 		Pricefloor: 0.5,
 	}
 
@@ -110,7 +110,7 @@ func TestAuctionConfigurationRepo_Update(t *testing.T) {
 	want := config
 	want.AppID = 2
 
-	updateParams := &auction.ConfigurationAttrs{
+	updateParams := &admin.AuctionConfigurationAttrs{
 		AppID: want.AppID,
 	}
 	got, err := repo.Update(context.Background(), config.ID, updateParams)
@@ -129,11 +129,11 @@ func TestAuctionConfigurationRepo_Delete(t *testing.T) {
 
 	repo := &store.AuctionConfigurationRepo{DB: tx}
 
-	attrs := &auction.ConfigurationAttrs{
+	attrs := &admin.AuctionConfigurationAttrs{
 		Name:       "Config 1",
 		AppID:      1,
-		AdType:     auction.BannerAdType,
-		Rounds:     []auction.RoundConfiguration{{ID: "1", Demands: []string{"demand1", "demand2"}, Timeout: 10}},
+		AdType:     admin.BannerAdType,
+		Rounds:     []admin.AuctionRoundConfiguration{{ID: "1", Demands: []string{"demand1", "demand2"}, Timeout: 10}},
 		Pricefloor: 0.5,
 	}
 	config, err := repo.Create(context.Background(), attrs)
