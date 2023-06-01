@@ -13,14 +13,14 @@ type Service struct {
 
 func (s *Service) RegisterAPIRoutes(g *echo.Group) {
 	g.GET("/auction_configurations", s.AuctionConfigurations.list)
-	g.POST("/auction_configurations", s.AuctionConfigurations.get)
-	g.GET("/auction_configurations/:id", s.AuctionConfigurations.create)
+	g.POST("/auction_configurations", s.AuctionConfigurations.create)
+	g.GET("/auction_configurations/:id", s.AuctionConfigurations.get)
 	g.PATCH("/auction_configurations/:id", s.AuctionConfigurations.update)
 	g.DELETE("/auction_configurations/:id", s.AuctionConfigurations.delete)
 
 	g.GET("/apps", s.Apps.list)
-	g.POST("/apps", s.Apps.get)
-	g.GET("/apps/:id", s.Apps.create)
+	g.POST("/apps", s.Apps.create)
+	g.GET("/apps/:id", s.Apps.get)
 	g.PATCH("/apps/:id", s.Apps.update)
 	g.DELETE("/apps/:id", s.Apps.delete)
 
