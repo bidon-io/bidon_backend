@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io/fs"
 	"log"
 	"net/http"
 	"os"
@@ -33,8 +34,13 @@ func main() {
 	apiGroup := e.Group("/api")
 	handlers.RegisterRoutes(apiGroup)
 
-	webServer := http.FileServer(http.FS(web.FS))
-	e.GET("/*", echo.WrapHandler(webServer))
+	redocFileSystem, _ := fs.Sub(web.FS, "redoc")
+	redocWebServer := http.FileServer(http.FS(redocFileSystem))
+	e.GET("/redoc/*", echo.WrapHandler(http.StripPrefix("/redoc/", redocWebServer)))
+
+	uiFileSystem, _ := fs.Sub(web.FS, "ui")
+	uiWebServer := http.FileServer(http.FS(uiFileSystem))
+	e.GET("/*", echo.WrapHandler(uiWebServer))
 
 	e.Logger.Fatal(e.Start(":1323"))
 }

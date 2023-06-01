@@ -2,5 +2,5 @@ package web
 
 import "embed"
 
-//go:embed redoc admin_api.yml
+//go:embed all:ui redoc
 var FS embed.FS
