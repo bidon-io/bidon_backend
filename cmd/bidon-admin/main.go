@@ -22,20 +22,13 @@ func main() {
 		log.Fatalf("failed opening connection to postgres: %v", err)
 	}
 
-	handlers := &admin.Handlers{
-		AuctionConfigurationRepo: &store.AuctionConfigurationRepo{
-			DB: db,
-		},
-		SegmentRepo: &store.SegmentRepo{
-			DB: db,
-		},
-	}
+	adminService := newAdminService(db)
 
 	e := echo.New()
 	e.Use(middleware.Logger())
 
 	apiGroup := e.Group("/api")
-	handlers.RegisterRoutes(apiGroup)
+	adminService.RegisterAPIRoutes(apiGroup)
 
 	redocFileSystem, _ := fs.Sub(web.FS, "redoc")
 	redocWebServer := http.FileServer(http.FS(redocFileSystem))
@@ -46,6 +39,20 @@ func main() {
 	e.GET("/*", echo.WrapHandler(uiWebServer))
 
 	e.Logger.Fatal(e.Start(":1323"))
+}
+
+func newAdminService(db *gorm.DB) *admin.Service {
+	return &admin.Service{
+		AuctionConfigurations: &admin.AuctionConfigurationService{
+			Repo: &store.AuctionConfigurationRepo{DB: db},
+		},
+		Apps: &admin.AppService{
+			Repo: &store.AppRepo{DB: db},
+		},
+		Segments: &admin.SegmentService{
+			Repo: &store.SegmentRepo{DB: db},
+		},
+	}
 }
 
 func openDB(databaseUrl string) (*gorm.DB, error) {
