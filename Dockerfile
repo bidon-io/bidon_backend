@@ -1,3 +1,16 @@
+# Build UI
+FROM node:18-alpine AS frontend-deps
+
+WORKDIR /app
+
+COPY web/bidon_ui/package.json web/bidon_ui/yarn.lock ./
+RUN yarn install
+
+FROM frontend-deps AS frontend-builder
+
+COPY web/bidon_ui .
+RUN yarn generate
+
 FROM golang:1.20-alpine AS base
 
 WORKDIR /app
@@ -16,6 +29,7 @@ FROM base AS builder
 
 ARG BIDON_SERVICE
 
+COPY --from=frontend-builder /app/.output/public ./cmd/$BIDON_SERVICE/web/ui
 RUN go build -o /$BIDON_SERVICE ./cmd/$BIDON_SERVICE
 
 FROM alpine:3.18
