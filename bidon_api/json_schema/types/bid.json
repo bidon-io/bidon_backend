@@ -26,6 +26,10 @@
       "title": "The demand_id Schema",
       "type": "string"
     },
+    "round_id": {
+      "title": "The demand_id Schema",
+      "type": "string"
+    },
     "ad_unit_id": {
       "title": "The ad_unit_id Schema",
       "type": "string"
