@@ -38,7 +38,9 @@ module Api
         demands = imp.dig(:ext, :bidon, :bidding)
 
         responses = demands.map do |demand, hash|
-          request_demand(demand, hash[:token], imp[:bidfloor]).call
+          request_demand(demand, hash[:token], imp[:bidfloor]).call.tap do |demand_response|
+            log(demand_response)
+          end
         end
 
         responses.max_by(&:price)
@@ -52,6 +54,10 @@ module Api
         else
           -> { DemandResponse.new(price: 0) }
         end
+      end
+
+      def log(demand_response)
+        Rails.logger.info(demand_response.to_h.merge(action: 'bid').to_json)
       end
     end
   end
