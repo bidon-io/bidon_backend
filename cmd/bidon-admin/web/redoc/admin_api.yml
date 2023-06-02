@@ -72,6 +72,542 @@ paths:
           description: Auction configuration deleted successfully
         default:
           $ref: '#/components/responses/ErrorResponse'
+  /apps:
+    get:
+      summary: List apps
+      tags:
+        - Apps
+      responses:
+        '200':
+          description: A list of apps
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/App'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    post:
+      summary: Create app
+      tags:
+        - Apps
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/App'
+      responses:
+        '201':
+          $ref: '#/components/responses/AppResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /apps/{id}:
+    parameters: 
+      - $ref: '#/components/parameters/idParam'
+    get:
+      tags:
+        - Apps
+      summary: Get app
+      responses:
+        '200':
+          $ref: '#/components/responses/AppResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    patch:
+      tags:
+        - Apps
+      summary: Update app
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppProps'
+      responses:
+        '200':
+          $ref: '#/components/responses/AppResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    delete:
+      tags:
+        - Apps
+      summary: Delete app
+      responses:
+        '204':
+          description: App deleted successfully
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /deman_source_accounts:
+    get:
+      summary: List demand source accounts
+      tags:
+        - Demand source accounts
+      responses:
+        '200':
+          description: A list of demand source accounts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DemandSourceAccount'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    post:
+      summary: Create demand source account
+      tags:
+        - Demand source accounts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DemandSourceAccount'
+      responses:
+        '201':
+          $ref: '#/components/responses/DemandSourceAccountResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /demand_source_accounts/{id}:
+    parameters: 
+      - $ref: '#/components/parameters/idParam'
+    get:
+      tags:
+        - Demand source accounts
+      summary: Get demand source account
+      responses:
+        '200':
+          $ref: '#/components/responses/DemandSourceAccountResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    patch:
+      tags:
+        - Demand source accounts
+      summary: Update demand source account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DemandSourceAccountProps'
+      responses:
+        '200':
+          $ref: '#/components/responses/DemandSourceAccountResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    delete:
+      tags:
+        - Demand source accounts
+      summary: Delete demand source account
+      responses:
+        '204':
+          description: Demand source account deleted successfully
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /app_demand_profiles:
+    get:
+      summary: List app demand profiles
+      tags:
+        - App demand profiles
+      responses:
+        '200':
+          description: A list of app demand profiles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AppDemandProfile'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    post:
+      summary: Create app demand profile
+      tags:
+        - App demand profiles
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppDemandProfile'
+      responses:
+        '201':
+          $ref: '#/components/responses/AppDemandProfileResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /app_demand_profiles/{id}:
+    parameters: 
+      - $ref: '#/components/parameters/idParam'
+    get:
+      tags:
+        - App demand profiles
+      summary: Get app demand profile
+      responses:
+        '200':
+          $ref: '#/components/responses/AppDemandProfileResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    patch:
+      tags:
+        - App demand profiles
+      summary: Update app demand profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppDemandProfileProps'
+      responses:
+        '200':
+          $ref: '#/components/responses/AppDemandProfileResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    delete:
+      tags:
+        - App demand profiles
+      summary: Delete app demand profile
+      responses:
+        '204':
+          description: App demand profile deleted successfully
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /line_items:
+    get:
+      summary: List line items
+      tags:
+        - Line items
+      responses:
+        '200':
+          description: A list of line items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LineItem'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    post:
+      summary: Create line item
+      tags:
+        - Line items
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LineItem'
+      responses:
+        '201':
+          $ref: '#/components/responses/LineItemResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /line_items/{id}:
+    parameters: 
+      - $ref: '#/components/parameters/idParam'
+    get:
+      tags:
+        - Line items
+      summary: Get line item
+      responses:
+        '200':
+          $ref: '#/components/responses/LineItemResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    patch:
+      tags:
+        - Line items
+      summary: Update line item
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LineItemProps'
+      responses:
+        '200':
+          $ref: '#/components/responses/LineItemResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    delete:
+      tags:
+        - Line items
+      summary: Delete line item
+      responses:
+        '204':
+          description: Line item deleted successfully
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /demand_sources:
+    get:
+      summary: List demand sources
+      tags:
+        - Demand sources
+      responses:
+        '200':
+          description: A list of demand sources
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DemandSource'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    post:
+      summary: Create demand source
+      tags:
+        - Demand sources
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DemandSource'
+      responses:
+        '201':
+          $ref: '#/components/responses/DemandSourceResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /demand_sources/{id}:
+    parameters: 
+      - $ref: '#/components/parameters/idParam'
+    get:
+      tags:
+        - Demand sources
+      summary: Get demand source
+      responses:
+        '200':
+          $ref: '#/components/responses/DemandSourceResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    patch:
+      tags:
+        - Demand sources
+      summary: Update demand source
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DemandSourceProps'
+      responses:
+        '200':
+          $ref: '#/components/responses/DemandSourceResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    delete:
+      tags:
+        - Demand sources
+      summary: Delete demand source
+      responses:
+        '204':
+          description: Demand source deleted successfully
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /countries:
+    get:
+      summary: List countries
+      tags:
+        - Countries
+      responses:
+        '200':
+          description: A list of countries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Country'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    post:
+      summary: Create country
+      tags:
+        - Countries
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Country'
+      responses:
+        '201':
+          $ref: '#/components/responses/CountryResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /countries/{id}:
+    parameters: 
+      - $ref: '#/components/parameters/idParam'
+    get:
+      tags:
+        - Countries
+      summary: Get country
+      responses:
+        '200':
+          $ref: '#/components/responses/CountryResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    patch:
+      tags:
+        - Countries
+      summary: Update country
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CountryProps'
+      responses:
+        '200':
+          $ref: '#/components/responses/CountryResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    delete:
+      tags:
+        - Countries
+      summary: Delete country
+      responses:
+        '204':
+          description: Country deleted successfully
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /users:
+    get:
+      summary: List users
+      tags:
+        - Users
+      responses:
+        '200':
+          description: A list of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    post:
+      summary: Create user
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '201':
+          $ref: '#/components/responses/UserResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /users/{id}:
+    parameters: 
+      - $ref: '#/components/parameters/idParam'
+    get:
+      tags:
+        - Users
+      summary: Get user
+      responses:
+        '200':
+          $ref: '#/components/responses/UserResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    patch:
+      tags:
+        - Users
+      summary: Update user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserProps'
+      responses:
+        '200':
+          $ref: '#/components/responses/UserResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    delete:
+      tags:
+        - Users
+      summary: Delete user
+      responses:
+        '204':
+          description: User deleted successfully
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /segments:
+    get:
+      summary: List segments
+      tags:
+        - Segments
+      responses:
+        '200':
+          description: A list of segments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Segment'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    post:
+      summary: Create segment
+      tags:
+        - Segments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Segment'
+      responses:
+        '201':
+          $ref: '#/components/responses/SegmentResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /segments/{id}:
+    parameters: 
+      - $ref: '#/components/parameters/idParam'
+    get:
+      tags:
+        - Segments
+      summary: Get segment
+      responses:
+        '200':
+          $ref: '#/components/responses/SegmentResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    patch:
+      tags:
+        - Segments
+      summary: Update segment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SegmentProps'
+      responses:
+        '200':
+          $ref: '#/components/responses/SegmentResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    delete:
+      tags:
+        - Segments
+      summary: Delete segment
+      responses:
+        '204':
+          description: Segment deleted successfully
+        default:
+          $ref: '#/components/responses/ErrorResponse'
 components:
   schemas:
     AuctionConfiguration:
@@ -122,6 +658,242 @@ components:
           type: number
           minimum: 0
           exclusiveMinimum: true
+    App:
+      allOf:
+        - $ref: '#/components/schemas/AppProps'
+        - required:
+            - id
+            - platform_id
+            - human_name
+            - package_name
+            - user_id
+            - app_key
+            - settings
+    AppProps:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/primaryID'
+        platform_id:
+          type: string
+          enum: [ios, android]
+        human_name:
+          type: string
+          minLength: 1
+        package_name:
+          type: string
+          minLength: 1
+        user_id:
+          $ref: '#/components/schemas/id'
+        app_key:
+          type: string
+          minLength: 1
+        settings:
+          type: object
+    DemandSourceAccount:
+      allOf:
+        - $ref: '#/components/schemas/DemandSourceAccountProps'
+        - required:
+            - id
+            - user_id
+            - type
+            - demand_source_id
+            - is_bidding
+            - extra
+    DemandSourceAccountProps:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/primaryID'
+        user_id:
+          $ref: '#/components/schemas/id'
+        type:
+          type: string
+          minLength: 1
+        demand_source_id:
+          $ref: '#/components/schemas/id'
+        is_bidding:
+          type: boolean
+        extra:
+          type: object
+    AppDemandProfile:
+      allOf:
+        - $ref: '#/components/schemas/AppDemandProfileProps'
+        - required:
+            - id
+            - app_id
+            - demand_source_id
+            - account_id
+            - account_type
+            - data
+    AppDemandProfileProps:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/primaryID'
+        app_id:
+          $ref: '#/components/schemas/id'
+        demand_source_id:
+          $ref: '#/components/schemas/id'
+        account_id:
+          $ref: '#/components/schemas/id'
+        account_type:
+          type: string
+          minLength: 1
+        data:
+          type: object
+    LineItem:
+      allOf:
+        - $ref: '#/components/schemas/LineItemProps'
+        - required:
+            - id
+            - human_name
+            - app_id
+            - bid_floor
+            - ad_type
+            - format
+            - account_id
+            - account_type
+            - code
+            - extra
+    LineItemProps:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/primaryID'
+        human_name:
+          type: string
+          minLength: 1
+        app_id:
+          $ref: '#/components/schemas/id'
+        bid_floor:
+          type: string
+          format: decimal
+          example: "0.01"
+        ad_type:
+          $ref: '#/components/schemas/adType'
+        format:
+          type: string
+          enum: ["", BANNER, LEADERBOARD, MREC, ADAPTIVE]
+        account_id:
+          $ref: '#/components/schemas/id'
+        account_type:
+          type: string
+          minLength: 1
+        code:
+          type: string
+        extra:
+          type: object
+    DemandSource:
+      allOf:
+        - $ref: '#/components/schemas/DemandSourceProps'
+        - required:
+            - id
+            - human_name
+            - api_key
+    DemandSourceProps:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/primaryID'
+        human_name:
+          type: string
+          minLength: 1
+        api_key:
+          type: string
+          minLength: 1
+    Country:
+      allOf:
+        - $ref: '#/components/schemas/CountryProps'
+        - required:
+            - id
+            - human_name
+            - alpha_2_code
+            - alpha_3_code
+    CountryProps:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/primaryID'
+        human_name:
+          type: string
+          minLength: 1
+          example: United States
+        alpha_2_code:
+          type: string
+          minLength: 2
+          maxLength: 2
+          example: US
+        alpha_3_code:
+          type: string
+          minLength: 3
+          maxLength: 3
+          example: USA
+    User:
+      allOf:
+        - $ref: '#/components/schemas/UserProps'
+        - required:
+            - id
+            - email
+    UserProps:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/primaryID'
+        email:
+          type: string
+          format: email
+    Segment:
+      allOf:
+        - $ref: '#/components/schemas/SegmentProps'
+        - required:
+            - id
+            - name
+            - description
+            - filters
+            - enabled
+            - app_id
+    SegmentProps:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/primaryID'
+        name:
+          type: string
+          minLength: 1
+        description:
+          type: string
+          minLength: 1
+        enabled:
+          type: boolean
+        app_id:
+          $ref: '#/components/schemas/id'
+        filters:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required:
+              - type
+              - name
+              - operator
+              - values
+            properties:
+              type:
+                type: string
+                minLength: 1
+              name:
+                type: string
+                minLength: 1
+              operator:
+                type: string
+                minLength: 1
+              values:
+                type: array
+                minItems: 1
+                items:
+                  type: string
+                  minLength: 1
     id:
       type: integer
       minimum: 1
@@ -146,6 +918,54 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/AuctionConfiguration'
+    AppResponse:
+      description: An app
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/App'
+    DemandSourceAccountResponse:
+      description: A demand source account
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DemandSourceAccount'
+    AppDemandProfileResponse:
+      description: An app demand profile
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AppDemandProfile'
+    LineItemResponse:
+      description: A line item
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LineItem'
+    DemandSourceResponse:
+      description: A demand source
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DemandSource'
+    CountryResponse:
+      description: A country
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Country'
+    UserResponse:
+      description: A user
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/User'
+    SegmentResponse:
+      description: A segment
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Segment'
     ErrorResponse:
       description: An error occurred.
       content:
