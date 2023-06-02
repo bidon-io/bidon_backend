@@ -169,9 +169,9 @@ module Api
             bid:  [{
               id:      bid['id'],
               impid:   bid['impid'],
-              nurl:    bid['nurl'],
-              burl:    bid['burl'],
-              lurl:    bid['lurl'],
+              nurl:    '', # bid['nurl'], disable while testing impressions
+              burl:    '', # bid['burl'],
+              lurl:    '', # bid['lurl'],
               price:   bid['price'], # Bid price expressed as CPM
               payload: bid['ext']['signaldata'],
             }],
