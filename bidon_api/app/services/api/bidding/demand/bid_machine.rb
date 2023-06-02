@@ -165,20 +165,18 @@ module Api
         end
 
         def parse_bid(bid)
-          {
-            seatbid: [{
-              bid:  [{
-                id:      bid['id'],
-                impid:   bid['impid'],
-                nurl:    bid['nurl'],
-                burl:    bid['burl'],
-                lurl:    bid['lurl'],
-                price:   bid['price'], # Bid price expressed as CPM
-                payload: bid['ext']['signaldata'],
-              }],
-              seat: 'bidmachine',
+          [{
+            bid:  [{
+              id:      bid['id'],
+              impid:   bid['impid'],
+              nurl:    bid['nurl'],
+              burl:    bid['burl'],
+              lurl:    bid['lurl'],
+              price:   bid['price'], # Bid price expressed as CPM
+              payload: bid['ext']['signaldata'],
             }],
-          }
+            seat: 'bidmachine',
+          }]
         end
 
         def empty_response(request, response)
@@ -188,7 +186,7 @@ module Api
             raw_response: '',
             status:       response.code,
             price:        0,
-            seatbid:      {},
+            seat_bid:     {},
           )
         end
 
@@ -199,7 +197,7 @@ module Api
             raw_response: { error: response.body }.to_json,
             status:       response.code,
             price:        0,
-            seatbid:      {},
+            seat_bid:     {},
           )
         end
 
@@ -212,7 +210,7 @@ module Api
             raw_response: response.body,
             status:       response.code,
             price:        bid['price'],
-            seatbid:      parse_bid(bid),
+            seat_bid:     parse_bid(bid),
           )
         end
       end

@@ -2,7 +2,7 @@
 
 module Api
   module Bidding
-    DemandResponse = Struct.new(:demand, :raw_request, :raw_response, :status, :price, :seatbid, keyword_init: true)
+    DemandResponse = Struct.new(:demand, :raw_request, :raw_response, :status, :price, :seat_bid, keyword_init: true)
 
     class Response
       prepend MemoWise
@@ -22,7 +22,7 @@ module Api
       def body
         {
           id:      SecureRandom.uuid,
-          seatbid: seat_bid[:seatbid],
+          seatbid: seat_bid.seat_bid,
         }
       end
       memo_wise :body
@@ -52,7 +52,7 @@ module Api
         when 'bidmachine'
           Bidding::Demand::BidMachine.new(bid_request, token, bidfloor)
         else
-          -> { DemandResponse.new(price: 0) }
+          -> { DemandResponse.new(price: 0, seat_bid: []) }
         end
       end
 
