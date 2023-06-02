@@ -5,6 +5,7 @@ Rails.application.routes.draw do
   post 'openrtb', to: 'rtb#create'
 
   post 'auction/:ad_type', to: 'auction#create'
+  post 'bidding/:ad_type', to: 'bidding#create'
   post 'stats/:ad_type',   to: 'stats#create'
   post 'click/:ad_type',   to: 'click#create'
   post 'show/:ad_type',    to: 'show#create'
