@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Bidding Schema",
+  "type": "object",
+  "required": [
+    "device",
+    "session",
+    "app",
+    "user",
+    "imp"
+  ],
+  "properties": {
+    "device": { "$ref": "types/device.json" },
+    "session": { "$ref": "types/session.json" },
+    "app": { "$ref": "types/app.json" },
+    "user": { "$ref": "types/user.json" },
+    "regs": { "$ref": "types/regs.json" },
+    "adapters": { "$ref": "types/adapters.json" },
+    "test": {
+      "title": "Flag indicating that request is test",
+      "type": "boolean"
+    },
+    "tmax": {
+      "title": "Max response time for server before timeout",
+      "type": "integer"
+    },
+    "token": {
+      "title": "The token Schema",
+      "type": "string"
+    },
+    "segment_id": {
+      "title": "The segment_id Schema",
+      "type": "string"
+    },
+    "ext": {
+      "title": "The ext Schema",
+      "type": "string"
+    },
+    "imp": {
+      "type": "array",
+      "items": { "$ref": "types/imp.json" }
+    }
+  }
+}

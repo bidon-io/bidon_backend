@@ -18,6 +18,7 @@
     "connection_type"
   ],
   "properties": {
+    "geo": { "$ref": "geo.json" },
     "ua": {
       "title": "The ua Schema",
       "type": "string"

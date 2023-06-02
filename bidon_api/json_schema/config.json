@@ -14,6 +14,7 @@
     "app": { "$ref": "./types/app.json" },
     "user": { "$ref": "./types/user.json" },
     "geo": { "$ref": "./types/geo.json" },
+    "regs": { "$ref": "./types/regs.json" },
     "adapters": { "$ref": "./types/adapters.json" },
     "ext": {
       "title": "The ext Schema",
