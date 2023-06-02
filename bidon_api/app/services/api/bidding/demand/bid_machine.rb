@@ -108,19 +108,10 @@ module Api
           data = build_request_body.to_json
           response = Net::HTTP.post(ENDPOINT, data, HEADERS)
 
-          if response.code_type == Net::HTTPNoContent
-            return empty_response(data)
-          end
+          return empty_response(data, response) if response.code_type == Net::HTTPNoContent
+          return error_response(data, response) if response.error_type == Net::HTTPClientException
 
-          bid = JSON.parse(response.body)['seatbid'][0]['bid'][0]
-          DemandResponse.new(
-            demand:       'bidmachine',
-            raw_request:  data,
-            raw_response: response.body,
-            status:       response.code,
-            price:        bid['price'],
-            seatbid:      parse_bid(bid),
-          )
+          success_response(data, response)
         end
 
         private
@@ -163,6 +154,12 @@ module Api
           }
 
           data[:device] = request.params[:device]
+          if (accuracy = data.dig(:device, :geo, :accuracy))
+            data[:device][:geo][:accuracy] = accuracy.round
+          end
+          if (lastfix = data.dig(:device, :geo, :lastfix))
+            data[:device][:geo][:lastfix] = (Time.zone.now - Time.zone.at(lastfix / 1000)).round
+          end
 
           data
         end
@@ -184,14 +181,38 @@ module Api
           }
         end
 
-        def empty_response(request)
+        def empty_response(request, response)
           DemandResponse.new(
             demand:       'bidmachine',
             raw_request:  request,
             raw_response: '',
-            status:       '204',
+            status:       response.code,
             price:        0,
             seatbid:      {},
+          )
+        end
+
+        def error_response(request, response)
+          DemandResponse.new(
+            demand:       'bidmachine',
+            raw_request:  request,
+            raw_response: { error: response.body }.to_json,
+            status:       response.code,
+            price:        0,
+            seatbid:      {},
+          )
+        end
+
+        def success_response(request, response)
+          bid = JSON.parse(response.body)['seatbid'][0]['bid'][0]
+
+          DemandResponse.new(
+            demand:       'bidmachine',
+            raw_request:  request,
+            raw_response: response.body,
+            status:       response.code,
+            price:        bid['price'],
+            seatbid:      parse_bid(bid),
           )
         end
       end
