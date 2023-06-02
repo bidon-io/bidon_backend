@@ -25,7 +25,7 @@
     },
     "round_id": {
       "title": "Round identifier that was used to generate this request",
-      "type": "integer"
+      "type": "string"
     },
     "orientation": {
       "title": "The orientation Schema",
