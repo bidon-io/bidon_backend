@@ -4,6 +4,8 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/admin"
 )
 
+type SegmentRepo = resourceRepo[admin.Segment, admin.SegmentAttrs, segment, *segment]
+
 type segment struct {
 	Model
 	Name        string                `gorm:"column:name;type:varchar;not null"`
@@ -35,5 +37,3 @@ func (s *segment) toResource() admin.Segment {
 		},
 	}
 }
-
-type SegmentRepo = resourceRepo[admin.Segment, admin.SegmentAttrs, segment, *segment]

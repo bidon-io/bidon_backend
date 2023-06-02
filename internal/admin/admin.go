@@ -10,14 +10,26 @@ import (
 type Service struct {
 	AuctionConfigurations *AuctionConfigurationService
 	Apps                  *AppService
+	AppDemandProfiles     *AppDemandProfileService
 	Segments              *SegmentService
+	DemandSources         *DemandSourceService
+	DemandSourceAccounts  *DemandSourceAccountService
+	LineItems             *LineItemService
+	Countries             *CountryService
+	Users                 *UserService
 }
 
 func (s *Service) RegisterAPIRoutes(g *echo.Group) {
 	resources := []resourceRoutes{
 		{"auction_configurations", s.AuctionConfigurations},
 		{"apps", s.Apps},
+		{"app_demand_profiles", s.AppDemandProfiles},
 		{"segments", s.Segments},
+		{"demand_source_accounts", s.DemandSourceAccounts},
+		{"line_items", s.LineItems},
+		{"demand_sources", s.DemandSources},
+		{"countries", s.Countries},
+		{"users", s.Users},
 	}
 
 	for i := range resources {
