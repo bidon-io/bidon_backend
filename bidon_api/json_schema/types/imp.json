@@ -6,24 +6,26 @@
     "id",
     "auction_id",
     "auction_configuration_id",
+    "round_id",
     "orientation",
     "bidfloor"
   ],
   "properties": {
     "id": {
       "title": "A unique identifier for this impression within the content of the bid request, UUID",
-      "type": "string",
-      "default": false
+      "type": "string"
     },
     "auction_id": {
       "title": "Auction identifier that was used to generate this request",
-      "type": "string",
-      "default": false
+      "type": "string"
     },
     "auction_configuration_id": {
       "title": "Auction Configuration identifier that was used to generate this request",
-      "type": "integer",
-      "default": false
+      "type": "integer"
+    },
+    "round_id": {
+      "title": "Round identifier that was used to generate this request",
+      "type": "integer"
     },
     "orientation": {
       "title": "The orientation Schema",
