@@ -5,8 +5,7 @@
   "required": [
     "idfa",
     "tracking_authorization_status",
-    "idg",
-    "coppa"
+    "idg"
   ],
   "properties": {
     "idfa": {
@@ -32,7 +31,7 @@
       "properties": {}
     },
     "coppa": {
-      "title": "The coppa Schema",
+      "title": "LEGACY, moved to Regs object",
       "type": "boolean"
     }
   }

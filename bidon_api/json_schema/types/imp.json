@@ -1,0 +1,51 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Imp Schema",
+  "type": "object",
+  "required": [
+    "id",
+    "auction_id",
+    "auction_configuration_id",
+    "orientation",
+    "bidfloor"
+  ],
+  "properties": {
+    "id": {
+      "title": "A unique identifier for this impression within the content of the bid request, UUID",
+      "type": "string",
+      "default": false
+    },
+    "auction_id": {
+      "title": "Auction identifier that was used to generate this request",
+      "type": "string",
+      "default": false
+    },
+    "auction_configuration_id": {
+      "title": "Auction Configuration identifier that was used to generate this request",
+      "type": "integer",
+      "default": false
+    },
+    "orientation": {
+      "title": "The orientation Schema",
+      "type": "string"
+    },
+    "banner": {
+      "title": "The banner Schema",
+      "type": "object",
+      "properties": {
+        "format": {
+          "title": "The format Schema",
+          "type": "string"
+        }
+      }
+    },
+    "bidfloor": {
+      "title": "Minimum bid for this impression expressed in CPM",
+      "type": "number"
+    },
+    "ext": {
+      "title": "Placeholder for exchange-specific extensions to OpenRTB",
+      "type": "object"
+    }
+  }
+}

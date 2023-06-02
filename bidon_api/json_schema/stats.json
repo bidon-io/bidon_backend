@@ -111,6 +111,7 @@
     "app": { "$ref": "./types/app.json" },
     "user": { "$ref": "./types/user.json" },
     "geo": { "$ref": "./types/geo.json" },
+    "regs": { "$ref": "./types/regs.json" },
     "ext": {
       "title": "The ext Schema",
       "type": "string"

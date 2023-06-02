@@ -43,9 +43,14 @@ jobs:
     name: brakeman
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Brakeman
-        uses: devmasx/brakeman-linter-action@master
-        env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-          PROJECT_PATH: bidon_api/
+      - name: Check out code
+        uses: actions/checkout@v3
+      - name: Set up ruby
+        uses: ruby/setup-ruby@v1
+      - name: brakeman
+        uses: reviewdog/action-brakeman@v2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-review
+          brakeman_version: 'gemfile'
+          workdir: 'bidon_api/'
