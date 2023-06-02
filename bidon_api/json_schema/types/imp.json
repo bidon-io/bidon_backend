@@ -45,8 +45,8 @@
       "title": "Minimum bid for this impression expressed in CPM",
       "type": "number"
     },
-    "ext": {
-      "title": "Placeholder for exchange-specific extensions to OpenRTB",
+    "demands": {
+      "title": "Object with demand specific values",
       "type": "object"
     }
   }

@@ -16,6 +16,7 @@
     "user": { "$ref": "types/user.json" },
     "regs": { "$ref": "types/regs.json" },
     "adapters": { "$ref": "types/adapters.json" },
+    "imp": { "$ref": "types/imp.json" },
     "test": {
       "title": "Flag indicating that request is test",
       "type": "boolean"
@@ -35,10 +36,6 @@
     "ext": {
       "title": "The ext Schema",
       "type": "string"
-    },
-    "imp": {
-      "type": "array",
-      "items": { "$ref": "types/imp.json" }
     }
   }
 }
