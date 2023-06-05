@@ -118,59 +118,76 @@ module Api
 
         def build_request_body # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
           data = {
-            id:   SecureRandom.uuid,
-            test: 1,
-            at:   1,
-            tmax: 3000,
-            app:  {
+            id:     SecureRandom.uuid,
+            test:   1,
+            at:     1,
+            tmax:   3000,
+            app:    {
               ver:    request.params[:app][:version],
               bundle: request.params[:app][:bundle],
               id:     '1',
             },
-            user: {
-              data: [{
-                id:      '1',
-                name:    'Bidon',
-                segment: [{
-                  signal: token,
-                }],
-              }],
+            user:   {
+              data: [user],
             },
-            imp:  [{
-              id:       SecureRandom.uuid,
-              instl:    0,
-              secure:   1,
-              exp:      14_400,
-              bidfloor:,
-              banner:   {
-                w: 320,
-                h: 50,
-              },
-            }],
-            regs: {
+            device: request.params[:device],
+            imp:    [imp],
+            regs:   {
               coppa: request.params[:regs][:coppa] ? 1 : 0,
               gdpr:  request.params[:regs][:gdpr] ? 1 : 0,
             },
           }
 
-          data[:device] = request.params[:device]
+          apply_overrides!(data)
+
+          data
+        end
+
+        def imp
+          res = {
+            id:       SecureRandom.uuid,
+            secure:   1,
+            bidfloor:,
+          }
+
+          res.merge(ad_type_params)
+        end
+
+        def ad_type_params
+          if request.params['imp'].key?('banner')
+            { instl: 0, banner: { w: 320, h: 50 } }
+          elsif request.params['imp'].key?('interstitial')
+            { instl: 1 }
+          elsif request.params['imp'].key?('rewarded')
+            { instl: 0, ext: { rewarded: 1 } }
+          else
+            {}
+          end
+        end
+
+        def user
+          {
+            id:      '1',
+            name:    'Bidon',
+            segment: [{ signal: token }],
+          }
+        end
+
+        def apply_overrides!(data)
+          # accuracy -> Int
           if (accuracy = data.dig(:device, :geo, :accuracy))
             data[:device][:geo][:accuracy] = accuracy.round
           end
-          if (lastfix = data.dig(:device, :geo, :lastfix))
+          # lastfix -> Int, seconds after last geo retrieval, we have unix timestamp of last retrieval
+          if (lastfix = data.dig(:device, :geo, :lastfix)) # rubocop:disable Style/GuardClause
             data[:device][:geo][:lastfix] = (Time.zone.now - Time.zone.at(lastfix / 1000)).round
           end
-
-          data
         end
 
         def parse_bid(bid)
           {
             id:        bid['id'],
             impid:     bid['impid'],
-            nurl:      '', # bid['nurl'], disable while testing impressions
-            burl:      '', # bid['burl'],
-            lurl:      '', # bid['lurl'],
             price:     bid['price'], # Bid price expressed as CPM
             payload:   bid['ext']['signaldata'],
             demand_id: 'bidmachine',
