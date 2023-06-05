@@ -10,6 +10,11 @@
     "orientation",
     "bidfloor"
   ],
+  "oneOf": [
+    { "required": ["banner"] },
+    { "required": ["interstitial"] },
+    { "required": ["rewarded"] }
+  ],
   "properties": {
     "id": {
       "title": "A unique identifier for this impression within the content of the bid request, UUID",
@@ -34,12 +39,25 @@
     "banner": {
       "title": "The banner Schema",
       "type": "object",
+      "required": [
+        "format"
+      ],
       "properties": {
         "format": {
           "title": "The format Schema",
           "type": "string"
         }
       }
+    },
+    "interstitial": {
+      "title": "The interstitial Schema",
+      "type": "object",
+      "properties": {}
+    },
+    "rewarded": {
+      "title": "The rewarded Schema",
+      "type": "object",
+      "properties": {}
     },
     "bidfloor": {
       "title": "Minimum bid for this impression expressed in CPM",

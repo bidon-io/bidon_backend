@@ -20,7 +20,14 @@ module Api
       end
 
       def body
-        { bid: auction_result.bid }
+        if bid?
+          {
+            bid:    auction_result.bid,
+            status: 'SUCCESS',
+          }
+        else
+          { status: 'NO_BID' }
+        end
       end
       memo_wise :body
 
