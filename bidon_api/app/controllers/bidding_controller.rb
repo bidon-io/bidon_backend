@@ -4,11 +4,7 @@ class BiddingController < ApplicationController
   def create
     auction_response = Api::Bidding::Response.new(api_request)
 
-    if auction_response.bid?
-      render json: auction_response.body, status: :ok
-    else
-      render nothing: true, status: :no_content
-    end
+    render json: auction_response.body, status: :ok
   end
 
   private
