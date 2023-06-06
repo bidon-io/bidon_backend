@@ -15,7 +15,8 @@
     "pxratio",
     "js",
     "language",
-    "connection_type"
+    "connection_type",
+    "type"
   ],
   "properties": {
     "geo": { "$ref": "geo.json" },
@@ -81,7 +82,8 @@
     },
     "type": {
       "title": "The type Schema",
-      "type": "string"
+      "type": "string",
+      "enum": ["PHONE", "TABLET"]
     }
   }
 }

@@ -47,7 +47,8 @@
       "properties": {
         "format": {
           "title": "The format Schema",
-          "type": "string"
+          "type": "string",
+          "enum": ["BANNER", "LEADERBOARD", "MREC", "ADAPTIVE"]
         }
       }
     },
