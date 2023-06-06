@@ -36,7 +36,8 @@
         },
         "orientation": {
           "title": "The orientation Schema",
-          "type": "string"
+          "type": "string",
+          "enum": ["PORTRAIT", "LANDSCAPE"]
         },
         "pricefloor": {
           "title": "The pricefloor Schema",
