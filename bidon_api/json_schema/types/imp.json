@@ -34,7 +34,8 @@
     },
     "orientation": {
       "title": "The orientation Schema",
-      "type": "string"
+      "type": "string",
+      "enum": ["PORTRAIT", "LANDSCAPE"]
     },
     "banner": {
       "title": "The banner Schema",
@@ -45,7 +46,8 @@
       "properties": {
         "format": {
           "title": "The format Schema",
-          "type": "string"
+          "type": "string",
+          "enum": ["BANNER", "LEADERBOARD", "MREC", "ADAPTIVE"]
         }
       }
     },

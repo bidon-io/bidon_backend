@@ -95,7 +95,21 @@ module Api
         ENDPOINT = URI('https://api-eu.bidmachine.io/auction/prebid/applovin')
         HEADERS  = { 'Content-Type' => 'application/json' }.freeze
 
+        BANNER_FORMATS = {
+          'BANNER'      => [320, 50],
+          'LEADERBOARD' => [728, 90],
+          'MREC'        => [300, 250],
+          'ADAPTIVE'    => [0, 50],
+        }.freeze
+
+        FULLSCREEN_FORMATS = {
+          'PHONE'  => [320, 480],
+          'TABLET' => [768, 1024],
+        }.freeze
+
         attr_reader :request, :token, :bidfloor
+
+        delegate :params, to: :request
 
         def initialize(request, token, bidfloor)
           @request = request
@@ -119,22 +133,22 @@ module Api
         def build_request_body # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
           data = {
             id:     SecureRandom.uuid,
-            test:   1,
+            test:   params[:test] ? 1 : 0,
             at:     1,
-            tmax:   3000,
+            tmax:   5000,
             app:    {
-              ver:    request.params[:app][:version],
-              bundle: request.params[:app][:bundle],
+              ver:    params[:app][:version],
+              bundle: params[:app][:bundle],
               id:     '1',
             },
             user:   {
               data: [user],
             },
-            device: request.params[:device],
+            device: params[:device],
             imp:    [imp],
             regs:   {
-              coppa: request.params[:regs][:coppa] ? 1 : 0,
-              gdpr:  request.params[:regs][:gdpr] ? 1 : 0,
+              coppa: params[:regs][:coppa] ? 1 : 0,
+              gdpr:  params[:regs][:gdpr] ? 1 : 0,
             },
           }
 
@@ -145,21 +159,54 @@ module Api
 
         def imp
           res = {
-            id:       SecureRandom.uuid,
-            secure:   1,
+            id:                SecureRandom.uuid,
+            displaymanager:    'BidMachine',
+            displaymanagerver: params[:adapters][:bidmachine][:sdk_version],
+            secure:            1,
             bidfloor:,
           }
 
           res.merge(ad_type_params)
         end
 
-        def ad_type_params
-          if request.params['imp'].key?('banner')
-            { instl: 0, banner: { w: 320, h: 50 } }
-          elsif request.params['imp'].key?('interstitial')
-            { instl: 1 }
-          elsif request.params['imp'].key?('rewarded')
-            { instl: 0, ext: { rewarded: 1 } }
+        def ad_type_params # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+          if params[:imp].key?(:banner)
+            size = BANNER_FORMATS[params.dig(:imp, :banner, :format)]
+            size.reverse! if params.dig(:imp, :orientation) == 'LANDSCAPE'
+
+            { instl:  0,
+              banner: {
+                w:     size[0],
+                h:     size[1],
+                btype: [],
+                battr: [1, 2, 5, 8, 9, 14, 17],
+                pos:   1,
+              } }
+          elsif params[:imp].key?(:interstitial)
+            size = FULLSCREEN_FORMATS[params.dig(:device, :type)]
+            size.reverse! if params.dig(:imp, :orientation) == 'LANDSCAPE'
+
+            { instl:  1,
+              banner: {
+                w:     size[0],
+                h:     size[1],
+                btype: [],
+                battr: [],
+                pos:   7,
+              } }
+          elsif params[:imp].key?(:rewarded)
+            size = FULLSCREEN_FORMATS[params.dig(:device, :type)]
+            size.reverse! if params.dig(:imp, :orientation) == 'LANDSCAPE'
+
+            { instl:  0,
+              ext:    { rewarded: 1 },
+              banner: {
+                w:     320,
+                h:     480,
+                btype: [],
+                battr: [16],
+                pos:   7,
+              } }
           else
             {}
           end
