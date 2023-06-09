@@ -198,7 +198,7 @@ module Api
             size = FULLSCREEN_FORMATS[params.dig(:device, :type)]
             size.reverse! if params.dig(:imp, :orientation) == 'LANDSCAPE'
 
-            { instl:  0,
+            { instl:  1,
               ext:    { rewarded: 1 },
               banner: {
                 w:     320,
