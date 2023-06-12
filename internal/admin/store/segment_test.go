@@ -5,16 +5,16 @@ import (
 	"testing"
 
 	"github.com/bidon-io/bidon-backend/internal/admin"
+	"github.com/bidon-io/bidon-backend/internal/admin/store"
 
-	"github.com/bidon-io/bidon-backend/internal/store"
 	"github.com/google/go-cmp/cmp"
 )
 
 func TestSegmentRepo_List(t *testing.T) {
-	tx := db.Begin()
+	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := &store.SegmentRepo{DB: tx}
+	repo := store.NewSegmentRepo(tx)
 
 	segments := []admin.SegmentAttrs{
 		{
@@ -61,10 +61,10 @@ func TestSegmentRepo_List(t *testing.T) {
 }
 
 func TestSegmentRepo_Find(t *testing.T) {
-	tx := db.Begin()
+	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := &store.SegmentRepo{DB: tx}
+	repo := store.NewSegmentRepo(tx)
 
 	attrs := &admin.SegmentAttrs{
 		Name:        "Country Segment",
@@ -90,10 +90,10 @@ func TestSegmentRepo_Find(t *testing.T) {
 }
 
 func TestSegmentRepo_Update(t *testing.T) {
-	tx := db.Begin()
+	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := &store.SegmentRepo{DB: tx}
+	repo := store.NewSegmentRepo(tx)
 
 	attrs := admin.SegmentAttrs{
 		Name:        "Country Segment",
@@ -128,10 +128,10 @@ func TestSegmentRepo_Update(t *testing.T) {
 }
 
 func TestSegmentRepo_Delete(t *testing.T) {
-	tx := db.Begin()
+	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := &store.SegmentRepo{DB: tx}
+	repo := store.NewSegmentRepo(tx)
 
 	attrs := &admin.SegmentAttrs{
 		Name:        "Country Segment",

@@ -5,15 +5,15 @@ import (
 	"testing"
 
 	"github.com/bidon-io/bidon-backend/internal/admin"
-	"github.com/bidon-io/bidon-backend/internal/store"
+	"github.com/bidon-io/bidon-backend/internal/admin/store"
 	"github.com/google/go-cmp/cmp"
 )
 
 func TestUserRepo_List(t *testing.T) {
-	tx := db.Begin()
+	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := &store.UserRepo{DB: tx}
+	repo := store.NewUserRepo(tx)
 
 	users := []admin.UserAttrs{
 		{
@@ -45,10 +45,10 @@ func TestUserRepo_List(t *testing.T) {
 }
 
 func TestUserRepo_Find(t *testing.T) {
-	tx := db.Begin()
+	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := &store.UserRepo{DB: tx}
+	repo := store.NewUserRepo(tx)
 
 	attrs := &admin.UserAttrs{
 		Email: "user1@example.com",
@@ -70,10 +70,10 @@ func TestUserRepo_Find(t *testing.T) {
 }
 
 func TestUserRepo_Update(t *testing.T) {
-	tx := db.Begin()
+	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := &store.UserRepo{DB: tx}
+	repo := store.NewUserRepo(tx)
 
 	attrs := admin.UserAttrs{
 		Email: "user1@example.com",
@@ -101,10 +101,10 @@ func TestUserRepo_Update(t *testing.T) {
 }
 
 func TestUserRepo_Delete(t *testing.T) {
-	tx := db.Begin()
+	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := &store.UserRepo{DB: tx}
+	repo := store.NewUserRepo(tx)
 
 	attrs := &admin.UserAttrs{
 		Email: "user1@example.com",
