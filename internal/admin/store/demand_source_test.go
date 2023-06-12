@@ -5,15 +5,15 @@ import (
 	"testing"
 
 	"github.com/bidon-io/bidon-backend/internal/admin"
-	"github.com/bidon-io/bidon-backend/internal/store"
+	"github.com/bidon-io/bidon-backend/internal/admin/store"
 	"github.com/google/go-cmp/cmp"
 )
 
 func TestDemandSourceRepo_List(t *testing.T) {
-	tx := db.Begin()
+	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := &store.DemandSourceRepo{DB: tx}
+	repo := store.NewDemandSourceRepo(tx)
 
 	sources := []admin.DemandSourceAttrs{
 		{
@@ -47,10 +47,10 @@ func TestDemandSourceRepo_List(t *testing.T) {
 }
 
 func TestDemandSourceRepo_Find(t *testing.T) {
-	tx := db.Begin()
+	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := &store.DemandSourceRepo{DB: tx}
+	repo := store.NewDemandSourceRepo(tx)
 
 	attrs := &admin.DemandSourceAttrs{
 		HumanName: "Applovin",
@@ -73,10 +73,10 @@ func TestDemandSourceRepo_Find(t *testing.T) {
 }
 
 func TestDemandSourceRepo_Update(t *testing.T) {
-	tx := db.Begin()
+	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := &store.DemandSourceRepo{DB: tx}
+	repo := store.NewDemandSourceRepo(tx)
 
 	attrs := admin.DemandSourceAttrs{
 		HumanName: "Applovin",
@@ -105,10 +105,10 @@ func TestDemandSourceRepo_Update(t *testing.T) {
 }
 
 func TestDemandSourceRepo_Delete(t *testing.T) {
-	tx := db.Begin()
+	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := &store.DemandSourceRepo{DB: tx}
+	repo := store.NewDemandSourceRepo(tx)
 
 	attrs := &admin.DemandSourceAttrs{
 		HumanName: "Applovin",

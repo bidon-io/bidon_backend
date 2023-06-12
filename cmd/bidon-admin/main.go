@@ -8,16 +8,15 @@ import (
 
 	"github.com/bidon-io/bidon-backend/cmd/bidon-admin/web"
 	"github.com/bidon-io/bidon-backend/internal/admin"
-	"github.com/bidon-io/bidon-backend/internal/store"
+	"github.com/bidon-io/bidon-backend/internal/admin/store"
+	"github.com/bidon-io/bidon-backend/internal/db"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 )
 
 func main() {
-	db, err := openDB(os.Getenv("DATABASE_URL"))
+	db, err := db.Open(os.Getenv("DATABASE_URL"))
 	if err != nil {
 		log.Fatalf("failed opening connection to postgres: %v", err)
 	}
@@ -41,43 +40,34 @@ func main() {
 	e.Logger.Fatal(e.Start(":1323"))
 }
 
-func newAdminService(db *gorm.DB) *admin.Service {
+func newAdminService(db *db.DB) *admin.Service {
 	return &admin.Service{
 		AuctionConfigurations: &admin.AuctionConfigurationService{
-			Repo: &store.AuctionConfigurationRepo{DB: db},
+			Repo: store.NewAuctionConfigurationRepo(db),
 		},
 		Apps: &admin.AppService{
-			Repo: &store.AppRepo{DB: db},
+			Repo: store.NewAppRepo(db),
 		},
 		AppDemandProfiles: &admin.AppDemandProfileService{
-			Repo: &store.AppDemandProfileRepo{DB: db},
+			Repo: store.NewAppDemandProfileRepo(db),
 		},
 		Segments: &admin.SegmentService{
-			Repo: &store.SegmentRepo{DB: db},
+			Repo: store.NewSegmentRepo(db),
 		},
 		DemandSourceAccounts: &admin.DemandSourceAccountService{
-			Repo: &store.DemandSourceAccountRepo{DB: db},
+			Repo: store.NewDemandSourceAccountRepo(db),
 		},
 		LineItems: &admin.LineItemService{
-			Repo: &store.LineItemRepo{DB: db},
+			Repo: store.NewLineItemRepo(db),
 		},
 		DemandSources: &admin.DemandSourceService{
-			Repo: &store.DemandSourceRepo{DB: db},
+			Repo: store.NewDemandSourceRepo(db),
 		},
 		Countries: &admin.CountryService{
-			Repo: &store.CountryRepo{DB: db},
+			Repo: store.NewCountryRepo(db),
 		},
 		Users: &admin.UserService{
-			Repo: &store.UserRepo{DB: db},
+			Repo: store.NewUserRepo(db),
 		},
 	}
-}
-
-func openDB(databaseUrl string) (*gorm.DB, error) {
-	db, err := gorm.Open(postgres.Open(databaseUrl))
-	if err != nil {
-		return nil, err
-	}
-
-	return db, nil
 }
