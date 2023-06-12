@@ -5,15 +5,15 @@ import (
 	"testing"
 
 	"github.com/bidon-io/bidon-backend/internal/admin"
-	"github.com/bidon-io/bidon-backend/internal/store"
+	"github.com/bidon-io/bidon-backend/internal/admin/store"
 	"github.com/google/go-cmp/cmp"
 )
 
 func TestCountryRepo_List(t *testing.T) {
-	tx := db.Begin()
+	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := &store.CountryRepo{DB: tx}
+	repo := store.NewCountryRepo(tx)
 
 	countries := []admin.CountryAttrs{
 		{
@@ -49,10 +49,10 @@ func TestCountryRepo_List(t *testing.T) {
 }
 
 func TestCountryRepo_Find(t *testing.T) {
-	tx := db.Begin()
+	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := &store.CountryRepo{DB: tx}
+	repo := store.NewCountryRepo(tx)
 
 	attrs := &admin.CountryAttrs{
 		HumanName:  "Japan",
@@ -76,10 +76,10 @@ func TestCountryRepo_Find(t *testing.T) {
 }
 
 func TestCountryRepo_Update(t *testing.T) {
-	tx := db.Begin()
+	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := &store.CountryRepo{DB: tx}
+	repo := store.NewCountryRepo(tx)
 
 	attrs := admin.CountryAttrs{
 		HumanName:  "Japan",
@@ -109,10 +109,10 @@ func TestCountryRepo_Update(t *testing.T) {
 }
 
 func TestCountryRepo_Delete(t *testing.T) {
-	tx := db.Begin()
+	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := &store.CountryRepo{DB: tx}
+	repo := store.NewCountryRepo(tx)
 
 	attrs := &admin.CountryAttrs{
 		HumanName:  "Japan",

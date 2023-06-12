@@ -5,15 +5,15 @@ import (
 	"testing"
 
 	"github.com/bidon-io/bidon-backend/internal/admin"
-	"github.com/bidon-io/bidon-backend/internal/store"
+	"github.com/bidon-io/bidon-backend/internal/admin/store"
 	"github.com/google/go-cmp/cmp"
 )
 
 func TestAppDemandProfileRepo_List(t *testing.T) {
-	tx := db.Begin()
+	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := &store.AppDemandProfileRepo{DB: tx}
+	repo := store.NewAppDemandProfileRepo(tx)
 
 	profiles := []admin.AppDemandProfileAttrs{
 		{
@@ -53,10 +53,10 @@ func TestAppDemandProfileRepo_List(t *testing.T) {
 }
 
 func TestAppDemandProfileRepo_Find(t *testing.T) {
-	tx := db.Begin()
+	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := &store.AppDemandProfileRepo{DB: tx}
+	repo := store.NewAppDemandProfileRepo(tx)
 
 	attrs := &admin.AppDemandProfileAttrs{
 		AppID:          1,
@@ -82,10 +82,10 @@ func TestAppDemandProfileRepo_Find(t *testing.T) {
 }
 
 func TestAppDemandProfileRepo_Update(t *testing.T) {
-	tx := db.Begin()
+	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := &store.AppDemandProfileRepo{DB: tx}
+	repo := store.NewAppDemandProfileRepo(tx)
 
 	attrs := admin.AppDemandProfileAttrs{
 		AppID:          1,
@@ -117,10 +117,10 @@ func TestAppDemandProfileRepo_Update(t *testing.T) {
 }
 
 func TestAppDemandProfileRepo_Delete(t *testing.T) {
-	tx := db.Begin()
+	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := &store.AppDemandProfileRepo{DB: tx}
+	repo := store.NewAppDemandProfileRepo(tx)
 
 	attrs := &admin.AppDemandProfileAttrs{
 		AppID:          1,

@@ -5,35 +5,51 @@ import (
 	"testing"
 
 	"github.com/bidon-io/bidon-backend/internal/admin"
-	"github.com/bidon-io/bidon-backend/internal/store"
+	"github.com/bidon-io/bidon-backend/internal/admin/store"
+	"github.com/bidon-io/bidon-backend/internal/db"
 	"github.com/google/go-cmp/cmp"
 )
 
+func createDemandSource(t *testing.T, tx *db.DB, APIKey string) *db.DemandSource {
+	t.Helper()
+
+	demandSource := &db.DemandSource{
+		APIKey:    APIKey,
+		HumanName: APIKey,
+	}
+	err := tx.Create(demandSource).Error
+	if err != nil {
+		t.Fatalf("Error creating demand source: %v", err)
+	}
+
+	return demandSource
+}
+
 func TestDemandSourceAccountRepo_List(t *testing.T) {
-	tx := db.Begin()
+	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := &store.DemandSourceAccountRepo{DB: tx}
+	repo := store.NewDemandSourceAccountRepo(tx)
 
 	accounts := []admin.DemandSourceAccountAttrs{
 		{
 			UserID:         1,
 			Type:           "DemandSourceAccount::Applovin",
-			DemandSourceID: 1,
+			DemandSourceID: createDemandSource(t, tx, "applovin").ID,
 			IsBidding:      ptr(false),
 			Extra:          map[string]any{"key": "value"},
 		},
 		{
 			UserID:         1,
 			Type:           "DemandSourceAccount::Bidmachine",
-			DemandSourceID: 2,
+			DemandSourceID: createDemandSource(t, tx, "bidmachine").ID,
 			IsBidding:      ptr(true),
 			Extra:          map[string]any{"key": "value"},
 		},
 		{
 			UserID:         1,
 			Type:           "DemandSourceAccount::UnityAds",
-			DemandSourceID: 3,
+			DemandSourceID: createDemandSource(t, tx, "unityads").ID,
 			IsBidding:      nil,
 			Extra:          map[string]any{"key": "value"},
 		},
@@ -60,15 +76,15 @@ func TestDemandSourceAccountRepo_List(t *testing.T) {
 }
 
 func TestDemandSourceAccountRepo_Find(t *testing.T) {
-	tx := db.Begin()
+	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := &store.DemandSourceAccountRepo{DB: tx}
+	repo := store.NewDemandSourceAccountRepo(tx)
 
 	attrs := &admin.DemandSourceAccountAttrs{
 		UserID:         1,
 		Type:           "DemandSourceAccount::Bidmachine",
-		DemandSourceID: 2,
+		DemandSourceID: createDemandSource(t, tx, "bidmachine").ID,
 		IsBidding:      ptr(true),
 		Extra:          map[string]any{"key": "value"},
 	}
@@ -89,15 +105,15 @@ func TestDemandSourceAccountRepo_Find(t *testing.T) {
 }
 
 func TestDemandSourceAccountRepo_Update(t *testing.T) {
-	tx := db.Begin()
+	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := &store.DemandSourceAccountRepo{DB: tx}
+	repo := store.NewDemandSourceAccountRepo(tx)
 
 	attrs := admin.DemandSourceAccountAttrs{
 		UserID:         1,
 		Type:           "DemandSourceAccount::Bidmachine",
-		DemandSourceID: 2,
+		DemandSourceID: createDemandSource(t, tx, "bidmachine").ID,
 		IsBidding:      ptr(true),
 		Extra:          map[string]any{"key": "value"},
 	}
@@ -126,15 +142,15 @@ func TestDemandSourceAccountRepo_Update(t *testing.T) {
 }
 
 func TestDemandSourceAccountRepo_Delete(t *testing.T) {
-	tx := db.Begin()
+	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := &store.DemandSourceAccountRepo{DB: tx}
+	repo := store.NewDemandSourceAccountRepo(tx)
 
 	attrs := &admin.DemandSourceAccountAttrs{
 		UserID:         1,
 		Type:           "DemandSourceAccount::Bidmachine",
-		DemandSourceID: 2,
+		DemandSourceID: createDemandSource(t, tx, "bidmachine").ID,
 		IsBidding:      ptr(true),
 		Extra:          map[string]any{"key": "value"},
 	}
