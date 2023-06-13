@@ -1,6 +1,13 @@
 <template>
+  <Toast />
+  <ConfirmDialog />
+  <NavigationContainer>
+    <NuxtLink to="/auction_configurations/new">
+      <Button label="New Auction Configuration" icon="pi pi-plus" class="p-button-success" />
+    </NuxtLink>
+  </NavigationContainer>
   <DataTable
-    v-model:selection="selectedConfiguration"
+    v-model:selection="selectedConfigurations"
     :value="configurations"
     data-key="id"
     paginator
@@ -23,9 +30,9 @@
           <NuxtLink :key="slotProps.data.id" :to="`/auction_configurations/${slotProps.data.id}/edit`">
             <i class="pi pi-pencil" style="color: green"></i>
           </NuxtLink>
-          <NuxtLink :key="slotProps.data.id" :to="`/auction_configurations/${slotProps.data.id}`">
+          <a :key="slotProps.data.id" href="_" @:click.prevent="deleteHandle(slotProps.data.id)">
             <i class="pi pi-trash" style="color: red"></i>
-          </NuxtLink>
+          </a>
         </div>
       </template>
     </Column>
@@ -34,14 +41,15 @@
 
 <script setup>
 import { ref } from "vue";
+import axios from "@/services/ApiService.js";
 
-const sampleConfigurations = Array.from({ length: 100 }, (_, index) => ({
-  id: index,
-  app: `App${index}`,
-  name: `Configuration${index}`,
-  adType: "banner",
-  priceFloor: 0.01 * index,
-}));
-const configurations = ref(sampleConfigurations);
-const selectedConfiguration = ref();
+const path = "/auction_configurations";
+const response = await axios.get(path);
+const configurations = ref(response.data);
+const selectedConfigurations = ref([]);
+
+const deleteHandle = useDeleteResource(
+  path,
+  (id) => (configurations.value = configurations.value.filter((item) => item.id !== id))
+);
 </script>
