@@ -8,8 +8,9 @@ RUN yarn install
 
 FROM frontend-deps AS frontend-builder
 
+ARG APP_ENV=production
 COPY web/bidon_ui .
-RUN yarn generate
+RUN VITE_APP_ENV=${APP_ENV} yarn generate
 
 FROM golang:1.20-alpine AS base
 
