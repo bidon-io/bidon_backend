@@ -1,0 +1,20 @@
+<template>
+  <div class="flex flex-row py-2">
+    <div class="w-1/4 px-6">
+      <div class="font-semibold text-gray-500">{{ props.lable }}</div>
+    </div>
+    <div class="px-6">
+      <slot></slot>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { defineProps } from "vue";
+const props = defineProps({
+  lable: {
+    type: String,
+    required: true,
+  },
+});
+</script>
