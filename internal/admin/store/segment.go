@@ -24,6 +24,7 @@ func (m segmentMapper) dbModel(s *admin.SegmentAttrs) *db.Segment {
 		Filters:     s.Filters,
 		Enabled:     s.Enabled,
 		AppID:       s.AppID,
+		Priority:    s.Priority,
 	}
 }
 
@@ -37,6 +38,7 @@ func (m segmentMapper) resource(s *db.Segment) admin.Segment {
 			Filters:     s.Filters,
 			Enabled:     s.Enabled,
 			AppID:       s.AppID,
+			Priority:    s.Priority,
 		},
 	}
 }
