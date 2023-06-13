@@ -49,14 +49,7 @@ class EventParams
   end
 
   def parse_ext
-    ext = parse_json(@request_params['ext'])
-    # Android SDK version 2.6.40 sends double escaped JSON
-    # TODO: Remove after SDK fixes this
-    return ext if !ext.key?('appodeal_token') || ext['appodeal_token'].is_a?(Hash)
-
-    ext['appodeal_token'] = parse_json(ext['appodeal_token'])
-
-    ext
+    parse_json(@request_params['ext'])
   rescue JSON::ParserError => e
     Rails.logger.error("Failed to parse 'ext': #{e.message}")
     Sentry.capture_exception(e)
