@@ -23,6 +23,7 @@ func TestSegmentRepo_List(t *testing.T) {
 			AppID:       1,
 			Filters:     []admin.SegmentFilter{{Type: "country", Name: "country", Operator: "in", Values: []string{"US", "UK"}}},
 			Enabled:     ptr(true),
+			Priority:    1,
 		},
 		{
 			Name:        "Custom String Segment",
@@ -30,6 +31,7 @@ func TestSegmentRepo_List(t *testing.T) {
 			AppID:       1,
 			Filters:     []admin.SegmentFilter{{Type: "string", Name: "custom_str", Operator: "==", Values: []string{"super"}}},
 			Enabled:     ptr(false),
+			Priority:    1,
 		},
 		{
 			Name:        "Custom Num Segment",
@@ -37,6 +39,7 @@ func TestSegmentRepo_List(t *testing.T) {
 			AppID:       1,
 			Filters:     []admin.SegmentFilter{{Type: "float", Name: "custom_num", Operator: ">=", Values: []string{"33"}}},
 			Enabled:     ptr(true),
+			Priority:    0,
 		},
 	}
 
@@ -101,6 +104,7 @@ func TestSegmentRepo_Update(t *testing.T) {
 		AppID:       1,
 		Filters:     []admin.SegmentFilter{{Type: "country", Name: "country", Operator: "in", Values: []string{"US", "UK"}}},
 		Enabled:     ptr(true),
+		Priority:    1,
 	}
 
 	segment, err := repo.Create(context.Background(), &attrs)
@@ -139,6 +143,7 @@ func TestSegmentRepo_Delete(t *testing.T) {
 		AppID:       1,
 		Filters:     []admin.SegmentFilter{{Type: "country", Name: "country", Operator: "in", Values: []string{"US", "UK"}}},
 		Enabled:     ptr(true),
+		Priority:    2,
 	}
 	segment, err := repo.Create(context.Background(), attrs)
 	if err != nil {

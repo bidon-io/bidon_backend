@@ -12,6 +12,7 @@ type SegmentAttrs struct {
 	Filters     []SegmentFilter `json:"filters"`
 	Enabled     *bool           `json:"enabled"`
 	AppID       int64           `json:"app_id"`
+	Priority    int32           `json:"priority"`
 }
 
 type SegmentFilter struct {
