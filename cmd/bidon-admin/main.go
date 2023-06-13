@@ -26,6 +26,8 @@ func main() {
 	e := echo.New()
 	e.Use(middleware.Logger())
 
+	configureCORS(e)
+
 	apiGroup := e.Group("/api")
 	adminService.RegisterAPIRoutes(apiGroup)
 
@@ -69,5 +71,14 @@ func newAdminService(db *db.DB) *admin.Service {
 		Users: &admin.UserService{
 			Repo: store.NewUserRepo(db),
 		},
+	}
+}
+
+func configureCORS(e *echo.Echo) {
+	if os.Getenv("ENVIRONMENT") == "development" {
+		e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+			AllowOrigins: []string{"*"},
+			AllowMethods: []string{echo.GET, echo.HEAD, echo.PUT, echo.PATCH, echo.POST, echo.DELETE},
+		}))
 	}
 }

@@ -6,13 +6,25 @@ import Column from "primevue/column";
 import InputNumber from "primevue/inputnumber";
 import Card from "primevue/card";
 import Textarea from "primevue/textarea";
+import Dropdown from "primevue/dropdown";
+import InputText from "primevue/inputtext";
+import Toast from "primevue/toast";
+import ToastService from "primevue/toastservice";
+import ConfirmDialog from "primevue/confirmdialog";
+import ConfirmationService from "primevue/confirmationservice";
 
 export default defineNuxtPlugin((nuxtApp) => {
   nuxtApp.vueApp.use(PrimeVue, { ripple: true });
+  nuxtApp.vueApp.use(ToastService);
+  nuxtApp.vueApp.use(ConfirmationService);
+  nuxtApp.vueApp.component("ConfirmDialog", ConfirmDialog);
+  nuxtApp.vueApp.component("Toast", Toast);
   nuxtApp.vueApp.component("Button", Button);
-  nuxtApp.vueApp.component("DataTable", DataTable);
-  nuxtApp.vueApp.component("Column", Column);
-  nuxtApp.vueApp.component("InputNumber", InputNumber);
   nuxtApp.vueApp.component("Card", Card);
+  nuxtApp.vueApp.component("Column", Column);
+  nuxtApp.vueApp.component("DataTable", DataTable);
+  nuxtApp.vueApp.component("Dropdown", Dropdown);
+  nuxtApp.vueApp.component("InputNumber", InputNumber);
+  nuxtApp.vueApp.component("InputText", InputText);
   nuxtApp.vueApp.component("Textarea", Textarea);
 });
