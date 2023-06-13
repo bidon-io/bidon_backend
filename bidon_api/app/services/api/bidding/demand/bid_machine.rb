@@ -92,7 +92,7 @@ module Api
   module Bidding
     module Demand
       class BidMachine
-        ENDPOINT = URI('https://api-eu.bidmachine.io/auction/prebid/applovin')
+        ENDPOINT = URI(Utils.fetch_from_env('BIDDING_BIDMACHINE_URL'))
         HEADERS  = { 'Content-Type' => 'application/json' }.freeze
 
         BANNER_FORMATS = {
