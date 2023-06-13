@@ -1,18 +1,18 @@
-REGISTRY_EXT = "ghcr.io/bidon-io"
-REGISTRY_INT = "registry.appodeal.com/bidon"
+REGISTRY = "ghcr.io/bidon-io"
 
 docker-build-push-prod-api:
 	cd bidon_api && \
 	docker buildx build --platform linux/amd64,linux/arm64 --provenance=false --target=prod \
-	--build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $(REGISTRY_EXT)/bidon-api:latest \
-	-t $(REGISTRY_INT)/api:$(TAG) -t $(REGISTRY_INT)/api:latest -t $(REGISTRY_EXT)/bidon-api:$(TAG) -t $(REGISTRY_EXT)/bidon-api:latest  --push .
+	--build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $(REGISTRY)/bidon-api:latest \
+	-t $(REGISTRY)/bidon-api:$(TAG) -t $(REGISTRY)/bidon-api:latest  --push .
 
 docker-build-push-prod-back:
 	cd bidon_back && \
 	docker buildx build --platform linux/amd64,linux/arm64 --provenance=false --target=prod \
-	--build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $(REGISTRY_EXT)/bidon-back:latest \
-	-t $(REGISTRY_INT)/back:$(TAG) -t $(REGISTRY_INT)/back:latest -t $(REGISTRY_EXT)/bidon-back:$(TAG) -t $(REGISTRY_EXT)/bidon-back:latest --push .
+	--build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $(REGISTRY)/bidon-back:latest \
+	-t $(REGISTRY)/bidon-back:$(TAG) -t $(REGISTRY)/bidon-back:latest --push .
+
 docker-build-push-prod-admin:
 	docker buildx build --platform linux/amd64,linux/arm64 --provenance=false \
-	--build-arg BIDON_SERVICE=bidon-admin --cache-to type=inline --cache-from $(REGISTRY_EXT)/bidon-admin \
-	-t $(REGISTRY_INT)/admin:$(TAG) -t $(REGISTRY_INT)/admin:latest -t $(REGISTRY_EXT)/bidon-admin:$(TAG) -t $(REGISTRY_EXT)/bidon-admin:latest --push .
+	--build-arg BIDON_SERVICE=bidon-admin --cache-to type=inline --cache-from $(REGISTRY)/bidon-admin \
+	-t $(REGISTRY)/bidon-admin:$(TAG) -t $(REGISTRY)/bidon-admin:latest --push .
