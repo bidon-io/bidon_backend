@@ -19,4 +19,9 @@ const (
 	AdaptiveFormat    Format = "ADAPTIVE"
 )
 
-var BannerFormats = []Format{BannerFormat, LeaderboardFormat, MRECFormat, AdaptiveFormat}
+func (f Format) IsBannerFormat() bool {
+	return f == BannerFormat ||
+		f == LeaderboardFormat ||
+		f == MRECFormat ||
+		f == AdaptiveFormat
+}

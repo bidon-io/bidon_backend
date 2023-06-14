@@ -2,10 +2,13 @@ package db
 
 import (
 	"database/sql"
+	"database/sql/driver"
+	"fmt"
 	"time"
 
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/admin"
+	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/shopspring/decimal"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -70,11 +73,11 @@ type App struct {
 
 type AuctionConfiguration struct {
 	Model
-	Name       sql.NullString                    `gorm:"column:name;type:varchar"`
-	AppID      int64                             `gorm:"column:app_id;type:bigint;not null"`
-	AdType     AdType                            `gorm:"column:ad_type;type:integer;not null"`
-	Rounds     []admin.AuctionRoundConfiguration `gorm:"column:rounds;type:jsonb;default:'[]';serializer:json"`
-	Pricefloor float64                           `gorm:"column:pricefloor;type:double precision;not null"`
+	Name       sql.NullString        `gorm:"column:name;type:varchar"`
+	AppID      int64                 `gorm:"column:app_id;type:bigint;not null"`
+	AdType     AdType                `gorm:"column:ad_type;type:integer;not null"`
+	Rounds     []auction.RoundConfig `gorm:"column:rounds;type:jsonb;default:'[]';serializer:json"`
+	Pricefloor float64               `gorm:"column:pricefloor;type:double precision;not null"`
 }
 
 type Country struct {
@@ -154,6 +157,19 @@ func AdTypeFromDomain(t ad.Type) AdType {
 	}
 }
 
+func (t *AdType) Scan(v any) (err error) {
+	if v, ok := v.(int64); ok {
+		*t = AdType(v)
+		return nil
+	}
+
+	return fmt.Errorf("db: unsupported value %v (type %T) converting to AdType", v, v)
+}
+
+func (t AdType) Value() (driver.Value, error) {
+	return int64(t), nil
+}
+
 func (t AdType) Domain() ad.Type {
 	switch t {
 	case InterstitialAdType:
@@ -174,3 +190,16 @@ const (
 	AndroidPlatformID PlatformID = 1
 	IOSPlatformID     PlatformID = 4
 )
+
+func (id *PlatformID) Scan(v any) (err error) {
+	if v, ok := v.(int64); ok {
+		*id = PlatformID(v)
+		return nil
+	}
+
+	return fmt.Errorf("db: unsupported value %v (type %T) converting to PlatformID", v, v)
+}
+
+func (id PlatformID) Value() (driver.Value, error) {
+	return int64(id), nil
+}
