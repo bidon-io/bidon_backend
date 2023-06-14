@@ -7,7 +7,7 @@
         v-if="field.type === 'textarea'"
         :value="JSON.stringify(localResource[field.key])"
         rows="5"
-        cols="80"
+        cols="50"
         disabled
       />
     </FormField>
