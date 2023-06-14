@@ -12,6 +12,7 @@ import Toast from "primevue/toast";
 import ToastService from "primevue/toastservice";
 import ConfirmDialog from "primevue/confirmdialog";
 import ConfirmationService from "primevue/confirmationservice";
+import Checkbox from "primevue/checkbox";
 
 export default defineNuxtPlugin((nuxtApp) => {
   nuxtApp.vueApp.use(PrimeVue, { ripple: true });
@@ -22,6 +23,7 @@ export default defineNuxtPlugin((nuxtApp) => {
   nuxtApp.vueApp.component("Button", Button);
   nuxtApp.vueApp.component("Card", Card);
   nuxtApp.vueApp.component("Column", Column);
+  nuxtApp.vueApp.component("Checkbox", Checkbox);
   nuxtApp.vueApp.component("DataTable", DataTable);
   nuxtApp.vueApp.component("Dropdown", Dropdown);
   nuxtApp.vueApp.component("InputNumber", InputNumber);
