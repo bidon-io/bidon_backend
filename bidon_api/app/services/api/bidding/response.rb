@@ -7,12 +7,13 @@ module Api
     class Response
       prepend MemoWise
 
-      attr_reader :bid_request
+      attr_reader :bid_request, :ip
 
       delegate :app, :ad_type, :device, to: :bid_request
 
-      def initialize(bid_request)
+      def initialize(bid_request, ip)
         @bid_request = bid_request
+        @ip = ip
       end
 
       def bid?
@@ -54,7 +55,7 @@ module Api
       def request_demand(demand, token, bidfloor)
         case demand.to_s
         when 'bidmachine'
-          Bidding::Demand::BidMachine.new(bid_request, token, bidfloor)
+          Bidding::Demand::BidMachine.new(bid_request, ip, token, bidfloor)
         else
           -> { empty_demand_response }
         end

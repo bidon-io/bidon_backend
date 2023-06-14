@@ -39,8 +39,8 @@ class EventParams
 
     geo = {
       'ip'         => @ip,
-      'country'    => geo_data[:country_code],
-      'country_id' => geo_data[:country_id],
+      'country'    => geo_data.country_code,
+      'country_id' => geo_data.country_id,
     }
 
     return @request_params['geo'].merge(geo) if @request_params['geo'].present?
