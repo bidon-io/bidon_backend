@@ -2,7 +2,7 @@
 
 class BiddingController < ApplicationController
   def create
-    auction_response = Api::Bidding::Response.new(api_request)
+    auction_response = Api::Bidding::Response.new(api_request, remote_ip)
 
     render json: auction_response.body, status: :ok
   end

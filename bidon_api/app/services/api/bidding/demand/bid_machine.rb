@@ -65,7 +65,7 @@
 #           "id": "adba7bca-d172-42b2-9f90-1bff8685fdd1",
 #           "impid": "9987d8b9-2958-4371-99ec-b545bd0d7a9e",
 #           "price": 50.0,
-#           "adid": "1378ygfvn928ouyghf19oiuhg03r",
+#           "adid": "1378ygfvn928ouyghf19o",
 #           "nurl": "https://...",
 #           "burl": "https://...",
 #           "lurl": "https://...",
@@ -107,12 +107,13 @@ module Api
           'TABLET' => [768, 1024],
         }.freeze
 
-        attr_reader :request, :token, :bidfloor
+        attr_reader :request, :ip, :token, :bidfloor
 
         delegate :params, to: :request
 
-        def initialize(request, token, bidfloor)
+        def initialize(request, ip, token, bidfloor)
           @request = request
+          @ip = ip
           @token = token
           @bidfloor = bidfloor
         end
@@ -130,8 +131,8 @@ module Api
 
         private
 
-        def build_request_body # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
-          data = {
+        def build_request_body # rubocop:disable Metrics/AbcSize
+          {
             id:     SecureRandom.uuid,
             test:   params[:test] ? 1 : 0,
             at:     1,
@@ -144,17 +145,13 @@ module Api
             user:   {
               data: [user],
             },
-            device: params[:device],
+            device:,
             imp:    [imp],
             regs:   {
               coppa: params[:regs][:coppa] ? 1 : 0,
               gdpr:  params[:regs][:gdpr] ? 1 : 0,
             },
           }
-
-          apply_overrides!(data)
-
-          data
         end
 
         def imp
@@ -220,15 +217,8 @@ module Api
           }
         end
 
-        def apply_overrides!(data)
-          # accuracy -> Int
-          if (accuracy = data.dig(:device, :geo, :accuracy))
-            data[:device][:geo][:accuracy] = accuracy.round
-          end
-          # lastfix -> Int, seconds after last geo retrieval, we have unix timestamp of last retrieval
-          if (lastfix = data.dig(:device, :geo, :lastfix)) # rubocop:disable Style/GuardClause
-            data[:device][:geo][:lastfix] = (Time.zone.now - Time.zone.at(lastfix / 1000)).round
-          end
+        def device
+          Bidding::DeviceBuilder.new(params[:device], ip).call
         end
 
         def parse_bid(bid)
