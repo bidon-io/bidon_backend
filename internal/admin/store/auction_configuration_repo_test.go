@@ -7,6 +7,7 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/admin"
 	"github.com/bidon-io/bidon-backend/internal/admin/store"
+	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/google/go-cmp/cmp"
 )
 
@@ -21,21 +22,21 @@ func TestAuctionConfigurationRepo_List(t *testing.T) {
 			Name:       "Config 1",
 			AppID:      1,
 			AdType:     ad.BannerType,
-			Rounds:     []admin.AuctionRoundConfiguration{{ID: "1", Demands: []string{"demand1", "demand2"}, Timeout: 10}},
+			Rounds:     []auction.RoundConfig{{ID: "1", Demands: []string{"demand1", "demand2"}, Timeout: 10}},
 			Pricefloor: 0.5,
 		},
 		{
 			Name:       "Config 2",
 			AppID:      2,
 			AdType:     ad.InterstitialType,
-			Rounds:     []admin.AuctionRoundConfiguration{{ID: "2", Demands: []string{"demand3", "demand4"}, Timeout: 20}},
+			Rounds:     []auction.RoundConfig{{ID: "2", Demands: []string{"demand3", "demand4"}, Timeout: 20}},
 			Pricefloor: 0.75,
 		},
 		{
 			Name:       "Config 3",
 			AppID:      3,
 			AdType:     ad.RewardedType,
-			Rounds:     []admin.AuctionRoundConfiguration{{ID: "3", Demands: []string{"demand5", "demand6"}, Timeout: 30}},
+			Rounds:     []auction.RoundConfig{{ID: "3", Demands: []string{"demand5", "demand6"}, Timeout: 30}},
 			Pricefloor: 1.0,
 		},
 	}
@@ -70,7 +71,7 @@ func TestAuctionConfigurationRepo_Find(t *testing.T) {
 		Name:       "Config 1",
 		AppID:      1,
 		AdType:     ad.BannerType,
-		Rounds:     []admin.AuctionRoundConfiguration{{ID: "1", Demands: []string{"demand1", "demand2"}, Timeout: 10}},
+		Rounds:     []auction.RoundConfig{{ID: "1", Demands: []string{"demand1", "demand2"}, Timeout: 10}},
 		Pricefloor: 0.5,
 	}
 
@@ -99,7 +100,7 @@ func TestAuctionConfigurationRepo_Update(t *testing.T) {
 		Name:       "Config 1",
 		AppID:      1,
 		AdType:     ad.BannerType,
-		Rounds:     []admin.AuctionRoundConfiguration{{ID: "1", Demands: []string{"demand1", "demand2"}, Timeout: 10}},
+		Rounds:     []auction.RoundConfig{{ID: "1", Demands: []string{"demand1", "demand2"}, Timeout: 10}},
 		Pricefloor: 0.5,
 	}
 
@@ -134,7 +135,7 @@ func TestAuctionConfigurationRepo_Delete(t *testing.T) {
 		Name:       "Config 1",
 		AppID:      1,
 		AdType:     ad.BannerType,
-		Rounds:     []admin.AuctionRoundConfiguration{{ID: "1", Demands: []string{"demand1", "demand2"}, Timeout: 10}},
+		Rounds:     []auction.RoundConfig{{ID: "1", Demands: []string{"demand1", "demand2"}, Timeout: 10}},
 		Pricefloor: 0.5,
 	}
 	config, err := repo.Create(context.Background(), attrs)
