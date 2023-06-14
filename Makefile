@@ -14,5 +14,5 @@ docker-build-push-prod-back:
 
 docker-build-push-prod-admin:
 	docker buildx build --platform linux/amd64,linux/arm64 --provenance=false \
-	--target build-admin --cache-to type=inline --cache-from $(REGISTRY)/bidon-admin \
+	--target bidon-admin --cache-to type=inline --cache-from $(REGISTRY)/bidon-admin \
 	-t $(REGISTRY)/bidon-admin:$(TAG) -t $(REGISTRY)/bidon-admin:latest --push .
