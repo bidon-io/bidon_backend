@@ -7,6 +7,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo/v4 v4.10.2
 	github.com/shopspring/decimal v1.3.1
+	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1
 	gorm.io/driver/postgres v1.5.2
 	gorm.io/gorm v1.25.1
 )
