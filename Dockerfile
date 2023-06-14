@@ -24,26 +24,34 @@ COPY internal internal
 
 FROM base AS test
 
-# Run tests for each package sequantially, because each test package that accesses the db runs db.AutoMigrate.
-# Fix this by running migrations before tests as a separate test.
+# Run tests for each package sequantially, because each test package that accesses the database runs database.AutoMigrate.
+# Fix this by running migrations before tests as a separate step.
 CMD [ "go", "test", "-p", "1", "./..." ]
 
-FROM base AS builder
+FROM base AS bidon-admin-builder
 
-ARG BIDON_SERVICE
+COPY --from=frontend-builder /app/.output/public ./cmd/bidon-admin/web/ui
+RUN go build -o /bidon-admin ./cmd/bidon-admin
 
-COPY --from=frontend-builder /app/.output/public ./cmd/$BIDON_SERVICE/web/ui
-RUN go build -o /$BIDON_SERVICE ./cmd/$BIDON_SERVICE
+FROM base AS bidon-sdkapi-builder
 
-FROM alpine:3.18
+RUN go build -o /bidon-sdkapi ./cmd/bidon-sdkapi
 
-ARG BIDON_SERVICE
+FROM alpine:3.18 AS deploy
 
 RUN adduser -D -u 1000 deploy
 USER deploy
 
-COPY --from=builder --chown=deploy /$BIDON_SERVICE /bidon-service
-
 EXPOSE 1323
 
-CMD [ "/bidon-service" ]
+FROM deploy AS bidon-admin
+
+COPY --from=bidon-admin-builder --chown=deploy /bidon-admin /bidon-admin
+
+CMD [ "/bidon-admin" ]
+
+FROM deploy AS bidon-sdkapi
+
+COPY --from=bidon-sdkapi-builder --chown=deploy /bidon-sdkapi /bidon-sdkapi
+
+CMD [ "/bidon-sdkapi" ]

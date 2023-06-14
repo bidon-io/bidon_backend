@@ -45,7 +45,7 @@ func (db *DB) AutoMigrate() error {
 	)
 }
 
-// Model different than default gorm.Model, because we already have schema from Rails
+// Model is different from default gorm.Model, because we already have schema from Rails
 type Model struct {
 	ID        int64     `gorm:"primaryKey;column:id;type:bigint"`
 	CreatedAt time.Time `gorm:"column:created_at;type:timestamp(6);not null"`
@@ -77,7 +77,7 @@ type AuctionConfiguration struct {
 	AppID      int64                 `gorm:"column:app_id;type:bigint;not null"`
 	AdType     AdType                `gorm:"column:ad_type;type:integer;not null"`
 	Rounds     []auction.RoundConfig `gorm:"column:rounds;type:jsonb;default:'[]';serializer:json"`
-	Pricefloor float64               `gorm:"column:pricefloor;type:double precision;not null"`
+	PriceFloor float64               `gorm:"column:pricefloor;type:double precision;not null"`
 }
 
 type Country struct {
