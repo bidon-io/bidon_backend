@@ -16,7 +16,7 @@ import axios from "@/services/ApiService.js";
 
 const route = useRoute();
 const id = route.params.id;
-const resourcesPath = "/auction_configurations";
+const resourcesPath = "/segments";
 const deleteHandle = useDeleteResource(resourcesPath, async () => await navigateTo(resourcesPath));
 
 const response = await axios.get(`${resourcesPath}/${id}`);
@@ -24,10 +24,10 @@ const resource = response.data;
 
 const fields = [
   { label: "ID", key: "id" },
-  { label: "App", key: "app_id", type: "link", link: `/apps/${resource.app_id}` },
   { label: "Name", key: "name" },
-  { label: "Ad type", key: "ad_type" },
-  { label: "Price floor", key: "pricefloor" },
-  { label: "Rounds", key: "rounds", type: "textarea" },
+  { label: "Description", key: "description" },
+  { label: "Filters", key: "filters" },
+  { label: "Enabled", key: "enabled" },
+  { label: "App", key: "app_id", type: "link", link: `/apps/${resource.app_id}` },
 ];
 </script>
