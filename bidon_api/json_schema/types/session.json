@@ -7,6 +7,7 @@
         "launch_ts",
         "launch_monotonic_ts",
         "start_ts",
+        "start_monotonic_ts",
         "ts",
         "monotonic_ts",
         "memory_warnings_ts",
@@ -35,8 +36,8 @@
             "title": "The start_ts Schema",
             "type": "integer"
         },
-        "monotonic_start_ts": {
-            "title": "The monotonic_start_ts Schema",
+        "start_monotonic_ts": {
+            "title": "The start_monotonic_ts Schema",
             "type": "integer"
         },
         "ts": {
