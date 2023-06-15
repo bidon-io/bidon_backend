@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -37,5 +38,10 @@ func main() {
 	e.POST("/auction/:ad_type", service.HandleAuction)
 	e.POST("/:ad_type/auction", service.HandleAuction)
 
-	e.Logger.Fatal(e.Start(":1323"))
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "1323"
+	}
+	addr := fmt.Sprintf(":%s", port)
+	e.Logger.Fatal(e.Start(addr))
 }
