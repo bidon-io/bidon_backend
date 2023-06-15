@@ -29,7 +29,10 @@ func main() {
 	}
 
 	e := echo.New()
+	e.HTTPErrorHandler = sdkapi.ErrorHandler
+
 	e.Use(middleware.Logger())
+	e.Use(sdkapi.CheckBidonHeader)
 
 	e.POST("/auction/:ad_type", service.HandleAuction)
 	e.POST("/:ad_type/auction", service.HandleAuction)

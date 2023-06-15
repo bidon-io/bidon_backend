@@ -2,10 +2,12 @@ package store
 
 import (
 	"context"
+	"errors"
 
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/db"
+	"gorm.io/gorm"
 )
 
 type ConfigMatcher struct {
@@ -25,6 +27,9 @@ func (m *ConfigMatcher) Match(ctx context.Context, appID int64, adType ad.Type) 
 		Take(dbConfig).
 		Error
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			err = auction.ErrNoAdsFound
+		}
 		return nil, err
 	}
 
