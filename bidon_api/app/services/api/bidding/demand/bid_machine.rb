@@ -1,99 +1,15 @@
 # frozen_string_literal: true
 
-# {
-#   "id": "843e6bdc-2a81-4126-be19-da1a023178e0",
-#   "test": 1,
-#   "at": 1,
-#   "tmax": 3000,
-#   "app": {
-#     "ver": "1.0",
-#     "bundle":"org.bidon.demo",
-#     "cat": ["IAB24"],
-#     "id": "1"
-#   },
-#   "device": {
-#     "ifa": "UUID",
-#     "ip": "",
-#     "carrier": "",
-#     "language": "en",
-#     "make": "Google",
-#     "model": "Google Pixel 7 Pro",
-#     "ua": "Mozilla\/5.0 ...",
-#     "pxratio": 2.625,
-#     "os": "iOS",
-#     "devicetype": "4",
-#     "osv": "13",
-#     "connectiontype": 2,
-#     "js": 1,
-#     "h": 2179,
-#     "w": 1080,
-#     "geo": {}
-#   },
-#   "imp": [{
-#     "id": "9987d8b9-2958-4371-99ec-b545bd0d7a9e",
-#     "instl": 0,
-#     "secure": 1,
-#     "exp": 14400,
-#     "bidfloor": 30,
-#     "banner": {
-#       "w": 320,
-#       "h": 50
-#     }
-#   }],
-#   "user": {
-#     "data": [{
-#       "id": "1",
-#       "name": "Bidon",
-#       "segment": [{
-#         "signal": "ChMKCkJpZE1hY2..."
-#       }]
-#     }]
-#   },
-#   "regs": {
-#     "gdpr": 0,
-#     "consent": "0",
-#     "ccpa": 0
-#   }
-# }
-
-# {
-#   "id": "843e6bdc-2a81-4126-be19-da1a023178e0",
-#   "seatbid": [
-#     {
-#       "bid": [
-#         {
-#           "id": "adba7bca-d172-42b2-9f90-1bff8685fdd1",
-#           "impid": "9987d8b9-2958-4371-99ec-b545bd0d7a9e",
-#           "price": 50.0,
-#           "adid": "1378ygfvn928ouyghf19o",
-#           "nurl": "https://...",
-#           "burl": "https://...",
-#           "lurl": "https://...",
-#           "adomain": [
-#             "bidmachine.io"
-#           ],
-#           "cid": "phone_banner",
-#           "crid": "phone_banner",
-#           "h": 50,
-#           "w": 320,
-#           "ext": {
-#             "signaldata": "...AQUIwAIQMg=="
-#           }
-#         }
-#       ],
-#       "seat": "3",
-#       "group": 0
-#     }
-#   ],
-#   "cur": "USD"
-# }
-
 module Api
   module Bidding
     module Demand
       class BidMachine
-        ENDPOINT = URI(Utils.fetch_from_env('BIDDING_BIDMACHINE_URL'))
-        HEADERS  = { 'Content-Type' => 'application/json' }.freeze
+        CONFIG = {
+          endpoint:  URI(Utils.fetch_from_env('BIDDING_BIDMACHINE_URL')),
+          demand_id: 'bidmachine',
+        }.freeze
+
+        HEADERS = { 'Content-Type' => 'application/json' }.freeze
 
         BANNER_FORMATS = {
           'BANNER'      => [320, 50],
@@ -109,7 +25,7 @@ module Api
 
         attr_reader :request, :ip, :token, :bidfloor
 
-        delegate :params, to: :request
+        delegate :params, :app, to: :request
 
         def initialize(request, ip, token, bidfloor)
           @request = request
@@ -121,9 +37,9 @@ module Api
         # @return [DemandResponse] Encoded JSON request, Encoded JSON response, response status, price, seatbid
         def call
           data = build_request_body.to_json
-          response = Net::HTTP.post(ENDPOINT, data, HEADERS)
+          response = Net::HTTP.post(CONFIG[:endpoint], data, HEADERS)
 
-          return empty_response(data, response) if response.code_type == Net::HTTPNoContent
+          return empty_response(data, response) if response.code_type  == Net::HTTPNoContent
           return error_response(data, response) if response.error_type == Net::HTTPClientException
 
           success_response(data, response)
@@ -138,18 +54,16 @@ module Api
             at:     1,
             tmax:   5000,
             app:    {
-              ver:    params[:app][:version],
-              bundle: params[:app][:bundle],
-              id:     '1',
-            },
-            user:   {
-              data: [user],
+              ver:       params.dig(:app, :version).to_s,
+              bundle:    app.package_name,
+              id:        app.id.to_s,
+              publisher: { id: adapter_config[:seller_id].to_s },
             },
             device:,
             imp:    [imp],
             regs:   {
-              coppa: params[:regs][:coppa] ? 1 : 0,
-              gdpr:  params[:regs][:gdpr] ? 1 : 0,
+              coppa: params.dig(:regs, :coppa) ? 1 : 0,
+              gdpr:  params.dig(:regs, :gdpr)  ? 1 : 0,
             },
           }
         end
@@ -157,10 +71,11 @@ module Api
         def imp
           res = {
             id:                SecureRandom.uuid,
-            displaymanager:    'BidMachine',
-            displaymanagerver: params[:adapters][:bidmachine][:sdk_version],
+            displaymanager:    CONFIG[:demand_id],
+            displaymanagerver: params.dig(:adapters, :bidmachine, :sdk_version),
             secure:            1,
             bidfloor:,
+            ext:               { bid_token: token },
           }
 
           res.merge(ad_type_params)
@@ -209,16 +124,14 @@ module Api
           end
         end
 
-        def user
-          {
-            id:      '1',
-            name:    'Bidon',
-            segment: [{ signal: token }],
-          }
-        end
-
         def device
           Bidding::DeviceBuilder.new(params[:device], ip).call
+        end
+
+        def adapter_config
+          @adapter_config ||= Api::Config::AdaptersFetcher.new(
+            app:, config_adapters: request.adapters,
+          ).fetch_adapter(CONFIG[:demand_id])
         end
 
         def parse_bid(bid)
@@ -226,14 +139,14 @@ module Api
             id:        bid['id'],
             impid:     bid['impid'],
             price:     bid['price'], # Bid price expressed as CPM
-            payload:   bid['ext']['signaldata'],
-            demand_id: 'bidmachine',
+            payload:   bid['adm'],
+            demand_id: CONFIG[:demand_id],
           }
         end
 
         def empty_response(request, response)
           DemandResponse.new(
-            demand:       'bidmachine',
+            demand:       CONFIG[:demand_id],
             raw_request:  request,
             raw_response: '',
             status:       response.code,
@@ -244,7 +157,7 @@ module Api
 
         def error_response(request, response)
           DemandResponse.new(
-            demand:       'bidmachine',
+            demand:       CONFIG[:demand_id],
             raw_request:  request,
             raw_response: { error: response.body }.to_json,
             status:       response.code,
@@ -257,7 +170,7 @@ module Api
           bid = JSON.parse(response.body)['seatbid'][0]['bid'][0]
 
           DemandResponse.new(
-            demand:       'bidmachine',
+            demand:       CONFIG[:demand_id],
             raw_request:  request,
             raw_response: response.body,
             status:       response.code,
