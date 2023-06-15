@@ -12,8 +12,8 @@ type Request struct {
 	Session     Session            `json:"session"`
 	App         App                `json:"app"`
 	User        User               `json:"user"`
-	Geo         Geo                `json:"geo"`
-	Regulations Regulations        `json:"regs"`
+	Geo         *Geo               `json:"geo"`
+	Regulations *Regulations       `json:"regs"`
 	Adapters    map[string]Adapter `json:"adapters"`
 	SegmentID   string             `json:"segment_id"`
 	Token       string             `json:"token"`
@@ -32,7 +32,7 @@ type Geo struct {
 }
 
 type Device struct {
-	Geo             Geo         `json:"geo"`
+	Geo             *Geo        `json:"geo"`
 	UserAgent       string      `json:"ua"`
 	Manufacturer    string      `json:"make"`
 	Model           string      `json:"model"`
@@ -56,7 +56,7 @@ type Session struct {
 	LaunchTS                  int     `json:"launch_ts"`
 	LaunchMonotonicTS         int     `json:"launch_monotonic_ts"`
 	StartTS                   int     `json:"start_ts"`
-	StartMonotonicTS          int     `json:"monotonic_start_ts"`
+	StartMonotonicTS          int     `json:"start_monotonic_ts"`
 	TS                        int     `json:"ts"`
 	MonotonicTS               int     `json:"monotonic_ts"`
 	MemoryWarningsTS          []int   `json:"memory_warnings_ts"`
@@ -84,6 +84,7 @@ type User struct {
 	IDFV                        string         `json:"idfv"`
 	IDG                         string         `json:"idg"`
 	Consent                     map[string]any `json:"consent"`
+	COPPA                       *bool          `json:"coppa"`
 }
 
 type Regulations struct {
