@@ -2,6 +2,7 @@ package auction
 
 import (
 	"context"
+	"errors"
 
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/device"
@@ -14,6 +15,8 @@ type Builder struct {
 }
 
 //go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks_test.go . ConfigMatcher LineItemsMatcher
+
+var ErrNoAdsFound = errors.New("no ads found")
 
 type ConfigMatcher interface {
 	Match(ctx context.Context, appID int64, adType ad.Type) (*Config, error)

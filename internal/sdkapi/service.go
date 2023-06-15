@@ -2,6 +2,7 @@ package sdkapi
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/bidon-io/bidon-backend/internal/auction"
@@ -20,6 +21,8 @@ type App struct {
 	ID int64
 }
 
+var ErrAppNotValid = echo.NewHTTPError(http.StatusUnprocessableEntity, "App is not valid")
+
 type AppFetcher interface {
 	Fetch(ctx context.Context, appKey, appBundle string) (*App, error)
 }
@@ -31,15 +34,15 @@ type AuctionResponse struct {
 	AuctionID  string  `json:"auction_id"`
 }
 
-func (s *Service) HandleAuction(ctx echo.Context) error {
+func (s *Service) HandleAuction(c echo.Context) error {
 	var request schema.Request
-	if err := ctx.Bind(&request); err != nil {
+	if err := c.Bind(&request); err != nil {
 		return err
 	}
 
-	requestCtx := ctx.Request().Context()
+	ctx := c.Request().Context()
 
-	app, err := s.AppFetcher.Fetch(requestCtx, request.App.Key, request.App.Bundle)
+	app, err := s.AppFetcher.Fetch(ctx, request.App.Key, request.App.Bundle)
 	if err != nil {
 		return err
 	}
@@ -51,17 +54,21 @@ func (s *Service) HandleAuction(ctx echo.Context) error {
 		DeviceType: request.Device.Type,
 		Adapters:   maps.Keys(request.Adapters),
 	}
-	auction, err := s.AuctionBuilder.Build(ctx.Request().Context(), params)
+	auc, err := s.AuctionBuilder.Build(ctx, params)
 	if err != nil {
+		if errors.Is(err, auction.ErrNoAdsFound) {
+			err = echo.NewHTTPError(http.StatusUnprocessableEntity, "No ads found")
+		}
+
 		return err
 	}
 
 	response := &AuctionResponse{
-		Auction:    *auction,
+		Auction:    *auc,
 		Token:      "{}",
 		PriceFloor: request.AdObject.PriceFloor,
 		AuctionID:  request.AdObject.AuctionID,
 	}
 
-	return ctx.JSON(http.StatusOK, response)
+	return c.JSON(http.StatusOK, response)
 }
