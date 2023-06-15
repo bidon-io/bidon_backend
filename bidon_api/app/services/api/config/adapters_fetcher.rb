@@ -45,8 +45,6 @@ module Api
       end
       memo_wise :unity_ads_demand_profile
 
-      private
-
       def fetch_adapter(adapter_name)
         case adapter_name.to_s
         when 'appsflyer'
@@ -65,6 +63,8 @@ module Api
           {}
         end
       end
+
+      private
 
       def fetch_appsflyer_adapter
         return {} unless app_mmp_profile
