@@ -2,7 +2,7 @@
   <Toast />
   <PageContainer>
     <NavigationContainer>
-      <GoBackButton :path="resourcesPath" />
+      <GoBackButton />
     </NavigationContainer>
     <SegmentForm :value="resource" @submit="handleSubmit" />
   </PageContainer>
