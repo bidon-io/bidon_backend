@@ -16,3 +16,8 @@ docker-build-push-prod-admin:
 	docker buildx build --platform linux/amd64,linux/arm64 --provenance=false \
 	--target bidon-admin --cache-to type=inline --cache-from $(REGISTRY)/bidon-admin \
 	-t $(REGISTRY)/bidon-admin:$(TAG) -t $(REGISTRY)/bidon-admin:latest --push .
+
+docker-build-push-prod-sdkapi:
+	docker buildx build --platform linux/amd64,linux/arm64 --provenance=false \
+	--target bidon-sdkapi --cache-to type=inline --cache-from $(REGISTRY)/bidon-sdkapi \
+	-t $(REGISTRY)/bidon-sdkapi:$(TAG) -t $(REGISTRY)/bidon-sdkapi:latest --push .
