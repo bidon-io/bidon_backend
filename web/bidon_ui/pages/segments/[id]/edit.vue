@@ -14,12 +14,12 @@ import axios from "@/services/ApiService";
 
 const route = useRoute();
 const id = route.params.id;
-const resourcesPath = "/segments";
+const resourcePath = `/segments/${id}`;
 
 const { state: resource, isReady } = useAsyncState(async () => {
-  const response = await axios.get(`${resourcesPath}/${id}`);
+  const response = await axios.get(resourcePath);
   return response.data;
 });
 
-const handleSubmit = useFormSubmit(resourcesPath, "Segment Updated!");
+const handleSubmit = useFormSubmit(resourcePath, "patch", "Segment Updated!");
 </script>
