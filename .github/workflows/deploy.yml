@@ -55,3 +55,7 @@ jobs:
       - name: Deploy admin
         working-directory: ./${{ secrets.ANSIBLE_SECRET }}/prod
         run: make bidon-admin TAG=$TAG
+
+      - name: Deploy sdkapi
+        working-directory: ./${{ secrets.ANSIBLE_SECRET }}/prod
+        run: make bidon-sdkapi TAG=$TAG

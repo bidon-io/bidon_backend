@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io/fs"
 	"log"
 	"net/http"
@@ -39,7 +40,12 @@ func main() {
 	uiWebServer := http.FileServer(http.FS(uiFileSystem))
 	e.GET("/*", echo.WrapHandler(uiWebServer))
 
-	e.Logger.Fatal(e.Start(":1323"))
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "1323"
+	}
+	addr := fmt.Sprintf(":%s", port)
+	e.Logger.Fatal(e.Start(addr))
 }
 
 func newAdminService(db *db.DB) *admin.Service {
