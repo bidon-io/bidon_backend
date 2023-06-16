@@ -2,7 +2,8 @@ import { useToast } from "primevue/usetoast";
 import axios from "@/services/ApiService.js";
 
 export default function (
-  resourcesPath,
+  path,
+  method,
   message,
   callback = () => {
     /* no operation function */
@@ -10,8 +11,7 @@ export default function (
 ) {
   const toast = useToast();
   const handleSubmit = (event) => {
-    axios
-      .post(resourcesPath, event)
+    axios[method](path, event)
       .then(async (response) => {
         const id = response.data.id;
         await callback(id);
