@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'main'
+      - 'task/DO-1444/go-sdkapi' 
   release:
     types: [published]
 
