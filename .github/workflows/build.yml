@@ -34,7 +34,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        component: [api, back, admin]
+        component: [api, back, admin, sdkapi]
     steps:
       - name: Login registry
         uses: docker/login-action@v2
