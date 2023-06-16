@@ -11,7 +11,7 @@
 <script setup>
 const resource = {};
 const resourcesPath = "/segments";
-const handleSubmit = useFormSubmit(resourcesPath, "Segment created!", async (id) =>
+const handleSubmit = useFormSubmit(resourcesPath, "post", "Segment created!", async (id) =>
   navigateTo(`${resourcesPath}/${id}`)
 );
 </script>
