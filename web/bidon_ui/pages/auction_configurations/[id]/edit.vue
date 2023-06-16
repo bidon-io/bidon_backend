@@ -1,10 +1,8 @@
 <template>
   <Toast />
   <PageContainer>
-    <NavigationContainer>
-      <GoBackButton :path="resourcesPath" />
-    </NavigationContainer>
-    <SegmentForm v-if="isReady" :value="resource" @submit="handleSubmit" />
+    <NavigationContainer> <GoBackButton" /> </NavigationContainer>
+    <AuctionConfigurationForm v-if="isReady" :value="resource" @submit="handleSubmit" />
   </PageContainer>
 </template>
 

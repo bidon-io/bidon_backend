@@ -3,11 +3,11 @@
   <ConfirmDialog />
   <PageContainer>
     <NavigationContainer>
-      <GoBackButton :path="resourcesPath" />
+      <GoBackButton />
       <DestroyButton :handler="() => deleteHandle(id)" />
       <EditButton :path="`${resourcesPath}/${id}/edit`" />
     </NavigationContainer>
-    <ResourceCard :fields="fields" :resource="resource" />
+    <ResourceCard title="Auction Configuration" :fields="fields" :resource="resource" />
   </PageContainer>
 </template>
 

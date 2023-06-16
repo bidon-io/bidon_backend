@@ -1,5 +1,5 @@
 <template>
-  <FormCard title="Auction Config">
+  <FormCard :title="title">
     <FormField v-for="field in fields" :key="field.key" :lable="field.label">
       <div v-if="!field.type" class="text-gray-900">{{ localResource[field.key] }}</div>
       <NuxtLink v-if="field.type === 'link'" :to="field.link">{{ localResource[field.key] }}</NuxtLink>
@@ -18,6 +18,10 @@
 import { ref } from "vue";
 
 const props = defineProps({
+  title: {
+    type: String,
+    required: true,
+  },
   resource: {
     type: Object,
     required: true,

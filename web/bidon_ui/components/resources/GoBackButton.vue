@@ -1,11 +1,7 @@
 <template>
-  <NuxtLink :to="path">
-    <Button label="Go back" icon="pi pi-arrow-left" severity="secondary" text />
-  </NuxtLink>
+  <Button label="Go back" icon="pi pi-arrow-left" severity="secondary" text @click.prevent="router.back()" />
 </template>
 
-<script setup lang="ts">
-defineProps<{
-  path: string;
-}>();
+<script setup>
+const router = useRouter();
 </script>

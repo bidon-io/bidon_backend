@@ -7,7 +7,7 @@
       <DestroyButton :handler="() => deleteHandle(id)" />
       <EditButton :path="`${resourcesPath}/${id}/edit`" />
     </NavigationContainer>
-    <ResourceCard :fields="fields" :resource="resource" />
+    <ResourceCard title="Segment" :fields="fields" :resource="resource" />
   </PageContainer>
 </template>
 
