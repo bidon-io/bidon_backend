@@ -17,8 +17,9 @@ func NewAppDemandProfileRepo(db *db.DB) *AppDemandProfileRepo {
 type appDemandProfileMapper struct{}
 
 //lint:ignore U1000 this method is used by generic struct
-func (m appDemandProfileMapper) dbModel(attrs *admin.AppDemandProfileAttrs) *db.AppDemandProfile {
+func (m appDemandProfileMapper) dbModel(attrs *admin.AppDemandProfileAttrs, id int64) *db.AppDemandProfile {
 	return &db.AppDemandProfile{
+		Model:          db.Model{ID: id},
 		AppID:          attrs.AppID,
 		AccountType:    attrs.AccountType,
 		AccountID:      attrs.AccountID,

@@ -21,7 +21,7 @@ func NewLineItemRepo(db *db.DB) *LineItemRepo {
 type lineItemMapper struct{}
 
 //lint:ignore U1000 this method is used by generic struct
-func (m lineItemMapper) dbModel(i *admin.LineItemAttrs) *db.LineItem {
+func (m lineItemMapper) dbModel(i *admin.LineItemAttrs, id int64) *db.LineItem {
 	var bidFloor decimal.NullDecimal
 	if i.BidFloor != nil {
 		bidFloor.Decimal = *i.BidFloor
@@ -35,6 +35,7 @@ func (m lineItemMapper) dbModel(i *admin.LineItemAttrs) *db.LineItem {
 	}
 
 	return &db.LineItem{
+		Model:       db.Model{ID: id},
 		AppID:       i.AppID,
 		AccountType: i.AccountType,
 		AccountID:   i.AccountID,
