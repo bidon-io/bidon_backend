@@ -17,6 +17,7 @@ type AuctionConfigurationAttrs struct {
 	AdType     ad.Type               `json:"ad_type"`
 	Rounds     []auction.RoundConfig `json:"rounds"`
 	Pricefloor float64               `json:"pricefloor"`
+	SegmentID  *int64                `json:"segment_id"`
 }
 
 type AuctionConfigurationService = resourceService[AuctionConfiguration, AuctionConfigurationAttrs]

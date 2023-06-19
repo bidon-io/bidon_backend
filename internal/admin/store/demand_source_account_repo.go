@@ -17,8 +17,9 @@ func NewDemandSourceAccountRepo(db *db.DB) *DemandSourceAccountRepo {
 type demandSourceAccountMapper struct{}
 
 //lint:ignore U1000 this method is used by generic struct
-func (m demandSourceAccountMapper) dbModel(a *admin.DemandSourceAccountAttrs) *db.DemandSourceAccount {
+func (m demandSourceAccountMapper) dbModel(a *admin.DemandSourceAccountAttrs, id int64) *db.DemandSourceAccount {
 	return &db.DemandSourceAccount{
+		Model:          db.Model{ID: id},
 		DemandSourceID: a.DemandSourceID,
 		UserID:         a.UserID,
 		Type:           a.Type,

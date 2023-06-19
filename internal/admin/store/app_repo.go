@@ -19,7 +19,7 @@ func NewAppRepo(db *db.DB) *AppRepo {
 type appMapper struct{}
 
 //lint:ignore U1000 this method is used by generic struct
-func (m appMapper) dbModel(a *admin.AppAttrs) *db.App {
+func (m appMapper) dbModel(a *admin.AppAttrs, id int64) *db.App {
 	packageName := sql.NullString{}
 	if a.PackageName != "" {
 		packageName.String = a.PackageName
@@ -33,6 +33,7 @@ func (m appMapper) dbModel(a *admin.AppAttrs) *db.App {
 	}
 
 	return &db.App{
+		Model:       db.Model{ID: id},
 		UserID:      a.UserID,
 		PlatformID:  dbPlatformID(a.PlatformID),
 		HumanName:   a.HumanName,

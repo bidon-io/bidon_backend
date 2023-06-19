@@ -29,5 +29,6 @@ const fields = [
   { label: "Ad type", key: "ad_type" },
   { label: "Price floor", key: "pricefloor" },
   { label: "Rounds", key: "rounds", type: "textarea" },
+  { label: "Segment", key: "segment_id" },
 ];
 </script>

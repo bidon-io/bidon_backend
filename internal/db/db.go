@@ -77,7 +77,8 @@ type AuctionConfiguration struct {
 	AppID      int64                 `gorm:"column:app_id;type:bigint;not null"`
 	AdType     AdType                `gorm:"column:ad_type;type:integer;not null"`
 	Rounds     []auction.RoundConfig `gorm:"column:rounds;type:jsonb;default:'[]';serializer:json"`
-	PriceFloor float64               `gorm:"column:pricefloor;type:double precision;not null"`
+	Pricefloor float64               `gorm:"column:pricefloor;type:double precision;not null"`
+	SegmentID  *sql.NullInt64        `gorm:"column:segment_id;type:bigint"`
 }
 
 type Country struct {

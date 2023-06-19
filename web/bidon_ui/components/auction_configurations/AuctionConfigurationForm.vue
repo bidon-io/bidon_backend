@@ -18,6 +18,7 @@
       <FormField lable="Rounds">
         <TextareaJSON v-model="resource.rounds" rows="5" cols="50" />
       </FormField>
+      <SegmentDropdown v-model="resource.segment_id" />
       <FormSubmitButton />
     </FormCard>
   </form>

@@ -17,8 +17,9 @@ func NewSegmentRepo(db *db.DB) *SegmentRepo {
 type segmentMapper struct{}
 
 //lint:ignore U1000 this method is used by generic struct
-func (m segmentMapper) dbModel(s *admin.SegmentAttrs) *db.Segment {
+func (m segmentMapper) dbModel(s *admin.SegmentAttrs, id int64) *db.Segment {
 	return &db.Segment{
+		Model:       db.Model{ID: id},
 		Name:        s.Name,
 		Description: s.Description,
 		Filters:     s.Filters,
