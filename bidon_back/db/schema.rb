@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_06_13_134627) do
+ActiveRecord::Schema[7.0].define(version: 2023_06_13_151729) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -77,7 +77,9 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_13_134627) do
     t.float "pricefloor", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "segment_id"
     t.index ["app_id"], name: "index_auction_configurations_on_app_id"
+    t.index ["segment_id"], name: "index_auction_configurations_on_segment_id"
   end
 
   create_table "countries", force: :cascade do |t|
@@ -171,6 +173,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_13_134627) do
   add_foreign_key "app_mmp_profiles", "apps"
   add_foreign_key "apps", "users"
   add_foreign_key "auction_configurations", "apps"
+  add_foreign_key "auction_configurations", "segments"
   add_foreign_key "demand_source_accounts", "demand_sources"
   add_foreign_key "line_items", "apps"
   add_foreign_key "line_items", "demand_source_accounts", column: "account_id"
