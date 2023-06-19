@@ -125,7 +125,7 @@ module Api
         end
 
         def device
-          Bidding::DeviceBuilder.new(params[:device], ip).call
+          Bidding::DeviceBuilder.new(params[:device], params[:user], ip).call
         end
 
         def adapter_config

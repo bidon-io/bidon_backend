@@ -3,7 +3,7 @@
 module Api
   module Bidding
     class DeviceBuilder
-      attr_reader :device_params, :ip
+      attr_reader :device_params, :user_params, :ip
 
       # https://github.com/InteractiveAdvertisingBureau/AdCOM/blob/master/AdCOM%20v1.0%20FINAL.md#list--connection-types-
       CONNECTION_TYPE_MAP = {
@@ -24,8 +24,9 @@ module Api
       }.freeze
       DEFAULT_DEVICE_TYPE = 4
 
-      def initialize(device_params, ip)
+      def initialize(device_params, user_params, ip)
         @device_params = device_params
+        @user_params = user_params
         @ip = ip
       end
 
@@ -46,6 +47,7 @@ module Api
           ua:             device_params[:ua],
           ppi:            device_params[:ppi],
           model:          device_params[:model],
+          ifa:            user_params[:idfa],
         }
 
         data[:carrier] = device_params[:carrier] if device_params[:carrier].present?
