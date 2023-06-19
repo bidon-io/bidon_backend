@@ -15,7 +15,7 @@ type Request struct {
 	Geo         *Geo               `json:"geo"`
 	Regulations *Regulations       `json:"regs"`
 	Adapters    map[string]Adapter `json:"adapters"`
-	SegmentID   string             `json:"segment_id"`
+	Segment     Segment            `json:"segment"`
 	Token       string             `json:"token"`
 	Ext         string             `json:"ext"`
 }
@@ -105,6 +105,11 @@ type AdObject struct {
 	Banner       *BannerAdObject       `json:"banner"`
 	Interstitial *InterstitialAdObject `json:"interstitial"`
 	Rewarded     *RewardedAdObject     `json:"rewarded"`
+}
+
+type Segment struct {
+	ID  string `json:"id"`
+	Ext string `json:"ext"`
 }
 
 func (o *AdObject) AdFormat() ad.Format {
