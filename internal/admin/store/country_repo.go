@@ -19,7 +19,7 @@ func NewCountryRepo(db *db.DB) *CountryRepo {
 type countryMapper struct{}
 
 //lint:ignore U1000 this method is used by generic struct
-func (m countryMapper) dbModel(a *admin.CountryAttrs) *db.Country {
+func (m countryMapper) dbModel(a *admin.CountryAttrs, id int64) *db.Country {
 	humanName := sql.NullString{}
 	if a.HumanName != "" {
 		humanName.String = a.HumanName
@@ -27,6 +27,7 @@ func (m countryMapper) dbModel(a *admin.CountryAttrs) *db.Country {
 	}
 
 	return &db.Country{
+		Model:      db.Model{ID: id},
 		Alpha2Code: a.Alpha2Code,
 		Alpha3Code: a.Alpha3Code,
 		HumanName:  humanName,

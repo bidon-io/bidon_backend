@@ -16,7 +16,7 @@ type resourceRepo[Resource, ResourceAttrs, DBModel any] struct {
 
 // resourceMapper maps resources with corresponding DB model, and vice versa
 type resourceMapper[Resource, ResourceAttrs, DBModel any] interface {
-	dbModel(*ResourceAttrs) *DBModel
+	dbModel(*ResourceAttrs, int64) *DBModel
 	resource(*DBModel) Resource
 }
 
@@ -45,7 +45,7 @@ func (r *resourceRepo[Resource, ResourceAttrs, DBModel]) Find(ctx context.Contex
 }
 
 func (r *resourceRepo[Resource, ResourceAttrs, DBModel]) Create(ctx context.Context, attrs *ResourceAttrs) (*Resource, error) {
-	dbModel := r.mapper.dbModel(attrs)
+	dbModel := r.mapper.dbModel(attrs, 0)
 
 	if err := r.db.WithContext(ctx).Create(dbModel).Error; err != nil {
 		return nil, err
@@ -56,7 +56,7 @@ func (r *resourceRepo[Resource, ResourceAttrs, DBModel]) Create(ctx context.Cont
 }
 
 func (r *resourceRepo[Resource, ResourceAttrs, DBModel]) Update(ctx context.Context, id int64, attrs *ResourceAttrs) (*Resource, error) {
-	dbModel := r.mapper.dbModel(attrs)
+	dbModel := r.mapper.dbModel(attrs, id)
 
 	if err := r.db.WithContext(ctx).Model(dbModel).Where("id = ?", id).Clauses(clause.Returning{}).Updates(&dbModel).Error; err != nil {
 		return nil, err

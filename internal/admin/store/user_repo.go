@@ -17,8 +17,9 @@ func NewUserRepo(db *db.DB) *UserRepo {
 type userMapper struct{}
 
 //lint:ignore U1000 this method is used by generic struct
-func (m userMapper) dbModel(u *admin.UserAttrs) *db.User {
+func (m userMapper) dbModel(u *admin.UserAttrs, id int64) *db.User {
 	return &db.User{
+		Model: db.Model{ID: id},
 		Email: u.Email,
 	}
 }
