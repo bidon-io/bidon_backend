@@ -78,7 +78,7 @@ module Api
             ext:               { bid_token: token },
           }
 
-          res.merge(ad_type_params)
+          res.deep_merge(ad_type_params)
         end
 
         def ad_type_params # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
