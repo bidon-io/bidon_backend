@@ -150,10 +150,10 @@ module RequestParams
 
   def user_params
     {
-      idfa:                          'UUID',
+      idfa:                          SecureRandom.uuid,
       tracking_authorization_status: 'AUTHORIZED',
-      idfv:                          'UUID',
-      idg:                           'UUID',
+      idfv:                          SecureRandom.uuid,
+      idg:                           SecureRandom.uuid,
       consent:                       {
         key1: 'value1',
       },
