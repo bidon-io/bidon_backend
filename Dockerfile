@@ -19,8 +19,7 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 
-COPY cmd cmd
-COPY internal internal
+COPY . .
 
 FROM base AS test
 
@@ -38,6 +37,8 @@ FROM base AS bidon-sdkapi-builder
 RUN go build -o /bidon-sdkapi ./cmd/bidon-sdkapi
 
 FROM alpine:3.18 AS deploy
+
+RUN apk add --no-cache ca-certificates
 
 RUN adduser -D -u 1000 deploy
 USER deploy

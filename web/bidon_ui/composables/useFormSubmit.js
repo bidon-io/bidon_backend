@@ -27,7 +27,7 @@ export default function (
         toast.add({
           severity: "error",
           summary: "Error",
-          detail: error.message,
+          detail: error.error.message,
         });
       });
   };
