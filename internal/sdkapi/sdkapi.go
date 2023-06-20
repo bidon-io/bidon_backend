@@ -1,7 +1,6 @@
 package sdkapi
 
 import (
-	"errors"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -14,33 +13,5 @@ func CheckBidonHeader(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 
 		return next(c)
-	}
-}
-
-func ErrorHandler(err error, c echo.Context) {
-	var herr *echo.HTTPError
-	if !errors.As(err, &herr) {
-		var message string
-		if c.Echo().Debug {
-			message = err.Error()
-		} else {
-			message = http.StatusText(http.StatusInternalServerError)
-		}
-
-		herr = &echo.HTTPError{
-			Code:    http.StatusInternalServerError,
-			Message: message,
-		}
-	}
-
-	response := map[string]any{
-		"error": map[string]any{
-			"code":    herr.Code,
-			"message": herr.Message,
-		},
-	}
-
-	if err := c.JSON(herr.Code, response); err != nil {
-		c.Logger().Error(err)
 	}
 }

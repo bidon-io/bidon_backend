@@ -907,10 +907,18 @@ components:
     Error:
       type: object
       required:
-        - message
+        - error
       properties:
-        message:
-          type: string
+        error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: integer
+            message:
+              type: string
   responses:
     AuctionConfigurationResponse:
       description: An auction configuration
