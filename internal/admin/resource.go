@@ -30,7 +30,7 @@ func (s *resourceService[Resource, ResourceAttrs]) list(c echo.Context) error {
 		return err
 	}
 
-	return c.JSONPretty(http.StatusOK, resources, "  ")
+	return c.JSON(http.StatusOK, resources)
 }
 
 func (s *resourceService[Resource, ResourceAttrs]) create(c echo.Context) error {
@@ -44,7 +44,7 @@ func (s *resourceService[Resource, ResourceAttrs]) create(c echo.Context) error 
 		return err
 	}
 
-	return c.JSONPretty(http.StatusCreated, resource, "  ")
+	return c.JSON(http.StatusCreated, resource)
 }
 
 func (s *resourceService[Resource, ResourceAttrs]) get(c echo.Context) error {
@@ -58,7 +58,7 @@ func (s *resourceService[Resource, ResourceAttrs]) get(c echo.Context) error {
 		return err
 	}
 
-	return c.JSONPretty(http.StatusOK, resource, "  ")
+	return c.JSON(http.StatusOK, resource)
 }
 
 func (s *resourceService[Resource, ResourceAttrs]) update(c echo.Context) error {
@@ -77,7 +77,7 @@ func (s *resourceService[Resource, ResourceAttrs]) update(c echo.Context) error 
 		return err
 	}
 
-	return c.JSONPretty(http.StatusOK, resource, "  ")
+	return c.JSON(http.StatusOK, resource)
 }
 
 func (s *resourceService[Resource, ResourceAttrs]) delete(c echo.Context) error {

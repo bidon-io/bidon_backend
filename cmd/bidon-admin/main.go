@@ -8,26 +8,35 @@ import (
 	"os"
 
 	"github.com/bidon-io/bidon-backend/cmd/bidon-admin/web"
+	"github.com/bidon-io/bidon-backend/config"
 	"github.com/bidon-io/bidon-backend/internal/admin"
 	"github.com/bidon-io/bidon-backend/internal/admin/store"
 	"github.com/bidon-io/bidon-backend/internal/db"
+	"github.com/getsentry/sentry-go"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
-	db, err := db.Open(os.Getenv("DATABASE_URL"))
+	sentryConf := config.Sentry()
+	err := sentry.Init(sentryConf.ClientOptions)
 	if err != nil {
-		log.Fatalf("failed opening connection to postgres: %v", err)
+		log.Fatalf("sentry.Init(%+v): %v", sentryConf.ClientOptions, err)
+	}
+	defer sentry.Flush(sentryConf.FlushTimeout)
+
+	dbURL := os.Getenv("DATABASE_URL")
+	db, err := db.Open(dbURL)
+	if err != nil {
+		log.Fatalf("db.Open(%v): %v", dbURL, err)
 	}
 
-	adminService := newAdminService(db)
-
-	e := echo.New()
-	e.Use(middleware.Logger())
+	e := config.Echo()
 
 	configureCORS(e)
+
+	adminService := newAdminService(db)
 
 	apiGroup := e.Group("/api")
 	adminService.RegisterAPIRoutes(apiGroup)
