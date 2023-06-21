@@ -31,6 +31,7 @@ RSpec.describe Api::Auction::RoundsFilterer do
           {
             'id'      => 'ROUND_BANNER_2',
             'demands' => %w[unityads],
+            'bidding' => [],
             'timeout' => 15_000,
           },
         ],
@@ -51,6 +52,32 @@ RSpec.describe Api::Auction::RoundsFilterer do
 
     it 'does not return this round' do
       expect(filterer.fetch).to eq([])
+    end
+  end
+
+  context 'when round matches only bidding' do
+    let(:rounds) do
+      [
+        {
+          'id'      => 'ROUND_BANNER_1',
+          'demands' => %w[dtexchange bidmachine],
+          'bidding' => ['unityads'],
+          'timeout' => 15_000,
+        },
+      ]
+    end
+
+    it 'does not return this round' do
+      expect(filterer.fetch).to eq(
+        [
+          {
+            'id'      => 'ROUND_BANNER_1',
+            'demands' => [],
+            'bidding' => ['unityads'],
+            'timeout' => 15_000,
+          },
+        ],
+      )
     end
   end
 
@@ -81,11 +108,13 @@ RSpec.describe Api::Auction::RoundsFilterer do
           {
             'id'      => 'ROUND_BANNER_2',
             'demands' => %w[unityads],
+            'bidding' => [],
             'timeout' => 15_000,
           },
           {
             'id'      => 'ROUND_BANNER_3',
             'demands' => %w[unityads],
+            'bidding' => [],
             'timeout' => 15_000,
           },
 
