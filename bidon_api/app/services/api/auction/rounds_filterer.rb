@@ -10,12 +10,15 @@ module Api
         @adapters = adapters
       end
 
+      # @return [Array]
       def fetch
         rounds.filter_map do |round|
-          filtered_demands = round['demands'] & adapters_names
-          next if filtered_demands.empty?
+          demands = Array(round['demands']) & adapters_names
+          bidding = Array(round['bidding']) & adapters_names
 
-          round.merge('demands' => filtered_demands)
+          next if demands.empty? && bidding.empty? # remove round if all empty
+
+          round.merge('demands' => demands, 'bidding' => bidding)
         end
       end
 
