@@ -1,5 +1,4 @@
 <template>
-  <Toast />
   <PageContainer>
     <NavigationContainer> <GoBackButton /> </NavigationContainer>
     <AuctionConfigurationForm v-if="isReady" :value="resource" @submit="handleSubmit" />
@@ -19,5 +18,5 @@ const { state: resource, isReady } = useAsyncState(async () => {
   return response.data;
 });
 
-const handleSubmit = useFormSubmit(resourcePath, "patch", "Auction Configuration Updated!");
+const handleSubmit = useUpdateResource({ path: resourcePath, message: "Auction Configuration Updated!" });
 </script>
