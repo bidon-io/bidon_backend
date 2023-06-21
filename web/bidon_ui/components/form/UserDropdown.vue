@@ -1,12 +1,12 @@
 <template>
-  <FormField label="App">
+  <FormField label="User">
     <Dropdown
       v-model="value"
-      :options="apps"
-      option-label="package_name"
+      :options="users"
+      option-label="email"
       option-value="id"
       class="w-full md:w-14rem"
-      placeholder="Select App"
+      placeholder="Select User"
     />
   </FormField>
 </template>
@@ -32,11 +32,11 @@ const value = computed({
   },
 });
 
-const apps = ref([]);
+const users = ref([]);
 axios
-  .get("/apps")
+  .get("/users")
   .then((response) => {
-    apps.value = response.data;
+    users.value = response.data;
   })
   .catch((error) => {
     console.error(error);

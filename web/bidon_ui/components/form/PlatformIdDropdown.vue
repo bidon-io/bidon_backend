@@ -1,6 +1,6 @@
 <template>
-  <FormField label="Ad Type">
-    <Dropdown v-model="value" :options="adTypes" class="w-full md:w-14rem" placeholder="Select Ad Type" />
+  <FormField label="Platform Id">
+    <Dropdown v-model="value" :options="platforms" class="w-full md:w-14rem" placeholder="Select Platform" />
   </FormField>
 </template>
 
@@ -23,5 +23,5 @@ const value = computed({
     emit("update:modelValue", value);
   },
 });
-const adTypes = ref(["banner", "interstitial", "rewarded"]);
+const platforms = ref(["ios", "android"]);
 </script>
