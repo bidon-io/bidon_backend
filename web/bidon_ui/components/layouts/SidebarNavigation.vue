@@ -13,6 +13,7 @@
 
 <script setup>
 const menuItems = [
+  { name: "Apps", link: "/apps" },
   { name: "Auction Configurations", link: "/auction_configurations" },
   { name: "Segments", link: "/segments" },
 ];

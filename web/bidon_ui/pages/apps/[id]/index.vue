@@ -1,11 +1,11 @@
 <template>
   <PageContainer>
     <NavigationContainer>
-      <GoBackButton :path="resourcesPath" />
+      <GoBackButton />
       <DestroyButton :handler="() => deleteHandle(id)" />
       <EditButton :path="`${resourcesPath}/${id}/edit`" />
     </NavigationContainer>
-    <ResourceCard title="Segment" :fields="fields" :resource="resource" />
+    <ResourceCard title="App" :fields="fields" :resource="resource" />
   </PageContainer>
 </template>
 
@@ -14,7 +14,7 @@ import axios from "@/services/ApiService.js";
 
 const route = useRoute();
 const id = route.params.id;
-const resourcesPath = "/segments";
+const resourcesPath = "/apps";
 const deleteHandle = useDeleteResource({
   path: resourcesPath,
   hook: async () => await navigateTo(resourcesPath),
@@ -25,10 +25,11 @@ const resource = response.data;
 
 const fields = [
   { label: "ID", key: "id" },
-  { label: "Name", key: "name" },
-  { label: "Description", key: "description" },
-  { label: "Filters", key: "filters" },
-  { label: "Enabled", key: "enabled" },
-  { label: "App", key: "app_id", type: "link", link: `/apps/${resource.app_id}` },
+  { label: "Platform Id", key: "platform_id" },
+  { label: "Human Name", key: "human_name" },
+  { label: "Package Name", key: "package_name" },
+  { label: "User", key: "user_id" },
+  { label: "App Key", key: "app_key" },
+  { label: "Settings", key: "settings", type: "textarea" },
 ];
 </script>

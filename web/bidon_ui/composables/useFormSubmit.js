@@ -1,25 +1,25 @@
 import { useToast } from "primevue/usetoast";
 import axios from "@/services/ApiService.js";
 
-export default function (
+export default function ({
   path,
   method,
   message,
-  callback = () => {
+  hook = async () => {
     /* no operation function */
-  }
-) {
+  },
+}) {
   const toast = useToast();
   const handleSubmit = (event) => {
     axios[method](path, event)
       .then(async (response) => {
         const id = response.data.id;
-        await callback(id);
-
+        await hook(id);
         toast.add({
           severity: "success",
           summary: "Success",
           detail: message,
+          live: 3000,
         });
       })
       .catch((error) => {

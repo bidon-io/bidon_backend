@@ -1,5 +1,4 @@
 <template>
-  <Toast />
   <PageContainer>
     <NavigationContainer>
       <GoBackButton />
@@ -11,7 +10,5 @@
 <script setup>
 const resource = {};
 const resourcesPath = "/segments";
-const handleSubmit = useFormSubmit(resourcesPath, "post", "Segment created!", async (id) =>
-  navigateTo(`${resourcesPath}/${id}`)
-);
+const handleSubmit = useCreateResource({ path: resourcesPath, message: "Segment created!" });
 </script>

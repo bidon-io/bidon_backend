@@ -1,5 +1,4 @@
 <template>
-  <Toast />
   <PageContainer>
     <NavigationContainer>
       <GoBackButton />
@@ -11,7 +10,5 @@
 <script setup>
 const resource = {};
 const resourcesPath = "/auction_configurations";
-const handleSubmit = useFormSubmit(resourcesPath, "post", "Auction configuration created!", async (id) =>
-  navigateTo(`${resourcesPath}/${id}`)
-);
+const handleSubmit = useCreateResource({ path: resourcesPath, message: "Auction configuration created!" });
 </script>
