@@ -1,6 +1,4 @@
 <template>
-  <Toast />
-  <ConfirmDialog />
   <PageContainer>
     <NavigationContainer>
       <GoBackButton />
@@ -17,7 +15,10 @@ import axios from "@/services/ApiService.js";
 const route = useRoute();
 const id = route.params.id;
 const resourcesPath = "/auction_configurations";
-const deleteHandle = useDeleteResource(resourcesPath, async () => await navigateTo(resourcesPath));
+const deleteHandle = useDeleteResource({
+  path: resourcesPath,
+  hook: async () => await navigateTo(resourcesPath),
+});
 
 const response = await axios.get(`${resourcesPath}/${id}`);
 const resource = response.data;

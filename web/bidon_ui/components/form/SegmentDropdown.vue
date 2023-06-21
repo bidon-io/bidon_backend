@@ -1,5 +1,5 @@
 <template>
-  <FormField lable="Segment">
+  <FormField label="Segment">
     <Dropdown
       v-model="value"
       :options="segments"

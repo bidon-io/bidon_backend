@@ -3,7 +3,7 @@
     <NavigationContainer>
       <GoBackButton />
     </NavigationContainer>
-    <SegmentForm v-if="isReady" :value="resource" @submit="handleSubmit" />
+    <AppForm v-if="isReady" :value="resource" @submit="handleSubmit" />
   </PageContainer>
 </template>
 
@@ -13,12 +13,12 @@ import axios from "@/services/ApiService";
 
 const route = useRoute();
 const id = route.params.id;
-const resourcePath = `/segments/${id}`;
+const resourcePath = `/apps/${id}`;
 
 const { state: resource, isReady } = useAsyncState(async () => {
   const response = await axios.get(resourcePath);
   return response.data;
 });
 
-const handleSubmit = useUpdateResource({ path: resourcePath, message: "Segment Updated!" });
+const handleSubmit = useUpdateResource({ path: resourcePath, message: "App Updated!" });
 </script>

@@ -15,7 +15,7 @@ export default defineNuxtConfig({
       pathPrefix: false,
     },
   ],
-  modules: ["@nuxtjs/tailwindcss"],
+  modules: ["@nuxtjs/tailwindcss", "@pinia/nuxt"],
   build: {
     transpile: ["primevue"],
   },

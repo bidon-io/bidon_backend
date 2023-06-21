@@ -7,20 +7,20 @@ import { computed } from "vue";
 
 const props = defineProps({
   modelValue: {
-    type: Object,
-    required: true,
+    type: [Object, null],
+    default: null,
   },
   placeholder: {
     type: String,
     default: "",
   },
-  row: {
-    type: Number,
+  rows: {
+    type: [Number, String],
     required: false,
     default: 5,
   },
   cols: {
-    type: Number,
+    type: [Number, String],
     required: false,
     default: 50,
   },
