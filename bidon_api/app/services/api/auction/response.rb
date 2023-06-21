@@ -16,6 +16,7 @@ module Api
 
       def body
         return unless auction_configuration
+        return if rounds.empty? # if we filtered all rounds return 422 response
 
         {
           'rounds'                   => rounds,
