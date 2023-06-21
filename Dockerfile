@@ -1,5 +1,5 @@
 # Build UI
-FROM node:18-alpine AS frontend-deps
+FROM node:20-alpine AS frontend-deps
 
 WORKDIR /app
 
