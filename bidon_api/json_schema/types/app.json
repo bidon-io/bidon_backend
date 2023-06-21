@@ -32,6 +32,14 @@
     "plugin_version": {
       "title": "The plugin_version Schema",
       "type": "string"
+    },
+    "skadn": {
+      "title": "An array of SKAdNetworkItems (ids) from an app's info.plist, only iOS",
+      "type": "array",
+      "items": {
+        "title": "SKAdNetwork id",
+        "type": "string"
+      }
     }
   }
 }

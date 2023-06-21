@@ -71,12 +71,13 @@ type Session struct {
 }
 
 type App struct {
-	Bundle           string `json:"bundle"`
-	Key              string `json:"key"`
-	Framework        string `json:"framework"`
-	Version          string `json:"version"`
-	FrameworkVersion string `json:"framework_version"`
-	PluginVersion    string `json:"plugin_version"`
+	Bundle           string   `json:"bundle"`
+	Key              string   `json:"key"`
+	Framework        string   `json:"framework"`
+	Version          string   `json:"version"`
+	FrameworkVersion string   `json:"framework_version"`
+	PluginVersion    string   `json:"plugin_version"`
+	Skadn            []string `json:"skadn"`
 }
 
 type User struct {
