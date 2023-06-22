@@ -18,7 +18,7 @@ func (f *AppFetcher) Fetch(ctx context.Context, appKey, appBundle string) (*sdka
 	err := f.DB.
 		WithContext(ctx).
 		Select("id").
-		Find(&dbApp, map[string]any{"app_key": appKey, "package_name": appBundle}).
+		Take(&dbApp, map[string]any{"app_key": appKey, "package_name": appBundle}).
 		Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
