@@ -2,7 +2,6 @@ Rails.application.routes.draw do
   get 'health_checks', to: 'health#show'
 
   post 'config', to: 'config#create'
-  post 'openrtb', to: 'rtb#create'
 
   post 'auction/:ad_type', to: 'auction#create'
   post 'bidding/:ad_type', to: 'bidding#create'
@@ -10,6 +9,7 @@ Rails.application.routes.draw do
   post 'click/:ad_type',   to: 'click#create'
   post 'show/:ad_type',    to: 'show#create'
   post 'loss/:ad_type',    to: 'loss#create'
+  post 'win/:ad_type',     to: 'win#create'
   post 'reward/rewarded',  to: 'reward#create'
 
   post ':ad_type/auction', to: 'auction#create'
