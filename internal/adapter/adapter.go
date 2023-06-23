@@ -4,18 +4,28 @@ type Key string
 
 const (
 	// Sorted alphabetically
+	AdmobKey      Key = "admob"
 	ApplovinKey   Key = "applovin"
 	BidmachineKey Key = "bidmachine"
 	DTExchangeKey Key = "dtexchange"
+	MetaKey       Key = "meta"
+	MintegralKey  Key = "mintegral"
+	MobileFuseKey Key = "mobilefuse"
 	UnityAdsKey   Key = "unityads"
+	VungleKey     Key = "vungle"
 )
 
 func AdapterKeys() []Key {
 	return []Key{
+		AdmobKey,
 		ApplovinKey,
 		BidmachineKey,
 		DTExchangeKey,
+		MetaKey,
+		MintegralKey,
+		MobileFuseKey,
 		UnityAdsKey,
+		VungleKey,
 	}
 }
 

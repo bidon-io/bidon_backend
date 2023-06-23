@@ -21,29 +21,12 @@ module Api
       end
       memo_wise :app_mmp_profile
 
-      def applovin_demand_profile
-        AppDemandProfile.eager(:demand_source_account)
-                        .where(app_id: app.id, account_type: 'DemandSourceAccount::Applovin').first
+      def app_demand_profile(adapter)
+        AppDemandProfile
+          .eager(:demand_source_account)
+          .where(app_id: app.id, account_type: AppDemandProfile::KEY_TO_ACCOUNT_TYPE[adapter])
+          .first
       end
-      memo_wise :applovin_demand_profile
-
-      def bidmachine_demand_profile
-        AppDemandProfile.eager(:demand_source_account)
-                        .where(app_id: app.id, account_type: 'DemandSourceAccount::BidMachine').first
-      end
-      memo_wise :bidmachine_demand_profile
-
-      def dtexchange_demand_profile
-        AppDemandProfile.eager(:demand_source_account)
-                        .where(app_id: app.id, account_type: 'DemandSourceAccount::DtExchange').first
-      end
-      memo_wise :dtexchange_demand_profile
-
-      def unity_ads_demand_profile
-        AppDemandProfile.eager(:demand_source_account)
-                        .where(app_id: app.id, account_type: 'DemandSourceAccount::UnityAds').first
-      end
-      memo_wise :unity_ads_demand_profile
 
       def fetch_adapter(adapter_name)
         case adapter_name.to_s
@@ -51,14 +34,8 @@ module Api
           fetch_appsflyer_adapter
         when 'adjust'
           fetch_adjust_adapter
-        when 'bidmachine'
-          fetch_bidmachine_adapter
-        when 'applovin'
-          fetch_applovin_adapter
-        when 'dtexchange'
-          fetch_dtexchange_adapter
-        when 'unityads'
-          fetch_unity_ads_adapter
+        when *AppDemandProfile::ADAPTERS_LIST
+          fetch_demand_adapter(adapter_name.to_s)
         else
           {}
         end
@@ -84,38 +61,24 @@ module Api
         }
       end
 
-      def fetch_applovin_adapter
-        return {} unless applovin_demand_profile
+      def fetch_demand_adapter(adapter)
+        profile = app_demand_profile(adapter)
+        return {} unless profile
 
-        extra = JSON.parse(applovin_demand_profile.demand_source_account.extra)
+        extra = JSON.parse(profile.demand_source_account.extra)
 
-        {
-          app_key: extra['api_key'],
-        }
-      end
-
-      def fetch_bidmachine_adapter
-        return {} unless bidmachine_demand_profile
-
-        extra = JSON.parse(bidmachine_demand_profile.demand_source_account.extra)
-
-        {
-          seller_id:        extra['seller_id'],
-          endpoint:         extra['endpoint'],
-          mediation_config: extra['mediation_config'],
-        }
-      end
-
-      def fetch_dtexchange_adapter
-        return {} unless dtexchange_demand_profile
-
-        JSON.parse(dtexchange_demand_profile.demand_source_account.extra)
-      end
-
-      def fetch_unity_ads_adapter
-        return {} unless unity_ads_demand_profile
-
-        JSON.parse(unity_ads_demand_profile.demand_source_account.extra)
+        case adapter
+        when 'applovin'
+          { app_key: extra['api_key'] }
+        when 'bidmachine'
+          {
+            seller_id:        extra['seller_id'],
+            endpoint:         extra['endpoint'],
+            mediation_config: extra['mediation_config'],
+          }
+        else
+          extra
+        end
       end
     end
   end
