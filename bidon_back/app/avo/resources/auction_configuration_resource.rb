@@ -8,4 +8,5 @@ class AuctionConfigurationResource < Avo::BaseResource
   field :ad_type, as: :select, required: true, enum: ::AuctionConfiguration.ad_types
   field :pricefloor, as: :number, required: true
   field :rounds, as: :code, required: true
+  field :external_win_notifications, as: :boolean, required: true
 end

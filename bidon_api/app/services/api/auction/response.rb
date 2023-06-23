@@ -19,12 +19,13 @@ module Api
         return if rounds.empty? # if we filtered all rounds return 422 response
 
         {
-          'rounds'                   => rounds,
-          'line_items'               => line_items,
-          'token'                    => '{}',
-          'pricefloor'               => ad_object['pricefloor'],
-          'auction_id'               => auction_id,
-          'auction_configuration_id' => auction_configuration.id,
+          'rounds'                     => rounds,
+          'line_items'                 => line_items,
+          'token'                      => '{}',
+          'pricefloor'                 => ad_object['pricefloor'],
+          'auction_id'                 => auction_id,
+          'auction_configuration_id'   => auction_configuration.id,
+          'external_win_notifications' => auction_configuration.external_win_notifications,
         }
       end
       memo_wise :body
