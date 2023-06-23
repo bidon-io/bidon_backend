@@ -2,6 +2,7 @@ package store
 
 import (
 	"database/sql"
+
 	"github.com/bidon-io/bidon-backend/internal/admin"
 	"github.com/bidon-io/bidon-backend/internal/db"
 )
@@ -31,13 +32,14 @@ func (m auctionConfigurationMapper) dbModel(c *admin.AuctionConfigurationAttrs, 
 	}
 
 	return &db.AuctionConfiguration{
-		Model:      db.Model{ID: id},
-		Name:       name,
-		AppID:      c.AppID,
-		AdType:     db.AdTypeFromDomain(c.AdType),
-		Rounds:     c.Rounds,
-		Pricefloor: c.Pricefloor,
-		SegmentID:  &segmentID,
+		Model:                    db.Model{ID: id},
+		Name:                     name,
+		AppID:                    c.AppID,
+		AdType:                   db.AdTypeFromDomain(c.AdType),
+		Rounds:                   c.Rounds,
+		Pricefloor:               c.Pricefloor,
+		SegmentID:                &segmentID,
+		ExternalWinNotifications: c.ExternalWinNotifications,
 	}
 }
 
@@ -53,11 +55,12 @@ func (m auctionConfigurationMapper) resource(c *db.AuctionConfiguration) admin.A
 	return admin.AuctionConfiguration{
 		ID: c.ID,
 		AuctionConfigurationAttrs: admin.AuctionConfigurationAttrs{
-			Name:      c.Name.String,
-			AppID:     c.AppID,
-			AdType:    c.AdType.Domain(),
-			Rounds:    c.Rounds,
-			SegmentID: segmentID,
+			Name:                     c.Name.String,
+			AppID:                    c.AppID,
+			AdType:                   c.AdType.Domain(),
+			Rounds:                   c.Rounds,
+			SegmentID:                segmentID,
+			ExternalWinNotifications: c.ExternalWinNotifications,
 		},
 	}
 }

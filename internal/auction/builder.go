@@ -46,9 +46,10 @@ func (b *Builder) Build(ctx context.Context, params *BuildParams) (*Auction, err
 	}
 
 	auction := Auction{
-		ConfigID:  config.ID,
-		Rounds:    filterRounds(config.Rounds, params.Adapters),
-		LineItems: lineItems,
+		ConfigID:                 config.ID,
+		ExternalWinNotifications: config.ExternalWinNotifications,
+		Rounds:                   filterRounds(config.Rounds, params.Adapters),
+		LineItems:                lineItems,
 	}
 
 	if len(auction.Rounds) == 0 {

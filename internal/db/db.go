@@ -73,12 +73,13 @@ type App struct {
 
 type AuctionConfiguration struct {
 	Model
-	Name       sql.NullString        `gorm:"column:name;type:varchar"`
-	AppID      int64                 `gorm:"column:app_id;type:bigint;not null"`
-	AdType     AdType                `gorm:"column:ad_type;type:integer;not null"`
-	Rounds     []auction.RoundConfig `gorm:"column:rounds;type:jsonb;default:'[]';serializer:json"`
-	Pricefloor float64               `gorm:"column:pricefloor;type:double precision;not null"`
-	SegmentID  *sql.NullInt64        `gorm:"column:segment_id;type:bigint"`
+	Name                     sql.NullString        `gorm:"column:name;type:varchar"`
+	AppID                    int64                 `gorm:"column:app_id;type:bigint;not null"`
+	AdType                   AdType                `gorm:"column:ad_type;type:integer;not null"`
+	Rounds                   []auction.RoundConfig `gorm:"column:rounds;type:jsonb;default:'[]';serializer:json"`
+	Pricefloor               float64               `gorm:"column:pricefloor;type:double precision;not null"`
+	SegmentID                *sql.NullInt64        `gorm:"column:segment_id;type:bigint"`
+	ExternalWinNotifications *bool                 `gorm:"column:external_win_notifications;type:boolean;default:false;not null"`
 }
 
 type Country struct {

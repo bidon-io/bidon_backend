@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_06_13_151729) do
+ActiveRecord::Schema[7.0].define(version: 2023_06_21_183328) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -78,6 +78,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_13_151729) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "segment_id"
+    t.boolean "external_win_notifications", default: false, null: false
     t.index ["app_id"], name: "index_auction_configurations_on_app_id"
     t.index ["segment_id"], name: "index_auction_configurations_on_segment_id"
   end

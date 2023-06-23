@@ -12,12 +12,13 @@ type AuctionConfiguration struct {
 
 // AuctionConfigurationAttrs is attributes of Configuration. Used to create and update configurations
 type AuctionConfigurationAttrs struct {
-	Name       string                `json:"name"`
-	AppID      int64                 `json:"app_id"`
-	AdType     ad.Type               `json:"ad_type"`
-	Rounds     []auction.RoundConfig `json:"rounds"`
-	Pricefloor float64               `json:"pricefloor"`
-	SegmentID  *int64                `json:"segment_id"`
+	Name                     string                `json:"name"`
+	AppID                    int64                 `json:"app_id"`
+	AdType                   ad.Type               `json:"ad_type"`
+	Rounds                   []auction.RoundConfig `json:"rounds"`
+	Pricefloor               float64               `json:"pricefloor"`
+	SegmentID                *int64                `json:"segment_id"`
+	ExternalWinNotifications *bool                 `json:"external_win_notifications"`
 }
 
 type AuctionConfigurationService = resourceService[AuctionConfiguration, AuctionConfigurationAttrs]

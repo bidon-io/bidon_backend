@@ -18,7 +18,7 @@ func (m *ConfigMatcher) Match(ctx context.Context, appID int64, adType ad.Type) 
 	dbConfig := &db.AuctionConfiguration{}
 	err := m.DB.
 		WithContext(ctx).
-		Select("id", "rounds").
+		Select("id", "external_win_notifications", "rounds").
 		Where(map[string]any{
 			"app_id":  appID,
 			"ad_type": db.AdTypeFromDomain(adType),
@@ -34,8 +34,9 @@ func (m *ConfigMatcher) Match(ctx context.Context, appID int64, adType ad.Type) 
 	}
 
 	config := &auction.Config{
-		ID:     dbConfig.ID,
-		Rounds: dbConfig.Rounds,
+		ID:                       dbConfig.ID,
+		ExternalWinNotifications: *dbConfig.ExternalWinNotifications,
+		Rounds:                   dbConfig.Rounds,
 	}
 
 	return config, nil
