@@ -5,13 +5,15 @@ import (
 )
 
 type Auction struct {
-	ConfigID  int64         `json:"auction_configuration_id"`
-	Rounds    []RoundConfig `json:"rounds"`
-	LineItems []LineItem    `json:"line_items"`
+	ConfigID                 int64         `json:"auction_configuration_id"`
+	ExternalWinNotifications bool          `json:"external_win_notifications"`
+	Rounds                   []RoundConfig `json:"rounds"`
+	LineItems                []LineItem    `json:"line_items"`
 }
 type Config struct {
-	ID     int64
-	Rounds []RoundConfig
+	ID                       int64
+	ExternalWinNotifications bool
+	Rounds                   []RoundConfig
 }
 
 type RoundConfig struct {
