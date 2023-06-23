@@ -3,113 +3,16 @@
   "title": "Adapters Schema",
   "type": "object",
   "properties": {
-    "admob": {
-      "title": "The admob Schema",
-      "type": "object",
-      "required": [
-        "version",
-        "sdk_version"
-      ],
-      "properties": {
-        "version": {
-          "title": "The version Schema",
-          "type": "string"
-        },
-        "sdk_version": {
-          "title": "The sdk_version Schema",
-          "type": "string"
-        }
-      }
-    },
-    "bidmachine": {
-      "title": "The bidmachine Schema",
-      "type": "object",
-      "required": [
-        "version",
-        "sdk_version"
-      ],
-      "properties": {
-        "version": {
-          "title": "The version Schema",
-          "type": "string"
-        },
-        "sdk_version": {
-          "title": "The sdk_version Schema",
-          "type": "string"
-        }
-      }
-    },
-    "applovin": {
-      "title": "The applovin Schema",
-      "type": "object",
-      "required": [
-        "version",
-        "sdk_version"
-      ],
-      "properties": {
-        "version": {
-          "title": "The version Schema",
-          "type": "string"
-        },
-        "sdk_version": {
-          "title": "The sdk_version Schema",
-          "type": "string"
-        }
-      }
-    },
-    "appsflyer": {
-      "title": "The appsflyer Schema",
-      "type": "object",
-      "required": [
-        "version",
-        "sdk_version"
-      ],
-      "properties": {
-        "version": {
-          "title": "The version Schema",
-          "type": "string"
-        },
-        "sdk_version": {
-          "title": "The sdk_version Schema",
-          "type": "string"
-        }
-      }
-    },
-    "dtexchange": {
-      "title": "The dtexchange Schema",
-      "type": "object",
-      "required": [
-        "version",
-        "sdk_version"
-      ],
-      "properties": {
-        "version": {
-          "title": "The version Schema",
-          "type": "string"
-        },
-        "sdk_version": {
-          "title": "The sdk_version Schema",
-          "type": "string"
-        }
-      }
-    },
-    "unityads": {
-      "title": "The unityads Schema",
-      "type": "object",
-      "required": [
-        "version",
-        "sdk_version"
-      ],
-      "properties": {
-        "version": {
-          "title": "The version Schema",
-          "type": "string"
-        },
-        "sdk_version": {
-          "title": "The sdk_version Schema",
-          "type": "string"
-        }
-      }
-    }
+    "admob": { "$ref": "./adapter.json" },
+    "applovin": { "$ref": "./adapter.json" },
+    "bidmachine": { "$ref": "./adapter.json" },
+    "dtexchange": { "$ref": "./adapter.json" },
+    "meta": { "$ref": "./adapter.json" },
+    "mintegral": { "$ref": "./adapter.json" },
+    "mobilefuse": { "$ref": "./adapter.json" },
+    "unityads": { "$ref": "./adapter.json" },
+    "vungle": { "$ref": "./adapter.json" },
+    "appsflyer": { "$ref": "./adapter.json" },
+    "adjust": { "$ref": "./adapter.json" }
   }
 }
