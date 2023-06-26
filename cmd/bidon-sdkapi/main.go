@@ -8,6 +8,8 @@ import (
 	"github.com/bidon-io/bidon-backend/config"
 	"github.com/bidon-io/bidon-backend/internal/auction"
 	auctionstore "github.com/bidon-io/bidon-backend/internal/auction/store"
+	bidonconfig "github.com/bidon-io/bidon-backend/internal/config"
+	configstore "github.com/bidon-io/bidon-backend/internal/config/store"
 	"github.com/bidon-io/bidon-backend/internal/db"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
 	sdkapistore "github.com/bidon-io/bidon-backend/internal/sdkapi/store"
@@ -29,20 +31,30 @@ func main() {
 		log.Fatalf("db.Open(%v): %v", dbURL, err)
 	}
 
-	service := sdkapi.Service{
+	baseHandler := sdkapi.BaseHandler{
+		AppFetcher: &sdkapistore.AppFetcher{DB: db},
+	}
+	auctionHandler := sdkapi.AuctionHandler{
+		BaseHandler: &baseHandler,
 		AuctionBuilder: &auction.Builder{
 			ConfigMatcher:    &auctionstore.ConfigMatcher{DB: db},
 			LineItemsMatcher: &auctionstore.LineItemsMatcher{DB: db},
 		},
-		AppFetcher: &sdkapistore.AppFetcher{DB: db},
+	}
+	configHandler := sdkapi.ConfigHandler{
+		BaseHandler: &baseHandler,
+		AdaptersBuilder: &bidonconfig.AdaptersBuilder{
+			AppDemandProfileFetcher: &configstore.AppDemandProfileFetcher{DB: db},
+		},
 	}
 
 	e := config.Echo()
 
 	e.Use(sdkapi.CheckBidonHeader)
 
-	e.POST("/auction/:ad_type", service.HandleAuction)
-	e.POST("/:ad_type/auction", service.HandleAuction)
+	e.POST("/config", configHandler.Handle)
+	e.POST("/auction/:ad_type", auctionHandler.Handle)
+	e.POST("/:ad_type/auction", auctionHandler.Handle)
 
 	port := os.Getenv("PORT")
 	if port == "" {
