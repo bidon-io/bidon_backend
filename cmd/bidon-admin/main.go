@@ -19,6 +19,8 @@ import (
 )
 
 func main() {
+	config.ConfigureOTel()
+
 	logger, err := config.NewLogger()
 	if err != nil {
 		log.Fatalf("config.NewLogger(): %v", err)
@@ -38,7 +40,7 @@ func main() {
 		log.Fatalf("db.Open(%v): %v", dbURL, err)
 	}
 
-	e := config.Echo(logger)
+	e := config.Echo("bidon-admin", logger)
 
 	configureCORS(e)
 
