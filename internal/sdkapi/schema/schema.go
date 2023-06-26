@@ -114,14 +114,6 @@ type Segment struct {
 	Ext string `json:"ext"`
 }
 
-func (o *AdObject) AdFormat() ad.Format {
-	if o.Banner != nil {
-		return o.Banner.Format
-	}
-
-	return ad.EmptyFormat
-}
-
 type BannerAdObject struct {
 	Format ad.Format `json:"format"`
 }

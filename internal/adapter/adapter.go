@@ -15,18 +15,16 @@ const (
 	VungleKey     Key = "vungle"
 )
 
-func AdapterKeys() []Key {
-	return []Key{
-		AdmobKey,
-		ApplovinKey,
-		BidmachineKey,
-		DTExchangeKey,
-		MetaKey,
-		MintegralKey,
-		MobileFuseKey,
-		UnityAdsKey,
-		VungleKey,
-	}
+var Keys = []Key{
+	AdmobKey,
+	ApplovinKey,
+	BidmachineKey,
+	DTExchangeKey,
+	MetaKey,
+	MintegralKey,
+	MobileFuseKey,
+	UnityAdsKey,
+	VungleKey,
 }
 
 func GetCommonAdapters(adapters1 []Key, adapters2 []Key) []Key {

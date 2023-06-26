@@ -19,14 +19,14 @@ func TestAppDemandProfileRepo_List(t *testing.T) {
 		{
 			AppID:          1,
 			DemandSourceID: 1,
-			AccountID:      1,
+			AccountID:      createDemandSourceAccount(t, tx, "DemandSourceAccount::Applovin").ID,
 			Data:           map[string]any{"api_key": "asdf"},
 			AccountType:    "DemandSourceAccount::Applovin",
 		},
 		{
 			AppID:          2,
 			DemandSourceID: 2,
-			AccountID:      2,
+			AccountID:      createDemandSourceAccount(t, tx, "DemandSourceAccount::Bidmachine").ID,
 			Data:           map[string]any{"api_key": "asdf"},
 			AccountType:    "DemandSourceAccount::Bidmachine",
 		},
@@ -61,7 +61,7 @@ func TestAppDemandProfileRepo_Find(t *testing.T) {
 	attrs := &admin.AppDemandProfileAttrs{
 		AppID:          1,
 		DemandSourceID: 1,
-		AccountID:      1,
+		AccountID:      createDemandSourceAccount(t, tx, "DemandSourceAccount::Applovin").ID,
 		Data:           map[string]any{"api_key": "asdf"},
 		AccountType:    "DemandSourceAccount::Applovin",
 	}
@@ -90,7 +90,7 @@ func TestAppDemandProfileRepo_Update(t *testing.T) {
 	attrs := admin.AppDemandProfileAttrs{
 		AppID:          1,
 		DemandSourceID: 1,
-		AccountID:      1,
+		AccountID:      createDemandSourceAccount(t, tx, "DemandSourceAccount::Applovin").ID,
 		Data:           map[string]any{"api_key": "asdf"},
 		AccountType:    "DemandSourceAccount::Applovin",
 	}
@@ -125,7 +125,7 @@ func TestAppDemandProfileRepo_Delete(t *testing.T) {
 	attrs := &admin.AppDemandProfileAttrs{
 		AppID:          1,
 		DemandSourceID: 1,
-		AccountID:      1,
+		AccountID:      createDemandSourceAccount(t, tx, "DemandSourceAccount::Applovin").ID,
 		Data:           map[string]any{"api_key": "asdf"},
 		AccountType:    "DemandSourceAccount::Applovin",
 	}
