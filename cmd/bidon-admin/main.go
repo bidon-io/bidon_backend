@@ -19,8 +19,14 @@ import (
 )
 
 func main() {
+	logger, err := config.NewLogger()
+	if err != nil {
+		log.Fatalf("config.NewLogger(): %v", err)
+	}
+	defer logger.Sync()
+
 	sentryConf := config.Sentry()
-	err := sentry.Init(sentryConf.ClientOptions)
+	err = sentry.Init(sentryConf.ClientOptions)
 	if err != nil {
 		log.Fatalf("sentry.Init(%+v): %v", sentryConf.ClientOptions, err)
 	}
@@ -32,7 +38,7 @@ func main() {
 		log.Fatalf("db.Open(%v): %v", dbURL, err)
 	}
 
-	e := config.Echo()
+	e := config.Echo(logger)
 
 	configureCORS(e)
 
