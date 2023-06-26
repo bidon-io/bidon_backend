@@ -4,16 +4,20 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/getsentry/sentry-go"
 	sentryecho "github.com/getsentry/sentry-go/echo"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho"
 	"go.uber.org/zap"
 )
 
-func Echo(logger *zap.Logger) *echo.Echo {
+func Echo(service string, logger *zap.Logger) *echo.Echo {
 	e := echo.New()
 	e.Debug = Env != ProdEnv
 	e.HTTPErrorHandler = HTTPErrorHandler
+
+	e.Use(otelecho.Middleware(service))
 
 	e.Use(middleware.RequestID())
 	e.Use(echoRequestLogger(logger))
@@ -34,7 +38,12 @@ func HTTPErrorHandler(err error, c echo.Context) {
 	if !errors.As(err, &herr) {
 		hub := sentryecho.GetHubFromContext(c)
 		if hub != nil {
-			hub.CaptureException(err)
+			client, scope := hub.Client(), hub.Scope()
+			client.CaptureException(
+				err,
+				&sentry.EventHint{Context: c.Request().Context()},
+				scope,
+			)
 		}
 
 		var message string

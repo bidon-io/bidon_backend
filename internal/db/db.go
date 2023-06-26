@@ -10,6 +10,7 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/admin"
 	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/shopspring/decimal"
+	"github.com/uptrace/opentelemetry-go-extra/otelgorm"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -21,6 +22,11 @@ type DB struct {
 
 func Open(databaseURL string) (*DB, error) {
 	db, err := gorm.Open(postgres.Open(databaseURL))
+	if err != nil {
+		return nil, err
+	}
+
+	err = db.Use(otelgorm.NewPlugin())
 	if err != nil {
 		return nil, err
 	}

@@ -18,6 +18,8 @@ import (
 )
 
 func main() {
+	config.ConfigureOTel()
+
 	logger, err := config.NewLogger()
 	if err != nil {
 		log.Fatalf("config.NewLogger(): %v", err)
@@ -54,7 +56,7 @@ func main() {
 		},
 	}
 
-	e := config.Echo(logger)
+	e := config.Echo("bidon-sdkapi", logger)
 
 	e.Use(sdkapi.CheckBidonHeader)
 
