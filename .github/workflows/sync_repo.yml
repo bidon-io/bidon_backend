@@ -1,0 +1,13 @@
+name: Sync repo
+on:
+  push:
+    branches:
+      - "main"
+
+jobs:
+  sync-repo:
+    name: Sync repo
+    uses: bidon-io/bidon-repo-sync/.github/workflows/shared-repo-sync.yml@main
+    with:
+      repo: ${{ github.event.repository.name }}
+    secrets: inherit
