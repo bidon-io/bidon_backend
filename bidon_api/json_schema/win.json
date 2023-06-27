@@ -3,7 +3,6 @@
   "title": "Show Schema",
   "type": "object",
   "required": [
-    "external_winner",
     "bid",
     "device",
     "session",
@@ -11,23 +10,6 @@
     "user"
   ],
   "properties": {
-    "external_winner": {
-      "title": "The external_winner Schema",
-      "type": "object",
-      "required": [
-        "ecpm"
-      ],
-      "properties": {
-        "demand_id": {
-          "title": "The demand_id Schema",
-          "type": "string"
-        },
-        "ecpm": {
-          "title": "The ecpm Schema",
-          "type": "number"
-        }
-      }
-    },
     "bid": { "$ref": "./types/bid.json" },
     "device": { "$ref": "./types/device.json" },
     "session": { "$ref": "./types/session.json" },
