@@ -1,0 +1,31 @@
+name: Scan repo
+on:
+  push:
+    branches:
+#     - master
+jobs:
+  trivy:
+    name: Vulnerability scanning
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checks-out repository
+        uses: actions/checkout@v3
+
+      - name: Run Trivy vulnerability scanner in repo mode
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          format: 'table'
+
+      - name: Download JUnit template
+        run: wget https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/junit.tpl
+
+      - name: Generate JUnit report
+        run: docker run --rm -v $(pwd):/opt/project aquasec/trivy fs --scanners vuln --format template --template "@/opt/project/junit.tpl" -o junit-report.xml /opt/project
+
+      - name: Publish tests results
+        uses: mikepenz/action-junit-report@v3
+        with:
+          report_paths: junit-report.xml
+          check_name: Trivy vulnerability report
+          annotate_only: true
