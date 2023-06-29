@@ -1,11 +1,11 @@
 <template>
   <PageContainer>
     <NavigationContainer>
-      <GoBackButton :path="resourcesPath" />
+      <GoBackButton />
       <DestroyButton :handler="() => deleteHandle(id)" />
       <EditButton :path="`${resourcesPath}/${id}/edit`" />
     </NavigationContainer>
-    <ResourceCard title="Segment" :fields="fields" :resource="resource" />
+    <ResourceCard title="Demand Source Account" :fields="fields" :resource="resource" />
   </PageContainer>
 </template>
 
@@ -14,7 +14,7 @@ import axios from "@/services/ApiService.js";
 
 const route = useRoute();
 const id = route.params.id;
-const resourcesPath = "/segments";
+const resourcesPath = "/demand_source_accounts";
 const deleteHandle = useDeleteResource({
   path: resourcesPath,
   hook: async () => await navigateTo(resourcesPath),
@@ -25,10 +25,12 @@ const resource = response.data;
 
 const fields = [
   { label: "ID", key: "id" },
-  { label: "Name", key: "name" },
-  { label: "Description", key: "description" },
-  { label: "Filters", key: "filters" },
-  { label: "Enabled", key: "enabled" },
-  { label: "App", key: "appId", type: "link", link: `/apps/${resource.app_id}` },
+  { label: "User", key: "userId", type: "link", link: `/user/${resource.app_id}` },
+  { label: "Type", key: "type" },
+  { label: "Demand Source", key: "demandSourceId" },
+  { label: "IsBidding", key: "isBidding" },
+  { label: "Extra", key: "extra", type: "textarea" },
 ];
 </script>
+
+isBidding

@@ -15,6 +15,7 @@
 const menuItems = [
   { name: "Apps", link: "/apps" },
   { name: "Auction Configurations", link: "/auction_configurations" },
+  { name: "Demand Source Accounts", link: "/demand_source_accounts" },
   { name: "Segments", link: "/segments" },
 ];
 </script>
