@@ -1,12 +1,12 @@
 <template>
-  <FormField label="Segment" :error="error" :required="required">
+  <FormField label="Demand source" :error="error" :required="required">
     <Dropdown
       v-model="value"
-      :options="segments"
-      option-label="name"
+      :options="options"
+      option-label="humanName"
       option-value="id"
       class="w-full md:w-14rem"
-      placeholder="None"
+      placeholder="Select Demand source"
     />
   </FormField>
 </template>
@@ -40,11 +40,11 @@ const value = computed({
   },
 });
 
-const segments = ref([]);
+const options = ref([]);
 axios
-  .get("/segments")
+  .get("/demand_sources")
   .then((response) => {
-    segments.value = [{ name: "None", id: null }, ...response.data];
+    options.value = response.data;
   })
   .catch((error) => {
     console.error(error);

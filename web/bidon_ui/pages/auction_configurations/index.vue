@@ -6,11 +6,11 @@
 <script setup>
 const columns = [
   { field: "id", header: "Id", sortable: true },
-  { field: "app_id", header: "App" },
+  { field: "appId", header: "App" },
   { field: "name", header: "Name" },
-  { field: "ad_type", header: "Ad Type" },
+  { field: "adType", header: "Ad Type" },
   { field: "pricefloor", header: "Price Floor" },
-  { field: "segment_id", header: "Segment" },
+  { field: "segmentId", header: "Segment" },
 ];
 const resourcesPath = "/auction_configurations";
 </script>

@@ -8,7 +8,7 @@
 </template>
 
 <script setup>
-const resource = {};
+const resource = { rounds: [] };
 const resourcesPath = "/auction_configurations";
 const handleSubmit = useCreateResource({ path: resourcesPath, message: "Auction configuration created!" });
 </script>
