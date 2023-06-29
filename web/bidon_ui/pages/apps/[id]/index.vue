@@ -25,11 +25,11 @@ const resource = response.data;
 
 const fields = [
   { label: "ID", key: "id" },
-  { label: "Platform Id", key: "platform_id" },
-  { label: "Human Name", key: "human_name" },
-  { label: "Package Name", key: "package_name" },
-  { label: "User", key: "user_id" },
-  { label: "App Key", key: "app_key" },
+  { label: "Platform Id", key: "platformId" },
+  { label: "Human Name", key: "humanName" },
+  { label: "Package Name", key: "packageName" },
+  { label: "User", key: "userId" },
+  { label: "App Key", key: "appKey" },
   { label: "Settings", key: "settings", type: "textarea" },
 ];
 </script>

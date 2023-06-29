@@ -31,10 +31,15 @@
   "dependencies": {
     "@nuxtjs/tailwindcss": "^6.7.0",
     "@pinia/nuxt": "^0.4.11",
+    "@types/humps": "^2.0.3",
+    "@vee-validate/nuxt": "^4.10.2",
+    "@vee-validate/yup": "^4.10.2",
     "@vueuse/core": "^10.1.2",
     "axios": "^1.4.0",
+    "humps": "^2.0.1",
     "pinia": "^2.1.4",
     "primeicons": "^6.0.1",
-    "primevue": "^3.29.1"
+    "primevue": "^3.29.1",
+    "yup": "^1.2.0"
   }
 }
