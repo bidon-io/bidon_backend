@@ -25,11 +25,11 @@ const resource = response.data;
 
 const fields = [
   { label: "ID", key: "id" },
-  { label: "App", key: "app_id", type: "link", link: `/apps/${resource.app_id}` },
+  { label: "App", key: "appId", type: "link", link: `/apps/${resource.app_id}` },
   { label: "Name", key: "name" },
-  { label: "Ad type", key: "ad_type" },
+  { label: "Ad type", key: "adType" },
   { label: "Price floor", key: "pricefloor" },
   { label: "Rounds", key: "rounds", type: "textarea" },
-  { label: "Segment", key: "segment_id" },
+  { label: "Segment", key: "segmentId" },
 ];
 </script>

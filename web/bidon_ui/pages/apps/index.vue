@@ -6,11 +6,11 @@
 <script setup>
 const columns = [
   { field: "id", header: "Id", sortable: true },
-  { field: "platform_id", header: "Platform Id" },
-  { field: "human_name", header: "Human Name" },
-  { field: "package_name", header: "Package Name" },
-  { field: "user_id", header: "User" },
-  { field: "app_key", header: "App Key" },
+  { field: "platformId", header: "Platform Id" },
+  { field: "humanName", header: "Human Name" },
+  { field: "packageName", header: "Package Name" },
+  { field: "userId", header: "User" },
+  { field: "appKey", header: "App Key" },
 ];
 const resourcesPath = "/apps";
 </script>
