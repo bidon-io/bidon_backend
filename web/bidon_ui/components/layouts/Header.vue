@@ -5,7 +5,9 @@
         <div class="flex items-center">
           <div class="relative mx-4 lg:mx-0">
             <span class="left-0 p-3 flex items-center">
-              <a class="text-blue-500 font-semibold" target="_blank" href="/">BidON Management Console</a>
+              <a class="text-blue-500 font-semibold" target="_blank" href="/"
+                >BidON Management Console</a
+              >
             </span>
           </div>
         </div>

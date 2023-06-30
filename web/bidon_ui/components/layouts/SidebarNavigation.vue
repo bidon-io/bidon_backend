@@ -13,6 +13,7 @@
 
 <script setup>
 const menuItems = [
+  { name: "App Demand Profile", link: "/app_demand_profiles" },
   { name: "Apps", link: "/apps" },
   { name: "Auction Configurations", link: "/auction_configurations" },
   { name: "Demand Source Accounts", link: "/demand_source_accounts" },

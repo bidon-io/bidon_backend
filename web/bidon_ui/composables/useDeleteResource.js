@@ -20,7 +20,12 @@ export default function ({ path, hook }) {
       accept: () => {
         deleteResource(id, () => {
           hook(id);
-          toastService.add({ severity: "info", summary: "Success", detail: "Record deleted", life: 3000 });
+          toastService.add({
+            severity: "info",
+            summary: "Success",
+            detail: "Record deleted",
+            life: 3000,
+          });
         });
       },
     });

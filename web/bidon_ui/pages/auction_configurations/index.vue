@@ -1,5 +1,8 @@
 <template>
-  <CreateResourceButton label="New Auction Configuration" :resources-path="resourcesPath" />
+  <CreateResourceButton
+    label="New Auction Configuration"
+    :resources-path="resourcesPath"
+  />
   <ResourcesTable :columns="columns" :resources-path="resourcesPath" />
 </template>
 

@@ -6,7 +6,7 @@
       <EditButton :path="`${resourcesPath}/${id}/edit`" />
     </NavigationContainer>
     <ResourceCard
-      title="Auction Configuration"
+      title="App Deman Profile"
       :fields="fields"
       :resource="resource"
     />
@@ -18,7 +18,7 @@ import axios from "@/services/ApiService.js";
 
 const route = useRoute();
 const id = route.params.id;
-const resourcesPath = "/auction_configurations";
+const resourcesPath = "/app_demand_profiles";
 const deleteHandle = useDeleteResource({
   path: resourcesPath,
   hook: async () => await navigateTo(resourcesPath),
@@ -29,16 +29,14 @@ const resource = response.data;
 
 const fields = [
   { label: "ID", key: "id" },
+  { label: "App", key: "appId", type: "link", link: `/apps/${resource.appId}` },
+  { label: "Demand Source", key: "demandSourceId" },
   {
-    label: "App",
-    key: "appId",
-    type: "link",
-    link: `/apps/${resource.app_id}`,
+    label: "Account",
+    key: "accountId",
+    link: `/demand_source_accounts/${resource.accountId}`,
   },
-  { label: "Name", key: "name" },
-  { label: "Ad type", key: "adType" },
-  { label: "Price floor", key: "pricefloor" },
-  { label: "Rounds", key: "rounds", type: "textarea" },
-  { label: "Segment", key: "segmentId" },
+  { label: "Data", key: "data", type: "textarea" },
+  { label: "Account Type", key: "accountType" },
 ];
 </script>

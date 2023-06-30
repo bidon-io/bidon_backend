@@ -3,7 +3,11 @@
     <FormCard title="Demand source account">
       <UserDropdown v-model="userId" :error="errors.userId" required />
       <DemandSourceTypeDropdown v-model="type" :error="errors.type" required />
-      <DemandSourceDropdown v-model="demandSourceId" :error="errors.demandSourceId" required />
+      <DemandSourceDropdown
+        v-model="demandSourceId"
+        :error="errors.demandSourceId"
+        required
+      />
       <FormField label="Bidding">
         <Checkbox v-model="isBidding" :binary="true" />
       </FormField>

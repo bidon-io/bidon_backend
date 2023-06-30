@@ -1,7 +1,9 @@
 <template>
   <PageContainer>
-    <NavigationContainer> <GoBackButton /> </NavigationContainer>
-    <AuctionConfigurationForm
+    <NavigationContainer>
+      <GoBackButton />
+    </NavigationContainer>
+    <AppDemandProfileForm
       v-if="isReady"
       :value="resource"
       @submit="handleSubmit"
@@ -15,7 +17,7 @@ import axios from "@/services/ApiService";
 
 const route = useRoute();
 const id = route.params.id;
-const resourcePath = `/auction_configurations/${id}`;
+const resourcePath = `/app_demand_profiles/${id}`;
 
 const { state: resource, isReady } = useAsyncState(async () => {
   const response = await axios.get(resourcePath);
@@ -24,6 +26,6 @@ const { state: resource, isReady } = useAsyncState(async () => {
 
 const handleSubmit = useUpdateResource({
   path: resourcePath,
-  message: "Auction Configuration Updated!",
+  message: "App Demand Profile Updated!",
 });
 </script>

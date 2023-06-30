@@ -19,7 +19,10 @@
         <TextareaJSON v-model="rounds" rows="5" />
       </FormField>
       <SegmentDropdown v-model="segmentId" :error="errors.segmentId" />
-      <FormField label="External Win Notification" :error="errors.externalWinNotifications">
+      <FormField
+        label="External Win Notification"
+        :error="errors.externalWinNotifications"
+      >
         <Checkbox v-model="externalWinNotifications" :binary="true" />
       </FormField>
       <FormSubmitButton />

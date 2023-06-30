@@ -3,15 +3,15 @@
     <NavigationContainer>
       <GoBackButton />
     </NavigationContainer>
-    <AppForm :value="resource" @submit="handleSubmit" />
+    <AppDemandProfileForm :value="resource" @submit="handleSubmit" />
   </PageContainer>
 </template>
 
 <script setup>
-const resource = { settings: {} };
-const resourcesPath = "/apps";
+const resource = {};
+const resourcesPath = "/app_demand_profiles";
 const handleSubmit = useCreateResource({
   path: resourcesPath,
-  message: "App created!",
+  message: "App demand profile created!",
 });
 </script>

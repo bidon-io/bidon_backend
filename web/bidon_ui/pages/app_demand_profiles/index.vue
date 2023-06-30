@@ -1,6 +1,6 @@
 <template>
   <CreateResourceButton
-    label="New Demand Source Account"
+    label="New App Demand Profile"
     :resources-path="resourcesPath"
   />
   <ResourcesTable :columns="columns" :resources-path="resourcesPath" />
@@ -9,10 +9,10 @@
 <script setup>
 const columns = [
   { field: "id", header: "Id", sortable: true },
-  { field: "userId", header: "User" },
-  { field: "type", header: "Type" },
+  { field: "appId", header: "App" },
   { field: "demandSourceId", header: "Demand Source" },
-  { field: "isBidding", header: "Bidding" },
+  { field: "accountId", header: "Account" },
+  { field: "accountType", header: "Account Type" },
 ];
-const resourcesPath = "/demand_source_accounts";
+const resourcesPath = "/app_demand_profiles";
 </script>

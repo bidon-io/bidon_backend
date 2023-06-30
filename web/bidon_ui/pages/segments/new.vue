@@ -10,5 +10,8 @@
 <script setup>
 const resource = {};
 const resourcesPath = "/segments";
-const handleSubmit = useCreateResource({ path: resourcesPath, message: "Segment created!" });
+const handleSubmit = useCreateResource({
+  path: resourcesPath,
+  message: "Segment created!",
+});
 </script>

@@ -19,13 +19,23 @@
     <Column style="width: 10%; min-width: 8rem" body-style="text-align:center">
       <template #body="slotProps">
         <div class="flex justify-between">
-          <NuxtLink :key="slotProps.data.id" :to="`${resourcesPath}/${slotProps.data.id}`">
+          <NuxtLink
+            :key="slotProps.data.id"
+            :to="`${resourcesPath}/${slotProps.data.id}`"
+          >
             <i class="pi pi-eye" style="color: slateblue"></i>
           </NuxtLink>
-          <NuxtLink :key="slotProps.data.id" :to="`${resourcesPath}/${slotProps.data.id}/edit`">
+          <NuxtLink
+            :key="slotProps.data.id"
+            :to="`${resourcesPath}/${slotProps.data.id}/edit`"
+          >
             <i class="pi pi-pencil" style="color: green"></i>
           </NuxtLink>
-          <a :key="slotProps.data.id" href="_" @:click.prevent="deleteHandle(slotProps.data.id)">
+          <a
+            :key="slotProps.data.id"
+            href="_"
+            @:click.prevent="deleteHandle(slotProps.data.id)"
+          >
             <i class="pi pi-trash" style="color: red"></i>
           </a>
         </div>
@@ -56,6 +66,9 @@ const selectedResources = ref([]);
 
 const deleteHandle = useDeleteResource({
   path: props.resourcesPath,
-  hook: (id: number) => (resources.value = resources.value.filter((item: { id: number }) => item.id !== id)),
+  hook: (id: number) =>
+    (resources.value = resources.value.filter(
+      (item: { id: number }) => item.id !== id
+    )),
 });
 </script>

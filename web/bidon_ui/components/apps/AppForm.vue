@@ -1,9 +1,19 @@
 <template>
   <form @submit="onSubmit">
     <FormCard title="App">
-      <PlatformIdDropdown v-model="platformId" :error="errors.platformId" required />
+      <PlatformIdDropdown
+        v-model="platformId"
+        :error="errors.platformId"
+        required
+      />
       <FormField label="Human Name" required>
-        <InputText v-model="humanName" :error="errors.humanId" reuired type="text" placeholder="Name" />
+        <InputText
+          v-model="humanName"
+          :error="errors.humanId"
+          reuired
+          type="text"
+          placeholder="Name"
+        />
       </FormField>
       <FormField label="Package Name" :error="errors.packageName" required>
         <InputText v-model="packageName" type="text" placeholder="Name" />

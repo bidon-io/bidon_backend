@@ -3,7 +3,11 @@
     <NavigationContainer>
       <GoBackButton />
     </NavigationContainer>
-    <DemandSourceAccountForm v-if="isReady" :value="resource" @submit="handleSubmit" />
+    <DemandSourceAccountForm
+      v-if="isReady"
+      :value="resource"
+      @submit="handleSubmit"
+    />
   </PageContainer>
 </template>
 
@@ -20,5 +24,8 @@ const { state: resource, isReady } = useAsyncState(async () => {
   return response.data;
 });
 
-const handleSubmit = useUpdateResource({ path: resourcePath, message: "Demand source account updated!" });
+const handleSubmit = useUpdateResource({
+  path: resourcePath,
+  message: "Demand source account updated!",
+});
 </script>

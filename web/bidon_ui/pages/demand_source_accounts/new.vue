@@ -10,5 +10,8 @@
 <script setup>
 const resource = {};
 const resourcesPath = "/demand_source_accounts";
-const handleSubmit = useCreateResource({ path: resourcesPath, message: "Demand source account created!" });
+const handleSubmit = useCreateResource({
+  path: resourcesPath,
+  message: "Demand source account created!",
+});
 </script>

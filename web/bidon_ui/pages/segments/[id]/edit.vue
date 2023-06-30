@@ -20,5 +20,8 @@ const { state: resource, isReady } = useAsyncState(async () => {
   return response.data;
 });
 
-const handleSubmit = useUpdateResource({ path: resourcePath, message: "Segment Updated!" });
+const handleSubmit = useUpdateResource({
+  path: resourcePath,
+  message: "Segment Updated!",
+});
 </script>
