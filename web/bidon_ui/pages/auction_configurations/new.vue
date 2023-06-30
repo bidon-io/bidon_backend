@@ -10,5 +10,8 @@
 <script setup>
 const resource = { rounds: [] };
 const resourcesPath = "/auction_configurations";
-const handleSubmit = useCreateResource({ path: resourcesPath, message: "Auction configuration created!" });
+const handleSubmit = useCreateResource({
+  path: resourcesPath,
+  message: "Auction configuration created!",
+});
 </script>
