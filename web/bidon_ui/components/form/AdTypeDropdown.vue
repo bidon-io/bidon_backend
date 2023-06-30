@@ -1,6 +1,11 @@
 <template>
   <FormField label="Ad Type">
-    <Dropdown v-model="value" :options="adTypes" class="w-full md:w-14rem" placeholder="Select Ad Type" />
+    <Dropdown
+      v-model="value"
+      :options="adTypes"
+      class="w-full md:w-14rem"
+      placeholder="Select Ad Type"
+    />
   </FormField>
 </template>
 

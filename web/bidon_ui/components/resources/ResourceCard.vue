@@ -1,8 +1,12 @@
 <template>
   <FormCard :title="title">
     <FormField v-for="field in fields" :key="field.key" :label="field.label">
-      <div v-if="!field.type" class="text-gray-900">{{ localResource[field.key] }}</div>
-      <NuxtLink v-if="field.type === 'link'" :to="field.link">{{ localResource[field.key] }}</NuxtLink>
+      <div v-if="!field.type" class="text-gray-900">
+        {{ localResource[field.key] }}
+      </div>
+      <NuxtLink v-if="field.type === 'link'" :to="field.link">{{
+        localResource[field.key]
+      }}</NuxtLink>
       <Textarea
         v-if="field.type === 'textarea'"
         :value="JSON.stringify(localResource[field.key])"
