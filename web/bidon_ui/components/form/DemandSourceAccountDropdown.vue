@@ -1,16 +1,19 @@
 <template>
-  <FormField label="Platform Id" :error="error" :required="required">
+  <FormField label="Demand Source Account" :error="error" :required="required">
     <Dropdown
       v-model="value"
-      :options="platforms"
+      :options="options"
+      option-label="label"
+      option-value="id"
       class="w-full md:w-14rem"
-      placeholder="Select Platform"
+      placeholder="Select Demand source account"
     />
   </FormField>
 </template>
 
 <script setup>
 import { computed } from "vue";
+import axios from "@/services/ApiService";
 
 const props = defineProps({
   error: {
@@ -22,7 +25,7 @@ const props = defineProps({
     default: false,
   },
   modelValue: {
-    type: [String, null],
+    type: [Number, null],
     default: null,
   },
 });
@@ -36,5 +39,17 @@ const value = computed({
     emit("update:modelValue", value);
   },
 });
-const platforms = ref(["ios", "android"]);
+
+const options = ref([]);
+axios
+  .get("/demand_source_accounts")
+  .then((response) => {
+    options.value = response.data.map(({ id, type }) => ({
+      id,
+      label: `${type}:${id}`,
+    }));
+  })
+  .catch((error) => {
+    console.error(error);
+  });
 </script>

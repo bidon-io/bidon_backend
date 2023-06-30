@@ -1,5 +1,11 @@
 <template>
-  <Textarea v-model="value" type="text" :placeholder="placeholder" :rows="rows" :cols="cols" />
+  <Textarea
+    v-model="value"
+    type="text"
+    :placeholder="placeholder"
+    :rows="rows"
+    :cols="cols"
+  />
 </template>
 
 <script setup>

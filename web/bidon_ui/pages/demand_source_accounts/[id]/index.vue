@@ -5,7 +5,11 @@
       <DestroyButton :handler="() => deleteHandle(id)" />
       <EditButton :path="`${resourcesPath}/${id}/edit`" />
     </NavigationContainer>
-    <ResourceCard title="Demand Source Account" :fields="fields" :resource="resource" />
+    <ResourceCard
+      title="Demand Source Account"
+      :fields="fields"
+      :resource="resource"
+    />
   </PageContainer>
 </template>
 
@@ -25,12 +29,15 @@ const resource = response.data;
 
 const fields = [
   { label: "ID", key: "id" },
-  { label: "User", key: "userId", type: "link", link: `/user/${resource.app_id}` },
+  {
+    label: "User",
+    key: "userId",
+    type: "link",
+    link: `/users/${resource.userId}`,
+  },
   { label: "Type", key: "type" },
   { label: "Demand Source", key: "demandSourceId" },
   { label: "IsBidding", key: "isBidding" },
   { label: "Extra", key: "extra", type: "textarea" },
 ];
 </script>
-
-isBidding
