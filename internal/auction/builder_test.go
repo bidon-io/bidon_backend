@@ -47,7 +47,7 @@ func TestBuilder_Build(t *testing.T) {
 	}
 
 	configFetcher := &auction.ConfigMatcherMock{
-		MatchFunc: func(ctx context.Context, appID int64, adType ad.Type) (*auction.Config, error) {
+		MatchFunc: func(ctx context.Context, appID int64, adType ad.Type, segmentID int64) (*auction.Config, error) {
 			return config, nil
 		},
 	}

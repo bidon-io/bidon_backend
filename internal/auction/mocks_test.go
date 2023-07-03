@@ -30,7 +30,7 @@ var _ ConfigMatcher = &ConfigMatcherMock{}
 //	}
 type ConfigMatcherMock struct {
 	// MatchFunc mocks the Match method.
-	MatchFunc func(ctx context.Context, appID int64, adType ad.Type) (*Config, error)
+	MatchFunc func(ctx context.Context, appID int64, adType ad.Type, segmentID int64) (*Config, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -42,13 +42,15 @@ type ConfigMatcherMock struct {
 			AppID int64
 			// AdType is the adType argument value.
 			AdType ad.Type
+			// AdType is the adType argument value.
+			SegmentID int64
 		}
 	}
 	lockMatch sync.RWMutex
 }
 
 // Match calls MatchFunc.
-func (mock *ConfigMatcherMock) Match(ctx context.Context, appID int64, adType ad.Type) (*Config, error) {
+func (mock *ConfigMatcherMock) Match(ctx context.Context, appID int64, adType ad.Type, segmentID int64) (*Config, error) {
 	if mock.MatchFunc == nil {
 		panic("ConfigMatcherMock.MatchFunc: method is nil but ConfigMatcher.Match was just called")
 	}
@@ -56,15 +58,17 @@ func (mock *ConfigMatcherMock) Match(ctx context.Context, appID int64, adType ad
 		Ctx    context.Context
 		AppID  int64
 		AdType ad.Type
+		SegmentID  int64
 	}{
 		Ctx:    ctx,
 		AppID:  appID,
 		AdType: adType,
+		SegmentID: segmentID,
 	}
 	mock.lockMatch.Lock()
 	mock.calls.Match = append(mock.calls.Match, callInfo)
 	mock.lockMatch.Unlock()
-	return mock.MatchFunc(ctx, appID, adType)
+	return mock.MatchFunc(ctx, appID, adType, segmentID)
 }
 
 // MatchCalls gets all the calls that were made to Match.
@@ -75,11 +79,13 @@ func (mock *ConfigMatcherMock) MatchCalls() []struct {
 	Ctx    context.Context
 	AppID  int64
 	AdType ad.Type
+	SegmentID  int64
 } {
 	var calls []struct {
 		Ctx    context.Context
 		AppID  int64
 		AdType ad.Type
+		SegmentID  int64
 	}
 	mock.lockMatch.RLock()
 	calls = mock.calls.Match
