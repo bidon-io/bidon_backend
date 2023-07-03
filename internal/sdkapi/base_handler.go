@@ -3,6 +3,7 @@ package sdkapi
 import (
 	"context"
 
+	"github.com/bidon-io/bidon-backend/internal/sdkapi/geocoder"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	"github.com/labstack/echo/v4"
 )
@@ -10,10 +11,15 @@ import (
 // BaseHandler provides common functionality between sdkapi handlers
 type BaseHandler struct {
 	AppFetcher AppFetcher
+	Geocoder   Geocoder
 }
 
 type AppFetcher interface {
 	Fetch(ctx context.Context, appKey, appBundle string) (*App, error)
+}
+
+type Geocoder interface {
+	FindGeoData(ctx context.Context, ipString string) (*geocoder.GeoData, error)
 }
 
 func (b *BaseHandler) resolveRequest(c echo.Context) (*request, error) {
@@ -27,8 +33,14 @@ func (b *BaseHandler) resolveRequest(c echo.Context) (*request, error) {
 		return nil, err
 	}
 
+	geoData, err := b.Geocoder.FindGeoData(c.Request().Context(), c.RealIP())
+	if err != nil {
+		c.Logger().Infof("Failed to lookup ip: %v", err)
+	}
+
 	return &request{
-		raw: raw,
-		app: app,
+		raw:     raw,
+		app:     app,
+		geoData: geoData,
 	}, nil
 }

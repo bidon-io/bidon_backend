@@ -8,6 +8,7 @@ require (
 	github.com/google/go-cmp v0.5.9
 	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo/v4 v4.10.2
+	github.com/oschwald/maxminddb-golang v1.11.0
 	github.com/shopspring/decimal v1.3.1
 	github.com/uptrace/opentelemetry-go-extra/otelgorm v0.2.2
 	go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho v0.42.0
