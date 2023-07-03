@@ -6,6 +6,7 @@ import (
 
 	"github.com/bidon-io/bidon-backend/internal/admin"
 	"github.com/bidon-io/bidon-backend/internal/admin/store"
+	"github.com/bidon-io/bidon-backend/internal/segment"
 
 	"github.com/google/go-cmp/cmp"
 )
@@ -21,7 +22,7 @@ func TestSegmentRepo_List(t *testing.T) {
 			Name:        "Country Segment",
 			Description: "Desc",
 			AppID:       1,
-			Filters:     []admin.SegmentFilter{{Type: "country", Name: "country", Operator: "in", Values: []string{"US", "UK"}}},
+			Filters:     []segment.Filter{{Type: "country", Name: "country", Operator: "in", Values: []string{"US", "UK"}}},
 			Enabled:     ptr(true),
 			Priority:    1,
 		},
@@ -29,7 +30,7 @@ func TestSegmentRepo_List(t *testing.T) {
 			Name:        "Custom String Segment",
 			Description: "Desc",
 			AppID:       1,
-			Filters:     []admin.SegmentFilter{{Type: "string", Name: "custom_str", Operator: "==", Values: []string{"super"}}},
+			Filters:     []segment.Filter{{Type: "string", Name: "custom_str", Operator: "==", Values: []string{"super"}}},
 			Enabled:     ptr(false),
 			Priority:    1,
 		},
@@ -37,7 +38,7 @@ func TestSegmentRepo_List(t *testing.T) {
 			Name:        "Custom Num Segment",
 			Description: "Desc",
 			AppID:       1,
-			Filters:     []admin.SegmentFilter{{Type: "float", Name: "custom_num", Operator: ">=", Values: []string{"33"}}},
+			Filters:     []segment.Filter{{Type: "float", Name: "custom_num", Operator: ">=", Values: []string{"33"}}},
 			Enabled:     ptr(true),
 			Priority:    0,
 		},
@@ -73,7 +74,7 @@ func TestSegmentRepo_Find(t *testing.T) {
 		Name:        "Country Segment",
 		Description: "Desc",
 		AppID:       1,
-		Filters:     []admin.SegmentFilter{{Type: "country", Name: "country", Operator: "in", Values: []string{"US", "UK"}}},
+		Filters:     []segment.Filter{{Type: "country", Name: "country", Operator: "in", Values: []string{"US", "UK"}}},
 		Enabled:     ptr(true),
 	}
 
@@ -102,7 +103,7 @@ func TestSegmentRepo_Update(t *testing.T) {
 		Name:        "Country Segment",
 		Description: "Desc",
 		AppID:       1,
-		Filters:     []admin.SegmentFilter{{Type: "country", Name: "country", Operator: "in", Values: []string{"US", "UK"}}},
+		Filters:     []segment.Filter{{Type: "country", Name: "country", Operator: "in", Values: []string{"US", "UK"}}},
 		Enabled:     ptr(true),
 		Priority:    1,
 	}
@@ -141,7 +142,7 @@ func TestSegmentRepo_Delete(t *testing.T) {
 		Name:        "Country Segment",
 		Description: "Desc",
 		AppID:       1,
-		Filters:     []admin.SegmentFilter{{Type: "country", Name: "country", Operator: "in", Values: []string{"US", "UK"}}},
+		Filters:     []segment.Filter{{Type: "country", Name: "country", Operator: "in", Values: []string{"US", "UK"}}},
 		Enabled:     ptr(true),
 		Priority:    2,
 	}

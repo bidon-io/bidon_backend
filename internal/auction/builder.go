@@ -3,6 +3,7 @@ package auction
 import (
 	"context"
 	"errors"
+	"strconv"
 
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
@@ -19,7 +20,7 @@ type Builder struct {
 var ErrNoAdsFound = errors.New("no ads found")
 
 type ConfigMatcher interface {
-	Match(ctx context.Context, appID int64, adType ad.Type) (*Config, error)
+	Match(ctx context.Context, appID int64, adType ad.Type, segmentID int64) (*Config, error)
 }
 
 type LineItemsMatcher interface {
@@ -32,10 +33,11 @@ type BuildParams struct {
 	AdFormat   ad.Format
 	DeviceType device.Type
 	Adapters   []adapter.Key
+	SegmentID  int64
 }
 
 func (b *Builder) Build(ctx context.Context, params *BuildParams) (*Auction, error) {
-	config, err := b.ConfigMatcher.Match(ctx, params.AppID, params.AdType)
+	config, err := b.ConfigMatcher.Match(ctx, params.AppID, params.AdType, params.SegmentID)
 	if err != nil {
 		return nil, err
 	}
@@ -45,11 +47,19 @@ func (b *Builder) Build(ctx context.Context, params *BuildParams) (*Auction, err
 		return nil, err
 	}
 
+	var segmentID string
+	if params.SegmentID != 0 {
+		segmentID = strconv.Itoa(int(params.SegmentID))
+	} else {
+		segmentID = ""
+	}
+
 	auction := Auction{
 		ConfigID:                 config.ID,
 		ExternalWinNotifications: config.ExternalWinNotifications,
 		Rounds:                   filterRounds(config.Rounds, params.Adapters),
 		LineItems:                lineItems,
+		Segment:                  Segment{ID: segmentID},
 	}
 
 	if len(auction.Rounds) == 0 {
