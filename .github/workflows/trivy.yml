@@ -2,7 +2,7 @@ name: Scan repo
 on:
   push:
     branches:
-     - master
+      - main
 jobs:
   trivy:
     name: Vulnerability scanning
@@ -11,7 +11,7 @@ jobs:
       - name: Checks-out repository
         uses: actions/checkout@v3
 
-      - name: Run trivy 
+      - name: Run trivy
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'fs'
