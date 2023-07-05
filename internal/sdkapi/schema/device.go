@@ -14,7 +14,7 @@ type Device struct {
 	Width           int         `json:"w" validate:"required"`
 	PPI             int         `json:"ppi" validate:"required"`
 	PXRatio         float64     `json:"pxratio" validate:"required"`
-	JS              int         `json:"js" validate:"required"`
+	JS              *int        `json:"js" validate:"required"`
 	Language        string      `json:"language" validate:"required"`
 	Carrier         string      `json:"carrier"`
 	MCCMNC          string      `json:"mccmnc"`
