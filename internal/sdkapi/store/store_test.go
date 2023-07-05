@@ -44,7 +44,7 @@ func TestAppFetcher_Fetch(t *testing.T) {
 			name:      "App matches",
 			appKey:    app.AppKey.String,
 			appBundle: app.PackageName.String,
-			want:      &sdkapi.App{ID: app.ID},
+			want:      sdkapi.App{ID: app.ID},
 		},
 		{
 			name:      "App key does not match",
@@ -71,7 +71,7 @@ func TestAppFetcher_Fetch(t *testing.T) {
 
 		var got any
 		switch tC.want.(type) {
-		case *sdkapi.App:
+		case sdkapi.App:
 			got = app
 		case error:
 			got = err
