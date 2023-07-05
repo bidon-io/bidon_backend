@@ -9,8 +9,9 @@ type AppDemandProfileRepo = resourceRepo[admin.AppDemandProfile, admin.AppDemand
 
 func NewAppDemandProfileRepo(db *db.DB) *AppDemandProfileRepo {
 	return &AppDemandProfileRepo{
-		db:     db,
-		mapper: appDemandProfileMapper{},
+		db:           db,
+		mapper:       appDemandProfileMapper{},
+		associations: []string{},
 	}
 }
 

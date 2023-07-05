@@ -9,8 +9,9 @@ type DemandSourceRepo = resourceRepo[admin.DemandSource, admin.DemandSourceAttrs
 
 func NewDemandSourceRepo(db *db.DB) *DemandSourceRepo {
 	return &DemandSourceRepo{
-		db:     db,
-		mapper: demandSourceMapper{},
+		db:           db,
+		mapper:       demandSourceMapper{},
+		associations: []string{},
 	}
 }
 

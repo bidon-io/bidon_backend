@@ -11,8 +11,9 @@ type AppRepo = resourceRepo[admin.App, admin.AppAttrs, db.App]
 
 func NewAppRepo(db *db.DB) *AppRepo {
 	return &AppRepo{
-		db:     db,
-		mapper: appMapper{},
+		db:           db,
+		mapper:       appMapper{},
+		associations: []string{"User"},
 	}
 }
 
@@ -54,6 +55,12 @@ func (m appMapper) resource(a *db.App) admin.App {
 			PackageName: a.PackageName.String,
 			AppKey:      a.AppKey.String,
 			Settings:    a.Settings,
+		},
+		User: admin.User{
+			ID: a.User.ID,
+			UserAttrs: admin.UserAttrs{
+				Email: a.User.Email,
+			},
 		},
 	}
 }

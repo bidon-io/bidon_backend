@@ -9,8 +9,9 @@ type UserRepo = resourceRepo[admin.User, admin.UserAttrs, db.User]
 
 func NewUserRepo(db *db.DB) *UserRepo {
 	return &UserRepo{
-		db:     db,
-		mapper: userMapper{},
+		db:           db,
+		mapper:       userMapper{},
+		associations: []string{},
 	}
 }
 

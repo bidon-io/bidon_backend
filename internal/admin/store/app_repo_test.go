@@ -6,6 +6,7 @@ import (
 
 	"github.com/bidon-io/bidon-backend/internal/admin"
 	"github.com/bidon-io/bidon-backend/internal/admin/store"
+	"github.com/bidon-io/bidon-backend/internal/db/dbtest"
 	"github.com/google/go-cmp/cmp"
 )
 
@@ -15,12 +16,13 @@ func TestAppRepo_List(t *testing.T) {
 
 	repo := store.NewAppRepo(tx)
 
+	users := dbtest.CreateUsersList(t, tx, 2)
 	apps := []admin.AppAttrs{
 		{
 			PlatformID:  admin.IOSPlatformID,
 			HumanName:   "App 1",
 			PackageName: "com.example.app1",
-			UserID:      1,
+			UserID:      users[0].ID,
 			AppKey:      "qwerty",
 			Settings:    map[string]any{"setting1": 1, "setting2": 2},
 		},
@@ -28,7 +30,7 @@ func TestAppRepo_List(t *testing.T) {
 			PlatformID:  admin.AndroidPlatformID,
 			HumanName:   "App 2",
 			PackageName: "com.example.app2",
-			UserID:      2,
+			UserID:      users[1].ID,
 			AppKey:      "asdfg",
 			Settings:    map[string]any{"setting1": 1, "setting2": 2},
 		},
@@ -42,6 +44,7 @@ func TestAppRepo_List(t *testing.T) {
 		}
 
 		want[i] = *app
+		want[i].User = *store.UserResource(users[i])
 	}
 
 	got, err := repo.List(context.Background())
@@ -60,11 +63,12 @@ func TestAppRepo_Find(t *testing.T) {
 
 	repo := store.NewAppRepo(tx)
 
+	user := dbtest.CreateUser(t, tx, 1)
 	attrs := &admin.AppAttrs{
 		PlatformID:  admin.IOSPlatformID,
 		HumanName:   "App 1",
 		PackageName: "com.example.app1",
-		UserID:      1,
+		UserID:      user.ID,
 		AppKey:      "qwerty",
 		Settings:    map[string]any{"setting1": 1, "setting2": 2},
 	}
@@ -73,6 +77,7 @@ func TestAppRepo_Find(t *testing.T) {
 	if err != nil {
 		t.Fatalf("repo.Create(ctx, %+v) = %v, %q; want %T, %v", attrs, nil, err, want, nil)
 	}
+	want.User = *store.UserResource(user)
 
 	got, err := repo.Find(context.Background(), want.ID)
 	if err != nil {
@@ -90,11 +95,12 @@ func TestAppRepo_Update(t *testing.T) {
 
 	repo := store.NewAppRepo(tx)
 
+	user := dbtest.CreateUser(t, tx, 1)
 	attrs := admin.AppAttrs{
 		PlatformID:  admin.IOSPlatformID,
 		HumanName:   "App 1",
 		PackageName: "com.example.app1",
-		UserID:      1,
+		UserID:      user.ID,
 		AppKey:      "qwerty",
 		Settings:    map[string]any{"setting1": 1, "setting2": 2},
 	}
@@ -105,10 +111,10 @@ func TestAppRepo_Update(t *testing.T) {
 	}
 
 	want := app
-	want.UserID = 2
+	want.PlatformID = admin.AndroidPlatformID
 
 	updateParams := &admin.AppAttrs{
-		UserID: want.UserID,
+		PlatformID: want.PlatformID,
 	}
 	got, err := repo.Update(context.Background(), app.ID, updateParams)
 	if err != nil {
@@ -126,11 +132,12 @@ func TestAppRepo_Delete(t *testing.T) {
 
 	repo := store.NewAppRepo(tx)
 
+	user := dbtest.CreateUser(t, tx, 1)
 	attrs := &admin.AppAttrs{
 		PlatformID:  admin.IOSPlatformID,
 		HumanName:   "App 1",
 		PackageName: "com.example.app1",
-		UserID:      1,
+		UserID:      user.ID,
 		AppKey:      "qwerty",
 		Settings:    map[string]any{"setting1": 1, "setting2": 2},
 	}

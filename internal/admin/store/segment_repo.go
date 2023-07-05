@@ -9,8 +9,9 @@ type SegmentRepo = resourceRepo[admin.Segment, admin.SegmentAttrs, db.Segment]
 
 func NewSegmentRepo(db *db.DB) *SegmentRepo {
 	return &SegmentRepo{
-		db:     db,
-		mapper: segmentMapper{},
+		db:           db,
+		mapper:       segmentMapper{},
+		associations: []string{},
 	}
 }
 
