@@ -76,6 +76,7 @@ type AppDemandProfile struct {
 type App struct {
 	Model
 	UserID      int64          `gorm:"column:user_id;type:bigint;not null"`
+	User        User           `gorm:"foreignKey:UserID"`
 	PlatformID  PlatformID     `gorm:"column:platform_id;type:integer;not null"`
 	HumanName   string         `gorm:"column:human_name;type:varchar;not null"`
 	PackageName sql.NullString `gorm:"column:package_name;type:varchar"`

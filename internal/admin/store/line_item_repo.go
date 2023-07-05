@@ -13,8 +13,9 @@ type LineItemRepo = resourceRepo[admin.LineItem, admin.LineItemAttrs, db.LineIte
 
 func NewLineItemRepo(db *db.DB) *LineItemRepo {
 	return &LineItemRepo{
-		db:     db,
-		mapper: lineItemMapper{},
+		db:           db,
+		mapper:       lineItemMapper{},
+		associations: []string{},
 	}
 }
 

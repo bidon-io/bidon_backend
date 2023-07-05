@@ -11,8 +11,9 @@ type CountryRepo = resourceRepo[admin.Country, admin.CountryAttrs, db.Country]
 
 func NewCountryRepo(db *db.DB) *CountryRepo {
 	return &CountryRepo{
-		db:     db,
-		mapper: countryMapper{},
+		db:           db,
+		mapper:       countryMapper{},
+		associations: []string{},
 	}
 }
 
