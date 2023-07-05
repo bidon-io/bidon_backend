@@ -6,6 +6,7 @@ import (
 
 	"github.com/getsentry/sentry-go"
 	sentryecho "github.com/getsentry/sentry-go/echo"
+	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho"
@@ -16,6 +17,7 @@ func Echo(service string, logger *zap.Logger) *echo.Echo {
 	e := echo.New()
 	e.Debug = Env != ProdEnv
 	e.HTTPErrorHandler = HTTPErrorHandler
+	e.Validator = &echoValidator{validate: validator.New()}
 
 	e.Use(otelecho.Middleware(service))
 
@@ -34,6 +36,11 @@ func Echo(service string, logger *zap.Logger) *echo.Echo {
 // HTTPErrorHandler is the default error handler for Bidon services.
 // Errors that do not wrap echo.HTTPError are considered unexpected and are sent to Sentry.
 func HTTPErrorHandler(err error, c echo.Context) {
+	// Error handler can be called from middleware, so we need to check if we already handled the error
+	if c.Response().Committed {
+		return
+	}
+
 	var herr *echo.HTTPError
 	if !errors.As(err, &herr) {
 		hub := sentryecho.GetHubFromContext(c)
@@ -69,6 +76,18 @@ func HTTPErrorHandler(err error, c echo.Context) {
 	if err := c.JSON(herr.Code, response); err != nil {
 		c.Logger().Error(err)
 	}
+}
+
+type echoValidator struct {
+	validate *validator.Validate
+}
+
+func (v *echoValidator) Validate(i any) error {
+	if err := v.validate.Struct(i); err != nil {
+		return echo.NewHTTPError(http.StatusUnprocessableEntity, err.Error())
+	}
+
+	return nil
 }
 
 func echoBodyDump(logger *zap.Logger) echo.MiddlewareFunc {

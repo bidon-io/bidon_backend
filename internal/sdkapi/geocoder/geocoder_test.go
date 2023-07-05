@@ -3,12 +3,13 @@ package geocoder
 import (
 	"context"
 	"database/sql"
-	"github.com/bidon-io/bidon-backend/internal/db"
-	"github.com/bidon-io/bidon-backend/internal/db/dbtest"
-	"github.com/oschwald/maxminddb-golang"
 	"net"
 	"os"
 	"testing"
+
+	"github.com/bidon-io/bidon-backend/internal/db"
+	"github.com/bidon-io/bidon-backend/internal/db/dbtest"
+	"github.com/oschwald/maxminddb-golang"
 )
 
 var testDB *db.DB
@@ -52,7 +53,7 @@ func TestFindGeoData(t *testing.T) {
 	ipString := "127.0.0.1"
 
 	// Call the method being tested
-	result, err := geocoder.FindGeoData(context.Background(), ipString)
+	result, err := geocoder.Lookup(context.Background(), ipString)
 
 	// Perform assertions on the result and error
 	// Example assertions:
@@ -60,7 +61,7 @@ func TestFindGeoData(t *testing.T) {
 		t.Errorf("FindGeoData returned an unexpected error: %v", err)
 	}
 
-	if result == nil {
+	if result == (GeoData{}) {
 		t.Error("FindGeoData returned nil result, expected non-nil result")
 	}
 

@@ -2,11 +2,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/bidon-io/bidon-backend/internal/sdkapi/geocoder"
-	"github.com/bidon-io/bidon-backend/internal/segment"
-	"github.com/oschwald/maxminddb-golang"
 	"log"
 	"os"
+
+	"github.com/bidon-io/bidon-backend/internal/sdkapi/geocoder"
+	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
+	"github.com/bidon-io/bidon-backend/internal/segment"
+	"github.com/oschwald/maxminddb-golang"
 
 	"github.com/bidon-io/bidon-backend/config"
 	"github.com/bidon-io/bidon-backend/internal/auction"
@@ -52,15 +54,16 @@ func main() {
 		}
 	}
 
-	baseHandler := sdkapi.BaseHandler{
-		AppFetcher: &sdkapistore.AppFetcher{DB: db},
-		Geocoder:   &geocoder.Geocoder{DB: db, MaxMindDB: maxMindDB},
-	}
+	appFetcher := &sdkapistore.AppFetcher{DB: db}
+	geocoder := &geocoder.Geocoder{DB: db, MaxMindDB: maxMindDB}
 	segmentMatcher := segment.Matcher{
 		Fetcher: &segmentstore.SegmentFetcher{DB: db},
 	}
 	auctionHandler := sdkapi.AuctionHandler{
-		BaseHandler:    &baseHandler,
+		BaseHandler: &sdkapi.BaseHandler[schema.AuctionRequest, *schema.AuctionRequest]{
+			AppFetcher: appFetcher,
+			Geocoder:   geocoder,
+		},
 		SegmentMatcher: &segmentMatcher,
 		AuctionBuilder: &auction.Builder{
 			ConfigMatcher:    &auctionstore.ConfigMatcher{DB: db},
@@ -68,7 +71,10 @@ func main() {
 		},
 	}
 	configHandler := sdkapi.ConfigHandler{
-		BaseHandler:    &baseHandler,
+		BaseHandler: &sdkapi.BaseHandler[schema.ConfigRequest, *schema.ConfigRequest]{
+			AppFetcher: appFetcher,
+			Geocoder:   geocoder,
+		},
 		SegmentMatcher: &segmentMatcher,
 		AdaptersBuilder: &bidonconfig.AdaptersBuilder{
 			AppDemandProfileFetcher: &configstore.AppDemandProfileFetcher{DB: db},
