@@ -3,6 +3,7 @@ package admin
 type App struct {
 	ID int64 `json:"id"`
 	AppAttrs
+	User User `json:"user"`
 }
 
 type AppAttrs struct {

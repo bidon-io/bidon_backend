@@ -24,7 +24,9 @@ func TestAppFetcher_Fetch(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
+	user := dbtest.CreateUser(t, tx, 1)
 	app := &db.App{
+		UserID:      user.ID,
 		AppKey:      sql.NullString{String: "asdf", Valid: true},
 		PackageName: sql.NullString{String: "com.example.app", Valid: true},
 	}
