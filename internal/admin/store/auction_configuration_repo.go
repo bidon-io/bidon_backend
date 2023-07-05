@@ -11,8 +11,9 @@ type AuctionConfigurationRepo = resourceRepo[admin.AuctionConfiguration, admin.A
 
 func NewAuctionConfigurationRepo(db *db.DB) *AuctionConfigurationRepo {
 	return &AuctionConfigurationRepo{
-		db:     db,
-		mapper: auctionConfigurationMapper{},
+		db:           db,
+		mapper:       auctionConfigurationMapper{},
+		associations: []string{},
 	}
 }
 
