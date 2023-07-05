@@ -5,12 +5,13 @@ import (
 	"net/http"
 
 	"github.com/bidon-io/bidon-backend/internal/auction"
+	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	"github.com/bidon-io/bidon-backend/internal/segment"
 	"github.com/labstack/echo/v4"
 )
 
 type AuctionHandler struct {
-	*BaseHandler
+	*BaseHandler[schema.AuctionRequest, *schema.AuctionRequest]
 	AuctionBuilder *auction.Builder
 	SegmentMatcher *segment.Matcher
 }
@@ -39,9 +40,9 @@ func (h *AuctionHandler) Handle(c echo.Context) error {
 	params := &auction.BuildParams{
 		AppID:      req.app.ID,
 		AdType:     req.raw.AdType,
-		AdFormat:   req.adFormat(),
+		AdFormat:   req.raw.AdObject.Format(),
 		DeviceType: req.raw.Device.Type,
-		Adapters:   req.adapterKeys(),
+		Adapters:   req.raw.Adapters.Keys(),
 		SegmentID:  sgmnt.ID,
 	}
 	auc, err := h.AuctionBuilder.Build(c.Request().Context(), params)

@@ -69,24 +69,25 @@ var DEFAULT_COUNTRY_CODES_FOR_CONTINENTS = map[string]string{
 }
 
 // FindGeoData finds the geolocation data for the given IP address.
-func (g *Geocoder) FindGeoData(ctx context.Context, ipString string) (*GeoData, error) {
+func (g *Geocoder) Lookup(ctx context.Context, ipString string) (GeoData, error) {
+	var geoData GeoData
+
 	if g.MaxMindDB == nil {
-		return nil, fmt.Errorf("maxminddb not set")
+		return geoData, fmt.Errorf("maxminddb not set")
 	}
 
-	var geoData GeoData
 	var mmdbGeoData MmdbGeoData
 	ip := net.ParseIP(ipString)
 
 	err := g.lookupIP(ip, mmdbGeoData)
 	if err != nil {
-		return nil, err
+		return geoData, err
 	}
 
 	countryCode := g.countryCodeFor(mmdbGeoData)
 	country, err := g.findCountry(ctx, countryCode)
 	if err != nil {
-		return nil, err
+		return geoData, err
 	}
 
 	geoData.CountryCode = countryCode
@@ -102,7 +103,7 @@ func (g *Geocoder) FindGeoData(ctx context.Context, ipString string) (*GeoData, 
 	geoData.ZipCode = mmdbGeoData.Postal.Code
 	geoData.IPService = MAX_MIND_PROVIDER_CODE
 
-	return &geoData, nil
+	return geoData, nil
 }
 
 func (g *Geocoder) lookupIP(ip net.IP, mmdbGeoData MmdbGeoData) error {

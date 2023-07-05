@@ -5,12 +5,13 @@ import (
 	"strconv"
 
 	"github.com/bidon-io/bidon-backend/internal/config"
+	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	"github.com/bidon-io/bidon-backend/internal/segment"
 	"github.com/labstack/echo/v4"
 )
 
 type ConfigHandler struct {
-	*BaseHandler
+	*BaseHandler[schema.ConfigRequest, *schema.ConfigRequest]
 	AdaptersBuilder *config.AdaptersBuilder
 	SegmentMatcher  *segment.Matcher
 }
@@ -51,7 +52,7 @@ func (h *ConfigHandler) Handle(c echo.Context) error {
 		segmentID = ""
 	}
 
-	adapters, err := h.AdaptersBuilder.Build(c.Request().Context(), req.app.ID, req.adapterKeys())
+	adapters, err := h.AdaptersBuilder.Build(c.Request().Context(), req.app.ID, req.raw.Adapters.Keys())
 	if err != nil {
 		return err
 	}
