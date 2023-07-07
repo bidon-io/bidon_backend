@@ -47,20 +47,22 @@ func (m appMapper) dbModel(a *admin.AppAttrs, id int64) *db.App {
 //lint:ignore U1000 this method is used by generic struct
 func (m appMapper) resource(a *db.App) admin.App {
 	return admin.App{
-		ID: a.ID,
-		AppAttrs: admin.AppAttrs{
-			UserID:      a.UserID,
-			PlatformID:  platformID(a.PlatformID),
-			HumanName:   a.HumanName,
-			PackageName: a.PackageName.String,
-			AppKey:      a.AppKey.String,
-			Settings:    a.Settings,
-		},
+		ID:       a.ID,
+		AppAttrs: m.resourceAttrs(a),
 		User: admin.User{
-			ID: a.User.ID,
-			UserAttrs: admin.UserAttrs{
-				Email: a.User.Email,
-			},
+			ID:        a.User.ID,
+			UserAttrs: userMapper{}.resourceAttrs(&a.User),
 		},
+	}
+}
+
+func (m appMapper) resourceAttrs(a *db.App) admin.AppAttrs {
+	return admin.AppAttrs{
+		UserID:      a.UserID,
+		PlatformID:  platformID(a.PlatformID),
+		HumanName:   a.HumanName,
+		PackageName: a.PackageName.String,
+		AppKey:      a.AppKey.String,
+		Settings:    a.Settings,
 	}
 }

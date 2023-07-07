@@ -28,9 +28,13 @@ func (m userMapper) dbModel(u *admin.UserAttrs, id int64) *db.User {
 //lint:ignore U1000 this method is used by generic struct
 func (m userMapper) resource(u *db.User) admin.User {
 	return admin.User{
-		ID: u.ID,
-		UserAttrs: admin.UserAttrs{
-			Email: u.Email,
-		},
+		ID:        u.ID,
+		UserAttrs: m.resourceAttrs(u),
+	}
+}
+
+func (m userMapper) resourceAttrs(u *db.User) admin.UserAttrs {
+	return admin.UserAttrs{
+		Email: u.Email,
 	}
 }
