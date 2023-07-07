@@ -8,6 +8,8 @@ import (
 type AuctionConfiguration struct {
 	ID int64 `json:"id"`
 	AuctionConfigurationAttrs
+	App     App      `json:"app"`
+	Segment *Segment `json:"segment"`
 }
 
 // AuctionConfigurationAttrs is attributes of Configuration. Used to create and update configurations

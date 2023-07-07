@@ -9,6 +9,7 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/auction/store"
 	"github.com/bidon-io/bidon-backend/internal/db"
+	"github.com/bidon-io/bidon-backend/internal/db/dbtest"
 	"github.com/google/go-cmp/cmp"
 )
 
@@ -16,11 +17,12 @@ func TestConfigMatcher_Match(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
+	apps := dbtest.CreateAppsList(t, tx, 3)
 	configs := []db.AuctionConfiguration{
-		{AppID: 1, AdType: db.BannerAdType},
-		{AppID: 2, AdType: db.BannerAdType},
-		{AppID: 3, AdType: db.InterstitialAdType, Model: db.Model{CreatedAt: time.Now()}},
-		{AppID: 3, AdType: db.InterstitialAdType, Model: db.Model{CreatedAt: time.Now().Add(-time.Hour)}},
+		{AppID: apps[0].ID, AdType: db.BannerAdType},
+		{AppID: apps[1].ID, AdType: db.BannerAdType},
+		{AppID: apps[2].ID, AdType: db.InterstitialAdType, Model: db.Model{CreatedAt: time.Now()}},
+		{AppID: apps[2].ID, AdType: db.InterstitialAdType, Model: db.Model{CreatedAt: time.Now().Add(-time.Hour)}},
 	}
 	if err := tx.Create(&configs).Error; err != nil {
 		t.Fatalf("Error creating configs: %v", err)
@@ -39,15 +41,15 @@ func TestConfigMatcher_Match(t *testing.T) {
 		want *auction.Config
 	}{
 		{
-			args: args{appID: 1, adType: ad.BannerType, segmentID: 0},
+			args: args{appID: apps[0].ID, adType: ad.BannerType, segmentID: 0},
 			want: &auction.Config{ID: app1BannerConfig.ID, Rounds: app1BannerConfig.Rounds},
 		},
 		{
-			args: args{appID: 2, adType: ad.BannerType, segmentID: 0},
+			args: args{appID: apps[1].ID, adType: ad.BannerType, segmentID: 0},
 			want: &auction.Config{ID: app2BannerConfig.ID, Rounds: app2BannerConfig.Rounds},
 		},
 		{
-			args: args{appID: 3, adType: ad.InterstitialType, segmentID: 0},
+			args: args{appID: apps[2].ID, adType: ad.InterstitialType, segmentID: 0},
 			want: &auction.Config{ID: latestConfig.ID, Rounds: latestConfig.Rounds},
 		},
 	}
