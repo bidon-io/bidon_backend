@@ -33,14 +33,18 @@ func (m segmentMapper) dbModel(s *admin.SegmentAttrs, id int64) *db.Segment {
 //lint:ignore U1000 this method is used by generic struct
 func (m segmentMapper) resource(s *db.Segment) admin.Segment {
 	return admin.Segment{
-		ID: s.ID,
-		SegmentAttrs: admin.SegmentAttrs{
-			Name:        s.Name,
-			Description: s.Description,
-			Filters:     s.Filters,
-			Enabled:     s.Enabled,
-			AppID:       s.AppID,
-			Priority:    s.Priority,
-		},
+		ID:           s.ID,
+		SegmentAttrs: m.resourceAttrs(s),
+	}
+}
+
+func (m segmentMapper) resourceAttrs(s *db.Segment) admin.SegmentAttrs {
+	return admin.SegmentAttrs{
+		Name:        s.Name,
+		Description: s.Description,
+		Filters:     s.Filters,
+		Enabled:     s.Enabled,
+		AppID:       s.AppID,
+		Priority:    s.Priority,
 	}
 }
