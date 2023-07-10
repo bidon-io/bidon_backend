@@ -43,7 +43,7 @@ const { errors, useFieldModel, handleSubmit } = useForm({
     name: resource.value.name || "",
     description: resource.value.description || "",
     filters: resource.value.filters || [],
-    enbled: resource.value.enabled || false,
+    enabled: resource.value.enabled || false,
     appId: resource.value.appId || null,
   },
 });
