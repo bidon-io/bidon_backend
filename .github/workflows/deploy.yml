@@ -18,6 +18,7 @@ jobs:
   deploy:
     name: Deploy
     runs-on: [self-hosted]
+    environment: production
     env:
       TAG: ${{ inputs.tag }}
     steps:
