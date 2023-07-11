@@ -74,13 +74,18 @@ jobs:
     if: github.event_name == 'release'
     runs-on: [self-hosted]
     steps:
+      - name: Checout repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
       - name: Create Sentry release
         uses: getsentry/action-release@v1
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_RELEASE_AUTH_TOKEN }}
           SENTRY_ORG: sentry
-          SENTRY_PROJECT: bidon-admin,bidon-sdkapi
           SENTRY_URL: ${{ secrets.SENTRY_URL }}
         with:
           environment: production
+          projects: bidon-admin bidon-sdkapi
           version: ${{ github.ref }}
