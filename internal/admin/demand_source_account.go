@@ -3,6 +3,8 @@ package admin
 type DemandSourceAccount struct {
 	ID int64 `json:"id"`
 	DemandSourceAccountAttrs
+	User         User         `json:"user"`
+	DemandSource DemandSource `json:"demand_source"`
 }
 
 type DemandSourceAccountAttrs struct {
