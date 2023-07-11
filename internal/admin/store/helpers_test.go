@@ -22,3 +22,15 @@ func UserResource(dbModel *db.User) *admin.User {
 
 	return &resource
 }
+
+func DemandSourceAccountResource(dbModel *db.DemandSourceAccount) *admin.DemandSourceAccount {
+	resource := demandSourceAccountMapper{}.resource(dbModel)
+
+	return &resource
+}
+
+func DemandSourceResource(dbModel *db.DemandSource) *admin.DemandSource {
+	resource := demandSourceMapper{}.resource(dbModel)
+
+	return &resource
+}

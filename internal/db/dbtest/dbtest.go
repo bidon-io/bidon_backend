@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/bidon-io/bidon-backend/internal/db"
 	"github.com/bidon-io/bidon-backend/internal/segment"
@@ -74,6 +75,120 @@ func CreateAppsList(t *testing.T, tx *db.DB, count int) []*db.App {
 	}
 
 	return apps
+}
+
+type DemandSourceOption func(db *db.DemandSource)
+
+func WithDemandSourceOptions(opt *db.DemandSource) DemandSourceOption {
+	return func(demandSource *db.DemandSource) {
+		if opt.HumanName != "" {
+			demandSource.HumanName = opt.HumanName
+		}
+		if opt.APIKey != "" {
+			demandSource.APIKey = opt.APIKey
+		}
+	}
+}
+
+func CreateDemandSource(t *testing.T, tx *db.DB, opts ...DemandSourceOption) *db.DemandSource {
+	t.Helper()
+
+	demandSource := &db.DemandSource{
+		APIKey:    fmt.Sprintf("apikey%d", time.Now().UnixNano()),
+		HumanName: "demandsource",
+	}
+
+	for _, opt := range opts {
+		opt(demandSource)
+	}
+
+	if err := tx.Create(demandSource).Error; err != nil {
+		t.Fatalf("Failed to create demand source: %v", err)
+	}
+	return demandSource
+}
+
+func CreateDemandSourcesList(t *testing.T, tx *db.DB, count int) []*db.DemandSource {
+	t.Helper()
+
+	demandSources := make([]*db.DemandSource, count)
+	for i := range demandSources {
+		demandSources[i] = CreateDemandSource(t, tx)
+	}
+
+	return demandSources
+}
+
+type DemandSourceAccountOption func(*db.DemandSourceAccount)
+
+func WithDemandSourceAccountOptions(optAccount *db.DemandSourceAccount) DemandSourceAccountOption {
+	return func(account *db.DemandSourceAccount) {
+		if optAccount.DemandSourceID != 0 {
+			account.DemandSourceID = optAccount.DemandSourceID
+		}
+		if optAccount.UserID != 0 {
+			account.UserID = optAccount.UserID
+		}
+		if optAccount.Type != "" {
+			account.Type = optAccount.Type
+		}
+		if optAccount.Extra != nil {
+			account.Extra = optAccount.Extra
+		}
+		if optAccount.IsBidding != nil {
+			account.IsBidding = optAccount.IsBidding
+		}
+		if optAccount.IsDefault.Valid {
+			account.IsDefault = optAccount.IsDefault
+		}
+		if optAccount.DemandSource != (db.DemandSource{}) {
+			account.DemandSource = optAccount.DemandSource
+		}
+	}
+}
+
+func CreateDemandSourceAccount(t *testing.T, tx *db.DB, opts ...DemandSourceAccountOption) *db.DemandSourceAccount {
+	t.Helper()
+
+	account := &db.DemandSourceAccount{
+		Type:      "DemandSourceAccount::Admob",
+		Extra:     map[string]any{},
+		IsBidding: new(bool),
+		IsDefault: sql.NullBool{
+			Valid: true,
+			Bool:  true,
+		},
+	}
+
+	for _, opt := range opts {
+		opt(account)
+	}
+
+	index := int(time.Now().UnixNano())
+
+	if account.UserID == 0 {
+		account.UserID = CreateUser(t, tx, index).ID
+	}
+
+	if account.DemandSourceID == 0 {
+		account.DemandSourceID = CreateDemandSource(t, tx).ID
+	}
+
+	if err := tx.Create(account).Error; err != nil {
+		t.Fatalf("Failed to create demand source account: %v", err)
+	}
+	return account
+}
+
+func CreateDemandSourceAccountsList(t *testing.T, tx *db.DB, count int) []*db.DemandSourceAccount {
+	t.Helper()
+
+	accounts := make([]*db.DemandSourceAccount, count)
+	for i := range accounts {
+		accounts[i] = CreateDemandSourceAccount(t, tx)
+	}
+
+	return accounts
 }
 
 func CreateSegment(t *testing.T, tx *db.DB, index int, app *db.App) *db.Segment {

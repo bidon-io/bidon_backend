@@ -10,6 +10,7 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/auction/store"
 	"github.com/bidon-io/bidon-backend/internal/db"
+	"github.com/bidon-io/bidon-backend/internal/db/dbtest"
 	"github.com/bidon-io/bidon-backend/internal/device"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -20,28 +21,27 @@ func TestLineItemsMatcher_Match(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	accounts := []db.DemandSourceAccount{
-		{
-			DemandSource: db.DemandSource{
-				APIKey: "applovin",
-			},
-		},
-		{
-			DemandSource: db.DemandSource{
-				APIKey: "bidmachine",
-			},
-		},
-	}
-	if err := tx.Create(&accounts).Error; err != nil {
-		t.Fatalf("Error creating accounts (%+v): %v", accounts, err)
-	}
+	apps := dbtest.CreateAppsList(t, tx, 2)
 
-	applovinAccount := &accounts[0]
-	bidmachineAccount := &accounts[1]
+	applovinDemandSource := dbtest.CreateDemandSource(t, tx, dbtest.WithDemandSourceOptions(&db.DemandSource{
+		APIKey: "applovin",
+	}))
+	applovinAccount := dbtest.CreateDemandSourceAccount(t, tx, dbtest.WithDemandSourceAccountOptions(&db.DemandSourceAccount{
+		DemandSourceID: applovinDemandSource.ID,
+		DemandSource:   *applovinDemandSource,
+	}))
+
+	bidmachineDemandSource := dbtest.CreateDemandSource(t, tx, dbtest.WithDemandSourceOptions(&db.DemandSource{
+		APIKey: "bidmachine",
+	}))
+	bidmachineAccount := dbtest.CreateDemandSourceAccount(t, tx, dbtest.WithDemandSourceAccountOptions(&db.DemandSourceAccount{
+		DemandSourceID: bidmachineDemandSource.ID,
+		DemandSource:   *bidmachineDemandSource,
+	}))
 
 	lineItems := []db.LineItem{
 		{
-			AppID:  1,
+			AppID:  apps[0].ID,
 			AdType: db.BannerAdType,
 			Format: sql.NullString{
 				String: string(ad.BannerFormat),
@@ -52,7 +52,7 @@ func TestLineItemsMatcher_Match(t *testing.T) {
 			AccountID: applovinAccount.ID,
 		},
 		{
-			AppID:  1,
+			AppID:  apps[0].ID,
 			AdType: db.BannerAdType,
 			Format: sql.NullString{
 				String: string(ad.AdaptiveFormat),
@@ -63,7 +63,7 @@ func TestLineItemsMatcher_Match(t *testing.T) {
 			AccountID: applovinAccount.ID,
 		},
 		{
-			AppID:  1,
+			AppID:  apps[0].ID,
 			AdType: db.BannerAdType,
 			Format: sql.NullString{
 				String: string(ad.LeaderboardFormat),
@@ -74,21 +74,21 @@ func TestLineItemsMatcher_Match(t *testing.T) {
 			AccountID: applovinAccount.ID,
 		},
 		{
-			AppID:     1,
+			AppID:     apps[0].ID,
 			AdType:    db.InterstitialAdType,
 			Code:      ptr("applovin-interstitial"),
 			BidFloor:  decimal.NewNullDecimal(decimal.RequireFromString("0.3")),
 			AccountID: applovinAccount.ID,
 		},
 		{
-			AppID:     1,
+			AppID:     apps[0].ID,
 			AdType:    db.InterstitialAdType,
 			Code:      ptr("bidmachine-interstitial"),
 			BidFloor:  decimal.NewNullDecimal(decimal.RequireFromString("0.3")),
 			AccountID: bidmachineAccount.ID,
 		},
 		{
-			AppID:  2,
+			AppID:  apps[1].ID,
 			AdType: db.BannerAdType,
 			Format: sql.NullString{
 				String: string(ad.MRECFormat),
@@ -99,7 +99,7 @@ func TestLineItemsMatcher_Match(t *testing.T) {
 			AccountID: applovinAccount.ID,
 		},
 		{
-			AppID:  2,
+			AppID:  apps[1].ID,
 			AdType: db.BannerAdType,
 			Format: sql.NullString{
 				String: string(ad.MRECFormat),
@@ -122,7 +122,7 @@ func TestLineItemsMatcher_Match(t *testing.T) {
 	}{
 		{
 			params: &auction.BuildParams{
-				AppID:      1,
+				AppID:      apps[0].ID,
 				AdType:     ad.BannerType,
 				AdFormat:   ad.EmptyFormat,
 				DeviceType: device.PhoneType,
@@ -132,7 +132,7 @@ func TestLineItemsMatcher_Match(t *testing.T) {
 		},
 		{
 			params: &auction.BuildParams{
-				AppID:      1,
+				AppID:      apps[0].ID,
 				AdType:     ad.BannerType,
 				AdFormat:   ad.AdaptiveFormat,
 				DeviceType: device.PhoneType,
@@ -145,7 +145,7 @@ func TestLineItemsMatcher_Match(t *testing.T) {
 		},
 		{
 			params: &auction.BuildParams{
-				AppID:      1,
+				AppID:      apps[0].ID,
 				AdType:     ad.BannerType,
 				AdFormat:   ad.AdaptiveFormat,
 				DeviceType: device.TabletType,
@@ -158,7 +158,7 @@ func TestLineItemsMatcher_Match(t *testing.T) {
 		},
 		{
 			params: &auction.BuildParams{
-				AppID:      1,
+				AppID:      apps[0].ID,
 				AdType:     ad.BannerType,
 				AdFormat:   ad.AdaptiveFormat,
 				DeviceType: device.UnknownType,
@@ -170,7 +170,7 @@ func TestLineItemsMatcher_Match(t *testing.T) {
 		},
 		{
 			params: &auction.BuildParams{
-				AppID:      1,
+				AppID:      apps[0].ID,
 				AdType:     ad.InterstitialType,
 				AdFormat:   ad.EmptyFormat,
 				DeviceType: device.PhoneType,
@@ -183,7 +183,7 @@ func TestLineItemsMatcher_Match(t *testing.T) {
 		},
 		{
 			params: &auction.BuildParams{
-				AppID:      2,
+				AppID:      apps[1].ID,
 				AdType:     ad.BannerType,
 				AdFormat:   ad.MRECFormat,
 				DeviceType: device.PhoneType,

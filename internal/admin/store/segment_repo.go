@@ -11,7 +11,7 @@ func NewSegmentRepo(db *db.DB) *SegmentRepo {
 	return &SegmentRepo{
 		db:           db,
 		mapper:       segmentMapper{},
-		associations: []string{},
+		associations: []string{"App"},
 	}
 }
 
@@ -35,6 +35,10 @@ func (m segmentMapper) resource(s *db.Segment) admin.Segment {
 	return admin.Segment{
 		ID:           s.ID,
 		SegmentAttrs: m.resourceAttrs(s),
+		App: admin.App{
+			ID:       s.App.ID,
+			AppAttrs: appMapper{}.resourceAttrs(&s.App),
+		},
 	}
 }
 

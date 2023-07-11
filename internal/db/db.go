@@ -65,12 +65,14 @@ type Model struct {
 
 type AppDemandProfile struct {
 	Model
-	AppID          int64  `gorm:"column:app_id;type:bigint;not null"`
-	AccountType    string `gorm:"column:account_type;type:varchar;not null"`
-	AccountID      int64  `gorm:"column:account_id;type:bigint;not null"`
-	Account        DemandSourceAccount
-	DemandSourceID int64          `gorm:"column:demand_source_id;type:bigint;not null"`
-	Data           map[string]any `gorm:"column:data;type:jsonb;default:'{}';serializer:json"`
+	AppID          int64               `gorm:"column:app_id;type:bigint;not null"`
+	App            App                 `gorm:"foreignKey:AppID"`
+	AccountType    string              `gorm:"column:account_type;type:varchar;not null"`
+	AccountID      int64               `gorm:"column:account_id;type:bigint;not null"`
+	Account        DemandSourceAccount `gorm:"foreignKey:AccountID"`
+	DemandSourceID int64               `gorm:"column:demand_source_id;type:bigint;not null"`
+	DemandSource   DemandSource        `gorm:"foreignKey:DemandSourceID"`
+	Data           map[string]any      `gorm:"column:data;type:jsonb;default:'{}';serializer:json"`
 }
 
 type App struct {
@@ -106,9 +108,10 @@ type Country struct {
 
 type DemandSourceAccount struct {
 	Model
-	DemandSourceID int64 `gorm:"column:demand_source_id;type:bigint;not null"`
-	DemandSource   DemandSource
+	DemandSourceID int64          `gorm:"column:demand_source_id;type:bigint;not null"`
+	DemandSource   DemandSource   `gorm:"foreignKey:DemandSourceID"`
 	UserID         int64          `gorm:"column:user_id;type:bigint;not null"`
+	User           User           `gorm:"foreignKey:UserID"`
 	Type           string         `gorm:"column:type;type:varchar;not null"`
 	Extra          map[string]any `gorm:"column:extra;type:jsonb;default:'{}';serializer:json"`
 	IsBidding      *bool          `gorm:"column:bidding;type:boolean;default:false"`
@@ -144,6 +147,7 @@ type Segment struct {
 	Filters     []segment.Filter `gorm:"column:filters;type:jsonb;not null;default:'[]';serializer:json"`
 	Enabled     *bool            `gorm:"column:enabled;type:bool;not null;default:true"`
 	AppID       int64            `gorm:"column:app_id;type:bigint;not null"`
+	App         App              `gorm:"foreignKey:AppID"`
 	Priority    int32            `gorm:"column:priority;type:integer;default:0;not null"`
 }
 

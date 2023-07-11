@@ -8,6 +8,7 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/config"
 	"github.com/bidon-io/bidon-backend/internal/config/store"
 	"github.com/bidon-io/bidon-backend/internal/db"
+	"github.com/bidon-io/bidon-backend/internal/db/dbtest"
 	"github.com/google/go-cmp/cmp"
 )
 
@@ -15,42 +16,72 @@ func TestAppDemandProfileFetcher_Fetch(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
+	user := dbtest.CreateUser(t, tx, 1)
+	apps := make([]*db.App, 2)
+	for i := range apps {
+		apps[i] = dbtest.CreateApp(t, tx, i, user)
+	}
+	demandSources := dbtest.CreateDemandSourcesList(t, tx, 2)
+	accountApplovin := dbtest.CreateDemandSourceAccount(t, tx, dbtest.WithDemandSourceAccountOptions(
+		&db.DemandSourceAccount{
+			UserID:         user.ID,
+			DemandSourceID: demandSources[0].ID,
+			DemandSource: db.DemandSource{
+				APIKey: string(adapter.ApplovinKey),
+			},
+			Extra: map[string]any{"applovin": "applovin"},
+		}))
+	accountBidmachine := dbtest.CreateDemandSourceAccount(t, tx, dbtest.WithDemandSourceAccountOptions(
+		&db.DemandSourceAccount{
+			UserID:         user.ID,
+			DemandSourceID: demandSources[0].ID,
+			DemandSource: db.DemandSource{
+				APIKey: string(adapter.BidmachineKey),
+			},
+			Extra: map[string]any{"bidmachine": "bidmachine"},
+		}))
+	accountDtexchange := dbtest.CreateDemandSourceAccount(t, tx, dbtest.WithDemandSourceAccountOptions(
+		&db.DemandSourceAccount{
+			UserID:         user.ID,
+			DemandSourceID: demandSources[1].ID,
+			DemandSource: db.DemandSource{
+				APIKey: string(adapter.DTExchangeKey),
+			},
+			Extra: map[string]any{"dtexchange": "dtexchange"},
+		}))
+	accountUnity := dbtest.CreateDemandSourceAccount(t, tx, dbtest.WithDemandSourceAccountOptions(
+		&db.DemandSourceAccount{
+			UserID:         user.ID,
+			DemandSourceID: demandSources[1].ID,
+			DemandSource: db.DemandSource{
+				APIKey: string(adapter.UnityAdsKey),
+			},
+			Extra: map[string]any{"unity": "unity"},
+		}))
 	profiles := []db.AppDemandProfile{
 		{
-			AppID: 1,
-			Account: db.DemandSourceAccount{
-				DemandSource: db.DemandSource{
-					APIKey: string(adapter.ApplovinKey),
-				},
-				Extra: map[string]any{"applovin": "applovin"},
-			},
+			AppID:          apps[0].ID,
+			AccountID:      accountApplovin.ID,
+			DemandSourceID: demandSources[0].ID,
+			Account:        *accountApplovin,
 		},
 		{
-			AppID: 1,
-			Account: db.DemandSourceAccount{
-				DemandSource: db.DemandSource{
-					APIKey: string(adapter.BidmachineKey),
-				},
-				Extra: map[string]any{"bidmachine": "bidmachine"},
-			},
+			AppID:          apps[0].ID,
+			AccountID:      accountBidmachine.ID,
+			DemandSourceID: demandSources[1].ID,
+			Account:        *accountBidmachine,
 		},
 		{
-			AppID: 2,
-			Account: db.DemandSourceAccount{
-				DemandSource: db.DemandSource{
-					APIKey: string(adapter.DTExchangeKey),
-				},
-				Extra: map[string]any{"dtexchange": "dtexchange"},
-			},
+			AppID:          apps[1].ID,
+			AccountID:      accountDtexchange.ID,
+			DemandSourceID: demandSources[0].ID,
+			Account:        *accountDtexchange,
 		},
 		{
-			AppID: 2,
-			Account: db.DemandSourceAccount{
-				DemandSource: db.DemandSource{
-					APIKey: string(adapter.UnityAdsKey),
-				},
-				Extra: map[string]any{"unity": "unity"},
-			},
+			AppID:          apps[1].ID,
+			AccountID:      accountUnity.ID,
+			DemandSourceID: demandSources[1].ID,
+			Account:        *accountUnity,
 		},
 	}
 
@@ -70,7 +101,7 @@ func TestAppDemandProfileFetcher_Fetch(t *testing.T) {
 	}{
 		{
 			name:        "All keys, App 1",
-			appID:       1,
+			appID:       apps[0].ID,
 			adapterKeys: adapter.Keys,
 			want: []config.AppDemandProfile{
 				{
@@ -85,7 +116,7 @@ func TestAppDemandProfileFetcher_Fetch(t *testing.T) {
 		},
 		{
 			name:        "One key, App 1",
-			appID:       1,
+			appID:       apps[0].ID,
 			adapterKeys: []adapter.Key{adapter.ApplovinKey},
 			want: []config.AppDemandProfile{
 				{
@@ -96,13 +127,13 @@ func TestAppDemandProfileFetcher_Fetch(t *testing.T) {
 		},
 		{
 			name:        "No keys, App 1",
-			appID:       1,
+			appID:       apps[0].ID,
 			adapterKeys: []adapter.Key{},
 			want:        []config.AppDemandProfile{},
 		},
 		{
 			name:        "One key, App 2",
-			appID:       2,
+			appID:       apps[1].ID,
 			adapterKeys: []adapter.Key{adapter.DTExchangeKey},
 			want: []config.AppDemandProfile{
 				{
