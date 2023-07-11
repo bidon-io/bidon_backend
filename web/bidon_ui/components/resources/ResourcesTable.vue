@@ -8,6 +8,7 @@
     :rows-per-page-options="[12, 24, 36, 48]"
     table-style="min-width: 50rem"
   >
+    <template #empty> No data found. </template>
     <Column selection-mode="multiple" header-style="width: 3rem"></Column>
     <Column
       v-for="column in columns"
@@ -15,7 +16,11 @@
       :field="column.field"
       :header="column.header"
       :sortable="column.sortable"
-    />
+    >
+      <template v-if="column.link" #body="{ data }">
+        <ResourceLink :link="column.link" :data="data" />
+      </template>
+    </Column>
     <Column style="width: 10%; min-width: 8rem" body-style="text-align:center">
       <template #body="slotProps">
         <div class="flex justify-between">
@@ -53,6 +58,7 @@ interface Column {
   header: string;
   field: string;
   sortable?: boolean;
+  link?: ResourceLink;
 }
 
 const props = defineProps<{

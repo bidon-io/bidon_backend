@@ -4,9 +4,11 @@
       <div v-if="!field.type" class="text-gray-900">
         {{ localResource[field.key] }}
       </div>
-      <NuxtLink v-if="field.type === 'link'" :to="field.link">{{
-        localResource[field.key]
-      }}</NuxtLink>
+      <ResourceLink
+        v-if="field.type === 'link'"
+        :link="field.link"
+        :data="localResource"
+      />
       <Textarea
         v-if="field.type === 'textarea'"
         :value="JSON.stringify(localResource[field.key])"

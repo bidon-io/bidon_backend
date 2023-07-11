@@ -15,6 +15,7 @@
 
 <script setup>
 import axios from "@/services/ApiService.js";
+import { ResourceCardFields } from "@/constants";
 
 const route = useRoute();
 const id = route.params.id;
@@ -28,15 +29,10 @@ const response = await axios.get(`${resourcesPath}/${id}`);
 const resource = response.data;
 
 const fields = [
-  { label: "ID", key: "id" },
-  {
-    label: "User",
-    key: "userId",
-    type: "link",
-    link: `/users/${resource.userId}`,
-  },
+  ResourceCardFields.Id,
+  ResourceCardFields.User,
   { label: "Type", key: "type" },
-  { label: "Demand Source", key: "demandSourceId" },
+  ResourceCardFields.DemandSource,
   { label: "IsBidding", key: "isBidding" },
   { label: "Extra", key: "extra", type: "textarea" },
 ];

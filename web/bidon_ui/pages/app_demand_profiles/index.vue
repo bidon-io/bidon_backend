@@ -7,11 +7,13 @@
 </template>
 
 <script setup>
+import { ResourceTableFields } from "@/constants";
+
 const columns = [
-  { field: "id", header: "Id", sortable: true },
-  { field: "appId", header: "App" },
-  { field: "demandSourceId", header: "Demand Source" },
-  { field: "accountId", header: "Account" },
+  ResourceTableFields.Id,
+  ResourceTableFields.App,
+  ResourceTableFields.DemandSource,
+  ResourceTableFields.DemandSourceAccount,
   { field: "accountType", header: "Account Type" },
 ];
 const resourcesPath = "/app_demand_profiles";
