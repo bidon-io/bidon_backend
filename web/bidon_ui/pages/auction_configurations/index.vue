@@ -7,13 +7,15 @@
 </template>
 
 <script setup>
+import { ResourceTableFields } from "@/constants";
+
 const columns = [
-  { field: "id", header: "Id", sortable: true },
-  { field: "appId", header: "App" },
+  ResourceTableFields.Id,
+  ResourceTableFields.App,
   { field: "name", header: "Name" },
   { field: "adType", header: "Ad Type" },
   { field: "pricefloor", header: "Price Floor" },
-  { field: "segmentId", header: "Segment" },
+  ResourceTableFields.Segment,
 ];
 const resourcesPath = "/auction_configurations";
 </script>

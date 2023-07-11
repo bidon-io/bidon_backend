@@ -15,6 +15,7 @@
 
 <script setup>
 import axios from "@/services/ApiService.js";
+import { ResourceCardFields } from "@/constants";
 
 const route = useRoute();
 const id = route.params.id;
@@ -28,17 +29,12 @@ const response = await axios.get(`${resourcesPath}/${id}`);
 const resource = response.data;
 
 const fields = [
-  { label: "ID", key: "id" },
-  {
-    label: "App",
-    key: "appId",
-    type: "link",
-    link: `/apps/${resource.app_id}`,
-  },
+  ResourceCardFields.Id,
+  ResourceCardFields.App,
   { label: "Name", key: "name" },
   { label: "Ad type", key: "adType" },
   { label: "Price floor", key: "pricefloor" },
   { label: "Rounds", key: "rounds", type: "textarea" },
-  { label: "Segment", key: "segmentId" },
+  ResourceCardFields.Segment,
 ];
 </script>
