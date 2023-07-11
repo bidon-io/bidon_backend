@@ -1,9 +1,6 @@
 package schema
 
-import "github.com/bidon-io/bidon-backend/internal/ad"
-
 type BaseRequest struct {
-	AdType      ad.Type      `param:"ad_type"`
 	Device      Device       `json:"device" validate:"required"`
 	Session     Session      `json:"session" validate:"required"`
 	App         App          `json:"app" validate:"required"`
@@ -13,6 +10,27 @@ type BaseRequest struct {
 	Ext         string       `json:"ext"`
 	Token       string       `json:"token"`
 	Segment     Segment      `json:"segment"`
+}
+
+func (r *BaseRequest) Map() map[string]any {
+	m := map[string]any{
+		"device":  r.Device.Map(),
+		"session": r.Session.Map(),
+		"app":     r.App.Map(),
+		"user":    r.User.Map(),
+		"ext":     r.Ext,
+		"token":   r.Token,
+		"segment": r.Segment.Map(),
+	}
+
+	if r.Geo != nil {
+		m["geo"] = r.Geo.Map()
+	}
+	if r.Regulations != nil {
+		m["regs"] = r.Regulations.Map()
+	}
+
+	return m
 }
 
 func (r *BaseRequest) GetApp() App {

@@ -15,3 +15,12 @@ type Adapter struct {
 	Version    string `json:"version" validate:"required"`
 	SDKVersion string `json:"sdk_version" validate:"required"`
 }
+
+func (a Adapter) Map() map[string]any {
+	m := map[string]any{
+		"version":     a.Version,
+		"sdk_version": a.SDKVersion,
+	}
+
+	return m
+}
