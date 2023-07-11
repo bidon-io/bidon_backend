@@ -6,6 +6,8 @@ import (
 
 	"github.com/bidon-io/bidon-backend/internal/admin"
 	"github.com/bidon-io/bidon-backend/internal/admin/store"
+	"github.com/bidon-io/bidon-backend/internal/db"
+	"github.com/bidon-io/bidon-backend/internal/db/dbtest"
 	"github.com/google/go-cmp/cmp"
 )
 
@@ -15,18 +17,31 @@ func TestAppDemandProfileRepo_List(t *testing.T) {
 
 	repo := store.NewAppDemandProfileRepo(tx)
 
+	user := dbtest.CreateUser(t, tx, 1)
+	apps := make([]*db.App, 2)
+	for i := range apps {
+		apps[i] = dbtest.CreateApp(t, tx, i, user)
+	}
+	demandSources := dbtest.CreateDemandSourcesList(t, tx, 2)
+	accounts := make([]*db.DemandSourceAccount, 2)
+	for i := range accounts {
+		accounts[i] = dbtest.CreateDemandSourceAccount(t, tx, dbtest.WithDemandSourceAccountOptions(&db.DemandSourceAccount{
+			UserID:         user.ID,
+			DemandSourceID: demandSources[i].ID,
+		}))
+	}
 	profiles := []admin.AppDemandProfileAttrs{
 		{
-			AppID:          1,
-			DemandSourceID: 1,
-			AccountID:      createDemandSourceAccount(t, tx, "DemandSourceAccount::Applovin").ID,
+			AppID:          apps[0].ID,
+			DemandSourceID: demandSources[0].ID,
+			AccountID:      accounts[0].ID,
 			Data:           map[string]any{"api_key": "asdf"},
 			AccountType:    "DemandSourceAccount::Applovin",
 		},
 		{
-			AppID:          2,
-			DemandSourceID: 2,
-			AccountID:      createDemandSourceAccount(t, tx, "DemandSourceAccount::Bidmachine").ID,
+			AppID:          apps[1].ID,
+			DemandSourceID: demandSources[1].ID,
+			AccountID:      accounts[1].ID,
 			Data:           map[string]any{"api_key": "asdf"},
 			AccountType:    "DemandSourceAccount::Bidmachine",
 		},
@@ -40,6 +55,9 @@ func TestAppDemandProfileRepo_List(t *testing.T) {
 		}
 
 		want[i] = *profile
+		want[i].App = *store.AppResource(apps[i])
+		want[i].DemandSource = *store.DemandSourceResource(demandSources[i])
+		want[i].Account = *store.DemandSourceAccountResource(accounts[i])
 	}
 
 	got, err := repo.List(context.Background())
@@ -58,10 +76,17 @@ func TestAppDemandProfileRepo_Find(t *testing.T) {
 
 	repo := store.NewAppDemandProfileRepo(tx)
 
+	user := dbtest.CreateUser(t, tx, 1)
+	app := dbtest.CreateApp(t, tx, 1, user)
+	demandSource := dbtest.CreateDemandSource(t, tx)
+	account := dbtest.CreateDemandSourceAccount(t, tx, dbtest.WithDemandSourceAccountOptions(&db.DemandSourceAccount{
+		UserID:         user.ID,
+		DemandSourceID: demandSource.ID,
+	}))
 	attrs := &admin.AppDemandProfileAttrs{
-		AppID:          1,
-		DemandSourceID: 1,
-		AccountID:      createDemandSourceAccount(t, tx, "DemandSourceAccount::Applovin").ID,
+		AppID:          app.ID,
+		DemandSourceID: demandSource.ID,
+		AccountID:      account.ID,
 		Data:           map[string]any{"api_key": "asdf"},
 		AccountType:    "DemandSourceAccount::Applovin",
 	}
@@ -70,6 +95,9 @@ func TestAppDemandProfileRepo_Find(t *testing.T) {
 	if err != nil {
 		t.Fatalf("repo.Create(ctx, %+v) = %v, %q; want %T, %v", attrs, nil, err, want, nil)
 	}
+	want.App = *store.AppResource(app)
+	want.Account = *store.DemandSourceAccountResource(account)
+	want.DemandSource = *store.DemandSourceResource(demandSource)
 
 	got, err := repo.Find(context.Background(), want.ID)
 	if err != nil {
@@ -87,10 +115,17 @@ func TestAppDemandProfileRepo_Update(t *testing.T) {
 
 	repo := store.NewAppDemandProfileRepo(tx)
 
+	user := dbtest.CreateUser(t, tx, 1)
+	app := dbtest.CreateApp(t, tx, 1, user)
+	demandSource := dbtest.CreateDemandSource(t, tx)
+	account := dbtest.CreateDemandSourceAccount(t, tx, dbtest.WithDemandSourceAccountOptions(&db.DemandSourceAccount{
+		UserID:         user.ID,
+		DemandSourceID: demandSource.ID,
+	}))
 	attrs := admin.AppDemandProfileAttrs{
-		AppID:          1,
-		DemandSourceID: 1,
-		AccountID:      createDemandSourceAccount(t, tx, "DemandSourceAccount::Applovin").ID,
+		AppID:          app.ID,
+		DemandSourceID: demandSource.ID,
+		AccountID:      account.ID,
 		Data:           map[string]any{"api_key": "asdf"},
 		AccountType:    "DemandSourceAccount::Applovin",
 	}
@@ -101,10 +136,10 @@ func TestAppDemandProfileRepo_Update(t *testing.T) {
 	}
 
 	want := profile
-	want.AppID = 2
+	want.Data = map[string]any{"api_key": "new_api_key"}
 
 	updateParams := &admin.AppDemandProfileAttrs{
-		AppID: want.AppID,
+		Data: want.Data,
 	}
 	got, err := repo.Update(context.Background(), profile.ID, updateParams)
 	if err != nil {
@@ -122,10 +157,17 @@ func TestAppDemandProfileRepo_Delete(t *testing.T) {
 
 	repo := store.NewAppDemandProfileRepo(tx)
 
+	user := dbtest.CreateUser(t, tx, 1)
+	app := dbtest.CreateApp(t, tx, 1, user)
+	demandSource := dbtest.CreateDemandSource(t, tx)
+	account := dbtest.CreateDemandSourceAccount(t, tx, dbtest.WithDemandSourceAccountOptions(&db.DemandSourceAccount{
+		UserID:         user.ID,
+		DemandSourceID: demandSource.ID,
+	}))
 	attrs := &admin.AppDemandProfileAttrs{
-		AppID:          1,
-		DemandSourceID: 1,
-		AccountID:      createDemandSourceAccount(t, tx, "DemandSourceAccount::Applovin").ID,
+		AppID:          app.ID,
+		DemandSourceID: demandSource.ID,
+		AccountID:      account.ID,
 		Data:           map[string]any{"api_key": "asdf"},
 		AccountType:    "DemandSourceAccount::Applovin",
 	}

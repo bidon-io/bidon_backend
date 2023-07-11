@@ -11,7 +11,7 @@ func NewDemandSourceAccountRepo(db *db.DB) *DemandSourceAccountRepo {
 	return &DemandSourceAccountRepo{
 		db:           db,
 		mapper:       demandSourceAccountMapper{},
-		associations: []string{},
+		associations: []string{"User", "DemandSource"},
 	}
 }
 
@@ -32,13 +32,25 @@ func (m demandSourceAccountMapper) dbModel(a *admin.DemandSourceAccountAttrs, id
 //lint:ignore U1000 this method is used by generic struct
 func (m demandSourceAccountMapper) resource(a *db.DemandSourceAccount) admin.DemandSourceAccount {
 	return admin.DemandSourceAccount{
-		ID: a.ID,
-		DemandSourceAccountAttrs: admin.DemandSourceAccountAttrs{
-			UserID:         a.UserID,
-			Type:           a.Type,
-			DemandSourceID: a.DemandSourceID,
-			IsBidding:      a.IsBidding,
-			Extra:          a.Extra,
+		ID:                       a.ID,
+		DemandSourceAccountAttrs: m.resourceAttrs(a),
+		User: admin.User{
+			ID:        a.User.ID,
+			UserAttrs: userMapper{}.resourceAttrs(&a.User),
 		},
+		DemandSource: admin.DemandSource{
+			ID:                a.DemandSource.ID,
+			DemandSourceAttrs: demandSourceMapper{}.resourceAttrs(&a.DemandSource),
+		},
+	}
+}
+
+func (m demandSourceAccountMapper) resourceAttrs(a *db.DemandSourceAccount) admin.DemandSourceAccountAttrs {
+	return admin.DemandSourceAccountAttrs{
+		UserID:         a.UserID,
+		Type:           a.Type,
+		DemandSourceID: a.DemandSourceID,
+		IsBidding:      a.IsBidding,
+		Extra:          a.Extra,
 	}
 }

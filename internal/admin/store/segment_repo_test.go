@@ -6,6 +6,7 @@ import (
 
 	"github.com/bidon-io/bidon-backend/internal/admin"
 	"github.com/bidon-io/bidon-backend/internal/admin/store"
+	"github.com/bidon-io/bidon-backend/internal/db/dbtest"
 	"github.com/bidon-io/bidon-backend/internal/segment"
 
 	"github.com/google/go-cmp/cmp"
@@ -17,11 +18,12 @@ func TestSegmentRepo_List(t *testing.T) {
 
 	repo := store.NewSegmentRepo(tx)
 
+	apps := dbtest.CreateAppsList(t, tx, 3)
 	segments := []admin.SegmentAttrs{
 		{
 			Name:        "Country Segment",
 			Description: "Desc",
-			AppID:       1,
+			AppID:       apps[0].ID,
 			Filters:     []segment.Filter{{Type: "country", Name: "country", Operator: "in", Values: []string{"US", "UK"}}},
 			Enabled:     ptr(true),
 			Priority:    1,
@@ -29,7 +31,7 @@ func TestSegmentRepo_List(t *testing.T) {
 		{
 			Name:        "Custom String Segment",
 			Description: "Desc",
-			AppID:       1,
+			AppID:       apps[1].ID,
 			Filters:     []segment.Filter{{Type: "string", Name: "custom_str", Operator: "==", Values: []string{"super"}}},
 			Enabled:     ptr(false),
 			Priority:    1,
@@ -37,7 +39,7 @@ func TestSegmentRepo_List(t *testing.T) {
 		{
 			Name:        "Custom Num Segment",
 			Description: "Desc",
-			AppID:       1,
+			AppID:       apps[2].ID,
 			Filters:     []segment.Filter{{Type: "float", Name: "custom_num", Operator: ">=", Values: []string{"33"}}},
 			Enabled:     ptr(true),
 			Priority:    0,
@@ -52,6 +54,7 @@ func TestSegmentRepo_List(t *testing.T) {
 		}
 
 		want[i] = *segment
+		want[i].App = *store.AppResource(apps[i])
 	}
 
 	got, err := repo.List(context.Background())
@@ -70,10 +73,11 @@ func TestSegmentRepo_Find(t *testing.T) {
 
 	repo := store.NewSegmentRepo(tx)
 
+	app := dbtest.CreateApp(t, tx, 1, nil)
 	attrs := &admin.SegmentAttrs{
 		Name:        "Country Segment",
 		Description: "Desc",
-		AppID:       1,
+		AppID:       app.ID,
 		Filters:     []segment.Filter{{Type: "country", Name: "country", Operator: "in", Values: []string{"US", "UK"}}},
 		Enabled:     ptr(true),
 	}
@@ -82,6 +86,7 @@ func TestSegmentRepo_Find(t *testing.T) {
 	if err != nil {
 		t.Fatalf("repo.Create(ctx, %+v) = %v, %q; want %T, %v", attrs, nil, err, want, nil)
 	}
+	want.App = *store.AppResource(app)
 
 	got, err := repo.Find(context.Background(), want.ID)
 	if err != nil {
@@ -99,10 +104,11 @@ func TestSegmentRepo_Update(t *testing.T) {
 
 	repo := store.NewSegmentRepo(tx)
 
+	app := dbtest.CreateApp(t, tx, 1, nil)
 	attrs := admin.SegmentAttrs{
 		Name:        "Country Segment",
 		Description: "Desc",
-		AppID:       1,
+		AppID:       app.ID,
 		Filters:     []segment.Filter{{Type: "country", Name: "country", Operator: "in", Values: []string{"US", "UK"}}},
 		Enabled:     ptr(true),
 		Priority:    1,
@@ -114,13 +120,13 @@ func TestSegmentRepo_Update(t *testing.T) {
 	}
 
 	want := segment
-	want.AppID = 2
+	want.Description = "New Desc"
 
 	want.Enabled = ptr(false)
 
 	updateParams := &admin.SegmentAttrs{
-		AppID:   want.AppID,
-		Enabled: ptr(false),
+		Description: want.Description,
+		Enabled:     ptr(false),
 	}
 	got, err := repo.Update(context.Background(), segment.ID, updateParams)
 	if err != nil {
@@ -138,10 +144,11 @@ func TestSegmentRepo_Delete(t *testing.T) {
 
 	repo := store.NewSegmentRepo(tx)
 
+	app := dbtest.CreateApp(t, tx, 1, nil)
 	attrs := &admin.SegmentAttrs{
 		Name:        "Country Segment",
 		Description: "Desc",
-		AppID:       1,
+		AppID:       app.ID,
 		Filters:     []segment.Filter{{Type: "country", Name: "country", Operator: "in", Values: []string{"US", "UK"}}},
 		Enabled:     ptr(true),
 		Priority:    2,

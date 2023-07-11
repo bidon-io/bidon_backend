@@ -3,6 +3,9 @@ package admin
 type AppDemandProfile struct {
 	ID int64 `json:"id"`
 	AppDemandProfileAttrs
+	App          App                 `json:"app"`
+	Account      DemandSourceAccount `json:"account"`
+	DemandSource DemandSource        `json:"demand_source"`
 }
 
 type AppDemandProfileAttrs struct {

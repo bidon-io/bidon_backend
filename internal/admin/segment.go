@@ -6,6 +6,7 @@ import "github.com/bidon-io/bidon-backend/internal/segment"
 type Segment struct {
 	ID int64 `json:"id"`
 	SegmentAttrs
+	App `json:"app"`
 }
 
 type SegmentAttrs struct {
