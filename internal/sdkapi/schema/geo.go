@@ -10,3 +10,18 @@ type Geo struct {
 	ZIP       string  `json:"zip"`
 	UTCOffset int     `json:"utcoffset"`
 }
+
+func (g Geo) Map() map[string]any {
+	m := map[string]any{
+		"lat":       g.Lat,
+		"lon":       g.Lon,
+		"accuracy":  g.Accuracy,
+		"lastfix":   g.LastFix,
+		"country":   g.Country,
+		"city":      g.City,
+		"zip":       g.ZIP,
+		"utcoffset": g.UTCOffset,
+	}
+
+	return m
+}

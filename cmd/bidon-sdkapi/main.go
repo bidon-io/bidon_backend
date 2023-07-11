@@ -1,14 +1,19 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
+	"time"
 
+	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
+	"github.com/bidon-io/bidon-backend/internal/sdkapi/event/engine"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/geocoder"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	"github.com/bidon-io/bidon-backend/internal/segment"
 	"github.com/oschwald/maxminddb-golang"
+	"github.com/twmb/franz-go/pkg/kgo"
 
 	"github.com/bidon-io/bidon-backend/config"
 	"github.com/bidon-io/bidon-backend/internal/auction"
@@ -54,6 +59,32 @@ func main() {
 		}
 	}
 
+	var loggerEngine event.LoggerEngine
+	if os.Getenv("USE_KAFKA") == "true" {
+		conf, err := config.Kafka()
+		if err != nil {
+			log.Fatalf("config.Kafka(): %v", err)
+		}
+
+		client, err := kgo.NewClient(conf.ClientOpts...)
+		if err != nil {
+			log.Fatalf("kgo.NewClient(): %v", err)
+		}
+		defer func() {
+			ctx, ctxCancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer ctxCancel()
+
+			err := client.Flush(ctx)
+			if err != nil {
+				log.Printf("client.Flush(): %v", err)
+			}
+		}()
+
+		loggerEngine = &engine.Kafka{Client: client, Topics: conf.Topics}
+	} else {
+		loggerEngine = &engine.Log{}
+	}
+
 	appFetcher := &sdkapistore.AppFetcher{DB: db}
 	geocoder := &geocoder.Geocoder{DB: db, MaxMindDB: maxMindDB}
 	segmentMatcher := segment.Matcher{
@@ -79,6 +110,7 @@ func main() {
 		AdaptersBuilder: &bidonconfig.AdaptersBuilder{
 			AppDemandProfileFetcher: &configstore.AppDemandProfileFetcher{DB: db},
 		},
+		EventLogger: &event.Logger{Engine: loggerEngine},
 	}
 
 	e := config.Echo("bidon-sdkapi", logger)

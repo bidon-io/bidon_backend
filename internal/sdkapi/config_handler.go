@@ -1,10 +1,12 @@
 package sdkapi
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/bidon-io/bidon-backend/internal/config"
+	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	"github.com/bidon-io/bidon-backend/internal/segment"
 	"github.com/labstack/echo/v4"
@@ -14,6 +16,7 @@ type ConfigHandler struct {
 	*BaseHandler[schema.ConfigRequest, *schema.ConfigRequest]
 	AdaptersBuilder *config.AdaptersBuilder
 	SegmentMatcher  *segment.Matcher
+	EventLogger     *event.Logger
 }
 
 type ConfigResponse struct {
@@ -37,22 +40,29 @@ func (h *ConfigHandler) Handle(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+	ctx := c.Request().Context()
+
+	event, err := event.Prepare(event.ConfigTopic, &req.raw, req.geoData)
+	if err != nil {
+		logError(c, fmt.Errorf("prepare config event: %v", err))
+	}
+	h.EventLogger.Log(ctx, event, func(err error) {
+		logError(c, fmt.Errorf("log config event: %v", err))
+	})
 
 	segmentParams := &segment.Params{
 		Country: req.countryCode(),
 		Ext:     req.raw.Segment.Ext,
 	}
 
-	sgmnt := h.SegmentMatcher.Match(c.Request().Context(), segmentParams)
+	sgmnt := h.SegmentMatcher.Match(ctx, segmentParams)
 
 	var segmentID string
 	if sgmnt.ID != 0 {
 		segmentID = strconv.Itoa(int(sgmnt.ID))
-	} else {
-		segmentID = ""
 	}
 
-	adapters, err := h.AdaptersBuilder.Build(c.Request().Context(), req.app.ID, req.raw.Adapters.Keys())
+	adapters, err := h.AdaptersBuilder.Build(ctx, req.app.ID, req.raw.Adapters.Keys())
 	if err != nil {
 		return err
 	}

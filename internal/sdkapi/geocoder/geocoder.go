@@ -29,6 +29,7 @@ type GeoData struct {
 	ZipCode        string
 	IPService      int
 	UnknownCountry bool
+	IPString       string
 }
 
 type MmdbGeoData struct {
@@ -102,6 +103,7 @@ func (g *Geocoder) Lookup(ctx context.Context, ipString string) (GeoData, error)
 	geoData.Accuracy = mmdbGeoData.Location.AccuracyRadius * 1000 // convert kilometers to meters
 	geoData.ZipCode = mmdbGeoData.Postal.Code
 	geoData.IPService = MAX_MIND_PROVIDER_CODE
+	geoData.IPString = ipString
 
 	return geoData, nil
 }

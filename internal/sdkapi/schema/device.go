@@ -21,3 +21,30 @@ type Device struct {
 	ConnectionType  string      `json:"connection_type" validate:"oneof=ETHERNET WIFI CELLULAR CELLULAR_UNKNOWN CELLULAR_2_G CELLULAR_3_G CELLULAR_4_G CELLULAR_5_G"`
 	Type            device.Type `json:"type" validate:"oneof=PHONE TABLET"` // TODO: add Marshal/Unmarshal to device.Type
 }
+
+func (d Device) Map() map[string]any {
+	m := map[string]any{
+		"ua":              d.UserAgent,
+		"make":            d.Manufacturer,
+		"model":           d.Model,
+		"os":              d.OS,
+		"osv":             d.OSVersion,
+		"hwv":             d.HardwareVersion,
+		"h":               d.Height,
+		"w":               d.Width,
+		"ppi":             d.PPI,
+		"pxratio":         d.PXRatio,
+		"js":              d.JS,
+		"language":        d.Language,
+		"carrier":         d.Carrier,
+		"mccmnc":          d.MCCMNC,
+		"connection_type": d.ConnectionType,
+		"type":            d.Type,
+	}
+
+	if d.Geo != nil {
+		m["geo"] = d.Geo.Map()
+	}
+
+	return m
+}
