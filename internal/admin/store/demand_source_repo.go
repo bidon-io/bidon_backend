@@ -29,10 +29,14 @@ func (m demandSourceMapper) dbModel(s *admin.DemandSourceAttrs, id int64) *db.De
 //lint:ignore U1000 this method is used by generic struct
 func (m demandSourceMapper) resource(s *db.DemandSource) admin.DemandSource {
 	return admin.DemandSource{
-		ID: s.ID,
-		DemandSourceAttrs: admin.DemandSourceAttrs{
-			ApiKey:    s.APIKey,
-			HumanName: s.HumanName,
-		},
+		ID:                s.ID,
+		DemandSourceAttrs: m.resourceAttrs(s),
+	}
+}
+
+func (m demandSourceMapper) resourceAttrs(s *db.DemandSource) admin.DemandSourceAttrs {
+	return admin.DemandSourceAttrs{
+		ApiKey:    s.APIKey,
+		HumanName: s.HumanName,
 	}
 }
