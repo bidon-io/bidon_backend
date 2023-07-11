@@ -4,9 +4,11 @@
 </template>
 
 <script setup>
+import { ResourceTableFields } from "@/constants";
+
 const columns = [
-  { field: "id", header: "Id", sortable: true },
-  { field: "appId", header: "App" },
+  ResourceTableFields.Id,
+  ResourceTableFields.App,
   { field: "name", header: "Name" },
   { field: "filters", header: "Filters" },
   { field: "enabled", header: "Enabled" },
