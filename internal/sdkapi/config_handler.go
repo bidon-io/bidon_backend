@@ -46,7 +46,7 @@ func (h *ConfigHandler) Handle(c echo.Context) error {
 	if err != nil {
 		logError(c, fmt.Errorf("prepare config event: %v", err))
 	}
-	h.EventLogger.Log(ctx, event, func(err error) {
+	h.EventLogger.Log(event, func(err error) {
 		logError(c, fmt.Errorf("log config event: %v", err))
 	})
 
