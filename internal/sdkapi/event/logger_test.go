@@ -1,7 +1,6 @@
 package event_test
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"testing"
@@ -63,7 +62,7 @@ func TestLogger_Log_ProcessesPayload(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			ev := event.Event{Payload: test.in}
 			mock := &event.LoggerEngineMock{
-				ProduceFunc: func(_ context.Context, _ event.Topic, message []byte, _ func(error)) {
+				ProduceFunc: func(_ event.Topic, message []byte, _ func(error)) {
 					var unmarshalledMessage map[string]any
 					err := json.Unmarshal(message, &unmarshalledMessage)
 					if err != nil {
@@ -77,7 +76,7 @@ func TestLogger_Log_ProcessesPayload(t *testing.T) {
 			}
 
 			logger := &event.Logger{Engine: mock}
-			logger.Log(context.Background(), ev, nil)
+			logger.Log(ev, nil)
 		})
 	}
 }
@@ -109,7 +108,7 @@ func TestLogger_Log_PassesTopic(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			ev := event.Event{Topic: test.in}
 			mock := &event.LoggerEngineMock{
-				ProduceFunc: func(_ context.Context, topic event.Topic, _ []byte, _ func(error)) {
+				ProduceFunc: func(topic event.Topic, _ []byte, _ func(error)) {
 					if topic != test.want {
 						t.Errorf("%v: logger.Engine.Produce() got topic %v, want %v", test.name, topic, test.want)
 					}
@@ -117,7 +116,7 @@ func TestLogger_Log_PassesTopic(t *testing.T) {
 			}
 			logger := &event.Logger{Engine: mock}
 
-			logger.Log(context.Background(), ev, nil)
+			logger.Log(ev, nil)
 		})
 	}
 }
@@ -125,7 +124,7 @@ func TestLogger_Log_PassesTopic(t *testing.T) {
 func TestLogger_Log_CallsErrHandlerWithErrorFromEngine(t *testing.T) {
 	err := errors.New("engine error")
 	mock := &event.LoggerEngineMock{
-		ProduceFunc: func(_ context.Context, _ event.Topic, _ []byte, handleErr func(error)) {
+		ProduceFunc: func(_ event.Topic, _ []byte, handleErr func(error)) {
 			handleErr(err)
 		},
 	}
@@ -133,7 +132,7 @@ func TestLogger_Log_CallsErrHandlerWithErrorFromEngine(t *testing.T) {
 
 	var handlerCalled bool
 	var gotErr error
-	logger.Log(context.Background(), event.Event{}, func(err error) {
+	logger.Log(event.Event{}, func(err error) {
 		handlerCalled = true
 		gotErr = err
 	})
@@ -148,12 +147,12 @@ func TestLogger_Log_CallsErrHandlerWithErrorFromEngine(t *testing.T) {
 }
 
 func TestLogger_Log_CallsErrHandlerWithErrorUnmarshallingInvalidJSON(t *testing.T) {
-	mock := &event.LoggerEngineMock{ProduceFunc: func(_ context.Context, _ event.Topic, _ []byte, _ func(error)) {}}
+	mock := &event.LoggerEngineMock{ProduceFunc: func(_ event.Topic, _ []byte, _ func(error)) {}}
 	logger := &event.Logger{Engine: mock}
 
 	var handlerCalled bool
 	var gotErr error
-	logger.Log(context.Background(), event.Event{Payload: map[string]any{"foo": func() {}}}, func(err error) {
+	logger.Log(event.Event{Payload: map[string]any{"foo": func() {}}}, func(err error) {
 		handlerCalled = true
 		gotErr = err
 	})

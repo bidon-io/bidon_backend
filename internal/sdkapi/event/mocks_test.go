@@ -4,7 +4,6 @@
 package event
 
 import (
-	"context"
 	"sync"
 )
 
@@ -18,7 +17,7 @@ var _ LoggerEngine = &LoggerEngineMock{}
 //
 //		// make and configure a mocked LoggerEngine
 //		mockedLoggerEngine := &LoggerEngineMock{
-//			ProduceFunc: func(ctx context.Context, topic Topic, message []byte, handleErr func(error))  {
+//			ProduceFunc: func(topic Topic, message []byte, handleErr func(error))  {
 //				panic("mock out the Produce method")
 //			},
 //		}
@@ -29,14 +28,12 @@ var _ LoggerEngine = &LoggerEngineMock{}
 //	}
 type LoggerEngineMock struct {
 	// ProduceFunc mocks the Produce method.
-	ProduceFunc func(ctx context.Context, topic Topic, message []byte, handleErr func(error))
+	ProduceFunc func(topic Topic, message []byte, handleErr func(error))
 
 	// calls tracks calls to the methods.
 	calls struct {
 		// Produce holds details about calls to the Produce method.
 		Produce []struct {
-			// Ctx is the ctx argument value.
-			Ctx context.Context
 			// Topic is the topic argument value.
 			Topic Topic
 			// Message is the message argument value.
@@ -49,17 +46,15 @@ type LoggerEngineMock struct {
 }
 
 // Produce calls ProduceFunc.
-func (mock *LoggerEngineMock) Produce(ctx context.Context, topic Topic, message []byte, handleErr func(error)) {
+func (mock *LoggerEngineMock) Produce(topic Topic, message []byte, handleErr func(error)) {
 	if mock.ProduceFunc == nil {
 		panic("LoggerEngineMock.ProduceFunc: method is nil but LoggerEngine.Produce was just called")
 	}
 	callInfo := struct {
-		Ctx       context.Context
 		Topic     Topic
 		Message   []byte
 		HandleErr func(error)
 	}{
-		Ctx:       ctx,
 		Topic:     topic,
 		Message:   message,
 		HandleErr: handleErr,
@@ -67,7 +62,7 @@ func (mock *LoggerEngineMock) Produce(ctx context.Context, topic Topic, message 
 	mock.lockProduce.Lock()
 	mock.calls.Produce = append(mock.calls.Produce, callInfo)
 	mock.lockProduce.Unlock()
-	mock.ProduceFunc(ctx, topic, message, handleErr)
+	mock.ProduceFunc(topic, message, handleErr)
 }
 
 // ProduceCalls gets all the calls that were made to Produce.
@@ -75,13 +70,11 @@ func (mock *LoggerEngineMock) Produce(ctx context.Context, topic Topic, message 
 //
 //	len(mockedLoggerEngine.ProduceCalls())
 func (mock *LoggerEngineMock) ProduceCalls() []struct {
-	Ctx       context.Context
 	Topic     Topic
 	Message   []byte
 	HandleErr func(error)
 } {
 	var calls []struct {
-		Ctx       context.Context
 		Topic     Topic
 		Message   []byte
 		HandleErr func(error)

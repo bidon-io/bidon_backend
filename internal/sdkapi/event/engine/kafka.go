@@ -13,7 +13,7 @@ type Kafka struct {
 	Client *kgo.Client
 }
 
-func (e *Kafka) Produce(ctx context.Context, topic event.Topic, message []byte, handleErr func(error)) {
+func (e *Kafka) Produce(topic event.Topic, message []byte, handleErr func(error)) {
 	topicStr, ok := e.Topics[topic]
 	if !ok {
 		handleErr(fmt.Errorf("unknown topic: %v", topic))
@@ -23,7 +23,7 @@ func (e *Kafka) Produce(ctx context.Context, topic event.Topic, message []byte, 
 		Topic: topicStr,
 		Value: message,
 	}
-	e.Client.Produce(ctx, record, func(r *kgo.Record, err error) {
+	e.Client.Produce(context.Background(), record, func(r *kgo.Record, err error) {
 		if err != nil {
 			handleErr(fmt.Errorf("kafka produce record: %v", err))
 		}
