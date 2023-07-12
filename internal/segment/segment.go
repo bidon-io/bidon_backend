@@ -7,7 +7,7 @@ import (
 
 type Ext struct {
 	Gender            string                 `json:"gender"`
-	TotalInAppsAmount int                    `json:"total_in_apps_amount"`
+	TotalInAppsAmount float64                `json:"total_in_apps_amount"`
 	IsPaying          bool                   `json:"is_paying"`
 	GameLevel         int                    `json:"game_level"`
 	Age               int                    `json:"age"`
