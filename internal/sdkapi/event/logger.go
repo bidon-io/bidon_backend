@@ -1,7 +1,6 @@
 package event
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -15,10 +14,10 @@ type Logger struct {
 
 //go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks_test.go . LoggerEngine
 type LoggerEngine interface {
-	Produce(ctx context.Context, topic Topic, message []byte, handleErr func(error))
+	Produce(topic Topic, message []byte, handleErr func(error))
 }
 
-func (l *Logger) Log(ctx context.Context, event Event, handleErr func(error)) {
+func (l *Logger) Log(event Event, handleErr func(error)) {
 	payload := make(map[string]any)
 	smashMap(payload, event.Payload)
 
@@ -27,7 +26,7 @@ func (l *Logger) Log(ctx context.Context, event Event, handleErr func(error)) {
 		handleErr(fmt.Errorf("marshal event payload: %v", err))
 	}
 
-	l.Engine.Produce(ctx, event.Topic, message, handleErr)
+	l.Engine.Produce(event.Topic, message, handleErr)
 }
 
 func smashMap(dst, src map[string]any, nesting ...string) {
