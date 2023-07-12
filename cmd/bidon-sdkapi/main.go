@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/bidon-io/bidon-backend/internal/bidding"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event/engine"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/geocoder"
@@ -112,6 +113,16 @@ func main() {
 		},
 		EventLogger: &event.Logger{Engine: loggerEngine},
 	}
+	biddingHandler := sdkapi.BiddingHandler{
+		BaseHandler: &sdkapi.BaseHandler[schema.BiddingRequest, *schema.BiddingRequest]{
+			AppFetcher: appFetcher,
+			Geocoder:   geocoder,
+		},
+		SegmentMatcher: &segmentMatcher,
+		BiddingBuilder: &bidding.Builder{
+			ConfigMatcher: &auctionstore.ConfigMatcher{DB: db},
+		},
+	}
 
 	e := config.Echo("bidon-sdkapi", logger)
 
@@ -120,6 +131,7 @@ func main() {
 	e.POST("/config", configHandler.Handle)
 	e.POST("/auction/:ad_type", auctionHandler.Handle)
 	e.POST("/:ad_type/auction", auctionHandler.Handle)
+	e.POST("/bidding/:ad_type", biddingHandler.Handle)
 
 	port := os.Getenv("PORT")
 	if port == "" {
