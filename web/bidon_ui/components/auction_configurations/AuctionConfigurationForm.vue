@@ -49,7 +49,7 @@ const { errors, useFieldModel, handleSubmit } = useForm({
     adType: yup.string().required().label("AdType"),
     pricefloor: yup.number().positive().required().label("Pricefloor"),
     rounds: yup.array().required(),
-    appId: yup.number().required().label("Segment Id"),
+    segmentId: yup.number().required().label("Segment Id"),
     externalWinNotifications: yup.boolean(),
   }),
   initialValues: {
