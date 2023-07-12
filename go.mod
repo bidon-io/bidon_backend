@@ -6,6 +6,7 @@ require (
 	github.com/getsentry/sentry-go v0.22.0
 	github.com/getsentry/sentry-go/otel v0.22.0
 	github.com/go-playground/validator/v10 v10.14.1
+	github.com/gofrs/uuid/v5 v5.0.0
 	github.com/google/go-cmp v0.5.9
 	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo/v4 v4.10.2
