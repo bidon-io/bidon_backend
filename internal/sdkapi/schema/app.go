@@ -7,7 +7,7 @@ type App struct {
 	Version          string   `json:"version" validate:"required"`
 	FrameworkVersion string   `json:"framework_version"`
 	PluginVersion    string   `json:"plugin_version"`
-	Skadn            []string `json:"skadn"`
+	SKAdN            []string `json:"skadn"`
 }
 
 func (a App) Map() map[string]any {
@@ -18,7 +18,10 @@ func (a App) Map() map[string]any {
 		"version":           a.Version,
 		"framework_version": a.FrameworkVersion,
 		"plugin_version":    a.PluginVersion,
-		"skadn":             a.Skadn,
+	}
+
+	if a.SKAdN != nil {
+		m["skadn"] = a.SKAdN
 	}
 
 	return m

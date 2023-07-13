@@ -7,6 +7,16 @@ import (
 
 type Adapters map[adapter.Key]Adapter
 
+func (as Adapters) Map() map[string]any {
+	m := make(map[string]any, len(as))
+
+	for k, a := range as {
+		m[string(k)] = a.Map()
+	}
+
+	return m
+}
+
 func (as Adapters) Keys() []adapter.Key {
 	return maps.Keys(as)
 }
