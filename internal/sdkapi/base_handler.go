@@ -19,6 +19,8 @@ type App struct {
 	ID int64
 }
 
+//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/mocks.go -pkg mocks . AppFetcher Geocoder
+
 type AppFetcher interface {
 	Fetch(ctx context.Context, appKey, appBundle string) (App, error)
 }
