@@ -14,6 +14,9 @@
         <Checkbox v-model="enabled" :binary="true" />
       </FormField>
       <AppDropdown v-model="appId" :error="errors.appId" />
+      <FormField label="Priority" :error="errors.priority">
+        <InputNumber v-model="priority" />
+      </FormField>
       <FormSubmitButton />
     </FormCard>
   </form>
@@ -38,6 +41,7 @@ const { errors, useFieldModel, handleSubmit } = useForm({
     filters: yup.array().required().label("Filters"),
     enabled: yup.boolean(),
     appId: yup.number().required().label("App Id"),
+    priority: yup.number().label("Priority"),
   }),
   initialValues: {
     name: resource.value.name || "",
@@ -45,6 +49,7 @@ const { errors, useFieldModel, handleSubmit } = useForm({
     filters: resource.value.filters || [],
     enabled: resource.value.enabled || false,
     appId: resource.value.appId || null,
+    priority: resource.value.priority || 0,
   },
 });
 
@@ -53,6 +58,7 @@ const description = useFieldModel("description");
 const filters = useFieldModel("filters");
 const enabled = useFieldModel("enabled");
 const appId = useFieldModel("appId");
+const priority = useFieldModel("priority");
 
 const onSubmit = handleSubmit((values) => emit("submit", values));
 </script>
