@@ -1,6 +1,8 @@
 package schema
 
-import "github.com/bidon-io/bidon-backend/internal/ad"
+import (
+	"github.com/bidon-io/bidon-backend/internal/ad"
+)
 
 type AuctionRequest struct {
 	BaseRequest
@@ -15,8 +17,8 @@ func (r *AuctionRequest) Map() map[string]any {
 	m["ad_type"] = r.AdType
 	m["ad_object"] = r.AdObject.Map()
 
-	for key, adapter := range r.Adapters {
-		m[string(key)] = adapter.Map()
+	if r.Adapters != nil {
+		m["adapters"] = r.Adapters.Map()
 	}
 
 	return m
