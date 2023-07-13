@@ -7,6 +7,7 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/auction"
+	auctionmocks "github.com/bidon-io/bidon-backend/internal/auction/mocks"
 	"github.com/google/go-cmp/cmp"
 )
 
@@ -46,12 +47,12 @@ func TestBuilder_Build(t *testing.T) {
 		{ID: "test", PriceFloor: 0.1, AdUnitID: "test_id"},
 	}
 
-	configFetcher := &auction.ConfigMatcherMock{
+	configFetcher := &auctionmocks.ConfigMatcherMock{
 		MatchFunc: func(ctx context.Context, appID int64, adType ad.Type, segmentID int64) (*auction.Config, error) {
 			return config, nil
 		},
 	}
-	lineItemsMatcher := &auction.LineItemsMatcherMock{
+	lineItemsMatcher := &auctionmocks.LineItemsMatcherMock{
 		MatchFunc: func(ctx context.Context, params *auction.BuildParams) ([]auction.LineItem, error) {
 			return lineItems, nil
 		},

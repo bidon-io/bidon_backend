@@ -6,6 +6,7 @@ import (
 
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/config"
+	configmocks "github.com/bidon-io/bidon-backend/internal/config/mocks"
 	"github.com/google/go-cmp/cmp"
 )
 
@@ -76,7 +77,7 @@ func TestAdaptersBuilder_Build(t *testing.T) {
 	}
 
 	for _, tC := range testCases {
-		fetcher := &config.AppDemandProfileFetcherMock{
+		fetcher := &configmocks.AppDemandProfileFetcherMock{
 			FetchFunc: func(ctx context.Context, appID int64, adapterKeys []adapter.Key) ([]config.AppDemandProfile, error) {
 				return tC.profiles, nil
 			},
