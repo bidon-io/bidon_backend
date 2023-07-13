@@ -30,6 +30,7 @@ const fields = [
   { label: "Description", key: "description" },
   { label: "Filters", key: "filters" },
   { label: "Enabled", key: "enabled" },
+  { label: "Priority", key: "priority" },
   ResourceCardFields.App,
 ];
 </script>
