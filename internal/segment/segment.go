@@ -36,34 +36,48 @@ type Matcher struct {
 	Fetcher Fetcher
 }
 
+//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/mocks.go -pkg mocks . Fetcher
+
 type Fetcher interface {
 	Fetch(ctx context.Context, appID int64) ([]Segment, error)
 }
 
 func (m *Matcher) Match(ctx context.Context, params *Params) Segment {
-	dbSgmnts, err := m.Fetcher.Fetch(ctx, params.AppID)
+	sgmnts, err := m.Fetcher.Fetch(ctx, params.AppID)
 	if err != nil {
 		return Segment{ID: 0}
 	}
 
-	for _, dbSgmnt := range dbSgmnts {
-		isMatched := false
-
-		for _, filter := range dbSgmnt.Filters {
-			switch filter.Type {
-			case "country":
-				isMatched = matchCountry(filter, params.Country)
-			case "custom_string":
-				isMatched = matchCustomString(filter, params.Ext)
-			}
-
-			if isMatched {
-				return Segment{ID: dbSgmnt.ID}
-			}
+	for _, sgmnt := range sgmnts {
+		if isSegmentMatch(sgmnt, params) {
+			return Segment{ID: sgmnt.ID}
 		}
 	}
 
 	return Segment{ID: 0}
+}
+
+func isSegmentMatch(sgmnt Segment, params *Params) bool {
+	if len(sgmnt.Filters) == 0 {
+		return false
+	}
+
+	for _, filter := range sgmnt.Filters {
+		switch filter.Type {
+		case "country":
+			if !matchCountry(filter, params.Country) {
+				return false
+			}
+		case "custom_string":
+			if !matchCustomString(filter, params.Ext) {
+				return false
+			}
+		default:
+			return false
+		}
+	}
+
+	return true
 }
 
 func matchCountry(filter Filter, country string) bool {
