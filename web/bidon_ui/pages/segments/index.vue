@@ -12,6 +12,7 @@ const columns = [
   { field: "name", header: "Name" },
   { field: "filters", header: "Filters" },
   { field: "enabled", header: "Enabled" },
+  { field: "priority", header: "Priority" },
 ];
 const resourcesPath = "/segments";
 </script>
