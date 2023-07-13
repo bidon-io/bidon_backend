@@ -8,8 +8,8 @@ type ConfigRequest struct {
 func (r *ConfigRequest) Map() map[string]any {
 	m := r.BaseRequest.Map()
 
-	for key, adapter := range r.Adapters {
-		m[string(key)] = adapter.Map()
+	if r.Adapters != nil {
+		m["adapters"] = r.Adapters.Map()
 	}
 
 	return m
