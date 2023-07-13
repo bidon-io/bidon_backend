@@ -15,7 +15,7 @@ type Builder struct {
 	LineItemsMatcher LineItemsMatcher
 }
 
-//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks_test.go . ConfigMatcher LineItemsMatcher
+//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/mocks.go -pkg mocks . ConfigMatcher LineItemsMatcher
 
 var ErrNoAdsFound = errors.New("no ads found")
 

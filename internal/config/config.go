@@ -21,7 +21,7 @@ type AdaptersBuilder struct {
 	AppDemandProfileFetcher AppDemandProfileFetcher
 }
 
-//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks_test.go . AppDemandProfileFetcher
+//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/mocks.go -pkg mocks . AppDemandProfileFetcher
 
 type AppDemandProfileFetcher interface {
 	// Fetch is used get one profile per adapter key, if present
