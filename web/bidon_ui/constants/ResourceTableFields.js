@@ -14,6 +14,9 @@ export const ResourceTableFields = {
       }),
     },
   },
+  AccountType: { field: "accountType", header: "Account Type" },
+  AdType: { field: "adType", header: "Ad Type" },
+  BidFloor: { field: "bidFloor", header: "Bid Floor" },
   DemandSource: {
     field: "demandSourceId",
     header: "Demand Source",
@@ -38,6 +41,7 @@ export const ResourceTableFields = {
       }),
     },
   },
+  HumanName: { field: "humanName", header: "Human Name" },
   Segment: {
     field: "segmentId",
     header: "Segment",

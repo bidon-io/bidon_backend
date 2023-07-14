@@ -29,7 +29,6 @@ func TestLineItemRepo_List(t *testing.T) {
 	applovinAccount := dbtest.CreateDemandSourceAccount(t, tx, dbtest.WithDemandSourceAccountOptions(&db.DemandSourceAccount{
 		UserID:         user.ID,
 		DemandSourceID: applovinDemandSource.ID,
-		DemandSource:   *applovinDemandSource,
 		Type:           "DemandSourceAccount::Applovin",
 	}))
 
@@ -40,7 +39,6 @@ func TestLineItemRepo_List(t *testing.T) {
 	bidmachineAccount := dbtest.CreateDemandSourceAccount(t, tx, dbtest.WithDemandSourceAccountOptions(&db.DemandSourceAccount{
 		UserID:         user.ID,
 		DemandSourceID: bidmachineDemandSource.ID,
-		DemandSource:   *bidmachineDemandSource,
 		Type:           "DemandSourceAccount::Bidmachine",
 	}))
 
@@ -51,10 +49,10 @@ func TestLineItemRepo_List(t *testing.T) {
 	unityAdsAccount := dbtest.CreateDemandSourceAccount(t, tx, dbtest.WithDemandSourceAccountOptions(&db.DemandSourceAccount{
 		UserID:         user.ID,
 		DemandSourceID: unityAdsDemandSource.ID,
-		DemandSource:   *unityAdsDemandSource,
 		Type:           "DemandSourceAccount::UnityAds",
 	}))
 
+	accounts := []db.DemandSourceAccount{*applovinAccount, *bidmachineAccount, *unityAdsAccount}
 	items := []admin.LineItemAttrs{
 		{
 			HumanName:   "banner",
@@ -99,6 +97,8 @@ func TestLineItemRepo_List(t *testing.T) {
 		}
 
 		want[i] = *item
+		want[i].Account = *store.DemandSourceAccountResource(&accounts[i])
+		want[i].App = *store.AppResource(app)
 	}
 
 	got, err := repo.List(context.Background())
@@ -124,7 +124,6 @@ func TestLineItemRepo_Find(t *testing.T) {
 	}))
 	applovinAccount := dbtest.CreateDemandSourceAccount(t, tx, dbtest.WithDemandSourceAccountOptions(&db.DemandSourceAccount{
 		DemandSourceID: applovinDemandSource.ID,
-		DemandSource:   *applovinDemandSource,
 		Type:           "DemandSourceAccount::Applovin",
 	}))
 
@@ -144,6 +143,8 @@ func TestLineItemRepo_Find(t *testing.T) {
 	if err != nil {
 		t.Fatalf("repo.Create(ctx, %+v) = %v, %q; want %T, %v", attrs, nil, err, want, nil)
 	}
+	want.App = *store.AppResource(app)
+	want.Account = *store.DemandSourceAccountResource(applovinAccount)
 
 	got, err := repo.Find(context.Background(), want.ID)
 	if err != nil {

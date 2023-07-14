@@ -15,7 +15,7 @@ func NewLineItemRepo(db *db.DB) *LineItemRepo {
 	return &LineItemRepo{
 		db:           db,
 		mapper:       lineItemMapper{},
-		associations: []string{},
+		associations: []string{"App", "Account"},
 	}
 }
 
@@ -51,19 +51,31 @@ func (m lineItemMapper) dbModel(i *admin.LineItemAttrs, id int64) *db.LineItem {
 
 //lint:ignore U1000 this method is used by generic struct
 func (m lineItemMapper) resource(i *db.LineItem) admin.LineItem {
-	format := ad.Format(i.Format.String)
 	return admin.LineItem{
-		ID: i.ID,
-		LineItemAttrs: admin.LineItemAttrs{
-			HumanName:   i.HumanName,
-			AppID:       i.AppID,
-			BidFloor:    &i.BidFloor.Decimal,
-			AdType:      i.AdType.Domain(),
-			Format:      &format,
-			AccountID:   i.AccountID,
-			AccountType: i.AccountType,
-			Code:        i.Code,
-			Extra:       i.Extra,
+		ID:            i.ID,
+		LineItemAttrs: m.resourceAttrs(i),
+		App: admin.App{
+			ID:       i.AppID,
+			AppAttrs: appMapper{}.resourceAttrs(&i.App),
 		},
+		Account: admin.DemandSourceAccount{
+			ID:                       i.AccountID,
+			DemandSourceAccountAttrs: demandSourceAccountMapper{}.resourceAttrs(&i.Account),
+		},
+	}
+}
+
+func (m lineItemMapper) resourceAttrs(i *db.LineItem) admin.LineItemAttrs {
+	format := ad.Format(i.Format.String)
+	return admin.LineItemAttrs{
+		HumanName:   i.HumanName,
+		AppID:       i.AppID,
+		BidFloor:    &i.BidFloor.Decimal,
+		AdType:      i.AdType.Domain(),
+		Format:      &format,
+		AccountID:   i.AccountID,
+		AccountType: i.AccountType,
+		Code:        i.Code,
+		Extra:       i.Extra,
 	}
 }

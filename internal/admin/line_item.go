@@ -8,6 +8,8 @@ import (
 type LineItem struct {
 	ID int64 `json:"id"`
 	LineItemAttrs
+	App     App                 `json:"app"`
+	Account DemandSourceAccount `json:"account"`
 }
 
 type LineItemAttrs struct {
