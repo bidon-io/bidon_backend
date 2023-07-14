@@ -49,7 +49,7 @@ const { errors, useFieldModel, handleSubmit } = useForm({
     appId: resource.value.appId || null,
     demandSourceId: resource.value.demandSourceId || null,
     accountId: resource.value.accountId || null,
-    data: resource.value.extra || {},
+    data: resource.value.data || {},
     accountType: resource.value.accountType || "",
   },
 });

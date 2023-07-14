@@ -126,10 +126,11 @@ type DemandSource struct {
 
 type LineItem struct {
 	Model
-	AppID       int64  `gorm:"column:app_id;type:bigint;not null"`
-	AccountType string `gorm:"column:account_type;type:varchar;not null"`
-	AccountID   int64  `gorm:"column:account_id;type:bigint;not null"`
-	Account     DemandSourceAccount
+	AppID       int64               `gorm:"column:app_id;type:bigint;not null"`
+	App         App                 `gorm:"foreignKey:AppID"`
+	AccountType string              `gorm:"column:account_type;type:varchar;not null"`
+	AccountID   int64               `gorm:"column:account_id;type:bigint;not null"`
+	Account     DemandSourceAccount `gorm:"foreignKey:AccountID"`
 	HumanName   string              `gorm:"column:human_name;type:varchar;not null"`
 	Code        *string             `gorm:"column:code;type:varchar;not null"`
 	BidFloor    decimal.NullDecimal `gorm:"column:bid_floor;type:numeric"`
