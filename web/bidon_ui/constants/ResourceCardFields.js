@@ -13,6 +13,9 @@ export const ResourceCardFields = {
       }),
     },
   },
+  AccountType: { label: "Account Type", key: "accountType" },
+  AdType: { label: "Ad Type", key: "adType" },
+  BidFloor: { label: "Bid Floor", key: "bidFloor" },
   DemandSource: {
     label: "Demand Source",
     key: "demandSourceId",
@@ -39,6 +42,7 @@ export const ResourceCardFields = {
       }),
     },
   },
+  HumanName: { label: "Human Name", key: "humanName" },
   Segment: {
     label: "Segment",
     key: "segmentId",
