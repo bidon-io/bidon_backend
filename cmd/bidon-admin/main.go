@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/bidon-io/bidon-backend/cmd/bidon-admin/web"
 	"github.com/bidon-io/bidon-backend/config"
@@ -55,7 +56,15 @@ func main() {
 
 	uiFileSystem, _ := fs.Sub(web.FS, "ui")
 	uiWebServer := http.FileServer(http.FS(uiFileSystem))
-	e.GET("/*", echo.WrapHandler(uiWebServer))
+	e.GET("/*", func(c echo.Context) error {
+		_, err := uiFileSystem.Open(strings.TrimPrefix(c.Request().URL.Path, "/"))
+		if err != nil {
+			c.Request().URL.Path = "/"
+		}
+		echo.WrapHandler(uiWebServer)(c)
+
+		return nil
+	})
 
 	port := os.Getenv("PORT")
 	if port == "" {
