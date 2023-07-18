@@ -10,7 +10,7 @@ type Imp struct {
 	AuctionID       string                         `json:"auction_id" validate:"required,uuid4"`
 	AuctionConfigID int64                          `json:"auction_configuration_id" validate:"required"`
 	RoundID         string                         `json:"round_id" validate:"required"`
-	Bidfloor        float64                        `json:"bidfloor" validate:"required"`
+	BidFloor        float64                        `json:"bidfloor" validate:"required"`
 	Orientation     string                         `json:"orientation" validate:"oneof=PORTRAIT LANDSCAPE"`
 	Demands         map[adapter.Key]map[string]any `json:"demands"`
 	Banner          *BannerAdObject                `json:"banner"`
@@ -24,4 +24,20 @@ func (o *Imp) Format() ad.Format {
 	}
 
 	return ad.EmptyFormat
+}
+
+func (o *Imp) Type() ad.Type {
+	if o.Rewarded != nil {
+		return ad.RewardedType
+	}
+
+	if o.Interstitial != nil {
+		return ad.InterstitialType
+	}
+
+	return ad.BannerType
+}
+
+func (o *Imp) IsPortrait() bool {
+	return o.Orientation == "PORTRAIT"
 }

@@ -12,7 +12,7 @@ type BaseRequest struct {
 	Segment     Segment      `json:"segment"`
 }
 
-func (r *BaseRequest) Map() map[string]any {
+func (r BaseRequest) Map() map[string]any {
 	m := map[string]any{
 		"device":  r.Device.Map(),
 		"session": r.Session.Map(),
@@ -33,11 +33,11 @@ func (r *BaseRequest) Map() map[string]any {
 	return m
 }
 
-func (r *BaseRequest) GetApp() App {
+func (r BaseRequest) GetApp() App {
 	return r.App
 }
 
-func (r *BaseRequest) GetGeo() Geo {
+func (r BaseRequest) GetGeo() Geo {
 	if r.Device.Geo != nil {
 		return *r.Device.Geo
 	} else if r.Geo != nil {
@@ -45,4 +45,12 @@ func (r *BaseRequest) GetGeo() Geo {
 	}
 
 	return Geo{}
+}
+
+func (r BaseRequest) GetRegulations() Regulations {
+	if r.Regulations != nil {
+		return *r.Regulations
+	}
+
+	return Regulations{}
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
@@ -19,6 +20,8 @@ import (
 	"github.com/bidon-io/bidon-backend/config"
 	"github.com/bidon-io/bidon-backend/internal/auction"
 	auctionstore "github.com/bidon-io/bidon-backend/internal/auction/store"
+	"github.com/bidon-io/bidon-backend/internal/bidding/adapters_builder"
+	biddingstore "github.com/bidon-io/bidon-backend/internal/bidding/store"
 	bidonconfig "github.com/bidon-io/bidon-backend/internal/config"
 	configstore "github.com/bidon-io/bidon-backend/internal/config/store"
 	"github.com/bidon-io/bidon-backend/internal/db"
@@ -91,6 +94,15 @@ func main() {
 	segmentMatcher := segment.Matcher{
 		Fetcher: &segmentstore.SegmentFetcher{DB: db},
 	}
+
+	biddingHttpClient := &http.Client{
+		Timeout: 5 * time.Second,
+		Transport: &http.Transport{
+			MaxConnsPerHost:     50,
+			MaxIdleConns:        50,
+			MaxIdleConnsPerHost: 50, // TODO: Move to config
+		},
+	}
 	auctionHandler := sdkapi.AuctionHandler{
 		BaseHandler: &sdkapi.BaseHandler[schema.AuctionRequest, *schema.AuctionRequest]{
 			AppFetcher: appFetcher,
@@ -120,7 +132,11 @@ func main() {
 		},
 		SegmentMatcher: &segmentMatcher,
 		BiddingBuilder: &bidding.Builder{
-			ConfigMatcher: &auctionstore.ConfigMatcher{DB: db},
+			ConfigMatcher:   &auctionstore.ConfigMatcher{DB: db},
+			AdaptersBuilder: adapters_builder.BuildBiddingAdapters(biddingHttpClient),
+		},
+		AdaptersConfigBuilder: &adapters_builder.AdaptersConfigBuilder{
+			AppDemandProfileFetcher: &biddingstore.AppDemandProfileFetcher{DB: db},
 		},
 	}
 
