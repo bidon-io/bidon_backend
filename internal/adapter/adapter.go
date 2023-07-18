@@ -2,6 +2,8 @@ package adapter
 
 type Key string
 
+type Config map[Key]map[string]any
+
 const (
 	// Sorted alphabetically
 	AdmobKey      Key = "admob"

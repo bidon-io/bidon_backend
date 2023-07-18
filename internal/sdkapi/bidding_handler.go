@@ -1,20 +1,23 @@
 package sdkapi
 
 import (
+	"context"
 	"net/http"
+	"time"
 
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/bidding"
+	"github.com/bidon-io/bidon-backend/internal/bidding/adapters_builder"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	"github.com/bidon-io/bidon-backend/internal/segment"
-	"github.com/gofrs/uuid/v5"
 	"github.com/labstack/echo/v4"
 )
 
 type BiddingHandler struct {
 	*BaseHandler[schema.BiddingRequest, *schema.BiddingRequest]
-	BiddingBuilder *bidding.Builder
-	SegmentMatcher *segment.Matcher
+	BiddingBuilder        *bidding.Builder
+	SegmentMatcher        *segment.Matcher
+	AdaptersConfigBuilder *adapters_builder.AdaptersConfigBuilder
 }
 
 type BiddingResponse struct {
@@ -23,12 +26,12 @@ type BiddingResponse struct {
 }
 
 type Bid struct {
-	ID       uuid.UUID              `json:"id"`
-	ImpID    uuid.UUID              `json:"impid"`
+	ID       string                 `json:"id"`
+	ImpID    string                 `json:"impid"`
 	Price    float64                `json:"price"`
 	Payload  string                 `json:"payload"`
 	DemandID adapter.Key            `json:"demand_id"`
-	Ext      map[string]interface{} `json:"ext"`
+	Ext      map[string]interface{} `json:"ext,omitempty"` // TODO: remove interface{} with concrete type
 }
 
 func (h *BiddingHandler) Handle(c echo.Context) error {
@@ -37,24 +40,38 @@ func (h *BiddingHandler) Handle(c echo.Context) error {
 		return err
 	}
 
+	start := time.Now()
+
+	ctx := c.Request().Context()
+
+	timeout := time.Duration(req.raw.TMax) * time.Millisecond
+	if timeout > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithDeadline(ctx, start.Add(timeout))
+		defer cancel()
+	}
+
 	segmentParams := &segment.Params{
 		Country: req.countryCode(),
 		Ext:     req.raw.Segment.Ext,
 		AppID:   req.app.ID,
 	}
 
-	sgmnt := h.SegmentMatcher.Match(c.Request().Context(), segmentParams)
+	sgmnt := h.SegmentMatcher.Match(ctx, segmentParams)
+	adapterConfigs, err := h.AdaptersConfigBuilder.Build(ctx, req.app.ID, req.raw.Adapters.Keys())
+	if err != nil {
+		return err
+	}
 
 	params := &bidding.BuildParams{
-		AppID:      req.app.ID,
-		AdType:     req.raw.AdType,
-		AdFormat:   req.raw.Imp.Format(),
-		DeviceType: req.raw.Device.Type,
-		Adapters:   req.raw.Adapters.Keys(),
-		SegmentID:  sgmnt.ID,
+		AppID:          req.app.ID,
+		BiddingRequest: req.raw,
+		SegmentID:      sgmnt.ID,
+		GeoData:        req.geoData,
+		AdapterConfigs: adapterConfigs,
 	}
-	bid, err := h.BiddingBuilder.Build(c.Request().Context(), params)
-	if err != nil {
+	result, err := h.BiddingBuilder.HoldAuction(ctx, params)
+	if err != nil && err != bidding.ErrNoBids {
 		return err
 	}
 
@@ -62,15 +79,13 @@ func (h *BiddingHandler) Handle(c echo.Context) error {
 		Status: "NO_BID",
 	}
 
-	if bid.IsBid() {
-		id, _ := uuid.NewV4()    // Temporary stub
-		impid, _ := uuid.NewV4() // Temporary stub
+	if result.IsBid() {
 		response.Bid = &Bid{
-			ID:       id,
-			ImpID:    impid,
-			Price:    bid.Price,
-			Payload:  "Some payload",
-			DemandID: adapter.BidmachineKey,
+			ID:       result.Bid.ID,
+			ImpID:    result.Bid.ImpID,
+			Price:    result.Bid.Price,
+			Payload:  result.Bid.Payload,
+			DemandID: result.Bid.DemandID,
 		}
 		response.Status = "SUCCESS"
 
