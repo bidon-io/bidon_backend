@@ -11,6 +11,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo/v4 v4.10.2
 	github.com/oschwald/maxminddb-golang v1.11.0
+	github.com/prebid/openrtb/v19 v19.0.0
 	github.com/shopspring/decimal v1.3.1
 	github.com/twmb/franz-go v1.13.6
 	github.com/uptrace/opentelemetry-go-extra/otelgorm v0.2.2
