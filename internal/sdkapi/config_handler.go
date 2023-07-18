@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/config"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
@@ -31,8 +32,8 @@ type Segment struct {
 }
 
 type ConfigResponseInit struct {
-	TMax     int             `json:"tmax"`
-	Adapters config.Adapters `json:"adapters"`
+	TMax     int            `json:"tmax"`
+	Adapters adapter.Config `json:"adapters"`
 }
 
 func (h *ConfigHandler) Handle(c echo.Context) error {

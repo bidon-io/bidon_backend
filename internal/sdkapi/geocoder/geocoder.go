@@ -37,13 +37,11 @@ type MmdbGeoData struct {
 		ISOCode string `maxminddb:"iso_code"`
 	} `maxminddb:"country"`
 	City struct {
-		Name string `maxminddb:"name"`
+		Names map[string]string `maxminddb:"names"`
 	} `maxminddb:"city"`
-	Subdivisions struct {
-		MostSpecific struct {
-			Name    string `maxminddb:"name"`
-			ISOCode string `maxminddb:"iso_code"`
-		} `maxminddb:"most_specific"`
+	Subdivisions []struct {
+		Names   map[string]string `maxminddb:"names"`
+		ISOCode string            `maxminddb:"iso_code"`
 	} `maxminddb:"subdivisions"`
 	Location struct {
 		Latitude       float64 `maxminddb:"latitude"`
@@ -54,8 +52,37 @@ type MmdbGeoData struct {
 		Code string `maxminddb:"code"`
 	} `maxminddb:"postal"`
 	Continent struct {
-		Name string `maxminddb:"name"`
+		Code  string            `maxminddb:"code"`
+		Names map[string]string `maxminddb:"names"`
 	}
+}
+
+func (g *MmdbGeoData) ContinentName() string {
+	return g.Continent.Names["en"]
+}
+
+func (g *MmdbGeoData) CountryCode() string {
+	return g.Country.ISOCode
+}
+
+func (g *MmdbGeoData) CityName() string {
+	return g.City.Names["en"]
+}
+
+func (g *MmdbGeoData) SubdivisionName() string {
+	if len(g.Subdivisions) == 0 {
+		return ""
+	}
+
+	return g.Subdivisions[0].Names["en"]
+}
+
+func (g *MmdbGeoData) SubdivisionCode() string {
+	if len(g.Subdivisions) == 0 {
+		return ""
+	}
+
+	return g.Subdivisions[0].ISOCode
 }
 
 const (
@@ -80,7 +107,7 @@ func (g *Geocoder) Lookup(ctx context.Context, ipString string) (GeoData, error)
 	var mmdbGeoData MmdbGeoData
 	ip := net.ParseIP(ipString)
 
-	err := g.lookupIP(ip, mmdbGeoData)
+	err := g.lookupIP(ip, &mmdbGeoData)
 	if err != nil {
 		return geoData, err
 	}
@@ -95,9 +122,9 @@ func (g *Geocoder) Lookup(ctx context.Context, ipString string) (GeoData, error)
 	geoData.CountryCode3 = country.Alpha3Code
 	geoData.UnknownCountry = countryCode == UNKNOWN_COUNTRY_CODE
 	geoData.CountryID = country.ID
-	geoData.CityName = mmdbGeoData.City.Name
-	geoData.RegionName = mmdbGeoData.Subdivisions.MostSpecific.Name
-	geoData.RegionCode = mmdbGeoData.Subdivisions.MostSpecific.ISOCode
+	geoData.CityName = mmdbGeoData.CityName()
+	geoData.RegionName = mmdbGeoData.SubdivisionName()
+	geoData.RegionCode = mmdbGeoData.SubdivisionCode()
 	geoData.Lat = mmdbGeoData.Location.Latitude
 	geoData.Lon = mmdbGeoData.Location.Longitude
 	geoData.Accuracy = mmdbGeoData.Location.AccuracyRadius * 1000 // convert kilometers to meters
@@ -108,8 +135,8 @@ func (g *Geocoder) Lookup(ctx context.Context, ipString string) (GeoData, error)
 	return geoData, nil
 }
 
-func (g *Geocoder) lookupIP(ip net.IP, mmdbGeoData MmdbGeoData) error {
-	err := g.MaxMindDB.Lookup(ip, &mmdbGeoData)
+func (g *Geocoder) lookupIP(ip net.IP, mmdbGeoData *MmdbGeoData) error {
+	err := g.MaxMindDB.Lookup(ip, mmdbGeoData)
 	if err != nil {
 		return err
 	}
@@ -121,7 +148,7 @@ func (g *Geocoder) countryCodeFor(mmdbGeoData MmdbGeoData) string {
 		return mmdbGeoData.Country.ISOCode
 	}
 
-	if code, ok := DEFAULT_COUNTRY_CODES_FOR_CONTINENTS[mmdbGeoData.Continent.Name]; ok {
+	if code, ok := DEFAULT_COUNTRY_CODES_FOR_CONTINENTS[mmdbGeoData.ContinentName()]; ok {
 		return code
 	}
 

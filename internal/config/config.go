@@ -6,10 +6,8 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 )
 
-type Adapters map[adapter.Key]map[string]any
-
-func NewAdapters(keys []adapter.Key) Adapters {
-	adapters := make(Adapters, len(keys))
+func NewAdapters(keys []adapter.Key) adapter.Config {
+	adapters := make(adapter.Config, len(keys))
 	for _, key := range keys {
 		// explicitly initialize with empty maps. nil maps are serialized to `null` in json, empty maps are serialized to `{}`
 		adapters[key] = map[string]any{}
@@ -33,7 +31,7 @@ type AppDemandProfile struct {
 	AccountExtra map[string]any
 }
 
-func (b *AdaptersBuilder) Build(ctx context.Context, appID int64, adapterKeys []adapter.Key) (Adapters, error) {
+func (b *AdaptersBuilder) Build(ctx context.Context, appID int64, adapterKeys []adapter.Key) (adapter.Config, error) {
 	profiles, err := b.AppDemandProfileFetcher.Fetch(ctx, appID, adapterKeys)
 	if err != nil {
 		return nil, err

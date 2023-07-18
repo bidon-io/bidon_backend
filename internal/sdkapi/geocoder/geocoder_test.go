@@ -54,7 +54,6 @@ func TestFindGeoData(t *testing.T) {
 
 	// Call the method being tested
 	result, err := geocoder.Lookup(context.Background(), ipString)
-
 	// Perform assertions on the result and error
 	// Example assertions:
 	if err != nil {
@@ -86,7 +85,7 @@ func TestLookupIP(t *testing.T) {
 	var geoData MmdbGeoData
 
 	// Call the method being tested
-	err = geocoder.lookupIP(ip, geoData)
+	err = geocoder.lookupIP(ip, &geoData)
 
 	// Perform assertions on the error
 	// Example assertions:
@@ -146,7 +145,6 @@ func TestFindCachedCountry(t *testing.T) {
 
 	// Call the method being tested
 	country, err := geocoder.findCountry(ctx, countryCode)
-
 	// Perform assertions on the country and error
 	// Example assertions:
 	if err != nil {

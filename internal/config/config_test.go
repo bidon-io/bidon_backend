@@ -32,7 +32,7 @@ func TestAdaptersBuilder_Build(t *testing.T) {
 		name        string
 		profiles    []config.AppDemandProfile
 		adapterKeys []adapter.Key
-		want        config.Adapters
+		want        adapter.Config
 	}{
 		{
 			name:        "All keys, no profiles",
@@ -44,13 +44,13 @@ func TestAdaptersBuilder_Build(t *testing.T) {
 			name:        "No keys",
 			profiles:    nil,
 			adapterKeys: []adapter.Key{},
-			want:        config.Adapters{},
+			want:        adapter.Config{},
 		},
 		{
 			name:        "All keys match all profiles",
 			profiles:    profiles,
 			adapterKeys: []adapter.Key{adapter.ApplovinKey, adapter.BidmachineKey, adapter.DTExchangeKey, adapter.UnityAdsKey},
-			want: config.Adapters{
+			want: adapter.Config{
 				adapter.ApplovinKey: map[string]any{
 					"app_key": applovinProfile.AccountExtra["api_key"],
 				},
@@ -67,7 +67,7 @@ func TestAdaptersBuilder_Build(t *testing.T) {
 			name:        "Some keys do not have matching profile",
 			profiles:    []config.AppDemandProfile{dtExchangeProfile, unityAdsProfile},
 			adapterKeys: []adapter.Key{adapter.ApplovinKey, adapter.BidmachineKey, adapter.DTExchangeKey, adapter.UnityAdsKey},
-			want: config.Adapters{
+			want: adapter.Config{
 				adapter.ApplovinKey:   map[string]any{},
 				adapter.BidmachineKey: map[string]any{},
 				adapter.DTExchangeKey: dtExchangeProfile.AccountExtra,
