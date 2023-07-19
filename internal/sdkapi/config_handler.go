@@ -54,6 +54,7 @@ func (h *ConfigHandler) Handle(c echo.Context) error {
 	segmentParams := &segment.Params{
 		Country: req.countryCode(),
 		Ext:     req.raw.Segment.Ext,
+		AppID:   req.app.ID,
 	}
 
 	sgmnt := h.SegmentMatcher.Match(ctx, segmentParams)
