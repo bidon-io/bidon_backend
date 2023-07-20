@@ -78,6 +78,7 @@ func (m auctionConfigurationMapper) resourceAttrs(c *db.AuctionConfiguration) ad
 		AppID:                    c.AppID,
 		AdType:                   c.AdType.Domain(),
 		Rounds:                   c.Rounds,
+		Pricefloor:               c.Pricefloor,
 		SegmentID:                segmentID,
 		ExternalWinNotifications: c.ExternalWinNotifications,
 	}
