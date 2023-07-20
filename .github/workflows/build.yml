@@ -57,7 +57,11 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Build and Push image
-        run: make docker-build-push-prod-${{ matrix.component }} TAG=$TAG
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: 12
+          max_attempts: 3
+          command: make docker-build-push-prod-${{ matrix.component }} TAG=$TAG
 
   deploy:
     name: Deploy
