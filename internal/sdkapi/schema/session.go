@@ -1,7 +1,7 @@
 package schema
 
 type Session struct {
-	ID                        string   `json:"id" validate:"required"`
+	ID                        string   `json:"id" validate:"required,uuid"`
 	LaunchTS                  int      `json:"launch_ts" validate:"required"`
 	LaunchMonotonicTS         int      `json:"launch_monotonic_ts" validate:"required"`
 	StartTS                   int      `json:"start_ts" validate:"required"`
