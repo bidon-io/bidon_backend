@@ -88,6 +88,7 @@ func main() {
 	} else {
 		loggerEngine = &engine.Log{}
 	}
+	eventLogger := &event.Logger{Engine: loggerEngine}
 
 	appFetcher := &sdkapistore.AppFetcher{DB: db}
 	geocoder := &geocoder.Geocoder{DB: db, MaxMindDB: maxMindDB}
@@ -103,6 +104,7 @@ func main() {
 			MaxIdleConnsPerHost: 50, // TODO: Move to config
 		},
 	}
+
 	auctionHandler := sdkapi.AuctionHandler{
 		BaseHandler: &sdkapi.BaseHandler[schema.AuctionRequest, *schema.AuctionRequest]{
 			AppFetcher: appFetcher,
@@ -123,7 +125,7 @@ func main() {
 		AdaptersBuilder: &bidonconfig.AdaptersBuilder{
 			AppDemandProfileFetcher: &configstore.AppDemandProfileFetcher{DB: db},
 		},
-		EventLogger: &event.Logger{Engine: loggerEngine},
+		EventLogger: eventLogger,
 	}
 	biddingHandler := sdkapi.BiddingHandler{
 		BaseHandler: &sdkapi.BaseHandler[schema.BiddingRequest, *schema.BiddingRequest]{
@@ -139,6 +141,13 @@ func main() {
 			AppDemandProfileFetcher: &biddingstore.AppDemandProfileFetcher{DB: db},
 		},
 	}
+	statsHandler := sdkapi.StatsHandler{
+		BaseHandler: &sdkapi.BaseHandler[schema.StatsRequest, *schema.StatsRequest]{
+			AppFetcher: appFetcher,
+			Geocoder:   geocoder,
+		},
+		EventLogger: eventLogger,
+	}
 
 	e := config.Echo("bidon-sdkapi", logger)
 
@@ -148,6 +157,8 @@ func main() {
 	e.POST("/auction/:ad_type", auctionHandler.Handle)
 	e.POST("/:ad_type/auction", auctionHandler.Handle)
 	e.POST("/bidding/:ad_type", biddingHandler.Handle)
+	e.POST("/stats/:ad_type", statsHandler.Handle)
+	e.POST("/:ad_type/stats", statsHandler.Handle)
 
 	port := os.Getenv("PORT")
 	if port == "" {
