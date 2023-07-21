@@ -1,5 +1,7 @@
 package schema
 
+import "strings"
+
 type BaseRequest struct {
 	Device      Device       `json:"device" validate:"required"`
 	Session     Session      `json:"session" validate:"required"`
@@ -53,4 +55,11 @@ func (r BaseRequest) GetRegulations() Regulations {
 	}
 
 	return Regulations{}
+}
+
+func (r *BaseRequest) NormalizeValues() {
+	r.User.IDFA = strings.ToLower(r.User.IDFA)
+	r.User.IDFV = strings.ToLower(r.User.IDFV)
+	r.User.IDG = strings.ToLower(r.User.IDG)
+	r.Session.ID = strings.ToLower(r.Session.ID)
 }
