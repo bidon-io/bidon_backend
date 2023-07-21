@@ -36,11 +36,14 @@ func (b *BaseHandler[T, PT]) resolveRequest(c echo.Context) (*request[T, PT], er
 		return nil, err
 	}
 
+	req := PT(&raw)
+	req.NormalizeValues()
+
 	if err := c.Validate(&raw); err != nil {
 		return nil, err
 	}
 
-	rawApp := PT(&raw).GetApp()
+	rawApp := req.GetApp()
 	app, err := b.AppFetcher.Fetch(c.Request().Context(), rawApp.Key, rawApp.Bundle)
 	if err != nil {
 		return nil, err
@@ -62,6 +65,7 @@ type rawRequest[T any] interface {
 	*T
 	GetApp() schema.App
 	GetGeo() schema.Geo
+	NormalizeValues()
 }
 
 // request wraps raw request and includes additional data that is needed for all sdkapi handlers
