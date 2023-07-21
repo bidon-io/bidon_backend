@@ -3,9 +3,6 @@ package event
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
-
-	"golang.org/x/exp/slices"
 )
 
 type Logger struct {
@@ -14,34 +11,48 @@ type Logger struct {
 
 //go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks_test.go . LoggerEngine
 type LoggerEngine interface {
-	Produce(topic Topic, message []byte, handleErr func(error))
+	Produce(message LogMessage, handleErr func(error))
+}
+
+type LogMessage struct {
+	Topic Topic
+	Value []byte
 }
 
 func (l *Logger) Log(event Event, handleErr func(error)) {
-	payload := make(map[string]any)
-	smashMap(payload, event.Payload)
+	events := append(event.Children(), event)
+	messages := make([]LogMessage, len(events))
 
-	message, err := json.Marshal(payload)
-	if err != nil {
-		handleErr(fmt.Errorf("marshal event payload: %v", err))
+	goodToProduce := true
+	for i, event := range events {
+		topic := event.Topic()
+
+		payload, err := event.Payload()
+		if err != nil {
+			handleErr(fmt.Errorf("prepare %q event payload: %v", topic, err))
+		}
+
+		message, err := json.Marshal(payload)
+		if err != nil {
+			handleErr(fmt.Errorf("marshal %q event payload: %v", topic, err))
+			goodToProduce = false
+		}
+
+		messages[i] = LogMessage{
+			Topic: topic,
+			Value: message,
+		}
 	}
 
-	l.Engine.Produce(event.Topic, message, handleErr)
-}
+	// Event must be batched together with children. Either all or none.
+	if !goodToProduce {
+		return
+	}
 
-func smashMap(dst, src map[string]any, nesting ...string) {
-	prefix := strings.Join(nesting, "__")
-
-	for key, value := range src {
-		mapValue, ok := value.(map[string]any)
-		if ok {
-			n := slices.Clone(nesting)
-			n = append(n, key)
-			smashMap(dst, mapValue, n...)
-		} else if prefix != "" {
-			dst[fmt.Sprintf("%s__%s", prefix, key)] = value
-		} else {
-			dst[key] = value
-		}
+	for _, message := range messages {
+		message := message
+		l.Engine.Produce(message, func(err error) {
+			handleErr(fmt.Errorf("produce %q message: %v", message.Topic, err))
+		})
 	}
 }

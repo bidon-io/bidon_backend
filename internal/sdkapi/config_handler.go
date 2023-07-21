@@ -43,11 +43,8 @@ func (h *ConfigHandler) Handle(c echo.Context) error {
 	}
 	ctx := c.Request().Context()
 
-	event, err := event.Prepare(event.ConfigTopic, &req.raw, req.geoData)
-	if err != nil {
-		logError(c, fmt.Errorf("prepare config event: %v", err))
-	}
-	h.EventLogger.Log(event, func(err error) {
+	configEvent := event.NewConfig(&req.raw, req.geoData)
+	h.EventLogger.Log(configEvent, func(err error) {
 		logError(c, fmt.Errorf("log config event: %v", err))
 	})
 

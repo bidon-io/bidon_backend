@@ -6,10 +6,10 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
 )
 
-type Log struct {
-	Topics map[event.Topic]string
-}
+type Log struct{}
 
-func (e *Log) Produce(topic event.Topic, message []byte, handleErr func(error)) {
-	log.Printf("PRODUCE EVENT %T(%v): %s", topic, topic, message)
+func (e *Log) Produce(message event.LogMessage, _ func(error)) {
+	topic := message.Topic
+	value := message.Value
+	log.Printf("PRODUCE EVENT %T(%v): %s", topic, topic, value)
 }

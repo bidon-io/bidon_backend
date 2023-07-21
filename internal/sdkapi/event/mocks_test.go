@@ -17,7 +17,7 @@ var _ LoggerEngine = &LoggerEngineMock{}
 //
 //		// make and configure a mocked LoggerEngine
 //		mockedLoggerEngine := &LoggerEngineMock{
-//			ProduceFunc: func(topic Topic, message []byte, handleErr func(error))  {
+//			ProduceFunc: func(message LogMessage, handleErr func(error))  {
 //				panic("mock out the Produce method")
 //			},
 //		}
@@ -28,16 +28,14 @@ var _ LoggerEngine = &LoggerEngineMock{}
 //	}
 type LoggerEngineMock struct {
 	// ProduceFunc mocks the Produce method.
-	ProduceFunc func(topic Topic, message []byte, handleErr func(error))
+	ProduceFunc func(message LogMessage, handleErr func(error))
 
 	// calls tracks calls to the methods.
 	calls struct {
 		// Produce holds details about calls to the Produce method.
 		Produce []struct {
-			// Topic is the topic argument value.
-			Topic Topic
 			// Message is the message argument value.
-			Message []byte
+			Message LogMessage
 			// HandleErr is the handleErr argument value.
 			HandleErr func(error)
 		}
@@ -46,23 +44,21 @@ type LoggerEngineMock struct {
 }
 
 // Produce calls ProduceFunc.
-func (mock *LoggerEngineMock) Produce(topic Topic, message []byte, handleErr func(error)) {
+func (mock *LoggerEngineMock) Produce(message LogMessage, handleErr func(error)) {
 	if mock.ProduceFunc == nil {
 		panic("LoggerEngineMock.ProduceFunc: method is nil but LoggerEngine.Produce was just called")
 	}
 	callInfo := struct {
-		Topic     Topic
-		Message   []byte
+		Message   LogMessage
 		HandleErr func(error)
 	}{
-		Topic:     topic,
 		Message:   message,
 		HandleErr: handleErr,
 	}
 	mock.lockProduce.Lock()
 	mock.calls.Produce = append(mock.calls.Produce, callInfo)
 	mock.lockProduce.Unlock()
-	mock.ProduceFunc(topic, message, handleErr)
+	mock.ProduceFunc(message, handleErr)
 }
 
 // ProduceCalls gets all the calls that were made to Produce.
@@ -70,13 +66,11 @@ func (mock *LoggerEngineMock) Produce(topic Topic, message []byte, handleErr fun
 //
 //	len(mockedLoggerEngine.ProduceCalls())
 func (mock *LoggerEngineMock) ProduceCalls() []struct {
-	Topic     Topic
-	Message   []byte
+	Message   LogMessage
 	HandleErr func(error)
 } {
 	var calls []struct {
-		Topic     Topic
-		Message   []byte
+		Message   LogMessage
 		HandleErr func(error)
 	}
 	mock.lockProduce.RLock()

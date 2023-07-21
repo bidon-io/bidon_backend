@@ -1,31 +1,31 @@
-package event_test
+package event
 
 import (
 	"errors"
 	"testing"
 
-	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/geocoder"
 	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-cmp/cmp/cmpopts"
 )
 
-type requestMapper map[string]any
+type testMapper map[string]any
 
-func (m requestMapper) Map() map[string]any {
+func (m testMapper) Map() map[string]any {
 	return m
 }
 
-func TestPrepare(t *testing.T) {
+func TestPrepareEventPayload(t *testing.T) {
 	type in struct {
-		topic   event.Topic
-		mapper  event.RequestMapper
-		geoData geocoder.GeoData
+		timestamp     float64
+		requestMapper mapper
+		geoData       geocoder.GeoData
 	}
 	type want struct {
-		event event.Event
-		err   error
+		payload map[string]any
+		err     error
 	}
+
+	timestamp := generateTimestamp()
 
 	tests := []struct {
 		name string
@@ -35,17 +35,13 @@ func TestPrepare(t *testing.T) {
 		{
 			"empty request and no geo data",
 			in{
-				event.ConfigTopic,
-				requestMapper{},
+				timestamp,
+				testMapper{},
 				geocoder.GeoData{},
 			},
 			want{
-				event.Event{
-					Topic: event.ConfigTopic,
-					Payload: map[string]any{
-						"geo": map[string]any{},
-						"ext": map[string]any{},
-					},
+				map[string]any{
+					"timestamp": timestamp,
 				},
 				nil,
 			},
@@ -53,22 +49,28 @@ func TestPrepare(t *testing.T) {
 		{
 			"filled request and no geo data",
 			in{
-				event.ConfigTopic,
-				requestMapper{
-					"foo": "foo",
-					"bar": "bar",
+				timestamp,
+				testMapper{
+					"foo": map[string]any{
+						"foo": map[string]any{
+							"foo": "foo",
+						},
+						"bar": "bar",
+					},
+					"bar": map[string]any{
+						"bar": "bar",
+					},
+					"baz": "baz",
 				},
 				geocoder.GeoData{},
 			},
 			want{
-				event.Event{
-					Topic: event.ConfigTopic,
-					Payload: map[string]any{
-						"foo": "foo",
-						"bar": "bar",
-						"geo": map[string]any{},
-						"ext": map[string]any{},
-					},
+				map[string]any{
+					"timestamp":     timestamp,
+					"foo__foo__foo": "foo",
+					"foo__bar":      "bar",
+					"bar__bar":      "bar",
+					"baz":           "baz",
 				},
 				nil,
 			},
@@ -76,21 +78,16 @@ func TestPrepare(t *testing.T) {
 		{
 			"empty request and present geo data",
 			in{
-				event.ConfigTopic,
-				requestMapper{},
+				timestamp,
+				testMapper{},
 				geocoder.GeoData{IPString: "8.8.8.8", CountryCode: "US", CountryID: 1},
 			},
 			want{
-				event.Event{
-					Topic: event.ConfigTopic,
-					Payload: map[string]any{
-						"geo": map[string]any{
-							"ip":         "8.8.8.8",
-							"country":    "US",
-							"country_id": int64(1),
-						},
-						"ext": map[string]any{},
-					},
+				map[string]any{
+					"timestamp":       timestamp,
+					"geo__ip":         "8.8.8.8",
+					"geo__country":    "US",
+					"geo__country_id": int64(1),
 				},
 				nil,
 			},
@@ -98,8 +95,8 @@ func TestPrepare(t *testing.T) {
 		{
 			"request with geo and present geo data",
 			in{
-				event.ConfigTopic,
-				requestMapper{
+				timestamp,
+				testMapper{
 					"geo": map[string]any{
 						"ip":         "1.1.1.1",
 						"country":    "GB",
@@ -110,17 +107,12 @@ func TestPrepare(t *testing.T) {
 				geocoder.GeoData{IPString: "8.8.8.8", CountryCode: "US", CountryID: 1},
 			},
 			want{
-				event.Event{
-					Topic: event.ConfigTopic,
-					Payload: map[string]any{
-						"geo": map[string]any{
-							"ip":         "8.8.8.8",
-							"country":    "US",
-							"country_id": int64(1),
-							"ext":        "something",
-						},
-						"ext": map[string]any{},
-					},
+				map[string]any{
+					"timestamp":       timestamp,
+					"geo__ip":         "8.8.8.8",
+					"geo__country":    "US",
+					"geo__country_id": int64(1),
+					"geo__ext":        "something",
 				},
 				nil,
 			},
@@ -128,19 +120,15 @@ func TestPrepare(t *testing.T) {
 		{
 			"request with empty ext and no geo data",
 			in{
-				event.ConfigTopic,
-				requestMapper{
+				timestamp,
+				testMapper{
 					"ext": "",
 				},
 				geocoder.GeoData{},
 			},
 			want{
-				event.Event{
-					Topic: event.ConfigTopic,
-					Payload: map[string]any{
-						"geo": map[string]any{},
-						"ext": map[string]any{},
-					},
+				map[string]any{
+					"timestamp": timestamp,
 				},
 				nil,
 			},
@@ -148,21 +136,17 @@ func TestPrepare(t *testing.T) {
 		{
 			"request with filled ext and no geo data",
 			in{
-				event.ConfigTopic,
-				requestMapper{
-					"ext": `{"foo": "foo"}`,
+				timestamp,
+				testMapper{
+					"ext": `{"foo": {"foo": "foo"}, "bar": "bar"}`,
 				},
 				geocoder.GeoData{},
 			},
 			want{
-				event.Event{
-					Topic: event.ConfigTopic,
-					Payload: map[string]any{
-						"geo": map[string]any{},
-						"ext": map[string]any{
-							"foo": "foo",
-						},
-					},
+				map[string]any{
+					"timestamp":     timestamp,
+					"ext__foo__foo": "foo",
+					"ext__bar":      "bar",
 				},
 				nil,
 			},
@@ -170,19 +154,15 @@ func TestPrepare(t *testing.T) {
 		{
 			"request with invalid ext and no geo data",
 			in{
-				event.ConfigTopic,
-				requestMapper{
+				timestamp,
+				testMapper{
 					"ext": `"foo": "foo"`,
 				},
 				geocoder.GeoData{},
 			},
 			want{
-				event.Event{
-					Topic: event.ConfigTopic,
-					Payload: map[string]any{
-						"geo": map[string]any{},
-						"ext": map[string]any{},
-					},
+				map[string]any{
+					"timestamp": timestamp,
 				},
 				errors.New("message not important"),
 			},
@@ -191,22 +171,14 @@ func TestPrepare(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			got, err := event.Prepare(test.in.topic, test.in.mapper, test.in.geoData)
+			got, err := prepareEventPayload(test.in.timestamp, test.in.requestMapper, test.in.geoData)
 
-			ignoreTSEntry := cmpopts.IgnoreMapEntries(func(key string, _ any) bool {
-				return key == "timestamp"
-			})
-			if diff := cmp.Diff(test.want.event, got, ignoreTSEntry); diff != "" {
-				t.Errorf("%v: event.Prepare() mismatch (-out +got):\n%s", test.name, diff)
-			}
-
-			tsVal := got.Payload["timestamp"]
-			if ts, _ := tsVal.(float64); ts == 0 {
-				t.Errorf("%v: event.Prepare() got timestamp %T(%v), out non-zero float64", test.name, tsVal, tsVal)
+			if diff := cmp.Diff(test.want.payload, got); diff != "" {
+				t.Errorf("%v: prepareEventPayload() mismatch (-want +got):\n%s", test.name, diff)
 			}
 
 			if err != test.want.err && (err == nil || test.want.err == nil) {
-				t.Errorf("%v: event.Prepare() got error %q, out error %q", test.name, err, test.want.err)
+				t.Errorf("%v: prepareEventPayload() got error %q, want error %q", test.name, err, test.want.err)
 			}
 		})
 	}
