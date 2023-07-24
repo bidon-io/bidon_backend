@@ -17,7 +17,8 @@ func (e *Kafka) Produce(message event.LogMessage, handleErr func(error)) {
 	topic := message.Topic
 	topicStr := e.Topics[topic]
 	if topicStr == "" {
-		handleErr(fmt.Errorf("unknown topic: %v", topic))
+		handleErr(fmt.Errorf("topic for %q not set", topic))
+		return
 	}
 
 	record := &kgo.Record{
