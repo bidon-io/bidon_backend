@@ -10,6 +10,7 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/bidding"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
+	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	"sync"
 )
 
@@ -166,5 +167,83 @@ func (mock *AdaptersBuilderMock) BuildCalls() []struct {
 	mock.lockBuild.RLock()
 	calls = mock.calls.Build
 	mock.lockBuild.RUnlock()
+	return calls
+}
+
+// Ensure, that NotificationHandlerMock does implement bidding.NotificationHandler.
+// If this is not the case, regenerate this file with moq.
+var _ bidding.NotificationHandler = &NotificationHandlerMock{}
+
+// NotificationHandlerMock is a mock implementation of bidding.NotificationHandler.
+//
+//	func TestSomethingThatUsesNotificationHandler(t *testing.T) {
+//
+//		// make and configure a mocked bidding.NotificationHandler
+//		mockedNotificationHandler := &NotificationHandlerMock{
+//			HandleRoundFunc: func(contextMoqParam context.Context, imp *schema.Imp, demandResponses []*adapters.DemandResponse) error {
+//				panic("mock out the HandleRound method")
+//			},
+//		}
+//
+//		// use mockedNotificationHandler in code that requires bidding.NotificationHandler
+//		// and then make assertions.
+//
+//	}
+type NotificationHandlerMock struct {
+	// HandleRoundFunc mocks the HandleRound method.
+	HandleRoundFunc func(contextMoqParam context.Context, imp *schema.Imp, demandResponses []*adapters.DemandResponse) error
+
+	// calls tracks calls to the methods.
+	calls struct {
+		// HandleRound holds details about calls to the HandleRound method.
+		HandleRound []struct {
+			// ContextMoqParam is the contextMoqParam argument value.
+			ContextMoqParam context.Context
+			// Imp is the imp argument value.
+			Imp *schema.Imp
+			// DemandResponses is the demandResponses argument value.
+			DemandResponses []*adapters.DemandResponse
+		}
+	}
+	lockHandleRound sync.RWMutex
+}
+
+// HandleRound calls HandleRoundFunc.
+func (mock *NotificationHandlerMock) HandleRound(contextMoqParam context.Context, imp *schema.Imp, demandResponses []*adapters.DemandResponse) error {
+	if mock.HandleRoundFunc == nil {
+		panic("NotificationHandlerMock.HandleRoundFunc: method is nil but NotificationHandler.HandleRound was just called")
+	}
+	callInfo := struct {
+		ContextMoqParam context.Context
+		Imp             *schema.Imp
+		DemandResponses []*adapters.DemandResponse
+	}{
+		ContextMoqParam: contextMoqParam,
+		Imp:             imp,
+		DemandResponses: demandResponses,
+	}
+	mock.lockHandleRound.Lock()
+	mock.calls.HandleRound = append(mock.calls.HandleRound, callInfo)
+	mock.lockHandleRound.Unlock()
+	return mock.HandleRoundFunc(contextMoqParam, imp, demandResponses)
+}
+
+// HandleRoundCalls gets all the calls that were made to HandleRound.
+// Check the length with:
+//
+//	len(mockedNotificationHandler.HandleRoundCalls())
+func (mock *NotificationHandlerMock) HandleRoundCalls() []struct {
+	ContextMoqParam context.Context
+	Imp             *schema.Imp
+	DemandResponses []*adapters.DemandResponse
+} {
+	var calls []struct {
+		ContextMoqParam context.Context
+		Imp             *schema.Imp
+		DemandResponses []*adapters.DemandResponse
+	}
+	mock.lockHandleRound.RLock()
+	calls = mock.calls.HandleRound
+	mock.lockHandleRound.RUnlock()
 	return calls
 }
