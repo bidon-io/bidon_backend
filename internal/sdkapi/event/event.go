@@ -231,15 +231,23 @@ func smashMap(src, dst map[string]any, nesting ...string) map[string]any {
 	prefix := strings.Join(nesting, "__")
 
 	for key, value := range src {
-		mapValue, ok := value.(map[string]any)
-		if ok {
+		switch mapValue := value.(type) {
+		case map[string]any:
 			n := slices.Clone(nesting)
 			n = append(n, key)
 			smashMap(mapValue, dst, n...)
-		} else if prefix != "" {
-			dst[fmt.Sprintf("%s__%s", prefix, key)] = value
-		} else {
-			dst[key] = value
+		case []map[string]any:
+			for i, v := range mapValue {
+				n := slices.Clone(nesting)
+				n = append(n, fmt.Sprintf("%s__%d", key, i))
+				smashMap(v, dst, n...)
+			}
+		default:
+			if prefix != "" {
+				dst[fmt.Sprintf("%s__%s", prefix, key)] = value
+			} else {
+				dst[key] = value
+			}
 		}
 	}
 
