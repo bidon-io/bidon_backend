@@ -56,6 +56,10 @@ func TestPrepareEventPayload(t *testing.T) {
 							"foo": "foo",
 						},
 						"bar": "bar",
+						"baz": []map[string]any{
+							{"foo": "foo"},
+							{"bar": map[string]any{"bar": "bar"}},
+						},
 					},
 					"bar": map[string]any{
 						"bar": "bar",
@@ -66,11 +70,13 @@ func TestPrepareEventPayload(t *testing.T) {
 			},
 			want{
 				map[string]any{
-					"timestamp":     timestamp,
-					"foo__foo__foo": "foo",
-					"foo__bar":      "bar",
-					"bar__bar":      "bar",
-					"baz":           "baz",
+					"timestamp":             timestamp,
+					"foo__foo__foo":         "foo",
+					"foo__bar":              "bar",
+					"foo__baz__0__foo":      "foo",
+					"foo__baz__1__bar__bar": "bar",
+					"bar__bar":              "bar",
+					"baz":                   "baz",
 				},
 				nil,
 			},

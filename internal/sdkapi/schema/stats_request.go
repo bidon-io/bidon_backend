@@ -8,11 +8,31 @@ type StatsRequest struct {
 	Stats  Stats   `json:"stats" validate:"required"`
 }
 
+func (r *StatsRequest) Map() map[string]any {
+	m := r.BaseRequest.Map()
+
+	m["ad_type"] = r.AdType
+	m["stats"] = r.Stats.Map()
+
+	return m
+}
+
 type Stats struct {
 	AuctionID              string       `json:"auction_id" validate:"required"`
 	AuctionConfigurationID int          `json:"auction_configuration_id" validate:"required"`
 	Result                 StatsResult  `json:"result" validate:"required"`
 	Rounds                 []StatsRound `json:"rounds" validate:"required"`
+}
+
+func (s Stats) Map() map[string]any {
+	m := map[string]any{
+		"auction_id":               s.AuctionID,
+		"auction_configuration_id": s.AuctionConfigurationID,
+		"result":                   s.Result.Map(),
+		"rounds":                   sliceMap(s.Rounds),
+	}
+
+	return m
 }
 
 type StatsResult struct {
@@ -21,6 +41,18 @@ type StatsResult struct {
 	ECPM            float64 `json:"ecpm"`
 	AuctionStartTS  int     `json:"auction_start_ts"`
 	AuctionFinishTS int     `json:"auction_finish_ts"`
+}
+
+func (s StatsResult) Map() map[string]any {
+	m := map[string]any{
+		"status":            s.Status,
+		"winner_id":         s.WinnerID,
+		"ecpm":              s.ECPM,
+		"auction_start_ts":  s.AuctionStartTS,
+		"auction_finish_ts": s.AuctionFinishTS,
+	}
+
+	return m
 }
 
 func (s StatsResult) IsSuccess() bool {
@@ -36,6 +68,19 @@ type StatsRound struct {
 	WinnerECPM float64        `json:"winner_ecpm"`
 }
 
+func (r StatsRound) Map() map[string]any {
+	m := map[string]any{
+		"id":          r.ID,
+		"pricefloor":  r.PriceFloor,
+		"demands":     sliceMap(r.Demands),
+		"biddings":    sliceMap(r.Biddings),
+		"winner_id":   r.WinnerID,
+		"winner_ecpm": r.WinnerECPM,
+	}
+
+	return m
+}
+
 type StatsDemand struct {
 	ID           string  `json:"id" validate:"required"`
 	Status       string  `json:"status" validate:"required"`
@@ -47,6 +92,21 @@ type StatsDemand struct {
 	FillFinishTS int     `json:"fill_finish_ts"`
 }
 
+func (d StatsDemand) Map() map[string]any {
+	m := map[string]any{
+		"id":             d.ID,
+		"status":         d.Status,
+		"ad_unit_id":     d.AdUnitID,
+		"ecpm":           d.ECPM,
+		"bid_start_ts":   d.BidStartTS,
+		"bid_finish_ts":  d.BidFinishTS,
+		"fill_start_ts":  d.FillStartTS,
+		"fill_finish_ts": d.FillFinishTS,
+	}
+
+	return m
+}
+
 type StatsBidding struct {
 	ID           string  `json:"id" validate:"required"`
 	Status       string  `json:"status" validate:"required"`
@@ -55,4 +115,31 @@ type StatsBidding struct {
 	BidFinishTS  int     `json:"bid_finish_ts"`
 	FillStartTS  int     `json:"fill_start_ts"`
 	FillFinishTS int     `json:"fill_finish_ts"`
+}
+
+func (b StatsBidding) Map() map[string]any {
+	m := map[string]any{
+		"id":             b.ID,
+		"status":         b.Status,
+		"ecpm":           b.ECPM,
+		"bid_start_ts":   b.BidStartTS,
+		"bid_finish_ts":  b.BidFinishTS,
+		"fill_start_ts":  b.FillStartTS,
+		"fill_finish_ts": b.FillFinishTS,
+	}
+
+	return m
+}
+
+type mapper interface {
+	Map() map[string]any
+}
+
+func sliceMap[E mapper](s []E) []map[string]any {
+	m := make([]map[string]any, len(s))
+	for i, e := range s {
+		m[i] = e.Map()
+	}
+
+	return m
 }
