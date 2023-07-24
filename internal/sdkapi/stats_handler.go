@@ -2,10 +2,11 @@ package sdkapi
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	"github.com/labstack/echo/v4"
-	"net/http"
 )
 
 type StatsHandler struct {
@@ -21,7 +22,7 @@ func (h *StatsHandler) Handle(c echo.Context) error {
 
 	configEvent := event.NewStats(&req.raw, req.geoData)
 	h.EventLogger.Log(configEvent, func(err error) {
-		logError(c, fmt.Errorf("log config event: %v", err))
+		logError(c, fmt.Errorf("log stats event: %v", err))
 	})
 
 	return c.JSON(http.StatusOK, map[string]any{"success": true})
