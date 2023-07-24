@@ -20,11 +20,12 @@ import (
 )
 
 type Builder struct {
-	ConfigMatcher   ConfigMatcher
-	AdaptersBuilder AdaptersBuilder
+	ConfigMatcher       ConfigMatcher
+	AdaptersBuilder     AdaptersBuilder
+	NotificationHandler NotificationHandler
 }
 
-//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/mocks.go -pkg mocks . ConfigMatcher AdaptersBuilder
+//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/mocks.go -pkg mocks . ConfigMatcher AdaptersBuilder NotificationHandler
 
 var ErrNoBids = errors.New("no bids")
 
@@ -34,6 +35,10 @@ type ConfigMatcher interface {
 
 type AdaptersBuilder interface {
 	Build(adapterKey adapter.Key, cfg adapter.Config) (adapters.Bidder, error)
+}
+
+type NotificationHandler interface {
+	HandleRound(context.Context, *schema.Imp, []*adapters.DemandResponse) error
 }
 
 type BuildParams struct {
@@ -130,6 +135,8 @@ func (b *Builder) HoldAuction(ctx context.Context, params *BuildParams) (adapter
 			result = resp
 		}
 	}
+
+	b.NotificationHandler.HandleRound(ctx, &br.Imp, responses)
 
 	return *result, nil
 }

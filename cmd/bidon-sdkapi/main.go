@@ -9,12 +9,14 @@ import (
 	"time"
 
 	"github.com/bidon-io/bidon-backend/internal/bidding"
+	"github.com/bidon-io/bidon-backend/internal/notification"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event/engine"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/geocoder"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	"github.com/bidon-io/bidon-backend/internal/segment"
 	"github.com/oschwald/maxminddb-golang"
+	"github.com/redis/go-redis/v9"
 	"github.com/twmb/franz-go/pkg/kgo"
 
 	"github.com/bidon-io/bidon-backend/config"
@@ -25,6 +27,7 @@ import (
 	bidonconfig "github.com/bidon-io/bidon-backend/internal/config"
 	configstore "github.com/bidon-io/bidon-backend/internal/config/store"
 	"github.com/bidon-io/bidon-backend/internal/db"
+	notificationstore "github.com/bidon-io/bidon-backend/internal/notification/store"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
 	sdkapistore "github.com/bidon-io/bidon-backend/internal/sdkapi/store"
 	segmentstore "github.com/bidon-io/bidon-backend/internal/segment/store"
@@ -53,6 +56,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("db.Open(%v): %v", dbURL, err)
 	}
+
+	redisURL := os.Getenv("REDIS_URL")
+	rdb := redis.NewClient(&redis.Options{
+		Addr: redisURL,
+	})
 
 	var maxMindDB *maxminddb.Reader
 
@@ -95,6 +103,9 @@ func main() {
 	segmentMatcher := segment.Matcher{
 		Fetcher: &segmentstore.SegmentFetcher{DB: db},
 	}
+	notificationHandler := notification.Handler{
+		AuctionResultRepo: notificationstore.AuctionResultRepo{Redis: rdb},
+	}
 
 	biddingHttpClient := &http.Client{
 		Timeout: 5 * time.Second,
@@ -134,8 +145,9 @@ func main() {
 		},
 		SegmentMatcher: &segmentMatcher,
 		BiddingBuilder: &bidding.Builder{
-			ConfigMatcher:   &auctionstore.ConfigMatcher{DB: db},
-			AdaptersBuilder: adapters_builder.BuildBiddingAdapters(biddingHttpClient),
+			ConfigMatcher:       &auctionstore.ConfigMatcher{DB: db},
+			AdaptersBuilder:     adapters_builder.BuildBiddingAdapters(biddingHttpClient),
+			NotificationHandler: notificationHandler,
 		},
 		AdaptersConfigBuilder: &adapters_builder.AdaptersConfigBuilder{
 			AppDemandProfileFetcher: &biddingstore.AppDemandProfileFetcher{DB: db},
@@ -146,7 +158,8 @@ func main() {
 			AppFetcher: appFetcher,
 			Geocoder:   geocoder,
 		},
-		EventLogger: eventLogger,
+		EventLogger:         eventLogger,
+		NotificationHandler: notificationHandler,
 	}
 
 	e := config.Echo("bidon-sdkapi", logger)
