@@ -180,7 +180,7 @@ var _ bidding.NotificationHandler = &NotificationHandlerMock{}
 //
 //		// make and configure a mocked bidding.NotificationHandler
 //		mockedNotificationHandler := &NotificationHandlerMock{
-//			HandleRoundFunc: func(contextMoqParam context.Context, imp *schema.Imp, demandResponses []*adapters.DemandResponse) error {
+//			HandleRoundFunc: func(contextMoqParam context.Context, imp *schema.Imp, demandResponses []adapters.DemandResponse) error {
 //				panic("mock out the HandleRound method")
 //			},
 //		}
@@ -191,7 +191,7 @@ var _ bidding.NotificationHandler = &NotificationHandlerMock{}
 //	}
 type NotificationHandlerMock struct {
 	// HandleRoundFunc mocks the HandleRound method.
-	HandleRoundFunc func(contextMoqParam context.Context, imp *schema.Imp, demandResponses []*adapters.DemandResponse) error
+	HandleRoundFunc func(contextMoqParam context.Context, imp *schema.Imp, demandResponses []adapters.DemandResponse) error
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -202,21 +202,21 @@ type NotificationHandlerMock struct {
 			// Imp is the imp argument value.
 			Imp *schema.Imp
 			// DemandResponses is the demandResponses argument value.
-			DemandResponses []*adapters.DemandResponse
+			DemandResponses []adapters.DemandResponse
 		}
 	}
 	lockHandleRound sync.RWMutex
 }
 
 // HandleRound calls HandleRoundFunc.
-func (mock *NotificationHandlerMock) HandleRound(contextMoqParam context.Context, imp *schema.Imp, demandResponses []*adapters.DemandResponse) error {
+func (mock *NotificationHandlerMock) HandleRound(contextMoqParam context.Context, imp *schema.Imp, demandResponses []adapters.DemandResponse) error {
 	if mock.HandleRoundFunc == nil {
 		panic("NotificationHandlerMock.HandleRoundFunc: method is nil but NotificationHandler.HandleRound was just called")
 	}
 	callInfo := struct {
 		ContextMoqParam context.Context
 		Imp             *schema.Imp
-		DemandResponses []*adapters.DemandResponse
+		DemandResponses []adapters.DemandResponse
 	}{
 		ContextMoqParam: contextMoqParam,
 		Imp:             imp,
@@ -235,12 +235,12 @@ func (mock *NotificationHandlerMock) HandleRound(contextMoqParam context.Context
 func (mock *NotificationHandlerMock) HandleRoundCalls() []struct {
 	ContextMoqParam context.Context
 	Imp             *schema.Imp
-	DemandResponses []*adapters.DemandResponse
+	DemandResponses []adapters.DemandResponse
 } {
 	var calls []struct {
 		ContextMoqParam context.Context
 		Imp             *schema.Imp
-		DemandResponses []*adapters.DemandResponse
+		DemandResponses []adapters.DemandResponse
 	}
 	mock.lockHandleRound.RLock()
 	calls = mock.calls.HandleRound

@@ -21,7 +21,7 @@ type BiddingHandler struct {
 }
 
 type BiddingResponse struct {
-	Bid    *Bid   `json:"bid,omitempty"`
+	Bids   []Bid  `json:"bids,omitempty"`
 	Status string `json:"status"`
 }
 
@@ -70,25 +70,26 @@ func (h *BiddingHandler) Handle(c echo.Context) error {
 		GeoData:        req.geoData,
 		AdapterConfigs: adapterConfigs,
 	}
-	result, err := h.BiddingBuilder.HoldAuction(ctx, params)
+	demandResponses, err := h.BiddingBuilder.HoldAuction(ctx, params)
 	if err != nil && err != bidding.ErrNoBids {
 		return err
 	}
 
-	response := &BiddingResponse{
+	response := BiddingResponse{
 		Status: "NO_BID",
 	}
 
-	if result.IsBid() {
-		response.Bid = &Bid{
-			ID:       result.Bid.ID,
-			ImpID:    result.Bid.ImpID,
-			Price:    result.Bid.Price,
-			Payload:  result.Bid.Payload,
-			DemandID: result.Bid.DemandID,
+	for _, result := range demandResponses {
+		if result.IsBid() {
+			response.Bids = append(response.Bids, Bid{
+				ID:       result.Bid.ID,
+				ImpID:    result.Bid.ImpID,
+				Price:    result.Bid.Price,
+				Payload:  result.Bid.Payload,
+				DemandID: result.Bid.DemandID,
+			})
+			response.Status = "SUCCESS"
 		}
-		response.Status = "SUCCESS"
-
 	}
 
 	return c.JSON(http.StatusOK, response)
