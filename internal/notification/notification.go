@@ -23,7 +23,7 @@ type AuctionResultRepo interface {
 
 // HandleRound is used to handle bidding round, it is called after all adapters have responded with bids or errors
 // Results saved to redis
-func (h Handler) HandleRound(ctx context.Context, imp *schema.Imp, responses []*adapters.DemandResponse) error {
+func (h Handler) HandleRound(ctx context.Context, imp *schema.Imp, responses []adapters.DemandResponse) error {
 	var bids []Bid
 	for _, resp := range responses {
 		if resp.IsBid() {
