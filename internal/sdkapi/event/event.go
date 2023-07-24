@@ -3,11 +3,12 @@ package event
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/geocoder"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	"golang.org/x/exp/slices"
-	"strings"
-	"time"
 )
 
 type Event interface {
@@ -79,7 +80,7 @@ func (s *statsEvent) Children() []Event {
 	children := make([]Event, 0)
 
 	for roundIndex, round := range s.request.Stats.Rounds {
-		for demandIndex, _ := range round.Demands {
+		for demandIndex := range round.Demands {
 			children = append(children, &demandResultEvent{
 				timestamp:   s.timestamp,
 				request:     s.request,

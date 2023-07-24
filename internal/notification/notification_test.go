@@ -14,7 +14,7 @@ import (
 func TestHandler_HandleRound(t *testing.T) {
 	ctx := context.Background()
 	imp := &schema.Imp{ID: "imp-1"}
-	responses := []*adapters.DemandResponse{
+	responses := []adapters.DemandResponse{
 		{Bid: &adapters.BidDemandResponse{ID: "bid-1", ImpID: "imp-1", Price: 1.23}},
 		{Bid: &adapters.BidDemandResponse{ID: "bid-2", ImpID: "imp-1", Price: 4.56}},
 		{Bid: &adapters.BidDemandResponse{ID: "bid-3", ImpID: "imp-1", Price: 7.89}},
