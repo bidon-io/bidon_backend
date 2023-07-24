@@ -2,12 +2,12 @@ package config
 
 import (
 	"fmt"
-	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
 	"os"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
 	"github.com/twmb/franz-go/pkg/kgo"
 )
 
