@@ -25,8 +25,32 @@ func NewConfig(request *schema.ConfigRequest, geoData geocoder.GeoData) Event {
 	}
 }
 
+func NewShow(request *schema.ShowRequest, geoData geocoder.GeoData) Event {
+	return &showEvent{
+		timestamp: generateTimestamp(),
+		request:   request,
+		geoData:   geoData,
+	}
+}
+
 func NewStats(request *schema.StatsRequest, geoData geocoder.GeoData) Event {
 	return &statsEvent{
+		timestamp: generateTimestamp(),
+		request:   request,
+		geoData:   geoData,
+	}
+}
+
+func NewClick(request *schema.ClickRequest, geoData geocoder.GeoData) Event {
+	return &clickEvent{
+		timestamp: generateTimestamp(),
+		request:   request,
+		geoData:   geoData,
+	}
+}
+
+func NewReward(request *schema.RewardRequest, geoData geocoder.GeoData) Event {
+	return &rewardEvent{
 		timestamp: generateTimestamp(),
 		request:   request,
 		geoData:   geoData,
@@ -37,6 +61,9 @@ type Topic string
 
 const (
 	ConfigTopic Topic = "config"
+	ShowTopic   Topic = "show"
+	ClickTopic  Topic = "click"
+	RewardTopic Topic = "reward"
 	StatsTopic  Topic = "stats"
 )
 
@@ -55,6 +82,78 @@ func (c *configEvent) Payload() (map[string]any, error) {
 }
 
 func (c *configEvent) Children() []Event {
+	return nil
+}
+
+type showEvent struct {
+	timestamp float64
+	request   *schema.ShowRequest
+	geoData   geocoder.GeoData
+}
+
+func (e *showEvent) Topic() Topic {
+	return ShowTopic
+}
+
+func (e *showEvent) Payload() (map[string]any, error) {
+	payload, err := prepareEventPayload(e.timestamp, e.request, e.geoData)
+
+	if _, found := payload["show"]; !found {
+		payload["show"] = payload["bid"]
+	}
+
+	return payload, err
+}
+
+func (e *showEvent) Children() []Event {
+	return nil
+}
+
+type clickEvent struct {
+	timestamp float64
+	request   *schema.ClickRequest
+	geoData   geocoder.GeoData
+}
+
+func (e *clickEvent) Topic() Topic {
+	return ClickTopic
+}
+
+func (e *clickEvent) Payload() (map[string]any, error) {
+	payload, err := prepareEventPayload(e.timestamp, e.request, e.geoData)
+
+	if _, found := payload["show"]; !found {
+		payload["show"] = payload["bid"]
+	}
+
+	return payload, err
+}
+
+func (e *clickEvent) Children() []Event {
+	return nil
+}
+
+type rewardEvent struct {
+	timestamp float64
+	request   *schema.RewardRequest
+	geoData   geocoder.GeoData
+}
+
+func (e *rewardEvent) Topic() Topic {
+	return RewardTopic
+}
+
+func (e *rewardEvent) Payload() (map[string]any, error) {
+	payload, err := prepareEventPayload(e.timestamp, e.request, e.geoData)
+
+	if _, found := payload["show"]; !found {
+		payload["show"] = payload["bid"]
+	}
+
+	return payload, err
+}
+
+func (e *rewardEvent) Children() []Event {
 	return nil
 }
 

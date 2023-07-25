@@ -42,7 +42,7 @@ func (o *AdObject) Format() ad.Format {
 }
 
 type BannerAdObject struct {
-	Format ad.Format `json:"format"`
+	Format ad.Format `json:"format" validate:"oneof=BANNER LEADERBOARD MREC ADAPTIVE"`
 }
 
 func (o BannerAdObject) Map() map[string]any {
