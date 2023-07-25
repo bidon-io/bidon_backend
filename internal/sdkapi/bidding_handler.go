@@ -26,12 +26,17 @@ type BiddingResponse struct {
 }
 
 type Bid struct {
-	ID       string                 `json:"id"`
-	ImpID    string                 `json:"impid"`
-	Price    float64                `json:"price"`
-	Payload  string                 `json:"payload"`
-	DemandID adapter.Key            `json:"demand_id"`
-	Ext      map[string]interface{} `json:"ext,omitempty"` // TODO: remove interface{} with concrete type
+	ID      string                 `json:"id"`
+	ImpID   string                 `json:"impid"`
+	Price   float64                `json:"price"`
+	Demands map[adapter.Key]Demand `json:"demands"`
+	Ext     map[string]interface{} `json:"ext,omitempty"` // TODO: remove interface{} with concrete type
+}
+
+type Demand struct {
+	Payload     string `json:"payload"`
+	UnitID      string `json:"unit_id,omitempty"`
+	PlacementID string `json:"placement_id,omitempty"`
 }
 
 func (h *BiddingHandler) Handle(c echo.Context) error {
@@ -82,11 +87,12 @@ func (h *BiddingHandler) Handle(c echo.Context) error {
 	for _, result := range demandResponses {
 		if result.IsBid() {
 			response.Bids = append(response.Bids, Bid{
-				ID:       result.Bid.ID,
-				ImpID:    result.Bid.ImpID,
-				Price:    result.Bid.Price,
-				Payload:  result.Bid.Payload,
-				DemandID: result.Bid.DemandID,
+				ID:    result.Bid.ID,
+				ImpID: result.Bid.ImpID,
+				Price: result.Bid.Price,
+				Demands: map[adapter.Key]Demand{
+					result.DemandID: {Payload: result.Bid.Payload},
+				},
 			})
 			response.Status = "SUCCESS"
 		}
