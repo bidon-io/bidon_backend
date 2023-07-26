@@ -17,7 +17,7 @@ func (b Bid) Map() map[string]any {
 	m := map[string]any{
 		"auction_id":               b.AuctionID,
 		"auction_configuration_id": b.AuctionConfigurationID,
-		"impid":                    b.ImpID,
+		"imp_id":                   b.ImpID,
 		"demand_id":                b.DemandID,
 		"round_id":                 b.RoundID,
 		"ad_unit_id":               b.AdUnitID,
