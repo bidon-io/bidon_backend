@@ -44,5 +44,8 @@ const options = ref([
   { label: "ApplovinAccount", value: "DemandSourceAccount::Applovin" },
   { label: "DTExchangeAccount", value: "DemandSourceAccount::DtExchange" },
   { label: "UnityAdsAccount", value: "DemandSourceAccount::UnityAds" },
+  { label: "VungleAccount", value: "DemandSourceAccount::Vungle" },
+  { label: "MintegralAccount", value: "DemandSourceAccount::Mintegral" },
+  { label: "BigoAdsAccount", value: "DemandSourceAccount::BigoAds" },
 ]);
 </script>

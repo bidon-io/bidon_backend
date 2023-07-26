@@ -9,6 +9,7 @@ class AppDemandProfile < Sequel::Model
     'mobilefuse' => 'DemandSourceAccount::MobileFuse',
     'unityads'   => 'DemandSourceAccount::UnityAds',
     'vungle'     => 'DemandSourceAccount::Vungle',
+    'bigoads'    => 'DemandSourceAccount::BigoAds',
   }.freeze
 
   ADAPTERS_LIST = Set.new(KEY_TO_ACCOUNT_TYPE.keys)

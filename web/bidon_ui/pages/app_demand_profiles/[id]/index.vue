@@ -6,7 +6,7 @@
       <EditButton :path="`${resourcesPath}/${id}/edit`" />
     </NavigationContainer>
     <ResourceCard
-      title="App Deman Profile"
+      title="App Demand Profile"
       :fields="fields"
       :resource="resource"
     />
