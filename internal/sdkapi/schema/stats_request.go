@@ -40,7 +40,7 @@ type StatsResult struct {
 	WinnerID        string  `json:"winner_id"`
 	RoundID         string  `json:"round_id"`
 	ECPM            float64 `json:"ecpm"`
-	AuctionStartTS  int     `json:"auction_start_ts" validate:"required"`
+	AuctionStartTS  int     `json:"auction_start_ts"`
 	AuctionFinishTS int     `json:"auction_finish_ts"`
 }
 
