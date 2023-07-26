@@ -15,10 +15,10 @@ func (r *ShowRequest) Map() map[string]any {
 	m["ad_type"] = r.AdType
 
 	if r.Bid != nil {
-		m["show"] = r.Bid.Map()
+		m["bid"] = r.Bid.Map()
 	}
 	if r.Show != nil {
-		m["bid"] = r.Show.Map()
+		m["show"] = r.Show.Map()
 	}
 
 	return m
