@@ -101,44 +101,54 @@
                   }
                 }
               },
-              "biddings": {
-                "title": "The demands Schema",
-                "type": "array",
-                "items": {
-                  "title": "A Schema",
-                  "type": "object",
-                  "required": [
-                    "id",
-                    "status"
-                  ],
-                  "properties": {
-                    "id": {
-                      "title": "The id Schema",
-                      "type": "string"
-                    },
-                    "status": {
-                      "title": "The status Schema",
-                      "type": "string"
-                    },
-                    "ecpm": {
-                      "title": "The ecpm Schema",
-                      "type": "number"
-                    },
-                    "bid_start_ts": {
-                      "title": "The bid_start_ts Schema",
-                      "type": "integer"
-                    },
-                    "bid_finish_ts": {
-                      "title": "The bid_finish_ts Schema",
-                      "type": "integer"
-                    },
-                    "fill_start_ts": {
-                      "title": "The fill_start_ts Schema",
-                      "type": "integer"
-                    },
-                    "fill_finish_ts": {
-                      "title": "The fill_finish_ts Schema",
-                      "type": "integer"
+              "bidding": {
+                "title": "Bidding Schema",
+                "type": "object",
+                "required": [
+                  "bid_start_ts",
+                  "bids"
+                ],
+                "properties": {
+                  "bid_start_ts": {
+                    "title": "The bid_start_ts Schema",
+                    "type": "integer"
+                  },
+                  "bid_finish_ts": {
+                    "title": "The bid_finish_ts Schema",
+                    "type": "integer"
+                  },
+                  "bids":{
+                    "title": "The bids Schema",
+                    "type": "array",
+                    "items": {
+                      "title": "A Schema",
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "status"
+                      ],
+                      "properties": {
+                        "id": {
+                          "title": "The id Schema",
+                          "type": "string"
+                        },
+                        "status": {
+                          "title": "The status Schema",
+                          "type": "string"
+                        },
+                        "ecpm": {
+                          "title": "The ecpm Schema",
+                          "type": "number"
+                        },
+                        "fill_start_ts": {
+                          "title": "The fill_start_ts Schema",
+                          "type": "integer"
+                        },
+                        "fill_finish_ts": {
+                          "title": "The fill_finish_ts Schema",
+                          "type": "integer"
+                        }
+                      }
                     }
                   }
                 }
