@@ -38,8 +38,9 @@ func (s Stats) Map() map[string]any {
 type StatsResult struct {
 	Status          string  `json:"status" validate:"required,oneof=SUCCESS FAIL AUCTION_CANCELLED"`
 	WinnerID        string  `json:"winner_id"`
+	RoundID         string  `json:"round_id"`
 	ECPM            float64 `json:"ecpm"`
-	AuctionStartTS  int     `json:"auction_start_ts"`
+	AuctionStartTS  int     `json:"auction_start_ts" validate:"required"`
 	AuctionFinishTS int     `json:"auction_finish_ts"`
 }
 
@@ -126,7 +127,7 @@ func (b StatsBidding) Map() map[string]any {
 type StatsBid struct {
 	ID           string  `json:"id" validate:"required"`
 	Status       string  `json:"status" validate:"required"`
-	ECPM         float64 `json:"ecpm"`
+	ECPM         float64 `json:"ecpm" validate:"required"`
 	FillStartTS  int     `json:"fill_start_ts"`
 	FillFinishTS int     `json:"fill_finish_ts"`
 }
