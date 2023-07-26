@@ -60,12 +60,12 @@ func (s StatsResult) IsSuccess() bool {
 }
 
 type StatsRound struct {
-	ID         string         `json:"id" validate:"required"`
-	PriceFloor float64        `json:"pricefloor" validate:"required"`
-	Demands    []StatsDemand  `json:"demands" validate:"required"`
-	Biddings   []StatsBidding `json:"biddings"`
-	WinnerID   string         `json:"winner_id"`
-	WinnerECPM float64        `json:"winner_ecpm"`
+	ID         string        `json:"id" validate:"required"`
+	PriceFloor float64       `json:"pricefloor" validate:"required"`
+	Demands    []StatsDemand `json:"demands" validate:"required"`
+	Bidding    StatsBidding  `json:"bidding"`
+	WinnerID   string        `json:"winner_id"`
+	WinnerECPM float64       `json:"winner_ecpm"`
 }
 
 func (r StatsRound) Map() map[string]any {
@@ -73,7 +73,7 @@ func (r StatsRound) Map() map[string]any {
 		"id":          r.ID,
 		"pricefloor":  r.PriceFloor,
 		"demands":     sliceMap(r.Demands),
-		"biddings":    sliceMap(r.Biddings),
+		"bidding":     r.Bidding.Map(),
 		"winner_id":   r.WinnerID,
 		"winner_ecpm": r.WinnerECPM,
 	}
@@ -108,22 +108,34 @@ func (d StatsDemand) Map() map[string]any {
 }
 
 type StatsBidding struct {
-	ID           string  `json:"id" validate:"required"`
-	Status       string  `json:"status" validate:"required"`
-	ECPM         float64 `json:"ecpm"`
-	BidStartTS   int     `json:"bid_start_ts"`
-	BidFinishTS  int     `json:"bid_finish_ts"`
-	FillStartTS  int     `json:"fill_start_ts"`
-	FillFinishTS int     `json:"fill_finish_ts"`
+	BidStartTS  int        `json:"bid_start_ts" validate:"required"`
+	BidFinishTS int        `json:"bid_finish_ts"`
+	Bids        []StatsBid `json:"bids" validate:"required"`
 }
 
 func (b StatsBidding) Map() map[string]any {
 	m := map[string]any{
+		"bid_start_ts":  b.BidStartTS,
+		"bid_finish_ts": b.BidFinishTS,
+		"bids":          sliceMap(b.Bids),
+	}
+
+	return m
+}
+
+type StatsBid struct {
+	ID           string  `json:"id" validate:"required"`
+	Status       string  `json:"status" validate:"required"`
+	ECPM         float64 `json:"ecpm"`
+	FillStartTS  int     `json:"fill_start_ts"`
+	FillFinishTS int     `json:"fill_finish_ts"`
+}
+
+func (b StatsBid) Map() map[string]any {
+	m := map[string]any{
 		"id":             b.ID,
 		"status":         b.Status,
 		"ecpm":           b.ECPM,
-		"bid_start_ts":   b.BidStartTS,
-		"bid_finish_ts":  b.BidFinishTS,
 		"fill_start_ts":  b.FillStartTS,
 		"fill_finish_ts": b.FillFinishTS,
 	}
