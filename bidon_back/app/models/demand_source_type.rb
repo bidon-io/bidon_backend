@@ -9,5 +9,6 @@ module DemandSourceType
     MobileFuseAccount: 'DemandSourceAccount::MobileFuse',
     UnityAdsAccount:   'DemandSourceAccount::UnityAds',
     VungleAccount:     'DemandSourceAccount::Vungle',
+    BigoAdsAccount:    'DemandSourceAccount::BigoAds',
   }.freeze
 end
