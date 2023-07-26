@@ -173,6 +173,26 @@ func TestPrepareEventPayload(t *testing.T) {
 				errors.New("message not important"),
 			},
 		},
+		{
+			"request with absent 'show' and present 'bid'",
+			in{
+				timestamp,
+				testMapper{
+					"bid": map[string]any{
+						"foo": "foo",
+					},
+				},
+				geocoder.GeoData{},
+			},
+			want{
+				map[string]any{
+					"timestamp": timestamp,
+					"show__foo": "foo",
+					"bid__foo":  "foo",
+				},
+				nil,
+			},
+		},
 	}
 
 	for _, test := range tests {

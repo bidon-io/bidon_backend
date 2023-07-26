@@ -18,16 +18,36 @@ type Event interface {
 }
 
 func NewConfig(request *schema.ConfigRequest, geoData geocoder.GeoData) Event {
-	return &configEvent{
+	return &simpleEvent[*schema.ConfigRequest]{
 		timestamp: generateTimestamp(),
+		topic:     ConfigTopic,
 		request:   request,
 		geoData:   geoData,
 	}
 }
 
 func NewShow(request *schema.ShowRequest, geoData geocoder.GeoData) Event {
-	return &showEvent{
+	return &simpleEvent[*schema.ShowRequest]{
 		timestamp: generateTimestamp(),
+		topic:     ShowTopic,
+		request:   request,
+		geoData:   geoData,
+	}
+}
+
+func NewClick(request *schema.ClickRequest, geoData geocoder.GeoData) Event {
+	return &simpleEvent[*schema.ClickRequest]{
+		timestamp: generateTimestamp(),
+		topic:     ClickTopic,
+		request:   request,
+		geoData:   geoData,
+	}
+}
+
+func NewReward(request *schema.RewardRequest, geoData geocoder.GeoData) Event {
+	return &simpleEvent[*schema.RewardRequest]{
+		timestamp: generateTimestamp(),
+		topic:     RewardTopic,
 		request:   request,
 		geoData:   geoData,
 	}
@@ -35,25 +55,12 @@ func NewShow(request *schema.ShowRequest, geoData geocoder.GeoData) Event {
 
 func NewStats(request *schema.StatsRequest, geoData geocoder.GeoData) Event {
 	return &statsEvent{
-		timestamp: generateTimestamp(),
-		request:   request,
-		geoData:   geoData,
-	}
-}
-
-func NewClick(request *schema.ClickRequest, geoData geocoder.GeoData) Event {
-	return &clickEvent{
-		timestamp: generateTimestamp(),
-		request:   request,
-		geoData:   geoData,
-	}
-}
-
-func NewReward(request *schema.RewardRequest, geoData geocoder.GeoData) Event {
-	return &rewardEvent{
-		timestamp: generateTimestamp(),
-		request:   request,
-		geoData:   geoData,
+		simpleEvent[*schema.StatsRequest]{
+			timestamp: generateTimestamp(),
+			topic:     StatsTopic,
+			request:   request,
+			geoData:   geoData,
+		},
 	}
 }
 
@@ -67,108 +74,31 @@ const (
 	StatsTopic  Topic = "stats"
 )
 
-type configEvent struct {
+type simpleEvent[T mapper] struct {
 	timestamp float64
-	request   *schema.ConfigRequest
+	topic     Topic
+	request   T
 	geoData   geocoder.GeoData
 }
 
-func (c *configEvent) Topic() Topic {
-	return ConfigTopic
+func (e *simpleEvent[T]) Topic() Topic {
+	return e.topic
 }
 
-func (c *configEvent) Payload() (map[string]any, error) {
-	return prepareEventPayload(c.timestamp, c.request, c.geoData)
+func (e *simpleEvent[T]) Payload() (map[string]any, error) {
+	return prepareEventPayload(e.timestamp, e.request, e.geoData)
 }
 
-func (c *configEvent) Children() []Event {
-	return nil
-}
-
-type showEvent struct {
-	timestamp float64
-	request   *schema.ShowRequest
-	geoData   geocoder.GeoData
-}
-
-func (e *showEvent) Topic() Topic {
-	return ShowTopic
-}
-
-func (e *showEvent) Payload() (map[string]any, error) {
-	payload, err := prepareEventPayload(e.timestamp, e.request, e.geoData)
-
-	if _, found := payload["show"]; !found {
-		payload["show"] = payload["bid"]
-	}
-
-	return payload, err
-}
-
-func (e *showEvent) Children() []Event {
-	return nil
-}
-
-type clickEvent struct {
-	timestamp float64
-	request   *schema.ClickRequest
-	geoData   geocoder.GeoData
-}
-
-func (e *clickEvent) Topic() Topic {
-	return ClickTopic
-}
-
-func (e *clickEvent) Payload() (map[string]any, error) {
-	payload, err := prepareEventPayload(e.timestamp, e.request, e.geoData)
-
-	if _, found := payload["show"]; !found {
-		payload["show"] = payload["bid"]
-	}
-
-	return payload, err
-}
-
-func (e *clickEvent) Children() []Event {
-	return nil
-}
-
-type rewardEvent struct {
-	timestamp float64
-	request   *schema.RewardRequest
-	geoData   geocoder.GeoData
-}
-
-func (e *rewardEvent) Topic() Topic {
-	return RewardTopic
-}
-
-func (e *rewardEvent) Payload() (map[string]any, error) {
-	payload, err := prepareEventPayload(e.timestamp, e.request, e.geoData)
-
-	if _, found := payload["show"]; !found {
-		payload["show"] = payload["bid"]
-	}
-
-	return payload, err
-}
-
-func (e *rewardEvent) Children() []Event {
+func (e *simpleEvent[T]) Children() []Event {
 	return nil
 }
 
 type statsEvent struct {
-	timestamp float64
-	request   *schema.StatsRequest
-	geoData   geocoder.GeoData
-}
-
-func (s *statsEvent) Topic() Topic {
-	return StatsTopic
+	simpleEvent[*schema.StatsRequest]
 }
 
 func (s *statsEvent) Payload() (map[string]any, error) {
-	payload, err := prepareEventPayload(s.timestamp, s.request, s.geoData)
+	payload, err := s.simpleEvent.Payload()
 
 	payload["event_type"] = "stats"
 
@@ -181,19 +111,15 @@ func (s *statsEvent) Children() []Event {
 	for roundIndex, round := range s.request.Stats.Rounds {
 		for demandIndex := range round.Demands {
 			children = append(children, &demandResultEvent{
-				timestamp:   s.timestamp,
-				request:     s.request,
-				geoData:     s.geoData,
+				simpleEvent: s.simpleEvent,
 				roundIndex:  roundIndex,
 				demandIndex: demandIndex,
 			})
 		}
 
 		children = append(children, &roundResultEvent{
-			timestamp:  s.timestamp,
-			request:    s.request,
-			geoData:    s.geoData,
-			roundIndex: roundIndex,
+			simpleEvent: s.simpleEvent,
+			roundIndex:  roundIndex,
 		})
 	}
 
@@ -201,18 +127,12 @@ func (s *statsEvent) Children() []Event {
 }
 
 type roundResultEvent struct {
-	timestamp  float64
-	request    *schema.StatsRequest
-	geoData    geocoder.GeoData
+	simpleEvent[*schema.StatsRequest]
 	roundIndex int
 }
 
-func (r roundResultEvent) Topic() Topic {
-	return StatsTopic
-}
-
 func (r roundResultEvent) Payload() (map[string]any, error) {
-	payload, err := prepareEventPayload(r.timestamp, r.request, r.geoData)
+	payload, err := r.simpleEvent.Payload()
 
 	round := r.request.Stats.Rounds[r.roundIndex]
 	winnerDemand := roundWinnerDemand(round)
@@ -233,24 +153,14 @@ func (r roundResultEvent) Payload() (map[string]any, error) {
 	return payload, err
 }
 
-func (r roundResultEvent) Children() []Event {
-	return nil
-}
-
 type demandResultEvent struct {
-	timestamp   float64
-	request     *schema.StatsRequest
-	geoData     geocoder.GeoData
+	simpleEvent[*schema.StatsRequest]
 	roundIndex  int
 	demandIndex int
 }
 
-func (r *demandResultEvent) Topic() Topic {
-	return StatsTopic
-}
-
 func (r *demandResultEvent) Payload() (map[string]any, error) {
-	payload, err := prepareEventPayload(r.timestamp, r.request, r.geoData)
+	payload, err := r.simpleEvent.Payload()
 
 	round := r.request.Stats.Rounds[r.roundIndex]
 	demand := round.Demands[r.demandIndex]
@@ -265,10 +175,6 @@ func (r *demandResultEvent) Payload() (map[string]any, error) {
 	payload["pricefloor"] = round.PriceFloor
 
 	return payload, err
-}
-
-func (r *demandResultEvent) Children() []Event {
-	return nil
 }
 
 func generateTimestamp() float64 {
@@ -290,6 +196,12 @@ func prepareEventPayload(timestamp float64, requestMapper mapper, geoData geocod
 	ext, _ := requestMap["ext"].(string)
 	eventExt, err := unmarshalEventExt(ext)
 	requestMap["ext"] = eventExt
+
+	if _, showPresent := requestMap["show"]; !showPresent {
+		if bid, bidPresent := requestMap["bid"]; bidPresent {
+			requestMap["show"] = bid
+		}
+	}
 
 	return smashMap(requestMap, nil), err
 }
