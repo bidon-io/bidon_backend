@@ -63,7 +63,7 @@ func (h *BiddingHandler) Handle(c echo.Context) error {
 	}
 
 	sgmnt := h.SegmentMatcher.Match(ctx, segmentParams)
-	adapterConfigs, err := h.AdaptersConfigBuilder.Build(ctx, req.app.ID, req.raw.Adapters.Keys())
+	adapterConfigs, err := h.AdaptersConfigBuilder.Build(ctx, req.app.ID, req.raw.Adapters.Keys(), req.raw.Imp)
 	if err != nil {
 		return err
 	}
