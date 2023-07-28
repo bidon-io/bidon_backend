@@ -10,7 +10,7 @@ type Imp struct {
 	AuctionID       string                         `json:"auction_id" validate:"required,uuid4"`
 	AuctionConfigID int64                          `json:"auction_configuration_id" validate:"required"`
 	RoundID         string                         `json:"round_id" validate:"required"`
-	BidFloor        float64                        `json:"bidfloor" validate:"required"`
+	BidFloor        float64                        `json:"bidfloor" validate:"gte=0"`
 	Orientation     string                         `json:"orientation" validate:"oneof=PORTRAIT LANDSCAPE"`
 	Demands         map[adapter.Key]map[string]any `json:"demands"`
 	Banner          *BannerAdObject                `json:"banner"`
