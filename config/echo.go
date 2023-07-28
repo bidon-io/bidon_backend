@@ -30,6 +30,10 @@ func Echo(service string, logger *zap.Logger) *echo.Echo {
 		Repanic: true,
 	}))
 
+	e.GET("/health_checks", func(c echo.Context) error {
+		return c.String(http.StatusOK, "OK")
+	})
+
 	return e
 }
 
