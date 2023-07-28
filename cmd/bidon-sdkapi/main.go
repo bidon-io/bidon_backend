@@ -151,6 +151,7 @@ func main() {
 		},
 		AdaptersConfigBuilder: &adapters_builder.AdaptersConfigBuilder{
 			AppDemandProfileFetcher: &biddingstore.AppDemandProfileFetcher{DB: db},
+			LineItemsMatcher:        &auctionstore.LineItemsMatcher{DB: db},
 		},
 	}
 	statsHandler := sdkapi.StatsHandler{
