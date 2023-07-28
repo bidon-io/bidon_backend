@@ -60,6 +60,8 @@ func TestHandler_HandleStats(t *testing.T) {
 }
 
 func TestHandler_HandleShow(t *testing.T) {
+	ctx := context.Background()
+	imp := &schema.Imp{ID: "imp-1"}
 	adapters := []*adapters.DemandResponse{
 		{Bid: &adapters.BidDemandResponse{ID: "bid-1", ImpID: "imp-1", Price: 1.23, BURL: "http://example.com/burl"}},
 		{Bid: &adapters.BidDemandResponse{ID: "bid-2", ImpID: "imp-1", Price: 4.56, BURL: "http://example.com/burl"}},
@@ -68,13 +70,15 @@ func TestHandler_HandleShow(t *testing.T) {
 	}
 	handler := notification.Handler{}
 
-	err := handler.HandleShow(adapters)
+	err := handler.HandleShow(ctx, imp, adapters)
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
 }
 
 func TestHandler_HandleWin(t *testing.T) {
+	ctx := context.Background()
+	imp := &schema.Imp{ID: "imp-1"}
 	adapters := []*adapters.DemandResponse{
 		{Bid: &adapters.BidDemandResponse{ID: "bid-1", ImpID: "imp-1", Price: 1.23, NURL: "http://example.com/win"}},
 		{Bid: &adapters.BidDemandResponse{ID: "bid-2", ImpID: "imp-1", Price: 4.56, NURL: "http://example.com/win"}},
@@ -83,13 +87,15 @@ func TestHandler_HandleWin(t *testing.T) {
 	}
 	handler := notification.Handler{}
 
-	err := handler.HandleWin(adapters)
+	err := handler.HandleWin(ctx, imp, adapters)
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
 }
 
 func TestHandler_HandleLoss(t *testing.T) {
+	ctx := context.Background()
+	imp := &schema.Imp{ID: "imp-1"}
 	adapters := []*adapters.DemandResponse{
 		{Bid: &adapters.BidDemandResponse{ID: "bid-1", ImpID: "imp-1", Price: 1.23, LURL: "http://example.com/loss"}},
 		{Bid: &adapters.BidDemandResponse{ID: "bid-2", ImpID: "imp-1", Price: 4.56, LURL: "http://example.com/loss"}},
@@ -98,7 +104,7 @@ func TestHandler_HandleLoss(t *testing.T) {
 	}
 	handler := notification.Handler{}
 
-	err := handler.HandleLoss(adapters)
+	err := handler.HandleLoss(ctx, imp, adapters)
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}

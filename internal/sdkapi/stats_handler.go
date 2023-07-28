@@ -14,10 +14,10 @@ import (
 type StatsHandler struct {
 	*BaseHandler[schema.StatsRequest, *schema.StatsRequest]
 	EventLogger         *event.Logger
-	NotificationHandler NotificationHandler
+	NotificationHandler StatsNotificationHandler
 }
 
-type NotificationHandler interface {
+type StatsNotificationHandler interface {
 	HandleStats(context.Context, *schema.Imp, []*adapters.DemandResponse) error
 }
 

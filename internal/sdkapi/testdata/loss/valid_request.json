@@ -1,0 +1,76 @@
+{
+    "device": {
+      "w": 1179,
+      "h": 2556,
+      "js": 1,
+      "mccmnc": "",
+      "osv": "16.2",
+      "type": "PHONE",
+      "os": "iOS",
+      "pxratio": 3,
+      "connection_type": "CELLULAR",
+      "language": "ru-US",
+      "make": "Apple",
+      "hwv": "x86_64",
+      "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
+      "ppi": 2556,
+      "model": "iPhone",
+      "carrier": ""
+    },
+    "segment": {},
+    "test": false,
+    "app": {
+      "skadn": [
+        "xxx.skadnetwork"
+      ],
+      "bundle": "com.app.name",
+      "key": "123",
+      "framework": "native",
+      "version": "1.0"
+    },
+    "ext": "{}",
+    "external_winner": {
+      "demand_id": "some_unknown_ad_network",
+      "ecpm": 18.76
+    },
+    "regs": {
+      "coppa": false,
+      "gdpr": false,
+      "iab": {
+        "tcf_v1": "{\"IABConsent_ConsentString\":\"BPWNT1FPWNT1FABABBENCy-AAAAkCAAA\",\"IABConsent_ParsedVendorConsents\":\"111111110011111100111111100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\",\"IABConsent_SubjectToGDPR\":\"1\",\"IABConsent_ParsedPurposeConsents\":\"11111\"}",
+        "us_privacy": "1YY-"
+      }
+    },
+    "session": {
+      "id": "CE2624BF-3B2F-42B5-86C2-20D0BED24D56",
+      "launch_monotonic_ts": 12521638000,
+      "battery": -1,
+      "memory_warnings_monotonic_ts": [],
+      "start_monotonic_ts": 12521638000,
+      "memory_warnings_ts": [],
+      "storage_free": 994662584320,
+      "monotonic_ts": 12521664000,
+      "start_ts": 1688371931187,
+      "ram_size": 17179869184,
+      "storage_used": 994662584320,
+      "launch_ts": 1688371931187,
+      "ts": 1688371957925,
+      "cpu_usage": 0.13499999046325684,
+      "ram_used": 429514752
+    },
+    "bid": {
+      "demand_id": "bidmachine",
+      "imp_id": "A3C2612D-EBFC-49ED-9FE5-6FF4B6BF23BC",
+      "round_id": "ROUND_INTERSTITIAL_1",
+      "auction_id": "4c100a13-5166-4310-8411-be5f2382f637",
+      "interstitial": {},
+      "ecpm": 18.75,
+      "auction_configuration_id": 12
+    },
+    "user": {
+      "tracking_authorization_status": "AUTHORIZED",
+      "idfv": "B45801B3-543E-4C06-9E0A-0D6D2B779E39",
+      "idg": "1699A9AE-D1CC-451B-948C-70E1584F7406",
+      "idfa": "00000000-0000-0000-0000-000000000000"
+    }
+  }
