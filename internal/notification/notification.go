@@ -55,18 +55,18 @@ func (h Handler) HandleStats(ctx context.Context, imp *schema.Imp, responses []*
 
 // HandleShow is used to handle impressions
 // Send burl to demand
-func (h *Handler) HandleShow(adaprts []*adapters.DemandResponse) error {
+func (h Handler) HandleShow(ctx context.Context, imp *schema.Imp, responses []*adapters.DemandResponse) error {
 	return nil
 }
 
 // If external_win_notification is enabled - send win/loss notifications to demands
 // If external_win_notification is disabled - do nothing
-func (h *Handler) HandleWin(adaprts []*adapters.DemandResponse) error {
+func (h Handler) HandleWin(ctx context.Context, imp *schema.Imp, responses []*adapters.DemandResponse) error {
 	return nil
 }
 
 // If external_win_notification is enabled - send win/loss notifications to demands
 // If external_win_notification is disabled - do nothing
-func (h *Handler) HandleLoss(adaprts []*adapters.DemandResponse) error {
+func (h Handler) HandleLoss(ctx context.Context, imp *schema.Imp, responses []*adapters.DemandResponse) error {
 	return nil
 }
