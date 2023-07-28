@@ -17,7 +17,7 @@ func (f *AppDemandProfileFetcher) Fetch(ctx context.Context, appID int64, adapte
 
 	err := f.DB.
 		WithContext(ctx).
-		Select("app_demand_profiles.id").
+		Select("app_demand_profiles.id, app_demand_profiles.data").
 		Where("app_id", appID).
 		InnerJoins("Account", f.DB.Select("id", "extra")).
 		InnerJoins("Account.DemandSource", f.DB.Select("api_key").Where(map[string]any{"api_key": adapterKeys})).
@@ -33,6 +33,7 @@ func (f *AppDemandProfileFetcher) Fetch(ctx context.Context, appID int64, adapte
 
 		profile.AdapterKey = adapter.Key(dbProfile.Account.DemandSource.APIKey)
 		profile.AccountExtra = dbProfile.Account.Extra
+		profile.AppData = dbProfile.Data
 	}
 
 	return profiles, nil
