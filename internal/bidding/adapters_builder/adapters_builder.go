@@ -11,16 +11,17 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters/bidmachine"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters/bigoads"
+	"github.com/bidon-io/bidon-backend/internal/bidding/adapters/mintegral"
 )
 
 var biddingAdapters = map[adapter.Key]adapters.Builder{
 	adapter.BidmachineKey: bidmachine.Builder,
 	adapter.BigoAdsKey:    bigoads.Builder,
+	adapter.MintegralKey:  mintegral.Builder,
 	// adapter.AdmobKey: admob.Builder,
 	// adapter.ApplovinKey: applovin.Builder,
 	// adapter.DTExchangeKey: dtexchange.Builder,
 	// adapter.MetaKey: meta.Builder,
-	// adapter.MintegralsdsdKey: mintegral.Builder,
 	// adapter.MobileFuseKey: mobilefuse.Builder,
 	// adapter.UnityAdsKey: unityads.Builder,
 	// adapter.VungleKey: vungle.Builder,
@@ -102,8 +103,16 @@ func (b *AdaptersConfigBuilder) Build(ctx context.Context, appID int64, adapterK
 			adapters[key]["mediation_config"] = extra["mediation_config"]
 		case adapter.BigoAdsKey:
 			adapters[key]["app_id"] = appData["app_id"]
-			adapters[key]["endpoint"] = extra["endpoint"]
 			adapters[key]["seller_id"] = extra["seller_id"]
+			adapters[key]["endpoint"] = extra["endpoint"]
+			adapters[key]["tag_id"] = ""
+			if lineItem, ok := lineItemsMap[key]; ok {
+				adapters[key]["tag_id"] = lineItem.AdUnitID
+			}
+		case adapter.MintegralKey:
+			adapters[key]["app_id"] = appData["app_id"]
+			adapters[key]["seller_id"] = extra["seller_id"]
+			adapters[key]["endpoint"] = extra["endpoint"]
 			adapters[key]["tag_id"] = ""
 			if lineItem, ok := lineItemsMap[key]; ok {
 				adapters[key]["tag_id"] = lineItem.AdUnitID

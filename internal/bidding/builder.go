@@ -50,8 +50,8 @@ type BuildParams struct {
 
 func (b *Builder) HoldAuction(ctx context.Context, params *BuildParams) ([]adapters.DemandResponse, error) {
 	// get config
-	// build ortb request
-	// filter adatapers
+	// build openrtb request
+	// filter adapters
 	// split to bids
 	// build requests and send them to adapters in parallel
 	// collect results
