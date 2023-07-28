@@ -1,9 +1,11 @@
 package sdkapi
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
+	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	"github.com/labstack/echo/v4"
@@ -11,7 +13,12 @@ import (
 
 type ShowHandler struct {
 	*BaseHandler[schema.ShowRequest, *schema.ShowRequest]
-	EventLogger *event.Logger
+	EventLogger         *event.Logger
+	NotificationHandler ShowNotificationHandler
+}
+
+type ShowNotificationHandler interface {
+	HandleShow(ctx context.Context, imp *schema.Imp, responses []*adapters.DemandResponse) error
 }
 
 func (h *ShowHandler) Handle(c echo.Context) error {
