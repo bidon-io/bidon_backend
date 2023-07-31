@@ -14,10 +14,11 @@ import (
 
 func TestAuctionResultRepo_CreateOrUpdate(t *testing.T) {
 	ctx := context.Background()
+	bidFloor := 0.5
 	imp := &schema.Imp{
 		AuctionID: "auction-1",
 		RoundID:   "round-1",
-		BidFloor:  0.5,
+		BidFloor:  &bidFloor,
 	}
 	bids := []notification.Bid{
 		{ID: "bid-1", ImpID: "imp-1", Price: 1.23},
@@ -51,11 +52,12 @@ func TestAuctionResultRepo_CreateOrUpdate(t *testing.T) {
 }
 
 func TestAuctionResultRepo_CreateOrUpdate_DuplicateRound(t *testing.T) {
+	bidFloor := 0.5
 	ctx := context.Background()
 	imp := &schema.Imp{
 		AuctionID: "auction-1",
 		RoundID:   "round-1",
-		BidFloor:  0.5,
+		BidFloor:  &bidFloor,
 	}
 	bids := []notification.Bid{
 		{ID: "bid-1", ImpID: "imp-1", Price: 1.23},
