@@ -113,7 +113,7 @@ func (a *BidmachineAdapter) CreateRequest(request openrtb2.BidRequest, br *schem
 	imp.DisplayManager = string(adapter.BidmachineKey)
 	imp.DisplayManagerVer = br.Adapters[adapter.BidmachineKey].SDKVersion
 	imp.Secure = &secure
-	imp.BidFloor = br.Imp.BidFloor
+	imp.BidFloor = br.Imp.GetBidFloor()
 	request.App.Publisher.ID = a.SellerID
 
 	extStructure := &map[string]interface{}{}

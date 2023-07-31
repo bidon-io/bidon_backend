@@ -23,7 +23,7 @@ func (r AuctionResultRepo) CreateOrUpdate(ctx context.Context, imp *schema.Imp, 
 	round := notification.Round{
 		RoundID:  imp.RoundID,
 		Bids:     bids,
-		BidFloor: imp.BidFloor,
+		BidFloor: imp.GetBidFloor(),
 	}
 
 	if auctionResult != nil {
