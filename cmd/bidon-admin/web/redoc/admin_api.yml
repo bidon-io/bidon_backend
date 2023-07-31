@@ -18,7 +18,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/AuctionConfiguration'
+                  $ref: '#/components/schemas/AuctionConfigurationDetailed'
         default:
           $ref: '#/components/responses/ErrorResponse'
     post:
@@ -37,7 +37,7 @@ paths:
         default:
           $ref: '#/components/responses/ErrorResponse'
   /auction_configurations/{id}:
-    parameters: 
+    parameters:
       - $ref: '#/components/parameters/idParam'
     get:
       tags:
@@ -45,7 +45,11 @@ paths:
       summary: Get auction configuration
       responses:
         '200':
-          $ref: '#/components/responses/AuctionConfigurationResponse'
+          description: An auction configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuctionConfigurationDetailed'
         default:
           $ref: '#/components/responses/ErrorResponse'
     patch:
@@ -85,7 +89,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/App'
+                  $ref: '#/components/schemas/AppDetailed'
         default:
           $ref: '#/components/responses/ErrorResponse'
     post:
@@ -104,7 +108,7 @@ paths:
         default:
           $ref: '#/components/responses/ErrorResponse'
   /apps/{id}:
-    parameters: 
+    parameters:
       - $ref: '#/components/parameters/idParam'
     get:
       tags:
@@ -112,7 +116,11 @@ paths:
       summary: Get app
       responses:
         '200':
-          $ref: '#/components/responses/AppResponse'
+          description: An app
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppDetailed'
         default:
           $ref: '#/components/responses/ErrorResponse'
     patch:
@@ -152,7 +160,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/DemandSourceAccount'
+                  $ref: '#/components/schemas/DemandSourceAccountDetailed'
         default:
           $ref: '#/components/responses/ErrorResponse'
     post:
@@ -171,7 +179,7 @@ paths:
         default:
           $ref: '#/components/responses/ErrorResponse'
   /demand_source_accounts/{id}:
-    parameters: 
+    parameters:
       - $ref: '#/components/parameters/idParam'
     get:
       tags:
@@ -179,7 +187,11 @@ paths:
       summary: Get demand source account
       responses:
         '200':
-          $ref: '#/components/responses/DemandSourceAccountResponse'
+          description: A demand source account
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DemandSourceAccountDetailed'
         default:
           $ref: '#/components/responses/ErrorResponse'
     patch:
@@ -219,7 +231,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/AppDemandProfile'
+                  $ref: '#/components/schemas/AppDemandProfileDetailed'
         default:
           $ref: '#/components/responses/ErrorResponse'
     post:
@@ -238,7 +250,7 @@ paths:
         default:
           $ref: '#/components/responses/ErrorResponse'
   /app_demand_profiles/{id}:
-    parameters: 
+    parameters:
       - $ref: '#/components/parameters/idParam'
     get:
       tags:
@@ -246,7 +258,11 @@ paths:
       summary: Get app demand profile
       responses:
         '200':
-          $ref: '#/components/responses/AppDemandProfileResponse'
+          description: An app demand profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppDemandProfileDetailed'
         default:
           $ref: '#/components/responses/ErrorResponse'
     patch:
@@ -286,7 +302,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/LineItem'
+                  $ref: '#/components/schemas/LineItemDetailed'
         default:
           $ref: '#/components/responses/ErrorResponse'
     post:
@@ -305,7 +321,7 @@ paths:
         default:
           $ref: '#/components/responses/ErrorResponse'
   /line_items/{id}:
-    parameters: 
+    parameters:
       - $ref: '#/components/parameters/idParam'
     get:
       tags:
@@ -313,7 +329,11 @@ paths:
       summary: Get line item
       responses:
         '200':
-          $ref: '#/components/responses/LineItemResponse'
+          description: A line item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LineItemDetailed'
         default:
           $ref: '#/components/responses/ErrorResponse'
     patch:
@@ -372,7 +392,7 @@ paths:
         default:
           $ref: '#/components/responses/ErrorResponse'
   /demand_sources/{id}:
-    parameters: 
+    parameters:
       - $ref: '#/components/parameters/idParam'
     get:
       tags:
@@ -439,7 +459,7 @@ paths:
         default:
           $ref: '#/components/responses/ErrorResponse'
   /countries/{id}:
-    parameters: 
+    parameters:
       - $ref: '#/components/parameters/idParam'
     get:
       tags:
@@ -506,7 +526,7 @@ paths:
         default:
           $ref: '#/components/responses/ErrorResponse'
   /users/{id}:
-    parameters: 
+    parameters:
       - $ref: '#/components/parameters/idParam'
     get:
       tags:
@@ -554,7 +574,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Segment'
+                  $ref: '#/components/schemas/SegmentDetailed'
         default:
           $ref: '#/components/responses/ErrorResponse'
     post:
@@ -573,7 +593,7 @@ paths:
         default:
           $ref: '#/components/responses/ErrorResponse'
   /segments/{id}:
-    parameters: 
+    parameters:
       - $ref: '#/components/parameters/idParam'
     get:
       tags:
@@ -581,7 +601,11 @@ paths:
       summary: Get segment
       responses:
         '200':
-          $ref: '#/components/responses/SegmentResponse'
+          description: A segment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SegmentDetailed'
         default:
           $ref: '#/components/responses/ErrorResponse'
     patch:
@@ -610,7 +634,7 @@ paths:
           $ref: '#/components/responses/ErrorResponse'
 components:
   schemas:
-    AuctionConfiguration:
+    AuctionConfiguration: &auction_configuration
       allOf:
         - $ref: '#/components/schemas/AuctionConfigurationProps'
         - required:
@@ -620,6 +644,13 @@ components:
           - ad_type
           - rounds
           - pricefloor
+    AuctionConfigurationDetailed:
+        allOf:
+            - *auction_configuration
+            - type: object
+              properties:
+                app:
+                  $ref: '#/components/schemas/App'
     AuctionConfigurationProps:
       type: object
       properties:
@@ -658,7 +689,7 @@ components:
           type: number
           minimum: 0
           exclusiveMinimum: true
-    App:
+    App: &app
       allOf:
         - $ref: '#/components/schemas/AppProps'
         - required:
@@ -669,6 +700,13 @@ components:
             - user_id
             - app_key
             - settings
+    AppDetailed:
+        allOf:
+          - *app
+          - type: object
+            properties:
+              user:
+                $ref: '#/components/schemas/User'
     AppProps:
       type: object
       properties:
@@ -690,7 +728,7 @@ components:
           minLength: 1
         settings:
           type: object
-    DemandSourceAccount:
+    DemandSourceAccount: &demand_source_account
       allOf:
         - $ref: '#/components/schemas/DemandSourceAccountProps'
         - required:
@@ -700,6 +738,15 @@ components:
             - demand_source_id
             - is_bidding
             - extra
+    DemandSourceAccountDetailed:
+        allOf:
+            - *demand_source_account
+            - type: object
+              properties:
+                user:
+                  $ref: '#/components/schemas/User'
+                demand_source:
+                  $ref: '#/components/schemas/DemandSource'
     DemandSourceAccountProps:
       type: object
       properties:
@@ -716,7 +763,7 @@ components:
           type: boolean
         extra:
           type: object
-    AppDemandProfile:
+    AppDemandProfile: &app_demand_profile
       allOf:
         - $ref: '#/components/schemas/AppDemandProfileProps'
         - required:
@@ -726,6 +773,17 @@ components:
             - account_id
             - account_type
             - data
+    AppDemandProfileDetailed:
+        allOf:
+            - *app_demand_profile
+            - type: object
+              properties:
+                user:
+                  $ref: '#/components/schemas/App'
+                demand_source:
+                  $ref: '#/components/schemas/DemandSource'
+                account:
+                  $ref: '#/components/schemas/DemandSourceAccount'
     AppDemandProfileProps:
       type: object
       properties:
@@ -742,7 +800,7 @@ components:
           minLength: 1
         data:
           type: object
-    LineItem:
+    LineItem: &line_item
       allOf:
         - $ref: '#/components/schemas/LineItemProps'
         - required:
@@ -756,6 +814,15 @@ components:
             - account_type
             - code
             - extra
+    LineItemDetailed:
+        allOf:
+            - *line_item
+            - type: object
+              properties:
+                app:
+                  $ref: '#/components/schemas/App'
+                account:
+                  $ref: '#/components/schemas/DemandSourceAccount'
     LineItemProps:
       type: object
       properties:
@@ -843,7 +910,7 @@ components:
         email:
           type: string
           format: email
-    Segment:
+    Segment: &segment
       allOf:
         - $ref: '#/components/schemas/SegmentProps'
         - required:
@@ -853,6 +920,13 @@ components:
             - filters
             - enabled
             - app_id
+    SegmentDetailed:
+        allOf:
+            - *segment
+            - type: object
+              properties:
+                app:
+                  $ref: '#/components/schemas/App'
     SegmentProps:
       type: object
       properties:
