@@ -118,7 +118,7 @@ func (a *BigoAdsAdapter) CreateRequest(request openrtb2.BidRequest, br *schema.B
 	imp.DisplayManager = string(adapter.BigoAdsKey)
 	imp.DisplayManagerVer = br.Adapters[adapter.BigoAdsKey].SDKVersion
 	imp.Secure = &secure
-	imp.BidFloor = br.Imp.BidFloor
+	imp.BidFloor = br.Imp.GetBidFloor()
 	request.Imp = []openrtb2.Imp{*imp}
 	request.Cur = []string{"USD"}
 	request.User = &openrtb2.User{
