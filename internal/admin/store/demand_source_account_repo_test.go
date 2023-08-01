@@ -33,21 +33,21 @@ func TestDemandSourceAccountRepo_List(t *testing.T) {
 			Type:           "DemandSourceAccount::Applovin",
 			DemandSourceID: demandSources[0].ID,
 			IsBidding:      ptr(false),
-			Extra:          map[string]any{"key": "value"},
+			Extra:          map[string]string{"key": "value"},
 		},
 		{
 			UserID:         user.ID,
 			Type:           "DemandSourceAccount::Bidmachine",
 			DemandSourceID: demandSources[1].ID,
 			IsBidding:      ptr(true),
-			Extra:          map[string]any{"key": "value"},
+			Extra:          map[string]string{"key": "value"},
 		},
 		{
 			UserID:         user.ID,
 			Type:           "DemandSourceAccount::UnityAds",
 			DemandSourceID: demandSources[2].ID,
 			IsBidding:      nil,
-			Extra:          map[string]any{"key": "value"},
+			Extra:          map[string]string{"key": "value"},
 		},
 	}
 
@@ -88,7 +88,7 @@ func TestDemandSourceAccountRepo_Find(t *testing.T) {
 		Type:           "DemandSourceAccount::Bidmachine",
 		DemandSourceID: demandSource.ID,
 		IsBidding:      ptr(true),
-		Extra:          map[string]any{"key": "value"},
+		Extra:          map[string]string{"key": "value"},
 	}
 
 	want, err := repo.Create(context.Background(), attrs)
@@ -123,7 +123,7 @@ func TestDemandSourceAccountRepo_Update(t *testing.T) {
 		Type:           "DemandSourceAccount::Bidmachine",
 		DemandSourceID: demandSource.ID,
 		IsBidding:      ptr(true),
-		Extra:          map[string]any{"key": "value"},
+		Extra:          map[string]string{"key": "value"},
 	}
 
 	account, err := repo.Create(context.Background(), &attrs)
@@ -132,7 +132,7 @@ func TestDemandSourceAccountRepo_Update(t *testing.T) {
 	}
 
 	want := account
-	want.Extra = map[string]any{"key": "value2"}
+	want.Extra = map[string]string{"key": "value2"}
 	want.IsBidding = ptr(false)
 
 	updateParams := &admin.DemandSourceAccountAttrs{
@@ -164,7 +164,7 @@ func TestDemandSourceAccountRepo_Delete(t *testing.T) {
 		Type:           "DemandSourceAccount::Bidmachine",
 		DemandSourceID: demandSource.ID,
 		IsBidding:      ptr(true),
-		Extra:          map[string]any{"key": "value"},
+		Extra:          map[string]string{"key": "value"},
 	}
 	account, err := repo.Create(context.Background(), attrs)
 	if err != nil {
