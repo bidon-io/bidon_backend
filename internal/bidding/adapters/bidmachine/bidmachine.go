@@ -132,7 +132,9 @@ func (a *BidmachineAdapter) CreateRequest(request openrtb2.BidRequest, br *schem
 
 func (a *BidmachineAdapter) ExecuteRequest(ctx context.Context, client *http.Client, request openrtb2.BidRequest) *adapters.DemandResponse {
 	dr := &adapters.DemandResponse{
-		DemandID: adapter.BidmachineKey,
+		DemandID:    adapter.BidmachineKey,
+		TagID:       "",
+		PlacementID: "",
 	}
 	requestBody, err := json.Marshal(request)
 	if err != nil {
@@ -199,18 +201,16 @@ func (a *BidmachineAdapter) ParseBids(dr *adapters.DemandResponse) (*adapters.De
 	bid := seat.Bid[0]
 
 	dr.Bid = &adapters.BidDemandResponse{
-		ID:          bid.ID,
-		ImpID:       bid.ImpID,
-		Price:       bid.Price,
-		Payload:     bid.AdM,
-		DemandID:    adapter.BidmachineKey,
-		AdID:        bid.AdID,
-		SeatID:      seat.Seat,
-		LURL:        bid.LURL,
-		NURL:        bid.NURL,
-		BURL:        bid.BURL,
-		UnitID:      "",
-		PlacementID: "",
+		ID:       bid.ID,
+		ImpID:    bid.ImpID,
+		Price:    bid.Price,
+		Payload:  bid.AdM,
+		DemandID: adapter.BidmachineKey,
+		AdID:     bid.AdID,
+		SeatID:   seat.Seat,
+		LURL:     bid.LURL,
+		NURL:     bid.NURL,
+		BURL:     bid.BURL,
 	}
 
 	return dr, nil
