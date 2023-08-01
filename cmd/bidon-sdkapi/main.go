@@ -20,12 +20,11 @@ import (
 	"github.com/twmb/franz-go/pkg/kgo"
 
 	"github.com/bidon-io/bidon-backend/config"
+	adapterstore "github.com/bidon-io/bidon-backend/internal/adapter/store"
 	"github.com/bidon-io/bidon-backend/internal/auction"
 	auctionstore "github.com/bidon-io/bidon-backend/internal/auction/store"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters_builder"
-	biddingstore "github.com/bidon-io/bidon-backend/internal/bidding/store"
 	bidonconfig "github.com/bidon-io/bidon-backend/internal/config"
-	configstore "github.com/bidon-io/bidon-backend/internal/config/store"
 	"github.com/bidon-io/bidon-backend/internal/db"
 	notificationstore "github.com/bidon-io/bidon-backend/internal/notification/store"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
@@ -134,7 +133,7 @@ func main() {
 		},
 		SegmentMatcher: &segmentMatcher,
 		AdaptersBuilder: &bidonconfig.AdaptersBuilder{
-			AppDemandProfileFetcher: &configstore.AppDemandProfileFetcher{DB: db},
+			ConfigurationFetcher: &adapterstore.ConfigurationFetcher{DB: db},
 		},
 		EventLogger: eventLogger,
 	}
@@ -150,8 +149,8 @@ func main() {
 			NotificationHandler: notificationHandler,
 		},
 		AdaptersConfigBuilder: &adapters_builder.AdaptersConfigBuilder{
-			AppDemandProfileFetcher: &biddingstore.AppDemandProfileFetcher{DB: db},
-			LineItemsMatcher:        &auctionstore.LineItemsMatcher{DB: db},
+			ConfigurationFetcher: &adapterstore.ConfigurationFetcher{DB: db},
+			LineItemsMatcher:     &auctionstore.LineItemsMatcher{DB: db},
 		},
 	}
 	statsHandler := sdkapi.StatsHandler{

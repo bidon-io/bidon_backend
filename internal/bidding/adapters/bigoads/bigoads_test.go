@@ -47,7 +47,6 @@ func compareErrors(want, got error) bool {
 func buildAdapter() bigoads.BigoAdsAdapter {
 	return bigoads.BigoAdsAdapter{
 		SellerID:    "1",
-		Endpoint:    "https://bigoads.com",
 		AppID:       "10182906",
 		TagID:       "10182906-10192212",
 		PlacementID: "10182906-10192212",
@@ -347,10 +346,9 @@ func TestBigoAds_ParseBids(t *testing.T) {
 
 func TestBigoAds_Builder(t *testing.T) {
 	client := &http.Client{}
-	bigoCfg := adapter.Config{
-		adapter.BigoAdsKey: map[string]any{
+	bigoCfg := adapter.ProcessedConfigsMap{
+		adapter.BigoAdsKey: map[string]string{
 			"seller_id":    "1",
-			"endpoint":     "https://bigoads.com",
 			"app_id":       "10182906",
 			"tag_id":       "10182906-10192212",
 			"placement_id": "10182906-10192212",

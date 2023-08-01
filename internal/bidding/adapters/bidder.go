@@ -27,7 +27,7 @@ type Bidder struct {
 	Client  *http.Client
 }
 
-type Builder func(adapter.Config, *http.Client) (Bidder, error)
+type Builder func(adapter.ProcessedConfigsMap, *http.Client) (Bidder, error)
 
 type DemandResponse struct {
 	DemandID    adapter.Key

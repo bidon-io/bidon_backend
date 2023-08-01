@@ -5,8 +5,7 @@ import (
 	"testing"
 
 	"github.com/bidon-io/bidon-backend/internal/adapter"
-	"github.com/bidon-io/bidon-backend/internal/config"
-	"github.com/bidon-io/bidon-backend/internal/config/store"
+	"github.com/bidon-io/bidon-backend/internal/adapter/store"
 	"github.com/bidon-io/bidon-backend/internal/db"
 	"github.com/bidon-io/bidon-backend/internal/db/dbtest"
 	"github.com/google/go-cmp/cmp"
@@ -29,7 +28,7 @@ func TestAppDemandProfileFetcher_Fetch(t *testing.T) {
 			DemandSource: db.DemandSource{
 				APIKey: string(adapter.ApplovinKey),
 			},
-			Extra: map[string]any{"applovin": "applovin"},
+			Extra: map[string]string{"applovin": "applovin"},
 		}))
 	accountBidmachine := dbtest.CreateDemandSourceAccount(t, tx, dbtest.WithDemandSourceAccountOptions(
 		&db.DemandSourceAccount{
@@ -38,7 +37,7 @@ func TestAppDemandProfileFetcher_Fetch(t *testing.T) {
 			DemandSource: db.DemandSource{
 				APIKey: string(adapter.BidmachineKey),
 			},
-			Extra: map[string]any{"bidmachine": "bidmachine"},
+			Extra: map[string]string{"bidmachine": "bidmachine"},
 		}))
 	accountDtexchange := dbtest.CreateDemandSourceAccount(t, tx, dbtest.WithDemandSourceAccountOptions(
 		&db.DemandSourceAccount{
@@ -47,7 +46,7 @@ func TestAppDemandProfileFetcher_Fetch(t *testing.T) {
 			DemandSource: db.DemandSource{
 				APIKey: string(adapter.DTExchangeKey),
 			},
-			Extra: map[string]any{"dtexchange": "dtexchange"},
+			Extra: map[string]string{"dtexchange": "dtexchange"},
 		}))
 	accountUnity := dbtest.CreateDemandSourceAccount(t, tx, dbtest.WithDemandSourceAccountOptions(
 		&db.DemandSourceAccount{
@@ -56,7 +55,7 @@ func TestAppDemandProfileFetcher_Fetch(t *testing.T) {
 			DemandSource: db.DemandSource{
 				APIKey: string(adapter.UnityAdsKey),
 			},
-			Extra: map[string]any{"unity": "unity"},
+			Extra: map[string]string{"unity": "unity"},
 		}))
 	profiles := []db.AppDemandProfile{
 		{
@@ -97,20 +96,20 @@ func TestAppDemandProfileFetcher_Fetch(t *testing.T) {
 		name        string
 		appID       int64
 		adapterKeys []adapter.Key
-		want        []config.AppDemandProfile
+		want        adapter.RawConfigsMap
 	}{
 		{
 			name:        "All keys, App 1",
 			appID:       apps[0].ID,
 			adapterKeys: adapter.Keys,
-			want: []config.AppDemandProfile{
-				{
-					AdapterKey:   adapter.ApplovinKey,
-					AccountExtra: map[string]any{"applovin": "applovin"},
+			want: adapter.RawConfigsMap{
+				adapter.ApplovinKey: {
+					AccountExtra: map[string]string{"applovin": "applovin"},
+					AppData:      map[string]string{},
 				},
-				{
-					AdapterKey:   adapter.BidmachineKey,
-					AccountExtra: map[string]any{"bidmachine": "bidmachine"},
+				adapter.BidmachineKey: {
+					AccountExtra: map[string]string{"bidmachine": "bidmachine"},
+					AppData:      map[string]string{},
 				},
 			},
 		},
@@ -118,10 +117,10 @@ func TestAppDemandProfileFetcher_Fetch(t *testing.T) {
 			name:        "One key, App 1",
 			appID:       apps[0].ID,
 			adapterKeys: []adapter.Key{adapter.ApplovinKey},
-			want: []config.AppDemandProfile{
-				{
-					AdapterKey:   adapter.ApplovinKey,
-					AccountExtra: map[string]any{"applovin": "applovin"},
+			want: adapter.RawConfigsMap{
+				adapter.ApplovinKey: {
+					AccountExtra: map[string]string{"applovin": "applovin"},
+					AppData:      map[string]string{},
 				},
 			},
 		},
@@ -129,22 +128,22 @@ func TestAppDemandProfileFetcher_Fetch(t *testing.T) {
 			name:        "No keys, App 1",
 			appID:       apps[0].ID,
 			adapterKeys: []adapter.Key{},
-			want:        []config.AppDemandProfile{},
+			want:        adapter.RawConfigsMap{},
 		},
 		{
 			name:        "One key, App 2",
 			appID:       apps[1].ID,
 			adapterKeys: []adapter.Key{adapter.DTExchangeKey},
-			want: []config.AppDemandProfile{
-				{
-					AdapterKey:   adapter.DTExchangeKey,
-					AccountExtra: map[string]any{"dtexchange": "dtexchange"},
+			want: adapter.RawConfigsMap{
+				adapter.DTExchangeKey: {
+					AccountExtra: map[string]string{"dtexchange": "dtexchange"},
+					AppData:      map[string]string{},
 				},
 			},
 		},
 	}
 
-	fetcher := store.AppDemandProfileFetcher{DB: tx}
+	fetcher := store.ConfigurationFetcher{DB: tx}
 
 	for _, tC := range testCases {
 		got, err := fetcher.Fetch(context.Background(), tC.appID, tC.adapterKeys)

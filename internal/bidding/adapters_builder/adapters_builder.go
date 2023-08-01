@@ -3,9 +3,10 @@ package adapters_builder
 import (
 	"context"
 	"fmt"
+	"net/http"
+
 	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
-	"net/http"
 
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
@@ -32,7 +33,7 @@ type AdaptersBuilder struct {
 	Client      *http.Client
 }
 
-func (b AdaptersBuilder) Build(adapterKey adapter.Key, cfg adapter.Config) (adapters.Bidder, error) {
+func (b AdaptersBuilder) Build(adapterKey adapter.Key, cfg adapter.ProcessedConfigsMap) (adapters.Bidder, error) {
 	if f, ok := b.AdaptersMap[adapterKey]; ok {
 		return f(cfg, b.Client)
 	}
@@ -48,11 +49,11 @@ func BuildBiddingAdapters(client *http.Client) AdaptersBuilder {
 	}
 }
 
-//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/mocks.go -pkg mocks . AppDemandProfileFetcher LineItemsMatcher
+//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/mocks.go -pkg mocks . ConfigurationFetcher LineItemsMatcher
 
-type AppDemandProfileFetcher interface {
+type ConfigurationFetcher interface {
 	// Fetch is used get one profile per adapter key, if present
-	Fetch(ctx context.Context, appID int64, adapterKeys []adapter.Key) ([]AppDemandProfile, error)
+	Fetch(ctx context.Context, appID int64, adapterKeys []adapter.Key) (adapter.RawConfigsMap, error)
 }
 
 type LineItemsMatcher interface {
@@ -60,27 +61,21 @@ type LineItemsMatcher interface {
 }
 
 type AdaptersConfigBuilder struct {
-	AppDemandProfileFetcher AppDemandProfileFetcher
-	LineItemsMatcher        LineItemsMatcher
+	ConfigurationFetcher ConfigurationFetcher
+	LineItemsMatcher     LineItemsMatcher
 }
 
-type AppDemandProfile struct {
-	AdapterKey   adapter.Key
-	AccountExtra map[string]any
-	AppData      map[string]any
-}
-
-func NewAdapters(keys []adapter.Key) adapter.Config {
-	adapters := make(adapter.Config, len(keys))
+func NewAdapters(keys []adapter.Key) adapter.ProcessedConfigsMap {
+	adapters := make(adapter.ProcessedConfigsMap, len(keys))
 	for _, key := range keys {
 		// explicitly initialize with empty maps. nil maps are serialized to `null` in json, empty maps are serialized to `{}`
-		adapters[key] = map[string]any{}
+		adapters[key] = map[string]string{}
 	}
 	return adapters
 }
 
-func (b *AdaptersConfigBuilder) Build(ctx context.Context, appID int64, adapterKeys []adapter.Key, imp schema.Imp) (adapter.Config, error) {
-	profiles, err := b.AppDemandProfileFetcher.Fetch(ctx, appID, adapterKeys)
+func (b *AdaptersConfigBuilder) Build(ctx context.Context, appID int64, adapterKeys []adapter.Key, imp schema.Imp) (adapter.ProcessedConfigsMap, error) {
+	profiles, err := b.ConfigurationFetcher.Fetch(ctx, appID, adapterKeys)
 	if err != nil {
 		return nil, err
 	}
@@ -90,13 +85,10 @@ func (b *AdaptersConfigBuilder) Build(ctx context.Context, appID int64, adapterK
 	}
 	adapters := NewAdapters(adapterKeys)
 
-	for _, profile := range profiles {
-		key := profile.AdapterKey
+	for key, profile := range profiles {
 		extra := profile.AccountExtra
 		appData := profile.AppData
 		switch key {
-		case adapter.ApplovinKey:
-			adapters[key]["app_key"] = extra["api_key"] // notice the "app" and "api" difference
 		case adapter.BidmachineKey:
 			adapters[key]["seller_id"] = extra["seller_id"]
 			adapters[key]["endpoint"] = extra["endpoint"]
@@ -104,9 +96,9 @@ func (b *AdaptersConfigBuilder) Build(ctx context.Context, appID int64, adapterK
 		case adapter.BigoAdsKey:
 			adapters[key]["app_id"] = appData["app_id"]
 			adapters[key]["seller_id"] = extra["seller_id"]
-			adapters[key]["endpoint"] = extra["endpoint"]
 			adapters[key]["tag_id"] = ""
 			adapters[key]["placement_id"] = ""
+
 			if lineItem, ok := lineItemsMap[key]; ok {
 				adapters[key]["tag_id"] = lineItem.AdUnitID
 				adapters[key]["placement_id"] = lineItem.AdUnitID
@@ -114,9 +106,9 @@ func (b *AdaptersConfigBuilder) Build(ctx context.Context, appID int64, adapterK
 		case adapter.MintegralKey:
 			adapters[key]["app_id"] = appData["app_id"]
 			adapters[key]["seller_id"] = extra["seller_id"]
-			adapters[key]["endpoint"] = extra["endpoint"]
 			adapters[key]["tag_id"] = ""
 			adapters[key]["placement_id"] = ""
+
 			if lineItem, ok := lineItemsMap[key]; ok {
 				adapters[key]["tag_id"] = lineItem.AdUnitID
 				adapters[key]["placement_id"] = lineItem.PlacementID

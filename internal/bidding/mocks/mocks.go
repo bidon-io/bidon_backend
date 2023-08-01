@@ -108,7 +108,7 @@ var _ bidding.AdaptersBuilder = &AdaptersBuilderMock{}
 //
 //		// make and configure a mocked bidding.AdaptersBuilder
 //		mockedAdaptersBuilder := &AdaptersBuilderMock{
-//			BuildFunc: func(adapterKey adapter.Key, cfg adapter.Config) (adapters.Bidder, error) {
+//			BuildFunc: func(adapterKey adapter.Key, cfg adapter.ProcessedConfigsMap) (adapters.Bidder, error) {
 //				panic("mock out the Build method")
 //			},
 //		}
@@ -119,7 +119,7 @@ var _ bidding.AdaptersBuilder = &AdaptersBuilderMock{}
 //	}
 type AdaptersBuilderMock struct {
 	// BuildFunc mocks the Build method.
-	BuildFunc func(adapterKey adapter.Key, cfg adapter.Config) (adapters.Bidder, error)
+	BuildFunc func(adapterKey adapter.Key, cfg adapter.ProcessedConfigsMap) (adapters.Bidder, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -128,20 +128,20 @@ type AdaptersBuilderMock struct {
 			// AdapterKey is the adapterKey argument value.
 			AdapterKey adapter.Key
 			// Cfg is the cfg argument value.
-			Cfg adapter.Config
+			Cfg adapter.ProcessedConfigsMap
 		}
 	}
 	lockBuild sync.RWMutex
 }
 
 // Build calls BuildFunc.
-func (mock *AdaptersBuilderMock) Build(adapterKey adapter.Key, cfg adapter.Config) (adapters.Bidder, error) {
+func (mock *AdaptersBuilderMock) Build(adapterKey adapter.Key, cfg adapter.ProcessedConfigsMap) (adapters.Bidder, error) {
 	if mock.BuildFunc == nil {
 		panic("AdaptersBuilderMock.BuildFunc: method is nil but AdaptersBuilder.Build was just called")
 	}
 	callInfo := struct {
 		AdapterKey adapter.Key
-		Cfg        adapter.Config
+		Cfg        adapter.ProcessedConfigsMap
 	}{
 		AdapterKey: adapterKey,
 		Cfg:        cfg,
@@ -158,11 +158,11 @@ func (mock *AdaptersBuilderMock) Build(adapterKey adapter.Key, cfg adapter.Confi
 //	len(mockedAdaptersBuilder.BuildCalls())
 func (mock *AdaptersBuilderMock) BuildCalls() []struct {
 	AdapterKey adapter.Key
-	Cfg        adapter.Config
+	Cfg        adapter.ProcessedConfigsMap
 } {
 	var calls []struct {
 		AdapterKey adapter.Key
-		Cfg        adapter.Config
+		Cfg        adapter.ProcessedConfigsMap
 	}
 	mock.lockBuild.RLock()
 	calls = mock.calls.Build
