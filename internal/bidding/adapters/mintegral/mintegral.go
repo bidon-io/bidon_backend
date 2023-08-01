@@ -208,6 +208,10 @@ func (a *MintegralAdapter) ParseBids(dr *adapters.DemandResponse) (*adapters.Dem
 		return dr, err
 	}
 
+	if bidResponse.SeatBid == nil {
+		return dr, nil
+	}
+
 	seat := bidResponse.SeatBid[0]
 	bid := seat.Bid[0]
 
