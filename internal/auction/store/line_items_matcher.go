@@ -61,6 +61,12 @@ func (m *LineItemsMatcher) find(query *gorm.DB) ([]auction.LineItem, error) {
 		lineItems[i].ID = dbLineItem.Account.DemandSource.APIKey
 		lineItems[i].PriceFloor = dbLineItem.BidFloor.Decimal.InexactFloat64()
 		lineItems[i].AdUnitID = *dbLineItem.Code
+
+		placementId, ok := dbLineItem.Extra["placement_id"].(string)
+		if ok {
+			lineItems[i].PlacementID = placementId
+		}
+
 	}
 
 	return lineItems, nil

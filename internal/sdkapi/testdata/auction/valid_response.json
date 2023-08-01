@@ -41,7 +41,8 @@
     {
       "id": "test",
       "pricefloor": 0.1,
-      "ad_unit_id": "test_id"
+      "ad_unit_id": "test_id",
+      "placement_id": ""
     }
   ],
   "segment": {

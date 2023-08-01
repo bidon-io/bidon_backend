@@ -91,7 +91,11 @@ func (h *BiddingHandler) Handle(c echo.Context) error {
 				ImpID: result.Bid.ImpID,
 				Price: result.Bid.Price,
 				Demands: map[adapter.Key]Demand{
-					result.DemandID: {Payload: result.Bid.Payload},
+					result.DemandID: {
+						Payload:     result.Bid.Payload,
+						UnitID:      result.Bid.UnitID,
+						PlacementID: result.Bid.PlacementID,
+					},
 				},
 			})
 			response.Status = "SUCCESS"
