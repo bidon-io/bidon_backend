@@ -25,9 +25,10 @@ type RoundConfig struct {
 }
 
 type LineItem struct {
-	ID         string  `json:"id"`
-	PriceFloor float64 `json:"pricefloor"`
-	AdUnitID   string  `json:"ad_unit_id"`
+	ID          string  `json:"id"`
+	PriceFloor  float64 `json:"pricefloor"`
+	AdUnitID    string  `json:"ad_unit_id"`
+	PlacementID string  `json:"placement_id"`
 }
 
 type Segment struct {

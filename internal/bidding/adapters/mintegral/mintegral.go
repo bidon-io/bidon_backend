@@ -20,10 +20,11 @@ import (
 )
 
 type MintegralAdapter struct {
-	SellerID string
-	Endpoint string
-	AppID    string
-	TagID    string
+	SellerID    string
+	Endpoint    string
+	AppID       string
+	TagID       string
+	PlacementID string
 }
 
 var bannerFormats = map[string][2]int64{
@@ -209,16 +210,18 @@ func (a *MintegralAdapter) ParseBids(dr *adapters.DemandResponse) (*adapters.Dem
 	bid := seat.Bid[0]
 
 	dr.Bid = &adapters.BidDemandResponse{
-		ID:       bid.ID,
-		ImpID:    bid.ImpID,
-		Price:    bid.Price,
-		Payload:  bid.AdM,
-		DemandID: adapter.MintegralKey,
-		AdID:     bid.AdID,
-		SeatID:   seat.Seat,
-		LURL:     bid.LURL,
-		NURL:     bid.NURL,
-		BURL:     bid.BURL,
+		ID:          bid.ID,
+		ImpID:       bid.ImpID,
+		Price:       bid.Price,
+		Payload:     bid.AdM,
+		DemandID:    adapter.MintegralKey,
+		AdID:        bid.AdID,
+		SeatID:      seat.Seat,
+		LURL:        bid.LURL,
+		NURL:        bid.NURL,
+		BURL:        bid.BURL,
+		UnitID:      a.TagID,
+		PlacementID: a.PlacementID,
 	}
 
 	return dr, nil
@@ -229,10 +232,11 @@ func Builder(cfg adapter.Config, client *http.Client) (adapters.Bidder, error) {
 	mCfg := cfg[adapter.MintegralKey]
 
 	adpt := &MintegralAdapter{
-		Endpoint: mCfg["endpoint"].(string),
-		SellerID: mCfg["seller_id"].(string),
-		AppID:    mCfg["app_id"].(string),
-		TagID:    mCfg["tag_id"].(string),
+		Endpoint:    mCfg["endpoint"].(string),
+		SellerID:    mCfg["seller_id"].(string),
+		AppID:       mCfg["app_id"].(string),
+		TagID:       mCfg["tag_id"].(string),
+		PlacementID: mCfg["placement_id"].(string),
 	}
 
 	bidder := adapters.Bidder{

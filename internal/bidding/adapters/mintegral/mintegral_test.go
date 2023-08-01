@@ -91,7 +91,7 @@ func buildWantRequest(imp openrtb2.Imp) openrtb2.BidRequest {
 				ID:                "1",
 				DisplayManager:    "mintegral",
 				DisplayManagerVer: "1.0.0",
-				TagID:             "10182906-10192212",
+				TagID:             "10182906",
 				BidFloorCur:       "USD",
 				Secure:            ptr(int8(1)),
 			},
@@ -206,10 +206,11 @@ func TestMintegral_CreateRequestTest(t *testing.T) {
 	}
 
 	adapter := &mintegral.MintegralAdapter{
-		SellerID: "1",
-		Endpoint: "https://mintegral.com",
-		AppID:    "10182906",
-		TagID:    "10182906-10192212",
+		SellerID:    "1",
+		Endpoint:    "https://mintegral.com",
+		AppID:       "10182906",
+		TagID:       "10182906",
+		PlacementID: "2020327",
 	}
 
 	for _, tC := range testCases {
