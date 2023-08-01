@@ -37,6 +37,8 @@ type DemandResponse struct {
 	Price       float64
 	Bid         *BidDemandResponse
 	Error       error
+	TagID       string
+	PlacementID string
 }
 
 func (m *DemandResponse) IsBid() bool {
@@ -44,16 +46,14 @@ func (m *DemandResponse) IsBid() bool {
 }
 
 type BidDemandResponse struct {
-	Payload     string
-	ID          string
-	ImpID       string
-	AdID        string
-	SeatID      string
-	DemandID    adapter.Key
-	Price       float64
-	LURL        string
-	NURL        string
-	BURL        string
-	UnitID      string
-	PlacementID string
+	Payload  string
+	ID       string
+	ImpID    string
+	AdID     string
+	SeatID   string
+	DemandID adapter.Key
+	Price    float64
+	LURL     string
+	NURL     string
+	BURL     string
 }
