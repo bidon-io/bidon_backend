@@ -44,14 +44,16 @@ func (m *DemandResponse) IsBid() bool {
 }
 
 type BidDemandResponse struct {
-	Payload  string
-	ID       string
-	ImpID    string
-	AdID     string
-	SeatID   string
-	DemandID adapter.Key
-	Price    float64
-	LURL     string
-	NURL     string
-	BURL     string
+	Payload     string
+	ID          string
+	ImpID       string
+	AdID        string
+	SeatID      string
+	DemandID    adapter.Key
+	Price       float64
+	LURL        string
+	NURL        string
+	BURL        string
+	UnitID      string
+	PlacementID string
 }
