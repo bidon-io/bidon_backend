@@ -207,7 +207,6 @@ func TestMintegral_CreateRequestTest(t *testing.T) {
 
 	adapter := &mintegral.MintegralAdapter{
 		SellerID:    "1",
-		Endpoint:    "https://mintegral.com",
 		AppID:       "10182906",
 		TagID:       "10182906",
 		PlacementID: "2020327",

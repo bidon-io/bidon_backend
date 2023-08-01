@@ -11,28 +11,36 @@ import (
 )
 
 func TestAdaptersBuilder_Build(t *testing.T) {
-	profiles := []config.AppDemandProfile{
-		{adapter.ApplovinKey, map[string]any{"api_key": "applovin_api_key", "ext": "some"}},
-		{adapter.BidmachineKey, map[string]any{
-			"seller_id":        "bidmachine_seller_id",
-			"endpoint":         "http://example.com/bidmachine",
-			"mediation_config": "{\"config\": true}",
-			"ext":              "some",
-		}},
-		{adapter.DTExchangeKey, map[string]any{"dt_key_1": 1, "dt_key_2": 2}},
-		{adapter.UnityAdsKey, map[string]any{"unity_key_1": 1, "unity_key_2": 2}},
+	profiles := adapter.RawConfigsMap{
+		adapter.ApplovinKey: {
+			AppData: map[string]string{"api_key": "applovin_api_key", "ext": "some"},
+		},
+		adapter.BidmachineKey: {
+			AccountExtra: map[string]string{
+				"seller_id":        "bidmachine_seller_id",
+				"endpoint":         "http://example.com/bidmachine",
+				"mediation_config": "{\"config\": true}",
+				"ext":              "some",
+			},
+		},
+		adapter.DTExchangeKey: {
+			AppData: map[string]string{"app_id": "123", "dt_key_1": "1", "dt_key_2": "2"},
+		},
+		adapter.UnityAdsKey: {
+			AppData: map[string]string{"game_id": "234", "unity_key_1": "1", "unity_key_2": "2"},
+		},
 	}
 
-	applovinProfile := profiles[0]
-	bidmachineProfile := profiles[1]
-	dtExchangeProfile := profiles[2]
-	unityAdsProfile := profiles[3]
+	applovinProfile := profiles[adapter.ApplovinKey]
+	bidmachineProfile := profiles[adapter.BidmachineKey]
+	dtExchangeProfile := profiles[adapter.DTExchangeKey]
+	unityAdsProfile := profiles[adapter.UnityAdsKey]
 
 	testCases := []struct {
 		name        string
-		profiles    []config.AppDemandProfile
+		profiles    adapter.RawConfigsMap
 		adapterKeys []adapter.Key
-		want        adapter.Config
+		want        adapter.ProcessedConfigsMap
 	}{
 		{
 			name:        "All keys, no profiles",
@@ -44,45 +52,48 @@ func TestAdaptersBuilder_Build(t *testing.T) {
 			name:        "No keys",
 			profiles:    nil,
 			adapterKeys: []adapter.Key{},
-			want:        adapter.Config{},
+			want:        adapter.ProcessedConfigsMap{},
 		},
 		{
 			name:        "All keys match all profiles",
 			profiles:    profiles,
 			adapterKeys: []adapter.Key{adapter.ApplovinKey, adapter.BidmachineKey, adapter.DTExchangeKey, adapter.UnityAdsKey},
-			want: adapter.Config{
-				adapter.ApplovinKey: map[string]any{
+			want: adapter.ProcessedConfigsMap{
+				adapter.ApplovinKey: map[string]string{
 					"app_key": applovinProfile.AccountExtra["api_key"],
 				},
-				adapter.BidmachineKey: map[string]any{
+				adapter.BidmachineKey: map[string]string{
 					"seller_id":        bidmachineProfile.AccountExtra["seller_id"],
 					"endpoint":         bidmachineProfile.AccountExtra["endpoint"],
 					"mediation_config": bidmachineProfile.AccountExtra["mediation_config"],
 				},
-				adapter.DTExchangeKey: dtExchangeProfile.AccountExtra,
-				adapter.UnityAdsKey:   unityAdsProfile.AccountExtra,
+				adapter.DTExchangeKey: map[string]string{"app_id": "123"},
+				adapter.UnityAdsKey:   map[string]string{"game_id": "234"},
 			},
 		},
 		{
-			name:        "Some keys do not have matching profile",
-			profiles:    []config.AppDemandProfile{dtExchangeProfile, unityAdsProfile},
+			name: "Some keys do not have matching profile",
+			profiles: adapter.RawConfigsMap{
+				adapter.DTExchangeKey: dtExchangeProfile,
+				adapter.UnityAdsKey:   unityAdsProfile,
+			},
 			adapterKeys: []adapter.Key{adapter.ApplovinKey, adapter.BidmachineKey, adapter.DTExchangeKey, adapter.UnityAdsKey},
-			want: adapter.Config{
-				adapter.ApplovinKey:   map[string]any{},
-				adapter.BidmachineKey: map[string]any{},
-				adapter.DTExchangeKey: dtExchangeProfile.AccountExtra,
-				adapter.UnityAdsKey:   unityAdsProfile.AccountExtra,
+			want: adapter.ProcessedConfigsMap{
+				adapter.ApplovinKey:   map[string]string{},
+				adapter.BidmachineKey: map[string]string{},
+				adapter.DTExchangeKey: map[string]string{"app_id": "123"},
+				adapter.UnityAdsKey:   map[string]string{"game_id": "234"},
 			},
 		},
 	}
 
 	for _, tC := range testCases {
-		fetcher := &configmocks.AppDemandProfileFetcherMock{
-			FetchFunc: func(ctx context.Context, appID int64, adapterKeys []adapter.Key) ([]config.AppDemandProfile, error) {
+		fetcher := &configmocks.ConfigurationFetcherMock{
+			FetchFunc: func(ctx context.Context, appID int64, adapterKeys []adapter.Key) (adapter.RawConfigsMap, error) {
 				return tC.profiles, nil
 			},
 		}
-		builder := &config.AdaptersBuilder{AppDemandProfileFetcher: fetcher}
+		builder := &config.AdaptersBuilder{ConfigurationFetcher: fetcher}
 
 		got, err := builder.Build(context.Background(), 0, tC.adapterKeys)
 		if err != nil {

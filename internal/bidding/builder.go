@@ -3,6 +3,8 @@ package bidding
 import (
 	"context"
 	"errors"
+	"strconv"
+
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/auction"
@@ -12,7 +14,6 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	"github.com/gofrs/uuid/v5"
 	"golang.org/x/exp/maps"
-	"strconv"
 
 	"github.com/prebid/openrtb/v19/adcom1"
 	"github.com/prebid/openrtb/v19/openrtb2"
@@ -33,7 +34,7 @@ type ConfigMatcher interface {
 }
 
 type AdaptersBuilder interface {
-	Build(adapterKey adapter.Key, cfg adapter.Config) (adapters.Bidder, error)
+	Build(adapterKey adapter.Key, cfg adapter.ProcessedConfigsMap) (adapters.Bidder, error)
 }
 
 type NotificationHandler interface {
@@ -45,7 +46,7 @@ type BuildParams struct {
 	BiddingRequest schema.BiddingRequest
 	SegmentID      int64
 	GeoData        geocoder.GeoData
-	AdapterConfigs adapter.Config
+	AdapterConfigs adapter.ProcessedConfigsMap
 }
 
 func (b *Builder) HoldAuction(ctx context.Context, params *BuildParams) ([]adapters.DemandResponse, error) {

@@ -10,28 +10,28 @@ import (
 	"sync"
 )
 
-// Ensure, that AppDemandProfileFetcherMock does implement config.AppDemandProfileFetcher.
+// Ensure, that ConfigurationFetcherMock does implement config.ConfigurationFetcher.
 // If this is not the case, regenerate this file with moq.
-var _ config.AppDemandProfileFetcher = &AppDemandProfileFetcherMock{}
+var _ config.ConfigurationFetcher = &ConfigurationFetcherMock{}
 
-// AppDemandProfileFetcherMock is a mock implementation of config.AppDemandProfileFetcher.
+// ConfigurationFetcherMock is a mock implementation of config.ConfigurationFetcher.
 //
-//	func TestSomethingThatUsesAppDemandProfileFetcher(t *testing.T) {
+//	func TestSomethingThatUsesConfigurationFetcher(t *testing.T) {
 //
-//		// make and configure a mocked config.AppDemandProfileFetcher
-//		mockedAppDemandProfileFetcher := &AppDemandProfileFetcherMock{
-//			FetchFunc: func(ctx context.Context, appID int64, adapterKeys []adapter.Key) ([]config.AppDemandProfile, error) {
+//		// make and configure a mocked config.ConfigurationFetcher
+//		mockedConfigurationFetcher := &ConfigurationFetcherMock{
+//			FetchFunc: func(ctx context.Context, appID int64, adapterKeys []adapter.Key) (adapter.RawConfigsMap, error) {
 //				panic("mock out the Fetch method")
 //			},
 //		}
 //
-//		// use mockedAppDemandProfileFetcher in code that requires config.AppDemandProfileFetcher
+//		// use mockedConfigurationFetcher in code that requires config.ConfigurationFetcher
 //		// and then make assertions.
 //
 //	}
-type AppDemandProfileFetcherMock struct {
+type ConfigurationFetcherMock struct {
 	// FetchFunc mocks the Fetch method.
-	FetchFunc func(ctx context.Context, appID int64, adapterKeys []adapter.Key) ([]config.AppDemandProfile, error)
+	FetchFunc func(ctx context.Context, appID int64, adapterKeys []adapter.Key) (adapter.RawConfigsMap, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -49,9 +49,9 @@ type AppDemandProfileFetcherMock struct {
 }
 
 // Fetch calls FetchFunc.
-func (mock *AppDemandProfileFetcherMock) Fetch(ctx context.Context, appID int64, adapterKeys []adapter.Key) ([]config.AppDemandProfile, error) {
+func (mock *ConfigurationFetcherMock) Fetch(ctx context.Context, appID int64, adapterKeys []adapter.Key) (adapter.RawConfigsMap, error) {
 	if mock.FetchFunc == nil {
-		panic("AppDemandProfileFetcherMock.FetchFunc: method is nil but AppDemandProfileFetcher.Fetch was just called")
+		panic("ConfigurationFetcherMock.FetchFunc: method is nil but ConfigurationFetcher.Fetch was just called")
 	}
 	callInfo := struct {
 		Ctx         context.Context
@@ -71,8 +71,8 @@ func (mock *AppDemandProfileFetcherMock) Fetch(ctx context.Context, appID int64,
 // FetchCalls gets all the calls that were made to Fetch.
 // Check the length with:
 //
-//	len(mockedAppDemandProfileFetcher.FetchCalls())
-func (mock *AppDemandProfileFetcherMock) FetchCalls() []struct {
+//	len(mockedConfigurationFetcher.FetchCalls())
+func (mock *ConfigurationFetcherMock) FetchCalls() []struct {
 	Ctx         context.Context
 	AppID       int64
 	AdapterKeys []adapter.Key
