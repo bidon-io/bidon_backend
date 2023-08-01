@@ -60,7 +60,7 @@ func testHelperAuctionHandler(t *testing.T) *sdkapi.AuctionHandler {
 		},
 	}
 	lineItems := []auction.LineItem{
-		{ID: "test", PriceFloor: 0.1, AdUnitID: "test_id"},
+		{ID: "test", PriceFloor: 0.1, PlacementID: "", AdUnitID: "test_id"},
 	}
 	segments := []segment.Segment{
 		{ID: 1, Filters: []segment.Filter{{Type: "country", Name: "country", Operator: "IN", Values: []string{"US", "UK"}}}},

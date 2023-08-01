@@ -108,6 +108,7 @@ func (b *AdaptersConfigBuilder) Build(ctx context.Context, appID int64, adapterK
 			adapters[key]["tag_id"] = ""
 			if lineItem, ok := lineItemsMap[key]; ok {
 				adapters[key]["tag_id"] = lineItem.AdUnitID
+				adapters[key]["placement_id"] = lineItem.AdUnitID
 			}
 		case adapter.MintegralKey:
 			adapters[key]["app_id"] = appData["app_id"]
@@ -116,6 +117,7 @@ func (b *AdaptersConfigBuilder) Build(ctx context.Context, appID int64, adapterK
 			adapters[key]["tag_id"] = ""
 			if lineItem, ok := lineItemsMap[key]; ok {
 				adapters[key]["tag_id"] = lineItem.AdUnitID
+				adapters[key]["placement_id"] = lineItem.PlacementID
 			}
 		default:
 			adapters[key] = extra

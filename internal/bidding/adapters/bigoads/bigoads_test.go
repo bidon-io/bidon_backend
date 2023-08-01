@@ -46,10 +46,11 @@ func compareErrors(want, got error) bool {
 
 func buildAdapter() bigoads.BigoAdsAdapter {
 	return bigoads.BigoAdsAdapter{
-		SellerID: "1",
-		Endpoint: "https://bigoads.com",
-		AppID:    "10182906",
-		TagID:    "10182906-10192212",
+		SellerID:    "1",
+		Endpoint:    "https://bigoads.com",
+		AppID:       "10182906",
+		TagID:       "10182906-10192212",
+		PlacementID: "10182906-10192212",
 	}
 }
 
@@ -286,14 +287,16 @@ func TestBigoAds_ParseBids(t *testing.T) {
 					Status:      200,
 					RawResponse: rawResponse,
 					Bid: &adapters.BidDemandResponse{
-						ID:       "0",
-						ImpID:    "6579ca7b-7e2c-48b6-8915-46efa6530fb5",
-						Price:    1.5,
-						Payload:  "0692d0a0efdbd5bd470dafea742cef6a1f6b840c5c83240e165bc33a038b3d5487e25a52",
-						DemandID: "bigoads",
-						AdID:     "Bigoad5e0471131b8a4e3c",
-						LURL:     "https://api.gov-static.tech/Ad/AdxEvent?sid=0&sslot=10182906-10163778",
-						NURL:     "https://api.gov-static.tech/Ad/AdxEvent?sid=0&sslot=10182906-10163778&adtype=4",
+						ID:          "0",
+						ImpID:       "6579ca7b-7e2c-48b6-8915-46efa6530fb5",
+						Price:       1.5,
+						Payload:     "0692d0a0efdbd5bd470dafea742cef6a1f6b840c5c83240e165bc33a038b3d5487e25a52",
+						DemandID:    "bigoads",
+						AdID:        "Bigoad5e0471131b8a4e3c",
+						LURL:        "https://api.gov-static.tech/Ad/AdxEvent?sid=0&sslot=10182906-10163778",
+						NURL:        "https://api.gov-static.tech/Ad/AdxEvent?sid=0&sslot=10182906-10163778&adtype=4",
+						UnitID:      "10182906-10192212",
+						PlacementID: "10182906-10192212",
 					},
 				},
 				Err: nil,
@@ -348,10 +351,11 @@ func TestBigoAds_Builder(t *testing.T) {
 	client := &http.Client{}
 	bigoCfg := adapter.Config{
 		adapter.BigoAdsKey: map[string]any{
-			"seller_id": "1",
-			"endpoint":  "https://bigoads.com",
-			"app_id":    "10182906",
-			"tag_id":    "10182906-10192212",
+			"seller_id":    "1",
+			"endpoint":     "https://bigoads.com",
+			"app_id":       "10182906",
+			"tag_id":       "10182906-10192212",
+			"placement_id": "10182906-10192212",
 		},
 	}
 	bidder, err := bigoads.Builder(bigoCfg, client)

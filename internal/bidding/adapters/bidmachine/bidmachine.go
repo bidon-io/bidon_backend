@@ -199,16 +199,18 @@ func (a *BidmachineAdapter) ParseBids(dr *adapters.DemandResponse) (*adapters.De
 	bid := seat.Bid[0]
 
 	dr.Bid = &adapters.BidDemandResponse{
-		ID:       bid.ID,
-		ImpID:    bid.ImpID,
-		Price:    bid.Price,
-		Payload:  bid.AdM,
-		DemandID: adapter.BidmachineKey,
-		AdID:     bid.AdID,
-		SeatID:   seat.Seat,
-		LURL:     bid.LURL,
-		NURL:     bid.NURL,
-		BURL:     bid.BURL,
+		ID:          bid.ID,
+		ImpID:       bid.ImpID,
+		Price:       bid.Price,
+		Payload:     bid.AdM,
+		DemandID:    adapter.BidmachineKey,
+		AdID:        bid.AdID,
+		SeatID:      seat.Seat,
+		LURL:        bid.LURL,
+		NURL:        bid.NURL,
+		BURL:        bid.BURL,
+		UnitID:      "",
+		PlacementID: "",
 	}
 
 	return dr, nil
