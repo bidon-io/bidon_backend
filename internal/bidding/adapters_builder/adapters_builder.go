@@ -106,6 +106,7 @@ func (b *AdaptersConfigBuilder) Build(ctx context.Context, appID int64, adapterK
 			adapters[key]["seller_id"] = extra["seller_id"]
 			adapters[key]["endpoint"] = extra["endpoint"]
 			adapters[key]["tag_id"] = ""
+			adapters[key]["placement_id"] = ""
 			if lineItem, ok := lineItemsMap[key]; ok {
 				adapters[key]["tag_id"] = lineItem.AdUnitID
 				adapters[key]["placement_id"] = lineItem.AdUnitID
@@ -115,6 +116,7 @@ func (b *AdaptersConfigBuilder) Build(ctx context.Context, appID int64, adapterK
 			adapters[key]["seller_id"] = extra["seller_id"]
 			adapters[key]["endpoint"] = extra["endpoint"]
 			adapters[key]["tag_id"] = ""
+			adapters[key]["placement_id"] = ""
 			if lineItem, ok := lineItemsMap[key]; ok {
 				adapters[key]["tag_id"] = lineItem.AdUnitID
 				adapters[key]["placement_id"] = lineItem.PlacementID
