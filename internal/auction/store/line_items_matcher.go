@@ -21,7 +21,7 @@ func (m *LineItemsMatcher) Match(ctx context.Context, params *auction.BuildParam
 
 	query := m.DB.
 		WithContext(ctx).
-		Select("bid_floor", "code").
+		Select("bid_floor", "code", "line_items.extra").
 		Where(map[string]any{
 			"app_id":  params.AppID,
 			"ad_type": db.AdTypeFromDomain(params.AdType),
