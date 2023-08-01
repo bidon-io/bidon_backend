@@ -21,7 +21,6 @@ import (
 
 type BigoAdsAdapter struct {
 	SellerID    string
-	Endpoint    string
 	AppID       string
 	TagID       string
 	PlacementID string
@@ -218,15 +217,14 @@ func (a *BigoAdsAdapter) ParseBids(dr *adapters.DemandResponse) (*adapters.Deman
 }
 
 // Builder builds a new instance of the BigoAds adapter for the given bidder with the given config.
-func Builder(cfg adapter.Config, client *http.Client) (adapters.Bidder, error) {
+func Builder(cfg adapter.ProcessedConfigsMap, client *http.Client) (adapters.Bidder, error) {
 	bigoCfg := cfg[adapter.BigoAdsKey]
 
 	adpt := &BigoAdsAdapter{
-		Endpoint:    bigoCfg["endpoint"].(string),
-		SellerID:    bigoCfg["seller_id"].(string),
-		AppID:       bigoCfg["app_id"].(string),
-		TagID:       bigoCfg["tag_id"].(string),
-		PlacementID: bigoCfg["placement_id"].(string),
+		SellerID:    bigoCfg["seller_id"],
+		AppID:       bigoCfg["app_id"],
+		TagID:       bigoCfg["tag_id"],
+		PlacementID: bigoCfg["placement_id"],
 	}
 
 	bidder := adapters.Bidder{

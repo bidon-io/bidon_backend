@@ -99,18 +99,16 @@ func testHelperBiddingHandler(t *testing.T) sdkapi.BiddingHandler {
 		},
 	}
 
-	profileFetcher := &adaptersbuildermocks.AppDemandProfileFetcherMock{
-		FetchFunc: func(ctx context.Context, appID int64, adapterKeys []adapter.Key) ([]adapters_builder.AppDemandProfile, error) {
-			return []adapters_builder.AppDemandProfile{
-				{
-					AdapterKey: adapter.ApplovinKey,
-					AccountExtra: map[string]any{
+	profileFetcher := &adaptersbuildermocks.ConfigurationFetcherMock{
+		FetchFunc: func(ctx context.Context, appID int64, adapterKeys []adapter.Key) (adapter.RawConfigsMap, error) {
+			return adapter.RawConfigsMap{
+				adapter.ApplovinKey: {
+					AccountExtra: map[string]string{
 						"app_key": "123",
 					},
 				},
-				{
-					AdapterKey:   adapter.BidmachineKey,
-					AccountExtra: map[string]any{},
+				adapter.BidmachineKey: {
+					AccountExtra: map[string]string{},
 				},
 			}, nil
 		},
@@ -135,8 +133,8 @@ func testHelperBiddingHandler(t *testing.T) sdkapi.BiddingHandler {
 			AdaptersBuilder: adapters_builder.BuildBiddingAdapters(biddingHttpClient),
 		},
 		AdaptersConfigBuilder: &adapters_builder.AdaptersConfigBuilder{
-			AppDemandProfileFetcher: profileFetcher,
-			LineItemsMatcher:        lineItemsMatcher,
+			ConfigurationFetcher: profileFetcher,
+			LineItemsMatcher:     lineItemsMatcher,
 		},
 	}
 	return handler

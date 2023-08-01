@@ -21,7 +21,6 @@ import (
 
 type MintegralAdapter struct {
 	SellerID    string
-	Endpoint    string
 	AppID       string
 	TagID       string
 	PlacementID string
@@ -232,15 +231,14 @@ func (a *MintegralAdapter) ParseBids(dr *adapters.DemandResponse) (*adapters.Dem
 }
 
 // Builder builds a new instance of the Mintegral adapter for the given bidder with the given config.
-func Builder(cfg adapter.Config, client *http.Client) (adapters.Bidder, error) {
+func Builder(cfg adapter.ProcessedConfigsMap, client *http.Client) (adapters.Bidder, error) {
 	mCfg := cfg[adapter.MintegralKey]
 
 	adpt := &MintegralAdapter{
-		Endpoint:    mCfg["endpoint"].(string),
-		SellerID:    mCfg["seller_id"].(string),
-		AppID:       mCfg["app_id"].(string),
-		TagID:       mCfg["tag_id"].(string),
-		PlacementID: mCfg["placement_id"].(string),
+		SellerID:    mCfg["seller_id"],
+		AppID:       mCfg["app_id"],
+		TagID:       mCfg["tag_id"],
+		PlacementID: mCfg["placement_id"],
 	}
 
 	bidder := adapters.Bidder{

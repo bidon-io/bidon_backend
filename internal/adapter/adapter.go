@@ -2,7 +2,15 @@ package adapter
 
 type Key string
 
-type Config map[Key]map[string]any
+type (
+	RawConfigsMap       map[Key]Config
+	ProcessedConfigsMap map[Key]map[string]string
+)
+
+type Config struct {
+	AccountExtra map[string]string
+	AppData      map[string]string
+}
 
 const (
 	// Sorted alphabetically

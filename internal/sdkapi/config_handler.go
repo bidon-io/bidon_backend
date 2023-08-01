@@ -32,8 +32,8 @@ type Segment struct {
 }
 
 type ConfigResponseInit struct {
-	TMax     int            `json:"tmax"`
-	Adapters adapter.Config `json:"adapters"`
+	TMax     int                         `json:"tmax"`
+	Adapters adapter.ProcessedConfigsMap `json:"adapters"`
 }
 
 func (h *ConfigHandler) Handle(c echo.Context) error {
