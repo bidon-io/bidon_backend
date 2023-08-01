@@ -133,7 +133,9 @@ func (a *BigoAdsAdapter) CreateRequest(request openrtb2.BidRequest, br *schema.B
 
 func (a *BigoAdsAdapter) ExecuteRequest(ctx context.Context, client *http.Client, request openrtb2.BidRequest) *adapters.DemandResponse {
 	dr := &adapters.DemandResponse{
-		DemandID: adapter.BigoAdsKey,
+		DemandID:    adapter.BigoAdsKey,
+		TagID:       a.TagID,
+		PlacementID: a.PlacementID,
 	}
 	requestBody, err := json.Marshal(request)
 	if err != nil {
@@ -200,18 +202,16 @@ func (a *BigoAdsAdapter) ParseBids(dr *adapters.DemandResponse) (*adapters.Deman
 	bid := seat.Bid[0]
 
 	dr.Bid = &adapters.BidDemandResponse{
-		ID:          bid.ID,
-		ImpID:       bid.ImpID,
-		Price:       bid.Price,
-		Payload:     bid.AdM,
-		DemandID:    adapter.BigoAdsKey,
-		AdID:        bid.AdID,
-		SeatID:      seat.Seat,
-		LURL:        bid.LURL,
-		NURL:        bid.NURL,
-		BURL:        bid.BURL,
-		UnitID:      a.TagID,
-		PlacementID: a.PlacementID,
+		ID:       bid.ID,
+		ImpID:    bid.ImpID,
+		Price:    bid.Price,
+		Payload:  bid.AdM,
+		DemandID: adapter.BigoAdsKey,
+		AdID:     bid.AdID,
+		SeatID:   seat.Seat,
+		LURL:     bid.LURL,
+		NURL:     bid.NURL,
+		BURL:     bid.BURL,
 	}
 
 	return dr, nil

@@ -7,6 +7,7 @@ import (
 
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/bidding"
+	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters_builder"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	"github.com/bidon-io/bidon-backend/internal/segment"
@@ -36,6 +37,7 @@ type Bid struct {
 type Demand struct {
 	Payload     string `json:"payload"`
 	UnitID      string `json:"unit_id,omitempty"`
+	SlotID      string `json:"slot_id,omitempty"`
 	PlacementID string `json:"placement_id,omitempty"`
 }
 
@@ -91,11 +93,7 @@ func (h *BiddingHandler) Handle(c echo.Context) error {
 				ImpID: result.Bid.ImpID,
 				Price: result.Bid.Price,
 				Demands: map[adapter.Key]Demand{
-					result.DemandID: {
-						Payload:     result.Bid.Payload,
-						UnitID:      result.Bid.UnitID,
-						PlacementID: result.Bid.PlacementID,
-					},
+					result.DemandID: buildDemandInfo(result),
 				},
 			})
 			response.Status = "SUCCESS"
@@ -103,4 +101,29 @@ func (h *BiddingHandler) Handle(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, response)
+}
+
+func buildDemandInfo(demandResponse adapters.DemandResponse) Demand {
+	switch demandResponse.DemandID {
+	case adapter.MintegralKey:
+		return Demand{
+			Payload:     demandResponse.Bid.Payload,
+			UnitID:      demandResponse.TagID,
+			PlacementID: demandResponse.PlacementID,
+		}
+	case adapter.BidmachineKey:
+		return Demand{
+			Payload: demandResponse.Bid.Payload,
+		}
+	case adapter.BigoAdsKey:
+		return Demand{
+			Payload: demandResponse.Bid.Payload,
+			SlotID:  demandResponse.TagID,
+		}
+	default:
+		return Demand{
+			Payload:     demandResponse.Bid.Payload,
+			PlacementID: demandResponse.TagID,
+		}
+	}
 }
