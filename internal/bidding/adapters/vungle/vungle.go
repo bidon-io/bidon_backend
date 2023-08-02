@@ -81,8 +81,8 @@ func (a *VungleAdapter) rewarded(br *schema.BiddingRequest) *openrtb2.Imp {
 			W:     w,
 			H:     h,
 			MIMEs: []string{"video/mp4"},
+			Ext:   json.RawMessage(`{"rewarded": 1}`),
 		},
-		Ext: json.RawMessage(`{"rewarded": 1}`),
 	}
 }
 
