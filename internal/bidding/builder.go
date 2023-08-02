@@ -3,8 +3,6 @@ package bidding
 import (
 	"context"
 	"errors"
-	"strconv"
-
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/auction"
@@ -13,10 +11,10 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/geocoder"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	"github.com/gofrs/uuid/v5"
-	"golang.org/x/exp/maps"
-
 	"github.com/prebid/openrtb/v19/adcom1"
 	"github.com/prebid/openrtb/v19/openrtb2"
+	"golang.org/x/exp/maps"
+	"strconv"
 )
 
 type Builder struct {
