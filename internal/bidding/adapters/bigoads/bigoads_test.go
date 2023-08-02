@@ -347,7 +347,7 @@ func TestBigoAds_ParseBids(t *testing.T) {
 func TestBigoAds_Builder(t *testing.T) {
 	client := &http.Client{}
 	bigoCfg := adapter.ProcessedConfigsMap{
-		adapter.BigoAdsKey: map[string]string{
+		adapter.BigoAdsKey: map[string]any{
 			"seller_id":    "1",
 			"app_id":       "10182906",
 			"tag_id":       "10182906-10192212",
@@ -356,7 +356,7 @@ func TestBigoAds_Builder(t *testing.T) {
 	}
 	bidder, err := bigoads.Builder(bigoCfg, client)
 	wantAdapter := buildAdapter()
-	wantBidder := adapters.Bidder{
+	wantBidder := &adapters.Bidder{
 		Adapter: &wantAdapter,
 		Client:  client,
 	}

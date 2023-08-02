@@ -34,7 +34,7 @@ type ConfigMatcher interface {
 }
 
 type AdaptersBuilder interface {
-	Build(adapterKey adapter.Key, cfg adapter.ProcessedConfigsMap) (adapters.Bidder, error)
+	Build(adapterKey adapter.Key, cfg adapter.ProcessedConfigsMap) (*adapters.Bidder, error)
 }
 
 type NotificationHandler interface {

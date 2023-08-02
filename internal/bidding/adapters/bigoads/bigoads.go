@@ -217,17 +217,26 @@ func (a *BigoAdsAdapter) ParseBids(dr *adapters.DemandResponse) (*adapters.Deman
 }
 
 // Builder builds a new instance of the BigoAds adapter for the given bidder with the given config.
-func Builder(cfg adapter.ProcessedConfigsMap, client *http.Client) (adapters.Bidder, error) {
+func Builder(cfg adapter.ProcessedConfigsMap, client *http.Client) (*adapters.Bidder, error) {
 	bigoCfg := cfg[adapter.BigoAdsKey]
 
-	adpt := &BigoAdsAdapter{
-		SellerID:    bigoCfg["seller_id"],
-		AppID:       bigoCfg["app_id"],
-		TagID:       bigoCfg["tag_id"],
-		PlacementID: bigoCfg["placement_id"],
+	sellerID, ok := bigoCfg["seller_id"].(string)
+	if !ok || sellerID == "" {
+		return nil, fmt.Errorf("missing seller_id param for %s adapter", adapter.BigoAdsKey)
+	}
+	appID, ok := bigoCfg["app_id"].(string)
+	if !ok || appID == "" {
+		return nil, fmt.Errorf("missing app_id param for %s adapter", adapter.BigoAdsKey)
 	}
 
-	bidder := adapters.Bidder{
+	adpt := &BigoAdsAdapter{
+		SellerID:    sellerID,
+		AppID:       appID,
+		TagID:       bigoCfg["tag_id"].(string),
+		PlacementID: bigoCfg["placement_id"].(string),
+	}
+
+	bidder := &adapters.Bidder{
 		Adapter: adpt,
 		Client:  client,
 	}
