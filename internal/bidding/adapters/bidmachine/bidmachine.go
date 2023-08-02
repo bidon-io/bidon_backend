@@ -217,15 +217,23 @@ func (a *BidmachineAdapter) ParseBids(dr *adapters.DemandResponse) (*adapters.De
 }
 
 // Builder builds a new instance of the Bidmachine adapter for the given bidder with the given config.
-func Builder(cfg adapter.ProcessedConfigsMap, client *http.Client) (adapters.Bidder, error) {
+func Builder(cfg adapter.ProcessedConfigsMap, client *http.Client) (*adapters.Bidder, error) {
 	bmCfg := cfg[adapter.BidmachineKey]
-
-	adpt := &BidmachineAdapter{
-		Endpoint: bmCfg["endpoint"],
-		SellerID: bmCfg["seller_id"],
+	endpoint, ok := bmCfg["endpoint"].(string)
+	if !ok || endpoint == "" {
+		return nil, fmt.Errorf("missing endpoint param for BM adapter")
+	}
+	sellerID, ok := bmCfg["seller_id"].(string)
+	if !ok || sellerID == "" {
+		return nil, fmt.Errorf("missing seller_id param for %s adapter", adapter.BidmachineKey)
 	}
 
-	bidder := adapters.Bidder{
+	adpt := &BidmachineAdapter{
+		Endpoint: endpoint,
+		SellerID: sellerID,
+	}
+
+	bidder := &adapters.Bidder{
 		Adapter: adpt,
 		Client:  client,
 	}

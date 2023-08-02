@@ -103,12 +103,12 @@ func testHelperBiddingHandler(t *testing.T) sdkapi.BiddingHandler {
 		FetchFunc: func(ctx context.Context, appID int64, adapterKeys []adapter.Key) (adapter.RawConfigsMap, error) {
 			return adapter.RawConfigsMap{
 				adapter.ApplovinKey: {
-					AccountExtra: map[string]string{
+					AccountExtra: map[string]any{
 						"app_key": "123",
 					},
 				},
 				adapter.BidmachineKey: {
-					AccountExtra: map[string]string{},
+					AccountExtra: map[string]any{},
 				},
 			}, nil
 		},

@@ -231,14 +231,23 @@ func (a *MintegralAdapter) ParseBids(dr *adapters.DemandResponse) (*adapters.Dem
 }
 
 // Builder builds a new instance of the Mintegral adapter for the given bidder with the given config.
-func Builder(cfg adapter.ProcessedConfigsMap, client *http.Client) (adapters.Bidder, error) {
+func Builder(cfg adapter.ProcessedConfigsMap, client *http.Client) (*adapters.Bidder, error) {
 	mCfg := cfg[adapter.MintegralKey]
 
+	sellerID, ok := mCfg["seller_id"].(string)
+	if !ok || sellerID == "" {
+		return nil, fmt.Errorf("missing seller_id param for %s adapter", adapter.MintegralKey)
+	}
+	appID, ok := mCfg["app_id"].(string)
+	if !ok || appID == "" {
+		return nil, fmt.Errorf("missing app_id param for %s adapter", adapter.MintegralKey)
+	}
+
 	adpt := &MintegralAdapter{
-		SellerID:    mCfg["seller_id"],
-		AppID:       mCfg["app_id"],
-		TagID:       mCfg["tag_id"],
-		PlacementID: mCfg["placement_id"],
+		SellerID:    sellerID,
+		AppID:       appID,
+		TagID:       mCfg["tag_id"].(string),
+		PlacementID: mCfg["placement_id"].(string),
 	}
 
 	bidder := adapters.Bidder{
@@ -246,5 +255,5 @@ func Builder(cfg adapter.ProcessedConfigsMap, client *http.Client) (adapters.Bid
 		Client:  client,
 	}
 
-	return bidder, nil
+	return &bidder, nil
 }

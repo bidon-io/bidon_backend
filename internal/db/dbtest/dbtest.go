@@ -152,7 +152,7 @@ func CreateDemandSourceAccount(t *testing.T, tx *db.DB, opts ...DemandSourceAcco
 
 	account := &db.DemandSourceAccount{
 		Type:      "DemandSourceAccount::Admob",
-		Extra:     map[string]string{},
+		Extra:     map[string]any{},
 		IsBidding: new(bool),
 		IsDefault: sql.NullBool{
 			Valid: true,

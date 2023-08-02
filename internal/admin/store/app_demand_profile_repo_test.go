@@ -35,14 +35,14 @@ func TestAppDemandProfileRepo_List(t *testing.T) {
 			AppID:          apps[0].ID,
 			DemandSourceID: demandSources[0].ID,
 			AccountID:      accounts[0].ID,
-			Data:           map[string]string{"api_key": "asdf"},
+			Data:           map[string]any{"api_key": "asdf"},
 			AccountType:    "DemandSourceAccount::Applovin",
 		},
 		{
 			AppID:          apps[1].ID,
 			DemandSourceID: demandSources[1].ID,
 			AccountID:      accounts[1].ID,
-			Data:           map[string]string{"api_key": "asdf"},
+			Data:           map[string]any{"api_key": "asdf"},
 			AccountType:    "DemandSourceAccount::Bidmachine",
 		},
 	}
@@ -87,7 +87,7 @@ func TestAppDemandProfileRepo_Find(t *testing.T) {
 		AppID:          app.ID,
 		DemandSourceID: demandSource.ID,
 		AccountID:      account.ID,
-		Data:           map[string]string{"api_key": "asdf"},
+		Data:           map[string]any{"api_key": "asdf"},
 		AccountType:    "DemandSourceAccount::Applovin",
 	}
 
@@ -126,7 +126,7 @@ func TestAppDemandProfileRepo_Update(t *testing.T) {
 		AppID:          app.ID,
 		DemandSourceID: demandSource.ID,
 		AccountID:      account.ID,
-		Data:           map[string]string{"api_key": "asdf"},
+		Data:           map[string]any{"api_key": "asdf"},
 		AccountType:    "DemandSourceAccount::Applovin",
 	}
 
@@ -136,7 +136,7 @@ func TestAppDemandProfileRepo_Update(t *testing.T) {
 	}
 
 	want := profile
-	want.Data = map[string]string{"api_key": "new_api_key"}
+	want.Data = map[string]any{"api_key": "new_api_key"}
 
 	updateParams := &admin.AppDemandProfileAttrs{
 		Data: want.Data,
@@ -168,7 +168,7 @@ func TestAppDemandProfileRepo_Delete(t *testing.T) {
 		AppID:          app.ID,
 		DemandSourceID: demandSource.ID,
 		AccountID:      account.ID,
-		Data:           map[string]string{"api_key": "asdf"},
+		Data:           map[string]any{"api_key": "asdf"},
 		AccountType:    "DemandSourceAccount::Applovin",
 	}
 	profile, err := repo.Create(context.Background(), attrs)

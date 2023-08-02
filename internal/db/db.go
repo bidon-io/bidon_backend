@@ -72,7 +72,7 @@ type AppDemandProfile struct {
 	Account        DemandSourceAccount `gorm:"foreignKey:AccountID"`
 	DemandSourceID int64               `gorm:"column:demand_source_id;type:bigint;not null"`
 	DemandSource   DemandSource        `gorm:"foreignKey:DemandSourceID"`
-	Data           map[string]string   `gorm:"column:data;type:jsonb;default:'{}';serializer:json"`
+	Data           map[string]any      `gorm:"column:data;type:jsonb;default:'{}';serializer:json"`
 }
 
 type App struct {
@@ -108,14 +108,14 @@ type Country struct {
 
 type DemandSourceAccount struct {
 	Model
-	DemandSourceID int64             `gorm:"column:demand_source_id;type:bigint;not null"`
-	DemandSource   DemandSource      `gorm:"foreignKey:DemandSourceID"`
-	UserID         int64             `gorm:"column:user_id;type:bigint;not null"`
-	User           User              `gorm:"foreignKey:UserID"`
-	Type           string            `gorm:"column:type;type:varchar;not null"`
-	Extra          map[string]string `gorm:"column:extra;type:jsonb;default:'{}';serializer:json"`
-	IsBidding      *bool             `gorm:"column:bidding;type:boolean;default:false"`
-	IsDefault      sql.NullBool      `gorm:"column:is_default;type:boolean"`
+	DemandSourceID int64          `gorm:"column:demand_source_id;type:bigint;not null"`
+	DemandSource   DemandSource   `gorm:"foreignKey:DemandSourceID"`
+	UserID         int64          `gorm:"column:user_id;type:bigint;not null"`
+	User           User           `gorm:"foreignKey:UserID"`
+	Type           string         `gorm:"column:type;type:varchar;not null"`
+	Extra          map[string]any `gorm:"column:extra;type:jsonb;default:'{}';serializer:json"`
+	IsBidding      *bool          `gorm:"column:bidding;type:boolean;default:false"`
+	IsDefault      sql.NullBool   `gorm:"column:is_default;type:boolean"`
 }
 
 type DemandSource struct {
