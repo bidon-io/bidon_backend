@@ -39,13 +39,13 @@ func TestBuilder_Build(t *testing.T) {
 	}
 
 	adaptersBuilder := &mocks.AdaptersBuilderMock{
-		BuildFunc: func(adapterKey adapter.Key, cfg adapter.ProcessedConfigsMap) (adapters.Bidder, error) {
+		BuildFunc: func(adapterKey adapter.Key, cfg adapter.ProcessedConfigsMap) (*adapters.Bidder, error) {
 			adpt := &bidmachine.BidmachineAdapter{
 				Endpoint: "https://example.com",
 				SellerID: "1",
 			}
 
-			bidder := adapters.Bidder{
+			bidder := &adapters.Bidder{
 				Adapter: adpt,
 				Client:  http.DefaultClient,
 			}

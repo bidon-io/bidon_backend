@@ -4,12 +4,12 @@ type Key string
 
 type (
 	RawConfigsMap       map[Key]Config
-	ProcessedConfigsMap map[Key]map[string]string
+	ProcessedConfigsMap map[Key]map[string]any
 )
 
 type Config struct {
-	AccountExtra map[string]string
-	AppData      map[string]string
+	AccountExtra map[string]any
+	AppData      map[string]any
 }
 
 const (

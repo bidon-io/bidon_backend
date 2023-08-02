@@ -28,7 +28,7 @@ func TestAppDemandProfileFetcher_Fetch(t *testing.T) {
 			DemandSource: db.DemandSource{
 				APIKey: string(adapter.ApplovinKey),
 			},
-			Extra: map[string]string{"applovin": "applovin"},
+			Extra: map[string]any{"applovin": "applovin"},
 		}))
 	accountBidmachine := dbtest.CreateDemandSourceAccount(t, tx, dbtest.WithDemandSourceAccountOptions(
 		&db.DemandSourceAccount{
@@ -37,7 +37,7 @@ func TestAppDemandProfileFetcher_Fetch(t *testing.T) {
 			DemandSource: db.DemandSource{
 				APIKey: string(adapter.BidmachineKey),
 			},
-			Extra: map[string]string{"bidmachine": "bidmachine"},
+			Extra: map[string]any{"bidmachine": "bidmachine"},
 		}))
 	accountDtexchange := dbtest.CreateDemandSourceAccount(t, tx, dbtest.WithDemandSourceAccountOptions(
 		&db.DemandSourceAccount{
@@ -46,7 +46,7 @@ func TestAppDemandProfileFetcher_Fetch(t *testing.T) {
 			DemandSource: db.DemandSource{
 				APIKey: string(adapter.DTExchangeKey),
 			},
-			Extra: map[string]string{"dtexchange": "dtexchange"},
+			Extra: map[string]any{"dtexchange": "dtexchange"},
 		}))
 	accountUnity := dbtest.CreateDemandSourceAccount(t, tx, dbtest.WithDemandSourceAccountOptions(
 		&db.DemandSourceAccount{
@@ -55,7 +55,7 @@ func TestAppDemandProfileFetcher_Fetch(t *testing.T) {
 			DemandSource: db.DemandSource{
 				APIKey: string(adapter.UnityAdsKey),
 			},
-			Extra: map[string]string{"unity": "unity"},
+			Extra: map[string]any{"unity": "unity"},
 		}))
 	profiles := []db.AppDemandProfile{
 		{
@@ -104,12 +104,12 @@ func TestAppDemandProfileFetcher_Fetch(t *testing.T) {
 			adapterKeys: adapter.Keys,
 			want: adapter.RawConfigsMap{
 				adapter.ApplovinKey: {
-					AccountExtra: map[string]string{"applovin": "applovin"},
-					AppData:      map[string]string{},
+					AccountExtra: map[string]any{"applovin": "applovin"},
+					AppData:      map[string]any{},
 				},
 				adapter.BidmachineKey: {
-					AccountExtra: map[string]string{"bidmachine": "bidmachine"},
-					AppData:      map[string]string{},
+					AccountExtra: map[string]any{"bidmachine": "bidmachine"},
+					AppData:      map[string]any{},
 				},
 			},
 		},
@@ -119,8 +119,8 @@ func TestAppDemandProfileFetcher_Fetch(t *testing.T) {
 			adapterKeys: []adapter.Key{adapter.ApplovinKey},
 			want: adapter.RawConfigsMap{
 				adapter.ApplovinKey: {
-					AccountExtra: map[string]string{"applovin": "applovin"},
-					AppData:      map[string]string{},
+					AccountExtra: map[string]any{"applovin": "applovin"},
+					AppData:      map[string]any{},
 				},
 			},
 		},
@@ -136,8 +136,8 @@ func TestAppDemandProfileFetcher_Fetch(t *testing.T) {
 			adapterKeys: []adapter.Key{adapter.DTExchangeKey},
 			want: adapter.RawConfigsMap{
 				adapter.DTExchangeKey: {
-					AccountExtra: map[string]string{"dtexchange": "dtexchange"},
-					AppData:      map[string]string{},
+					AccountExtra: map[string]any{"dtexchange": "dtexchange"},
+					AppData:      map[string]any{},
 				},
 			},
 		},

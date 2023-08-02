@@ -10,7 +10,7 @@ func NewAdapters(keys []adapter.Key) adapter.ProcessedConfigsMap {
 	adapters := make(adapter.ProcessedConfigsMap, len(keys))
 	for _, key := range keys {
 		// explicitly initialize with empty maps. nil maps are serialized to `null` in json, empty maps are serialized to `{}`
-		adapters[key] = map[string]string{}
+		adapters[key] = map[string]any{}
 	}
 	return adapters
 }

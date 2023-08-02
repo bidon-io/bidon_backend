@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/db"
@@ -23,7 +24,7 @@ func (f *ConfigurationFetcher) Fetch(ctx context.Context, appID int64, adapterKe
 		Find(&dbProfiles).
 		Error
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("cannot load adapter config from DB: %w", err)
 	}
 
 	configs := adapter.RawConfigsMap{}

@@ -13,10 +13,10 @@ import (
 func TestAdaptersBuilder_Build(t *testing.T) {
 	profiles := adapter.RawConfigsMap{
 		adapter.ApplovinKey: {
-			AppData: map[string]string{"api_key": "applovin_api_key", "ext": "some"},
+			AppData: map[string]any{"api_key": "applovin_api_key", "ext": "some"},
 		},
 		adapter.BidmachineKey: {
-			AccountExtra: map[string]string{
+			AccountExtra: map[string]any{
 				"seller_id":        "bidmachine_seller_id",
 				"endpoint":         "http://example.com/bidmachine",
 				"mediation_config": "{\"config\": true}",
@@ -24,10 +24,10 @@ func TestAdaptersBuilder_Build(t *testing.T) {
 			},
 		},
 		adapter.DTExchangeKey: {
-			AppData: map[string]string{"app_id": "123", "dt_key_1": "1", "dt_key_2": "2"},
+			AppData: map[string]any{"app_id": "123", "dt_key_1": "1", "dt_key_2": "2"},
 		},
 		adapter.UnityAdsKey: {
-			AppData: map[string]string{"game_id": "234", "unity_key_1": "1", "unity_key_2": "2"},
+			AppData: map[string]any{"game_id": "234", "unity_key_1": "1", "unity_key_2": "2"},
 		},
 	}
 
@@ -59,16 +59,16 @@ func TestAdaptersBuilder_Build(t *testing.T) {
 			profiles:    profiles,
 			adapterKeys: []adapter.Key{adapter.ApplovinKey, adapter.BidmachineKey, adapter.DTExchangeKey, adapter.UnityAdsKey},
 			want: adapter.ProcessedConfigsMap{
-				adapter.ApplovinKey: map[string]string{
+				adapter.ApplovinKey: map[string]any{
 					"app_key": applovinProfile.AccountExtra["api_key"],
 				},
-				adapter.BidmachineKey: map[string]string{
+				adapter.BidmachineKey: map[string]any{
 					"seller_id":        bidmachineProfile.AccountExtra["seller_id"],
 					"endpoint":         bidmachineProfile.AccountExtra["endpoint"],
 					"mediation_config": bidmachineProfile.AccountExtra["mediation_config"],
 				},
-				adapter.DTExchangeKey: map[string]string{"app_id": "123"},
-				adapter.UnityAdsKey:   map[string]string{"game_id": "234"},
+				adapter.DTExchangeKey: map[string]any{"app_id": "123"},
+				adapter.UnityAdsKey:   map[string]any{"game_id": "234"},
 			},
 		},
 		{
@@ -79,10 +79,10 @@ func TestAdaptersBuilder_Build(t *testing.T) {
 			},
 			adapterKeys: []adapter.Key{adapter.ApplovinKey, adapter.BidmachineKey, adapter.DTExchangeKey, adapter.UnityAdsKey},
 			want: adapter.ProcessedConfigsMap{
-				adapter.ApplovinKey:   map[string]string{},
-				adapter.BidmachineKey: map[string]string{},
-				adapter.DTExchangeKey: map[string]string{"app_id": "123"},
-				adapter.UnityAdsKey:   map[string]string{"game_id": "234"},
+				adapter.ApplovinKey:   map[string]any{},
+				adapter.BidmachineKey: map[string]any{},
+				adapter.DTExchangeKey: map[string]any{"app_id": "123"},
+				adapter.UnityAdsKey:   map[string]any{"game_id": "234"},
 			},
 		},
 	}

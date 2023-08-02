@@ -33,13 +33,12 @@ type AdaptersBuilder struct {
 	Client      *http.Client
 }
 
-func (b AdaptersBuilder) Build(adapterKey adapter.Key, cfg adapter.ProcessedConfigsMap) (adapters.Bidder, error) {
+func (b AdaptersBuilder) Build(adapterKey adapter.Key, cfg adapter.ProcessedConfigsMap) (*adapters.Bidder, error) {
 	if f, ok := b.AdaptersMap[adapterKey]; ok {
 		return f(cfg, b.Client)
 	}
-	empty := adapters.Bidder{}
 
-	return empty, fmt.Errorf("adapter %s not found", adapterKey)
+	return nil, fmt.Errorf("adapter %s not found", adapterKey)
 }
 
 func BuildBiddingAdapters(client *http.Client) AdaptersBuilder {
@@ -69,7 +68,7 @@ func NewAdapters(keys []adapter.Key) adapter.ProcessedConfigsMap {
 	adapters := make(adapter.ProcessedConfigsMap, len(keys))
 	for _, key := range keys {
 		// explicitly initialize with empty maps. nil maps are serialized to `null` in json, empty maps are serialized to `{}`
-		adapters[key] = map[string]string{}
+		adapters[key] = map[string]any{}
 	}
 	return adapters
 }
