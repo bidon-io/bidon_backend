@@ -1,28 +1,3 @@
-x-api: &api
-  image: 'bidon/bidon_api'
-  build:
-    context: './bidon_api'
-    target: dev
-    args:
-      RUBY_VERSION: '3.1.2'
-  stdin_open: true
-  tty: true
-  volumes:
-    - ./bidon_api:/app:cached
-    - api_bundle:/usr/local/bundle
-    - api_rails_cache:/app/tmp/cache
-    - api_history:/usr/local/hist
-  env_file: './bidon_api/.env'
-  environment:
-    HISTFILE: /usr/local/hist/.bash_history
-    IRB_HISTFILE: /usr/local/hist/.irb_history
-    BOOTSNAP_CACHE_DIR: /usr/local/bundle/_bootsnap
-    EDITOR: vi
-  depends_on:
-    - postgres
-    - redis
-    - kafka
-
 x-back: &back
   image: 'bidon/bidon_back'
   build:
@@ -50,16 +25,6 @@ x-back: &back
     - debezium
 
 services:
-  rails_api:
-    <<: *api
-    command: rails
-
-  web_api:
-    <<: *api
-    command: rails server -b 0.0.0.0
-    ports:
-      - '3100:3000'
-
   rails_back:
     <<: *back
     command: rails
@@ -157,9 +122,6 @@ services:
 volumes:
   pgdata:
   redisdata:
-  api_bundle:
-  api_rails_cache:
-  api_history:
   back_bundle:
   back_rails_cache:
   back_history:

@@ -109,32 +109,6 @@ services:
       PG_HOST: postgres
       PG_PORT: 5432
 
-  bidon-api:
-    image: ghcr.io/bidon-io/bidon-api:${BIDON_BACKEND_VERS}
-    command: bundle exec puma -C /app/config/puma.rb -p 3100
-    depends_on:
-      kafka:
-        condition: service_started
-      schema-registry:
-        condition: service_started
-      postgres:
-        condition: service_started
-      redis:
-        condition: service_started
-      db-migration:
-        condition: service_completed_successfully
-      geodb-maxmind:
-        condition: service_completed_successfully
-      geodb-sx:
-        condition: service_completed_successfully
-    environment:
-      <<: *bidon-environment
-      ALLOWED_HOSTS: web_api
-    volumes:
-      - "./geodb/:/app/public/system/"
-      - "./test/:/app/test/"
-    <<: *restart-policy
-
   bidon-backend:
     image: ghcr.io/bidon-io/bidon-back:${BIDON_BACKEND_VERS}
     command: bundle exec puma -C /app/config/puma.rb -p 3200
