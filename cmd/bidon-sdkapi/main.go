@@ -201,25 +201,24 @@ func main() {
 	}
 
 	e := config.Echo("bidon-sdkapi", logger)
+	g := e.Group("", sdkapi.CheckBidonHeader)
 
-	e.Use(sdkapi.CheckBidonHeader)
-
-	e.POST("/config", configHandler.Handle)
-	e.POST("/auction/:ad_type", auctionHandler.Handle)
-	e.POST("/bidding/:ad_type", biddingHandler.Handle)
-	e.POST("/stats/:ad_type", statsHandler.Handle)
-	e.POST("/show/:ad_type", showHandler.Handle)
-	e.POST("/click/:ad_type", clickHandler.Handle)
-	e.POST("/reward/:ad_type", rewardHandler.Handle)
-	e.POST("/loss/:ad_type", lossHandler.Handle)
-	e.POST("/win/:ad_type", winHandler.Handle)
+	g.POST("/config", configHandler.Handle)
+	g.POST("/auction/:ad_type", auctionHandler.Handle)
+	g.POST("/bidding/:ad_type", biddingHandler.Handle)
+	g.POST("/stats/:ad_type", statsHandler.Handle)
+	g.POST("/show/:ad_type", showHandler.Handle)
+	g.POST("/click/:ad_type", clickHandler.Handle)
+	g.POST("/reward/:ad_type", rewardHandler.Handle)
+	g.POST("/loss/:ad_type", lossHandler.Handle)
+	g.POST("/win/:ad_type", winHandler.Handle)
 
 	// Legacy endpoints
-	e.POST("/:ad_type/auction", auctionHandler.Handle)
-	e.POST("/:ad_type/stats", statsHandler.Handle)
-	e.POST("/:ad_type/show", showHandler.Handle)
-	e.POST("/:ad_type/click", clickHandler.Handle)
-	e.POST("/:ad_type/reward", rewardHandler.Handle)
+	g.POST("/:ad_type/auction", auctionHandler.Handle)
+	g.POST("/:ad_type/stats", statsHandler.Handle)
+	g.POST("/:ad_type/show", showHandler.Handle)
+	g.POST("/:ad_type/click", clickHandler.Handle)
+	g.POST("/:ad_type/reward", rewardHandler.Handle)
 
 	port := os.Getenv("PORT")
 	if port == "" {
