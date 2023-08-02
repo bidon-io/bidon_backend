@@ -10,17 +10,6 @@ env:
   MAXMIND_LICENSE_KEY: ${{ secrets.MAXMIND_GEOIPUPDATE_LICENSE_KEY }}
 
 jobs:
-  build-api:
-    name: Build api image
-    runs-on: [self-hosted]
-    steps:
-      - name: Checks-out repository
-        uses: actions/checkout@v3
-
-      - name: Build
-        working-directory: bidon_api
-        run: docker build --target=prod -t ghcr.io/bidon-io/bidon-api:$COMPOSE_PROJECT_NAME .
-
   build-back:
     name: Build backend image
     runs-on: [self-hosted]
@@ -35,7 +24,7 @@ jobs:
   start-docker-compose:
     name: Start docker compose
     runs-on: [self-hosted]
-    needs: [build-api, build-back]
+    needs: [build-back]
     steps:
       - name: Checks-out repository
         uses: actions/checkout@v3
@@ -46,7 +35,7 @@ jobs:
           docker compose -f docker-compose-test.yml up -d
 
       - name: Start tests
-        run: docker compose -f docker-compose-test.yml exec bidon-api bundle exec rspec
+        run: docker compose -f docker-compose-test.yml exec bidon-backend bundle exec rspec
 
       - name: Publish tests results
         if: always()
