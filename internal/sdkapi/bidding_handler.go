@@ -3,6 +3,7 @@ package sdkapi
 import (
 	"context"
 	"net/http"
+	"sort"
 	"time"
 
 	"github.com/bidon-io/bidon-backend/internal/adapter"
@@ -99,6 +100,10 @@ func (h *BiddingHandler) Handle(c echo.Context) error {
 			response.Status = "SUCCESS"
 		}
 	}
+	// Sort bids by price descending
+	sort.Slice(response.Bids, func(i, j int) bool {
+		return response.Bids[i].Price > response.Bids[j].Price
+	})
 
 	return c.JSON(http.StatusOK, response)
 }
