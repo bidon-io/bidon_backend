@@ -25,7 +25,7 @@ FROM base AS test
 
 # Run tests for each package sequantially, because each test package that accesses the database runs database.AutoMigrate.
 # Fix this by running migrations before tests as a separate step.
-CMD [ "go", "test", "-p", "1", "./..." ]
+CMD [ "go", "test", "-coverprofile=testcov/coverage.out", "-p", "1", "./..." ]
 
 FROM base AS bidon-admin-builder
 
