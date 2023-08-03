@@ -23,7 +23,7 @@ type createRequestTestParams struct {
 
 type createRequestTestOutput struct {
 	Request openrtb2.BidRequest
-	Err     []error
+	Err     error
 }
 
 type ParseBidsTestParams struct {
@@ -189,7 +189,7 @@ func TestBigoAds_CreateRequest(t *testing.T) {
 			),
 			want: createRequestTestOutput{
 				Request: buildBaseRequest(),
-				Err:     []error{errors.New("unknown banner format")},
+				Err:     errors.New("unknown banner format"),
 			},
 		},
 		{

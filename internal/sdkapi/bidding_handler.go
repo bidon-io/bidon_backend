@@ -79,7 +79,7 @@ func (h *BiddingHandler) Handle(c echo.Context) error {
 		AdapterConfigs: adapterConfigs,
 	}
 	demandResponses, err := h.BiddingBuilder.HoldAuction(ctx, params)
-	if err != nil && err != bidding.ErrNoBids {
+	if err != nil {
 		return err
 	}
 
