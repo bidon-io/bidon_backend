@@ -13,7 +13,21 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
 
-      - run: docker compose -f docker-compose.go-test.yml run --rm bidon-test
+      - run: docker compose -f docker-compose.go-test.yml run -v $(pwd)/testcov:/app/testcov --rm bidon-test
+
+      - name: Test coverage
+        env:
+          TEST_COVERAGE_THRESHOLD: 55
+        run: |
+          echo "Test coverage threshold: $TEST_COVERAGE_THRESHOLD%"
+          testCoverage=`docker compose -f docker-compose.go-test.yml run -v $(pwd)/testcov:/app/testcov --rm bidon-test go tool cover -func testcov/coverage.out | grep total | grep -Eo '[0-9]+\.[0-9]+'`
+          echo "Current test coverage: $testCoverage%"
+          if (( $(echo "$testCoverage $TEST_COVERAGE_THRESHOLD" | awk '{ print ($1 < $2) }') )); then
+            echo "FAILED: Test coverage is lower than threshold"
+            exit 1
+          else
+            echo "OK"
+          fi
 
       - uses: dominikh/staticcheck-action@v1.3.0
         with:
