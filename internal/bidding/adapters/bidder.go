@@ -13,7 +13,7 @@ type BidderInterface interface {
 	// ParseConfig(config *json.RawMessage) error
 
 	// CreateRequest makes the HTTP requests which should be made to fetch bids.
-	CreateRequest(openrtb2.BidRequest, *schema.BiddingRequest) (openrtb2.BidRequest, []error)
+	CreateRequest(openrtb2.BidRequest, *schema.BiddingRequest) (openrtb2.BidRequest, error)
 
 	// ExecuteRequest sends request to bidder endpoint.
 	ExecuteRequest(context.Context, *http.Client, openrtb2.BidRequest) *DemandResponse

@@ -3,6 +3,9 @@ package bidding
 import (
 	"context"
 	"errors"
+	"fmt"
+	"strconv"
+
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/auction"
@@ -14,7 +17,6 @@ import (
 	"github.com/prebid/openrtb/v19/adcom1"
 	"github.com/prebid/openrtb/v19/openrtb2"
 	"golang.org/x/exp/maps"
-	"strconv"
 )
 
 type Builder struct {
@@ -55,18 +57,18 @@ func (b *Builder) HoldAuction(ctx context.Context, params *BuildParams) ([]adapt
 	// build requests and send them to adapters in parallel
 	// collect results
 	// build response
-	response := []adapters.DemandResponse{{
+	emptyResponse := []adapters.DemandResponse{{
 		Price: 0,
 	}}
 	br := params.BiddingRequest
 	config, err := b.ConfigMatcher.Match(ctx, params.AppID, br.AdType, params.SegmentID)
 	if err != nil {
-		return response, err
+		return emptyResponse, fmt.Errorf("cannot build config: %s", err)
 	}
 
 	bidId, err := uuid.NewV4()
 	if err != nil {
-		return response, err
+		return emptyResponse, fmt.Errorf("cannot generate Bid UUID: %s", err)
 	}
 	baseBidRequest := openrtb2.BidRequest{
 		ID:   bidId.String(),
@@ -98,13 +100,13 @@ func (b *Builder) HoldAuction(ctx context.Context, params *BuildParams) ([]adapt
 		}
 	}
 	if roundConfig == nil {
-		return response, errors.New("round not found")
+		return emptyResponse, errors.New("round not found")
 	}
 	adapterKeys := adapter.GetCommonAdapters(roundConfig.Bidding, br.Adapters.Keys())
 	adapterKeys = adapter.GetCommonAdapters(adapterKeys, maps.Keys(br.Imp.Demands))
 
 	if len(adapterKeys) == 0 {
-		return response, ErrNoBids
+		return emptyResponse, errors.New("no adapters matched")
 	}
 
 	var responses []adapters.DemandResponse
@@ -115,23 +117,31 @@ func (b *Builder) HoldAuction(ctx context.Context, params *BuildParams) ([]adapt
 		// adapter parse bid response
 		bidder, err := b.AdaptersBuilder.Build(adapterKey, params.AdapterConfigs)
 		if err != nil {
-			return response, err
+			demandResponse := adapters.DemandResponse{
+				DemandID: adapterKey,
+				Error:    err,
+			}
+			responses = append(responses, demandResponse)
+			continue
 		}
-		bidRequest, _ := bidder.Adapter.CreateRequest(baseBidRequest, &br)
+		bidRequest, err := bidder.Adapter.CreateRequest(baseBidRequest, &br)
+		if err != nil {
+			demandResponse := adapters.DemandResponse{
+				DemandID: adapterKey,
+				Error:    err,
+			}
+			responses = append(responses, demandResponse)
+			continue
+		}
 
 		demandResponse := bidder.Adapter.ExecuteRequest(ctx, bidder.Client, bidRequest)
-		resp, err := bidder.Adapter.ParseBids(demandResponse)
+		demandResponse, err = bidder.Adapter.ParseBids(demandResponse)
 		if err != nil {
-			return response, err
+			demandResponse.Error = err
+			responses = append(responses, *demandResponse)
+			continue
 		}
-		responses = append(responses, *resp)
-	}
-
-	result := responses[0]
-	for _, resp := range responses {
-		if result.Price < resp.Price {
-			result = resp
-		}
+		responses = append(responses, *demandResponse)
 	}
 
 	b.NotificationHandler.HandleRound(ctx, &br.Imp, responses)

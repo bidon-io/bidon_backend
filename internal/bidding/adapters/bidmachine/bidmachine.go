@@ -92,8 +92,7 @@ func (a *BidmachineAdapter) rewarded(br *schema.BiddingRequest) *openrtb2.Imp {
 	}
 }
 
-func (a *BidmachineAdapter) CreateRequest(request openrtb2.BidRequest, br *schema.BiddingRequest) (openrtb2.BidRequest, []error) {
-	var errs []error
+func (a *BidmachineAdapter) CreateRequest(request openrtb2.BidRequest, br *schema.BiddingRequest) (openrtb2.BidRequest, error) {
 	secure := int8(1)
 
 	var imp *openrtb2.Imp
@@ -105,7 +104,7 @@ func (a *BidmachineAdapter) CreateRequest(request openrtb2.BidRequest, br *schem
 	case ad.RewardedType:
 		imp = a.rewarded(br)
 	default:
-		return request, []error{errors.New("unknown impression type")}
+		return request, errors.New("unknown impression type")
 	}
 
 	impId, _ := uuid.NewV4()
@@ -127,7 +126,7 @@ func (a *BidmachineAdapter) CreateRequest(request openrtb2.BidRequest, br *schem
 
 	request.Imp = []openrtb2.Imp{*imp}
 
-	return request, errs
+	return request, nil
 }
 
 func (a *BidmachineAdapter) ExecuteRequest(ctx context.Context, client *http.Client, request openrtb2.BidRequest) *adapters.DemandResponse {

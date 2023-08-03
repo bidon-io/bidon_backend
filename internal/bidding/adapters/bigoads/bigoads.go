@@ -70,12 +70,11 @@ func (a *BigoAdsAdapter) rewarded() *openrtb2.Imp {
 	}
 }
 
-func (a *BigoAdsAdapter) CreateRequest(request openrtb2.BidRequest, br *schema.BiddingRequest) (openrtb2.BidRequest, []error) {
+func (a *BigoAdsAdapter) CreateRequest(request openrtb2.BidRequest, br *schema.BiddingRequest) (openrtb2.BidRequest, error) {
 	if a.TagID == "" {
-		return request, []error{errors.New("TagID is empty")}
+		return request, errors.New("TagID is empty")
 	}
 
-	var errs []error
 	secure := int8(1)
 
 	var imp *openrtb2.Imp
@@ -84,7 +83,7 @@ func (a *BigoAdsAdapter) CreateRequest(request openrtb2.BidRequest, br *schema.B
 	case ad.BannerType:
 		bannerImp, err := a.banner(br)
 		if err != nil {
-			return request, []error{err}
+			return request, err
 		}
 		imp = bannerImp
 		impAdType = 2
@@ -95,7 +94,7 @@ func (a *BigoAdsAdapter) CreateRequest(request openrtb2.BidRequest, br *schema.B
 		imp = a.rewarded()
 		impAdType = 4
 	default:
-		return request, []error{errors.New("unknown impression type")}
+		return request, errors.New("unknown impression type")
 	}
 
 	impId, _ := uuid.NewV4()
@@ -110,7 +109,7 @@ func (a *BigoAdsAdapter) CreateRequest(request openrtb2.BidRequest, br *schema.B
 		},
 	})
 	if err != nil {
-		return request, []error{err}
+		return request, err
 	}
 
 	imp.Ext = json.RawMessage(impExt)
@@ -127,7 +126,7 @@ func (a *BigoAdsAdapter) CreateRequest(request openrtb2.BidRequest, br *schema.B
 	request.App.Publisher.ID = a.SellerID
 	request.App.ID = a.AppID
 
-	return request, errs
+	return request, nil
 }
 
 func (a *BigoAdsAdapter) ExecuteRequest(ctx context.Context, client *http.Client, request openrtb2.BidRequest) *adapters.DemandResponse {
