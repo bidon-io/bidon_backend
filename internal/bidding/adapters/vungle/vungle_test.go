@@ -20,7 +20,7 @@ type createRequestTestParams struct {
 
 type createRequestTestOutput struct {
 	Request openrtb2.BidRequest
-	Err     []error
+	Err     error
 }
 
 func ptr[T any](t T) *T {
@@ -222,7 +222,7 @@ func TestVungle_CreateRequestTest(t *testing.T) {
 			Err:     err,
 		}
 		if diff := cmp.Diff(tC.want, got, cmp.Comparer(func(x, y error) bool {
-			return x.Error() == y.Error()
+			return x == y
 		})); diff != "" {
 			t.Errorf("%s: adapter.CreateRequest(ctx, %v, %v) mismatch (-want, +got):\n%s", tC.name, tC.params.BaseBidRequest, tC.params.Br, diff)
 		}
