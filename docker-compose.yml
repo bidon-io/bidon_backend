@@ -22,7 +22,6 @@ x-back: &back
     - postgres
     - redis
     - kafka
-    - debezium
 
 services:
   rails_back:
@@ -50,7 +49,7 @@ services:
       interval: 5s
 
   redis:
-    image: redis:7.0.0-alpine
+    image: redis:7.0.9
     volumes:
       - redisdata:/data
     ports:
@@ -104,20 +103,6 @@ services:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'kafka:29092'
       SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
-
-  debezium:
-    image: quay.io/debezium/connect:1.9
-    ports:
-      - 8083:8083
-    depends_on:
-      - kafka
-      - postgres
-    environment:
-      - BOOTSTRAP_SERVERS=kafka:9092
-      - GROUP_ID=1
-      - CONFIG_STORAGE_TOPIC=connect_configs
-      - OFFSET_STORAGE_TOPIC=connect_offsets
-      - STATUS_STORAGE_TOPIC=source_connect_statuses
 
 volumes:
   pgdata:
