@@ -3,7 +3,7 @@
     <Dropdown
       v-model="value"
       :options="apps"
-      option-label="packageName"
+      option-label="label"
       option-value="id"
       class="w-full md:w-14rem"
       placeholder="Select App"
@@ -40,7 +40,10 @@ const apps = ref([]);
 axios
   .get("/apps")
   .then((response) => {
-    apps.value = response.data;
+    apps.value = response.data.map((app) => ({
+      ...app,
+      label: `${app.packageName} (${app.platformId})`,
+    }));
   })
   .catch((error) => {
     console.error(error);
