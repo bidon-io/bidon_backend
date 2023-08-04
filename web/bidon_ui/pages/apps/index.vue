@@ -9,7 +9,27 @@ import { ResourceTableFields } from "@/constants";
 const columns = [
   ResourceTableFields.Id,
   { field: "platformId", header: "Platform Id" },
-  { field: "humanName", header: "Human Name" },
+  ResourceTableFields.HumanName,
+  {
+    field: "",
+    header: "Line Items",
+    associatedResourcesLink: {
+      extractLinkData: ({ id }) => ({
+        label: "Line Items",
+        path: `/line_items?appId=${id}`,
+      }),
+    },
+  },
+  {
+    field: "",
+    header: "App Demand Profiles",
+    associatedResourcesLink: {
+      extractLinkData: ({ id }) => ({
+        label: "App Demand Profiles",
+        path: `/app_demand_profiles?appId=${id}`,
+      }),
+    },
+  },
   { field: "packageName", header: "Package Name" },
   ResourceTableFields.User,
   { field: "appKey", header: "App Key" },

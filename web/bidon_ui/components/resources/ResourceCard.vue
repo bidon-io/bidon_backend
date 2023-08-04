@@ -9,6 +9,11 @@
         :link="field.link"
         :data="localResource"
       />
+      <AssociatedResourcesLink
+        v-if="field.type === 'associatedResourcesLink'"
+        :link="field.associatedResourcesLink"
+        :data="localResource"
+      />
       <Textarea
         v-if="field.type === 'textarea'"
         :value="JSON.stringify(localResource[field.key])"
