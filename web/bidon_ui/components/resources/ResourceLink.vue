@@ -5,11 +5,9 @@
 </template>
 
 <script setup lang="ts">
-/* eslint-disable @typescript-eslint/no-explicit-any */
 const props = defineProps<{
   link: ResourceLink;
-  data: any;
+  data: object;
 }>();
 const { isValid, linkText, id } = props.link.extractLinkData(props.data);
-/* eslint-enable @typescript-eslint/no-explicit-any */
 </script>

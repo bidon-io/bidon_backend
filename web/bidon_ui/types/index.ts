@@ -11,4 +11,11 @@ declare global {
       isValid: boolean;
     };
   }
+
+  interface AssociatedResourcesLink {
+    extractLinkData: (data: any) => {
+      label: string;
+      path: string;
+    };
+  }
 }
