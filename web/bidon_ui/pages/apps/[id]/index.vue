@@ -28,6 +28,28 @@ const fields = [
   ResourceCardFields.Id,
   { label: "Platform Id", key: "platformId" },
   { label: "Human Name", key: "humanName" },
+  {
+    key: "lineItems",
+    label: "Line Items",
+    type: "associatedResourcesLink",
+    associatedResourcesLink: {
+      extractLinkData: ({ id }) => ({
+        label: "Line Items",
+        path: `/line_items?appId=${id}`,
+      }),
+    },
+  },
+  {
+    key: "appDemandProfiles",
+    label: "App Demand Profiles",
+    type: "associatedResourcesLink",
+    associatedResourcesLink: {
+      extractLinkData: ({ id }) => ({
+        label: "App Demand Profiles",
+        path: `/app_demand_profiles?appId=${id}`,
+      }),
+    },
+  },
   { label: "Package Name", key: "packageName" },
   ResourceCardFields.User,
   { label: "App Key", key: "appKey" },
