@@ -132,6 +132,7 @@ func (a *BigoAdsAdapter) CreateRequest(request openrtb2.BidRequest, br *schema.B
 func (a *BigoAdsAdapter) ExecuteRequest(ctx context.Context, client *http.Client, request openrtb2.BidRequest) *adapters.DemandResponse {
 	dr := &adapters.DemandResponse{
 		DemandID:    adapter.BigoAdsKey,
+		RequestID:   request.ID,
 		TagID:       a.TagID,
 		PlacementID: a.PlacementID,
 	}

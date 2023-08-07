@@ -158,6 +158,7 @@ func main() {
 			AppFetcher: appFetcher,
 			Geocoder:   geocoder,
 		},
+		ConfigMatcher:       &auctionstore.ConfigMatcher{DB: db},
 		EventLogger:         eventLogger,
 		NotificationHandler: notificationHandler,
 	}

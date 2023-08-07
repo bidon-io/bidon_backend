@@ -31,6 +31,7 @@ type Builder func(adapter.ProcessedConfigsMap, *http.Client) (*Bidder, error)
 
 type DemandResponse struct {
 	DemandID    adapter.Key
+	RequestID   string
 	RawRequest  string
 	RawResponse string
 	Status      int

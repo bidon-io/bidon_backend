@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
 	"github.com/bidon-io/bidon-backend/internal/notification"
 	"github.com/bidon-io/bidon-backend/internal/notification/mocks"
@@ -44,16 +45,26 @@ func TestHandler_HandleRound(t *testing.T) {
 
 func TestHandler_HandleStats(t *testing.T) {
 	ctx := context.Background()
-	imp := &schema.Imp{ID: "imp-1"}
-	responses := []*adapters.DemandResponse{
-		{Bid: &adapters.BidDemandResponse{ID: "bid-1", ImpID: "imp-1", Price: 1.23}},
-		{Bid: &adapters.BidDemandResponse{ID: "bid-2", ImpID: "imp-1", Price: 4.56}},
-		{Bid: &adapters.BidDemandResponse{ID: "bid-3", ImpID: "imp-2", Price: 7.89}},
-		{Bid: &adapters.BidDemandResponse{ID: "bid-4", ImpID: "imp-1", Price: 0.12}},
+	imp := schema.Stats{}
+	result := notification.AuctionResult{
+		Rounds: []notification.Round{{
+			Bids: []notification.Bid{
+				{ID: "bid-1", ImpID: "imp-1", Price: 1.23},
+				{ID: "bid-2", ImpID: "imp-1", Price: 4.56},
+				{ID: "bid-3", ImpID: "imp-2", Price: 7.89},
+				{ID: "bid-4", ImpID: "imp-1", Price: 0.12},
+			},
+		}},
 	}
-	handler := notification.Handler{}
+	config := auction.Config{ExternalWinNotifications: false}
+	mockRepo := &mocks.AuctionResultRepoMock{}
+	mockRepo.FindFunc = func(ctx context.Context, id string) (*notification.AuctionResult, error) {
+		return &result, nil
+	}
 
-	err := handler.HandleStats(ctx, imp, responses)
+	handler := notification.Handler{AuctionResultRepo: mockRepo}
+
+	err := handler.HandleStats(ctx, imp, config)
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
