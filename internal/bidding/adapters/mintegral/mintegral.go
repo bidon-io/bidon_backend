@@ -140,6 +140,7 @@ func (a *MintegralAdapter) CreateRequest(request openrtb2.BidRequest, br *schema
 func (a *MintegralAdapter) ExecuteRequest(ctx context.Context, client *http.Client, request openrtb2.BidRequest) *adapters.DemandResponse {
 	dr := &adapters.DemandResponse{
 		DemandID:    adapter.MintegralKey,
+		RequestID:   request.ID,
 		TagID:       a.TagID,
 		PlacementID: a.PlacementID,
 	}

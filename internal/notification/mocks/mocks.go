@@ -23,6 +23,9 @@ var _ notification.AuctionResultRepo = &AuctionResultRepoMock{}
 //			CreateOrUpdateFunc: func(ctx context.Context, imp *schema.Imp, bids []notification.Bid) error {
 //				panic("mock out the CreateOrUpdate method")
 //			},
+//			FindFunc: func(ctx context.Context, auctionID string) (*notification.AuctionResult, error) {
+//				panic("mock out the Find method")
+//			},
 //		}
 //
 //		// use mockedAuctionResultRepo in code that requires notification.AuctionResultRepo
@@ -32,6 +35,9 @@ var _ notification.AuctionResultRepo = &AuctionResultRepoMock{}
 type AuctionResultRepoMock struct {
 	// CreateOrUpdateFunc mocks the CreateOrUpdate method.
 	CreateOrUpdateFunc func(ctx context.Context, imp *schema.Imp, bids []notification.Bid) error
+
+	// FindFunc mocks the Find method.
+	FindFunc func(ctx context.Context, auctionID string) (*notification.AuctionResult, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -44,8 +50,16 @@ type AuctionResultRepoMock struct {
 			// Bids is the bids argument value.
 			Bids []notification.Bid
 		}
+		// Find holds details about calls to the Find method.
+		Find []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// AuctionID is the auctionID argument value.
+			AuctionID string
+		}
 	}
 	lockCreateOrUpdate sync.RWMutex
+	lockFind           sync.RWMutex
 }
 
 // CreateOrUpdate calls CreateOrUpdateFunc.
@@ -85,5 +99,41 @@ func (mock *AuctionResultRepoMock) CreateOrUpdateCalls() []struct {
 	mock.lockCreateOrUpdate.RLock()
 	calls = mock.calls.CreateOrUpdate
 	mock.lockCreateOrUpdate.RUnlock()
+	return calls
+}
+
+// Find calls FindFunc.
+func (mock *AuctionResultRepoMock) Find(ctx context.Context, auctionID string) (*notification.AuctionResult, error) {
+	if mock.FindFunc == nil {
+		panic("AuctionResultRepoMock.FindFunc: method is nil but AuctionResultRepo.Find was just called")
+	}
+	callInfo := struct {
+		Ctx       context.Context
+		AuctionID string
+	}{
+		Ctx:       ctx,
+		AuctionID: auctionID,
+	}
+	mock.lockFind.Lock()
+	mock.calls.Find = append(mock.calls.Find, callInfo)
+	mock.lockFind.Unlock()
+	return mock.FindFunc(ctx, auctionID)
+}
+
+// FindCalls gets all the calls that were made to Find.
+// Check the length with:
+//
+//	len(mockedAuctionResultRepo.FindCalls())
+func (mock *AuctionResultRepoMock) FindCalls() []struct {
+	Ctx       context.Context
+	AuctionID string
+} {
+	var calls []struct {
+		Ctx       context.Context
+		AuctionID string
+	}
+	mock.lockFind.RLock()
+	calls = mock.calls.Find
+	mock.lockFind.RUnlock()
 	return calls
 }

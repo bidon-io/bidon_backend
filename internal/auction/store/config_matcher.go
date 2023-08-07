@@ -48,3 +48,29 @@ func (m *ConfigMatcher) Match(ctx context.Context, appID int64, adType ad.Type, 
 
 	return config, nil
 }
+
+func (m *ConfigMatcher) MatchById(ctx context.Context, appID, id int64) *auction.Config {
+	dbConfig := &db.AuctionConfiguration{}
+
+	err := m.DB.
+		WithContext(ctx).
+		Select("id", "external_win_notifications", "rounds").
+		Where(map[string]any{
+			"app_id": appID,
+			"id":     id,
+		}).
+		Order("created_at DESC").
+		Take(dbConfig).
+		Error
+	if err != nil {
+		return nil
+	}
+
+	config := &auction.Config{
+		ID:                       dbConfig.ID,
+		ExternalWinNotifications: *dbConfig.ExternalWinNotifications,
+		Rounds:                   dbConfig.Rounds,
+	}
+
+	return config
+}
