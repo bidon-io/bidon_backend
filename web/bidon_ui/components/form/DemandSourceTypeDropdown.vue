@@ -47,5 +47,6 @@ const options = ref([
   { label: "VungleAccount", value: "DemandSourceAccount::Vungle" },
   { label: "MintegralAccount", value: "DemandSourceAccount::Mintegral" },
   { label: "BigoAdsAccount", value: "DemandSourceAccount::BigoAds" },
+  { label: "MetaAccount", value: "DemandSourceAccount::Meta" },
 ]);
 </script>
