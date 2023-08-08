@@ -1,8 +1,11 @@
-package bigoads
+package meta
 
 import (
 	"bytes"
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -19,25 +22,30 @@ import (
 	"github.com/prebid/openrtb/v19/openrtb2"
 )
 
-type BigoAdsAdapter struct {
-	SellerID    string
-	AppID       string
-	TagID       string
-	PlacementID string
+type MetaAdapter struct {
+	SellerID  string
+	AppID     string
+	AppSecret string
+	TagID     string
 }
 
 var bannerFormats = map[string][2]int64{
-	"BANNER": {320, 50},
-	"MREC":   {300, 250},
-	"":       {320, 50}, // Default
+	"BANNER":      {320, 50},
+	"LEADERBOARD": {728, 90},
+	"MREC":        {300, 250},
+	"ADAPTIVE":    {0, 50},
+	"":            {320, 50}, // Default
 }
 
-func (a *BigoAdsAdapter) banner(br *schema.BiddingRequest) (*openrtb2.Imp, error) {
-	size, ok := bannerFormats[string(br.Imp.Format())]
-	if !ok {
-		return nil, errors.New("unknown banner format")
-	}
+var fullscreenFormats = map[string][2]int64{
+	"PHONE":  {320, 480},
+	"TABLET": {768, 1024},
+}
 
+const platformID = "687579938617452"
+
+func (a *MetaAdapter) banner(br *schema.BiddingRequest) *openrtb2.Imp {
+	size := bannerFormats[string(br.Imp.Format())]
 	w, h := size[0], size[1]
 	if !br.Imp.IsPortrait() {
 		w, h = h, w
@@ -49,92 +57,94 @@ func (a *BigoAdsAdapter) banner(br *schema.BiddingRequest) (*openrtb2.Imp, error
 			H:   &h,
 			Pos: adcom1.PositionAboveFold.Ptr(),
 		},
-	}, nil
+	}
 }
 
-func (a *BigoAdsAdapter) interstitial() *openrtb2.Imp {
+func (a *MetaAdapter) interstitial(br *schema.BiddingRequest) *openrtb2.Imp {
+	size := fullscreenFormats[string(br.Device.Type)]
+	w, h := size[0], size[1]
+	if !br.Imp.IsPortrait() {
+		w, h = h, w
+	}
 	return &openrtb2.Imp{
 		Instl: 1,
 		Banner: &openrtb2.Banner{
+			W:   &w,
+			H:   &h,
 			Pos: adcom1.PositionFullScreen.Ptr(),
 		},
 	}
 }
 
-func (a *BigoAdsAdapter) rewarded() *openrtb2.Imp {
+func (a *MetaAdapter) rewarded(br *schema.BiddingRequest) *openrtb2.Imp {
+	size := fullscreenFormats[string(br.Device.Type)]
+	w, h := size[0], size[1]
+	if !br.Imp.IsPortrait() {
+		w, h = h, w
+	}
 	return &openrtb2.Imp{
-		Instl: 0,
 		Video: &openrtb2.Video{
-			MIMEs: []string{"video/mp4"},
+			W:   w,
+			H:   h,
+			Ext: json.RawMessage(`{"videotype": "rewarded"}`),
 		},
 	}
 }
 
-func (a *BigoAdsAdapter) CreateRequest(request openrtb2.BidRequest, br *schema.BiddingRequest) (openrtb2.BidRequest, error) {
-	if a.TagID == "" {
-		return request, errors.New("TagID is empty")
-	}
-
+func (a *MetaAdapter) CreateRequest(request openrtb2.BidRequest, br *schema.BiddingRequest) (openrtb2.BidRequest, error) {
 	secure := int8(1)
 
 	var imp *openrtb2.Imp
-	var impAdType int
 	switch br.Imp.Type() {
 	case ad.BannerType:
-		bannerImp, err := a.banner(br)
-		if err != nil {
-			return request, err
-		}
-		imp = bannerImp
-		impAdType = 2
+		imp = a.banner(br)
 	case ad.InterstitialType:
-		imp = a.interstitial()
-		impAdType = 3
+		imp = a.interstitial(br)
 	case ad.RewardedType:
-		imp = a.rewarded()
-		impAdType = 4
+		imp = a.rewarded(br)
 	default:
 		return request, errors.New("unknown impression type")
 	}
 
 	impId, _ := uuid.NewV4()
 	imp.ID = impId.String()
+
+	if a.TagID == "" {
+		return request, errors.New("TagID is empty")
+	}
 	imp.TagID = a.TagID
 
-	impExt, err := json.Marshal(map[string]any{
-		"adtype": impAdType,
-		"networkid": map[string]any{
-			"appid":       a.AppID,
-			"placementid": a.PlacementID,
-		},
+	imp.DisplayManager = string(adapter.MetaKey)
+	imp.DisplayManagerVer = br.Adapters[adapter.MetaKey].SDKVersion
+	imp.Secure = &secure
+	imp.BidFloor = br.Imp.GetBidFloor()
+	imp.BidFloorCur = "USD"
+
+	request.Imp = []openrtb2.Imp{*imp}
+	request.User = &openrtb2.User{
+		BuyerUID: br.Imp.Demands[adapter.MetaKey]["token"].(string),
+	}
+	request.Cur = []string{"USD"}
+
+	request.App.Publisher.ID = a.AppID
+
+	ext, err := json.Marshal(map[string]any{
+		"platformid":        platformID,
+		"authentication_id": calculateHMACSHA256(request.ID, a.AppSecret),
 	})
 	if err != nil {
 		return request, err
 	}
 
-	imp.Ext = impExt
-
-	imp.DisplayManager = string(adapter.BigoAdsKey)
-	imp.DisplayManagerVer = br.Adapters[adapter.BigoAdsKey].SDKVersion
-	imp.Secure = &secure
-	imp.BidFloor = br.Imp.GetBidFloor()
-	request.Imp = []openrtb2.Imp{*imp}
-	request.Cur = []string{"USD"}
-	request.User = &openrtb2.User{
-		BuyerUID: br.Imp.Demands[adapter.BigoAdsKey]["token"].(string),
-	}
-	request.App.Publisher.ID = a.SellerID
-	request.App.ID = a.AppID
+	request.Ext = ext
 
 	return request, nil
 }
 
-func (a *BigoAdsAdapter) ExecuteRequest(ctx context.Context, client *http.Client, request openrtb2.BidRequest) *adapters.DemandResponse {
+func (a *MetaAdapter) ExecuteRequest(ctx context.Context, client *http.Client, request openrtb2.BidRequest) *adapters.DemandResponse {
 	dr := &adapters.DemandResponse{
-		DemandID:    adapter.BigoAdsKey,
-		RequestID:   request.ID,
-		TagID:       a.TagID,
-		PlacementID: a.PlacementID,
+		DemandID: adapter.MetaKey,
+		TagID:    a.TagID,
 	}
 	requestBody, err := json.Marshal(request)
 	if err != nil {
@@ -143,7 +153,7 @@ func (a *BigoAdsAdapter) ExecuteRequest(ctx context.Context, client *http.Client
 	}
 	dr.RawRequest = string(requestBody)
 
-	url := "https://api.gov-static.tech/Ad/GetUniAdS2s?id=200104"
+	url := "https://an.facebook.com/" + platformID + "/placementbid.ortb"
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(requestBody))
 	if err != nil {
 		dr.Error = err
@@ -173,7 +183,7 @@ func (a *BigoAdsAdapter) ExecuteRequest(ctx context.Context, client *http.Client
 	return dr
 }
 
-func (a *BigoAdsAdapter) ParseBids(dr *adapters.DemandResponse) (*adapters.DemandResponse, error) {
+func (a *MetaAdapter) ParseBids(dr *adapters.DemandResponse) (*adapters.DemandResponse, error) {
 	switch dr.Status {
 	case http.StatusNoContent:
 		return dr, nil
@@ -205,7 +215,7 @@ func (a *BigoAdsAdapter) ParseBids(dr *adapters.DemandResponse) (*adapters.Deman
 		ImpID:    bid.ImpID,
 		Price:    bid.Price,
 		Payload:  bid.AdM,
-		DemandID: adapter.BigoAdsKey,
+		DemandID: adapter.MetaKey,
 		AdID:     bid.AdID,
 		SeatID:   seat.Seat,
 		LURL:     bid.LURL,
@@ -216,30 +226,41 @@ func (a *BigoAdsAdapter) ParseBids(dr *adapters.DemandResponse) (*adapters.Deman
 	return dr, nil
 }
 
-// Builder builds a new instance of the BigoAds adapter for the given bidder with the given config.
+// Builder builds a new instance of the Meta adapter for the given bidder with the given config.
 func Builder(cfg adapter.ProcessedConfigsMap, client *http.Client) (*adapters.Bidder, error) {
-	bigoCfg := cfg[adapter.BigoAdsKey]
+	mCfg := cfg[adapter.MetaKey]
 
-	sellerID, ok := bigoCfg["seller_id"].(string)
+	sellerID, ok := mCfg["seller_id"].(string)
 	if !ok || sellerID == "" {
-		return nil, fmt.Errorf("missing seller_id param for %s adapter", adapter.BigoAdsKey)
+		return nil, fmt.Errorf("missing seller_id param for %s adapter", adapter.MetaKey)
 	}
-	appID, ok := bigoCfg["app_id"].(string)
+	appID, ok := mCfg["app_id"].(string)
 	if !ok || appID == "" {
-		return nil, fmt.Errorf("missing app_id param for %s adapter", adapter.BigoAdsKey)
+		return nil, fmt.Errorf("missing app_id param for %s adapter", adapter.MintegralKey)
+	}
+	appSecret, ok := mCfg["app_secret"].(string)
+	if !ok || appID == "" {
+		return nil, fmt.Errorf("missing app_secret param for %s adapter", adapter.MintegralKey)
 	}
 
-	adpt := &BigoAdsAdapter{
-		SellerID:    sellerID,
-		AppID:       appID,
-		TagID:       bigoCfg["tag_id"].(string),
-		PlacementID: bigoCfg["placement_id"].(string),
+	adpt := &MetaAdapter{
+		SellerID:  sellerID,
+		AppID:     appID,
+		AppSecret: appSecret,
+		TagID:     mCfg["tag_id"].(string),
 	}
 
-	bidder := &adapters.Bidder{
+	bidder := adapters.Bidder{
 		Adapter: adpt,
 		Client:  client,
 	}
 
-	return bidder, nil
+	return &bidder, nil
+}
+
+func calculateHMACSHA256(data, key string) string {
+	h := hmac.New(sha256.New, []byte(key))
+	h.Write([]byte(data))
+
+	return hex.EncodeToString(h.Sum(nil))
 }
