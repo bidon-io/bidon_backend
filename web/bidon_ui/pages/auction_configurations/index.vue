@@ -13,7 +13,7 @@ const columns = [
   ResourceTableFields.Id,
   ResourceTableFields.App,
   { field: "name", header: "Name" },
-  { field: "adType", header: "Ad Type" },
+  ResourceTableFields.AdType,
   { field: "pricefloor", header: "Price Floor" },
   ResourceTableFields.Segment,
 ];

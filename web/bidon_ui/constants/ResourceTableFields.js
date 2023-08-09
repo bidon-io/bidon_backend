@@ -25,7 +25,7 @@ export const ResourceTableFields = {
             app?.id,
             {
               label: `${app?.packageName} (${app?.platformId})`,
-              value: app?.id,
+              value: String(app?.id),
             },
           ])
         ).values(),
@@ -63,6 +63,23 @@ export const ResourceTableFields = {
         linkText: demandSource?.humanName,
       }),
     },
+    filter: {
+      field: "demandSourceId",
+      type: "select",
+      matchMode: FilterMatchMode.EQUALS,
+      placeholder: "Demand Source",
+      extractOptions: (records) => [
+        ...new Map(
+          records.map(({ demandSource }) => [
+            demandSource?.id,
+            {
+              label: demandSource?.humanName,
+              value: String(demandSource?.id),
+            },
+          ])
+        ).values(),
+      ],
+    },
   },
   DemandSourceAccount: {
     field: "accountId",
@@ -86,7 +103,7 @@ export const ResourceTableFields = {
             account?.id,
             {
               label: `${account?.type?.split("::")[1]} (${account?.id})`,
-              value: account?.id,
+              value: String(account?.id),
             },
           ])
         ).values(),
@@ -114,6 +131,23 @@ export const ResourceTableFields = {
         linkText: segment?.name,
       }),
     },
+    filter: {
+      field: "segmentId",
+      type: "select",
+      matchMode: FilterMatchMode.EQUALS,
+      placeholder: "Segment",
+      extractOptions: (records) => [
+        ...new Map(
+          records.map(({ segment }) => [
+            segment?.id,
+            {
+              label: segment?.name,
+              value: String(segment?.id),
+            },
+          ])
+        ).values(),
+      ],
+    },
   },
   User: {
     field: "userId",
@@ -125,6 +159,23 @@ export const ResourceTableFields = {
         id: user?.id,
         linkText: user?.email,
       }),
+    },
+    filter: {
+      field: "userId",
+      type: "select",
+      matchMode: FilterMatchMode.EQUALS,
+      placeholder: "User",
+      extractOptions: (records) => [
+        ...new Map(
+          records.map(({ user }) => [
+            user?.id,
+            {
+              label: user?.email,
+              value: String(user?.id),
+            },
+          ])
+        ).values(),
+      ],
     },
   },
 };

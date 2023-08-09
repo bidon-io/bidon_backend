@@ -1,7 +1,7 @@
 <template>
   <PageContainer>
     <NavigationContainer>
-      <GoBackButton />
+      <GoBackButton :path="resourcePath" />
     </NavigationContainer>
     <AppDemandProfileForm
       v-if="isReady"

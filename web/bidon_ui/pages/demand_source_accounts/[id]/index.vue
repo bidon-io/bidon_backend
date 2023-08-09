@@ -1,7 +1,7 @@
 <template>
   <PageContainer>
     <NavigationContainer>
-      <GoBackButton />
+      <GoBackButton :path="resourcesPath" />
       <DestroyButton :handler="() => deleteHandle(id)" />
       <EditButton :path="`${resourcesPath}/${id}/edit`" />
     </NavigationContainer>
