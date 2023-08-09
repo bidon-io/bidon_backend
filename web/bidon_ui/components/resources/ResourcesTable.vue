@@ -9,6 +9,7 @@
     :rows-per-page-options="[12, 24, 36, 48]"
     filter-display="row"
     class="whitespace-nowrap"
+    @filter="onFilter"
   >
     <template #empty> No data found. </template>
     <Column selection-mode="multiple" header-style="width: 3rem"></Column>
@@ -86,7 +87,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
 import { FilterMatchModeOptions } from "primevue/api";
 
 import axios from "@/services/ApiService.js";
@@ -102,7 +102,7 @@ interface Filter {
 
 interface SelectFilter extends Filter {
   type: "select";
-  extractOptions: (records: object[]) => { label: string; value: object }[];
+  extractOptions: (records: object[]) => { label: string; value: string }[];
 }
 
 interface Column {
@@ -142,6 +142,24 @@ const filters = ref(
     )
 );
 
+const getFilterOptions = (filteredResources: object[]) =>
+  props.columns
+    .filter((column) => column.filter && column.filter.type === "select")
+    .map((column) => column.filter as SelectFilter)
+    .reduce(
+      (result, filter) => ({
+        ...result,
+        [filter.field || ""]: filter.extractOptions(filteredResources) || [],
+      }),
+      {}
+    );
+
+const filtersOptions = ref(getFilterOptions(resources.value));
+
+const onFilter = (event: { filteredValue: object[] }) => {
+  filtersOptions.value = getFilterOptions(event.filteredValue);
+};
+
 watch(filters, () => {
   const query = Object.entries(filters.value)
     .filter(([, filter]) => (filter as Filter).value)
@@ -155,19 +173,6 @@ watch(filters, () => {
 
   router.push({ query });
 });
-
-const filtersOptions = ref(
-  props.columns
-    .filter((column) => column.filter && column.filter.type === "select")
-    .map((column) => column.filter as SelectFilter)
-    .reduce(
-      (result, filter) => ({
-        ...result,
-        [filter.field || ""]: filter.extractOptions(resources.value) || [],
-      }),
-      {}
-    )
-);
 
 const deleteHandle = useDeleteResource({
   path: props.resourcesPath,
