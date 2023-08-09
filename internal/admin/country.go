@@ -7,8 +7,8 @@ type Country struct {
 
 type CountryAttrs struct {
 	HumanName  string `json:"human_name"`
-	Alpha2Code string `json:"alpha_2_code"`
-	Alpha3Code string `json:"alpha_3_code"`
+	Alpha2Code string `json:"alpha2_code"`
+	Alpha3Code string `json:"alpha3_code"`
 }
 
 type CountryService = resourceService[Country, CountryAttrs]

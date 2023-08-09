@@ -24,6 +24,9 @@ const menuItems = [
   { name: "Demand Source Accounts", link: "/demand_source_accounts" },
   { name: "Line Items", link: "/line_items" },
   { name: "Segments", link: "/segments" },
+  { name: "Demand Sources", link: "/demand_sources" },
+  { name: "Country", link: "/countries" },
+  { name: "User", link: "/users" },
 ];
 const route = useRoute();
 </script>
