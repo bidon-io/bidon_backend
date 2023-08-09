@@ -4,10 +4,20 @@
     icon="pi pi-arrow-left"
     severity="secondary"
     text
-    @click.prevent="router.back()"
+    @click.prevent="goBack"
   />
 </template>
 
 <script setup>
+const props = defineProps({
+  path: {
+    type: String,
+    default: "/",
+  },
+});
+
 const router = useRouter();
+const goBack = () => {
+  router.push(props.path);
+};
 </script>

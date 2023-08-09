@@ -1,7 +1,7 @@
 <template>
   <PageContainer>
     <NavigationContainer>
-      <GoBackButton />
+      <GoBackButton :path="resourcePath" />
     </NavigationContainer>
     <CountryForm v-if="isReady" :value="resource" @submit="handleSubmit" />
   </PageContainer>

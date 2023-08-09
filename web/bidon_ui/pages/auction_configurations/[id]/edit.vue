@@ -1,6 +1,8 @@
 <template>
   <PageContainer>
-    <NavigationContainer> <GoBackButton /> </NavigationContainer>
+    <NavigationContainer>
+      <GoBackButton :path="resourcePath" />
+    </NavigationContainer>
     <AuctionConfigurationForm
       v-if="isReady"
       :value="resource"
