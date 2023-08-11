@@ -143,8 +143,9 @@ func (a *MetaAdapter) CreateRequest(request openrtb2.BidRequest, br *schema.Bidd
 
 func (a *MetaAdapter) ExecuteRequest(ctx context.Context, client *http.Client, request openrtb2.BidRequest) *adapters.DemandResponse {
 	dr := &adapters.DemandResponse{
-		DemandID: adapter.MetaKey,
-		TagID:    a.TagID,
+		DemandID:  adapter.MetaKey,
+		RequestID: request.ID,
+		TagID:     a.TagID,
 	}
 	requestBody, err := json.Marshal(request)
 	if err != nil {

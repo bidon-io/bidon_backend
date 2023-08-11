@@ -57,9 +57,7 @@ func (b *Builder) HoldAuction(ctx context.Context, params *BuildParams) ([]adapt
 	// build requests and send them to adapters in parallel
 	// collect results
 	// build response
-	emptyResponse := []adapters.DemandResponse{{
-		Price: 0,
-	}}
+	emptyResponse := []adapters.DemandResponse{}
 	br := params.BiddingRequest
 	config, err := b.ConfigMatcher.Match(ctx, params.AppID, br.AdType, params.SegmentID)
 	if err != nil {
@@ -141,6 +139,7 @@ func (b *Builder) HoldAuction(ctx context.Context, params *BuildParams) ([]adapt
 			responses = append(responses, *demandResponse)
 			continue
 		}
+
 		responses = append(responses, *demandResponse)
 	}
 

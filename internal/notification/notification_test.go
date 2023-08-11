@@ -2,6 +2,9 @@ package notification_test
 
 import (
 	"context"
+	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/bidon-io/bidon-backend/internal/auction"
@@ -10,22 +13,23 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/notification/mocks"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	"github.com/google/go-cmp/cmp"
+	"github.com/prebid/openrtb/v19/openrtb3"
 )
 
 func TestHandler_HandleRound(t *testing.T) {
 	ctx := context.Background()
-	imp := &schema.Imp{ID: "imp-1"}
+	floor := float64(2)
+	imp := &schema.Imp{ID: "imp-1", BidFloor: &floor}
 	responses := []adapters.DemandResponse{
 		{Bid: &adapters.BidDemandResponse{ID: "bid-1", ImpID: "imp-1", Price: 1.23}},
 		{Bid: &adapters.BidDemandResponse{ID: "bid-2", ImpID: "imp-1", Price: 4.56}},
 		{Bid: &adapters.BidDemandResponse{ID: "bid-3", ImpID: "imp-1", Price: 7.89}},
 		{Bid: &adapters.BidDemandResponse{ID: "bid-4", ImpID: "imp-1", Price: 0.12}},
+		{Error: fmt.Errorf("error-1")},
 	}
 	expectedBids := []notification.Bid{
-		{ID: "bid-1", ImpID: "imp-1", Price: 1.23},
 		{ID: "bid-2", ImpID: "imp-1", Price: 4.56},
 		{ID: "bid-3", ImpID: "imp-1", Price: 7.89},
-		{ID: "bid-4", ImpID: "imp-1", Price: 0.12},
 	}
 	mockRepo := &mocks.AuctionResultRepoMock{}
 	mockRepo.CreateOrUpdateFunc = func(ctx context.Context, imp *schema.Imp, bids []notification.Bid) error {
@@ -45,7 +49,7 @@ func TestHandler_HandleRound(t *testing.T) {
 
 func TestHandler_HandleStats(t *testing.T) {
 	ctx := context.Background()
-	imp := schema.Stats{}
+	imp := schema.Stats{Result: schema.StatsResult{Status: "SUCCESS", ECPM: 7.89}}
 	result := notification.AuctionResult{
 		Rounds: []notification.Round{{
 			Bids: []notification.Bid{
@@ -63,6 +67,20 @@ func TestHandler_HandleStats(t *testing.T) {
 	}
 
 	handler := notification.Handler{AuctionResultRepo: mockRepo}
+
+	err := handler.HandleStats(ctx, imp, config)
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+}
+
+func TestHandler_HandleStats_notification_true(t *testing.T) {
+	ctx := context.Background()
+	imp := schema.Stats{}
+
+	config := auction.Config{ExternalWinNotifications: true}
+
+	handler := notification.Handler{}
 
 	err := handler.HandleStats(ctx, imp, config)
 	if err != nil {
@@ -119,6 +137,44 @@ func TestHandler_HandleLoss(t *testing.T) {
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
+}
+
+func TestHandler_SendLoss(t *testing.T) {
+	// Create a test context and input data
+	ctx := context.Background()
+
+	// Create a mock HTTP server to handle the LURL request
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			t.Errorf("unexpected method: %s", r.Method)
+		}
+
+		params := r.URL.Query()
+		if diff := cmp.Diff("request-1", params.Get("id")); diff != "" {
+			t.Errorf("mismatched id (-want, +got)\n%s", diff)
+		}
+		if diff := cmp.Diff("4.56", params.Get("auction_price")); diff != "" {
+			t.Errorf("mismatched winprice (-want, +got)\n%s", diff)
+		}
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	bid := notification.Bid{
+		RequestID: "request-1",
+		ImpID:     "imp-1",
+		Price:     1.23,
+		LURL:      fmt.Sprintf("%s/lurl?auction_price=${AUCTION_PRICE}&id=${AUCTION_ID}", server.URL),
+	}
+	lossReason := openrtb3.LossBelowAuctionFloor
+	winPrice := 4.56
+	secondPrice := 3.00
+
+	// Create a Handler instance with the mock HTTP client and server
+	handler := notification.Handler{HttpClient: server.Client()}
+
+	// Call the SendLoss method with the test context and input data
+	handler.SendLoss(ctx, bid, lossReason, winPrice, secondPrice)
 }
 
 func TestAuctionResult_WinningBid(t *testing.T) {
