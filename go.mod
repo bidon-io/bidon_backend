@@ -3,6 +3,7 @@ module github.com/bidon-io/bidon-backend
 go 1.20
 
 require (
+	github.com/cenkalti/backoff/v4 v4.2.1
 	github.com/getsentry/sentry-go v0.22.0
 	github.com/getsentry/sentry-go/otel v0.22.0
 	github.com/go-playground/validator/v10 v10.14.1

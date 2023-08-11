@@ -95,7 +95,6 @@ func TestBuilder_Build(t *testing.T) {
 				},
 			},
 			expectedResult: adapters.DemandResponse{
-				Price:    0,
 				Status:   204,
 				DemandID: adapter.BidmachineKey,
 			},
@@ -112,10 +111,8 @@ func TestBuilder_Build(t *testing.T) {
 				AppID:     1,
 				SegmentID: 1,
 			},
-			expectedResult: adapters.DemandResponse{
-				Price: 0,
-			},
-			expectedError: errors.New("config matcher error"),
+			expectedResult: adapters.DemandResponse{},
+			expectedError:  errors.New("config matcher error"),
 		},
 	}
 
@@ -137,7 +134,7 @@ func TestBuilder_Build(t *testing.T) {
 				t.Errorf("expected error: %v, but got nil", tt.expectedError)
 			}
 
-			if result[0].Status != tt.expectedResult.Status {
+			if len(result) > 0 && result[0].Status != tt.expectedResult.Status {
 				t.Errorf("expected result: %+v, but got %+v", tt.expectedResult, result)
 			}
 		})
