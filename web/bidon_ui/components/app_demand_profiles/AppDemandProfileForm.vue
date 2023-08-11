@@ -9,23 +9,21 @@
       />
       <DemandSourceAccountDropdown
         v-model="accountId"
+        :accounts="accounts"
         :error="errors.accountId"
         required
       />
-      <DemandSourceTypeDropdown
-        v-model="accountType"
-        :error="errors.accountType"
-        required
+      <AppDemandProfileDataFormFields
+        v-model:schema="dataSchema"
+        :account-type="accountType"
       />
-      <FormField label="Data">
-        <TextareaJSON v-model="data" rows="5" />
-      </FormField>
       <FormSubmitButton />
     </FormCard>
   </form>
 </template>
 
 <script setup>
+import axios from "@/services/ApiService";
 import * as yup from "yup";
 
 const props = defineProps({
@@ -37,14 +35,16 @@ const props = defineProps({
 const emit = defineEmits(["submit"]);
 const resource = ref(props.value);
 
+const dataSchema = ref(yup.object());
 const { errors, useFieldModel, handleSubmit } = useForm({
-  validationSchema: yup.object({
-    appId: yup.number().required().label("App Id"),
-    demandSourceId: yup.number().required().label("Deamand Source Id"),
-    accountId: yup.number().required().label("Account Id"),
-    data: yup.object(),
-    accountType: yup.string().required().label("Demand Source Type"),
-  }),
+  validationSchema: computed(() =>
+    yup.object({
+      appId: yup.number().required().label("App Id"),
+      demandSourceId: yup.number().required().label("Deamand Source Id"),
+      accountId: yup.number().required().label("Account Id"),
+      data: dataSchema.value,
+    })
+  ),
   initialValues: {
     appId: resource.value.appId || null,
     demandSourceId: resource.value.demandSourceId || null,
@@ -57,8 +57,18 @@ const { errors, useFieldModel, handleSubmit } = useForm({
 const appId = useFieldModel("appId");
 const demandSourceId = useFieldModel("demandSourceId");
 const accountId = useFieldModel("accountId");
-const data = useFieldModel("data");
-const accountType = useFieldModel("accountType");
 
-const onSubmit = handleSubmit((values) => emit("submit", values));
+const response = await axios.get("/demand_source_accounts");
+const accounts = ref(response.data);
+
+const accountToTypeMapping = new Map(
+  accounts.value.map((account) => [account.id, account.type])
+);
+const accountType = computed(
+  () => accountToTypeMapping.get(accountId.value) || ""
+);
+
+const onSubmit = handleSubmit((values) =>
+  emit("submit", { ...values, accountType: accountType.value })
+);
 </script>
