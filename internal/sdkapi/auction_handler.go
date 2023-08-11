@@ -44,6 +44,7 @@ func (h *AuctionHandler) Handle(c echo.Context) error {
 		DeviceType: req.raw.Device.Type,
 		Adapters:   req.raw.Adapters.Keys(),
 		SegmentID:  sgmnt.ID,
+		PriceFloor: &req.raw.AdObject.PriceFloor,
 	}
 	auc, err := h.AuctionBuilder.Build(c.Request().Context(), params)
 	if err != nil {

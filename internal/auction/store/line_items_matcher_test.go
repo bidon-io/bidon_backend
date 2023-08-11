@@ -115,6 +115,7 @@ func TestLineItemsMatcher_Match(t *testing.T) {
 	}
 
 	matcher := store.LineItemsMatcher{DB: tx}
+	pf := 0.15
 
 	testCases := []struct {
 		params *auction.BuildParams
@@ -191,6 +192,19 @@ func TestLineItemsMatcher_Match(t *testing.T) {
 			},
 			want: []auction.LineItem{
 				{ID: "applovin", PriceFloor: 0.4, AdUnitID: "app2-applovin-banner-mrec"},
+			},
+		},
+		{
+			params: &auction.BuildParams{
+				AppID:      apps[0].ID,
+				AdType:     ad.BannerType,
+				AdFormat:   ad.AdaptiveFormat,
+				DeviceType: device.PhoneType,
+				Adapters:   []adapter.Key{adapter.ApplovinKey},
+				PriceFloor: &pf,
+			},
+			want: []auction.LineItem{
+				{ID: "applovin", PriceFloor: 0.2, AdUnitID: "applovin-banner-adaptive"},
 			},
 		},
 	}
