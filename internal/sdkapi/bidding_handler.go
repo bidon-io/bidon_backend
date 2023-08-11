@@ -85,6 +85,7 @@ func (h *BiddingHandler) Handle(c echo.Context) error {
 		AdapterConfigs: adapterConfigs,
 	}
 	demandResponses, err := h.BiddingBuilder.HoldAuction(ctx, params)
+	c.Logger().Printf("[BIDDING] bids: (%+v), err: (%s), took (%s)", demandResponses, err, time.Since(start))
 	if err != nil {
 		return err
 	}
