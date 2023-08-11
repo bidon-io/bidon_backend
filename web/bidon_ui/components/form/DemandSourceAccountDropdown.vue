@@ -28,6 +28,10 @@ const props = defineProps({
     type: [Number, null],
     default: null,
   },
+  accounts: {
+    type: Array,
+    default: () => [],
+  },
 });
 const emit = defineEmits(["update:modelValue"]);
 
@@ -40,16 +44,23 @@ const value = computed({
   },
 });
 
+const buildOptions = (accounts) =>
+  accounts.map(({ id, type }) => ({
+    id,
+    label: `${type}:${id}`,
+  }));
+
 const options = ref([]);
-axios
-  .get("/demand_source_accounts")
-  .then((response) => {
-    options.value = response.data.map(({ id, type }) => ({
-      id,
-      label: `${type}:${id}`,
-    }));
-  })
-  .catch((error) => {
-    console.error(error);
-  });
+if (props.accounts.length > 0) {
+  options.value = buildOptions(props.accounts);
+} else {
+  axios
+    .get("/demand_source_accounts")
+    .then((response) => {
+      options.value = buildOptions(response.data);
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+}
 </script>
