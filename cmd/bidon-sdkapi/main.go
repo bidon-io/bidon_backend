@@ -102,9 +102,6 @@ func main() {
 	segmentMatcher := segment.Matcher{
 		Fetcher: &segmentstore.SegmentFetcher{DB: db},
 	}
-	notificationHandler := notification.Handler{
-		AuctionResultRepo: notificationstore.AuctionResultRepo{Redis: rdb},
-	}
 
 	biddingHttpClient := &http.Client{
 		Timeout: 5 * time.Second,
@@ -113,6 +110,10 @@ func main() {
 			MaxIdleConns:        50,
 			MaxIdleConnsPerHost: 50, // TODO: Move to config
 		},
+	}
+	notificationHandler := notification.Handler{
+		AuctionResultRepo: notificationstore.AuctionResultRepo{Redis: rdb},
+		HttpClient:        biddingHttpClient,
 	}
 
 	auctionHandler := sdkapi.AuctionHandler{

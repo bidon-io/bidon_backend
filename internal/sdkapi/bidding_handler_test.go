@@ -2,11 +2,12 @@ package sdkapi_test
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -18,8 +19,9 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/auction"
 	auctionmocks "github.com/bidon-io/bidon-backend/internal/auction/mocks"
 	"github.com/bidon-io/bidon-backend/internal/bidding"
+	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters_builder"
-	adaptersbuildermocks "github.com/bidon-io/bidon-backend/internal/bidding/adapters_builder/mocks"
+	biddingmocks "github.com/bidon-io/bidon-backend/internal/bidding/mocks"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/geocoder"
 	sdkapimocks "github.com/bidon-io/bidon-backend/internal/sdkapi/mocks"
@@ -42,7 +44,7 @@ func testHelperBiddingHandler(t *testing.T) sdkapi.BiddingHandler {
 			{
 				ID:      "ROUND_2",
 				Demands: []adapter.Key{adapter.UnityAdsKey},
-				Bidding: []adapter.Key{adapter.BidmachineKey},
+				Bidding: []adapter.Key{adapter.MetaKey},
 				Timeout: 15000,
 			},
 			{
@@ -99,24 +101,26 @@ func testHelperBiddingHandler(t *testing.T) sdkapi.BiddingHandler {
 		},
 	}
 
-	profileFetcher := &adaptersbuildermocks.ConfigurationFetcherMock{
-		FetchFunc: func(ctx context.Context, appID int64, adapterKeys []adapter.Key) (adapter.RawConfigsMap, error) {
-			return adapter.RawConfigsMap{
-				adapter.ApplovinKey: {
-					AccountExtra: map[string]any{
-						"app_key": "123",
-					},
+	adapterConfigBuilder := &sdkapimocks.AdaptersConfigBuilderMock{
+		BuildFunc: func(ctx context.Context, appID int64, adapterKeys []adapter.Key, imp schema.Imp) (adapter.ProcessedConfigsMap, error) {
+			return adapter.ProcessedConfigsMap{
+				adapter.ApplovinKey: map[string]any{
+					"app_key": "123",
 				},
-				adapter.BidmachineKey: {
-					AccountExtra: map[string]any{},
+				adapter.BidmachineKey: map[string]any{},
+				adapter.MetaKey: map[string]any{
+					"app_id":     "123",
+					"app_secret": "123",
+					"seller_id":  "123",
+					"tag_id":     "123",
 				},
 			}, nil
 		},
 	}
 
-	lineItemsMatcher := &adaptersbuildermocks.LineItemsMatcherMock{
-		MatchFunc: func(ctx context.Context, params *auction.BuildParams) ([]auction.LineItem, error) {
-			return []auction.LineItem{}, nil
+	notificationMock := &biddingmocks.NotificationHandlerMock{
+		HandleRoundFunc: func(context.Context, *schema.Imp, []adapters.DemandResponse) error {
+			return nil
 		},
 	}
 
@@ -129,13 +133,11 @@ func testHelperBiddingHandler(t *testing.T) sdkapi.BiddingHandler {
 		},
 		SegmentMatcher: segmentMatcher,
 		BiddingBuilder: &bidding.Builder{
-			ConfigMatcher:   configMatcher,
-			AdaptersBuilder: adapters_builder.BuildBiddingAdapters(biddingHttpClient),
+			ConfigMatcher:       configMatcher,
+			AdaptersBuilder:     adapters_builder.BuildBiddingAdapters(biddingHttpClient),
+			NotificationHandler: notificationMock,
 		},
-		AdaptersConfigBuilder: &adapters_builder.AdaptersConfigBuilder{
-			ConfigurationFetcher: profileFetcher,
-			LineItemsMatcher:     lineItemsMatcher,
-		},
+		AdaptersConfigBuilder: adapterConfigBuilder,
 	}
 	return handler
 }
@@ -144,12 +146,11 @@ func TestBiddingHandler_OK(t *testing.T) {
 	handler := testHelperBiddingHandler(t)
 
 	// Read request and response from file
-	requestJson, err := os.ReadFile("testdata/bidding/bad_request.json")
+	requestJson, err := os.ReadFile("testdata/bidding/ok_request.json")
 	if err != nil {
 		t.Fatalf("Error reading request file: %v", err)
 	}
-	expectedResponseJson, err := os.ReadFile("testdata/bidding/bad_response.json")
-	fmt.Println(expectedResponseJson)
+	expectedResponseJson, err := os.ReadFile("testdata/bidding/ok_response.json")
 	if err != nil {
 		t.Fatalf("Error reading response file: %v", err)
 	}
@@ -166,32 +167,32 @@ func TestBiddingHandler_OK(t *testing.T) {
 	c := e.NewContext(req, rec)
 
 	// Call the Handle method
-	_ = handler.Handle(c)
-	// if err != nil {
-	// 	t.Fatalf("Handle method returned an error: %v", err)
-	// }
+	err = handler.Handle(c)
+	if err != nil {
+		t.Fatalf("Handle method returned an error: %v", err)
+	}
 
-	// // Check that the response status code is HTTP 200 OK
-	// if rec.Code != http.StatusOK {
-	// 	t.Errorf("Http status is not ok (200). Received: %v", rec.Code)
-	// }
+	// Check that the response status code is HTTP 200 OK
+	if rec.Code != http.StatusOK {
+		t.Errorf("Http status is not ok (200). Received: %v", rec.Code)
+	}
 
-	// // Read response body from file
-	// var actualResponse interface{}
-	// var expectedResponse interface{}
-	// err = json.Unmarshal(rec.Body.Bytes(), &actualResponse)
-	// if err != nil {
-	// 	t.Fatalf("Failed to parse JSON1: %s", err)
-	// }
-	// err = json.Unmarshal(expectedResponseJson, &expectedResponse)
-	// if err != nil {
-	// 	t.Fatalf("Failed to parse JSON2: %s", err)
-	// }
+	// Read response body from file
+	var actualResponse interface{}
+	var expectedResponse interface{}
+	err = json.Unmarshal(rec.Body.Bytes(), &actualResponse)
+	if err != nil {
+		t.Fatalf("Failed to parse JSON1: %s", err)
+	}
+	err = json.Unmarshal(expectedResponseJson, &expectedResponse)
+	if err != nil {
+		t.Fatalf("Failed to parse JSON2: %s", err)
+	}
 
-	// // Check that the response body is what we expect
-	// if reflect.DeepEqual(actualResponse, expectedResponse) {
-	// 	t.Errorf("Response mismatch. Expected: %v. Received: %v", expectedResponse, actualResponse)
-	// }
+	// Check that the response body is what we expect
+	if !reflect.DeepEqual(actualResponse, expectedResponse) {
+		t.Errorf("Response mismatch. Expected: %v. Received: %v", expectedResponse, actualResponse)
+	}
 }
 
 func TestBiddingHandler_ErrNoAdsFound(t *testing.T) {

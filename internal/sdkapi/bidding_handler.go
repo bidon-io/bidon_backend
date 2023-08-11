@@ -9,7 +9,6 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/bidding"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
-	"github.com/bidon-io/bidon-backend/internal/bidding/adapters_builder"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	"github.com/bidon-io/bidon-backend/internal/segment"
 	"github.com/labstack/echo/v4"
@@ -19,7 +18,13 @@ type BiddingHandler struct {
 	*BaseHandler[schema.BiddingRequest, *schema.BiddingRequest]
 	BiddingBuilder        *bidding.Builder
 	SegmentMatcher        *segment.Matcher
-	AdaptersConfigBuilder *adapters_builder.AdaptersConfigBuilder
+	AdaptersConfigBuilder AdaptersConfigBuilder
+}
+
+//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/bidding_mocks.go -pkg mocks . AdaptersConfigBuilder
+
+type AdaptersConfigBuilder interface {
+	Build(ctx context.Context, appID int64, adapterKeys []adapter.Key, imp schema.Imp) (adapter.ProcessedConfigsMap, error)
 }
 
 type BiddingResponse struct {
@@ -66,7 +71,8 @@ func (h *BiddingHandler) Handle(c echo.Context) error {
 	}
 
 	sgmnt := h.SegmentMatcher.Match(ctx, segmentParams)
-	adapterConfigs, err := h.AdaptersConfigBuilder.Build(ctx, req.app.ID, req.raw.Adapters.Keys(), req.raw.Imp)
+	imp := req.raw.Imp
+	adapterConfigs, err := h.AdaptersConfigBuilder.Build(ctx, req.app.ID, req.raw.Adapters.Keys(), imp)
 	if err != nil {
 		return err
 	}
@@ -88,7 +94,7 @@ func (h *BiddingHandler) Handle(c echo.Context) error {
 	}
 
 	for _, result := range demandResponses {
-		if result.IsBid() {
+		if result.IsBid() && result.Bid.Price >= imp.GetBidFloor() {
 			response.Bids = append(response.Bids, Bid{
 				ID:    result.Bid.ID,
 				ImpID: result.Bid.ImpID,
