@@ -35,7 +35,6 @@ type DemandResponse struct {
 	RawRequest  string
 	RawResponse string
 	Status      int
-	Price       float64
 	Bid         *BidDemandResponse
 	Error       error
 	TagID       string
