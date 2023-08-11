@@ -34,6 +34,7 @@ type BuildParams struct {
 	DeviceType device.Type
 	Adapters   []adapter.Key
 	SegmentID  int64
+	PriceFloor *float64
 }
 
 func (b *Builder) Build(ctx context.Context, params *BuildParams) (*Auction, error) {

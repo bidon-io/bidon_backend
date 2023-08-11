@@ -29,6 +29,10 @@ func (m *LineItemsMatcher) Match(ctx context.Context, params *auction.BuildParam
 		InnerJoins("Account", m.DB.Select("id")).
 		InnerJoins("Account.DemandSource", m.DB.Select("api_key").Where(map[string]any{"api_key": params.Adapters}))
 
+	if params.PriceFloor != nil {
+		query = query.Where("bid_floor >= ?", params.PriceFloor)
+	}
+
 	if params.AdType != ad.BannerType {
 		return m.find(query)
 	}
