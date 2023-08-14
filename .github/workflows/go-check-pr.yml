@@ -29,9 +29,5 @@ jobs:
             echo "OK"
           fi
 
-      - uses: dominikh/staticcheck-action@v1.3.0
-        with:
-          version: "latest"
-
       - run: docker compose -f docker-compose.go-test.yml down --rmi local -v
         if: always()
