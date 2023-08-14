@@ -1,4 +1,4 @@
-package store
+package adminstore
 
 import (
 	"database/sql"

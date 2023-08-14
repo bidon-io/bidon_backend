@@ -23,4 +23,12 @@ const (
 	AndroidPlatformID PlatformID = "android"
 )
 
-type AppService = resourceService[App, AppAttrs]
+type AppRepo = ResourceRepo[App, AppAttrs]
+
+type AppService = ResourceService[App, AppAttrs]
+
+func NewAppService(store Store) *AppService {
+	return &AppService{
+		ResourceRepo: store.Apps(),
+	}
+}
