@@ -1,4 +1,4 @@
-package store_test
+package adminstore_test
 
 import (
 	"context"
@@ -13,7 +13,7 @@ func TestDemandSourceRepo_List(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := store.NewDemandSourceRepo(tx)
+	repo := adminstore.NewDemandSourceRepo(tx)
 
 	sources := []admin.DemandSourceAttrs{
 		{
@@ -50,7 +50,7 @@ func TestDemandSourceRepo_Find(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := store.NewDemandSourceRepo(tx)
+	repo := adminstore.NewDemandSourceRepo(tx)
 
 	attrs := &admin.DemandSourceAttrs{
 		HumanName: "Applovin",
@@ -76,7 +76,7 @@ func TestDemandSourceRepo_Update(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := store.NewDemandSourceRepo(tx)
+	repo := adminstore.NewDemandSourceRepo(tx)
 
 	attrs := admin.DemandSourceAttrs{
 		HumanName: "Applovin",
@@ -108,7 +108,7 @@ func TestDemandSourceRepo_Delete(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := store.NewDemandSourceRepo(tx)
+	repo := adminstore.NewDemandSourceRepo(tx)
 
 	attrs := &admin.DemandSourceAttrs{
 		HumanName: "Applovin",

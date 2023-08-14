@@ -1,4 +1,4 @@
-package store
+package adminstore
 
 import (
 	"github.com/bidon-io/bidon-backend/internal/admin"

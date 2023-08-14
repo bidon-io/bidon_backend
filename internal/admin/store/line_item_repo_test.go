@@ -1,4 +1,4 @@
-package store_test
+package adminstore_test
 
 import (
 	"context"
@@ -17,7 +17,7 @@ func TestLineItemRepo_List(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := store.NewLineItemRepo(tx)
+	repo := adminstore.NewLineItemRepo(tx)
 
 	user := dbtest.CreateUser(t, tx, 1)
 	app := dbtest.CreateApp(t, tx, 1, user)
@@ -97,8 +97,8 @@ func TestLineItemRepo_List(t *testing.T) {
 		}
 
 		want[i] = *item
-		want[i].Account = *store.DemandSourceAccountResource(&accounts[i])
-		want[i].App = *store.AppResource(app)
+		want[i].Account = *adminstore.DemandSourceAccountResource(&accounts[i])
+		want[i].App = *adminstore.AppResource(app)
 	}
 
 	got, err := repo.List(context.Background())
@@ -115,7 +115,7 @@ func TestLineItemRepo_Find(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := store.NewLineItemRepo(tx)
+	repo := adminstore.NewLineItemRepo(tx)
 
 	app := dbtest.CreateApp(t, tx, 1, nil)
 	applovinDemandSource := dbtest.CreateDemandSource(t, tx, dbtest.WithDemandSourceOptions(&db.DemandSource{
@@ -143,8 +143,8 @@ func TestLineItemRepo_Find(t *testing.T) {
 	if err != nil {
 		t.Fatalf("repo.Create(ctx, %+v) = %v, %q; want %T, %v", attrs, nil, err, want, nil)
 	}
-	want.App = *store.AppResource(app)
-	want.Account = *store.DemandSourceAccountResource(applovinAccount)
+	want.App = *adminstore.AppResource(app)
+	want.Account = *adminstore.DemandSourceAccountResource(applovinAccount)
 
 	got, err := repo.Find(context.Background(), want.ID)
 	if err != nil {
@@ -160,7 +160,7 @@ func TestLineItemRepo_Update(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := store.NewLineItemRepo(tx)
+	repo := adminstore.NewLineItemRepo(tx)
 
 	app := dbtest.CreateApp(t, tx, 1, nil)
 	applovinDemandSource := dbtest.CreateDemandSource(t, tx, dbtest.WithDemandSourceOptions(&db.DemandSource{
@@ -214,7 +214,7 @@ func TestLineItemRepo_Delete(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := store.NewLineItemRepo(tx)
+	repo := adminstore.NewLineItemRepo(tx)
 
 	app := dbtest.CreateApp(t, tx, 1, nil)
 	applovinDemandSource := dbtest.CreateDemandSource(t, tx, dbtest.WithDemandSourceOptions(&db.DemandSource{
