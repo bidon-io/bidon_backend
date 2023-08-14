@@ -1,4 +1,4 @@
-package store_test
+package adminstore_test
 
 import (
 	"context"
@@ -13,7 +13,7 @@ func TestUserRepo_List(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := store.NewUserRepo(tx)
+	repo := adminstore.NewUserRepo(tx)
 
 	users := []admin.UserAttrs{
 		{
@@ -48,7 +48,7 @@ func TestUserRepo_Find(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := store.NewUserRepo(tx)
+	repo := adminstore.NewUserRepo(tx)
 
 	attrs := &admin.UserAttrs{
 		Email: "user1@example.com",
@@ -73,7 +73,7 @@ func TestUserRepo_Update(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := store.NewUserRepo(tx)
+	repo := adminstore.NewUserRepo(tx)
 
 	attrs := admin.UserAttrs{
 		Email: "user1@example.com",
@@ -104,7 +104,7 @@ func TestUserRepo_Delete(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := store.NewUserRepo(tx)
+	repo := adminstore.NewUserRepo(tx)
 
 	attrs := &admin.UserAttrs{
 		Email: "user1@example.com",

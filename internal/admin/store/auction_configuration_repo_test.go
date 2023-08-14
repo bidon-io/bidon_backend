@@ -1,4 +1,4 @@
-package store_test
+package adminstore_test
 
 import (
 	"context"
@@ -18,7 +18,7 @@ func TestAuctionConfigurationRepo_List(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := store.NewAuctionConfigurationRepo(tx)
+	repo := adminstore.NewAuctionConfigurationRepo(tx)
 	apps := dbtest.CreateAppsList(t, tx, 3)
 	segments := make([]*db.Segment, 3)
 	segments[0] = dbtest.CreateSegment(t, tx, 1, apps[0])
@@ -55,9 +55,9 @@ func TestAuctionConfigurationRepo_List(t *testing.T) {
 		}
 
 		want[i] = *config
-		want[i].App = *store.AppResource(apps[i])
+		want[i].App = *adminstore.AppResource(apps[i])
 		if segments[i] != nil {
-			want[i].Segment = store.SegmentResource(segments[i])
+			want[i].Segment = adminstore.SegmentResource(segments[i])
 		}
 	}
 
@@ -75,7 +75,7 @@ func TestAuctionConfigurationRepo_Find(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := store.NewAuctionConfigurationRepo(tx)
+	repo := adminstore.NewAuctionConfigurationRepo(tx)
 
 	app := dbtest.CreateApp(t, tx, 1, nil)
 	attrs := &admin.AuctionConfigurationAttrs{
@@ -90,7 +90,7 @@ func TestAuctionConfigurationRepo_Find(t *testing.T) {
 	if err != nil {
 		t.Fatalf("repo.Create(ctx, %+v) = %v, %q; want %T, %v", attrs, nil, err, want, nil)
 	}
-	want.App = *store.AppResource(app)
+	want.App = *adminstore.AppResource(app)
 
 	got, err := repo.Find(context.Background(), want.ID)
 	if err != nil {
@@ -106,7 +106,7 @@ func TestAuctionConfigurationRepo_Update(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := store.NewAuctionConfigurationRepo(tx)
+	repo := adminstore.NewAuctionConfigurationRepo(tx)
 
 	app := dbtest.CreateApp(t, tx, 1, nil)
 	attrs := admin.AuctionConfigurationAttrs{
@@ -142,7 +142,7 @@ func TestAuctionConfigurationRepo_Delete(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := store.NewAuctionConfigurationRepo(tx)
+	repo := adminstore.NewAuctionConfigurationRepo(tx)
 
 	app := dbtest.CreateApp(t, tx, 1, nil)
 	attrs := &admin.AuctionConfigurationAttrs{

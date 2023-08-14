@@ -18,4 +18,12 @@ type SegmentAttrs struct {
 	Priority    int32            `json:"priority"`
 }
 
-type SegmentService = resourceService[Segment, SegmentAttrs]
+type SegmentRepo = ResourceRepo[Segment, SegmentAttrs]
+
+type SegmentService = ResourceService[Segment, SegmentAttrs]
+
+func NewSegmentService(store Store) *SegmentService {
+	return &SegmentService{
+		ResourceRepo: store.Segments(),
+	}
+}

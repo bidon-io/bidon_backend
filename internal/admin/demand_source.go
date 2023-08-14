@@ -10,4 +10,12 @@ type DemandSourceAttrs struct {
 	ApiKey    string `json:"api_key"`
 }
 
-type DemandSourceService = resourceService[DemandSource, DemandSourceAttrs]
+type DemandSourceRepo = ResourceRepo[DemandSource, DemandSourceAttrs]
+
+type DemandSourceService = ResourceService[DemandSource, DemandSourceAttrs]
+
+func NewDemandSourceService(store Store) *DemandSourceService {
+	return &DemandSourceService{
+		ResourceRepo: store.DemandSources(),
+	}
+}
