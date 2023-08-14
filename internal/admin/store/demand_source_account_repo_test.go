@@ -1,4 +1,4 @@
-package store_test
+package adminstore_test
 
 import (
 	"context"
@@ -15,7 +15,7 @@ func TestDemandSourceAccountRepo_List(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := store.NewDemandSourceAccountRepo(tx)
+	repo := adminstore.NewDemandSourceAccountRepo(tx)
 	demandSources := make([]*db.DemandSource, 3)
 	demandSources[0] = dbtest.CreateDemandSource(t, tx, dbtest.WithDemandSourceOptions(&db.DemandSource{
 		APIKey: "applovin",
@@ -59,8 +59,8 @@ func TestDemandSourceAccountRepo_List(t *testing.T) {
 		}
 
 		want[i] = *account
-		want[i].User = *store.UserResource(user)
-		want[i].DemandSource = *store.DemandSourceResource(demandSources[i])
+		want[i].User = *adminstore.UserResource(user)
+		want[i].DemandSource = *adminstore.DemandSourceResource(demandSources[i])
 	}
 
 	got, err := repo.List(context.Background())
@@ -77,7 +77,7 @@ func TestDemandSourceAccountRepo_Find(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := store.NewDemandSourceAccountRepo(tx)
+	repo := adminstore.NewDemandSourceAccountRepo(tx)
 
 	user := dbtest.CreateUser(t, tx, 1)
 	demandSource := dbtest.CreateDemandSource(t, tx, dbtest.WithDemandSourceOptions(&db.DemandSource{
@@ -95,8 +95,8 @@ func TestDemandSourceAccountRepo_Find(t *testing.T) {
 	if err != nil {
 		t.Fatalf("repo.Create(ctx, %+v) = %v, %q; want %T, %v", attrs, nil, err, want, nil)
 	}
-	want.User = *store.UserResource(user)
-	want.DemandSource = *store.DemandSourceResource(demandSource)
+	want.User = *adminstore.UserResource(user)
+	want.DemandSource = *adminstore.DemandSourceResource(demandSource)
 
 	got, err := repo.Find(context.Background(), want.ID)
 	if err != nil {
@@ -112,7 +112,7 @@ func TestDemandSourceAccountRepo_Update(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := store.NewDemandSourceAccountRepo(tx)
+	repo := adminstore.NewDemandSourceAccountRepo(tx)
 
 	user := dbtest.CreateUser(t, tx, 1)
 	demandSource := dbtest.CreateDemandSource(t, tx, dbtest.WithDemandSourceOptions(&db.DemandSource{
@@ -153,7 +153,7 @@ func TestDemandSourceAccountRepo_Delete(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := store.NewDemandSourceAccountRepo(tx)
+	repo := adminstore.NewDemandSourceAccountRepo(tx)
 
 	user := dbtest.CreateUser(t, tx, 1)
 	demandSource := dbtest.CreateDemandSource(t, tx, dbtest.WithDemandSourceOptions(&db.DemandSource{

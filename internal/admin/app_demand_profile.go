@@ -1,5 +1,12 @@
 package admin
 
+import (
+	"context"
+
+	"github.com/bidon-io/bidon-backend/internal/adapter"
+	v8n "github.com/go-ozzo/ozzo-validation/v4"
+)
+
 type AppDemandProfile struct {
 	ID int64 `json:"id"`
 	AppDemandProfileAttrs
@@ -16,4 +23,60 @@ type AppDemandProfileAttrs struct {
 	AccountType    string         `json:"account_type"`
 }
 
-type AppDemandProfileService = resourceService[AppDemandProfile, AppDemandProfileAttrs]
+type AppDemandProfileRepo = ResourceRepo[AppDemandProfile, AppDemandProfileAttrs]
+
+type AppDemandProfileService = ResourceService[AppDemandProfile, AppDemandProfileAttrs]
+
+func NewAppDemandProfileService(store Store) *AppDemandProfileService {
+	s := &AppDemandProfileService{
+		ResourceRepo: store.AppDemandProfiles(),
+	}
+
+	s.getValidator = func(attrs *AppDemandProfileAttrs) v8n.ValidatableWithContext {
+		return &appDemandProfileAttrsValidator{
+			attrs:            attrs,
+			demandSourceRepo: store.DemandSources(),
+		}
+	}
+
+	return s
+}
+
+type appDemandProfileAttrsValidator struct {
+	attrs *AppDemandProfileAttrs
+
+	demandSourceRepo DemandSourceRepo
+}
+
+func (v *appDemandProfileAttrsValidator) ValidateWithContext(ctx context.Context) error {
+	demandSource, err := v.demandSourceRepo.Find(ctx, v.attrs.DemandSourceID)
+	if err != nil {
+		return v8n.NewInternalError(err)
+	}
+
+	return v8n.ValidateStruct(v.attrs,
+		v8n.Field(&v.attrs.Data, v.dataRule(demandSource)),
+	)
+}
+
+func (v *appDemandProfileAttrsValidator) dataRule(demandSource *DemandSource) v8n.Rule {
+	var rule v8n.MapRule
+
+	switch adapter.Key(demandSource.ApiKey) {
+	case adapter.AdmobKey, adapter.BigoAdsKey, adapter.DTExchangeKey, adapter.MintegralKey, adapter.VungleKey:
+		rule = v8n.Map(
+			v8n.Key("app_id", v8n.Required, isString),
+		)
+	case adapter.MetaKey:
+		rule = v8n.Map(
+			v8n.Key("app_id", v8n.Required, isString),
+			v8n.Key("app_secret", v8n.Required, isString),
+		)
+	case adapter.UnityAdsKey:
+		rule = v8n.Map(
+			v8n.Key("game_id", v8n.Required, isString),
+		)
+	}
+
+	return rule.AllowExtraKeys()
+}

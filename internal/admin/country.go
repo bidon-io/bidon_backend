@@ -11,4 +11,12 @@ type CountryAttrs struct {
 	Alpha3Code string `json:"alpha3_code"`
 }
 
-type CountryService = resourceService[Country, CountryAttrs]
+type CountryRepo = ResourceRepo[Country, CountryAttrs]
+
+type CountryService = ResourceService[Country, CountryAttrs]
+
+func NewCountryService(store Store) *CountryService {
+	return &CountryService{
+		ResourceRepo: store.Countries(),
+	}
+}

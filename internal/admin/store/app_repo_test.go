@@ -1,4 +1,4 @@
-package store_test
+package adminstore_test
 
 import (
 	"context"
@@ -14,7 +14,7 @@ func TestAppRepo_List(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := store.NewAppRepo(tx)
+	repo := adminstore.NewAppRepo(tx)
 
 	users := dbtest.CreateUsersList(t, tx, 2)
 	apps := []admin.AppAttrs{
@@ -44,7 +44,7 @@ func TestAppRepo_List(t *testing.T) {
 		}
 
 		want[i] = *app
-		want[i].User = *store.UserResource(users[i])
+		want[i].User = *adminstore.UserResource(users[i])
 	}
 
 	got, err := repo.List(context.Background())
@@ -61,7 +61,7 @@ func TestAppRepo_Find(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := store.NewAppRepo(tx)
+	repo := adminstore.NewAppRepo(tx)
 
 	user := dbtest.CreateUser(t, tx, 1)
 	attrs := &admin.AppAttrs{
@@ -77,7 +77,7 @@ func TestAppRepo_Find(t *testing.T) {
 	if err != nil {
 		t.Fatalf("repo.Create(ctx, %+v) = %v, %q; want %T, %v", attrs, nil, err, want, nil)
 	}
-	want.User = *store.UserResource(user)
+	want.User = *adminstore.UserResource(user)
 
 	got, err := repo.Find(context.Background(), want.ID)
 	if err != nil {
@@ -93,7 +93,7 @@ func TestAppRepo_Update(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := store.NewAppRepo(tx)
+	repo := adminstore.NewAppRepo(tx)
 
 	user := dbtest.CreateUser(t, tx, 1)
 	attrs := admin.AppAttrs{
@@ -130,7 +130,7 @@ func TestAppRepo_Delete(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := store.NewAppRepo(tx)
+	repo := adminstore.NewAppRepo(tx)
 
 	user := dbtest.CreateUser(t, tx, 1)
 	attrs := &admin.AppAttrs{

@@ -1,4 +1,4 @@
-package store_test
+package adminstore_test
 
 import (
 	"context"
@@ -13,7 +13,7 @@ func TestCountryRepo_List(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := store.NewCountryRepo(tx)
+	repo := adminstore.NewCountryRepo(tx)
 
 	countries := []admin.CountryAttrs{
 		{
@@ -52,7 +52,7 @@ func TestCountryRepo_Find(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := store.NewCountryRepo(tx)
+	repo := adminstore.NewCountryRepo(tx)
 
 	attrs := &admin.CountryAttrs{
 		HumanName:  "Japan",
@@ -79,7 +79,7 @@ func TestCountryRepo_Update(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := store.NewCountryRepo(tx)
+	repo := adminstore.NewCountryRepo(tx)
 
 	attrs := admin.CountryAttrs{
 		HumanName:  "Japan",
@@ -112,7 +112,7 @@ func TestCountryRepo_Delete(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := store.NewCountryRepo(tx)
+	repo := adminstore.NewCountryRepo(tx)
 
 	attrs := &admin.CountryAttrs{
 		HumanName:  "Japan",

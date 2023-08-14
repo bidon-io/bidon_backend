@@ -23,4 +23,12 @@ type AuctionConfigurationAttrs struct {
 	ExternalWinNotifications *bool                 `json:"external_win_notifications"`
 }
 
-type AuctionConfigurationService = resourceService[AuctionConfiguration, AuctionConfigurationAttrs]
+type AuctionConfigurationRepo = ResourceRepo[AuctionConfiguration, AuctionConfigurationAttrs]
+
+type AuctionConfigurationService = ResourceService[AuctionConfiguration, AuctionConfigurationAttrs]
+
+func NewAuctionConfigurationService(store Store) *AuctionConfigurationService {
+	return &AuctionConfigurationService{
+		ResourceRepo: store.AuctionConfigurations(),
+	}
+}

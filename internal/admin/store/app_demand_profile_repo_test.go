@@ -1,4 +1,4 @@
-package store_test
+package adminstore_test
 
 import (
 	"context"
@@ -15,7 +15,7 @@ func TestAppDemandProfileRepo_List(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := store.NewAppDemandProfileRepo(tx)
+	repo := adminstore.NewAppDemandProfileRepo(tx)
 
 	user := dbtest.CreateUser(t, tx, 1)
 	apps := make([]*db.App, 2)
@@ -55,9 +55,9 @@ func TestAppDemandProfileRepo_List(t *testing.T) {
 		}
 
 		want[i] = *profile
-		want[i].App = *store.AppResource(apps[i])
-		want[i].DemandSource = *store.DemandSourceResource(demandSources[i])
-		want[i].Account = *store.DemandSourceAccountResource(accounts[i])
+		want[i].App = *adminstore.AppResource(apps[i])
+		want[i].DemandSource = *adminstore.DemandSourceResource(demandSources[i])
+		want[i].Account = *adminstore.DemandSourceAccountResource(accounts[i])
 	}
 
 	got, err := repo.List(context.Background())
@@ -74,7 +74,7 @@ func TestAppDemandProfileRepo_Find(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := store.NewAppDemandProfileRepo(tx)
+	repo := adminstore.NewAppDemandProfileRepo(tx)
 
 	user := dbtest.CreateUser(t, tx, 1)
 	app := dbtest.CreateApp(t, tx, 1, user)
@@ -95,9 +95,9 @@ func TestAppDemandProfileRepo_Find(t *testing.T) {
 	if err != nil {
 		t.Fatalf("repo.Create(ctx, %+v) = %v, %q; want %T, %v", attrs, nil, err, want, nil)
 	}
-	want.App = *store.AppResource(app)
-	want.Account = *store.DemandSourceAccountResource(account)
-	want.DemandSource = *store.DemandSourceResource(demandSource)
+	want.App = *adminstore.AppResource(app)
+	want.Account = *adminstore.DemandSourceAccountResource(account)
+	want.DemandSource = *adminstore.DemandSourceResource(demandSource)
 
 	got, err := repo.Find(context.Background(), want.ID)
 	if err != nil {
@@ -113,7 +113,7 @@ func TestAppDemandProfileRepo_Update(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := store.NewAppDemandProfileRepo(tx)
+	repo := adminstore.NewAppDemandProfileRepo(tx)
 
 	user := dbtest.CreateUser(t, tx, 1)
 	app := dbtest.CreateApp(t, tx, 1, user)
@@ -155,7 +155,7 @@ func TestAppDemandProfileRepo_Delete(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := store.NewAppDemandProfileRepo(tx)
+	repo := adminstore.NewAppDemandProfileRepo(tx)
 
 	user := dbtest.CreateUser(t, tx, 1)
 	app := dbtest.CreateApp(t, tx, 1, user)

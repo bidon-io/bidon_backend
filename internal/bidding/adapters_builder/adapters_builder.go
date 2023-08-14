@@ -96,7 +96,7 @@ func (b *AdaptersConfigBuilder) Build(ctx context.Context, appID int64, adapterK
 			adapters[key]["mediation_config"] = extra["mediation_config"]
 		case adapter.BigoAdsKey:
 			adapters[key]["app_id"] = appData["app_id"]
-			adapters[key]["seller_id"] = extra["seller_id"]
+			adapters[key]["seller_id"] = fetchFirstValue(extra, "seller_id", "publisher_id")
 			adapters[key]["tag_id"] = ""
 			adapters[key]["placement_id"] = ""
 
@@ -106,7 +106,7 @@ func (b *AdaptersConfigBuilder) Build(ctx context.Context, appID int64, adapterK
 			}
 		case adapter.MintegralKey:
 			adapters[key]["app_id"] = appData["app_id"]
-			adapters[key]["seller_id"] = extra["seller_id"]
+			adapters[key]["seller_id"] = fetchFirstValue(extra, "seller_id", "app_key")
 			adapters[key]["tag_id"] = ""
 			adapters[key]["placement_id"] = ""
 
@@ -116,7 +116,7 @@ func (b *AdaptersConfigBuilder) Build(ctx context.Context, appID int64, adapterK
 			}
 		case adapter.VungleKey:
 			adapters[key]["app_id"] = appData["app_id"]
-			adapters[key]["seller_id"] = extra["seller_id"]
+			adapters[key]["seller_id"] = fetchFirstValue(extra, "seller_id", "account_id")
 			adapters[key]["tag_id"] = ""
 
 			if lineItem, ok := lineItemsMap[key]; ok {
@@ -159,4 +159,14 @@ func (b *AdaptersConfigBuilder) buildLineItemsMap(ctx context.Context, appID int
 	}
 
 	return lineItemsMap, nil
+}
+
+// fetchFirstValue returns map value for the first key that is present in the map
+func fetchFirstValue(m map[string]any, keys ...string) any {
+	for _, key := range keys {
+		if value, ok := m[key]; ok {
+			return value
+		}
+	}
+	return nil
 }

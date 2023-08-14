@@ -1,8 +1,7 @@
-package store
+package adminstore
 
 import (
 	"context"
-
 	"github.com/bidon-io/bidon-backend/internal/db"
 	"gorm.io/gorm/clause"
 )

@@ -1,4 +1,4 @@
-package store_test
+package adminstore_test
 
 import (
 	"context"
@@ -16,7 +16,7 @@ func TestSegmentRepo_List(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := store.NewSegmentRepo(tx)
+	repo := adminstore.NewSegmentRepo(tx)
 
 	apps := dbtest.CreateAppsList(t, tx, 3)
 	segments := []admin.SegmentAttrs{
@@ -54,7 +54,7 @@ func TestSegmentRepo_List(t *testing.T) {
 		}
 
 		want[i] = *segment
-		want[i].App = *store.AppResource(apps[i])
+		want[i].App = *adminstore.AppResource(apps[i])
 	}
 
 	got, err := repo.List(context.Background())
@@ -71,7 +71,7 @@ func TestSegmentRepo_Find(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := store.NewSegmentRepo(tx)
+	repo := adminstore.NewSegmentRepo(tx)
 
 	app := dbtest.CreateApp(t, tx, 1, nil)
 	attrs := &admin.SegmentAttrs{
@@ -86,7 +86,7 @@ func TestSegmentRepo_Find(t *testing.T) {
 	if err != nil {
 		t.Fatalf("repo.Create(ctx, %+v) = %v, %q; want %T, %v", attrs, nil, err, want, nil)
 	}
-	want.App = *store.AppResource(app)
+	want.App = *adminstore.AppResource(app)
 
 	got, err := repo.Find(context.Background(), want.ID)
 	if err != nil {
@@ -102,7 +102,7 @@ func TestSegmentRepo_Update(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := store.NewSegmentRepo(tx)
+	repo := adminstore.NewSegmentRepo(tx)
 
 	app := dbtest.CreateApp(t, tx, 1, nil)
 	attrs := admin.SegmentAttrs{
@@ -142,7 +142,7 @@ func TestSegmentRepo_Delete(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	repo := store.NewSegmentRepo(tx)
+	repo := adminstore.NewSegmentRepo(tx)
 
 	app := dbtest.CreateApp(t, tx, 1, nil)
 	attrs := &admin.SegmentAttrs{

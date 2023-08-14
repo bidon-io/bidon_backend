@@ -11,7 +11,8 @@ import (
 	"github.com/bidon-io/bidon-backend/cmd/bidon-admin/web"
 	"github.com/bidon-io/bidon-backend/config"
 	"github.com/bidon-io/bidon-backend/internal/admin"
-	"github.com/bidon-io/bidon-backend/internal/admin/store"
+	adminecho "github.com/bidon-io/bidon-backend/internal/admin/echo"
+	adminstore "github.com/bidon-io/bidon-backend/internal/admin/store"
 	"github.com/bidon-io/bidon-backend/internal/db"
 	"github.com/getsentry/sentry-go"
 	_ "github.com/joho/godotenv/autoload"
@@ -26,7 +27,12 @@ func main() {
 	if err != nil {
 		log.Fatalf("config.NewLogger(): %v", err)
 	}
-	defer logger.Sync()
+	defer func() {
+		err := logger.Sync()
+		if err != nil {
+			log.Printf("logger.Sync(): %v", err)
+		}
+	}()
 
 	sentryConf := config.Sentry()
 	err = sentry.Init(sentryConf.ClientOptions)
@@ -45,10 +51,9 @@ func main() {
 
 	configureCORS(e)
 
-	adminService := newAdminService(db)
-
-	apiGroup := e.Group("/api")
-	adminService.RegisterAPIRoutes(apiGroup)
+	store := adminstore.New(db)
+	adminService := admin.NewService(store)
+	adminecho.RegisterService(e.Group("/api"), adminService)
 
 	redocFileSystem, _ := fs.Sub(web.FS, "redoc")
 	redocWebServer := http.FileServer(http.FS(redocFileSystem))
@@ -72,38 +77,6 @@ func main() {
 	}
 	addr := fmt.Sprintf(":%s", port)
 	e.Logger.Fatal(e.Start(addr))
-}
-
-func newAdminService(db *db.DB) *admin.Service {
-	return &admin.Service{
-		AuctionConfigurations: &admin.AuctionConfigurationService{
-			Repo: store.NewAuctionConfigurationRepo(db),
-		},
-		Apps: &admin.AppService{
-			Repo: store.NewAppRepo(db),
-		},
-		AppDemandProfiles: &admin.AppDemandProfileService{
-			Repo: store.NewAppDemandProfileRepo(db),
-		},
-		Segments: &admin.SegmentService{
-			Repo: store.NewSegmentRepo(db),
-		},
-		DemandSourceAccounts: &admin.DemandSourceAccountService{
-			Repo: store.NewDemandSourceAccountRepo(db),
-		},
-		LineItems: &admin.LineItemService{
-			Repo: store.NewLineItemRepo(db),
-		},
-		DemandSources: &admin.DemandSourceService{
-			Repo: store.NewDemandSourceRepo(db),
-		},
-		Countries: &admin.CountryService{
-			Repo: store.NewCountryRepo(db),
-		},
-		Users: &admin.UserService{
-			Repo: store.NewUserRepo(db),
-		},
-	}
 }
 
 func configureCORS(e *echo.Echo) {

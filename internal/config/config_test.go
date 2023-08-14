@@ -13,7 +13,7 @@ import (
 func TestAdaptersBuilder_Build(t *testing.T) {
 	profiles := adapter.RawConfigsMap{
 		adapter.ApplovinKey: {
-			AppData: map[string]any{"api_key": "applovin_api_key", "ext": "some"},
+			AccountExtra: map[string]any{"api_key": "applovin_api_key", "ext": "some"},
 		},
 		adapter.BidmachineKey: {
 			AccountExtra: map[string]any{
