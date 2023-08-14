@@ -3,12 +3,12 @@ package event
 import (
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strings"
 	"time"
 
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/geocoder"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
-	"golang.org/x/exp/slices"
 )
 
 type Event interface {
