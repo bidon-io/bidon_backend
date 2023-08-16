@@ -106,7 +106,7 @@ func (b *AdaptersConfigBuilder) Build(ctx context.Context, appID int64, adapterK
 			}
 		case adapter.MintegralKey:
 			adapters[key]["app_id"] = appData["app_id"]
-			adapters[key]["seller_id"] = fetchFirstValue(extra, "seller_id", "app_key")
+			adapters[key]["seller_id"] = fetchFirstValue(extra, "seller_id", "publisher_id")
 			adapters[key]["tag_id"] = ""
 			adapters[key]["placement_id"] = ""
 

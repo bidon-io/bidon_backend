@@ -72,8 +72,9 @@ func Test_demandSourceAccountValidator_ValidateWithContext(t *testing.T) {
 			&DemandSourceAccountAttrs{
 				DemandSourceID: 1,
 				Extra: map[string]any{
-					"app_key": "f674fbc5dea30e35fee264960a16e5f9",
-					"foo":     "bar",
+					"app_key":      "f674fbc5dea30e35fee264960a16e5f9",
+					"publisher_id": "28686",
+					"foo":          "bar",
 				},
 			},
 			&DemandSource{
