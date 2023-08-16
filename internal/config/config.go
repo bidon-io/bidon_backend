@@ -39,7 +39,8 @@ func (b *AdaptersBuilder) Build(ctx context.Context, appID int64, adapterKeys []
 		appData := profile.AppData
 		switch key {
 		case adapter.ApplovinKey:
-			adapters[key]["app_key"] = fetchFirstValue(extra, "app_key", "api_key", "sdk_key")
+			adapters[key]["app_key"] = extra["sdk_key"] // DEPRECATED
+			adapters[key]["sdk_key"] = extra["sdk_key"]
 		case adapter.BidmachineKey:
 			adapters[key]["seller_id"] = extra["seller_id"]
 			adapters[key]["endpoint"] = extra["endpoint"]
@@ -59,14 +60,4 @@ func (b *AdaptersBuilder) Build(ctx context.Context, appID int64, adapterKeys []
 	}
 
 	return adapters, nil
-}
-
-// fetchFirstValue returns map value for the first key that is present in the map
-func fetchFirstValue(m map[string]any, keys ...string) any {
-	for _, key := range keys {
-		if value, ok := m[key]; ok {
-			return value
-		}
-	}
-	return nil
 }
