@@ -208,9 +208,8 @@ func TestMeta_CreateRequestTest(t *testing.T) {
 	}
 
 	adapter := &meta.MetaAdapter{
-		SellerID: "1",
-		AppID:    "10182906",
-		TagID:    "10182906",
+		AppID: "10182906",
+		TagID: "10182906",
 	}
 
 	for _, tC := range testCases {
