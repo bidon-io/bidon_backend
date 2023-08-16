@@ -125,7 +125,6 @@ func (b *AdaptersConfigBuilder) Build(ctx context.Context, appID int64, adapterK
 		case adapter.MetaKey:
 			adapters[key]["app_id"] = appData["app_id"]
 			adapters[key]["app_secret"] = appData["app_secret"]
-			adapters[key]["seller_id"] = extra["seller_id"]
 			adapters[key]["tag_id"] = ""
 
 			if lineItem, ok := lineItemsMap[key]; ok {
