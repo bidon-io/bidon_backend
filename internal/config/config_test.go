@@ -13,7 +13,7 @@ import (
 func TestAdaptersBuilder_Build(t *testing.T) {
 	profiles := adapter.RawConfigsMap{
 		adapter.ApplovinKey: {
-			AccountExtra: map[string]any{"api_key": "applovin_api_key", "ext": "some"},
+			AccountExtra: map[string]any{"sdk_key": "applovin_api_key", "ext": "some"},
 		},
 		adapter.BidmachineKey: {
 			AccountExtra: map[string]any{
@@ -60,7 +60,8 @@ func TestAdaptersBuilder_Build(t *testing.T) {
 			adapterKeys: []adapter.Key{adapter.ApplovinKey, adapter.BidmachineKey, adapter.DTExchangeKey, adapter.UnityAdsKey},
 			want: adapter.ProcessedConfigsMap{
 				adapter.ApplovinKey: map[string]any{
-					"app_key": applovinProfile.AccountExtra["api_key"],
+					"app_key": applovinProfile.AccountExtra["sdk_key"],
+					"sdk_key": applovinProfile.AccountExtra["sdk_key"],
 				},
 				adapter.BidmachineKey: map[string]any{
 					"seller_id":        bidmachineProfile.AccountExtra["seller_id"],
