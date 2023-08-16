@@ -23,7 +23,6 @@ import (
 )
 
 type MetaAdapter struct {
-	SellerID  string
 	AppID     string
 	AppSecret string
 	TagID     string
@@ -231,10 +230,6 @@ func (a *MetaAdapter) ParseBids(dr *adapters.DemandResponse) (*adapters.DemandRe
 func Builder(cfg adapter.ProcessedConfigsMap, client *http.Client) (*adapters.Bidder, error) {
 	mCfg := cfg[adapter.MetaKey]
 
-	sellerID, ok := mCfg["seller_id"].(string)
-	if !ok || sellerID == "" {
-		return nil, fmt.Errorf("missing seller_id param for %s adapter", adapter.MetaKey)
-	}
 	appID, ok := mCfg["app_id"].(string)
 	if !ok || appID == "" {
 		return nil, fmt.Errorf("missing app_id param for %s adapter", adapter.MintegralKey)
@@ -245,7 +240,6 @@ func Builder(cfg adapter.ProcessedConfigsMap, client *http.Client) (*adapters.Bi
 	}
 
 	adpt := &MetaAdapter{
-		SellerID:  sellerID,
 		AppID:     appID,
 		AppSecret: appSecret,
 		TagID:     mCfg["tag_id"].(string),
