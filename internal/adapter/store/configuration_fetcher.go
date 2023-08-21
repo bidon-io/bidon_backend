@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/bidon-io/bidon-backend/internal/adapter"
@@ -29,10 +30,22 @@ func (f *ConfigurationFetcher) Fetch(ctx context.Context, appID int64, adapterKe
 
 	configs := adapter.RawConfigsMap{}
 	for _, dbProfile := range dbProfiles {
+		var extra map[string]any
+		err = json.Unmarshal(dbProfile.Account.Extra, &extra)
+		if err != nil {
+			return nil, fmt.Errorf("cannot unmarshal account extra: %v", err)
+		}
+
+		var data map[string]any
+		err = json.Unmarshal(dbProfile.Data, &data)
+		if err != nil {
+			return nil, fmt.Errorf("cannot unmarshal profile data: %v", err)
+		}
+
 		key := adapter.Key(dbProfile.Account.DemandSource.APIKey)
 		configs[key] = adapter.Config{
-			AccountExtra: dbProfile.Account.Extra,
-			AppData:      dbProfile.Data,
+			AccountExtra: extra,
+			AppData:      data,
 		}
 	}
 

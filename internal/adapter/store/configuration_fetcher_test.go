@@ -28,7 +28,7 @@ func TestAppDemandProfileFetcher_Fetch(t *testing.T) {
 			DemandSource: db.DemandSource{
 				APIKey: string(adapter.ApplovinKey),
 			},
-			Extra: map[string]any{"applovin": "applovin"},
+			Extra: []byte(`{"applovin": "applovin"}`),
 		}))
 	accountBidmachine := dbtest.CreateDemandSourceAccount(t, tx, dbtest.WithDemandSourceAccountOptions(
 		&db.DemandSourceAccount{
@@ -37,7 +37,7 @@ func TestAppDemandProfileFetcher_Fetch(t *testing.T) {
 			DemandSource: db.DemandSource{
 				APIKey: string(adapter.BidmachineKey),
 			},
-			Extra: map[string]any{"bidmachine": "bidmachine"},
+			Extra: []byte(`{"bidmachine": "bidmachine"}`),
 		}))
 	accountDtexchange := dbtest.CreateDemandSourceAccount(t, tx, dbtest.WithDemandSourceAccountOptions(
 		&db.DemandSourceAccount{
@@ -46,7 +46,7 @@ func TestAppDemandProfileFetcher_Fetch(t *testing.T) {
 			DemandSource: db.DemandSource{
 				APIKey: string(adapter.DTExchangeKey),
 			},
-			Extra: map[string]any{"dtexchange": "dtexchange"},
+			Extra: []byte(`{"dtexchange": "dtexchange"}`),
 		}))
 	accountUnity := dbtest.CreateDemandSourceAccount(t, tx, dbtest.WithDemandSourceAccountOptions(
 		&db.DemandSourceAccount{
@@ -55,7 +55,7 @@ func TestAppDemandProfileFetcher_Fetch(t *testing.T) {
 			DemandSource: db.DemandSource{
 				APIKey: string(adapter.UnityAdsKey),
 			},
-			Extra: map[string]any{"unity": "unity"},
+			Extra: []byte(`{"unity": "unity"}`),
 		}))
 	profiles := []db.AppDemandProfile{
 		{
