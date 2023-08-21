@@ -38,6 +38,33 @@ func Prepare() *db.DB {
 	return testDB
 }
 
+type Factory[T any] interface {
+	Build(int) T
+}
+
+func Create[T any](t *testing.T, tx *db.DB, factory Factory[T], index int) T {
+	t.Helper()
+
+	m := factory.Build(index)
+	if err := tx.Create(&m).Error; err != nil {
+		t.Fatalf("Failed to create %T: %v", m, err)
+	}
+
+	return m
+}
+
+func CreateList[T any](t *testing.T, tx *db.DB, factory Factory[T], count int) []T {
+	t.Helper()
+
+	ms := make([]T, count)
+	for i := range ms {
+		ms[i] = Create(t, tx, factory, i)
+	}
+
+	return ms
+}
+
+// CreateApp is deprecated in favor of Create with AppFactory
 func CreateApp(t *testing.T, tx *db.DB, index int, user *db.User) *db.App {
 	t.Helper()
 
@@ -66,6 +93,7 @@ func CreateApp(t *testing.T, tx *db.DB, index int, user *db.User) *db.App {
 	return app
 }
 
+// CreateAppsList is deprecated in favor of CreateList with AppFactory
 func CreateAppsList(t *testing.T, tx *db.DB, count int) []*db.App {
 	t.Helper()
 
@@ -90,6 +118,7 @@ func WithDemandSourceOptions(opt *db.DemandSource) DemandSourceOption {
 	}
 }
 
+// CreateDemandSource is deprecated in favor of Create with DemandSourceFactory
 func CreateDemandSource(t *testing.T, tx *db.DB, opts ...DemandSourceOption) *db.DemandSource {
 	t.Helper()
 
@@ -108,6 +137,7 @@ func CreateDemandSource(t *testing.T, tx *db.DB, opts ...DemandSourceOption) *db
 	return demandSource
 }
 
+// CreateDemandSourcesList is deprecated in favor of CreateList with DemandSourceFactory
 func CreateDemandSourcesList(t *testing.T, tx *db.DB, count int) []*db.DemandSource {
 	t.Helper()
 
@@ -147,12 +177,13 @@ func WithDemandSourceAccountOptions(optAccount *db.DemandSourceAccount) DemandSo
 	}
 }
 
+// CreateDemandSourceAccount is deprecated in favor of Create with DemandSourceAccountFactory
 func CreateDemandSourceAccount(t *testing.T, tx *db.DB, opts ...DemandSourceAccountOption) *db.DemandSourceAccount {
 	t.Helper()
 
 	account := &db.DemandSourceAccount{
 		Type:      "DemandSourceAccount::Admob",
-		Extra:     map[string]any{},
+		Extra:     []byte(`{}`),
 		IsBidding: new(bool),
 		IsDefault: sql.NullBool{
 			Valid: true,
@@ -180,6 +211,7 @@ func CreateDemandSourceAccount(t *testing.T, tx *db.DB, opts ...DemandSourceAcco
 	return account
 }
 
+// CreateDemandSourceAccountsList is deprecated in favor of CreateList with DemandSourceAccountFactory
 func CreateDemandSourceAccountsList(t *testing.T, tx *db.DB, count int) []*db.DemandSourceAccount {
 	t.Helper()
 
@@ -224,6 +256,7 @@ func CreateSegmentsList(t *testing.T, tx *db.DB, count int) []*db.Segment {
 	return segments
 }
 
+// CreateUser is deprecated in favor of Create with UserFactory
 func CreateUser(t *testing.T, tx *db.DB, index int) *db.User {
 	t.Helper()
 
@@ -237,6 +270,7 @@ func CreateUser(t *testing.T, tx *db.DB, index int) *db.User {
 	return user
 }
 
+// CreateUsersList is deprecated in favor of CreateList with UserFactory
 func CreateUsersList(t *testing.T, tx *db.DB, usersCount int) []*db.User {
 	t.Helper()
 
