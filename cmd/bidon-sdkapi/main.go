@@ -24,7 +24,6 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/auction"
 	auctionstore "github.com/bidon-io/bidon-backend/internal/auction/store"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters_builder"
-	bidonconfig "github.com/bidon-io/bidon-backend/internal/config"
 	"github.com/bidon-io/bidon-backend/internal/db"
 	notificationstore "github.com/bidon-io/bidon-backend/internal/notification/store"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
@@ -132,11 +131,9 @@ func main() {
 			AppFetcher: appFetcher,
 			Geocoder:   geocoder,
 		},
-		SegmentMatcher: &segmentMatcher,
-		AdaptersBuilder: &bidonconfig.AdaptersBuilder{
-			ConfigurationFetcher: &adapterstore.ConfigurationFetcher{DB: db},
-		},
-		EventLogger: eventLogger,
+		SegmentMatcher:            &segmentMatcher,
+		AdapterInitConfigsFetcher: &sdkapistore.AdapterInitConfigsFetcher{DB: db},
+		EventLogger:               eventLogger,
 	}
 	biddingHandler := sdkapi.BiddingHandler{
 		BaseHandler: &sdkapi.BaseHandler[schema.BiddingRequest, *schema.BiddingRequest]{

@@ -38,7 +38,7 @@ func Test_demandSourceAccountValidator_ValidateWithContext(t *testing.T) {
 				DemandSourceID: 1,
 				Extra: map[string]any{
 					"seller_id":        "154",
-					"endpoint":         "https://api.test.bidmachine.io",
+					"endpoint":         "x.appbaqend.com",
 					"mediation_config": []string{"foo", "bar"},
 					"foo":              "bar",
 				},
