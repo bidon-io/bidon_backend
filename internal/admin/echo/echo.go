@@ -57,6 +57,7 @@ func RegisterService(g *echo.Group, service *admin.Service) {
 		r.group.POST("", r.handler.create)
 		r.group.GET("/:id", r.handler.get)
 		r.group.PUT("/:id", r.handler.update)
+		r.group.PATCH("/:id", r.handler.update)
 		r.group.DELETE("/:id", r.handler.delete)
 	}
 }
