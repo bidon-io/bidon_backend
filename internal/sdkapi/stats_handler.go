@@ -37,6 +37,8 @@ func (h *StatsHandler) Handle(c echo.Context) error {
 		logError(c, fmt.Errorf("log stats event: %v", err))
 	})
 
+	h.sendEvents(c, req)
+
 	ctx := c.Request().Context()
 	config := h.ConfigMatcher.MatchById(ctx, req.app.ID, int64(req.raw.Stats.AuctionConfigurationID))
 	if config == nil {
@@ -47,4 +49,103 @@ func (h *StatsHandler) Handle(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]any{"success": true})
+}
+
+func (h *StatsHandler) sendEvents(c echo.Context, req *request[schema.StatsRequest, *schema.StatsRequest]) {
+	// 1 event whole auction
+	// 1 event for each round
+	// 1 event for each demand in round
+	stats := req.raw.Stats
+
+	adRequestParams := event.AdRequestParams{
+		EventType:              "stats_request",
+		AdType:                 string(req.raw.AdType),
+		AuctionID:              stats.AuctionID,
+		AuctionConfigurationID: int64(stats.AuctionConfigurationID),
+		Status:                 stats.Result.Status,
+		RoundID:                stats.Result.RoundID,
+		RoundNumber:            0,
+		ImpID:                  "",
+		DemandID:               stats.Result.WinnerID,
+		AdUnitID:               0,
+		AdUnitCode:             "",
+		Ecpm:                   stats.Result.ECPM,
+		PriceFloor:             0,
+	}
+	statsRequestEvent := event.NewRequest(&req.raw.BaseRequest, adRequestParams, req.geoData)
+	h.EventLogger.Log(statsRequestEvent, func(err error) {
+		logError(c, fmt.Errorf("log stats_request event: %v", err))
+	})
+
+	for roundNumber, round := range stats.Rounds {
+		adRequestParams = event.AdRequestParams{
+			EventType:              "round_request",
+			AdType:                 string(req.raw.AdType),
+			AuctionID:              stats.AuctionID,
+			AuctionConfigurationID: int64(stats.AuctionConfigurationID),
+			RoundID:                round.ID,
+			RoundNumber:            roundNumber,
+			ImpID:                  "",
+			DemandID:               round.WinnerID,
+			AdUnitID:               0,
+			AdUnitCode:             "",
+			Ecpm:                   round.WinnerECPM,
+			PriceFloor:             round.PriceFloor,
+		}
+		if round.WinnerID != "" {
+			adRequestParams.Status = "SUCCESS"
+		} else {
+			adRequestParams.Status = "FAIL"
+		}
+		roundRequestEvent := event.NewRequest(&req.raw.BaseRequest, adRequestParams, req.geoData)
+		h.EventLogger.Log(roundRequestEvent, func(err error) {
+			logError(c, fmt.Errorf("log round_request event: %v", err))
+		})
+
+		for _, demand := range round.Demands {
+			adRequestParams = event.AdRequestParams{
+				EventType:              "demand_request",
+				AdType:                 string(req.raw.AdType),
+				AuctionID:              stats.AuctionID,
+				AuctionConfigurationID: int64(stats.AuctionConfigurationID),
+				Status:                 demand.Status,
+				RoundID:                round.ID,
+				RoundNumber:            roundNumber,
+				ImpID:                  "",
+				DemandID:               demand.ID,
+				AdUnitID:               0,
+				AdUnitCode:             demand.AdUnitID,
+				Ecpm:                   demand.ECPM,
+				PriceFloor:             round.PriceFloor,
+				Bidding:                false,
+			}
+			demandRequestEvent := event.NewRequest(&req.raw.BaseRequest, adRequestParams, req.geoData)
+			h.EventLogger.Log(demandRequestEvent, func(err error) {
+				logError(c, fmt.Errorf("log demand_request event: %v", err))
+			})
+		}
+
+		for _, bid := range round.Bidding.Bids {
+			adRequestParams = event.AdRequestParams{
+				EventType:              "client_bid",
+				AdType:                 string(req.raw.AdType),
+				AuctionID:              stats.AuctionID,
+				AuctionConfigurationID: int64(stats.AuctionConfigurationID),
+				Status:                 bid.Status,
+				RoundID:                round.ID,
+				RoundNumber:            roundNumber,
+				ImpID:                  "",
+				DemandID:               bid.ID,
+				AdUnitID:               0,
+				AdUnitCode:             "",
+				Ecpm:                   bid.ECPM,
+				PriceFloor:             round.PriceFloor,
+				Bidding:                true,
+			}
+			demandRequestEvent := event.NewRequest(&req.raw.BaseRequest, adRequestParams, req.geoData)
+			h.EventLogger.Log(demandRequestEvent, func(err error) {
+				logError(c, fmt.Errorf("log bid event: %v", err))
+			})
+		}
+	}
 }

@@ -74,6 +74,9 @@ services:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
 
+  # Use localhost:9092 to connect from local machine
+  # Use kafka:29092 to connect from compose network, e.g. from debezium container
+  # Use host.docker.internal:9093 to connect external docker network, for example ClickHouse in separate docker-compose file
   kafka:
     image: confluentinc/cp-kafka:7.2.1
     hostname: kafka
@@ -81,12 +84,14 @@ services:
       - zookeeper
     ports:
       - '9092:9092'
+      - '9093:9093'
       - '9101:9101'
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_INTERNAL://kafka:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT,EXTERNAL_DOCKER:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://:9092,PLAINTEXT_INTERNAL://:29092,EXTERNAL_DOCKER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://kafka:29092,EXTERNAL_DOCKER://host.docker.internal:9093
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
@@ -113,7 +118,7 @@ services:
       - kafka
       - postgres
     environment:
-      - BOOTSTRAP_SERVERS=kafka:9092
+      - BOOTSTRAP_SERVERS=kafka:29092
       - GROUP_ID=1
       - CONFIG_STORAGE_TOPIC=connect_configs
       - OFFSET_STORAGE_TOPIC=connect_offsets

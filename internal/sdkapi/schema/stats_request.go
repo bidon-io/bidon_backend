@@ -1,6 +1,8 @@
 package schema
 
-import "github.com/bidon-io/bidon-backend/internal/ad"
+import (
+	"github.com/bidon-io/bidon-backend/internal/ad"
+)
 
 type StatsRequest struct {
 	BaseRequest

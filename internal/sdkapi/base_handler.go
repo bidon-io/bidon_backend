@@ -38,12 +38,14 @@ func (b *BaseHandler[T, PT]) resolveRequest(c echo.Context) (*request[T, PT], er
 
 	req := PT(&raw)
 	req.NormalizeValues()
+	req.SetSDKVersion(c.Request().Header.Get("X-Bidon-Version"))
 
 	if err := c.Validate(&raw); err != nil {
 		return nil, err
 	}
 
 	rawApp := req.GetApp()
+
 	app, err := b.AppFetcher.Fetch(c.Request().Context(), rawApp.Key, rawApp.Bundle)
 	if err != nil {
 		return nil, err
@@ -65,6 +67,7 @@ type rawRequest[T any] interface {
 	*T
 	GetApp() schema.App
 	GetGeo() schema.Geo
+	SetSDKVersion(string)
 	NormalizeValues()
 }
 

@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/bidon-io/bidon-backend/internal/auction"
+	"github.com/bidon-io/bidon-backend/internal/bidding"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
 	"github.com/bidon-io/bidon-backend/internal/notification"
 	"github.com/bidon-io/bidon-backend/internal/notification/mocks"
@@ -20,12 +21,14 @@ func TestHandler_HandleRound(t *testing.T) {
 	ctx := context.Background()
 	floor := float64(2)
 	imp := &schema.Imp{ID: "imp-1", BidFloor: &floor}
-	responses := []adapters.DemandResponse{
-		{Bid: &adapters.BidDemandResponse{ID: "bid-1", ImpID: "imp-1", Price: 1.23}},
-		{Bid: &adapters.BidDemandResponse{ID: "bid-2", ImpID: "imp-1", Price: 4.56}},
-		{Bid: &adapters.BidDemandResponse{ID: "bid-3", ImpID: "imp-1", Price: 7.89}},
-		{Bid: &adapters.BidDemandResponse{ID: "bid-4", ImpID: "imp-1", Price: 0.12}},
-		{Error: fmt.Errorf("error-1")},
+	responses := bidding.AuctionResult{
+		Bids: []adapters.DemandResponse{
+			{Bid: &adapters.BidDemandResponse{ID: "bid-1", ImpID: "imp-1", Price: 1.23}},
+			{Bid: &adapters.BidDemandResponse{ID: "bid-2", ImpID: "imp-1", Price: 4.56}},
+			{Bid: &adapters.BidDemandResponse{ID: "bid-3", ImpID: "imp-1", Price: 7.89}},
+			{Bid: &adapters.BidDemandResponse{ID: "bid-4", ImpID: "imp-1", Price: 0.12}},
+			{Error: fmt.Errorf("error-1")},
+		},
 	}
 	expectedBids := []notification.Bid{
 		{ID: "bid-2", ImpID: "imp-1", Price: 4.56},

@@ -8,6 +8,7 @@ type App struct {
 	FrameworkVersion string   `json:"framework_version"`
 	PluginVersion    string   `json:"plugin_version"`
 	SKAdN            []string `json:"skadn"`
+	SDKVersion       string   `json:"sdk_version"`
 }
 
 func (a App) Map() map[string]any {
