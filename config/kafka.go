@@ -47,13 +47,14 @@ func Kafka() (conf KafkaConfig, err error) {
 	}
 
 	conf.Topics = map[event.Topic]string{
-		event.ConfigTopic: os.Getenv("KAFKA_CONFIG_TOPIC"),
-		event.ShowTopic:   os.Getenv("KAFKA_SHOW_TOPIC"),
-		event.ClickTopic:  os.Getenv("KAFKA_CLICK_TOPIC"),
-		event.RewardTopic: os.Getenv("KAFKA_REWARD_TOPIC"),
-		event.StatsTopic:  os.Getenv("KAFKA_STATS_TOPIC"),
-		event.LossTopic:   os.Getenv("KAFKA_LOSS_TOPIC"),
-		event.WinTopic:    os.Getenv("KAFKA_WIN_TOPIC"),
+		event.ConfigTopic:   os.Getenv("KAFKA_CONFIG_TOPIC"),
+		event.ShowTopic:     os.Getenv("KAFKA_SHOW_TOPIC"),
+		event.ClickTopic:    os.Getenv("KAFKA_CLICK_TOPIC"),
+		event.RewardTopic:   os.Getenv("KAFKA_REWARD_TOPIC"),
+		event.StatsTopic:    os.Getenv("KAFKA_STATS_TOPIC"),
+		event.LossTopic:     os.Getenv("KAFKA_LOSS_TOPIC"),
+		event.WinTopic:      os.Getenv("KAFKA_WIN_TOPIC"),
+		event.AdEventsTopic: os.Getenv("KAFKA_AD_EVENTS_TOPIC"),
 	}
 
 	return

@@ -55,7 +55,7 @@ func TestBuilder_Build(t *testing.T) {
 	}
 
 	notificationHanler := &mocks.NotificationHandlerMock{
-		HandleRoundFunc: func(ctx context.Context, imp *schema.Imp, responses []adapters.DemandResponse) error {
+		HandleRoundFunc: func(ctx context.Context, imp *schema.Imp, auctionResult bidding.AuctionResult) error {
 			return nil
 		},
 	}
@@ -134,7 +134,7 @@ func TestBuilder_Build(t *testing.T) {
 				t.Errorf("expected error: %v, but got nil", tt.expectedError)
 			}
 
-			if len(result) > 0 && result[0].Status != tt.expectedResult.Status {
+			if len(result.Bids) > 0 && result.Bids[0].Status != tt.expectedResult.Status {
 				t.Errorf("expected result: %+v, but got %+v", tt.expectedResult, result)
 			}
 		})

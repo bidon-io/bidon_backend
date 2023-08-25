@@ -63,3 +63,7 @@ func (r *BaseRequest) NormalizeValues() {
 	r.User.IDG = strings.ToLower(r.User.IDG)
 	r.Session.ID = strings.ToLower(r.Session.ID)
 }
+
+func (r *BaseRequest) SetSDKVersion(version string) {
+	r.App.SDKVersion = version
+}

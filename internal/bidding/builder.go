@@ -38,7 +38,7 @@ type AdaptersBuilder interface {
 }
 
 type NotificationHandler interface {
-	HandleRound(context.Context, *schema.Imp, []adapters.DemandResponse) error
+	HandleRound(context.Context, *schema.Imp, AuctionResult) error
 }
 
 type BuildParams struct {
@@ -49,7 +49,12 @@ type BuildParams struct {
 	AdapterConfigs adapter.ProcessedConfigsMap
 }
 
-func (b *Builder) HoldAuction(ctx context.Context, params *BuildParams) ([]adapters.DemandResponse, error) {
+type AuctionResult struct {
+	Bids        []adapters.DemandResponse
+	RoundNumber int
+}
+
+func (b *Builder) HoldAuction(ctx context.Context, params *BuildParams) (AuctionResult, error) {
 	// get config
 	// build openrtb request
 	// filter adapters
@@ -57,7 +62,7 @@ func (b *Builder) HoldAuction(ctx context.Context, params *BuildParams) ([]adapt
 	// build requests and send them to adapters in parallel
 	// collect results
 	// build response
-	emptyResponse := []adapters.DemandResponse{}
+	emptyResponse := AuctionResult{}
 	br := params.BiddingRequest
 	config, err := b.ConfigMatcher.Match(ctx, params.AppID, br.AdType, params.SegmentID)
 	if err != nil {
@@ -91,9 +96,11 @@ func (b *Builder) HoldAuction(ctx context.Context, params *BuildParams) ([]adapt
 
 	// Get apaters from request, demands from bidding request and demands from round config and merge them
 	var roundConfig *auction.RoundConfig
-	for _, round := range config.Rounds {
+	roundNumber := 0
+	for idx, round := range config.Rounds {
 		if round.ID == br.Imp.RoundID {
 			roundConfig = &round
+			roundNumber = idx
 			break
 		}
 	}
@@ -107,7 +114,7 @@ func (b *Builder) HoldAuction(ctx context.Context, params *BuildParams) ([]adapt
 		return emptyResponse, errors.New("no adapters matched")
 	}
 
-	var responses []adapters.DemandResponse
+	auctionResult := AuctionResult{RoundNumber: roundNumber}
 
 	for _, adapterKey := range adapterKeys {
 		// adapter build bid request from baseBidRequest
@@ -119,7 +126,7 @@ func (b *Builder) HoldAuction(ctx context.Context, params *BuildParams) ([]adapt
 				DemandID: adapterKey,
 				Error:    err,
 			}
-			responses = append(responses, demandResponse)
+			auctionResult.Bids = append(auctionResult.Bids, demandResponse)
 			continue
 		}
 		bidRequest, err := bidder.Adapter.CreateRequest(baseBidRequest, &br)
@@ -128,7 +135,7 @@ func (b *Builder) HoldAuction(ctx context.Context, params *BuildParams) ([]adapt
 				DemandID: adapterKey,
 				Error:    err,
 			}
-			responses = append(responses, demandResponse)
+			auctionResult.Bids = append(auctionResult.Bids, demandResponse)
 			continue
 		}
 
@@ -136,16 +143,16 @@ func (b *Builder) HoldAuction(ctx context.Context, params *BuildParams) ([]adapt
 		demandResponse, err = bidder.Adapter.ParseBids(demandResponse)
 		if err != nil {
 			demandResponse.Error = err
-			responses = append(responses, *demandResponse)
+			auctionResult.Bids = append(auctionResult.Bids, *demandResponse)
 			continue
 		}
 
-		responses = append(responses, *demandResponse)
+		auctionResult.Bids = append(auctionResult.Bids, *demandResponse)
 	}
 
-	b.NotificationHandler.HandleRound(ctx, &br.Imp, responses)
+	b.NotificationHandler.HandleRound(ctx, &br.Imp, auctionResult)
 
-	return responses, nil
+	return auctionResult, nil
 }
 
 func (b *Builder) BuildDevice(device schema.Device, user schema.User, geo geocoder.GeoData) *openrtb2.Device {
