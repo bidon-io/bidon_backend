@@ -2,9 +2,11 @@ package sdkapi
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/bidon-io/bidon-backend/internal/auction"
+	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	"github.com/bidon-io/bidon-backend/internal/segment"
 	"github.com/labstack/echo/v4"
@@ -14,6 +16,7 @@ type AuctionHandler struct {
 	*BaseHandler[schema.AuctionRequest, *schema.AuctionRequest]
 	AuctionBuilder *auction.Builder
 	SegmentMatcher *segment.Matcher
+	EventLogger    *event.Logger
 }
 
 type AuctionResponse struct {
@@ -54,6 +57,26 @@ func (h *AuctionHandler) Handle(c echo.Context) error {
 
 		return err
 	}
+
+	adRequestParams := event.AdRequestParams{
+		EventType:              "auction_request",
+		AdType:                 string(req.raw.AdType),
+		AuctionID:              req.raw.AdObject.AuctionID,
+		AuctionConfigurationID: auc.ConfigID,
+		Status:                 "",
+		RoundID:                "",
+		RoundNumber:            0,
+		ImpID:                  "",
+		DemandID:               "",
+		AdUnitID:               0,
+		AdUnitCode:             "",
+		Ecpm:                   0,
+		PriceFloor:             0,
+	}
+	aucRequestEvent := event.NewRequest(&req.raw.BaseRequest, adRequestParams, req.geoData)
+	h.EventLogger.Log(aucRequestEvent, func(err error) {
+		logError(c, fmt.Errorf("log auction_request event: %v", err))
+	})
 
 	response := &AuctionResponse{
 		Auction:    auc,

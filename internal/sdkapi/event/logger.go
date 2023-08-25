@@ -26,12 +26,7 @@ func (l *Logger) Log(event Event, handleErr func(error)) {
 	for i, event := range events {
 		topic := event.Topic()
 
-		payload, err := event.Payload()
-		if err != nil {
-			handleErr(fmt.Errorf("prepare %q event payload: %v", topic, err))
-		}
-
-		message, err := json.Marshal(payload)
+		message, err := json.Marshal(event)
 		if err != nil {
 			handleErr(fmt.Errorf("marshal %q event payload: %v", topic, err))
 			goodToProduce = false
