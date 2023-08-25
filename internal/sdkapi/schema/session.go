@@ -39,3 +39,7 @@ func (s Session) Map() map[string]any {
 
 	return m
 }
+
+func (s Session) Uptime() int {
+	return s.MonotonicTS - s.StartMonotonicTS
+}

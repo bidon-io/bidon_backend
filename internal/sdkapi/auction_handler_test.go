@@ -18,6 +18,8 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/auction"
 	auctionmocks "github.com/bidon-io/bidon-backend/internal/auction/mocks"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
+	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
+	"github.com/bidon-io/bidon-backend/internal/sdkapi/event/engine"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/geocoder"
 	sdkapimocks "github.com/bidon-io/bidon-backend/internal/sdkapi/mocks"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
@@ -108,6 +110,7 @@ func testHelperAuctionHandler(t *testing.T) *sdkapi.AuctionHandler {
 		},
 		AuctionBuilder: auctionBuilder,
 		SegmentMatcher: segmentMatcher,
+		EventLogger:    &event.Logger{Engine: &engine.Log{}},
 	}
 
 	return handler

@@ -19,10 +19,11 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/auction"
 	auctionmocks "github.com/bidon-io/bidon-backend/internal/auction/mocks"
 	"github.com/bidon-io/bidon-backend/internal/bidding"
-	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters_builder"
 	biddingmocks "github.com/bidon-io/bidon-backend/internal/bidding/mocks"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
+	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
+	"github.com/bidon-io/bidon-backend/internal/sdkapi/event/engine"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/geocoder"
 	sdkapimocks "github.com/bidon-io/bidon-backend/internal/sdkapi/mocks"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
@@ -119,7 +120,7 @@ func testHelperBiddingHandler(t *testing.T) sdkapi.BiddingHandler {
 	}
 
 	notificationMock := &biddingmocks.NotificationHandlerMock{
-		HandleRoundFunc: func(context.Context, *schema.Imp, []adapters.DemandResponse) error {
+		HandleRoundFunc: func(context.Context, *schema.Imp, bidding.AuctionResult) error {
 			return nil
 		},
 	}
@@ -138,6 +139,7 @@ func testHelperBiddingHandler(t *testing.T) sdkapi.BiddingHandler {
 			NotificationHandler: notificationMock,
 		},
 		AdaptersConfigBuilder: adapterConfigBuilder,
+		EventLogger:           &event.Logger{Engine: &engine.Log{}},
 	}
 	return handler
 }
