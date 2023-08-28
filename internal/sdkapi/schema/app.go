@@ -19,6 +19,7 @@ func (a App) Map() map[string]any {
 		"version":           a.Version,
 		"framework_version": a.FrameworkVersion,
 		"plugin_version":    a.PluginVersion,
+		"sdk_version":       a.SDKVersion,
 	}
 
 	if a.SKAdN != nil {
