@@ -13,6 +13,9 @@
   <FormField v-if="gameIdVisible" label="Game Id" :error="gameIdError" required>
     <InputText v-model="gameId" type="text" placeholder="Game ID" />
   </FormField>
+  <FormField v-if="appKeyVisible" label="App key" :error="appKeyError" required>
+    <InputText v-model="appKey" type="text" placeholder="App Key" />
+  </FormField>
 </template>
 
 <script setup>
@@ -54,6 +57,9 @@ const dataSchemas = {
   "DemandSourceAccount::UnityAds": yup.object({
     gameId: yup.number().required().label("Game Id"),
   }),
+  "DemandSourceAccount::Inmobi": yup.object({
+    appKey: yup.string().required().label("App Key"),
+  }),
 };
 
 const appIdVisible = computed(() =>
@@ -72,11 +78,15 @@ const appSecretVisible = computed(
 const gameIdVisible = computed(
   () => props.accountType === "DemandSourceAccount::UnityAds"
 );
+const appKeyVisible = computed(
+  () => props.accountType === "DemandSourceAccount::Inmobi"
+);
 
 const { value: appId, errorMessage: appIdError } = useField("data.appId");
 const { value: appSecret, errorMessage: appSecretError } =
   useField("data.appSecret");
 const { value: gameId, errorMessage: gameIdError } = useField("data.gameId");
+const { value: appKey, errorMessage: appKeyError } = useField("data.appKey");
 
 const schema = computed(() => dataSchemas[props.accountType] || yup.object());
 

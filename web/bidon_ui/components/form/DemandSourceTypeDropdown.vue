@@ -48,5 +48,6 @@ const options = ref([
   { label: "MintegralAccount", value: "DemandSourceAccount::Mintegral" },
   { label: "BigoAdsAccount", value: "DemandSourceAccount::BigoAds" },
   { label: "MetaAccount", value: "DemandSourceAccount::Meta" },
+  { label: "InmobiAccount", value: "DemandSourceAccount::Inmobi" },
 ]);
 </script>
