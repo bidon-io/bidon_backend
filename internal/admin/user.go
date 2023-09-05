@@ -9,12 +9,29 @@ type UserAttrs struct {
 	Email string `json:"email"`
 }
 
-type UserRepo = ResourceRepo[User, UserAttrs]
-
 type UserService = ResourceService[User, UserAttrs]
 
 func NewUserService(store Store) *UserService {
 	return &UserService{
-		ResourceRepo: store.Users(),
+		repo: store.Users(),
+		policy: &userPolicy{
+			repo: store.Users(),
+		},
+	}
+}
+
+type UserRepo interface {
+	AllResourceQuerier[User]
+	ResourceManipulator[User, UserAttrs]
+}
+
+type userPolicy struct {
+	repo UserRepo
+}
+
+func (p *userPolicy) scope(authCtx AuthContext) resourceScope[User] {
+	return &privateResourceScope[User]{
+		repo:    p.repo,
+		authCtx: authCtx,
 	}
 }

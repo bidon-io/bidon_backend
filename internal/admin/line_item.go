@@ -28,13 +28,15 @@ type LineItemAttrs struct {
 	Extra       map[string]any   `json:"extra"`
 }
 
-type LineItemRepo = ResourceRepo[LineItem, LineItemAttrs]
-
 type LineItemService = ResourceService[LineItem, LineItemAttrs]
 
 func NewLineItemService(store Store) *LineItemService {
 	s := &LineItemService{
-		ResourceRepo: store.LineItems(),
+		repo: store.LineItems(),
+	}
+
+	s.policy = &lineItemPolicy{
+		repo: store.LineItems(),
 	}
 
 	s.getValidator = func(attrs *LineItemAttrs) v8n.ValidatableWithContext {
@@ -45,6 +47,23 @@ func NewLineItemService(store Store) *LineItemService {
 	}
 
 	return s
+}
+
+type LineItemRepo interface {
+	AllResourceQuerier[LineItem]
+	OwnedResourceQuerier[LineItem]
+	ResourceManipulator[LineItem, LineItemAttrs]
+}
+
+type lineItemPolicy struct {
+	repo LineItemRepo
+}
+
+func (p *lineItemPolicy) scope(authCtx AuthContext) resourceScope[LineItem] {
+	return &ownedResourceScope[LineItem]{
+		repo:    p.repo,
+		authCtx: authCtx,
+	}
 }
 
 type lineItemAttrsValidator struct {

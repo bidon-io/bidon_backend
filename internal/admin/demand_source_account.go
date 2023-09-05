@@ -23,13 +23,15 @@ type DemandSourceAccountAttrs struct {
 	Extra          map[string]any `json:"extra"`
 }
 
-type DemandSourceAccountRepo = ResourceRepo[DemandSourceAccount, DemandSourceAccountAttrs]
-
 type DemandSourceAccountService = ResourceService[DemandSourceAccount, DemandSourceAccountAttrs]
 
 func NewDemandSourceAccountService(store Store) *DemandSourceAccountService {
 	s := &DemandSourceAccountService{
-		ResourceRepo: store.DemandSourceAccounts(),
+		repo: store.DemandSourceAccounts(),
+	}
+
+	s.policy = &demandSourceAccountPolicy{
+		repo: store.DemandSourceAccounts(),
 	}
 
 	s.getValidator = func(attrs *DemandSourceAccountAttrs) v8n.ValidatableWithContext {
@@ -40,6 +42,24 @@ func NewDemandSourceAccountService(store Store) *DemandSourceAccountService {
 	}
 
 	return s
+}
+
+//go:generate go run -mod=mod github.com/matryer/moq@latest -out demand_source_account_mocks_test.go . DemandSourceAccountRepo
+type DemandSourceAccountRepo interface {
+	AllResourceQuerier[DemandSourceAccount]
+	OwnedOrSharedResourceQuerier[DemandSourceAccount]
+	ResourceManipulator[DemandSourceAccount, DemandSourceAccountAttrs]
+}
+
+type demandSourceAccountPolicy struct {
+	repo DemandSourceAccountRepo
+}
+
+func (p *demandSourceAccountPolicy) scope(authCtx AuthContext) resourceScope[DemandSourceAccount] {
+	return &ownedOrSharedResourceScope[DemandSourceAccount]{
+		repo:    p.repo,
+		authCtx: authCtx,
+	}
 }
 
 type demandSourceAccountValidator struct {
