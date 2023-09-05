@@ -117,6 +117,8 @@ func NewAdapterInitConfig(key adapter.Key) (AdapterInitConfig, error) {
 		return new(VungleInitConfig), nil
 	case adapter.MobileFuseKey:
 		return new(MobileFuseInitConfig), nil
+	case adapter.InmobiKey:
+		return new(InmobiInitConfig), nil
 	default:
 		return nil, fmt.Errorf("AdapterInitConfig for key %q not defined", key)
 	}
@@ -205,4 +207,13 @@ type MobileFuseInitConfig struct {
 
 func (a *MobileFuseInitConfig) Key() adapter.Key {
 	return adapter.MobileFuseKey
+}
+
+type InmobiInitConfig struct {
+	AccountID string `json:"account_id,omitempty"`
+	AppKey    string `json:"app_key,omitempty"`
+}
+
+func (a *InmobiInitConfig) Key() adapter.Key {
+	return adapter.InmobiKey
 }
