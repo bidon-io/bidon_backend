@@ -97,6 +97,8 @@ func ValidDemandSourceAccountExtra(t *testing.T, key adapter.Key) []byte {
 		return []byte(`{"account_id": "vungle", "foo": "bar"}`)
 	case adapter.MobileFuseKey:
 		return []byte(`{"foo": "bar"}`)
+	case adapter.InmobiKey:
+		return []byte(`{"account_id": "inmobi", "foo": "bar"}`)
 	default:
 		t.Fatalf("Invalid adapter key or missing valid ACCOUNT config for adapter %q", key)
 		return nil

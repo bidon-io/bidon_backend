@@ -194,6 +194,10 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Valid(t *testing.T) {
 				&sdkapi.BigoAdsInitConfig{
 					AppID: fmt.Sprintf("bigoads_app_%d", apps[1].ID),
 				},
+				&sdkapi.InmobiInitConfig{
+					AccountID: "inmobi",
+					AppKey:    fmt.Sprintf("inmobi_app_%d", apps[1].ID),
+				},
 			},
 		},
 	}
