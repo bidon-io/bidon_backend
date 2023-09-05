@@ -1,20 +1,40 @@
 package adminstore
 
 import (
+	"context"
 	"database/sql"
 
 	"github.com/bidon-io/bidon-backend/internal/admin"
 	"github.com/bidon-io/bidon-backend/internal/db"
+	"gorm.io/gorm"
 )
 
-type AuctionConfigurationRepo = resourceRepo[admin.AuctionConfiguration, admin.AuctionConfigurationAttrs, db.AuctionConfiguration]
+type AuctionConfigurationRepo struct {
+	*resourceRepo[admin.AuctionConfiguration, admin.AuctionConfigurationAttrs, db.AuctionConfiguration]
+}
 
-func NewAuctionConfigurationRepo(db *db.DB) *AuctionConfigurationRepo {
+func NewAuctionConfigurationRepo(d *db.DB) *AuctionConfigurationRepo {
 	return &AuctionConfigurationRepo{
-		db:           db,
-		mapper:       auctionConfigurationMapper{},
-		associations: []string{"App", "Segment"},
+		resourceRepo: &resourceRepo[admin.AuctionConfiguration, admin.AuctionConfigurationAttrs, db.AuctionConfiguration]{
+			db:           d,
+			mapper:       auctionConfigurationMapper{},
+			associations: []string{"App", "Segment"},
+		},
 	}
+}
+
+func (r *AuctionConfigurationRepo) ListOwnedByUser(ctx context.Context, userID int64) ([]admin.AuctionConfiguration, error) {
+	return r.list(ctx, func(db *gorm.DB) *gorm.DB {
+		s := db.Session(&gorm.Session{NewDB: true})
+		return db.InnerJoins("App", s.Select("user_id").Where(map[string]any{"user_id": userID}))
+	})
+}
+
+func (r *AuctionConfigurationRepo) FindOwnedByUser(ctx context.Context, userID int64, id int64) (*admin.AuctionConfiguration, error) {
+	return r.find(ctx, id, func(db *gorm.DB) *gorm.DB {
+		s := db.Session(&gorm.Session{NewDB: true})
+		return db.InnerJoins("App", s.Select("user_id").Where(map[string]any{"user_id": userID}))
+	})
 }
 
 type auctionConfigurationMapper struct{}
