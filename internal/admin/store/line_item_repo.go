@@ -1,22 +1,42 @@
 package adminstore
 
 import (
+	"context"
 	"database/sql"
 
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/admin"
 	"github.com/bidon-io/bidon-backend/internal/db"
 	"github.com/shopspring/decimal"
+	"gorm.io/gorm"
 )
 
-type LineItemRepo = resourceRepo[admin.LineItem, admin.LineItemAttrs, db.LineItem]
+type LineItemRepo struct {
+	*resourceRepo[admin.LineItem, admin.LineItemAttrs, db.LineItem]
+}
 
-func NewLineItemRepo(db *db.DB) *LineItemRepo {
+func NewLineItemRepo(d *db.DB) *LineItemRepo {
 	return &LineItemRepo{
-		db:           db,
-		mapper:       lineItemMapper{},
-		associations: []string{"App", "Account"},
+		resourceRepo: &resourceRepo[admin.LineItem, admin.LineItemAttrs, db.LineItem]{
+			db:           d,
+			mapper:       lineItemMapper{},
+			associations: []string{"App", "Account"},
+		},
 	}
+}
+
+func (r *LineItemRepo) ListOwnedByUser(ctx context.Context, userID int64) ([]admin.LineItem, error) {
+	return r.list(ctx, func(db *gorm.DB) *gorm.DB {
+		s := db.Session(&gorm.Session{NewDB: true})
+		return db.InnerJoins("App", s.Select("user_id").Where(map[string]any{"user_id": userID}))
+	})
+}
+
+func (r *LineItemRepo) FindOwnedByUser(ctx context.Context, userID int64, id int64) (*admin.LineItem, error) {
+	return r.find(ctx, id, func(db *gorm.DB) *gorm.DB {
+		s := db.Session(&gorm.Session{NewDB: true})
+		return db.InnerJoins("App", s.Select("user_id").Where(map[string]any{"user_id": userID}))
+	})
 }
 
 type lineItemMapper struct{}

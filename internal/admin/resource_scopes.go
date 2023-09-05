@@ -1,0 +1,117 @@
+package admin
+
+import (
+	"context"
+	"errors"
+)
+
+//go:generate go run -mod=mod github.com/matryer/moq@latest -out resource_scopes_mocks_test.go . AllResourceQuerier OwnedResourceQuerier OwnedOrSharedResourceQuerier
+
+// AllResourceQuerier defines the interface for querying all resources from persistence layer.
+// Resource repositories implement this interface.
+type AllResourceQuerier[Resource any] interface {
+	List(context.Context) ([]Resource, error)
+	Find(ctx context.Context, id int64) (*Resource, error)
+}
+
+// OwnedResourceQuerier defines the interface for querying resources owned by a user from persistence layer.
+// Resource repositories implement this interface.
+type OwnedResourceQuerier[Resource any] interface {
+	ListOwnedByUser(ctx context.Context, userID int64) ([]Resource, error)
+	FindOwnedByUser(ctx context.Context, userID, id int64) (*Resource, error)
+}
+
+// OwnedOrSharedResourceQuerier defines the interface for querying resources owned by a user or shared with a user from persistence layer.
+// Resource repositories implement this interface.
+type OwnedOrSharedResourceQuerier[Resource any] interface {
+	ListOwnedByUserOrShared(ctx context.Context, userID int64) ([]Resource, error)
+	FindOwnedByUserOrShared(ctx context.Context, userID, id int64) (*Resource, error)
+}
+
+// publicResourceScope is a resource scope that allows access to all resources.
+type publicResourceScope[Resource any] struct {
+	repo AllResourceQuerier[Resource]
+}
+
+func (s *publicResourceScope[Resource]) list(ctx context.Context) ([]Resource, error) {
+	return s.repo.List(ctx)
+}
+
+func (s *publicResourceScope[Resource]) find(ctx context.Context, id int64) (*Resource, error) {
+	return s.repo.Find(ctx, id)
+}
+
+// privateResourceScope is a resource scope that allows access to all resources only for admin users.
+type privateResourceScope[Resource any] struct {
+	repo AllResourceQuerier[Resource]
+
+	authCtx AuthContext
+}
+
+func (s *privateResourceScope[Resource]) list(ctx context.Context) ([]Resource, error) {
+	if s.authCtx.IsAdmin() {
+		return s.repo.List(ctx)
+	}
+
+	return nil, errors.New("unauthorized")
+}
+
+func (s *privateResourceScope[Resource]) find(ctx context.Context, id int64) (*Resource, error) {
+	if s.authCtx.IsAdmin() {
+		return s.repo.Find(ctx, id)
+	}
+
+	return nil, errors.New("unauthorized")
+}
+
+// ownedResourceScope is a resource scope that allows access to resources owned by a user and all resources for admin users.
+type ownedResourceScope[Resource any] struct {
+	repo interface {
+		AllResourceQuerier[Resource]
+		OwnedResourceQuerier[Resource]
+	}
+
+	authCtx AuthContext
+}
+
+func (s *ownedResourceScope[Resource]) list(ctx context.Context) ([]Resource, error) {
+	if s.authCtx.IsAdmin() {
+		return s.repo.List(ctx)
+	}
+
+	return s.repo.ListOwnedByUser(ctx, s.authCtx.UserID())
+}
+
+func (s *ownedResourceScope[Resource]) find(ctx context.Context, id int64) (*Resource, error) {
+	if s.authCtx.IsAdmin() {
+		return s.repo.Find(ctx, id)
+	}
+
+	return s.repo.FindOwnedByUser(ctx, s.authCtx.UserID(), id)
+}
+
+// ownedOrSharedResourceScope is a resource scope that allows access to resources owned by a user or shared with a user and all resources for admin users.
+type ownedOrSharedResourceScope[Resource any] struct {
+	repo interface {
+		AllResourceQuerier[Resource]
+		OwnedOrSharedResourceQuerier[Resource]
+	}
+
+	authCtx AuthContext
+}
+
+func (s *ownedOrSharedResourceScope[Resource]) list(ctx context.Context) ([]Resource, error) {
+	if s.authCtx.IsAdmin() {
+		return s.repo.List(ctx)
+	}
+
+	return s.repo.ListOwnedByUserOrShared(ctx, s.authCtx.UserID())
+}
+
+func (s *ownedOrSharedResourceScope[Resource]) find(ctx context.Context, id int64) (*Resource, error) {
+	if s.authCtx.IsAdmin() {
+		return s.repo.Find(ctx, id)
+	}
+
+	return s.repo.FindOwnedByUserOrShared(ctx, s.authCtx.UserID(), id)
+}

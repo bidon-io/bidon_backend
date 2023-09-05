@@ -54,7 +54,7 @@ func TestSegmentRepo_List(t *testing.T) {
 		}
 
 		want[i] = *segment
-		want[i].App = *adminstore.AppResource(apps[i])
+		want[i].App = adminstore.AppResource(apps[i])
 	}
 
 	got, err := repo.List(context.Background())
@@ -86,7 +86,7 @@ func TestSegmentRepo_Find(t *testing.T) {
 	if err != nil {
 		t.Fatalf("repo.Create(ctx, %+v) = %v, %q; want %T, %v", attrs, nil, err, want, nil)
 	}
-	want.App = *adminstore.AppResource(app)
+	want.App = adminstore.AppResource(app)
 
 	got, err := repo.Find(context.Background(), want.ID)
 	if err != nil {
