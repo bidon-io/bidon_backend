@@ -23,12 +23,31 @@ const (
 	AndroidPlatformID PlatformID = "android"
 )
 
-type AppRepo = ResourceRepo[App, AppAttrs]
-
 type AppService = ResourceService[App, AppAttrs]
 
 func NewAppService(store Store) *AppService {
 	return &AppService{
-		ResourceRepo: store.Apps(),
+		repo: store.Apps(),
+
+		policy: &appPolicy{
+			repo: store.Apps(),
+		},
+	}
+}
+
+type AppRepo interface {
+	AllResourceQuerier[App]
+	OwnedResourceQuerier[App]
+	ResourceManipulator[App, AppAttrs]
+}
+
+type appPolicy struct {
+	repo AppRepo
+}
+
+func (p *appPolicy) scope(authCtx AuthContext) resourceScope[App] {
+	return &ownedResourceScope[App]{
+		repo:    p.repo,
+		authCtx: authCtx,
 	}
 }

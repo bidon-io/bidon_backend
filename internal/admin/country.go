@@ -11,12 +11,28 @@ type CountryAttrs struct {
 	Alpha3Code string `json:"alpha3_code"`
 }
 
-type CountryRepo = ResourceRepo[Country, CountryAttrs]
-
 type CountryService = ResourceService[Country, CountryAttrs]
 
 func NewCountryService(store Store) *CountryService {
 	return &CountryService{
-		ResourceRepo: store.Countries(),
+		repo: store.Countries(),
+		policy: &countryPolicy{
+			repo: store.Countries(),
+		},
+	}
+}
+
+type CountryRepo interface {
+	AllResourceQuerier[Country]
+	ResourceManipulator[Country, CountryAttrs]
+}
+
+type countryPolicy struct {
+	repo CountryRepo
+}
+
+func (p *countryPolicy) scope(_ AuthContext) resourceScope[Country] {
+	return &publicResourceScope[Country]{
+		repo: p.repo,
 	}
 }

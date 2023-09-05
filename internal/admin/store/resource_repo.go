@@ -2,7 +2,9 @@ package adminstore
 
 import (
 	"context"
+
 	"github.com/bidon-io/bidon-backend/internal/db"
+	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
@@ -21,10 +23,18 @@ type resourceMapper[Resource, ResourceAttrs, DBModel any] interface {
 }
 
 func (r *resourceRepo[Resource, ResourceAttrs, DBModel]) List(ctx context.Context) ([]Resource, error) {
+	return r.list(ctx, nil)
+}
+
+func (r *resourceRepo[Resource, ResourceAttrs, DBModel]) list(ctx context.Context, addFilters func(*gorm.DB) *gorm.DB) ([]Resource, error) {
 	var dbModels []DBModel
 	db := r.db.WithContext(ctx)
 	for _, association := range r.associations {
 		db = db.Preload(association)
+	}
+
+	if addFilters != nil {
+		db = addFilters(db)
 	}
 
 	if err := db.Find(&dbModels).Error; err != nil {
@@ -40,10 +50,18 @@ func (r *resourceRepo[Resource, ResourceAttrs, DBModel]) List(ctx context.Contex
 }
 
 func (r *resourceRepo[Resource, ResourceAttrs, DBModel]) Find(ctx context.Context, id int64) (*Resource, error) {
+	return r.find(ctx, id, nil)
+}
+
+func (r *resourceRepo[Resource, ResourceAttrs, DBModel]) find(ctx context.Context, id int64, addFilters func(*gorm.DB) *gorm.DB) (*Resource, error) {
 	var dbModel DBModel
 	db := r.db.WithContext(ctx)
 	for _, association := range r.associations {
 		db = db.Preload(association)
+	}
+
+	if addFilters != nil {
+		db = addFilters(db)
 	}
 
 	if err := db.First(&dbModel, id).Error; err != nil {

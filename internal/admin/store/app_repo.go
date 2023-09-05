@@ -1,20 +1,38 @@
 package adminstore
 
 import (
+	"context"
 	"database/sql"
 
 	"github.com/bidon-io/bidon-backend/internal/admin"
 	"github.com/bidon-io/bidon-backend/internal/db"
+	"gorm.io/gorm"
 )
 
-type AppRepo = resourceRepo[admin.App, admin.AppAttrs, db.App]
+type AppRepo struct {
+	*resourceRepo[admin.App, admin.AppAttrs, db.App]
+}
 
-func NewAppRepo(db *db.DB) *AppRepo {
+func NewAppRepo(d *db.DB) *AppRepo {
 	return &AppRepo{
-		db:           db,
-		mapper:       appMapper{},
-		associations: []string{"User"},
+		resourceRepo: &resourceRepo[admin.App, admin.AppAttrs, db.App]{
+			db:           d,
+			mapper:       appMapper{},
+			associations: []string{"User"},
+		},
 	}
+}
+
+func (r *AppRepo) ListOwnedByUser(ctx context.Context, userID int64) ([]admin.App, error) {
+	return r.list(ctx, func(db *gorm.DB) *gorm.DB {
+		return db.Where("user_id = ?", userID)
+	})
+}
+
+func (r *AppRepo) FindOwnedByUser(ctx context.Context, userID int64, id int64) (*admin.App, error) {
+	return r.find(ctx, id, func(db *gorm.DB) *gorm.DB {
+		return db.Where("user_id = ?", userID)
+	})
 }
 
 type appMapper struct{}

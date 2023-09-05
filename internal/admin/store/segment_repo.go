@@ -1,18 +1,39 @@
 package adminstore
 
 import (
+	"context"
+
 	"github.com/bidon-io/bidon-backend/internal/admin"
 	"github.com/bidon-io/bidon-backend/internal/db"
+	"gorm.io/gorm"
 )
 
-type SegmentRepo = resourceRepo[admin.Segment, admin.SegmentAttrs, db.Segment]
+type SegmentRepo struct {
+	*resourceRepo[admin.Segment, admin.SegmentAttrs, db.Segment]
+}
 
-func NewSegmentRepo(db *db.DB) *SegmentRepo {
+func NewSegmentRepo(d *db.DB) *SegmentRepo {
 	return &SegmentRepo{
-		db:           db,
-		mapper:       segmentMapper{},
-		associations: []string{"App"},
+		resourceRepo: &resourceRepo[admin.Segment, admin.SegmentAttrs, db.Segment]{
+			db:           d,
+			mapper:       segmentMapper{},
+			associations: []string{"App"},
+		},
 	}
+}
+
+func (r *SegmentRepo) ListOwnedByUser(ctx context.Context, userID int64) ([]admin.Segment, error) {
+	return r.list(ctx, func(db *gorm.DB) *gorm.DB {
+		s := db.Session(&gorm.Session{NewDB: true})
+		return db.InnerJoins("App", s.Select("user_id").Where(map[string]any{"user_id": userID}))
+	})
+}
+
+func (r *SegmentRepo) FindOwnedByUser(ctx context.Context, userID int64, id int64) (*admin.Segment, error) {
+	return r.find(ctx, id, func(db *gorm.DB) *gorm.DB {
+		s := db.Session(&gorm.Session{NewDB: true})
+		return db.InnerJoins("App", s.Select("user_id").Where(map[string]any{"user_id": userID}))
+	})
 }
 
 type segmentMapper struct{}

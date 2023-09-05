@@ -23,13 +23,15 @@ type AppDemandProfileAttrs struct {
 	AccountType    string         `json:"account_type"`
 }
 
-type AppDemandProfileRepo = ResourceRepo[AppDemandProfile, AppDemandProfileAttrs]
-
 type AppDemandProfileService = ResourceService[AppDemandProfile, AppDemandProfileAttrs]
 
 func NewAppDemandProfileService(store Store) *AppDemandProfileService {
 	s := &AppDemandProfileService{
-		ResourceRepo: store.AppDemandProfiles(),
+		repo: store.AppDemandProfiles(),
+	}
+
+	s.policy = &appDemandProfilePolicy{
+		repo: store.AppDemandProfiles(),
 	}
 
 	s.getValidator = func(attrs *AppDemandProfileAttrs) v8n.ValidatableWithContext {
@@ -40,6 +42,23 @@ func NewAppDemandProfileService(store Store) *AppDemandProfileService {
 	}
 
 	return s
+}
+
+type AppDemandProfileRepo interface {
+	AllResourceQuerier[AppDemandProfile]
+	OwnedResourceQuerier[AppDemandProfile]
+	ResourceManipulator[AppDemandProfile, AppDemandProfileAttrs]
+}
+
+type appDemandProfilePolicy struct {
+	repo AppDemandProfileRepo
+}
+
+func (p *appDemandProfilePolicy) scope(authCtx AuthContext) resourceScope[AppDemandProfile] {
+	return &ownedResourceScope[AppDemandProfile]{
+		repo:    p.repo,
+		authCtx: authCtx,
+	}
 }
 
 type appDemandProfileAttrsValidator struct {

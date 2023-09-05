@@ -1,20 +1,40 @@
 package adminstore
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/bidon-io/bidon-backend/internal/admin"
 	"github.com/bidon-io/bidon-backend/internal/db"
+	"gorm.io/gorm"
 )
 
-type AppDemandProfileRepo = resourceRepo[admin.AppDemandProfile, admin.AppDemandProfileAttrs, db.AppDemandProfile]
+type AppDemandProfileRepo struct {
+	*resourceRepo[admin.AppDemandProfile, admin.AppDemandProfileAttrs, db.AppDemandProfile]
+}
 
-func NewAppDemandProfileRepo(db *db.DB) *AppDemandProfileRepo {
+func NewAppDemandProfileRepo(d *db.DB) *AppDemandProfileRepo {
 	return &AppDemandProfileRepo{
-		db:           db,
-		mapper:       appDemandProfileMapper{},
-		associations: []string{"App", "Account", "DemandSource"},
+		resourceRepo: &resourceRepo[admin.AppDemandProfile, admin.AppDemandProfileAttrs, db.AppDemandProfile]{
+			db:           d,
+			mapper:       appDemandProfileMapper{},
+			associations: []string{"App", "Account", "DemandSource"},
+		},
 	}
+}
+
+func (r *AppDemandProfileRepo) ListOwnedByUser(ctx context.Context, userID int64) ([]admin.AppDemandProfile, error) {
+	return r.list(ctx, func(db *gorm.DB) *gorm.DB {
+		s := db.Session(&gorm.Session{NewDB: true})
+		return db.InnerJoins("App", s.Select("user_id").Where(map[string]any{"user_id": userID}))
+	})
+}
+
+func (r *AppDemandProfileRepo) FindOwnedByUser(ctx context.Context, userID int64, id int64) (*admin.AppDemandProfile, error) {
+	return r.find(ctx, id, func(db *gorm.DB) *gorm.DB {
+		s := db.Session(&gorm.Session{NewDB: true})
+		return db.InnerJoins("App", s.Select("user_id").Where(map[string]any{"user_id": userID}))
+	})
 }
 
 type appDemandProfileMapper struct{}

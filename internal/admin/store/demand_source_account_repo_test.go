@@ -73,6 +73,79 @@ func TestDemandSourceAccountRepo_List(t *testing.T) {
 	}
 }
 
+func TestDemandSourceAccountRepo_ListOwnedByUserOrSharedRepo(t *testing.T) {
+	tx := testDB.Begin()
+	defer tx.Rollback()
+
+	users := dbtest.CreateList[db.User](t, tx, dbtest.UserFactory{}, 2)
+
+	dbFirstUserAccounts := dbtest.CreateList[db.DemandSourceAccount](t, tx, dbtest.DemandSourceAccountFactory{
+		User: func(i int) db.User {
+			return users[0]
+		},
+	}, 2)
+	dbSecondUserAccounts := dbtest.CreateList[db.DemandSourceAccount](t, tx, dbtest.DemandSourceAccountFactory{
+		User: func(i int) db.User {
+			return users[1]
+		},
+	}, 2)
+	// Need to remove constraint
+	//dbSharedAccounts := dbtest.CreateList[db.DemandSourceAccount](t, tx, dbtest.DemandSourceAccountFactory{
+	//	User: func(i int) db.User {
+	//		return db.User{}
+	//	},
+	//}, 2)
+
+	firstUserAccounts := make([]admin.DemandSourceAccount, 2)
+	secondUserAccounts := make([]admin.DemandSourceAccount, 2)
+	//sharedAccounts := make([]admin.DemandSourceAccount, 2)
+	for i := 0; i < 2; i++ {
+		firstUserAccounts[i] = adminstore.DemandSourceAccountResource(&dbFirstUserAccounts[i])
+		secondUserAccounts[i] = adminstore.DemandSourceAccountResource(&dbSecondUserAccounts[i])
+		//sharedAccounts[i] = adminstore.DemandSourceAccountResource(&dbSharedAccounts[i])
+	}
+	//for _, a := range dbSharedAccounts {
+	//	firstUserAccounts = append(firstUserAccounts, adminstore.DemandSourceAccountResource(&a))
+	//	secondUserAccounts = append(secondUserAccounts, adminstore.DemandSourceAccountResource(&a))
+	//}
+
+	repo := adminstore.NewDemandSourceAccountRepo(tx)
+
+	tests := []struct {
+		name   string
+		userID int64
+		want   []admin.DemandSourceAccount
+	}{
+		{
+			"first user",
+			users[0].ID,
+			firstUserAccounts,
+		},
+		{
+			"second user",
+			users[1].ID,
+			secondUserAccounts,
+		},
+		{
+			"other user",
+			999,
+			[]admin.DemandSourceAccount{},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := repo.ListOwnedByUserOrShared(context.Background(), tt.userID)
+			if err != nil {
+				t.Fatalf("ListOwnedByUserOrShared() got %v; want %+v", err, tt.want)
+			}
+
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Fatalf("ListOwnedByUserOrShared() mismatch (-want, +got):\n%s", diff)
+			}
+		})
+	}
+}
+
 func TestDemandSourceAccountRepo_Find(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
@@ -105,6 +178,101 @@ func TestDemandSourceAccountRepo_Find(t *testing.T) {
 
 	if diff := cmp.Diff(want, got); diff != "" {
 		t.Fatalf("repo.List(ctx) mismatch (-want, +got):\n%s", diff)
+	}
+}
+
+func TestDemandSourceAccountRepo_FindOwnedByUserOrSharedRepo(t *testing.T) {
+	tx := testDB.Begin()
+	defer tx.Rollback()
+
+	users := dbtest.CreateList[db.User](t, tx, dbtest.UserFactory{}, 2)
+
+	dbFirstUserAccounts := dbtest.CreateList[db.DemandSourceAccount](t, tx, dbtest.DemandSourceAccountFactory{
+		User: func(i int) db.User {
+			return users[0]
+		},
+	}, 2)
+	dbSecondUserAccounts := dbtest.CreateList[db.DemandSourceAccount](t, tx, dbtest.DemandSourceAccountFactory{
+		User: func(i int) db.User {
+			return users[1]
+		},
+	}, 2)
+	// Need to remove constraint
+	//dbSharedAccounts := dbtest.CreateList[db.DemandSourceAccount](t, tx, dbtest.DemandSourceAccountFactory{
+	//	User: func(i int) db.User {
+	//		return db.User{}
+	//	},
+	//}, 2)
+
+	firstUserAccounts := make([]admin.DemandSourceAccount, 2)
+	secondUserAccounts := make([]admin.DemandSourceAccount, 2)
+	//sharedAccounts := make([]admin.DemandSourceAccount, 2)
+	for i := 0; i < 2; i++ {
+		firstUserAccounts[i] = adminstore.DemandSourceAccountResource(&dbFirstUserAccounts[i])
+		secondUserAccounts[i] = adminstore.DemandSourceAccountResource(&dbSecondUserAccounts[i])
+		//sharedAccounts[i] = adminstore.DemandSourceAccountResource(&dbSharedAccounts[i])
+	}
+	//for _, a := range dbSharedAccounts {
+	//	firstUserAccounts = append(firstUserAccounts, adminstore.DemandSourceAccountResource(&a))
+	//	secondUserAccounts = append(secondUserAccounts, adminstore.DemandSourceAccountResource(&a))
+	//}
+
+	repo := adminstore.NewDemandSourceAccountRepo(tx)
+
+	tests := []struct {
+		name    string
+		userID  int64
+		id      int64
+		want    *admin.DemandSourceAccount
+		wantErr bool
+	}{
+		{
+			"first user, first user's account",
+			users[0].ID,
+			firstUserAccounts[0].ID,
+			&firstUserAccounts[0],
+			false,
+		},
+		{
+			"first user, second user's account",
+			users[0].ID,
+			secondUserAccounts[0].ID,
+			nil,
+			true,
+		},
+		{
+			"second user, second user's account",
+			users[1].ID,
+			secondUserAccounts[0].ID,
+			&secondUserAccounts[0],
+			false,
+		},
+		{
+			"second user, first user's account",
+			users[1].ID,
+			firstUserAccounts[0].ID,
+			nil,
+			true,
+		},
+		{
+			"non-existent user",
+			999,
+			999,
+			nil,
+			true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := repo.FindOwnedByUserOrShared(context.Background(), tt.userID, tt.id)
+			if tt.wantErr {
+				if err == nil {
+					t.Errorf("FindOwnedByUserOrShared() = %+v; want error", got)
+				}
+			} else if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Errorf("FindOwnedByUserOrShared() mismatch (-want, +got):\n%s", diff)
+			}
+		})
 	}
 }
 

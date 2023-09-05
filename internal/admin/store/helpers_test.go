@@ -5,10 +5,14 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/db"
 )
 
-func AppResource(dbModel *db.App) *admin.App {
+func AppResource(dbModel *db.App) admin.App {
 	resource := appMapper{}.resource(dbModel)
 
-	return &resource
+	return resource
+}
+
+func AppDemandProfileResource(dbModel *db.AppDemandProfile) admin.AppDemandProfile {
+	return appDemandProfileMapper{}.resource(dbModel)
 }
 
 func SegmentResource(dbModel *db.Segment) *admin.Segment {
@@ -23,10 +27,10 @@ func UserResource(dbModel *db.User) *admin.User {
 	return &resource
 }
 
-func DemandSourceAccountResource(dbModel *db.DemandSourceAccount) *admin.DemandSourceAccount {
+func DemandSourceAccountResource(dbModel *db.DemandSourceAccount) admin.DemandSourceAccount {
 	resource := demandSourceAccountMapper{}.resource(dbModel)
 
-	return &resource
+	return resource
 }
 
 func DemandSourceResource(dbModel *db.DemandSource) *admin.DemandSource {

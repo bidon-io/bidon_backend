@@ -8,52 +8,52 @@ import (
 	"sync"
 )
 
-// Ensure, that ResourceRepoMock does implement ResourceRepo.
+// Ensure, that DemandSourceRepoMock does implement DemandSourceRepo.
 // If this is not the case, regenerate this file with moq.
-var _ ResourceRepo[any, any] = &ResourceRepoMock[any, any]{}
+var _ DemandSourceRepo = &DemandSourceRepoMock{}
 
-// ResourceRepoMock is a mock implementation of ResourceRepo.
+// DemandSourceRepoMock is a mock implementation of DemandSourceRepo.
 //
-//	func TestSomethingThatUsesResourceRepo(t *testing.T) {
+//	func TestSomethingThatUsesDemandSourceRepo(t *testing.T) {
 //
-//		// make and configure a mocked ResourceRepo
-//		mockedResourceRepo := &ResourceRepoMock{
-//			CreateFunc: func(ctx context.Context, attrs *ResourceAttrs) (*Resource, error) {
+//		// make and configure a mocked DemandSourceRepo
+//		mockedDemandSourceRepo := &DemandSourceRepoMock{
+//			CreateFunc: func(ctx context.Context, attrs *DemandSourceAttrs) (*DemandSource, error) {
 //				panic("mock out the Create method")
 //			},
 //			DeleteFunc: func(ctx context.Context, id int64) error {
 //				panic("mock out the Delete method")
 //			},
-//			FindFunc: func(ctx context.Context, id int64) (*Resource, error) {
+//			FindFunc: func(ctx context.Context, id int64) (*DemandSource, error) {
 //				panic("mock out the Find method")
 //			},
-//			ListFunc: func(ctx context.Context) ([]Resource, error) {
+//			ListFunc: func(contextMoqParam context.Context) ([]DemandSource, error) {
 //				panic("mock out the List method")
 //			},
-//			UpdateFunc: func(ctx context.Context, id int64, attrs *ResourceAttrs) (*Resource, error) {
+//			UpdateFunc: func(ctx context.Context, id int64, attrs *DemandSourceAttrs) (*DemandSource, error) {
 //				panic("mock out the Update method")
 //			},
 //		}
 //
-//		// use mockedResourceRepo in code that requires ResourceRepo
+//		// use mockedDemandSourceRepo in code that requires DemandSourceRepo
 //		// and then make assertions.
 //
 //	}
-type ResourceRepoMock[Resource any, ResourceAttrs any] struct {
+type DemandSourceRepoMock struct {
 	// CreateFunc mocks the Create method.
-	CreateFunc func(ctx context.Context, attrs *ResourceAttrs) (*Resource, error)
+	CreateFunc func(ctx context.Context, attrs *DemandSourceAttrs) (*DemandSource, error)
 
 	// DeleteFunc mocks the Delete method.
 	DeleteFunc func(ctx context.Context, id int64) error
 
 	// FindFunc mocks the Find method.
-	FindFunc func(ctx context.Context, id int64) (*Resource, error)
+	FindFunc func(ctx context.Context, id int64) (*DemandSource, error)
 
 	// ListFunc mocks the List method.
-	ListFunc func(ctx context.Context) ([]Resource, error)
+	ListFunc func(contextMoqParam context.Context) ([]DemandSource, error)
 
 	// UpdateFunc mocks the Update method.
-	UpdateFunc func(ctx context.Context, id int64, attrs *ResourceAttrs) (*Resource, error)
+	UpdateFunc func(ctx context.Context, id int64, attrs *DemandSourceAttrs) (*DemandSource, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -62,7 +62,7 @@ type ResourceRepoMock[Resource any, ResourceAttrs any] struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// Attrs is the attrs argument value.
-			Attrs *ResourceAttrs
+			Attrs *DemandSourceAttrs
 		}
 		// Delete holds details about calls to the Delete method.
 		Delete []struct {
@@ -80,8 +80,8 @@ type ResourceRepoMock[Resource any, ResourceAttrs any] struct {
 		}
 		// List holds details about calls to the List method.
 		List []struct {
-			// Ctx is the ctx argument value.
-			Ctx context.Context
+			// ContextMoqParam is the contextMoqParam argument value.
+			ContextMoqParam context.Context
 		}
 		// Update holds details about calls to the Update method.
 		Update []struct {
@@ -90,7 +90,7 @@ type ResourceRepoMock[Resource any, ResourceAttrs any] struct {
 			// ID is the id argument value.
 			ID int64
 			// Attrs is the attrs argument value.
-			Attrs *ResourceAttrs
+			Attrs *DemandSourceAttrs
 		}
 	}
 	lockCreate sync.RWMutex
@@ -101,13 +101,13 @@ type ResourceRepoMock[Resource any, ResourceAttrs any] struct {
 }
 
 // Create calls CreateFunc.
-func (mock *ResourceRepoMock[Resource, ResourceAttrs]) Create(ctx context.Context, attrs *ResourceAttrs) (*Resource, error) {
+func (mock *DemandSourceRepoMock) Create(ctx context.Context, attrs *DemandSourceAttrs) (*DemandSource, error) {
 	if mock.CreateFunc == nil {
-		panic("ResourceRepoMock.CreateFunc: method is nil but ResourceRepo.Create was just called")
+		panic("DemandSourceRepoMock.CreateFunc: method is nil but DemandSourceRepo.Create was just called")
 	}
 	callInfo := struct {
 		Ctx   context.Context
-		Attrs *ResourceAttrs
+		Attrs *DemandSourceAttrs
 	}{
 		Ctx:   ctx,
 		Attrs: attrs,
@@ -121,14 +121,14 @@ func (mock *ResourceRepoMock[Resource, ResourceAttrs]) Create(ctx context.Contex
 // CreateCalls gets all the calls that were made to Create.
 // Check the length with:
 //
-//	len(mockedResourceRepo.CreateCalls())
-func (mock *ResourceRepoMock[Resource, ResourceAttrs]) CreateCalls() []struct {
+//	len(mockedDemandSourceRepo.CreateCalls())
+func (mock *DemandSourceRepoMock) CreateCalls() []struct {
 	Ctx   context.Context
-	Attrs *ResourceAttrs
+	Attrs *DemandSourceAttrs
 } {
 	var calls []struct {
 		Ctx   context.Context
-		Attrs *ResourceAttrs
+		Attrs *DemandSourceAttrs
 	}
 	mock.lockCreate.RLock()
 	calls = mock.calls.Create
@@ -137,9 +137,9 @@ func (mock *ResourceRepoMock[Resource, ResourceAttrs]) CreateCalls() []struct {
 }
 
 // Delete calls DeleteFunc.
-func (mock *ResourceRepoMock[Resource, ResourceAttrs]) Delete(ctx context.Context, id int64) error {
+func (mock *DemandSourceRepoMock) Delete(ctx context.Context, id int64) error {
 	if mock.DeleteFunc == nil {
-		panic("ResourceRepoMock.DeleteFunc: method is nil but ResourceRepo.Delete was just called")
+		panic("DemandSourceRepoMock.DeleteFunc: method is nil but DemandSourceRepo.Delete was just called")
 	}
 	callInfo := struct {
 		Ctx context.Context
@@ -157,8 +157,8 @@ func (mock *ResourceRepoMock[Resource, ResourceAttrs]) Delete(ctx context.Contex
 // DeleteCalls gets all the calls that were made to Delete.
 // Check the length with:
 //
-//	len(mockedResourceRepo.DeleteCalls())
-func (mock *ResourceRepoMock[Resource, ResourceAttrs]) DeleteCalls() []struct {
+//	len(mockedDemandSourceRepo.DeleteCalls())
+func (mock *DemandSourceRepoMock) DeleteCalls() []struct {
 	Ctx context.Context
 	ID  int64
 } {
@@ -173,9 +173,9 @@ func (mock *ResourceRepoMock[Resource, ResourceAttrs]) DeleteCalls() []struct {
 }
 
 // Find calls FindFunc.
-func (mock *ResourceRepoMock[Resource, ResourceAttrs]) Find(ctx context.Context, id int64) (*Resource, error) {
+func (mock *DemandSourceRepoMock) Find(ctx context.Context, id int64) (*DemandSource, error) {
 	if mock.FindFunc == nil {
-		panic("ResourceRepoMock.FindFunc: method is nil but ResourceRepo.Find was just called")
+		panic("DemandSourceRepoMock.FindFunc: method is nil but DemandSourceRepo.Find was just called")
 	}
 	callInfo := struct {
 		Ctx context.Context
@@ -193,8 +193,8 @@ func (mock *ResourceRepoMock[Resource, ResourceAttrs]) Find(ctx context.Context,
 // FindCalls gets all the calls that were made to Find.
 // Check the length with:
 //
-//	len(mockedResourceRepo.FindCalls())
-func (mock *ResourceRepoMock[Resource, ResourceAttrs]) FindCalls() []struct {
+//	len(mockedDemandSourceRepo.FindCalls())
+func (mock *DemandSourceRepoMock) FindCalls() []struct {
 	Ctx context.Context
 	ID  int64
 } {
@@ -209,30 +209,30 @@ func (mock *ResourceRepoMock[Resource, ResourceAttrs]) FindCalls() []struct {
 }
 
 // List calls ListFunc.
-func (mock *ResourceRepoMock[Resource, ResourceAttrs]) List(ctx context.Context) ([]Resource, error) {
+func (mock *DemandSourceRepoMock) List(contextMoqParam context.Context) ([]DemandSource, error) {
 	if mock.ListFunc == nil {
-		panic("ResourceRepoMock.ListFunc: method is nil but ResourceRepo.List was just called")
+		panic("DemandSourceRepoMock.ListFunc: method is nil but DemandSourceRepo.List was just called")
 	}
 	callInfo := struct {
-		Ctx context.Context
+		ContextMoqParam context.Context
 	}{
-		Ctx: ctx,
+		ContextMoqParam: contextMoqParam,
 	}
 	mock.lockList.Lock()
 	mock.calls.List = append(mock.calls.List, callInfo)
 	mock.lockList.Unlock()
-	return mock.ListFunc(ctx)
+	return mock.ListFunc(contextMoqParam)
 }
 
 // ListCalls gets all the calls that were made to List.
 // Check the length with:
 //
-//	len(mockedResourceRepo.ListCalls())
-func (mock *ResourceRepoMock[Resource, ResourceAttrs]) ListCalls() []struct {
-	Ctx context.Context
+//	len(mockedDemandSourceRepo.ListCalls())
+func (mock *DemandSourceRepoMock) ListCalls() []struct {
+	ContextMoqParam context.Context
 } {
 	var calls []struct {
-		Ctx context.Context
+		ContextMoqParam context.Context
 	}
 	mock.lockList.RLock()
 	calls = mock.calls.List
@@ -241,14 +241,14 @@ func (mock *ResourceRepoMock[Resource, ResourceAttrs]) ListCalls() []struct {
 }
 
 // Update calls UpdateFunc.
-func (mock *ResourceRepoMock[Resource, ResourceAttrs]) Update(ctx context.Context, id int64, attrs *ResourceAttrs) (*Resource, error) {
+func (mock *DemandSourceRepoMock) Update(ctx context.Context, id int64, attrs *DemandSourceAttrs) (*DemandSource, error) {
 	if mock.UpdateFunc == nil {
-		panic("ResourceRepoMock.UpdateFunc: method is nil but ResourceRepo.Update was just called")
+		panic("DemandSourceRepoMock.UpdateFunc: method is nil but DemandSourceRepo.Update was just called")
 	}
 	callInfo := struct {
 		Ctx   context.Context
 		ID    int64
-		Attrs *ResourceAttrs
+		Attrs *DemandSourceAttrs
 	}{
 		Ctx:   ctx,
 		ID:    id,
@@ -263,16 +263,16 @@ func (mock *ResourceRepoMock[Resource, ResourceAttrs]) Update(ctx context.Contex
 // UpdateCalls gets all the calls that were made to Update.
 // Check the length with:
 //
-//	len(mockedResourceRepo.UpdateCalls())
-func (mock *ResourceRepoMock[Resource, ResourceAttrs]) UpdateCalls() []struct {
+//	len(mockedDemandSourceRepo.UpdateCalls())
+func (mock *DemandSourceRepoMock) UpdateCalls() []struct {
 	Ctx   context.Context
 	ID    int64
-	Attrs *ResourceAttrs
+	Attrs *DemandSourceAttrs
 } {
 	var calls []struct {
 		Ctx   context.Context
 		ID    int64
-		Attrs *ResourceAttrs
+		Attrs *DemandSourceAttrs
 	}
 	mock.lockUpdate.RLock()
 	calls = mock.calls.Update

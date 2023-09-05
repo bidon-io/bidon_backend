@@ -7,8 +7,6 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 )
 
-type DemandSourceAccountRepoMock = ResourceRepoMock[DemandSourceAccount, DemandSourceAccountAttrs]
-
 func Test_demandSourceAccountValidator_ValidateWithContext(t *testing.T) {
 	tests := []struct {
 		name         string

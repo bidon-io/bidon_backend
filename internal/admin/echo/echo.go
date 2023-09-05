@@ -90,15 +90,26 @@ type resourceServiceHandler[Resource, ResourceAttrs any] struct {
 }
 
 type resourceService[Resource, ResourceAttrs any] interface {
-	List(ctx context.Context) ([]Resource, error)
-	Find(ctx context.Context, id int64) (*Resource, error)
+	List(ctx context.Context, authCtx admin.AuthContext) ([]Resource, error)
+	Find(ctx context.Context, authCtx admin.AuthContext, id int64) (*Resource, error)
 	Create(ctx context.Context, attrs *ResourceAttrs) (*Resource, error)
 	Update(ctx context.Context, id int64, attrs *ResourceAttrs) (*Resource, error)
 	Delete(ctx context.Context, id int64) error
 }
 
+// stubAuthContext is a stub implementation of admin.AuthContext. Build auth context from JWT token.
+type stubAuthContext struct{}
+
+func (s stubAuthContext) UserID() int64 {
+	return 0
+}
+
+func (s stubAuthContext) IsAdmin() bool {
+	return true
+}
+
 func (s *resourceServiceHandler[Resource, ResourceAttrs]) list(c echo.Context) error {
-	resources, err := s.service.List(c.Request().Context())
+	resources, err := s.service.List(c.Request().Context(), stubAuthContext{})
 	if err != nil {
 		return err
 	}
@@ -131,7 +142,7 @@ func (s *resourceServiceHandler[Resource, ResourceAttrs]) get(c echo.Context) er
 		return fmt.Errorf("invalid id: %v", err)
 	}
 
-	resource, err := s.service.Find(c.Request().Context(), int64(id))
+	resource, err := s.service.Find(c.Request().Context(), stubAuthContext{}, int64(id))
 	if err != nil {
 		return err
 	}

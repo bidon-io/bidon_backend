@@ -23,12 +23,30 @@ type AuctionConfigurationAttrs struct {
 	ExternalWinNotifications *bool                 `json:"external_win_notifications"`
 }
 
-type AuctionConfigurationRepo = ResourceRepo[AuctionConfiguration, AuctionConfigurationAttrs]
-
 type AuctionConfigurationService = ResourceService[AuctionConfiguration, AuctionConfigurationAttrs]
 
 func NewAuctionConfigurationService(store Store) *AuctionConfigurationService {
 	return &AuctionConfigurationService{
-		ResourceRepo: store.AuctionConfigurations(),
+		repo: store.AuctionConfigurations(),
+		policy: &auctionConfigurationPolicy{
+			repo: store.AuctionConfigurations(),
+		},
+	}
+}
+
+type AuctionConfigurationRepo interface {
+	AllResourceQuerier[AuctionConfiguration]
+	OwnedResourceQuerier[AuctionConfiguration]
+	ResourceManipulator[AuctionConfiguration, AuctionConfigurationAttrs]
+}
+
+type auctionConfigurationPolicy struct {
+	repo AuctionConfigurationRepo
+}
+
+func (p *auctionConfigurationPolicy) scope(authCtx AuthContext) resourceScope[AuctionConfiguration] {
+	return &ownedResourceScope[AuctionConfiguration]{
+		repo:    p.repo,
+		authCtx: authCtx,
 	}
 }

@@ -1,20 +1,38 @@
 package adminstore
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/bidon-io/bidon-backend/internal/admin"
 	"github.com/bidon-io/bidon-backend/internal/db"
+	"gorm.io/gorm"
 )
 
-type DemandSourceAccountRepo = resourceRepo[admin.DemandSourceAccount, admin.DemandSourceAccountAttrs, db.DemandSourceAccount]
+type DemandSourceAccountRepo struct {
+	*resourceRepo[admin.DemandSourceAccount, admin.DemandSourceAccountAttrs, db.DemandSourceAccount]
+}
 
-func NewDemandSourceAccountRepo(db *db.DB) *DemandSourceAccountRepo {
+func NewDemandSourceAccountRepo(d *db.DB) *DemandSourceAccountRepo {
 	return &DemandSourceAccountRepo{
-		db:           db,
-		mapper:       demandSourceAccountMapper{},
-		associations: []string{"User", "DemandSource"},
+		resourceRepo: &resourceRepo[admin.DemandSourceAccount, admin.DemandSourceAccountAttrs, db.DemandSourceAccount]{
+			db:           d,
+			mapper:       demandSourceAccountMapper{},
+			associations: []string{"User", "DemandSource"},
+		},
 	}
+}
+
+func (r DemandSourceAccountRepo) ListOwnedByUserOrShared(ctx context.Context, userID int64) ([]admin.DemandSourceAccount, error) {
+	return r.list(ctx, func(db *gorm.DB) *gorm.DB {
+		return db.Where("user_id IN ?", []int64{userID, 0})
+	})
+}
+
+func (r DemandSourceAccountRepo) FindOwnedByUserOrShared(ctx context.Context, userID int64, id int64) (*admin.DemandSourceAccount, error) {
+	return r.find(ctx, id, func(db *gorm.DB) *gorm.DB {
+		return db.Where("user_id IN ?", []int64{userID, 0})
+	})
 }
 
 type demandSourceAccountMapper struct{}
