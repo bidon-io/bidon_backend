@@ -155,7 +155,9 @@ type Segment struct {
 
 type User struct {
 	Model
-	Email string `gorm:"column:email;type:varchar;not null"`
+	Email        string `gorm:"column:email;type:varchar;not null"`
+	IsAdmin      *bool  `gorm:"column:is_admin;type:boolean;default:false;not null"`
+	PasswordHash string `gorm:"column:password_hash;type:varchar;not null"`
 }
 
 type AdType int32
