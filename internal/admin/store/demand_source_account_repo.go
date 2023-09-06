@@ -56,10 +56,7 @@ func (m demandSourceAccountMapper) resource(a *db.DemandSourceAccount) admin.Dem
 	return admin.DemandSourceAccount{
 		ID:                       a.ID,
 		DemandSourceAccountAttrs: m.resourceAttrs(a),
-		User: admin.User{
-			ID:        a.User.ID,
-			UserAttrs: userMapper{}.resourceAttrs(&a.User),
-		},
+		User:                     userMapper{}.resource(&a.User),
 		DemandSource: admin.DemandSource{
 			ID:                a.DemandSource.ID,
 			DemandSourceAttrs: demandSourceMapper{}.resourceAttrs(&a.DemandSource),
