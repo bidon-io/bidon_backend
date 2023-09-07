@@ -11,6 +11,7 @@ import (
 	"github.com/bidon-io/bidon-backend/cmd/bidon-admin/web"
 	"github.com/bidon-io/bidon-backend/config"
 	"github.com/bidon-io/bidon-backend/internal/admin"
+	"github.com/bidon-io/bidon-backend/internal/admin/auth"
 	adminecho "github.com/bidon-io/bidon-backend/internal/admin/echo"
 	adminstore "github.com/bidon-io/bidon-backend/internal/admin/store"
 	"github.com/bidon-io/bidon-backend/internal/db"
@@ -51,9 +52,14 @@ func main() {
 
 	configureCORS(e)
 
+	apiGroup := e.Group("/api")
+	jwtSecretKey := []byte(os.Getenv("APP_SECRET"))
+	auth.SetUpRoutes(e, db, jwtSecretKey)
+	auth.ConfigureJWT(apiGroup, jwtSecretKey)
+
 	store := adminstore.New(db)
 	adminService := admin.NewService(store)
-	adminecho.RegisterService(e.Group("/api"), adminService)
+	adminecho.RegisterService(apiGroup, adminService)
 
 	redocFileSystem, _ := fs.Sub(web.FS, "redoc")
 	redocWebServer := http.FileServer(http.FS(redocFileSystem))
