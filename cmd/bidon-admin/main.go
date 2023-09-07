@@ -55,7 +55,7 @@ func main() {
 	apiGroup := e.Group("/api")
 	jwtSecretKey := []byte(os.Getenv("APP_SECRET"))
 	auth.SetUpRoutes(e, db, jwtSecretKey)
-	auth.ConfigureJWT(apiGroup, jwtSecretKey)
+	//auth.ConfigureJWT(apiGroup, jwtSecretKey)
 
 	store := adminstore.New(db)
 	adminService := admin.NewService(store)
