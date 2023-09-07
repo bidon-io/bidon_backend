@@ -11,7 +11,20 @@
             </span>
           </div>
         </div>
+        <Button
+          v-if="user"
+          label="Log out"
+          icon="pi pi-sign-out"
+          text
+          @click="logout"
+        />
       </div>
     </div>
   </header>
 </template>
+
+<script setup>
+import { useAuthStore } from "@/stores/AuthStore.js";
+
+const { user, logout } = useAuthStore();
+</script>
