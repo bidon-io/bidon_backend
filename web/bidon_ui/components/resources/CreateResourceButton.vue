@@ -1,5 +1,5 @@
 <template>
-  <NavigationContainer>
+  <NavigationContainer v-if="permissions.create">
     <NuxtLink :to="`${resourcesPath}/new`">
       <Button :label="label" icon="pi pi-plus" class="p-button-success" />
     </NuxtLink>
@@ -7,8 +7,14 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{
+import { useAuthStore } from "@/stores/AuthStore";
+
+const props = defineProps<{
   resourcesPath: string;
   label: string;
 }>();
+const { getResourcePermissionsByPath } = useAuthStore();
+const permissions: ResourcePermissions = await getResourcePermissionsByPath(
+  props.resourcesPath
+);
 </script>
