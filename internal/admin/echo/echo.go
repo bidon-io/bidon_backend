@@ -7,13 +7,73 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/bidon-io/bidon-backend/internal/admin"
+	"github.com/bidon-io/bidon-backend/internal/admin/auth"
 	v8n "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
-func RegisterService(g *echo.Group, service *admin.Service) {
+func UseAuthorization(g *echo.Group, authService *auth.Service) {
+	g.Use(middleware.BasicAuthWithConfig(middleware.BasicAuthConfig{
+		// Do not check basic auth if JWT token is present.
+		Skipper: authIsBearer,
+		Validator: func(username, password string, c echo.Context) (bool, error) {
+			if authService.IsSuperUser(username, password) {
+				c.Set("authCtx", stubAuthContext{})
+
+				return true, nil
+			}
+
+			return false, nil
+		},
+	}))
+	g.Use(echojwt.WithConfig(echojwt.Config{
+		Skipper: func(c echo.Context) bool {
+			// Skip if basic auth already set auth context.
+			authCtx := c.Get("authCtx")
+			return authCtx != nil
+		},
+		SuccessHandler: func(c echo.Context) {
+			token := c.Get("user").(*jwt.Token)
+			claims := token.Claims.(*auth.JWTClaims)
+
+			c.Set("authCtx", claims)
+		},
+		NewClaimsFunc: func(c echo.Context) jwt.Claims {
+			return new(auth.JWTClaims)
+		},
+		KeyFunc: func(_ *jwt.Token) (any, error) {
+			return authService.GetSecretKey(), nil
+		},
+	}))
+}
+
+func RegisterAuthService(g *echo.Group, service *auth.Service) {
+	g.POST("/login", func(c echo.Context) error {
+		var r auth.LogInRequest
+		if err := c.Bind(&r); err != nil {
+			return err
+		}
+
+		response, err := service.LogIn(c.Request().Context(), r)
+		if err != nil {
+			if errors.Is(err, auth.ErrInvalidCredentials) {
+				return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
+			}
+
+			return err
+		}
+
+		return c.JSON(http.StatusOK, response)
+	})
+}
+
+func RegisterAdminService(g *echo.Group, service *admin.Service) {
 	resourceRoutes := []resourceRoute{
 		{
 			group:   g.Group("/apps"),
@@ -109,7 +169,12 @@ func (s stubAuthContext) IsAdmin() bool {
 }
 
 func (s *resourceServiceHandler[Resource, ResourceAttrs]) list(c echo.Context) error {
-	resources, err := s.service.List(c.Request().Context(), stubAuthContext{})
+	authCtx, err := getAuthContext(c)
+	if err != nil {
+		return err
+	}
+
+	resources, err := s.service.List(c.Request().Context(), authCtx)
 	if err != nil {
 		return err
 	}
@@ -137,12 +202,17 @@ func (s *resourceServiceHandler[Resource, ResourceAttrs]) create(c echo.Context)
 }
 
 func (s *resourceServiceHandler[Resource, ResourceAttrs]) get(c echo.Context) error {
+	authCtx, err := getAuthContext(c)
+	if err != nil {
+		return err
+	}
+
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		return fmt.Errorf("invalid id: %v", err)
 	}
 
-	resource, err := s.service.Find(c.Request().Context(), stubAuthContext{}, int64(id))
+	resource, err := s.service.Find(c.Request().Context(), authCtx, int64(id))
 	if err != nil {
 		return err
 	}
@@ -185,4 +255,24 @@ func (s *resourceServiceHandler[Resource, ResourceAttrs]) delete(c echo.Context)
 	}
 
 	return c.NoContent(http.StatusNoContent)
+}
+
+func getAuthContext(c echo.Context) (admin.AuthContext, error) {
+	authCtx, ok := c.Get("authCtx").(admin.AuthContext)
+	if !ok {
+		return nil, fmt.Errorf("failed to get auth context from request")
+	}
+
+	return authCtx, nil
+}
+
+func authIsBearer(c echo.Context) bool {
+	header := c.Request().Header.Get(echo.HeaderAuthorization)
+
+	const prefix = "Bearer "
+	if len(header) < len(prefix) || !strings.EqualFold(header[:len(prefix)], prefix) {
+		return false
+	}
+
+	return true
 }
