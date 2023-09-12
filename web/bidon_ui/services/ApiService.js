@@ -1,7 +1,7 @@
 import axios from "axios";
 import { camelizeKeys, decamelizeKeys } from "humps";
 import { API_URL } from "@/constants/index.js";
-// import { useAuthStore } from "@/stores/AuthStore.js";
+import { useAuthStore } from "@/stores/AuthStore.js";
 
 const api = axios.create({
   baseURL: `${API_URL}api`,
@@ -22,8 +22,8 @@ api.interceptors.response.use(
   },
   (error) => {
     if (error.response.status === 401) {
-      // useAuthStore().logout();
-      // window.location.reload();
+      useAuthStore().logout();
+      window.location.reload();
     }
   }
 );
@@ -32,10 +32,10 @@ api.interceptors.response.use(
 api.interceptors.request.use((config) => {
   const newConfig = { ...config };
 
-  // const { accessToken } = useAuthStore();
-  // if (accessToken) {
-  //   newConfig.headers["Authorization"] = `Bearer ${accessToken}`;
-  // }
+  const { accessToken } = useAuthStore();
+  if (accessToken) {
+    newConfig.headers["Authorization"] = `Bearer ${accessToken}`;
+  }
 
   if (newConfig.headers["Content-Type"] === "multipart/form-data")
     return newConfig;

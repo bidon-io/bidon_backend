@@ -1,16 +1,17 @@
 package auth
 
-type AuthRequest struct {
+type LogInRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
-type AuthResponse struct {
-	User        PublicUser `json:"user"`
-	AccessToken string     `json:"access_token"`
+type LogInResponse struct {
+	User        User   `json:"user"`
+	AccessToken string `json:"access_token"`
 }
 
-type PublicUser struct {
+type User struct {
+	ID      int64  `json:"-"`
 	Email   string `json:"email"`
-	IsAdmin *bool  `json:"is_admin"`
+	IsAdmin bool   `json:"is_admin"`
 }
