@@ -120,6 +120,8 @@ func RegisterAdminService(g *echo.Group, service *admin.Service) {
 		r.group.PATCH("/:id", r.handler.update)
 		r.group.DELETE("/:id", r.handler.delete)
 	}
+
+	g.GET("/permissions", getPermissionsHandler)
 }
 
 type resourceRoute struct {
@@ -144,6 +146,13 @@ type demandSourceAccountHandler = resourceServiceHandler[admin.DemandSourceAccou
 type lineItemHandler = resourceServiceHandler[admin.LineItem, admin.LineItemAttrs]
 type segmentHandler = resourceServiceHandler[admin.Segment, admin.SegmentAttrs]
 type userHandler = resourceServiceHandler[admin.User, admin.UserAttrs]
+
+func getPermissionsHandler(c echo.Context) error {
+	authContext := stubAuthContext{}
+	permissions := admin.GetPermissions(authContext)
+
+	return c.JSON(http.StatusOK, permissions)
+}
 
 type resourceServiceHandler[Resource, ResourceAttrs any] struct {
 	service resourceService[Resource, ResourceAttrs]
