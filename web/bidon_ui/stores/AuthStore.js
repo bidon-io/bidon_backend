@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import axios from "axios";
-import { camelizeKeys } from "humps";
+import authorizedApi from "@/services/ApiService.js";
 import { useToast } from "primevue/usetoast";
 import { API_URL } from "@/constants/index.js";
 
@@ -45,8 +45,8 @@ export const useAuthStore = defineStore("authStore", () => {
   async function getResourcesPermissions() {
     if (permissions.value.length > 0) return permissions.value;
 
-    const response = await api.get("/api/permissions");
-    permissions.value = camelizeKeys(response.data);
+    const response = await authorizedApi.get("/permissions");
+    permissions.value = response.data;
 
     return permissions.value;
   }

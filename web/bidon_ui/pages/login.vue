@@ -12,10 +12,10 @@
             >Email</label
           >
           <InputText
+            id="emailInput"
             v-model="email"
             type="text"
             placeholder="Email"
-            input-id="emailInput"
           />
           <small v-if="errors.email" class="p-error">{{ errors.email }}</small>
         </div>
@@ -24,10 +24,10 @@
             >Password</label
           >
           <InputText
+            id="passwordInput"
             v-model="password"
             type="password"
             placeholder="Pasword"
-            input-id="passwordInput"
           />
           <small v-if="errors.password" class="p-error">{{
             errors.password

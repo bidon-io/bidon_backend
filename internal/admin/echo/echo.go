@@ -148,8 +148,11 @@ type segmentHandler = resourceServiceHandler[admin.Segment, admin.SegmentAttrs]
 type userHandler = resourceServiceHandler[admin.User, admin.UserAttrs]
 
 func getPermissionsHandler(c echo.Context) error {
-	authContext := stubAuthContext{}
-	permissions := admin.GetPermissions(authContext)
+	authCtx, err := getAuthContext(c)
+	if err != nil {
+		return err
+	}
+	permissions := admin.GetPermissions(authCtx)
 
 	return c.JSON(http.StatusOK, permissions)
 }
