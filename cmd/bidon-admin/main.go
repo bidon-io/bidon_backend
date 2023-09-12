@@ -52,14 +52,19 @@ func main() {
 
 	configureCORS(e)
 
-	apiGroup := e.Group("/api")
-	jwtSecretKey := []byte(os.Getenv("APP_SECRET"))
-	auth.SetUpRoutes(e, db, jwtSecretKey)
-	//auth.ConfigureJWT(apiGroup, jwtSecretKey)
-
 	store := adminstore.New(db)
+	authService := auth.NewAuthService(store.UserRepo, auth.Config{
+		SecretKey:         []byte(os.Getenv("APP_SECRET")),
+		SuperUserLogin:    []byte(os.Getenv("SUPERUSER_LOGIN")),
+		SuperUserPassword: []byte(os.Getenv("SUPERUSER_PASSWORD")),
+	})
 	adminService := admin.NewService(store)
-	adminecho.RegisterService(apiGroup, adminService)
+
+	adminecho.RegisterAuthService(e.Group("/auth"), authService)
+
+	apiGroup := e.Group("/api")
+	adminecho.UseAuthorization(apiGroup, authService)
+	adminecho.RegisterAdminService(apiGroup, adminService)
 
 	redocFileSystem, _ := fs.Sub(web.FS, "redoc")
 	redocWebServer := http.FileServer(http.FS(redocFileSystem))
