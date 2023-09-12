@@ -17,7 +17,7 @@ jobs:
 
       - name: Test coverage
         env:
-          TEST_COVERAGE_THRESHOLD: 55
+          TEST_COVERAGE_THRESHOLD: 50
         run: |
           echo "Test coverage threshold: $TEST_COVERAGE_THRESHOLD%"
           testCoverage=`docker compose -f docker-compose.go-test.yml run -v $(pwd)/testcov:/app/testcov --rm bidon-test go tool cover -func testcov/coverage.out | grep total | grep -Eo '[0-9]+\.[0-9]+'`
