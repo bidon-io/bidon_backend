@@ -62,18 +62,21 @@
       <template #body="slotProps">
         <div class="flex justify-between">
           <NuxtLink
+            v-if="permissions.read"
             :key="slotProps.data.id"
             :to="`${resourcesPath}/${slotProps.data.id}`"
           >
             <i class="pi pi-eye" style="color: slateblue"></i>
           </NuxtLink>
           <NuxtLink
+            v-if="permissions.update"
             :key="slotProps.data.id"
             :to="`${resourcesPath}/${slotProps.data.id}/edit`"
           >
             <i class="pi pi-pencil" style="color: green"></i>
           </NuxtLink>
           <a
+            v-if="permissions.delete"
             :key="slotProps.data.id"
             href="_"
             @:click.prevent="deleteHandle(slotProps.data.id)"
@@ -91,6 +94,7 @@ import { FilterMatchModeOptions } from "primevue/api";
 
 import axios from "@/services/ApiService.js";
 import useDeleteResource from "@/composables/useDeleteResource";
+import { useAuthStore } from "~/stores/AuthStore";
 
 interface Filter {
   field: string;
@@ -125,6 +129,10 @@ const selectedResources = ref([]);
 
 const route = useRoute();
 const router = useRouter();
+const { getResourcePermissionsByPath } = useAuthStore();
+const permissions: ResourcePermissions = await getResourcePermissionsByPath(
+  props.resourcesPath
+);
 
 const filters = ref(
   props.columns

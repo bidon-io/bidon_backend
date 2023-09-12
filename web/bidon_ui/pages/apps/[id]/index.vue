@@ -2,8 +2,8 @@
   <PageContainer>
     <NavigationContainer>
       <GoBackButton :path="resourcesPath" />
-      <DestroyButton :handler="() => deleteHandle(id)" />
-      <EditButton :path="`${resourcesPath}/${id}/edit`" />
+      <DestroyButton :id="id" :path="resourcesPath" />
+      <EditButton :id="id" :path="resourcesPath" />
     </NavigationContainer>
     <ResourceCard title="App" :fields="fields" :resource="resource" />
   </PageContainer>
@@ -16,10 +16,6 @@ import { ResourceCardFields } from "@/constants";
 const route = useRoute();
 const id = route.params.id;
 const resourcesPath = "/apps";
-const deleteHandle = useDeleteResource({
-  path: resourcesPath,
-  hook: async () => await navigateTo(resourcesPath),
-});
 
 const response = await axios.get(`${resourcesPath}/${id}`);
 const resource = response.data;

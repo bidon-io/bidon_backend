@@ -18,4 +18,11 @@ declare global {
       path: string;
     };
   }
+
+  interface ResourcePermissions {
+    create?: boolean;
+    read?: boolean;
+    update?: boolean;
+    delete?: boolean;
+  }
 }

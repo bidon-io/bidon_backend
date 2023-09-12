@@ -178,4 +178,14 @@ export const ResourceTableFields = {
       ],
     },
   },
+  Email: {
+    field: "email",
+    header: "Email",
+    filter: {
+      field: "email",
+      type: "input",
+      matchMode: FilterMatchMode.CONTAINS,
+      placeholder: "Email",
+    },
+  },
 };
