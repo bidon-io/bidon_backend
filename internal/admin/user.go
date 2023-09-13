@@ -2,6 +2,7 @@ package admin
 
 import (
 	"context"
+
 	v8n "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/go-ozzo/ozzo-validation/v4/is"
 )
@@ -22,10 +23,8 @@ type UserService = ResourceService[User, UserAttrs]
 
 func NewUserService(store Store) *UserService {
 	s := &UserService{
-		repo: store.Users(),
-		policy: &userPolicy{
-			repo: store.Users(),
-		},
+		repo:   store.Users(),
+		policy: newUserPolicy(store),
 	}
 
 	s.getValidator = func(attrs *UserAttrs) v8n.ValidatableWithContext {
@@ -46,11 +45,40 @@ type userPolicy struct {
 	repo UserRepo
 }
 
-func (p *userPolicy) scope(authCtx AuthContext) resourceScope[User] {
+func newUserPolicy(store Store) *userPolicy {
+	return &userPolicy{
+		repo: store.Users(),
+	}
+}
+
+func (p *userPolicy) getReadScope(authCtx AuthContext) resourceScope[User] {
 	return &privateResourceScope[User]{
 		repo:    p.repo,
 		authCtx: authCtx,
 	}
+}
+
+func (p *userPolicy) getManageScope(authCtx AuthContext) resourceScope[User] {
+	return &privateResourceScope[User]{
+		repo:    p.repo,
+		authCtx: authCtx,
+	}
+}
+
+func (p *userPolicy) authorizeCreate(_ context.Context, authCtx AuthContext, _ *UserAttrs) error {
+	if !authCtx.IsAdmin() {
+		return ErrActionForbidden
+	}
+
+	return nil
+}
+
+func (p *userPolicy) authorizeUpdate(_ context.Context, _ AuthContext, _ *User, _ *UserAttrs) error {
+	return nil
+}
+
+func (p *userPolicy) authorizeDelete(_ context.Context, _ AuthContext, _ *User) error {
+	return nil
 }
 
 type userAttrsValidator struct {

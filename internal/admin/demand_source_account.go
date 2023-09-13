@@ -30,8 +30,12 @@ func NewDemandSourceAccountService(store Store) *DemandSourceAccountService {
 		repo: store.DemandSourceAccounts(),
 	}
 
-	s.policy = &demandSourceAccountPolicy{
-		repo: store.DemandSourceAccounts(),
+	s.policy = newDemandSourceAccountPolicy(store)
+
+	s.prepareCreateAttrs = func(authCtx AuthContext, attrs *DemandSourceAccountAttrs) {
+		if attrs.UserID == 0 {
+			attrs.UserID = authCtx.UserID()
+		}
 	}
 
 	s.getValidator = func(attrs *DemandSourceAccountAttrs) v8n.ValidatableWithContext {
@@ -47,19 +51,71 @@ func NewDemandSourceAccountService(store Store) *DemandSourceAccountService {
 //go:generate go run -mod=mod github.com/matryer/moq@latest -out demand_source_account_mocks_test.go . DemandSourceAccountRepo
 type DemandSourceAccountRepo interface {
 	AllResourceQuerier[DemandSourceAccount]
+	OwnedResourceQuerier[DemandSourceAccount]
 	OwnedOrSharedResourceQuerier[DemandSourceAccount]
 	ResourceManipulator[DemandSourceAccount, DemandSourceAccountAttrs]
 }
 
 type demandSourceAccountPolicy struct {
 	repo DemandSourceAccountRepo
+
+	userPolicy         *userPolicy
+	demandSourcePolicy *demandSourcePolicy
 }
 
-func (p *demandSourceAccountPolicy) scope(authCtx AuthContext) resourceScope[DemandSourceAccount] {
+func newDemandSourceAccountPolicy(store Store) *demandSourceAccountPolicy {
+	return &demandSourceAccountPolicy{
+		repo: store.DemandSourceAccounts(),
+
+		userPolicy:         newUserPolicy(store),
+		demandSourcePolicy: newDemandSourcePolicy(store),
+	}
+}
+
+func (p *demandSourceAccountPolicy) getReadScope(authCtx AuthContext) resourceScope[DemandSourceAccount] {
 	return &ownedOrSharedResourceScope[DemandSourceAccount]{
 		repo:    p.repo,
 		authCtx: authCtx,
 	}
+}
+
+func (p *demandSourceAccountPolicy) getManageScope(authCtx AuthContext) resourceScope[DemandSourceAccount] {
+	return &ownedResourceScope[DemandSourceAccount]{
+		repo:    p.repo,
+		authCtx: authCtx,
+	}
+}
+
+func (p *demandSourceAccountPolicy) authorizeCreate(ctx context.Context, authCtx AuthContext, attrs *DemandSourceAccountAttrs) error {
+	// If user is not the owner, check if user can manage the owner.
+	if attrs.UserID != authCtx.UserID() {
+		_, err := p.userPolicy.getManageScope(authCtx).find(ctx, attrs.UserID)
+		return err
+	}
+
+	// Check if user can read the account.
+	_, err := p.demandSourcePolicy.getReadScope(authCtx).find(ctx, attrs.DemandSourceID)
+	return err
+}
+
+func (p *demandSourceAccountPolicy) authorizeUpdate(ctx context.Context, authCtx AuthContext, account *DemandSourceAccount, attrs *DemandSourceAccountAttrs) error {
+	// If user tries to change the owner and owner is not the same as before, check if user can manage the new owner.
+	if attrs.UserID != 0 && attrs.UserID != account.UserID {
+		_, err := p.userPolicy.getManageScope(authCtx).find(ctx, attrs.UserID)
+		return err
+	}
+
+	// If user tries to change the demand source and demand source is not the same as before, check if user can read the new demand source.
+	if attrs.DemandSourceID != 0 && attrs.DemandSourceID != account.DemandSourceID {
+		_, err := p.demandSourcePolicy.getReadScope(authCtx).find(ctx, attrs.DemandSourceID)
+		return err
+	}
+
+	return nil
+}
+
+func (p *demandSourceAccountPolicy) authorizeDelete(_ context.Context, _ AuthContext, _ *DemandSourceAccount) error {
+	return nil
 }
 
 type demandSourceAccountValidator struct {

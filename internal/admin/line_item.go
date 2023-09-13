@@ -35,9 +35,7 @@ func NewLineItemService(store Store) *LineItemService {
 		repo: store.LineItems(),
 	}
 
-	s.policy = &lineItemPolicy{
-		repo: store.LineItems(),
-	}
+	s.policy = newLineItemPolicy(store)
 
 	s.getValidator = func(attrs *LineItemAttrs) v8n.ValidatableWithContext {
 		return &lineItemAttrsValidator{
@@ -57,13 +55,72 @@ type LineItemRepo interface {
 
 type lineItemPolicy struct {
 	repo LineItemRepo
+
+	appPolicy                 *appPolicy
+	demandSourceAccountPolicy *demandSourceAccountPolicy
 }
 
-func (p *lineItemPolicy) scope(authCtx AuthContext) resourceScope[LineItem] {
+func newLineItemPolicy(store Store) *lineItemPolicy {
+	return &lineItemPolicy{
+		repo: store.LineItems(),
+
+		appPolicy:                 newAppPolicy(store),
+		demandSourceAccountPolicy: newDemandSourceAccountPolicy(store),
+	}
+}
+
+func (p *lineItemPolicy) getReadScope(authCtx AuthContext) resourceScope[LineItem] {
 	return &ownedResourceScope[LineItem]{
 		repo:    p.repo,
 		authCtx: authCtx,
 	}
+}
+
+func (p *lineItemPolicy) getManageScope(authCtx AuthContext) resourceScope[LineItem] {
+	return &ownedResourceScope[LineItem]{
+		repo:    p.repo,
+		authCtx: authCtx,
+	}
+}
+
+func (p *lineItemPolicy) authorizeCreate(ctx context.Context, authCtx AuthContext, attrs *LineItemAttrs) error {
+	// Check if user can manage the app.
+	_, err := p.appPolicy.getManageScope(authCtx).find(ctx, attrs.AppID)
+	if err != nil {
+		return err
+	}
+
+	// Check if user can read the account.
+	_, err = p.demandSourceAccountPolicy.getReadScope(authCtx).find(ctx, attrs.AccountID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (p *lineItemPolicy) authorizeUpdate(ctx context.Context, authCtx AuthContext, profile *LineItem, attrs *LineItemAttrs) error {
+	// If user tries to change the app and app is not the same as before, check if user can manage the new app.
+	if attrs.AppID != 0 && attrs.AppID != profile.AppID {
+		_, err := p.appPolicy.getManageScope(authCtx).find(ctx, attrs.AppID)
+		if err != nil {
+			return err
+		}
+	}
+
+	// If user tries to change the account and account is not the same as before, check if user can read the new account.
+	if attrs.AccountID != 0 && attrs.AccountID != profile.AccountID {
+		_, err := p.demandSourceAccountPolicy.getReadScope(authCtx).find(ctx, attrs.AccountID)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (p *lineItemPolicy) authorizeDelete(_ context.Context, _ AuthContext, _ *LineItem) error {
+	return nil
 }
 
 type lineItemAttrsValidator struct {
