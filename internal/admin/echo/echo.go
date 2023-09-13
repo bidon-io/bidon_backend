@@ -164,9 +164,9 @@ type resourceServiceHandler[Resource, ResourceAttrs any] struct {
 type resourceService[Resource, ResourceAttrs any] interface {
 	List(ctx context.Context, authCtx admin.AuthContext) ([]Resource, error)
 	Find(ctx context.Context, authCtx admin.AuthContext, id int64) (*Resource, error)
-	Create(ctx context.Context, attrs *ResourceAttrs) (*Resource, error)
-	Update(ctx context.Context, id int64, attrs *ResourceAttrs) (*Resource, error)
-	Delete(ctx context.Context, id int64) error
+	Create(ctx context.Context, authCtx admin.AuthContext, attrs *ResourceAttrs) (*Resource, error)
+	Update(ctx context.Context, authCtx admin.AuthContext, id int64, attrs *ResourceAttrs) (*Resource, error)
+	Delete(ctx context.Context, authCtx admin.AuthContext, id int64) error
 }
 
 // stubAuthContext is a stub implementation of admin.AuthContext. Build auth context from JWT token.
@@ -195,12 +195,17 @@ func (s *resourceServiceHandler[Resource, ResourceAttrs]) list(c echo.Context) e
 }
 
 func (s *resourceServiceHandler[Resource, ResourceAttrs]) create(c echo.Context) error {
+	authCtx, err := getAuthContext(c)
+	if err != nil {
+		return err
+	}
+
 	attrs := new(ResourceAttrs)
 	if err := c.Bind(attrs); err != nil {
 		return err
 	}
 
-	resource, err := s.service.Create(c.Request().Context(), attrs)
+	resource, err := s.service.Create(c.Request().Context(), authCtx, attrs)
 	if err != nil {
 		var validationError v8n.Errors
 		if errors.As(err, &validationError) {
@@ -233,6 +238,11 @@ func (s *resourceServiceHandler[Resource, ResourceAttrs]) get(c echo.Context) er
 }
 
 func (s *resourceServiceHandler[Resource, ResourceAttrs]) update(c echo.Context) error {
+	authCtx, err := getAuthContext(c)
+	if err != nil {
+		return err
+	}
+
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		return fmt.Errorf("invalid id: %v", err)
@@ -243,7 +253,7 @@ func (s *resourceServiceHandler[Resource, ResourceAttrs]) update(c echo.Context)
 		return err
 	}
 
-	resource, err := s.service.Update(c.Request().Context(), int64(id), attrs)
+	resource, err := s.service.Update(c.Request().Context(), authCtx, int64(id), attrs)
 	if err != nil {
 		var validationError v8n.Errors
 		if errors.As(err, &validationError) {
@@ -257,12 +267,14 @@ func (s *resourceServiceHandler[Resource, ResourceAttrs]) update(c echo.Context)
 }
 
 func (s *resourceServiceHandler[Resource, ResourceAttrs]) delete(c echo.Context) error {
+	authCtx, err := getAuthContext(c)
+
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		return fmt.Errorf("invalid id: %v", err)
 	}
 
-	if err := s.service.Delete(c.Request().Context(), int64(id)); err != nil {
+	if err := s.service.Delete(c.Request().Context(), authCtx, int64(id)); err != nil {
 		return err
 	}
 
