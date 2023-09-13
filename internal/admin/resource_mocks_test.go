@@ -284,7 +284,7 @@ func (mock *AuthContextMock) UserIDCalls() []struct {
 
 // Ensure, that resourcePolicyMock does implement resourcePolicy.
 // If this is not the case, regenerate this file with moq.
-var _ resourcePolicy[any] = &resourcePolicyMock[any]{}
+var _ resourcePolicy[any, any] = &resourcePolicyMock[any, any]{}
 
 // resourcePolicyMock is a mock implementation of resourcePolicy.
 //
@@ -292,8 +292,20 @@ var _ resourcePolicy[any] = &resourcePolicyMock[any]{}
 //
 //		// make and configure a mocked resourcePolicy
 //		mockedresourcePolicy := &resourcePolicyMock{
-//			scopeFunc: func(authContext AuthContext) resourceScope[Resource] {
-//				panic("mock out the scope method")
+//			authorizeCreateFunc: func(ctx context.Context, authCtx AuthContext, attrs *ResourceAttrs) error {
+//				panic("mock out the authorizeCreate method")
+//			},
+//			authorizeDeleteFunc: func(ctx context.Context, authCtx AuthContext, resource *Resource) error {
+//				panic("mock out the authorizeDelete method")
+//			},
+//			authorizeUpdateFunc: func(ctx context.Context, authCtx AuthContext, resource *Resource, attrs *ResourceAttrs) error {
+//				panic("mock out the authorizeUpdate method")
+//			},
+//			getManageScopeFunc: func(authContext AuthContext) resourceScope[Resource] {
+//				panic("mock out the getManageScope method")
+//			},
+//			getReadScopeFunc: func(authContext AuthContext) resourceScope[Resource] {
+//				panic("mock out the getReadScope method")
 //			},
 //		}
 //
@@ -301,50 +313,256 @@ var _ resourcePolicy[any] = &resourcePolicyMock[any]{}
 //		// and then make assertions.
 //
 //	}
-type resourcePolicyMock[Resource any] struct {
-	// scopeFunc mocks the scope method.
-	scopeFunc func(authContext AuthContext) resourceScope[Resource]
+type resourcePolicyMock[Resource any, ResourceAttrs any] struct {
+	// authorizeCreateFunc mocks the authorizeCreate method.
+	authorizeCreateFunc func(ctx context.Context, authCtx AuthContext, attrs *ResourceAttrs) error
+
+	// authorizeDeleteFunc mocks the authorizeDelete method.
+	authorizeDeleteFunc func(ctx context.Context, authCtx AuthContext, resource *Resource) error
+
+	// authorizeUpdateFunc mocks the authorizeUpdate method.
+	authorizeUpdateFunc func(ctx context.Context, authCtx AuthContext, resource *Resource, attrs *ResourceAttrs) error
+
+	// getManageScopeFunc mocks the getManageScope method.
+	getManageScopeFunc func(authContext AuthContext) resourceScope[Resource]
+
+	// getReadScopeFunc mocks the getReadScope method.
+	getReadScopeFunc func(authContext AuthContext) resourceScope[Resource]
 
 	// calls tracks calls to the methods.
 	calls struct {
-		// scope holds details about calls to the scope method.
-		scope []struct {
+		// authorizeCreate holds details about calls to the authorizeCreate method.
+		authorizeCreate []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// AuthCtx is the authCtx argument value.
+			AuthCtx AuthContext
+			// Attrs is the attrs argument value.
+			Attrs *ResourceAttrs
+		}
+		// authorizeDelete holds details about calls to the authorizeDelete method.
+		authorizeDelete []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// AuthCtx is the authCtx argument value.
+			AuthCtx AuthContext
+			// Resource is the resource argument value.
+			Resource *Resource
+		}
+		// authorizeUpdate holds details about calls to the authorizeUpdate method.
+		authorizeUpdate []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// AuthCtx is the authCtx argument value.
+			AuthCtx AuthContext
+			// Resource is the resource argument value.
+			Resource *Resource
+			// Attrs is the attrs argument value.
+			Attrs *ResourceAttrs
+		}
+		// getManageScope holds details about calls to the getManageScope method.
+		getManageScope []struct {
+			// AuthContext is the authContext argument value.
+			AuthContext AuthContext
+		}
+		// getReadScope holds details about calls to the getReadScope method.
+		getReadScope []struct {
 			// AuthContext is the authContext argument value.
 			AuthContext AuthContext
 		}
 	}
-	lockscope sync.RWMutex
+	lockauthorizeCreate sync.RWMutex
+	lockauthorizeDelete sync.RWMutex
+	lockauthorizeUpdate sync.RWMutex
+	lockgetManageScope  sync.RWMutex
+	lockgetReadScope    sync.RWMutex
 }
 
-// scope calls scopeFunc.
-func (mock *resourcePolicyMock[Resource]) scope(authContext AuthContext) resourceScope[Resource] {
-	if mock.scopeFunc == nil {
-		panic("resourcePolicyMock.scopeFunc: method is nil but resourcePolicy.scope was just called")
+// authorizeCreate calls authorizeCreateFunc.
+func (mock *resourcePolicyMock[Resource, ResourceAttrs]) authorizeCreate(ctx context.Context, authCtx AuthContext, attrs *ResourceAttrs) error {
+	if mock.authorizeCreateFunc == nil {
+		panic("resourcePolicyMock.authorizeCreateFunc: method is nil but resourcePolicy.authorizeCreate was just called")
+	}
+	callInfo := struct {
+		Ctx     context.Context
+		AuthCtx AuthContext
+		Attrs   *ResourceAttrs
+	}{
+		Ctx:     ctx,
+		AuthCtx: authCtx,
+		Attrs:   attrs,
+	}
+	mock.lockauthorizeCreate.Lock()
+	mock.calls.authorizeCreate = append(mock.calls.authorizeCreate, callInfo)
+	mock.lockauthorizeCreate.Unlock()
+	return mock.authorizeCreateFunc(ctx, authCtx, attrs)
+}
+
+// authorizeCreateCalls gets all the calls that were made to authorizeCreate.
+// Check the length with:
+//
+//	len(mockedresourcePolicy.authorizeCreateCalls())
+func (mock *resourcePolicyMock[Resource, ResourceAttrs]) authorizeCreateCalls() []struct {
+	Ctx     context.Context
+	AuthCtx AuthContext
+	Attrs   *ResourceAttrs
+} {
+	var calls []struct {
+		Ctx     context.Context
+		AuthCtx AuthContext
+		Attrs   *ResourceAttrs
+	}
+	mock.lockauthorizeCreate.RLock()
+	calls = mock.calls.authorizeCreate
+	mock.lockauthorizeCreate.RUnlock()
+	return calls
+}
+
+// authorizeDelete calls authorizeDeleteFunc.
+func (mock *resourcePolicyMock[Resource, ResourceAttrs]) authorizeDelete(ctx context.Context, authCtx AuthContext, resource *Resource) error {
+	if mock.authorizeDeleteFunc == nil {
+		panic("resourcePolicyMock.authorizeDeleteFunc: method is nil but resourcePolicy.authorizeDelete was just called")
+	}
+	callInfo := struct {
+		Ctx      context.Context
+		AuthCtx  AuthContext
+		Resource *Resource
+	}{
+		Ctx:      ctx,
+		AuthCtx:  authCtx,
+		Resource: resource,
+	}
+	mock.lockauthorizeDelete.Lock()
+	mock.calls.authorizeDelete = append(mock.calls.authorizeDelete, callInfo)
+	mock.lockauthorizeDelete.Unlock()
+	return mock.authorizeDeleteFunc(ctx, authCtx, resource)
+}
+
+// authorizeDeleteCalls gets all the calls that were made to authorizeDelete.
+// Check the length with:
+//
+//	len(mockedresourcePolicy.authorizeDeleteCalls())
+func (mock *resourcePolicyMock[Resource, ResourceAttrs]) authorizeDeleteCalls() []struct {
+	Ctx      context.Context
+	AuthCtx  AuthContext
+	Resource *Resource
+} {
+	var calls []struct {
+		Ctx      context.Context
+		AuthCtx  AuthContext
+		Resource *Resource
+	}
+	mock.lockauthorizeDelete.RLock()
+	calls = mock.calls.authorizeDelete
+	mock.lockauthorizeDelete.RUnlock()
+	return calls
+}
+
+// authorizeUpdate calls authorizeUpdateFunc.
+func (mock *resourcePolicyMock[Resource, ResourceAttrs]) authorizeUpdate(ctx context.Context, authCtx AuthContext, resource *Resource, attrs *ResourceAttrs) error {
+	if mock.authorizeUpdateFunc == nil {
+		panic("resourcePolicyMock.authorizeUpdateFunc: method is nil but resourcePolicy.authorizeUpdate was just called")
+	}
+	callInfo := struct {
+		Ctx      context.Context
+		AuthCtx  AuthContext
+		Resource *Resource
+		Attrs    *ResourceAttrs
+	}{
+		Ctx:      ctx,
+		AuthCtx:  authCtx,
+		Resource: resource,
+		Attrs:    attrs,
+	}
+	mock.lockauthorizeUpdate.Lock()
+	mock.calls.authorizeUpdate = append(mock.calls.authorizeUpdate, callInfo)
+	mock.lockauthorizeUpdate.Unlock()
+	return mock.authorizeUpdateFunc(ctx, authCtx, resource, attrs)
+}
+
+// authorizeUpdateCalls gets all the calls that were made to authorizeUpdate.
+// Check the length with:
+//
+//	len(mockedresourcePolicy.authorizeUpdateCalls())
+func (mock *resourcePolicyMock[Resource, ResourceAttrs]) authorizeUpdateCalls() []struct {
+	Ctx      context.Context
+	AuthCtx  AuthContext
+	Resource *Resource
+	Attrs    *ResourceAttrs
+} {
+	var calls []struct {
+		Ctx      context.Context
+		AuthCtx  AuthContext
+		Resource *Resource
+		Attrs    *ResourceAttrs
+	}
+	mock.lockauthorizeUpdate.RLock()
+	calls = mock.calls.authorizeUpdate
+	mock.lockauthorizeUpdate.RUnlock()
+	return calls
+}
+
+// getManageScope calls getManageScopeFunc.
+func (mock *resourcePolicyMock[Resource, ResourceAttrs]) getManageScope(authContext AuthContext) resourceScope[Resource] {
+	if mock.getManageScopeFunc == nil {
+		panic("resourcePolicyMock.getManageScopeFunc: method is nil but resourcePolicy.getManageScope was just called")
 	}
 	callInfo := struct {
 		AuthContext AuthContext
 	}{
 		AuthContext: authContext,
 	}
-	mock.lockscope.Lock()
-	mock.calls.scope = append(mock.calls.scope, callInfo)
-	mock.lockscope.Unlock()
-	return mock.scopeFunc(authContext)
+	mock.lockgetManageScope.Lock()
+	mock.calls.getManageScope = append(mock.calls.getManageScope, callInfo)
+	mock.lockgetManageScope.Unlock()
+	return mock.getManageScopeFunc(authContext)
 }
 
-// scopeCalls gets all the calls that were made to scope.
+// getManageScopeCalls gets all the calls that were made to getManageScope.
 // Check the length with:
 //
-//	len(mockedresourcePolicy.scopeCalls())
-func (mock *resourcePolicyMock[Resource]) scopeCalls() []struct {
+//	len(mockedresourcePolicy.getManageScopeCalls())
+func (mock *resourcePolicyMock[Resource, ResourceAttrs]) getManageScopeCalls() []struct {
 	AuthContext AuthContext
 } {
 	var calls []struct {
 		AuthContext AuthContext
 	}
-	mock.lockscope.RLock()
-	calls = mock.calls.scope
-	mock.lockscope.RUnlock()
+	mock.lockgetManageScope.RLock()
+	calls = mock.calls.getManageScope
+	mock.lockgetManageScope.RUnlock()
+	return calls
+}
+
+// getReadScope calls getReadScopeFunc.
+func (mock *resourcePolicyMock[Resource, ResourceAttrs]) getReadScope(authContext AuthContext) resourceScope[Resource] {
+	if mock.getReadScopeFunc == nil {
+		panic("resourcePolicyMock.getReadScopeFunc: method is nil but resourcePolicy.getReadScope was just called")
+	}
+	callInfo := struct {
+		AuthContext AuthContext
+	}{
+		AuthContext: authContext,
+	}
+	mock.lockgetReadScope.Lock()
+	mock.calls.getReadScope = append(mock.calls.getReadScope, callInfo)
+	mock.lockgetReadScope.Unlock()
+	return mock.getReadScopeFunc(authContext)
+}
+
+// getReadScopeCalls gets all the calls that were made to getReadScope.
+// Check the length with:
+//
+//	len(mockedresourcePolicy.getReadScopeCalls())
+func (mock *resourcePolicyMock[Resource, ResourceAttrs]) getReadScopeCalls() []struct {
+	AuthContext AuthContext
+} {
+	var calls []struct {
+		AuthContext AuthContext
+	}
+	mock.lockgetReadScope.RLock()
+	calls = mock.calls.getReadScope
+	mock.lockgetReadScope.RUnlock()
 	return calls
 }
 
