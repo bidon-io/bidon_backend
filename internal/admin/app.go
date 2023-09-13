@@ -1,5 +1,9 @@
 package admin
 
+import (
+	"context"
+)
+
 type App struct {
 	ID int64 `json:"id"`
 	AppAttrs
@@ -27,10 +31,13 @@ type AppService = ResourceService[App, AppAttrs]
 
 func NewAppService(store Store) *AppService {
 	return &AppService{
-		repo: store.Apps(),
+		repo:   store.Apps(),
+		policy: newAppPolicy(store),
 
-		policy: &appPolicy{
-			repo: store.Apps(),
+		prepareCreateAttrs: func(authCtx AuthContext, attrs *AppAttrs) {
+			if attrs.UserID == 0 {
+				attrs.UserID = authCtx.UserID()
+			}
 		},
 	}
 }
@@ -43,11 +50,52 @@ type AppRepo interface {
 
 type appPolicy struct {
 	repo AppRepo
+
+	userPolicy *userPolicy
 }
 
-func (p *appPolicy) scope(authCtx AuthContext) resourceScope[App] {
+func newAppPolicy(store Store) *appPolicy {
+	return &appPolicy{
+		repo: store.Apps(),
+
+		userPolicy: newUserPolicy(store),
+	}
+}
+
+func (p *appPolicy) getReadScope(authCtx AuthContext) resourceScope[App] {
 	return &ownedResourceScope[App]{
 		repo:    p.repo,
 		authCtx: authCtx,
 	}
+}
+
+func (p *appPolicy) getManageScope(authCtx AuthContext) resourceScope[App] {
+	return &ownedResourceScope[App]{
+		repo:    p.repo,
+		authCtx: authCtx,
+	}
+}
+
+func (p *appPolicy) authorizeCreate(ctx context.Context, authCtx AuthContext, attrs *AppAttrs) error {
+	// If user is not the owner, check if user can manage the owner.
+	if attrs.UserID != authCtx.UserID() {
+		_, err := p.userPolicy.getManageScope(authCtx).find(ctx, attrs.UserID)
+		return err
+	}
+
+	return nil
+}
+
+func (p *appPolicy) authorizeUpdate(ctx context.Context, authCtx AuthContext, app *App, attrs *AppAttrs) error {
+	// If user tries to change the owner and owner is not the same as before, check if user can manage the new owner.
+	if attrs.UserID != 0 && attrs.UserID != app.UserID {
+		_, err := p.userPolicy.getManageScope(authCtx).find(ctx, attrs.UserID)
+		return err
+	}
+
+	return nil
+}
+
+func (p *appPolicy) authorizeDelete(_ context.Context, _ AuthContext, _ *App) error {
+	return nil
 }

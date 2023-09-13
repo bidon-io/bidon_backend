@@ -30,9 +30,7 @@ func NewAppDemandProfileService(store Store) *AppDemandProfileService {
 		repo: store.AppDemandProfiles(),
 	}
 
-	s.policy = &appDemandProfilePolicy{
-		repo: store.AppDemandProfiles(),
-	}
+	s.policy = newAppDemandProfilePolicy(store)
 
 	s.getValidator = func(attrs *AppDemandProfileAttrs) v8n.ValidatableWithContext {
 		return &appDemandProfileAttrsValidator{
@@ -52,13 +50,88 @@ type AppDemandProfileRepo interface {
 
 type appDemandProfilePolicy struct {
 	repo AppDemandProfileRepo
+
+	appPolicy                 *appPolicy
+	demandSourceAccountPolicy *demandSourceAccountPolicy
+	demandSourcePolicy        *demandSourcePolicy
 }
 
-func (p *appDemandProfilePolicy) scope(authCtx AuthContext) resourceScope[AppDemandProfile] {
+func newAppDemandProfilePolicy(store Store) *appDemandProfilePolicy {
+	return &appDemandProfilePolicy{
+		repo: store.AppDemandProfiles(),
+
+		appPolicy:                 newAppPolicy(store),
+		demandSourceAccountPolicy: newDemandSourceAccountPolicy(store),
+		demandSourcePolicy:        newDemandSourcePolicy(store),
+	}
+}
+
+func (p *appDemandProfilePolicy) getReadScope(authCtx AuthContext) resourceScope[AppDemandProfile] {
 	return &ownedResourceScope[AppDemandProfile]{
 		repo:    p.repo,
 		authCtx: authCtx,
 	}
+}
+
+func (p *appDemandProfilePolicy) getManageScope(authCtx AuthContext) resourceScope[AppDemandProfile] {
+	return &ownedResourceScope[AppDemandProfile]{
+		repo:    p.repo,
+		authCtx: authCtx,
+	}
+}
+
+func (p *appDemandProfilePolicy) authorizeCreate(ctx context.Context, authCtx AuthContext, attrs *AppDemandProfileAttrs) error {
+	// Check if user can manage the app.
+	_, err := p.appPolicy.getManageScope(authCtx).find(ctx, attrs.AppID)
+	if err != nil {
+		return err
+	}
+
+	// Check if user can read the account.
+	_, err = p.demandSourceAccountPolicy.getReadScope(authCtx).find(ctx, attrs.AccountID)
+	if err != nil {
+		return err
+	}
+
+	// Check if user can read the demand source.
+	_, err = p.demandSourcePolicy.getReadScope(authCtx).find(ctx, attrs.DemandSourceID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (p *appDemandProfilePolicy) authorizeUpdate(ctx context.Context, authCtx AuthContext, profile *AppDemandProfile, attrs *AppDemandProfileAttrs) error {
+	// If user tries to change the app and app is not the same as before, check if user can manage the new app.
+	if attrs.AppID != 0 && attrs.AppID != profile.AppID {
+		_, err := p.appPolicy.getManageScope(authCtx).find(ctx, attrs.AppID)
+		if err != nil {
+			return err
+		}
+	}
+
+	// If user tries to change the account and account is not the same as before, check if user can read the new account.
+	if attrs.AccountID != 0 && attrs.AccountID != profile.AccountID {
+		_, err := p.demandSourceAccountPolicy.getReadScope(authCtx).find(ctx, attrs.AccountID)
+		if err != nil {
+			return err
+		}
+	}
+
+	// If user tries to change the demand source and demand source is not the same as before, check if user can read the new demand source.
+	if attrs.DemandSourceID != 0 && attrs.DemandSourceID != profile.DemandSourceID {
+		_, err := p.demandSourcePolicy.getReadScope(authCtx).find(ctx, attrs.DemandSourceID)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (p *appDemandProfilePolicy) authorizeDelete(_ context.Context, _ AuthContext, _ *AppDemandProfile) error {
+	return nil
 }
 
 type appDemandProfileAttrsValidator struct {

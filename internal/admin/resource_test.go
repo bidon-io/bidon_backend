@@ -25,8 +25,8 @@ func TestResourceService_List(t *testing.T) {
 	}
 
 	s := ResourceService[TestResource, TestResourceAttrs]{
-		policy: &resourcePolicyMock[TestResource]{
-			scopeFunc: func(authCtx AuthContext) resourceScope[TestResource] {
+		policy: &resourcePolicyMock[TestResource, TestResourceAttrs]{
+			getReadScopeFunc: func(authCtx AuthContext) resourceScope[TestResource] {
 				return &resourceScopeMock[TestResource]{
 					listFunc: func(ctx context.Context) ([]TestResource, error) {
 						return want, nil
@@ -49,8 +49,8 @@ func TestResourceService_Find(t *testing.T) {
 	}
 
 	s := ResourceService[TestResource, TestResourceAttrs]{
-		policy: &resourcePolicyMock[TestResource]{
-			scopeFunc: func(authCtx AuthContext) resourceScope[TestResource] {
+		policy: &resourcePolicyMock[TestResource, TestResourceAttrs]{
+			getReadScopeFunc: func(authCtx AuthContext) resourceScope[TestResource] {
 				return &resourceScopeMock[TestResource]{
 					findFunc: func(ctx context.Context, id int64) (*TestResource, error) {
 						if id != want.ID {
@@ -92,6 +92,14 @@ func TestResourceService_Create(t *testing.T) {
 				return want, nil
 			},
 		},
+		policy: &resourcePolicyMock[TestResource, TestResourceAttrs]{
+			authorizeCreateFunc: func(ctx context.Context, authCtx AuthContext, attrs *TestResourceAttrs) error {
+				if diff := cmp.Diff(&want.TestResourceAttrs, attrs); diff != "" {
+					t.Errorf("authorizeCreate() mismatch (-want +got):\n%s", diff)
+				}
+				return nil
+			},
+		},
 		getValidator: func(attrs *TestResourceAttrs) v8n.ValidatableWithContext {
 			if diff := cmp.Diff(&want.TestResourceAttrs, attrs); diff != "" {
 				t.Errorf("getValidator() mismatch (-want +got):\n%s", diff)
@@ -101,7 +109,7 @@ func TestResourceService_Create(t *testing.T) {
 		},
 	}
 
-	resource, _ := s.Create(context.Background(), &want.TestResourceAttrs)
+	resource, _ := s.Create(context.Background(), nil, &want.TestResourceAttrs)
 	if diff := cmp.Diff(want, resource); diff != "" {
 		t.Errorf("Create() mismatch (-want +got):\n%s", diff)
 	}
@@ -113,6 +121,14 @@ func TestResourceService_Create_validationError(t *testing.T) {
 	repoMock := &ResourceManipulatorMock[TestResource, TestResourceAttrs]{}
 	s := ResourceService[TestResource, TestResourceAttrs]{
 		repo: repoMock,
+		policy: &resourcePolicyMock[TestResource, TestResourceAttrs]{
+			authorizeCreateFunc: func(ctx context.Context, authCtx AuthContext, attrs *TestResourceAttrs) error {
+				if diff := cmp.Diff(testResourceAttrs, attrs); diff != "" {
+					t.Errorf("authorizeCreate() mismatch (-want +got):\n%s", diff)
+				}
+				return nil
+			},
+		},
 		getValidator: func(attrs *TestResourceAttrs) v8n.ValidatableWithContext {
 			if diff := cmp.Diff(testResourceAttrs, attrs); diff != "" {
 				t.Errorf("getValidator() mismatch (-want +got):\n%s", diff)
@@ -122,7 +138,7 @@ func TestResourceService_Create_validationError(t *testing.T) {
 		},
 	}
 
-	resource, err := s.Create(context.Background(), testResourceAttrs)
+	resource, err := s.Create(context.Background(), nil, testResourceAttrs)
 	if err == nil {
 		t.Errorf("Create() got %v, want error", resource)
 	} else if resource != nil {
@@ -152,6 +168,27 @@ func TestResourceService_Update(t *testing.T) {
 				return want, nil
 			},
 		},
+		policy: &resourcePolicyMock[TestResource, TestResourceAttrs]{
+			getManageScopeFunc: func(authCtx AuthContext) resourceScope[TestResource] {
+				return &resourceScopeMock[TestResource]{
+					findFunc: func(ctx context.Context, id int64) (*TestResource, error) {
+						if id != want.ID {
+							t.Errorf("Find() got %d, want %d", id, want.ID)
+						}
+						return want, nil
+					},
+				}
+			},
+			authorizeUpdateFunc: func(ctx context.Context, authCtx AuthContext, resource *TestResource, attrs *TestResourceAttrs) error {
+				if diff := cmp.Diff(want, resource); diff != "" {
+					t.Errorf("authorizeUpdate() mismatch (-want +got):\n%s", diff)
+				}
+				if diff := cmp.Diff(&want.TestResourceAttrs, attrs); diff != "" {
+					t.Errorf("authorizeUpdate() mismatch (-want +got):\n%s", diff)
+				}
+				return nil
+			},
+		},
 		getValidator: func(attrs *TestResourceAttrs) v8n.ValidatableWithContext {
 			if diff := cmp.Diff(&want.TestResourceAttrs, attrs); diff != "" {
 				t.Errorf("getValidator() mismatch (-want +got):\n%s", diff)
@@ -161,7 +198,7 @@ func TestResourceService_Update(t *testing.T) {
 		},
 	}
 
-	resource, _ := s.Update(context.Background(), want.ID, &want.TestResourceAttrs)
+	resource, _ := s.Update(context.Background(), nil, want.ID, &want.TestResourceAttrs)
 	if diff := cmp.Diff(want, resource); diff != "" {
 		t.Errorf("Update() mismatch (-want +got):\n%s", diff)
 	}
@@ -169,10 +206,35 @@ func TestResourceService_Update(t *testing.T) {
 
 func TestResourceService_Update_validationError(t *testing.T) {
 	testResourceAttrs := &TestResourceAttrs{Name: "test1"}
+	want := &TestResource{
+		ID:                1,
+		TestResourceAttrs: *testResourceAttrs,
+	}
 
 	repoMock := &ResourceManipulatorMock[TestResource, TestResourceAttrs]{}
 	s := ResourceService[TestResource, TestResourceAttrs]{
 		repo: repoMock,
+		policy: &resourcePolicyMock[TestResource, TestResourceAttrs]{
+			getManageScopeFunc: func(authCtx AuthContext) resourceScope[TestResource] {
+				return &resourceScopeMock[TestResource]{
+					findFunc: func(ctx context.Context, id int64) (*TestResource, error) {
+						if id != want.ID {
+							t.Errorf("Find() got %d, want %d", id, want.ID)
+						}
+						return want, nil
+					},
+				}
+			},
+			authorizeUpdateFunc: func(ctx context.Context, authCtx AuthContext, resource *TestResource, attrs *TestResourceAttrs) error {
+				if diff := cmp.Diff(want, resource); diff != "" {
+					t.Errorf("authorizeUpdate() mismatch (-want +got):\n%s", diff)
+				}
+				if diff := cmp.Diff(&want.TestResourceAttrs, attrs); diff != "" {
+					t.Errorf("authorizeUpdate() mismatch (-want +got):\n%s", diff)
+				}
+				return nil
+			},
+		},
 		getValidator: func(attrs *TestResourceAttrs) v8n.ValidatableWithContext {
 			if diff := cmp.Diff(testResourceAttrs, attrs); diff != "" {
 				t.Errorf("getValidator() mismatch (-want +got):\n%s", diff)
@@ -182,7 +244,7 @@ func TestResourceService_Update_validationError(t *testing.T) {
 		},
 	}
 
-	resource, err := s.Update(context.Background(), 1, testResourceAttrs)
+	resource, err := s.Update(context.Background(), nil, 1, testResourceAttrs)
 	if err == nil {
 		t.Errorf("Update() got %v, want error", resource)
 	} else if resource != nil {
@@ -206,9 +268,24 @@ func TestResourceService_Delete(t *testing.T) {
 				return nil
 			},
 		},
+		policy: &resourcePolicyMock[TestResource, TestResourceAttrs]{
+			getManageScopeFunc: func(authCtx AuthContext) resourceScope[TestResource] {
+				return &resourceScopeMock[TestResource]{
+					findFunc: func(ctx context.Context, id int64) (*TestResource, error) {
+						if id != want {
+							t.Errorf("Find() got %d, want %d", id, id)
+						}
+						return &TestResource{ID: id}, nil
+					},
+				}
+			},
+			authorizeDeleteFunc: func(ctx context.Context, authCtx AuthContext, resource *TestResource) error {
+				return nil
+			},
+		},
 	}
 
-	if err := s.Delete(context.Background(), want); err != nil {
+	if err := s.Delete(context.Background(), nil, want); err != nil {
 		t.Errorf("Delete() got %v, want nil", err)
 	}
 }
