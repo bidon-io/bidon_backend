@@ -56,6 +56,7 @@ func (m demandSourceAccountMapper) dbModel(a *admin.DemandSourceAccountAttrs, id
 	return &db.DemandSourceAccount{
 		Model:          db.Model{ID: id},
 		DemandSourceID: a.DemandSourceID,
+		Label:          a.Label,
 		UserID:         a.UserID,
 		Type:           a.Type,
 		Extra:          extra,
@@ -82,6 +83,7 @@ func (m demandSourceAccountMapper) resourceAttrs(a *db.DemandSourceAccount) admi
 
 	return admin.DemandSourceAccountAttrs{
 		UserID:         a.UserID,
+		Label:          a.Label,
 		Type:           a.Type,
 		DemandSourceID: a.DemandSourceID,
 		IsBidding:      a.IsBidding,
