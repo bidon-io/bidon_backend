@@ -165,7 +165,7 @@ func TestBiddingHandler_OK(t *testing.T) {
 	rec := httptest.NewRecorder()
 
 	// Create a new Echo instance and context
-	e := config.Echo("sdkapi-test", nil)
+	e := config.Echo()
 	c := e.NewContext(req, rec)
 
 	// Call the Handle method
@@ -214,7 +214,7 @@ func TestBiddingHandler_ErrNoAdsFound(t *testing.T) {
 	rec := httptest.NewRecorder()
 
 	// Create a new Echo instance and context
-	e := config.Echo("sdkapi-test", nil)
+	e := config.Echo()
 	c := e.NewContext(req, rec)
 
 	// Check that Handle method returns a ErrNoAdsFound error
