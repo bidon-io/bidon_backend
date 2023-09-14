@@ -55,8 +55,7 @@ func main() {
 		log.Fatalf("db.Open(%v): %v", dbURL, err)
 	}
 
-	e := config.Echo("bidon-admin", logger)
-
+	e := config.Echo()
 	configureCORS(e)
 
 	store := adminstore.New(db)
@@ -67,9 +66,12 @@ func main() {
 	})
 	adminService := admin.NewService(store)
 
-	adminecho.RegisterAuthService(e.Group("/auth"), authService)
+	authGroup := e.Group("/auth")
+	config.UseCommonMiddleware(authGroup, "bidon-admin", logger)
+	adminecho.RegisterAuthService(authGroup, authService)
 
 	apiGroup := e.Group("/api")
+	config.UseCommonMiddleware(apiGroup, "bidon-admin", logger)
 	adminecho.UseAuthorization(apiGroup, authService)
 	adminecho.RegisterAdminService(apiGroup, adminService)
 
