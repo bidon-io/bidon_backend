@@ -50,6 +50,10 @@ func TestLineItemsMatcher_Match(t *testing.T) {
 			Code:      ptr("applovin-banner-banner"),
 			BidFloor:  decimal.NewNullDecimal(decimal.RequireFromString("0.1")),
 			AccountID: applovinAccount.ID,
+			PublicUID: sql.NullInt64{
+				Int64: 1701972528521547776,
+				Valid: true,
+			},
 		},
 		{
 			AppID:  apps[0].ID,
@@ -61,6 +65,10 @@ func TestLineItemsMatcher_Match(t *testing.T) {
 			Code:      ptr("applovin-banner-adaptive"),
 			BidFloor:  decimal.NewNullDecimal(decimal.RequireFromString("0.2")),
 			AccountID: applovinAccount.ID,
+			PublicUID: sql.NullInt64{
+				Int64: 1701972528521547777,
+				Valid: true,
+			},
 		},
 		{
 			AppID:  apps[0].ID,
@@ -72,6 +80,10 @@ func TestLineItemsMatcher_Match(t *testing.T) {
 			Code:      ptr("applovin-banner-leaderboard"),
 			BidFloor:  decimal.NewNullDecimal(decimal.RequireFromString("0.3")),
 			AccountID: applovinAccount.ID,
+			PublicUID: sql.NullInt64{
+				Int64: 1701972528521547778,
+				Valid: true,
+			},
 		},
 		{
 			AppID:     apps[0].ID,
@@ -79,6 +91,10 @@ func TestLineItemsMatcher_Match(t *testing.T) {
 			Code:      ptr("applovin-interstitial"),
 			BidFloor:  decimal.NewNullDecimal(decimal.RequireFromString("0.3")),
 			AccountID: applovinAccount.ID,
+			PublicUID: sql.NullInt64{
+				Int64: 1701972528521547779,
+				Valid: true,
+			},
 		},
 		{
 			AppID:     apps[0].ID,
@@ -86,6 +102,10 @@ func TestLineItemsMatcher_Match(t *testing.T) {
 			Code:      ptr("bidmachine-interstitial"),
 			BidFloor:  decimal.NewNullDecimal(decimal.RequireFromString("0.3")),
 			AccountID: bidmachineAccount.ID,
+			PublicUID: sql.NullInt64{
+				Int64: 1701972528521547780,
+				Valid: true,
+			},
 		},
 		{
 			AppID:  apps[1].ID,
@@ -97,6 +117,10 @@ func TestLineItemsMatcher_Match(t *testing.T) {
 			Code:      ptr("app2-applovin-banner-mrec"),
 			BidFloor:  decimal.NewNullDecimal(decimal.RequireFromString("0.4")),
 			AccountID: applovinAccount.ID,
+			PublicUID: sql.NullInt64{
+				Int64: 1701972528521547781,
+				Valid: true,
+			},
 		},
 		{
 			AppID:  apps[1].ID,
@@ -108,6 +132,10 @@ func TestLineItemsMatcher_Match(t *testing.T) {
 			Code:      ptr("app2-bidmachine-banner-mrec"),
 			BidFloor:  decimal.NewNullDecimal(decimal.RequireFromString("0.4")),
 			AccountID: bidmachineAccount.ID,
+			PublicUID: sql.NullInt64{
+				Int64: 1701972528521547782,
+				Valid: true,
+			},
 		},
 	}
 	if err := tx.Create(&lineItems).Error; err != nil {
@@ -140,8 +168,8 @@ func TestLineItemsMatcher_Match(t *testing.T) {
 				Adapters:   []adapter.Key{adapter.ApplovinKey},
 			},
 			want: []auction.LineItem{
-				{ID: "applovin", PriceFloor: 0.1, AdUnitID: "applovin-banner-banner"},
-				{ID: "applovin", PriceFloor: 0.2, AdUnitID: "applovin-banner-adaptive"},
+				{ID: "applovin", UID: "1701972528521547776", PriceFloor: 0.1, AdUnitID: "applovin-banner-banner"},
+				{ID: "applovin", UID: "1701972528521547777", PriceFloor: 0.2, AdUnitID: "applovin-banner-adaptive"},
 			},
 		},
 		{
@@ -153,8 +181,8 @@ func TestLineItemsMatcher_Match(t *testing.T) {
 				Adapters:   []adapter.Key{adapter.ApplovinKey},
 			},
 			want: []auction.LineItem{
-				{ID: "applovin", PriceFloor: 0.2, AdUnitID: "applovin-banner-adaptive"},
-				{ID: "applovin", PriceFloor: 0.3, AdUnitID: "applovin-banner-leaderboard"},
+				{ID: "applovin", UID: "1701972528521547777", PriceFloor: 0.2, AdUnitID: "applovin-banner-adaptive"},
+				{ID: "applovin", UID: "1701972528521547778", PriceFloor: 0.3, AdUnitID: "applovin-banner-leaderboard"},
 			},
 		},
 		{
@@ -166,7 +194,7 @@ func TestLineItemsMatcher_Match(t *testing.T) {
 				Adapters:   []adapter.Key{adapter.ApplovinKey},
 			},
 			want: []auction.LineItem{
-				{ID: "applovin", PriceFloor: 0.2, AdUnitID: "applovin-banner-adaptive"},
+				{ID: "applovin", UID: "1701972528521547777", PriceFloor: 0.2, AdUnitID: "applovin-banner-adaptive"},
 			},
 		},
 		{
@@ -178,8 +206,8 @@ func TestLineItemsMatcher_Match(t *testing.T) {
 				Adapters:   []adapter.Key{adapter.ApplovinKey, adapter.BidmachineKey},
 			},
 			want: []auction.LineItem{
-				{ID: "applovin", PriceFloor: 0.3, AdUnitID: "applovin-interstitial"},
-				{ID: "bidmachine", PriceFloor: 0.3, AdUnitID: "bidmachine-interstitial"},
+				{ID: "applovin", UID: "1701972528521547779", PriceFloor: 0.3, AdUnitID: "applovin-interstitial"},
+				{ID: "bidmachine", UID: "1701972528521547780", PriceFloor: 0.3, AdUnitID: "bidmachine-interstitial"},
 			},
 		},
 		{
@@ -191,7 +219,7 @@ func TestLineItemsMatcher_Match(t *testing.T) {
 				Adapters:   []adapter.Key{adapter.ApplovinKey},
 			},
 			want: []auction.LineItem{
-				{ID: "applovin", PriceFloor: 0.4, AdUnitID: "app2-applovin-banner-mrec"},
+				{ID: "applovin", UID: "1701972528521547781", PriceFloor: 0.4, AdUnitID: "app2-applovin-banner-mrec"},
 			},
 		},
 		{
@@ -204,7 +232,7 @@ func TestLineItemsMatcher_Match(t *testing.T) {
 				PriceFloor: &pf,
 			},
 			want: []auction.LineItem{
-				{ID: "applovin", PriceFloor: 0.2, AdUnitID: "applovin-banner-adaptive"},
+				{ID: "applovin", UID: "1701972528521547777", PriceFloor: 0.2, AdUnitID: "applovin-banner-adaptive"},
 			},
 		},
 	}
