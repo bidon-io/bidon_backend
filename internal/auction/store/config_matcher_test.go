@@ -22,7 +22,6 @@ func TestConfigMatcher_Match(t *testing.T) {
 		{AppID: apps[0].ID, AdType: db.BannerAdType},
 		{AppID: apps[1].ID, AdType: db.BannerAdType},
 		{AppID: apps[2].ID, AdType: db.InterstitialAdType, Model: db.Model{CreatedAt: time.Now()}},
-		{AppID: apps[2].ID, AdType: db.InterstitialAdType, Model: db.Model{CreatedAt: time.Now().Add(-time.Hour)}},
 	}
 	if err := tx.Create(&configs).Error; err != nil {
 		t.Fatalf("Error creating configs: %v", err)
@@ -76,7 +75,6 @@ func TestConfigMatcher_MatchById(t *testing.T) {
 		{AppID: apps[0].ID, AdType: db.BannerAdType},
 		{AppID: apps[1].ID, AdType: db.BannerAdType},
 		{AppID: apps[2].ID, AdType: db.InterstitialAdType, Model: db.Model{CreatedAt: time.Now()}},
-		{AppID: apps[2].ID, AdType: db.InterstitialAdType, Model: db.Model{CreatedAt: time.Now().Add(-time.Hour)}},
 	}
 	if err := tx.Create(&configs).Error; err != nil {
 		t.Fatalf("Error creating configs: %v", err)

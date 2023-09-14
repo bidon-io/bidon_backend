@@ -3,6 +3,7 @@ module github.com/bidon-io/bidon-backend
 go 1.21
 
 require (
+	github.com/bwmarrin/snowflake v0.3.0
 	github.com/cenkalti/backoff/v4 v4.2.1
 	github.com/getsentry/sentry-go v0.23.0
 	github.com/getsentry/sentry-go/otel v0.23.0

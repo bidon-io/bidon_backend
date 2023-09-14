@@ -259,6 +259,7 @@ GEM
       actionpack (>= 6.0.0)
       activejob (>= 6.0.0)
       railties (>= 6.0.0)
+    twitter_snowflake (0.0.2)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
     unicode-display_width (2.2.0)
@@ -300,6 +301,7 @@ DEPENDENCIES
   stimulus-rails
   strong_migrations
   turbo-rails
+  twitter_snowflake (~> 0.0.2)
 
 RUBY VERSION
    ruby 3.1.2p20
