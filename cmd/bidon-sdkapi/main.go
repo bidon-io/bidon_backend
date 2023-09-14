@@ -201,8 +201,11 @@ func main() {
 		NotificationHandler: notificationHandler,
 	}
 
-	e := config.Echo("bidon-sdkapi", logger)
-	g := e.Group("", sdkapi.CheckBidonHeader)
+	e := config.Echo()
+
+	g := e.Group("")
+	config.UseCommonMiddleware(g, "bidon-sdkapi", logger)
+	g.Use(sdkapi.CheckBidonHeader)
 
 	g.POST("/config", configHandler.Handle)
 	g.POST("/auction/:ad_type", auctionHandler.Handle)

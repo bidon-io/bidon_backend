@@ -13,28 +13,30 @@ import (
 	"go.uber.org/zap"
 )
 
-func Echo(service string, logger *zap.Logger) *echo.Echo {
+func Echo() *echo.Echo {
 	e := echo.New()
 	e.Debug = Env != ProdEnv
 	e.HTTPErrorHandler = HTTPErrorHandler
 	e.Validator = &echoValidator{validate: validator.New()}
-
-	e.Use(otelecho.Middleware(service))
-
-	e.Use(middleware.RequestID())
-	e.Use(echoRequestLogger(logger))
-	e.Use(echoBodyDump(logger))
-	e.Use(middleware.Recover())
-
-	e.Use(sentryecho.New(sentryecho.Options{
-		Repanic: true,
-	}))
 
 	e.GET("/health_checks", func(c echo.Context) error {
 		return c.String(http.StatusOK, "OK")
 	})
 
 	return e
+}
+
+func UseCommonMiddleware(g *echo.Group, service string, logger *zap.Logger) {
+	g.Use(otelecho.Middleware(service))
+
+	g.Use(middleware.RequestID())
+	g.Use(echoRequestLogger(logger))
+	g.Use(echoBodyDump(logger))
+	g.Use(middleware.Recover())
+
+	g.Use(sentryecho.New(sentryecho.Options{
+		Repanic: true,
+	}))
 }
 
 // HTTPErrorHandler is the default error handler for Bidon services.

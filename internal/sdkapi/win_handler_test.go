@@ -65,7 +65,7 @@ func TestWinHandler_Handle(t *testing.T) {
 	handler := SetupWinHandler()
 
 	// Call the Handle method with the mock request and response
-	e := config.Echo("sdkapi-test", nil)
+	e := config.Echo()
 	c := e.NewContext(req, rec)
 
 	err = handler.Handle(c)
@@ -91,7 +91,7 @@ func TestWinHandler_Handle_InvalidRequest(t *testing.T) {
 	handler := SetupWinHandler()
 
 	// Call the Handle method with the mock request and response
-	e := config.Echo("sdkapi-test", nil)
+	e := config.Echo()
 	c := e.NewContext(req, rec)
 	err := handler.Handle(c)
 
