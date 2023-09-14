@@ -39,7 +39,7 @@ func TestMatchTwoFilters(t *testing.T) {
 	}
 
 	result := segmentMatcher.Match(ctx, params)
-	expected := segment.Segment{ID: 123}
+	expected := segments[0]
 	if !reflect.DeepEqual(result, expected) {
 		t.Errorf("segmentMatcher.Match returned unexpected segment. Expected: %v, Got: %v", expected, result)
 	}

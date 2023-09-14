@@ -34,6 +34,7 @@ type BuildParams struct {
 	DeviceType device.Type
 	Adapters   []adapter.Key
 	SegmentID  int64
+	SegmentUID int64
 	PriceFloor *float64
 }
 
@@ -57,10 +58,11 @@ func (b *Builder) Build(ctx context.Context, params *BuildParams) (*Auction, err
 
 	auction := Auction{
 		ConfigID:                 config.ID,
+		ConfigUID:                config.UID,
 		ExternalWinNotifications: config.ExternalWinNotifications,
 		Rounds:                   filterRounds(config.Rounds, params.Adapters),
 		LineItems:                lineItems,
-		Segment:                  Segment{ID: segmentID},
+		Segment:                  Segment{ID: segmentID, UID: params.SegmentUID},
 	}
 
 	if len(auction.Rounds) == 0 {

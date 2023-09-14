@@ -31,7 +31,8 @@ func testHelperAuctionHandler(t *testing.T) *sdkapi.AuctionHandler {
 	app := sdkapi.App{ID: 1}
 	geodata := geocoder.GeoData{CountryCode: "US"}
 	auctionConfig := &auction.Config{
-		ID: 1,
+		ID:  1,
+		UID: 1701972528521547776,
 		Rounds: []auction.RoundConfig{
 			{
 				ID:      "ROUND_1",
@@ -62,10 +63,14 @@ func testHelperAuctionHandler(t *testing.T) *sdkapi.AuctionHandler {
 		},
 	}
 	lineItems := []auction.LineItem{
-		{ID: "test", PriceFloor: 0.1, PlacementID: "", AdUnitID: "test_id"},
+		{ID: "test", UID: 1701972528521547776, PriceFloor: 0.1, PlacementID: "", AdUnitID: "test_id"},
 	}
 	segments := []segment.Segment{
-		{ID: 1, Filters: []segment.Filter{{Type: "country", Name: "country", Operator: "IN", Values: []string{"US", "UK"}}}},
+		{
+			ID:      1,
+			UID:     1701972528521547776,
+			Filters: []segment.Filter{{Type: "country", Name: "country", Operator: "IN", Values: []string{"US", "UK"}}},
+		},
 	}
 
 	appFetcher := &sdkapimocks.AppFetcherMock{

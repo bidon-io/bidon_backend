@@ -62,6 +62,7 @@
     "test": true,
     "imp": {
         "auction_configuration_id": 1,
+        "auction_configuration_uid": 1701972528521547776,
         "auction_id": "1d7fa438-cd08-4849-80ed-e20d5657a5ea",
         "bidfloor": 10.0,
         "demands": {

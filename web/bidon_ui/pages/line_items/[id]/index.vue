@@ -22,6 +22,7 @@ const resource = response.data;
 
 const fields = [
   ResourceCardFields.Id,
+  { label: "Public UID", key: "publicUid" },
   ResourceCardFields.HumanName,
   ResourceCardFields.App,
   ResourceCardFields.BidFloor,

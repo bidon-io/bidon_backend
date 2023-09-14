@@ -65,7 +65,8 @@
       "auction_id": "4c100a13-5166-4310-8411-be5f2382f637",
       "interstitial": {},
       "ecpm": 18.75,
-      "auction_configuration_id": 12
+      "auction_configuration_id": 12,
+      "auction_configuration_uid": 1701972528521547776
     },
     "user": {
       "tracking_authorization_status": "AUTHORIZED",

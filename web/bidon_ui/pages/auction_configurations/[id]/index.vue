@@ -26,6 +26,7 @@ const resource = response.data;
 
 const fields = [
   ResourceCardFields.Id,
+  { label: "Public UID", key: "publicUid" },
   ResourceCardFields.App,
   { label: "Name", key: "name" },
   { label: "Ad type", key: "adType" },
