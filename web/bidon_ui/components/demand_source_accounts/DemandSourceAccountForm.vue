@@ -2,6 +2,9 @@
   <form @submit="onSubmit">
     <FormCard title="Demand source account">
       <UserDropdown v-model="userId" :error="errors.userId" required />
+      <FormField label="Label" :error="errors.label" required>
+        <InputText v-model="label" type="text" placeholder="Label" />
+      </FormField>
       <DemandSourceTypeDropdown v-model="type" :error="errors.type" required />
       <DemandSourceDropdown
         v-model="demandSourceId"
@@ -34,6 +37,7 @@ const resource = ref(props.value);
 const { errors, useFieldModel, handleSubmit } = useForm({
   validationSchema: yup.object({
     userId: yup.number().required().label("User Id"),
+    label: yup.string().required().label("Label"),
     type: yup.string().required().label("Demand Source Type"),
     demandSourceId: yup.number().required().label("Deamand Source Id"),
     isBidding: yup.boolean(),
@@ -41,6 +45,7 @@ const { errors, useFieldModel, handleSubmit } = useForm({
   }),
   initialValues: {
     userId: resource.value.userId || null,
+    label: resource.value.label || "",
     type: resource.value.type || "",
     demandSourceId: resource.value.demandSourceId || null,
     isBidding: resource.value.isBidding || false,
@@ -49,6 +54,7 @@ const { errors, useFieldModel, handleSubmit } = useForm({
 });
 
 const userId = useFieldModel("userId");
+const label = useFieldModel("label");
 const type = useFieldModel("type");
 const demandSourceId = useFieldModel("demandSourceId");
 const isBidding = useFieldModel("isBidding");

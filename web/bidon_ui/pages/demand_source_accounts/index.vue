@@ -12,6 +12,7 @@ import { ResourceTableFields } from "@/constants";
 const columns = [
   ResourceTableFields.Id,
   ResourceTableFields.User,
+  ResourceTableFields.Label,
   { field: "type", header: "Type" },
   ResourceTableFields.DemandSource,
   { field: "isBidding", header: "Bidding" },

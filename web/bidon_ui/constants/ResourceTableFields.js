@@ -102,7 +102,9 @@ export const ResourceTableFields = {
           records.map(({ account }) => [
             account?.id,
             {
-              label: `${account?.type?.split("::")[1]} (${account?.id})`,
+              label: `(${account?.type?.split("::")[1]}) ${
+                account?.label ? account?.label : `#${account?.id}`
+              }`,
               value: String(account?.id),
             },
           ])
@@ -118,6 +120,16 @@ export const ResourceTableFields = {
       type: "input",
       matchMode: FilterMatchMode.CONTAINS,
       placeholder: "Human Name",
+    },
+  },
+  Label: {
+    field: "label",
+    header: "Label",
+    filter: {
+      field: "label",
+      type: "input",
+      matchMode: FilterMatchMode.CONTAINS,
+      placeholder: "Label",
     },
   },
   Segment: {
