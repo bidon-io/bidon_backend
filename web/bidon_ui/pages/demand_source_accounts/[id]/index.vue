@@ -27,6 +27,7 @@ const resource = response.data;
 const fields = [
   ResourceCardFields.Id,
   ResourceCardFields.User,
+  { label: "Label", key: "label" },
   { label: "Type", key: "type" },
   ResourceCardFields.DemandSource,
   { label: "IsBidding", key: "isBidding" },

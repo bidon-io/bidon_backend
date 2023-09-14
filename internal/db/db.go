@@ -113,6 +113,7 @@ type DemandSourceAccount struct {
 	DemandSource   DemandSource   `gorm:"foreignKey:DemandSourceID"`
 	UserID         int64          `gorm:"column:user_id;type:bigint;not null"`
 	User           User           `gorm:"foreignKey:UserID"`
+	Label          string         `gorm:"column:label;type:varchar;not null"`
 	Type           string         `gorm:"column:type;type:varchar;not null"`
 	Extra          datatypes.JSON `gorm:"column:extra;type:jsonb;default:'{}'"`
 	IsBidding      *bool          `gorm:"column:bidding;type:boolean;default:false"`
