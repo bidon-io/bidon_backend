@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/auction"
@@ -63,7 +64,7 @@ func (m *LineItemsMatcher) find(query *gorm.DB) ([]auction.LineItem, error) {
 		dbLineItem := &dbLineItems[i]
 
 		lineItems[i].ID = dbLineItem.Account.DemandSource.APIKey
-		lineItems[i].UID = dbLineItem.PublicUID.Int64
+		lineItems[i].UID = strconv.FormatInt(dbLineItem.PublicUID.Int64, 10)
 		lineItems[i].PriceFloor = dbLineItem.BidFloor.Decimal.InexactFloat64()
 		lineItems[i].AdUnitID = *dbLineItem.Code
 
