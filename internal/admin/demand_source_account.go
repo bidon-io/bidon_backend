@@ -17,6 +17,7 @@ type DemandSourceAccount struct {
 
 type DemandSourceAccountAttrs struct {
 	UserID         int64          `json:"user_id"`
+	Label          string         `json:"label"`
 	Type           string         `json:"type"`
 	DemandSourceID int64          `json:"demand_source_id"`
 	IsBidding      *bool          `json:"is_bidding"`
