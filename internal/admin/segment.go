@@ -8,7 +8,8 @@ import (
 )
 
 type Segment struct {
-	ID int64 `json:"id"`
+	ID        int64 `json:"id"`
+	PublicUID int64 `json:"public_uid"`
 	SegmentAttrs
 	App `json:"app"`
 }

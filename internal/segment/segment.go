@@ -22,6 +22,7 @@ type Params struct {
 
 type Segment struct {
 	ID      int64    `json:"id"`
+	UID     int64    `json:"uid"`
 	Filters []Filter `json:"filters"`
 }
 
@@ -50,7 +51,7 @@ func (m *Matcher) Match(ctx context.Context, params *Params) Segment {
 
 	for _, sgmnt := range sgmnts {
 		if isSegmentMatch(sgmnt, params) {
-			return Segment{ID: sgmnt.ID}
+			return sgmnt
 		}
 	}
 

@@ -8,6 +8,7 @@ import { ResourceTableFields } from "@/constants";
 
 const columns = [
   ResourceTableFields.Id,
+  { field: "publicUid", header: "Public UID" },
   ResourceTableFields.HumanName,
   ResourceTableFields.App,
   ResourceTableFields.BidFloor,

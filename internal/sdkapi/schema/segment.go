@@ -2,6 +2,7 @@ package schema
 
 type Segment struct {
 	ID  string `json:"id"`
+	UID int64  `json:"uid"`
 	Ext string `json:"ext"`
 }
 
