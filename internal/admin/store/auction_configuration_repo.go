@@ -17,7 +17,7 @@ func NewAuctionConfigurationRepo(d *db.DB) *AuctionConfigurationRepo {
 	return &AuctionConfigurationRepo{
 		resourceRepo: &resourceRepo[admin.AuctionConfiguration, admin.AuctionConfigurationAttrs, db.AuctionConfiguration]{
 			db:           d,
-			mapper:       auctionConfigurationMapper{},
+			mapper:       auctionConfigurationMapper{db: d},
 			associations: []string{"App", "Segment"},
 		},
 	}
@@ -37,7 +37,9 @@ func (r *AuctionConfigurationRepo) FindOwnedByUser(ctx context.Context, userID i
 	})
 }
 
-type auctionConfigurationMapper struct{}
+type auctionConfigurationMapper struct {
+	db *db.DB
+}
 
 //lint:ignore U1000 this method is used by generic struct
 func (m auctionConfigurationMapper) dbModel(c *admin.AuctionConfigurationAttrs, id int64) *db.AuctionConfiguration {
@@ -51,6 +53,11 @@ func (m auctionConfigurationMapper) dbModel(c *admin.AuctionConfigurationAttrs, 
 		segmentID.Int64 = *c.SegmentID
 		segmentID.Valid = true
 	}
+	publicUID := sql.NullInt64{}
+	if id == 0 {
+		publicUID.Int64 = m.db.GenerateSnowflakeID()
+		publicUID.Valid = true
+	}
 
 	return &db.AuctionConfiguration{
 		Model:                    db.Model{ID: id},
@@ -61,6 +68,7 @@ func (m auctionConfigurationMapper) dbModel(c *admin.AuctionConfigurationAttrs, 
 		Pricefloor:               c.Pricefloor,
 		SegmentID:                &segmentID,
 		ExternalWinNotifications: c.ExternalWinNotifications,
+		PublicUID:                publicUID,
 	}
 }
 
