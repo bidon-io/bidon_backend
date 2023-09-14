@@ -6,7 +6,7 @@ import (
 
 type Auction struct {
 	ConfigID                 int64         `json:"auction_configuration_id"`
-	ConfigUID                int64         `json:"auction_configuration_uid"`
+	ConfigUID                string        `json:"auction_configuration_uid"`
 	ExternalWinNotifications bool          `json:"external_win_notifications"`
 	Rounds                   []RoundConfig `json:"rounds"`
 	LineItems                []LineItem    `json:"line_items"`
@@ -14,7 +14,7 @@ type Auction struct {
 }
 type Config struct {
 	ID                       int64
-	UID                      int64
+	UID                      string
 	ExternalWinNotifications bool
 	Rounds                   []RoundConfig
 }
@@ -28,7 +28,7 @@ type RoundConfig struct {
 
 type LineItem struct {
 	ID          string  `json:"id"`
-	UID         int64   `json:"uid"`
+	UID         string  `json:"uid"`
 	PriceFloor  float64 `json:"pricefloor"`
 	AdUnitID    string  `json:"ad_unit_id"`
 	PlacementID string  `json:"placement_id"`
@@ -36,5 +36,5 @@ type LineItem struct {
 
 type Segment struct {
 	ID  string `json:"id"`
-	UID int64  `json:"uid"`
+	UID string `json:"uid"`
 }

@@ -34,7 +34,7 @@ type BuildParams struct {
 	DeviceType device.Type
 	Adapters   []adapter.Key
 	SegmentID  int64
-	SegmentUID int64
+	SegmentUID string
 	PriceFloor *float64
 }
 

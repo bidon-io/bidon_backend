@@ -33,7 +33,7 @@ type ConfigResponse struct {
 
 type Segment struct {
 	ID  string `json:"id"`
-	UID int64  `json:"uid"`
+	UID string `json:"uid"`
 }
 
 type ConfigResponseInit struct {

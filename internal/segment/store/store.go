@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/bidon-io/bidon-backend/internal/db"
 	"github.com/bidon-io/bidon-backend/internal/segment"
+	"strconv"
 )
 
 type SegmentFetcher struct {
@@ -25,7 +26,7 @@ func (f *SegmentFetcher) Fetch(ctx context.Context, appID int64) ([]segment.Segm
 	for _, dbSegment := range dbSegments {
 		sgmnts = append(sgmnts, segment.Segment{
 			ID:      dbSegment.ID,
-			UID:     dbSegment.PublicUID.Int64,
+			UID:     strconv.FormatInt(dbSegment.PublicUID.Int64, 10),
 			Filters: dbSegment.Filters,
 		})
 	}
