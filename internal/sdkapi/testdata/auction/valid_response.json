@@ -1,6 +1,6 @@
 {
   "auction_configuration_id": 1,
-  "auction_configuration_uid": 1701972528521547776,
+  "auction_configuration_uid": "1701972528521547776",
   "external_win_notifications": false,
   "rounds": [
     {
@@ -43,13 +43,13 @@
       "id": "test",
       "pricefloor": 0.1,
       "ad_unit_id": "test_id",
-      "uid": 1701972528521547776,
+      "uid": "1701972528521547776",
       "placement_id": ""
     }
   ],
   "segment": {
     "id": "1",
-    "uid": 1701972528521547776
+    "uid": "1701972528521547776"
   },
   "token": "{}",
   "pricefloor": 0.66,

@@ -66,7 +66,7 @@
       "interstitial": {},
       "ecpm": 18.75,
       "auction_configuration_id": 12,
-      "auction_configuration_uid": 1701972528521547776
+      "auction_configuration_uid": "1701972528521547776"
     },
     "user": {
       "tracking_authorization_status": "AUTHORIZED",
