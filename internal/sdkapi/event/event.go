@@ -288,6 +288,7 @@ type RequestEvent struct {
 	AdType                      string  `json:"ad_type"`
 	AuctionID                   string  `json:"auction_id"`
 	AuctionConfigurationID      int64   `json:"auction_configuration_id"`
+	AuctionConfigurationUID     int64   `json:"auction_configuration_uid"`
 	Status                      string  `json:"status"`
 	RoundID                     string  `json:"round_id"`
 	RoundNumber                 int     `json:"round_number"`
@@ -295,6 +296,7 @@ type RequestEvent struct {
 	DemandID                    string  `json:"demand_id"`
 	Bidding                     bool    `json:"bidding"`
 	AdUnitID                    int     `json:"ad_unit_id"`
+	LineItemUID                 int64   `json:"line_item_uid"`
 	AdUnitCode                  string  `json:"ad_unit_code"`
 	Ecpm                        float64 `json:"ecpm"`
 	PriceFloor                  float64 `json:"price_floor"`

@@ -20,18 +20,20 @@ func (r *StatsRequest) Map() map[string]any {
 }
 
 type Stats struct {
-	AuctionID              string       `json:"auction_id" validate:"required"`
-	AuctionConfigurationID int          `json:"auction_configuration_id" validate:"required"`
-	Result                 StatsResult  `json:"result" validate:"required"`
-	Rounds                 []StatsRound `json:"rounds" validate:"required"`
+	AuctionID               string       `json:"auction_id" validate:"required"`
+	AuctionConfigurationID  int          `json:"auction_configuration_id" validate:"required"`
+	AuctionConfigurationUID int64        `json:"auction_configuration_uid"`
+	Result                  StatsResult  `json:"result" validate:"required"`
+	Rounds                  []StatsRound `json:"rounds" validate:"required"`
 }
 
 func (s Stats) Map() map[string]any {
 	m := map[string]any{
-		"auction_id":               s.AuctionID,
-		"auction_configuration_id": s.AuctionConfigurationID,
-		"result":                   s.Result.Map(),
-		"rounds":                   sliceMap(s.Rounds),
+		"auction_id":                s.AuctionID,
+		"auction_configuration_id":  s.AuctionConfigurationID,
+		"auction_configuration_uid": s.AuctionConfigurationUID,
+		"result":                    s.Result.Map(),
+		"rounds":                    sliceMap(s.Rounds),
 	}
 
 	return m
@@ -88,6 +90,7 @@ type StatsDemand struct {
 	ID           string  `json:"id" validate:"required"`
 	Status       string  `json:"status" validate:"required"`
 	AdUnitID     string  `json:"ad_unit_id"`
+	LineItemUID  int64   `json:"line_item_uid"`
 	ECPM         float64 `json:"ecpm"`
 	BidStartTS   int     `json:"bid_start_ts"`
 	BidFinishTS  int     `json:"bid_finish_ts"`
@@ -100,6 +103,7 @@ func (d StatsDemand) Map() map[string]any {
 		"id":             d.ID,
 		"status":         d.Status,
 		"ad_unit_id":     d.AdUnitID,
+		"line_item_uid":  d.LineItemUID,
 		"ecpm":           d.ECPM,
 		"bid_start_ts":   d.BidStartTS,
 		"bid_finish_ts":  d.BidFinishTS,

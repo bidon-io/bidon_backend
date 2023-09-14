@@ -25,6 +25,7 @@ func (f *SegmentFetcher) Fetch(ctx context.Context, appID int64) ([]segment.Segm
 	for _, dbSegment := range dbSegments {
 		sgmnts = append(sgmnts, segment.Segment{
 			ID:      dbSegment.ID,
+			UID:     dbSegment.PublicUID.Int64,
 			Filters: dbSegment.Filters,
 		})
 	}

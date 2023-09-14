@@ -61,7 +61,8 @@
       "auction_id": "85011491-cada-4a8a-a79f-2876a5286ce0",
       "interstitial": {},
       "ecpm": 26.25,
-      "auction_configuration_id": 12
+      "auction_configuration_id": 12,
+      "auction_configuration_uid": 1701972528521547776
     },
     "user": {
       "tracking_authorization_status": "AUTHORIZED",

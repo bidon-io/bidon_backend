@@ -6,6 +6,7 @@ import (
 
 type Bidding struct {
 	ConfigID                 int64                 `json:"auction_configuration_id"`
+	ConfigUID                int64                 `json:"auction_configuration_uid"`
 	ExternalWinNotifications bool                  `json:"external_win_notifications"`
 	Rounds                   []auction.RoundConfig `json:"rounds"`
 	Segment                  Segment               `json:"segment"`
