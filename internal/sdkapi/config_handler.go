@@ -32,7 +32,8 @@ type ConfigResponse struct {
 }
 
 type Segment struct {
-	ID string `json:"id"`
+	ID  string `json:"id"`
+	UID int64  `json:"uid"`
 }
 
 type ConfigResponseInit struct {
@@ -85,7 +86,7 @@ func (h *ConfigHandler) Handle(c echo.Context) error {
 		},
 		Placements: []any{},
 		Token:      "{}",
-		Segment:    Segment{ID: segmentID},
+		Segment:    Segment{ID: segmentID, UID: sgmnt.UID},
 	}
 
 	return c.JSON(http.StatusOK, resp)

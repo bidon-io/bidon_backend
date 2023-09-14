@@ -6,16 +6,17 @@ import (
 )
 
 type Imp struct {
-	ID              string                         `json:"id" validate:"required,uuid4"`
-	AuctionID       string                         `json:"auction_id" validate:"required,uuid4"`
-	AuctionConfigID int64                          `json:"auction_configuration_id" validate:"required"`
-	RoundID         string                         `json:"round_id" validate:"required"`
-	BidFloor        *float64                       `json:"bidfloor" validate:"required,gte=0"`
-	Orientation     string                         `json:"orientation" validate:"oneof=PORTRAIT LANDSCAPE"`
-	Demands         map[adapter.Key]map[string]any `json:"demands"`
-	Banner          *BannerAdObject                `json:"banner"`
-	Interstitial    *InterstitialAdObject          `json:"interstitial"`
-	Rewarded        *RewardedAdObject              `json:"rewarded"`
+	ID               string                         `json:"id" validate:"required,uuid4"`
+	AuctionID        string                         `json:"auction_id" validate:"required,uuid4"`
+	AuctionConfigID  int64                          `json:"auction_configuration_id" validate:"required"`
+	AuctionConfigUID int64                          `json:"auction_configuration_uid"`
+	RoundID          string                         `json:"round_id" validate:"required"`
+	BidFloor         *float64                       `json:"bidfloor" validate:"required,gte=0"`
+	Orientation      string                         `json:"orientation" validate:"oneof=PORTRAIT LANDSCAPE"`
+	Demands          map[adapter.Key]map[string]any `json:"demands"`
+	Banner           *BannerAdObject                `json:"banner"`
+	Interstitial     *InterstitialAdObject          `json:"interstitial"`
+	Rewarded         *RewardedAdObject              `json:"rewarded"`
 }
 
 func (o *Imp) GetBidFloor() float64 {
