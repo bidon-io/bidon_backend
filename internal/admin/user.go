@@ -1,5 +1,7 @@
 package admin
 
+//go:generate go run -mod=mod github.com/matryer/moq@latest -out user_mocks_test.go . UserRepo
+
 import (
 	"context"
 
