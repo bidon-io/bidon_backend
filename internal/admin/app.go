@@ -1,5 +1,7 @@
 package admin
 
+//go:generate go run -mod=mod github.com/matryer/moq@latest -out app_mocks_test.go . AppRepo
+
 import (
 	"context"
 )

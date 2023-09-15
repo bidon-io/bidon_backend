@@ -1,6 +1,8 @@
 // Package admin implements services for managing resources.
 package admin
 
+//go:generate go run -mod=mod github.com/matryer/moq@latest -out admin_mocks_test.go . Store
+
 // Service is a top-level service for managing resources.
 type Service struct {
 	AppService                  *AppService
