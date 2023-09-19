@@ -3,6 +3,7 @@ package adminstore
 import (
 	"context"
 	"database/sql"
+	"strconv"
 
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/admin"
@@ -82,7 +83,7 @@ func (m lineItemMapper) dbModel(i *admin.LineItemAttrs, id int64) *db.LineItem {
 func (m lineItemMapper) resource(i *db.LineItem) admin.LineItem {
 	return admin.LineItem{
 		ID:            i.ID,
-		PublicUID:     i.PublicUID.Int64,
+		PublicUID:     strconv.FormatInt(i.PublicUID.Int64, 10),
 		LineItemAttrs: m.resourceAttrs(i),
 		App: admin.App{
 			ID:       i.AppID,

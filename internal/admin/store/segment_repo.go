@@ -3,6 +3,7 @@ package adminstore
 import (
 	"context"
 	"database/sql"
+	"strconv"
 
 	"github.com/bidon-io/bidon-backend/internal/admin"
 	"github.com/bidon-io/bidon-backend/internal/db"
@@ -65,7 +66,7 @@ func (m segmentMapper) dbModel(s *admin.SegmentAttrs, id int64) *db.Segment {
 func (m segmentMapper) resource(s *db.Segment) admin.Segment {
 	return admin.Segment{
 		ID:           s.ID,
-		PublicUID:    s.PublicUID.Int64,
+		PublicUID:    strconv.FormatInt(s.PublicUID.Int64, 10),
 		SegmentAttrs: m.resourceAttrs(s),
 		App: admin.App{
 			ID:       s.App.ID,

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_09_14_100940) do
+ActiveRecord::Schema[7.0].define(version: 2023_09_18_162514) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -23,10 +23,12 @@ ActiveRecord::Schema[7.0].define(version: 2023_09_14_100940) do
     t.jsonb "data", default: {}
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "public_uid"
     t.index ["account_type", "account_id"], name: "index_app_demand_profiles_on_account"
     t.index ["app_id", "demand_source_id"], name: "index_app_demand_profiles_on_app_id_and_demand_source_id", unique: true
     t.index ["app_id"], name: "index_app_demand_profiles_on_app_id"
     t.index ["demand_source_id"], name: "index_app_demand_profiles_on_demand_source_id"
+    t.index ["public_uid"], name: "index_app_demand_profiles_on_public_uid", unique: true
   end
 
   create_table "app_mmp_profiles", force: :cascade do |t|
@@ -62,8 +64,10 @@ ActiveRecord::Schema[7.0].define(version: 2023_09_14_100940) do
     t.jsonb "settings", default: {}
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "public_uid"
     t.index ["app_key"], name: "index_apps_on_app_key", unique: true
     t.index ["package_name", "platform_id"], name: "index_apps_on_package_name_and_platform_id", unique: true
+    t.index ["public_uid"], name: "index_apps_on_public_uid", unique: true
     t.index ["user_id"], name: "index_apps_on_user_id"
   end
 
@@ -105,7 +109,9 @@ ActiveRecord::Schema[7.0].define(version: 2023_09_14_100940) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "label"
+    t.bigint "public_uid"
     t.index ["demand_source_id"], name: "index_demand_source_accounts_on_demand_source_id"
+    t.index ["public_uid"], name: "index_demand_source_accounts_on_public_uid", unique: true
   end
 
   create_table "demand_sources", force: :cascade do |t|
@@ -174,7 +180,9 @@ ActiveRecord::Schema[7.0].define(version: 2023_09_14_100940) do
     t.datetime "updated_at", null: false
     t.boolean "is_admin", default: false, null: false
     t.string "password_hash", null: false
+    t.bigint "public_uid"
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["public_uid"], name: "index_users_on_public_uid", unique: true
   end
 
   add_foreign_key "app_demand_profiles", "apps"

@@ -97,8 +97,8 @@ func TestLineItemRepo_List(t *testing.T) {
 		}
 
 		want[i] = *item
-		want[i].Account = adminstore.DemandSourceAccountResource(&accounts[i])
-		want[i].App = adminstore.AppResource(app)
+		want[i].Account = adminstore.DemandSourceAccountAttrsWithId(&accounts[i])
+		want[i].App = adminstore.AppAttrsWithId(app)
 	}
 
 	got, err := repo.List(context.Background())
@@ -143,8 +143,8 @@ func TestLineItemRepo_Find(t *testing.T) {
 	if err != nil {
 		t.Fatalf("repo.Create(ctx, %+v) = %v, %q; want %T, %v", attrs, nil, err, want, nil)
 	}
-	want.App = adminstore.AppResource(app)
-	want.Account = adminstore.DemandSourceAccountResource(applovinAccount)
+	want.App = adminstore.AppAttrsWithId(app)
+	want.Account = adminstore.DemandSourceAccountAttrsWithId(applovinAccount)
 
 	got, err := repo.Find(context.Background(), want.ID)
 	if err != nil {
