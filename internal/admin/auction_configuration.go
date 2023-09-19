@@ -8,8 +8,8 @@ import (
 )
 
 type AuctionConfiguration struct {
-	ID        int64 `json:"id"`
-	PublicUID int64 `json:"public_uid"`
+	ID        int64  `json:"id"`
+	PublicUID string `json:"public_uid"`
 	AuctionConfigurationAttrs
 	App     App      `json:"app"`
 	Segment *Segment `json:"segment"`

@@ -2,7 +2,9 @@ package adminstore
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
+	"strconv"
 
 	"github.com/bidon-io/bidon-backend/internal/admin"
 	"github.com/bidon-io/bidon-backend/internal/db"
@@ -17,7 +19,7 @@ func NewAppDemandProfileRepo(d *db.DB) *AppDemandProfileRepo {
 	return &AppDemandProfileRepo{
 		resourceRepo: &resourceRepo[admin.AppDemandProfile, admin.AppDemandProfileAttrs, db.AppDemandProfile]{
 			db:           d,
-			mapper:       appDemandProfileMapper{},
+			mapper:       appDemandProfileMapper{db: d},
 			associations: []string{"App", "Account", "DemandSource"},
 		},
 	}
@@ -37,11 +39,18 @@ func (r *AppDemandProfileRepo) FindOwnedByUser(ctx context.Context, userID int64
 	})
 }
 
-type appDemandProfileMapper struct{}
+type appDemandProfileMapper struct {
+	db *db.DB
+}
 
 //lint:ignore U1000 this method is used by generic struct
 func (m appDemandProfileMapper) dbModel(attrs *admin.AppDemandProfileAttrs, id int64) *db.AppDemandProfile {
 	data, _ := json.Marshal(attrs.Data)
+	publicUID := sql.NullInt64{}
+	if id == 0 {
+		publicUID.Int64 = m.db.GenerateSnowflakeID()
+		publicUID.Valid = true
+	}
 
 	return &db.AppDemandProfile{
 		Model:          db.Model{ID: id},
@@ -50,6 +59,7 @@ func (m appDemandProfileMapper) dbModel(attrs *admin.AppDemandProfileAttrs, id i
 		AccountID:      attrs.AccountID,
 		DemandSourceID: attrs.DemandSourceID,
 		Data:           data,
+		PublicUID:      publicUID,
 	}
 }
 
@@ -57,6 +67,7 @@ func (m appDemandProfileMapper) dbModel(attrs *admin.AppDemandProfileAttrs, id i
 func (m appDemandProfileMapper) resource(p *db.AppDemandProfile) admin.AppDemandProfile {
 	return admin.AppDemandProfile{
 		ID:                    p.ID,
+		PublicUID:             strconv.FormatInt(p.PublicUID.Int64, 10),
 		AppDemandProfileAttrs: m.resourceAttrs(p),
 		App: admin.App{
 			ID:       p.AppID,
