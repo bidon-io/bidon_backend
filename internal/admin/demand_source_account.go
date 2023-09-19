@@ -9,7 +9,8 @@ import (
 )
 
 type DemandSourceAccount struct {
-	ID int64 `json:"id"`
+	ID        int64  `json:"id"`
+	PublicUID string `json:"public_uid"`
 	DemandSourceAccountAttrs
 	User         User         `json:"user"`
 	DemandSource DemandSource `json:"demand_source"`

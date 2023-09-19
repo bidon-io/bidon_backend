@@ -7,7 +7,7 @@
 import { ResourceTableFields } from "@/constants";
 
 const columns = [
-  ResourceTableFields.Id,
+  ResourceTableFields.PublicUid,
   { field: "platformId", header: "Platform Id" },
   ResourceTableFields.HumanName,
   {

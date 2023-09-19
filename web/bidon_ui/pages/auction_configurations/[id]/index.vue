@@ -25,8 +25,7 @@ const response = await axios.get(`${resourcesPath}/${id}`);
 const resource = response.data;
 
 const fields = [
-  ResourceCardFields.Id,
-  { label: "Public UID", key: "publicUid" },
+  ResourceCardFields.PublicUid,
   ResourceCardFields.App,
   { label: "Name", key: "name" },
   { label: "Ad type", key: "adType" },
