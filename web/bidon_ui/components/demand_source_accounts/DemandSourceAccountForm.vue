@@ -1,7 +1,12 @@
 <template>
   <form @submit="onSubmit">
     <FormCard title="Demand source account">
-      <UserDropdown v-model="userId" :error="errors.userId" required />
+      <UserDropdown
+        v-if="currentUser.isAdmin"
+        v-model="userId"
+        :error="errors.userId"
+        required
+      />
       <FormField label="Label" :error="errors.label" required>
         <InputText v-model="label" type="text" placeholder="Label" />
       </FormField>
@@ -24,6 +29,7 @@
 
 <script setup>
 import * as yup from "yup";
+import { useAuthStore } from "@/stores/AuthStore";
 
 const props = defineProps({
   value: {
@@ -34,15 +40,22 @@ const props = defineProps({
 const emit = defineEmits(["submit"]);
 const resource = ref(props.value);
 
+const { user: currentUser } = useAuthStore();
+const validationFields = {
+  label: yup.string().required().label("Label"),
+  type: yup.string().required().label("Demand Source Type"),
+  demandSourceId: yup.number().required().label("Deamand Source Id"),
+  isBidding: yup.boolean(),
+  extra: yup.object(),
+};
+
+if (currentUser.isAdmin) {
+  validationFields.userId = yup.number().required().label("User Id");
+}
+const validationSchema = yup.object(validationFields);
+
 const { errors, useFieldModel, handleSubmit } = useForm({
-  validationSchema: yup.object({
-    userId: yup.number().required().label("User Id"),
-    label: yup.string().required().label("Label"),
-    type: yup.string().required().label("Demand Source Type"),
-    demandSourceId: yup.number().required().label("Deamand Source Id"),
-    isBidding: yup.boolean(),
-    extra: yup.object(),
-  }),
+  validationSchema,
   initialValues: {
     userId: resource.value.userId || null,
     label: resource.value.label || "",
