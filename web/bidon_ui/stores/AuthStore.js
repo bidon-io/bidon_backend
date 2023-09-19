@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+import { camelizeKeys } from "humps";
 import axios from "axios";
 import authorizedApi from "@/services/ApiService.js";
 import { useToast } from "primevue/usetoast";
@@ -10,7 +11,9 @@ export const useAuthStore = defineStore("authStore", () => {
   const router = useRouter();
 
   const localStorageUser = localStorage.getItem("user");
-  const user = ref(localStorageUser ? JSON.parse(localStorageUser) : null);
+  const user = ref(
+    localStorageUser ? camelizeKeys(JSON.parse(localStorageUser)) : null
+  );
   const accessToken = ref(localStorage.getItem("accessToken") || null);
   const permissions = ref([]);
 
@@ -18,10 +21,10 @@ export const useAuthStore = defineStore("authStore", () => {
     api
       .post("/auth/login", { email, password })
       .then((response) => {
-        user.value = response.data.user;
+        user.value = camelizeKeys(response.data.user);
         accessToken.value = response.data["access_token"];
-        localStorage.setItem("user", JSON.stringify(response.data.user));
-        localStorage.setItem("accessToken", response.data["access_token"]);
+        localStorage.setItem("user", JSON.stringify(user.value));
+        localStorage.setItem("accessToken", accessToken.value);
         router.push("/");
       })
       .catch((error) => {
