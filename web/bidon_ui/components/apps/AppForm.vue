@@ -12,7 +12,12 @@
       <FormField label="Package Name" :error="errors.packageName" required>
         <InputText v-model="packageName" type="text" placeholder="Name" />
       </FormField>
-      <UserDropdown v-model="userId" :error="errors.userId" required />
+      <UserDropdown
+        v-if="currentUser.isAdmin"
+        v-model="userId"
+        :error="errors.userId"
+        required
+      />
       <FormField label="App Key" :error="errors.appKey" required>
         <InputText v-model="appKey" type="text" placeholder="Name" />
       </FormField>
@@ -26,6 +31,8 @@
 
 <script setup>
 import * as yup from "yup";
+import { useAuthStore } from "@/stores/AuthStore";
+
 const props = defineProps({
   value: {
     type: Object,
@@ -35,15 +42,23 @@ const props = defineProps({
 const emit = defineEmits(["submit"]);
 const resource = ref(props.value);
 
+const { user: currentUser } = useAuthStore();
+let validationFields = {
+  platformId: yup.string().required().label("Platform Id"),
+  humanName: yup.string().required().label("Human Name"),
+  packageName: yup.string().required().label("Package Name"),
+  appKey: yup.string().required().label("App Key"),
+  settings: yup.object(),
+};
+
+if (currentUser.isAdmin) {
+  validationFields.userId = yup.number().required().label("User Id");
+}
+
+const validationSchema = yup.object(validationFields);
+
 const { errors, useFieldModel, handleSubmit } = useForm({
-  validationSchema: yup.object({
-    platformId: yup.string().required().label("Platform Id"),
-    humanName: yup.string().required().label("Human Name"),
-    packageName: yup.string().required().label("Package Name"),
-    userId: yup.number().required().label("User Id"),
-    appKey: yup.string().required().label("App Key"),
-    settings: yup.object(),
-  }),
+  validationSchema,
   initialValues: {
     platformId: resource.value.platformId || "",
     humanName: resource.value.humanName || "",
