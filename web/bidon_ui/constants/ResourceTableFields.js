@@ -2,6 +2,7 @@ import { FilterMatchMode } from "primevue/api";
 
 export const ResourceTableFields = {
   Id: { field: "id", header: "Id", sortable: true },
+  PublicUid: { field: "publicUid", header: "Public UID" },
   App: {
     field: "appId",
     header: "App",

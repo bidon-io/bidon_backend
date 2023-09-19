@@ -1,5 +1,6 @@
 export const ResourceCardFields = {
   Id: { label: "ID", key: "id" },
+  PublicUid: { label: "Public UID", key: "publicUid" },
   App: {
     label: "App",
     key: "appId",

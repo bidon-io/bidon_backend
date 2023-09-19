@@ -10,8 +10,8 @@ import (
 )
 
 type LineItem struct {
-	ID        int64 `json:"id"`
-	PublicUID int64 `json:"public_uid"`
+	ID        int64  `json:"id"`
+	PublicUID string `json:"public_uid"`
 	LineItemAttrs
 	App     App                 `json:"app"`
 	Account DemandSourceAccount `json:"account"`

@@ -3,6 +3,7 @@ package adminstore
 import (
 	"context"
 	"database/sql"
+	"strconv"
 
 	"github.com/bidon-io/bidon-backend/internal/admin"
 	"github.com/bidon-io/bidon-backend/internal/db"
@@ -17,7 +18,7 @@ func NewAppRepo(d *db.DB) *AppRepo {
 	return &AppRepo{
 		resourceRepo: &resourceRepo[admin.App, admin.AppAttrs, db.App]{
 			db:           d,
-			mapper:       appMapper{},
+			mapper:       appMapper{db: d},
 			associations: []string{"User"},
 		},
 	}
@@ -35,7 +36,9 @@ func (r *AppRepo) FindOwnedByUser(ctx context.Context, userID int64, id int64) (
 	})
 }
 
-type appMapper struct{}
+type appMapper struct {
+	db *db.DB
+}
 
 //lint:ignore U1000 this method is used by generic struct
 func (m appMapper) dbModel(a *admin.AppAttrs, id int64) *db.App {
@@ -51,6 +54,12 @@ func (m appMapper) dbModel(a *admin.AppAttrs, id int64) *db.App {
 		appKey.Valid = true
 	}
 
+	publicUID := sql.NullInt64{}
+	if id == 0 {
+		publicUID.Int64 = m.db.GenerateSnowflakeID()
+		publicUID.Valid = true
+	}
+
 	return &db.App{
 		Model:       db.Model{ID: id},
 		UserID:      a.UserID,
@@ -59,15 +68,17 @@ func (m appMapper) dbModel(a *admin.AppAttrs, id int64) *db.App {
 		PackageName: packageName,
 		AppKey:      appKey,
 		Settings:    a.Settings,
+		PublicUID:   publicUID,
 	}
 }
 
 //lint:ignore U1000 this method is used by generic struct
 func (m appMapper) resource(a *db.App) admin.App {
 	return admin.App{
-		ID:       a.ID,
-		AppAttrs: m.resourceAttrs(a),
-		User:     userMapper{}.resource(&a.User),
+		ID:        a.ID,
+		PublicUID: strconv.FormatInt(a.PublicUID.Int64, 10),
+		AppAttrs:  m.resourceAttrs(a),
+		User:      userMapper{}.resource(&a.User),
 	}
 }
 

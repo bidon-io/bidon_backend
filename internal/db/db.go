@@ -98,6 +98,7 @@ type AppDemandProfile struct {
 	DemandSourceID int64               `gorm:"column:demand_source_id;type:bigint;not null"`
 	DemandSource   DemandSource        `gorm:"foreignKey:DemandSourceID"`
 	Data           datatypes.JSON      `gorm:"column:data;type:jsonb;default:'{}'"`
+	PublicUID      sql.NullInt64       `gorm:"column:public_uid;type:bigint"`
 }
 
 type App struct {
@@ -109,6 +110,7 @@ type App struct {
 	PackageName sql.NullString `gorm:"column:package_name;type:varchar"`
 	AppKey      sql.NullString `gorm:"column:app_key;type:varchar"`
 	Settings    map[string]any `gorm:"column:settings;type:jsonb;default:'{}';serializer:json"`
+	PublicUID   sql.NullInt64  `gorm:"column:public_uid;type:bigint"`
 }
 
 type AuctionConfiguration struct {
@@ -143,6 +145,7 @@ type DemandSourceAccount struct {
 	Extra          datatypes.JSON `gorm:"column:extra;type:jsonb;default:'{}'"`
 	IsBidding      *bool          `gorm:"column:bidding;type:boolean;default:false"`
 	IsDefault      sql.NullBool   `gorm:"column:is_default;type:boolean"`
+	PublicUID      sql.NullInt64  `gorm:"column:public_uid;type:bigint"`
 }
 
 type DemandSource struct {
@@ -183,9 +186,10 @@ type Segment struct {
 
 type User struct {
 	Model
-	Email        string `gorm:"column:email;type:varchar;not null"`
-	IsAdmin      *bool  `gorm:"column:is_admin;type:boolean;default:false;not null"`
-	PasswordHash string `gorm:"column:password_hash;type:varchar;not null"`
+	Email        string        `gorm:"column:email;type:varchar;not null"`
+	IsAdmin      *bool         `gorm:"column:is_admin;type:boolean;default:false;not null"`
+	PasswordHash string        `gorm:"column:password_hash;type:varchar;not null"`
+	PublicUID    sql.NullInt64 `gorm:"column:public_uid;type:bigint"`
 }
 
 type AdType int32

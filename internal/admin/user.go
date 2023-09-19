@@ -10,9 +10,10 @@ import (
 )
 
 type User struct {
-	ID      int64  `json:"id"`
-	IsAdmin *bool  `json:"is_admin"`
-	Email   string `json:"email"`
+	ID        int64  `json:"id"`
+	PublicUID string `json:"public_uid"`
+	IsAdmin   *bool  `json:"is_admin"`
+	Email     string `json:"email"`
 }
 
 type UserAttrs struct {

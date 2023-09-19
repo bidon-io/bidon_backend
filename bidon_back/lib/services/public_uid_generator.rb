@@ -24,3 +24,7 @@ end
 # Segment.find_each { |r| PublicUidGenerator.generate_for(r) }
 # LineItem.find_each { |r| PublicUidGenerator.generate_for(r) }
 # AuctionConfiguration.find_each { |r| PublicUidGenerator.generate_for(r) }
+# App.find_each { |r| PublicUidGenerator.generate_for(r) }
+# DemandSourceAccount.find_each { |r| PublicUidGenerator.generate_for(r) }
+# AppDemandProfile.find_each { |r| PublicUidGenerator.generate_for(r) }
+# User.find_each { |r| PublicUidGenerator.generate_for(r) }

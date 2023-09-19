@@ -7,8 +7,7 @@
 import { ResourceTableFields } from "@/constants";
 
 const columns = [
-  ResourceTableFields.Id,
-  { field: "publicUid", header: "Public UID" },
+  ResourceTableFields.PublicUid,
   ResourceTableFields.App,
   { field: "name", header: "Name" },
   { field: "filters", header: "Filters" },

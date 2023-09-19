@@ -55,9 +55,9 @@ func TestAppDemandProfileRepo_List(t *testing.T) {
 		}
 
 		want[i] = *profile
-		want[i].App = adminstore.AppResource(apps[i])
+		want[i].App = adminstore.AppAttrsWithId(apps[i])
 		want[i].DemandSource = *adminstore.DemandSourceResource(demandSources[i])
-		want[i].Account = adminstore.DemandSourceAccountResource(accounts[i])
+		want[i].Account = adminstore.DemandSourceAccountAttrsWithId(accounts[i])
 	}
 
 	got, err := repo.List(context.Background())
@@ -167,8 +167,8 @@ func TestAppDemandProfileRepo_Find(t *testing.T) {
 	if err != nil {
 		t.Fatalf("repo.Create(ctx, %+v) = %v, %q; want %T, %v", attrs, nil, err, want, nil)
 	}
-	want.App = adminstore.AppResource(app)
-	want.Account = adminstore.DemandSourceAccountResource(account)
+	want.App = adminstore.AppAttrsWithId(app)
+	want.Account = adminstore.DemandSourceAccountAttrsWithId(account)
 	want.DemandSource = *adminstore.DemandSourceResource(demandSource)
 
 	got, err := repo.Find(context.Background(), want.ID)

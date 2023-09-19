@@ -10,7 +10,7 @@
 import { ResourceTableFields } from "@/constants";
 
 const columns = [
-  ResourceTableFields.Id,
+  ResourceTableFields.PublicUid,
   ResourceTableFields.App,
   ResourceTableFields.DemandSource,
   ResourceTableFields.DemandSourceAccount,

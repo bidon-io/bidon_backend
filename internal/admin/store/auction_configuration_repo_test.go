@@ -55,9 +55,9 @@ func TestAuctionConfigurationRepo_List(t *testing.T) {
 		}
 
 		want[i] = *config
-		want[i].App = adminstore.AppResource(apps[i])
+		want[i].App = adminstore.AppAttrsWithId(apps[i])
 		if segments[i] != nil {
-			want[i].Segment = adminstore.SegmentResource(segments[i])
+			want[i].Segment = adminstore.SegmentAttrsWithId(segments[i])
 		}
 	}
 
@@ -90,7 +90,7 @@ func TestAuctionConfigurationRepo_Find(t *testing.T) {
 	if err != nil {
 		t.Fatalf("repo.Create(ctx, %+v) = %v, %q; want %T, %v", attrs, nil, err, want, nil)
 	}
-	want.App = adminstore.AppResource(app)
+	want.App = adminstore.AppAttrsWithId(app)
 
 	got, err := repo.Find(context.Background(), want.ID)
 	if err != nil {
