@@ -1,5 +1,7 @@
 package schema
 
+import "strconv"
+
 type Bid struct {
 	AuctionID               string                `json:"auction_id" validate:"required"`
 	AuctionConfigurationID  int                   `json:"auction_configuration_id" validate:"required"`
@@ -16,15 +18,24 @@ type Bid struct {
 }
 
 func (b Bid) Map() map[string]any {
+	auctionConfigurationUID, err := strconv.Atoi(b.AuctionConfigurationUID)
+	if err != nil {
+		auctionConfigurationUID = 0
+	}
+	lineItemUID, err := strconv.Atoi(b.LineItemUID)
+	if err != nil {
+		lineItemUID = 0
+	}
+
 	m := map[string]any{
 		"auction_id":                b.AuctionID,
 		"auction_configuration_id":  b.AuctionConfigurationID,
-		"auction_configuration_uid": b.AuctionConfigurationUID,
+		"auction_configuration_uid": auctionConfigurationUID,
 		"imp_id":                    b.ImpID,
 		"demand_id":                 b.DemandID,
 		"round_id":                  b.RoundID,
 		"ad_unit_id":                b.AdUnitID,
-		"line_item_uid":             b.LineItemUID,
+		"line_item_uid":             lineItemUID,
 		"ecpm":                      b.ECPM,
 	}
 

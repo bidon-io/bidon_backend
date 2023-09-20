@@ -2,6 +2,7 @@ package schema
 
 import (
 	"github.com/bidon-io/bidon-backend/internal/ad"
+	"strconv"
 )
 
 type StatsRequest struct {
@@ -28,10 +29,15 @@ type Stats struct {
 }
 
 func (s Stats) Map() map[string]any {
+	auctionConfigurationUID, err := strconv.Atoi(s.AuctionConfigurationUID)
+	if err != nil {
+		auctionConfigurationUID = 0
+	}
+
 	m := map[string]any{
 		"auction_id":                s.AuctionID,
 		"auction_configuration_id":  s.AuctionConfigurationID,
-		"auction_configuration_uid": s.AuctionConfigurationUID,
+		"auction_configuration_uid": auctionConfigurationUID,
 		"result":                    s.Result.Map(),
 		"rounds":                    sliceMap(s.Rounds),
 	}
@@ -99,11 +105,16 @@ type StatsDemand struct {
 }
 
 func (d StatsDemand) Map() map[string]any {
+	lineItemUID, err := strconv.Atoi(d.LineItemUID)
+	if err != nil {
+		lineItemUID = 0
+	}
+
 	m := map[string]any{
 		"id":             d.ID,
 		"status":         d.Status,
 		"ad_unit_id":     d.AdUnitID,
-		"line_item_uid":  d.LineItemUID,
+		"line_item_uid":  lineItemUID,
 		"ecpm":           d.ECPM,
 		"bid_start_ts":   d.BidStartTS,
 		"bid_finish_ts":  d.BidFinishTS,
