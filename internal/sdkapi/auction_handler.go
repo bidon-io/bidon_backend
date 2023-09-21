@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
@@ -59,20 +60,26 @@ func (h *AuctionHandler) Handle(c echo.Context) error {
 		return err
 	}
 
+	auctionConfigurationUID, err := strconv.Atoi(auc.ConfigUID)
+	if err != nil {
+		auctionConfigurationUID = 0
+	}
 	adRequestParams := event.AdRequestParams{
-		EventType:              "auction_request",
-		AdType:                 string(req.raw.AdType),
-		AuctionID:              req.raw.AdObject.AuctionID,
-		AuctionConfigurationID: auc.ConfigID,
-		Status:                 "",
-		RoundID:                "",
-		RoundNumber:            0,
-		ImpID:                  "",
-		DemandID:               "",
-		AdUnitID:               0,
-		AdUnitCode:             "",
-		Ecpm:                   0,
-		PriceFloor:             0,
+		EventType:               "auction_request",
+		AdType:                  string(req.raw.AdType),
+		AuctionID:               req.raw.AdObject.AuctionID,
+		AuctionConfigurationID:  auc.ConfigID,
+		AuctionConfigurationUID: int64(auctionConfigurationUID),
+		Status:                  "",
+		RoundID:                 "",
+		RoundNumber:             0,
+		ImpID:                   "",
+		DemandID:                "",
+		AdUnitID:                0,
+		LineItemUID:             0,
+		AdUnitCode:              "",
+		Ecpm:                    0,
+		PriceFloor:              0,
 	}
 	aucRequestEvent := event.NewRequest(&req.raw.BaseRequest, adRequestParams, req.geoData)
 	h.EventLogger.Log(aucRequestEvent, func(err error) {
