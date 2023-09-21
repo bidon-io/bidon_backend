@@ -25,6 +25,7 @@ api.interceptors.response.use(
       useAuthStore().logout();
       window.location.reload();
     }
+    throw error;
   }
 );
 

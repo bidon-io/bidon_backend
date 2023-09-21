@@ -41,10 +41,13 @@
   "line_items": [
     {
       "id": "test",
+      "uid": "1701972528521547776",
       "pricefloor": 0.1,
       "ad_unit_id": "test_id",
-      "uid": "1701972528521547776",
-      "placement_id": ""
+      "placement_id": "",
+      "zoned_id": "",
+      "slot_uuid": "",
+      "slot_id": ""
     }
   ],
   "segment": {
