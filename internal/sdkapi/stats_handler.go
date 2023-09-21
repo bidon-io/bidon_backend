@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
@@ -57,20 +58,27 @@ func (h *StatsHandler) sendEvents(c echo.Context, req *request[schema.StatsReque
 	// 1 event for each demand in round
 	stats := req.raw.Stats
 
+	auctionConfigurationUID, err := strconv.Atoi(stats.AuctionConfigurationUID)
+	if err != nil {
+		auctionConfigurationUID = 0
+	}
+
 	adRequestParams := event.AdRequestParams{
-		EventType:              "stats_request",
-		AdType:                 string(req.raw.AdType),
-		AuctionID:              stats.AuctionID,
-		AuctionConfigurationID: int64(stats.AuctionConfigurationID),
-		Status:                 stats.Result.Status,
-		RoundID:                stats.Result.RoundID,
-		RoundNumber:            0,
-		ImpID:                  "",
-		DemandID:               stats.Result.WinnerID,
-		AdUnitID:               0,
-		AdUnitCode:             "",
-		Ecpm:                   stats.Result.ECPM,
-		PriceFloor:             0,
+		EventType:               "stats_request",
+		AdType:                  string(req.raw.AdType),
+		AuctionID:               stats.AuctionID,
+		AuctionConfigurationID:  int64(stats.AuctionConfigurationID),
+		AuctionConfigurationUID: int64(auctionConfigurationUID),
+		Status:                  stats.Result.Status,
+		RoundID:                 stats.Result.RoundID,
+		RoundNumber:             0,
+		ImpID:                   "",
+		DemandID:                stats.Result.WinnerID,
+		AdUnitID:                0,
+		LineItemUID:             0,
+		AdUnitCode:              "",
+		Ecpm:                    stats.Result.ECPM,
+		PriceFloor:              0,
 	}
 	statsRequestEvent := event.NewRequest(&req.raw.BaseRequest, adRequestParams, req.geoData)
 	h.EventLogger.Log(statsRequestEvent, func(err error) {
@@ -79,18 +87,20 @@ func (h *StatsHandler) sendEvents(c echo.Context, req *request[schema.StatsReque
 
 	for roundNumber, round := range stats.Rounds {
 		adRequestParams = event.AdRequestParams{
-			EventType:              "round_request",
-			AdType:                 string(req.raw.AdType),
-			AuctionID:              stats.AuctionID,
-			AuctionConfigurationID: int64(stats.AuctionConfigurationID),
-			RoundID:                round.ID,
-			RoundNumber:            roundNumber,
-			ImpID:                  "",
-			DemandID:               round.WinnerID,
-			AdUnitID:               0,
-			AdUnitCode:             "",
-			Ecpm:                   round.WinnerECPM,
-			PriceFloor:             round.PriceFloor,
+			EventType:               "round_request",
+			AdType:                  string(req.raw.AdType),
+			AuctionID:               stats.AuctionID,
+			AuctionConfigurationID:  int64(stats.AuctionConfigurationID),
+			AuctionConfigurationUID: int64(auctionConfigurationUID),
+			RoundID:                 round.ID,
+			RoundNumber:             roundNumber,
+			ImpID:                   "",
+			DemandID:                round.WinnerID,
+			AdUnitID:                0,
+			LineItemUID:             0,
+			AdUnitCode:              "",
+			Ecpm:                    round.WinnerECPM,
+			PriceFloor:              round.PriceFloor,
 		}
 		if round.WinnerID != "" {
 			adRequestParams.Status = "SUCCESS"
@@ -103,21 +113,28 @@ func (h *StatsHandler) sendEvents(c echo.Context, req *request[schema.StatsReque
 		})
 
 		for _, demand := range round.Demands {
+			lineItemUID, err := strconv.Atoi(demand.LineItemUID)
+			if err != nil {
+				lineItemUID = 0
+			}
+
 			adRequestParams = event.AdRequestParams{
-				EventType:              "demand_request",
-				AdType:                 string(req.raw.AdType),
-				AuctionID:              stats.AuctionID,
-				AuctionConfigurationID: int64(stats.AuctionConfigurationID),
-				Status:                 demand.Status,
-				RoundID:                round.ID,
-				RoundNumber:            roundNumber,
-				ImpID:                  "",
-				DemandID:               demand.ID,
-				AdUnitID:               0,
-				AdUnitCode:             demand.AdUnitID,
-				Ecpm:                   demand.ECPM,
-				PriceFloor:             round.PriceFloor,
-				Bidding:                false,
+				EventType:               "demand_request",
+				AdType:                  string(req.raw.AdType),
+				AuctionID:               stats.AuctionID,
+				AuctionConfigurationID:  int64(stats.AuctionConfigurationID),
+				AuctionConfigurationUID: int64(auctionConfigurationUID),
+				Status:                  demand.Status,
+				RoundID:                 round.ID,
+				RoundNumber:             roundNumber,
+				ImpID:                   "",
+				DemandID:                demand.ID,
+				AdUnitID:                0,
+				LineItemUID:             int64(lineItemUID),
+				AdUnitCode:              demand.AdUnitID,
+				Ecpm:                    demand.ECPM,
+				PriceFloor:              round.PriceFloor,
+				Bidding:                 false,
 			}
 			demandRequestEvent := event.NewRequest(&req.raw.BaseRequest, adRequestParams, req.geoData)
 			h.EventLogger.Log(demandRequestEvent, func(err error) {
@@ -127,20 +144,22 @@ func (h *StatsHandler) sendEvents(c echo.Context, req *request[schema.StatsReque
 
 		for _, bid := range round.Bidding.Bids {
 			adRequestParams = event.AdRequestParams{
-				EventType:              "client_bid",
-				AdType:                 string(req.raw.AdType),
-				AuctionID:              stats.AuctionID,
-				AuctionConfigurationID: int64(stats.AuctionConfigurationID),
-				Status:                 bid.Status,
-				RoundID:                round.ID,
-				RoundNumber:            roundNumber,
-				ImpID:                  "",
-				DemandID:               bid.ID,
-				AdUnitID:               0,
-				AdUnitCode:             "",
-				Ecpm:                   bid.ECPM,
-				PriceFloor:             round.PriceFloor,
-				Bidding:                true,
+				EventType:               "client_bid",
+				AdType:                  string(req.raw.AdType),
+				AuctionID:               stats.AuctionID,
+				AuctionConfigurationID:  int64(stats.AuctionConfigurationID),
+				AuctionConfigurationUID: int64(auctionConfigurationUID),
+				Status:                  bid.Status,
+				RoundID:                 round.ID,
+				RoundNumber:             roundNumber,
+				ImpID:                   "",
+				DemandID:                bid.ID,
+				AdUnitID:                0,
+				LineItemUID:             0,
+				AdUnitCode:              "",
+				Ecpm:                    bid.ECPM,
+				PriceFloor:              round.PriceFloor,
+				Bidding:                 true,
 			}
 			demandRequestEvent := event.NewRequest(&req.raw.BaseRequest, adRequestParams, req.geoData)
 			h.EventLogger.Log(demandRequestEvent, func(err error) {

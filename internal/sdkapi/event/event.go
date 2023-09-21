@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"slices"
+	"strconv"
 	"strings"
 	"time"
 
@@ -72,12 +73,14 @@ func NewRequest(request *schema.BaseRequest, adRequestParams AdRequestParams, ge
 	requestEvent.AdType = adRequestParams.AdType
 	requestEvent.AuctionID = adRequestParams.AuctionID
 	requestEvent.AuctionConfigurationID = adRequestParams.AuctionConfigurationID
+	requestEvent.AuctionConfigurationUID = adRequestParams.AuctionConfigurationUID
 	requestEvent.RoundID = adRequestParams.RoundID
 	requestEvent.RoundNumber = adRequestParams.RoundNumber
 	requestEvent.ImpID = adRequestParams.ImpID
 	requestEvent.DemandID = adRequestParams.DemandID
 	requestEvent.Bidding = adRequestParams.Bidding
 	requestEvent.AdUnitID = adRequestParams.AdUnitID
+	requestEvent.LineItemUID = adRequestParams.LineItemUID
 	requestEvent.AdUnitCode = adRequestParams.AdUnitCode
 	requestEvent.Ecpm = adRequestParams.Ecpm
 	requestEvent.PriceFloor = adRequestParams.PriceFloor
@@ -106,6 +109,11 @@ func NewWin(request *schema.WinRequest, geoData geocoder.GeoData) Event {
 }
 
 func newBaseRequest(request *schema.BaseRequest, geoData geocoder.GeoData) RequestEvent {
+	segmentUID, err := strconv.Atoi(request.Segment.UID)
+	if err != nil {
+		segmentUID = 0
+	}
+
 	return RequestEvent{
 		Timestamp:                   generateTimestamp(),
 		Manufacturer:                request.Device.Manufacturer,
@@ -132,6 +140,7 @@ func newBaseRequest(request *schema.BaseRequest, geoData geocoder.GeoData) Reque
 		Ip:                          geoData.IPString,
 		CountryID:                   geoData.CountryID,
 		SegmentID:                   request.Segment.ID,
+		SegmentUID:                  int64(segmentUID),
 		Ext:                         request.Ext,
 	}
 }
@@ -264,22 +273,24 @@ func (r *demandResultEvent) Payload() (map[string]any, error) {
 }
 
 type AdRequestParams struct {
-	EventType              string
-	AdType                 string
-	AuctionID              string
-	AuctionConfigurationID int64
-	Status                 string
-	RoundID                string
-	RoundNumber            int
-	ImpID                  string
-	DemandID               string
-	Bidding                bool
-	AdUnitID               int
-	AdUnitCode             string
-	Ecpm                   float64
-	PriceFloor             float64
-	RawRequest             string
-	RawResponse            string
+	EventType               string
+	AdType                  string
+	AuctionID               string
+	AuctionConfigurationID  int64
+	AuctionConfigurationUID int64
+	Status                  string
+	RoundID                 string
+	RoundNumber             int
+	ImpID                   string
+	DemandID                string
+	Bidding                 bool
+	AdUnitID                int
+	LineItemUID             int64
+	AdUnitCode              string
+	Ecpm                    float64
+	PriceFloor              float64
+	RawRequest              string
+	RawResponse             string
 }
 
 type RequestEvent struct {
@@ -288,7 +299,7 @@ type RequestEvent struct {
 	AdType                      string  `json:"ad_type"`
 	AuctionID                   string  `json:"auction_id"`
 	AuctionConfigurationID      int64   `json:"auction_configuration_id"`
-	AuctionConfigurationUID     string  `json:"auction_configuration_uid"`
+	AuctionConfigurationUID     int64   `json:"auction_configuration_uid"`
 	Status                      string  `json:"status"`
 	RoundID                     string  `json:"round_id"`
 	RoundNumber                 int     `json:"round_number"`
@@ -296,7 +307,7 @@ type RequestEvent struct {
 	DemandID                    string  `json:"demand_id"`
 	Bidding                     bool    `json:"bidding"`
 	AdUnitID                    int     `json:"ad_unit_id"`
-	LineItemUID                 string  `json:"line_item_uid"`
+	LineItemUID                 int64   `json:"line_item_uid"`
 	AdUnitCode                  string  `json:"ad_unit_code"`
 	Ecpm                        float64 `json:"ecpm"`
 	PriceFloor                  float64 `json:"price_floor"`
@@ -326,7 +337,7 @@ type RequestEvent struct {
 	Ip                          string  `json:"ip"`
 	CountryID                   int64   `json:"country_id"`
 	SegmentID                   string  `json:"segment_id"`
-	SegmentUID                  string  `json:"segment_uid"`
+	SegmentUID                  int64   `json:"segment_uid"`
 	Ext                         string  `json:"ext"`
 }
 

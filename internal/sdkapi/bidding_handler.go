@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"sort"
+	"strconv"
 	"time"
 
 	"github.com/bidon-io/bidon-backend/internal/adapter"
@@ -122,25 +123,31 @@ func (h *BiddingHandler) Handle(c echo.Context) error {
 
 func (h *BiddingHandler) sendEvents(c echo.Context, req *request[schema.BiddingRequest, *schema.BiddingRequest], auctionResult *bidding.AuctionResult) {
 	imp := req.raw.Imp
+	auctionConfigurationUID, err := strconv.Atoi(imp.AuctionConfigUID)
+	if err != nil {
+		auctionConfigurationUID = 0
+	}
 
 	for _, result := range auctionResult.Bids {
 		adRequestParams := event.AdRequestParams{
-			EventType:              "bid_request",
-			AdType:                 string(req.raw.AdType),
-			AuctionID:              imp.AuctionID,
-			AuctionConfigurationID: imp.AuctionConfigID,
-			Status:                 fmt.Sprint(result.Status),
-			RoundID:                imp.RoundID,
-			RoundNumber:            auctionResult.RoundNumber,
-			ImpID:                  imp.ID,
-			DemandID:               string(result.DemandID),
-			AdUnitID:               0,
-			AdUnitCode:             "",
-			Ecpm:                   0,
-			PriceFloor:             imp.GetBidFloor(),
-			Bidding:                true,
-			RawRequest:             result.RawRequest,
-			RawResponse:            result.RawResponse,
+			EventType:               "bid_request",
+			AdType:                  string(req.raw.AdType),
+			AuctionID:               imp.AuctionID,
+			AuctionConfigurationID:  imp.AuctionConfigID,
+			AuctionConfigurationUID: int64(auctionConfigurationUID),
+			Status:                  fmt.Sprint(result.Status),
+			RoundID:                 imp.RoundID,
+			RoundNumber:             auctionResult.RoundNumber,
+			ImpID:                   imp.ID,
+			DemandID:                string(result.DemandID),
+			AdUnitID:                0,
+			LineItemUID:             0,
+			AdUnitCode:              "",
+			Ecpm:                    0,
+			PriceFloor:              imp.GetBidFloor(),
+			Bidding:                 true,
+			RawRequest:              result.RawRequest,
+			RawResponse:             result.RawResponse,
 		}
 		bidRequestEvent := event.NewRequest(&req.raw.BaseRequest, adRequestParams, req.geoData)
 		h.EventLogger.Log(bidRequestEvent, func(err error) {
@@ -148,20 +155,22 @@ func (h *BiddingHandler) sendEvents(c echo.Context, req *request[schema.BiddingR
 		})
 		if result.IsBid() {
 			adRequestParams = event.AdRequestParams{
-				EventType:              "bid",
-				AdType:                 string(req.raw.AdType),
-				AuctionID:              imp.AuctionID,
-				AuctionConfigurationID: imp.AuctionConfigID,
-				Status:                 "SUCCESS",
-				RoundID:                imp.RoundID,
-				RoundNumber:            auctionResult.RoundNumber,
-				ImpID:                  imp.ID,
-				DemandID:               string(result.DemandID),
-				AdUnitID:               0,
-				AdUnitCode:             result.TagID,
-				Ecpm:                   result.Bid.Price,
-				PriceFloor:             imp.GetBidFloor(),
-				Bidding:                true,
+				EventType:               "bid",
+				AdType:                  string(req.raw.AdType),
+				AuctionID:               imp.AuctionID,
+				AuctionConfigurationID:  imp.AuctionConfigID,
+				AuctionConfigurationUID: int64(auctionConfigurationUID),
+				Status:                  "SUCCESS",
+				RoundID:                 imp.RoundID,
+				RoundNumber:             auctionResult.RoundNumber,
+				ImpID:                   imp.ID,
+				DemandID:                string(result.DemandID),
+				AdUnitID:                0,
+				LineItemUID:             0,
+				AdUnitCode:              result.TagID,
+				Ecpm:                    result.Bid.Price,
+				PriceFloor:              imp.GetBidFloor(),
+				Bidding:                 true,
 			}
 			bidEvent := event.NewRequest(&req.raw.BaseRequest, adRequestParams, req.geoData)
 			h.EventLogger.Log(bidEvent, func(err error) {
