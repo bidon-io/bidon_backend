@@ -2,6 +2,8 @@ package store_test
 
 import (
 	"context"
+	"database/sql"
+	"strconv"
 	"testing"
 	"time"
 
@@ -19,9 +21,22 @@ func TestConfigMatcher_Match(t *testing.T) {
 
 	apps := dbtest.CreateAppsList(t, tx, 3)
 	configs := []db.AuctionConfiguration{
-		{AppID: apps[0].ID, AdType: db.BannerAdType},
-		{AppID: apps[1].ID, AdType: db.BannerAdType},
-		{AppID: apps[2].ID, AdType: db.InterstitialAdType, Model: db.Model{CreatedAt: time.Now()}},
+		{
+			AppID:     apps[0].ID,
+			PublicUID: sql.NullInt64{Int64: 1111111111111111111, Valid: true},
+			AdType:    db.BannerAdType,
+		},
+		{
+			AppID:     apps[1].ID,
+			PublicUID: sql.NullInt64{Int64: 2222222222222222222, Valid: true},
+			AdType:    db.BannerAdType,
+		},
+		{
+			AppID:     apps[2].ID,
+			PublicUID: sql.NullInt64{Int64: 3333333333333333333, Valid: true},
+			AdType:    db.InterstitialAdType,
+			Model:     db.Model{CreatedAt: time.Now()},
+		},
 	}
 	if err := tx.Create(&configs).Error; err != nil {
 		t.Fatalf("Error creating configs: %v", err)
@@ -41,15 +56,27 @@ func TestConfigMatcher_Match(t *testing.T) {
 	}{
 		{
 			args: args{appID: apps[0].ID, adType: ad.BannerType, segmentID: 0},
-			want: &auction.Config{ID: app1BannerConfig.ID, Rounds: app1BannerConfig.Rounds},
+			want: &auction.Config{
+				ID:     app1BannerConfig.ID,
+				UID:    strconv.FormatInt(app1BannerConfig.PublicUID.Int64, 10),
+				Rounds: app1BannerConfig.Rounds,
+			},
 		},
 		{
 			args: args{appID: apps[1].ID, adType: ad.BannerType, segmentID: 0},
-			want: &auction.Config{ID: app2BannerConfig.ID, Rounds: app2BannerConfig.Rounds},
+			want: &auction.Config{
+				ID:     app2BannerConfig.ID,
+				UID:    strconv.FormatInt(app2BannerConfig.PublicUID.Int64, 10),
+				Rounds: app2BannerConfig.Rounds,
+			},
 		},
 		{
 			args: args{appID: apps[2].ID, adType: ad.InterstitialType, segmentID: 0},
-			want: &auction.Config{ID: latestConfig.ID, Rounds: latestConfig.Rounds},
+			want: &auction.Config{
+				ID:     latestConfig.ID,
+				UID:    strconv.FormatInt(latestConfig.PublicUID.Int64, 10),
+				Rounds: latestConfig.Rounds,
+			},
 		},
 	}
 
@@ -72,9 +99,22 @@ func TestConfigMatcher_MatchById(t *testing.T) {
 
 	apps := dbtest.CreateAppsList(t, tx, 3)
 	configs := []db.AuctionConfiguration{
-		{AppID: apps[0].ID, AdType: db.BannerAdType},
-		{AppID: apps[1].ID, AdType: db.BannerAdType},
-		{AppID: apps[2].ID, AdType: db.InterstitialAdType, Model: db.Model{CreatedAt: time.Now()}},
+		{
+			AppID:     apps[0].ID,
+			PublicUID: sql.NullInt64{Int64: 1111111111111111111, Valid: true},
+			AdType:    db.BannerAdType,
+		},
+		{
+			AppID:     apps[1].ID,
+			PublicUID: sql.NullInt64{Int64: 2222222222222222222, Valid: true},
+			AdType:    db.BannerAdType,
+		},
+		{
+			AppID:     apps[2].ID,
+			PublicUID: sql.NullInt64{Int64: 3333333333333333333, Valid: true},
+			AdType:    db.InterstitialAdType,
+			Model:     db.Model{CreatedAt: time.Now()},
+		},
 	}
 	if err := tx.Create(&configs).Error; err != nil {
 		t.Fatalf("Error creating configs: %v", err)
@@ -93,15 +133,27 @@ func TestConfigMatcher_MatchById(t *testing.T) {
 	}{
 		{
 			args: args{appID: apps[0].ID, id: app1BannerConfig.ID},
-			want: &auction.Config{ID: app1BannerConfig.ID, Rounds: app1BannerConfig.Rounds},
+			want: &auction.Config{
+				ID:     app1BannerConfig.ID,
+				UID:    strconv.FormatInt(app1BannerConfig.PublicUID.Int64, 10),
+				Rounds: app1BannerConfig.Rounds,
+			},
 		},
 		{
 			args: args{appID: apps[1].ID, id: app2BannerConfig.ID},
-			want: &auction.Config{ID: app2BannerConfig.ID, Rounds: app2BannerConfig.Rounds},
+			want: &auction.Config{
+				ID:     app2BannerConfig.ID,
+				UID:    strconv.FormatInt(app2BannerConfig.PublicUID.Int64, 10),
+				Rounds: app2BannerConfig.Rounds,
+			},
 		},
 		{
 			args: args{appID: apps[2].ID, id: latestConfig.ID},
-			want: &auction.Config{ID: latestConfig.ID, Rounds: latestConfig.Rounds},
+			want: &auction.Config{
+				ID:     latestConfig.ID,
+				UID:    strconv.FormatInt(latestConfig.PublicUID.Int64, 10),
+				Rounds: latestConfig.Rounds,
+			},
 		},
 	}
 
