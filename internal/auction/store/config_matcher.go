@@ -19,7 +19,7 @@ func (m *ConfigMatcher) Match(ctx context.Context, appID int64, adType ad.Type, 
 
 	query := m.DB.
 		WithContext(ctx).
-		Select("id", "external_win_notifications", "rounds").
+		Select("id", "public_uid", "external_win_notifications", "rounds").
 		Where(map[string]any{
 			"app_id":  appID,
 			"ad_type": db.AdTypeFromDomain(adType),
@@ -54,7 +54,7 @@ func (m *ConfigMatcher) MatchById(ctx context.Context, appID, id int64) *auction
 
 	err := m.DB.
 		WithContext(ctx).
-		Select("id", "external_win_notifications", "rounds").
+		Select("id", "public_uid", "external_win_notifications", "rounds").
 		Where(map[string]any{
 			"app_id": appID,
 			"id":     id,
