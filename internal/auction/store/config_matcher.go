@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"errors"
+	"strconv"
 
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/auction"
@@ -42,6 +43,7 @@ func (m *ConfigMatcher) Match(ctx context.Context, appID int64, adType ad.Type, 
 
 	config := &auction.Config{
 		ID:                       dbConfig.ID,
+		UID:                      strconv.FormatInt(dbConfig.PublicUID.Int64, 10),
 		ExternalWinNotifications: *dbConfig.ExternalWinNotifications,
 		Rounds:                   dbConfig.Rounds,
 	}
@@ -68,6 +70,7 @@ func (m *ConfigMatcher) MatchById(ctx context.Context, appID, id int64) *auction
 
 	config := &auction.Config{
 		ID:                       dbConfig.ID,
+		UID:                      strconv.FormatInt(dbConfig.PublicUID.Int64, 10),
 		ExternalWinNotifications: *dbConfig.ExternalWinNotifications,
 		Rounds:                   dbConfig.Rounds,
 	}
