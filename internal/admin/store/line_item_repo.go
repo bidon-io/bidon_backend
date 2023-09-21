@@ -64,6 +64,19 @@ func (m lineItemMapper) dbModel(i *admin.LineItemAttrs, id int64) *db.LineItem {
 		publicUID.Valid = true
 	}
 
+	// TODO: remove this hack
+	// sets code to one of the following values: ad_unit_id, zone_id, placement_id, slot_id, slot_uuid
+	if i.Code == nil {
+		keysToCheck := []string{"zone_id", "placement_id", "slot_id", "slot_uuid", "ad_unit_id"}
+
+		for _, key := range keysToCheck {
+			if value, ok := i.Extra[key].(string); ok {
+				i.Code = &value
+				break
+			}
+		}
+	}
+
 	return &db.LineItem{
 		Model:       db.Model{ID: id},
 		AppID:       i.AppID,
@@ -75,6 +88,7 @@ func (m lineItemMapper) dbModel(i *admin.LineItemAttrs, id int64) *db.LineItem {
 		AdType:      db.AdTypeFromDomain(i.AdType),
 		Extra:       i.Extra,
 		Format:      format,
+		IsBidding:   i.IsBidding,
 		PublicUID:   publicUID,
 	}
 }
@@ -107,6 +121,7 @@ func (m lineItemMapper) resourceAttrs(i *db.LineItem) admin.LineItemAttrs {
 		AccountID:   i.AccountID,
 		AccountType: i.AccountType,
 		Code:        i.Code,
+		IsBidding:   i.IsBidding,
 		Extra:       i.Extra,
 	}
 }
