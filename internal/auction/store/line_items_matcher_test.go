@@ -249,3 +249,158 @@ func TestLineItemsMatcher_Match(t *testing.T) {
 		}
 	}
 }
+
+func TestLineItemsMatcher_ExtraFields(t *testing.T) {
+	tx := testDB.Begin()
+	defer tx.Rollback()
+
+	user := dbtest.Create[db.User](t, tx, dbtest.UserFactory{}, 1)
+
+	keys := adapter.Keys
+	demandSources := dbtest.CreateList[db.DemandSource](t, tx,
+		dbtest.DemandSourceFactory{
+			APIKey: func(i int) string { return string(keys[i]) },
+		},
+		len(keys),
+	)
+
+	accounts := dbtest.CreateList[db.DemandSourceAccount](t, tx,
+		dbtest.DemandSourceAccountFactory{
+			User:         func(i int) db.User { return user },
+			DemandSource: func(i int) db.DemandSource { return demandSources[i] },
+			Extra: func(i int) []byte {
+				demandSource := demandSources[i]
+				return dbtest.ValidDemandSourceAccountExtra(t, adapter.Key(demandSource.APIKey))
+			},
+		},
+		len(demandSources),
+	)
+
+	app := dbtest.Create[db.App](t, tx, dbtest.AppFactory{
+		User: func(i int) db.User { return user },
+	}, 1)
+
+	dbtest.CreateList[db.LineItem](t, tx, dbtest.LineItemFactory{
+		App: func(i int) db.App { return app },
+		Account: func(i int) db.DemandSourceAccount {
+			return accounts[i]
+		},
+		AdType: func(i int) db.AdType {
+			return db.BannerAdType
+		},
+		Format: func(i int) sql.NullString {
+			return sql.NullString{
+				String: string(ad.BannerFormat),
+				Valid:  true,
+			}
+		},
+		BidFloor: func() decimal.NullDecimal {
+			return decimal.NewNullDecimal(decimal.RequireFromString("0.15"))
+		},
+		Extra: func(i int) map[string]any {
+			return dbtest.ValidLineItemExtra(t, adapter.Key(demandSources[i].APIKey))
+		},
+	}, len(accounts))
+
+	matcher := store.LineItemsMatcher{DB: tx}
+
+	params := func(adapters []adapter.Key) *auction.BuildParams {
+		return &auction.BuildParams{
+			AppID:      app.ID,
+			AdType:     ad.BannerType,
+			AdFormat:   ad.BannerFormat,
+			DeviceType: device.PhoneType,
+			Adapters:   adapters,
+		}
+	}
+
+	testCases := []struct {
+		params *auction.BuildParams
+		want   []auction.LineItem
+	}{
+		{
+			params: params([]adapter.Key{adapter.AdmobKey}),
+			want: []auction.LineItem{
+				{ID: "admob", UID: "0", PriceFloor: 0.15, AdUnitID: "admob_line_item"},
+			},
+		},
+		{
+			params: params([]adapter.Key{adapter.ApplovinKey}),
+			want: []auction.LineItem{
+				{ID: "applovin", UID: "1", PriceFloor: 0.15, AdUnitID: "code1", ZonedID: "applovin_line_item_zone_id"},
+			},
+		},
+		{
+			params: params([]adapter.Key{adapter.BidmachineKey}),
+			want: []auction.LineItem{
+				{ID: "bidmachine", UID: "2", PriceFloor: 0.15, AdUnitID: "code2"},
+			},
+		},
+		{
+			params: params([]adapter.Key{adapter.DTExchangeKey}),
+			want: []auction.LineItem{
+				{ID: "dtexchange", UID: "3", PriceFloor: 0.15, AdUnitID: "code3", PlacementID: "dt_exchange_line_item_placement_id"},
+			},
+		},
+		{
+			params: params([]adapter.Key{adapter.MetaKey}),
+			want: []auction.LineItem{
+				{ID: "meta", UID: "4", PriceFloor: 0.15, AdUnitID: "code4", PlacementID: "meta_line_item_placement_id"},
+			},
+		},
+		{
+			params: params([]adapter.Key{adapter.MintegralKey}),
+			want: []auction.LineItem{
+				{
+					ID:          "mintegral",
+					UID:         "5",
+					PriceFloor:  0.15,
+					AdUnitID:    "mintegral_line_item_ad_unit_id",
+					PlacementID: "mintegral_line_item_placement_id",
+				},
+			},
+		},
+		{
+			params: params([]adapter.Key{adapter.MobileFuseKey}),
+			want: []auction.LineItem{
+				{ID: "mobilefuse", UID: "6", PriceFloor: 0.15, AdUnitID: "code6", PlacementID: "mobile_fuse_line_item_placement_id"},
+			},
+		},
+		{
+			params: params([]adapter.Key{adapter.UnityAdsKey}),
+			want: []auction.LineItem{
+				{ID: "unityads", UID: "7", PriceFloor: 0.15, AdUnitID: "code7", PlacementID: "unity_ads_line_item_placement_id"},
+			},
+		},
+		{
+			params: params([]adapter.Key{adapter.VungleKey}),
+			want: []auction.LineItem{
+				{ID: "vungle", UID: "8", PriceFloor: 0.15, AdUnitID: "code8", PlacementID: "vungle_line_item_placement_id"},
+			},
+		},
+		{
+			params: params([]adapter.Key{adapter.BigoAdsKey}),
+			want: []auction.LineItem{
+				{ID: "bigoads", UID: "9", PriceFloor: 0.15, AdUnitID: "code9", SlotID: "bigo_ads_line_item_slot_id"},
+			},
+		},
+		{
+			params: params([]adapter.Key{adapter.InmobiKey}),
+			want: []auction.LineItem{
+				{ID: "inmobi", UID: "10", PriceFloor: 0.15, AdUnitID: "code10", PlacementID: "inmobi_line_item_placement_id"},
+			},
+		},
+	}
+
+	for _, tC := range testCases {
+		got, err := matcher.Match(context.Background(), tC.params)
+		if err != nil {
+			t.Errorf("Error matching line items: %v", err)
+		}
+
+		less := func(a, b auction.LineItem) bool { return a.AdUnitID < b.AdUnitID }
+		if diff := cmp.Diff(tC.want, got, cmpopts.SortSlices(less)); diff != "" {
+			t.Errorf("matcher.Match(ctx, %+v) mismatch (-want, +got)\n%s", tC.params, diff)
+		}
+	}
+}

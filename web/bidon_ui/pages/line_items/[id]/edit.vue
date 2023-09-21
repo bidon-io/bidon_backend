@@ -3,7 +3,12 @@
     <NavigationContainer>
       <GoBackButton :path="resourcePath" />
     </NavigationContainer>
-    <LineItemForm v-if="isReady" :value="resource" @submit="handleSubmit" />
+    <LineItemForm
+      v-if="isReady"
+      :value="resource"
+      :submit-error="error"
+      @submit="handleSubmit"
+    />
   </PageContainer>
 </template>
 
@@ -20,8 +25,10 @@ const { state: resource, isReady } = useAsyncState(async () => {
   return response.data;
 });
 
+const error = ref(null);
 const handleSubmit = useUpdateResource({
   path: resourcePath,
   message: "Line Item Updated!",
+  onError: async (e) => (error.value = e),
 });
 </script>

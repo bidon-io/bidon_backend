@@ -26,6 +26,7 @@ type LineItemAttrs struct {
 	AccountID   int64            `json:"account_id"`
 	AccountType string           `json:"account_type"`
 	Code        *string          `json:"code"`
+	IsBidding   *bool            `json:"is_bidding"`
 	Extra       map[string]any   `json:"extra"`
 }
 

@@ -30,6 +30,7 @@ const fields = [
   ResourceCardFields.DemandSourceAccount,
   ResourceCardFields.AccountType,
   { key: "code", label: "Code" },
+  { key: "isBidding", label: "Bidding" },
   { key: "extra", label: "Extra", type: "textarea" },
 ];
 </script>

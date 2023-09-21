@@ -170,6 +170,7 @@ type LineItem struct {
 	Height      int32               `gorm:"column:height;type:integer;default:0;not null"`
 	Format      sql.NullString      `gorm:"column:format;type:varchar"`
 	PublicUID   sql.NullInt64       `gorm:"column:public_uid;type:bigint"`
+	IsBidding   *bool               `gorm:"column:bidding;type:boolean;default:false"`
 }
 
 type Segment struct {

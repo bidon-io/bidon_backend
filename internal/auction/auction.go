@@ -32,6 +32,9 @@ type LineItem struct {
 	PriceFloor  float64 `json:"pricefloor"`
 	AdUnitID    string  `json:"ad_unit_id"`
 	PlacementID string  `json:"placement_id"`
+	ZonedID     string  `json:"zoned_id"`
+	SlotUUID    string  `json:"slot_uuid"`
+	SlotID      string  `json:"slot_id"`
 }
 
 type Segment struct {

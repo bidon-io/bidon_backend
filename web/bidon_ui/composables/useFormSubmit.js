@@ -5,31 +5,35 @@ export default function ({
   path,
   method,
   message,
-  hook = async () => {
+  onSuccess = async () => {
+    /* no operation function */
+  },
+  onError = async () => {
     /* no operation function */
   },
 }) {
   const toast = useToast();
-  const handleSubmit = (event) => {
-    axios[method](path, event)
-      .then(async (response) => {
-        const id = response.data.id;
-        await hook(id);
-        toast.add({
-          severity: "success",
-          summary: "Success",
-          detail: message,
-          life: 3000,
-        });
-      })
-      .catch((error) => {
-        console.error(error);
-        toast.add({
-          severity: "error",
-          summary: "Error",
-          detail: error.error.message,
-        });
+  const handleSubmit = async (event) => {
+    try {
+      const response = await axios[method](path, event);
+
+      const id = response.data.id;
+      await onSuccess(id);
+      toast.add({
+        severity: "success",
+        summary: "Success",
+        detail: message,
+        life: 3000,
       });
+    } catch (error) {
+      console.error(error);
+      await onError(error);
+      // toast.add({
+      //   severity: "error",
+      //   summary: "Error",
+      //   detail: error.error.message,
+      // });
+    }
   };
   return handleSubmit;
 }

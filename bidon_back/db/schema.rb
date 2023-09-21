@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_09_18_162514) do
+ActiveRecord::Schema[7.0].define(version: 2023_09_21_073317) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -137,6 +137,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_09_18_162514) do
     t.integer "height", default: 0, null: false
     t.string "format"
     t.bigint "public_uid"
+    t.boolean "bidding"
     t.index ["account_type", "account_id"], name: "index_line_items_on_account"
     t.index ["app_id"], name: "index_line_items_on_app_id"
     t.index ["public_uid"], name: "index_line_items_on_public_uid", unique: true

@@ -1,0 +1,128 @@
+<template>
+  <template v-if="apiKey == 'admob'">
+    <VeeFormFieldWrapper field="extra.adUnitId" label="Ad Unit Id" required />
+  </template>
+  <template v-if="apiKey == 'applovin'">
+    <VeeFormFieldWrapper field="extra.zoneId" label="Zone Id" required />
+  </template>
+  <template v-if="apiKey == 'amazone'">
+    <VeeFormFieldWrapper field="extra.slotUuid" label="Slot Uuid" required />
+  </template>
+  <template v-if="apiKey == 'bigoads'">
+    <VeeFormFieldWrapper field="extra.slotId" label="Slot Id" required />
+  </template>
+  <template v-if="apiKey == 'dtexchange'">
+    <VeeFormFieldWrapper
+      field="extra.plcementId"
+      label="Placement Id"
+      required
+    />
+  </template>
+  <template v-if="apiKey == 'inmobi'">
+    <VeeFormFieldWrapper
+      field="extra.placementId"
+      label="Placement Id"
+      required
+    />
+  </template>
+  <template v-if="apiKey == 'meta'">
+    <VeeFormFieldWrapper
+      field="extra.placementId"
+      label="Placement Id"
+      required
+    />
+  </template>
+  <template v-if="apiKey == 'mintegral'">
+    <VeeFormFieldWrapper
+      field="extra.placementId"
+      label="Placement Id"
+      required
+    />
+    <VeeFormFieldWrapper field="extra.adUnitId" label="Ad Unit Id" required />
+  </template>
+  <template v-if="apiKey == 'unityads'">
+    <VeeFormFieldWrapper
+      field="extra.placementId"
+      label="Placement Id"
+      required
+    />
+  </template>
+  <template v-if="apiKey == 'vungle'">
+    <VeeFormFieldWrapper
+      field="extra.placementId"
+      label="Placement Id"
+      required
+    />
+  </template>
+  <template v-if="apiKey == 'mobilefuse'">
+    <VeeFormFieldWrapper
+      field="extra.placementId"
+      label="Placement Id"
+      required
+    />
+  </template>
+  <template v-if="apiKey == 'bidmachine'">
+    <VeeFormFieldWrapper field="extra.adUnitId" label="Ad Unit Id" required />
+  </template>
+</template>
+
+<script setup>
+import * as yup from "yup";
+
+const props = defineProps({
+  schema: {
+    type: Object,
+    required: true,
+  },
+  apiKey: {
+    type: String,
+    required: true,
+  },
+});
+const emit = defineEmits(["update:schema"]);
+
+const dataSchemas = {
+  admob: yup.object({
+    adUnitId: yup.string().required().label("Ad Unit Id"),
+  }),
+  applovin: yup.object({
+    zoneId: yup.string().required().label("Zone Id"),
+  }),
+  amazone: yup.object({
+    slotUuid: yup.string().required().label("Slot Uuid"),
+  }),
+  bigoads: yup.object({
+    slotId: yup.string().required().label("Slot Id"),
+  }),
+  dtexchange: yup.object({
+    plcementId: yup.string().required().label("Placement Id"),
+  }),
+  inmobi: yup.object({
+    placementId: yup.string().required().label("Placement Id"),
+  }),
+  meta: yup.object({
+    placementId: yup.string().required().label("Placement Id"),
+  }),
+  mintegral: yup.object({
+    placementId: yup.string().required().label("Placement Id"),
+    adUnitId: yup.string().required().label("Ad Unit Id"),
+  }),
+  unityads: yup.object({
+    placementId: yup.string().required().label("Placement Id"),
+  }),
+  vungle: yup.object({
+    placementId: yup.string().required().label("Placement Id"),
+  }),
+  mobilefuse: yup.object({
+    placementId: yup.string().required().label("Placement Id"),
+  }),
+  bidmachine: yup.object({
+    adUnitId: yup.string().required().label("Ad Unit Id"),
+  }),
+};
+
+const schema = computed(() => dataSchemas[props.apiKey] || yup.object());
+watchEffect(() => {
+  emit("update:schema", schema.value);
+});
+</script>
