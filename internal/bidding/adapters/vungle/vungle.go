@@ -231,7 +231,7 @@ func Builder(cfg adapter.ProcessedConfigsMap, client *http.Client) (*adapters.Bi
 	}
 	appID, ok := vCfg["app_id"].(string)
 	if !ok || appID == "" {
-		return nil, fmt.Errorf("missing app_id param for %s adapter", adapter.MintegralKey)
+		return nil, fmt.Errorf("missing app_id param for %s adapter", adapter.VungleKey)
 	}
 
 	adpt := &VungleAdapter{
