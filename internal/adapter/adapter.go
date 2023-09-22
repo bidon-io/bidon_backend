@@ -25,6 +25,7 @@ const (
 	VungleKey     Key = "vungle"
 	BigoAdsKey    Key = "bigoads"
 	InmobiKey     Key = "inmobi"
+	AmazonKey     Key = "amazon"
 )
 
 var Keys = []Key{
@@ -39,6 +40,7 @@ var Keys = []Key{
 	VungleKey,
 	BigoAdsKey,
 	InmobiKey,
+	AmazonKey,
 }
 
 func GetCommonAdapters(adapters1 []Key, adapters2 []Key) []Key {
