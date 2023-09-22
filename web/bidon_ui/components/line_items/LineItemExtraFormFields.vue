@@ -54,6 +54,13 @@
       required
     />
   </template>
+  <template v-if="apiKey == 'mobilefuse'">
+    <VeeFormFieldWrapper
+      field="extra.placementId"
+      label="Placement Id"
+      required
+    />
+  </template>
   <template v-if="apiKey == 'bidmachine'">
     <VeeFormFieldWrapper field="extra.adUnitId" label="Ad Unit Id" required />
   </template>
@@ -104,6 +111,9 @@ const dataSchemas = {
     placementId: yup.string().required().label("Placement Id"),
   }),
   vungle: yup.object({
+    placementId: yup.string().required().label("Placement Id"),
+  }),
+  mobilefuse: yup.object({
     placementId: yup.string().required().label("Placement Id"),
   }),
   bidmachine: yup.object({
