@@ -60,9 +60,6 @@ const dataSchemas = {
   "DemandSourceAccount::Inmobi": yup.object({
     appKey: yup.string().required().label("App Key"),
   }),
-  "DemandSourceAccount::MobileFuse": yup.object({
-    appId: yup.number().required().label("App Id"),
-  }),
 };
 
 const appIdVisible = computed(() =>
@@ -73,7 +70,6 @@ const appIdVisible = computed(() =>
     "DemandSourceAccount::Vungle",
     "DemandSourceAccount::Meta",
     "DemandSourceAccount::Mintegral",
-    "DemandSourceAccount::MobileFuse",
   ].includes(props.accountType)
 );
 const appSecretVisible = computed(
