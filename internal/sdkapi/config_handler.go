@@ -120,6 +120,8 @@ func NewAdapterInitConfig(key adapter.Key) (AdapterInitConfig, error) {
 		return new(MobileFuseInitConfig), nil
 	case adapter.InmobiKey:
 		return new(InmobiInitConfig), nil
+	case adapter.AmazonKey:
+		return new(AmazonInitConfig), nil
 	default:
 		return nil, fmt.Errorf("AdapterInitConfig for key %q not defined", key)
 	}
@@ -217,4 +219,11 @@ type InmobiInitConfig struct {
 
 func (a *InmobiInitConfig) Key() adapter.Key {
 	return adapter.InmobiKey
+}
+
+type AmazonInitConfig struct {
+}
+
+func (a *AmazonInitConfig) Key() adapter.Key {
+	return adapter.AmazonKey
 }

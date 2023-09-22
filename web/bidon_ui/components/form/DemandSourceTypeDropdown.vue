@@ -58,5 +58,7 @@ const options = ref([
   { label: "BigoAds", value: "DemandSourceAccount::BigoAds" },
   { label: "Meta", value: "DemandSourceAccount::Meta" },
   { label: "Inmobi", value: "DemandSourceAccount::Inmobi" },
+  { label: "Amazon", value: "DemandSourceAccount::Amazon" },
+  { label: "MobileFuse", value: "DemandSourceAccount::MobileFuse" },
 ]);
 </script>

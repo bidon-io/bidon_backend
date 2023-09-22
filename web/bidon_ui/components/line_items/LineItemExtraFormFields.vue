@@ -5,7 +5,7 @@
   <template v-if="apiKey == 'applovin'">
     <VeeFormFieldWrapper field="extra.zoneId" label="Zone Id" required />
   </template>
-  <template v-if="apiKey == 'amazone'">
+  <template v-if="apiKey == 'amazon'">
     <VeeFormFieldWrapper field="extra.slotUuid" label="Slot Uuid" required />
   </template>
   <template v-if="apiKey == 'bigoads'">
@@ -88,7 +88,7 @@ const dataSchemas = {
   applovin: yup.object({
     zoneId: yup.string().required().label("Zone Id"),
   }),
-  amazone: yup.object({
+  amazon: yup.object({
     slotUuid: yup.string().required().label("Slot Uuid"),
   }),
   bigoads: yup.object({
