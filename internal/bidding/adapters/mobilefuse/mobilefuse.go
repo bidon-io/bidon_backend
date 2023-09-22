@@ -1,11 +1,8 @@
-package meta
+package mobilefuse
 
 import (
 	"bytes"
 	"context"
-	"crypto/hmac"
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -22,29 +19,22 @@ import (
 	"github.com/prebid/openrtb/v19/openrtb2"
 )
 
-type MetaAdapter struct {
-	AppID     string
-	AppSecret string
-	TagID     string
+type MobileFuseAdapter struct {
+	TagID string
 }
 
 var bannerFormats = map[string][2]int64{
-	"BANNER":      {320, 50},
-	"LEADERBOARD": {728, 90},
-	"MREC":        {300, 250},
-	"ADAPTIVE":    {0, 50},
-	"":            {320, 50}, // Default
+	"BANNER": {320, 50},
+	"MREC":   {300, 250},
+	"":       {320, 50}, // Default
 }
 
-var fullscreenFormats = map[string][2]int64{
-	"PHONE":  {320, 480},
-	"TABLET": {768, 1024},
-}
+func (a *MobileFuseAdapter) banner(br *schema.BiddingRequest) (*openrtb2.Imp, error) {
+	size, ok := bannerFormats[string(br.Imp.Format())]
+	if !ok {
+		return nil, errors.New("unknown banner format")
+	}
 
-const platformID = "687579938617452"
-
-func (a *MetaAdapter) banner(br *schema.BiddingRequest) *openrtb2.Imp {
-	size := bannerFormats[string(br.Imp.Format())]
 	w, h := size[0], size[1]
 	if !br.Imp.IsPortrait() {
 		w, h = h, w
@@ -56,93 +46,86 @@ func (a *MetaAdapter) banner(br *schema.BiddingRequest) *openrtb2.Imp {
 			H:   &h,
 			Pos: adcom1.PositionAboveFold.Ptr(),
 		},
-	}
+	}, nil
 }
 
-func (a *MetaAdapter) interstitial(br *schema.BiddingRequest) *openrtb2.Imp {
-	size := fullscreenFormats[string(br.Device.Type)]
-	w, h := size[0], size[1]
-	if !br.Imp.IsPortrait() {
-		w, h = h, w
-	}
+func (a *MobileFuseAdapter) interstitial() *openrtb2.Imp {
 	return &openrtb2.Imp{
 		Instl: 1,
 		Banner: &openrtb2.Banner{
-			W:   &w,
-			H:   &h,
 			Pos: adcom1.PositionFullScreen.Ptr(),
 		},
 	}
 }
 
-func (a *MetaAdapter) rewarded(br *schema.BiddingRequest) *openrtb2.Imp {
-	size := fullscreenFormats[string(br.Device.Type)]
-	w, h := size[0], size[1]
-	if !br.Imp.IsPortrait() {
-		w, h = h, w
-	}
+func (a *MobileFuseAdapter) rewarded() *openrtb2.Imp {
 	return &openrtb2.Imp{
+		Instl: 0,
 		Video: &openrtb2.Video{
-			W:   w,
-			H:   h,
-			Ext: json.RawMessage(`{"videotype": "rewarded"}`),
+			MIMEs: []string{"video/mp4"},
 		},
 	}
 }
 
-func (a *MetaAdapter) CreateRequest(request openrtb2.BidRequest, br *schema.BiddingRequest) (openrtb2.BidRequest, error) {
+func (a *MobileFuseAdapter) CreateRequest(request openrtb2.BidRequest, br *schema.BiddingRequest) (openrtb2.BidRequest, error) {
+	if a.TagID == "" {
+		return request, errors.New("TagID is empty")
+	}
+
 	secure := int8(1)
 
 	var imp *openrtb2.Imp
 	switch br.Imp.Type() {
 	case ad.BannerType:
-		imp = a.banner(br)
+		bannerImp, err := a.banner(br)
+		if err != nil {
+			return request, err
+		}
+		imp = bannerImp
 	case ad.InterstitialType:
-		imp = a.interstitial(br)
+		imp = a.interstitial()
 	case ad.RewardedType:
-		imp = a.rewarded(br)
+		imp = a.rewarded()
 	default:
 		return request, errors.New("unknown impression type")
 	}
 
 	impId, _ := uuid.NewV4()
 	imp.ID = impId.String()
-
-	if a.TagID == "" {
-		return request, errors.New("TagID is empty")
-	}
 	imp.TagID = a.TagID
 
-	imp.DisplayManager = string(adapter.MetaKey)
-	imp.DisplayManagerVer = br.Adapters[adapter.MetaKey].SDKVersion
+	imp.DisplayManager = string(adapter.MobileFuseKey)
+	imp.DisplayManagerVer = br.Adapters[adapter.MobileFuseKey].SDKVersion
 	imp.Secure = &secure
 	imp.BidFloor = br.Imp.GetBidFloor()
-	imp.BidFloorCur = "USD"
-
 	request.Imp = []openrtb2.Imp{*imp}
-	request.User = &openrtb2.User{
-		BuyerUID: br.Imp.Demands[adapter.MetaKey]["token"].(string),
-	}
 	request.Cur = []string{"USD"}
 
-	request.App.Publisher.ID = a.AppID
-
-	ext, err := json.Marshal(map[string]any{
-		"platformid":        platformID,
-		"authentication_id": calculateHMACSHA256(request.ID, a.AppSecret),
+	segmentExt, err := json.Marshal(map[string]any{
+		"signal": br.Imp.Demands[adapter.MobileFuseKey]["token"].(string),
 	})
 	if err != nil {
 		return request, err
 	}
 
-	request.Ext = ext
+	request.User = &openrtb2.User{
+		Data: []openrtb2.Data{
+			{
+				Segment: []openrtb2.Segment{
+					{
+						Ext: segmentExt,
+					},
+				},
+			},
+		},
+	}
 
 	return request, nil
 }
 
-func (a *MetaAdapter) ExecuteRequest(ctx context.Context, client *http.Client, request openrtb2.BidRequest) *adapters.DemandResponse {
+func (a *MobileFuseAdapter) ExecuteRequest(ctx context.Context, client *http.Client, request openrtb2.BidRequest) *adapters.DemandResponse {
 	dr := &adapters.DemandResponse{
-		DemandID:  adapter.MetaKey,
+		DemandID:  adapter.MobileFuseKey,
 		RequestID: request.ID,
 		TagID:     a.TagID,
 	}
@@ -153,7 +136,7 @@ func (a *MetaAdapter) ExecuteRequest(ctx context.Context, client *http.Client, r
 	}
 	dr.RawRequest = string(requestBody)
 
-	url := "https://an.facebook.com/" + platformID + "/placementbid.ortb"
+	url := "https://mfx.mobilefuse.com/openrtb?ssp=4020"
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(requestBody))
 	if err != nil {
 		dr.Error = err
@@ -183,7 +166,7 @@ func (a *MetaAdapter) ExecuteRequest(ctx context.Context, client *http.Client, r
 	return dr
 }
 
-func (a *MetaAdapter) ParseBids(dr *adapters.DemandResponse) (*adapters.DemandResponse, error) {
+func (a *MobileFuseAdapter) ParseBids(dr *adapters.DemandResponse) (*adapters.DemandResponse, error) {
 	switch dr.Status {
 	case http.StatusNoContent:
 		return dr, nil
@@ -215,7 +198,7 @@ func (a *MetaAdapter) ParseBids(dr *adapters.DemandResponse) (*adapters.DemandRe
 		ImpID:    bid.ImpID,
 		Price:    bid.Price,
 		Payload:  bid.AdM,
-		DemandID: adapter.MetaKey,
+		DemandID: adapter.MobileFuseKey,
 		AdID:     bid.AdID,
 		SeatID:   seat.Seat,
 		LURL:     bid.LURL,
@@ -226,36 +209,18 @@ func (a *MetaAdapter) ParseBids(dr *adapters.DemandResponse) (*adapters.DemandRe
 	return dr, nil
 }
 
-// Builder builds a new instance of the Meta adapter for the given bidder with the given config.
+// Builder builds a new instance of the MobileFuse adapter for the given bidder with the given config.
 func Builder(cfg adapter.ProcessedConfigsMap, client *http.Client) (*adapters.Bidder, error) {
-	mCfg := cfg[adapter.MetaKey]
+	mobileFuseCfg := cfg[adapter.MobileFuseKey]
 
-	appID, ok := mCfg["app_id"].(string)
-	if !ok || appID == "" {
-		return nil, fmt.Errorf("missing app_id param for %s adapter", adapter.MetaKey)
-	}
-	appSecret, ok := mCfg["app_secret"].(string)
-	if !ok || appID == "" {
-		return nil, fmt.Errorf("missing app_secret param for %s adapter", adapter.MetaKey)
+	adpt := &MobileFuseAdapter{
+		TagID: mobileFuseCfg["tag_id"].(string),
 	}
 
-	adpt := &MetaAdapter{
-		AppID:     appID,
-		AppSecret: appSecret,
-		TagID:     mCfg["tag_id"].(string),
-	}
-
-	bidder := adapters.Bidder{
+	bidder := &adapters.Bidder{
 		Adapter: adpt,
 		Client:  client,
 	}
 
-	return &bidder, nil
-}
-
-func calculateHMACSHA256(data, key string) string {
-	h := hmac.New(sha256.New, []byte(key))
-	h.Write([]byte(data))
-
-	return hex.EncodeToString(h.Sum(nil))
+	return bidder, nil
 }
