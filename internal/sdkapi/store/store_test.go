@@ -173,6 +173,10 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Valid(t *testing.T) {
 					AppID:     fmt.Sprintf("meta_app_%d", apps[0].ID),
 					AppSecret: fmt.Sprintf("meta_app_%d_secret", apps[0].ID),
 				},
+				&sdkapi.MintegralInitConfig{
+					AppID:  fmt.Sprintf("mintegral_app_%d", apps[0].ID),
+					AppKey: "mintegral",
+				},
 			},
 		},
 		{
@@ -180,10 +184,6 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Valid(t *testing.T) {
 			appID:       apps[1].ID,
 			adapterKeys: adapter.Keys,
 			want: []sdkapi.AdapterInitConfig{
-				&sdkapi.MintegralInitConfig{
-					AppID:  fmt.Sprintf("mintegral_app_%d", apps[1].ID),
-					AppKey: "mintegral",
-				},
 				&sdkapi.MobileFuseInitConfig{},
 				&sdkapi.UnityAdsInitConfig{
 					GameID: fmt.Sprintf("unityads_game_%d", apps[1].ID),
@@ -198,6 +198,7 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Valid(t *testing.T) {
 					AccountID: "inmobi",
 					AppKey:    fmt.Sprintf("inmobi_app_%d", apps[1].ID),
 				},
+				&sdkapi.AmazonInitConfig{},
 			},
 		},
 	}

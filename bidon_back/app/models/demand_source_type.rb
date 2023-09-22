@@ -10,5 +10,6 @@ module DemandSourceType
     UnityAdsAccount:   'DemandSourceAccount::UnityAds',
     VungleAccount:     'DemandSourceAccount::Vungle',
     BigoAdsAccount:    'DemandSourceAccount::BigoAds',
+    AmazonAccount:     'DemandSourceAccount::Amazon',
   }.freeze
 end
