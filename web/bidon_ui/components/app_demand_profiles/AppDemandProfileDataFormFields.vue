@@ -16,14 +16,6 @@
   <FormField v-if="appKeyVisible" label="App key" :error="appKeyError" required>
     <InputText v-model="appKey" type="text" placeholder="App Key" />
   </FormField>
-  <FormField
-    v-if="placementIdVisible"
-    label="Placement Id"
-    :error="placementIdError"
-    required
-  >
-    <InputText v-model="placementId" type="text" placeholder="Placement ID" />
-  </FormField>
 </template>
 
 <script setup>
@@ -70,7 +62,6 @@ const dataSchemas = {
   }),
   "DemandSourceAccount::MobileFuse": yup.object({
     appKey: yup.string().required().label("App Key"),
-    placementId: yup.string().required().label("Placement ID"),
   }),
 };
 
@@ -95,17 +86,12 @@ const appKeyVisible = computed(() =>
     props.accountType
   )
 );
-const placementIdVisible = computed(
-  () => props.accountType === "DemandSourceAccount::MobileFuse"
-);
 
 const { value: appId, errorMessage: appIdError } = useField("data.appId");
 const { value: appSecret, errorMessage: appSecretError } =
   useField("data.appSecret");
 const { value: gameId, errorMessage: gameIdError } = useField("data.gameId");
 const { value: appKey, errorMessage: appKeyError } = useField("data.appKey");
-const { value: placementId, errorMessage: placementIdError } =
-  useField("data.placementId");
 
 const schema = computed(() => dataSchemas[props.accountType] || yup.object());
 
