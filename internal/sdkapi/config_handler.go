@@ -206,8 +206,7 @@ func (a *VungleInitConfig) Key() adapter.Key {
 }
 
 type MobileFuseInitConfig struct {
-	AppKey      string `json:"app_key,omitempty"`
-	PlacementID string `json:"placement_id,omitempty"`
+	AppKey string `json:"app_key,omitempty"`
 }
 
 func (a *MobileFuseInitConfig) Key() adapter.Key {

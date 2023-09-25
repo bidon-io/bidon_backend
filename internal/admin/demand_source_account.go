@@ -165,6 +165,10 @@ func (v *demandSourceAccountValidator) extraRule(demandSource *DemandSource) v8n
 		rule = v8n.Map(
 			v8n.Key("account_id", v8n.Required, isString),
 		)
+	case adapter.MobileFuseKey:
+		rule = v8n.Map(
+			v8n.Key("publisher_id", v8n.Required, isString),
+		)
 	}
 
 	return rule.AllowExtraKeys()
