@@ -10,6 +10,7 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters/bigoads"
+	"github.com/bidon-io/bidon-backend/internal/bidding/openrtb"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	"github.com/google/go-cmp/cmp"
 	"github.com/prebid/openrtb/v19/adcom1"
@@ -17,12 +18,12 @@ import (
 )
 
 type createRequestTestParams struct {
-	BaseBidRequest openrtb2.BidRequest
+	BaseBidRequest openrtb.BidRequest
 	Br             *schema.BiddingRequest
 }
 
 type createRequestTestOutput struct {
-	Request openrtb2.BidRequest
+	Request openrtb.BidRequest
 	Err     error
 }
 
@@ -53,8 +54,8 @@ func buildAdapter() bigoads.BigoAdsAdapter {
 	}
 }
 
-func buildBaseRequest() openrtb2.BidRequest {
-	return openrtb2.BidRequest{
+func buildBaseRequest() openrtb.BidRequest {
+	return openrtb.BidRequest{
 		App: &openrtb2.App{
 			Publisher: &openrtb2.Publisher{},
 		},
@@ -97,10 +98,10 @@ func buildTestParams(imp schema.Imp) createRequestTestParams {
 	}
 }
 
-func buildWantRequest(imp openrtb2.Imp) openrtb2.BidRequest {
-	request := openrtb2.BidRequest{
+func buildWantRequest(imp openrtb2.Imp) openrtb.BidRequest {
+	request := openrtb.BidRequest{
 		App:  &openrtb2.App{ID: "10182906", Publisher: &openrtb2.Publisher{ID: "1"}},
-		User: &openrtb2.User{BuyerUID: "token"},
+		User: &openrtb.User{BuyerUID: "token"},
 		Cur:  []string{"USD"},
 		Imp: []openrtb2.Imp{
 			{

@@ -67,4 +67,5 @@ require (
 	golang.org/x/text v0.13.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	gorm.io/driver/mysql v1.5.1 // indirect
+	moul.io/http2curl v1.0.0 // indirect
 )

@@ -13,6 +13,7 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
+	"github.com/bidon-io/bidon-backend/internal/bidding/openrtb"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	"github.com/gofrs/uuid/v5"
 	"github.com/prebid/openrtb/v19/adcom1"
@@ -92,7 +93,7 @@ func (a *BidmachineAdapter) rewarded(br *schema.BiddingRequest) *openrtb2.Imp {
 	}
 }
 
-func (a *BidmachineAdapter) CreateRequest(request openrtb2.BidRequest, br *schema.BiddingRequest) (openrtb2.BidRequest, error) {
+func (a *BidmachineAdapter) CreateRequest(request openrtb.BidRequest, br *schema.BiddingRequest) (openrtb.BidRequest, error) {
 	secure := int8(1)
 
 	var imp *openrtb2.Imp
@@ -129,7 +130,7 @@ func (a *BidmachineAdapter) CreateRequest(request openrtb2.BidRequest, br *schem
 	return request, nil
 }
 
-func (a *BidmachineAdapter) ExecuteRequest(ctx context.Context, client *http.Client, request openrtb2.BidRequest) *adapters.DemandResponse {
+func (a *BidmachineAdapter) ExecuteRequest(ctx context.Context, client *http.Client, request openrtb.BidRequest) *adapters.DemandResponse {
 	dr := &adapters.DemandResponse{
 		DemandID:    adapter.BidmachineKey,
 		RequestID:   request.ID,

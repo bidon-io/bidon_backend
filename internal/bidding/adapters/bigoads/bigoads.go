@@ -13,6 +13,7 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
+	"github.com/bidon-io/bidon-backend/internal/bidding/openrtb"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	"github.com/gofrs/uuid/v5"
 	"github.com/prebid/openrtb/v19/adcom1"
@@ -70,7 +71,7 @@ func (a *BigoAdsAdapter) rewarded() *openrtb2.Imp {
 	}
 }
 
-func (a *BigoAdsAdapter) CreateRequest(request openrtb2.BidRequest, br *schema.BiddingRequest) (openrtb2.BidRequest, error) {
+func (a *BigoAdsAdapter) CreateRequest(request openrtb.BidRequest, br *schema.BiddingRequest) (openrtb.BidRequest, error) {
 	if a.TagID == "" {
 		return request, errors.New("TagID is empty")
 	}
@@ -120,7 +121,7 @@ func (a *BigoAdsAdapter) CreateRequest(request openrtb2.BidRequest, br *schema.B
 	imp.BidFloor = br.Imp.GetBidFloor()
 	request.Imp = []openrtb2.Imp{*imp}
 	request.Cur = []string{"USD"}
-	request.User = &openrtb2.User{
+	request.User = &openrtb.User{
 		BuyerUID: br.Imp.Demands[adapter.BigoAdsKey]["token"].(string),
 	}
 	request.App.Publisher.ID = a.SellerID
@@ -129,7 +130,7 @@ func (a *BigoAdsAdapter) CreateRequest(request openrtb2.BidRequest, br *schema.B
 	return request, nil
 }
 
-func (a *BigoAdsAdapter) ExecuteRequest(ctx context.Context, client *http.Client, request openrtb2.BidRequest) *adapters.DemandResponse {
+func (a *BigoAdsAdapter) ExecuteRequest(ctx context.Context, client *http.Client, request openrtb.BidRequest) *adapters.DemandResponse {
 	dr := &adapters.DemandResponse{
 		DemandID:    adapter.BigoAdsKey,
 		RequestID:   request.ID,

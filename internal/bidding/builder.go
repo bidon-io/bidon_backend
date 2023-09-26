@@ -10,6 +10,7 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
+	"github.com/bidon-io/bidon-backend/internal/bidding/openrtb"
 	"github.com/bidon-io/bidon-backend/internal/device"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/geocoder"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
@@ -73,7 +74,7 @@ func (b *Builder) HoldAuction(ctx context.Context, params *BuildParams) (Auction
 	if err != nil {
 		return emptyResponse, fmt.Errorf("cannot generate Bid UUID: %s", err)
 	}
-	baseBidRequest := openrtb2.BidRequest{
+	baseBidRequest := openrtb.BidRequest{
 		ID:   bidId.String(),
 		Test: *bool2int(br.Test),
 		AT:   1,

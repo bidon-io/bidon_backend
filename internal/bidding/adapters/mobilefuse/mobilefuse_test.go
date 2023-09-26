@@ -1,7 +1,6 @@
 package mobilefuse_test
 
 import (
-	"encoding/json"
 	"errors"
 	"net/http"
 	"testing"
@@ -10,6 +9,7 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters/mobilefuse"
+	"github.com/bidon-io/bidon-backend/internal/bidding/openrtb"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	"github.com/google/go-cmp/cmp"
 	"github.com/prebid/openrtb/v19/adcom1"
@@ -17,12 +17,12 @@ import (
 )
 
 type createRequestTestParams struct {
-	BaseBidRequest openrtb2.BidRequest
+	BaseBidRequest openrtb.BidRequest
 	Br             *schema.BiddingRequest
 }
 
 type createRequestTestOutput struct {
-	Request openrtb2.BidRequest
+	Request openrtb.BidRequest
 	Err     error
 }
 
@@ -50,8 +50,8 @@ func buildAdapter() mobilefuse.MobileFuseAdapter {
 	}
 }
 
-func buildBaseRequest() openrtb2.BidRequest {
-	return openrtb2.BidRequest{
+func buildBaseRequest() openrtb.BidRequest {
+	return openrtb.BidRequest{
 		App: &openrtb2.App{
 			Publisher: &openrtb2.Publisher{},
 		},
@@ -94,19 +94,15 @@ func buildTestParams(imp schema.Imp) createRequestTestParams {
 	}
 }
 
-func buildWantRequest(imp openrtb2.Imp) openrtb2.BidRequest {
-	segmentExt, _ := json.Marshal(map[string]any{
-		"signal": "token",
-	})
-
-	request := openrtb2.BidRequest{
+func buildWantRequest(imp openrtb2.Imp) openrtb.BidRequest {
+	request := openrtb.BidRequest{
 		App: &openrtb2.App{Publisher: &openrtb2.Publisher{}},
-		User: &openrtb2.User{
-			Data: []openrtb2.Data{
+		User: &openrtb.User{
+			Data: []openrtb.Data{
 				{
-					Segment: []openrtb2.Segment{
+					Segment: []openrtb.Segment{
 						{
-							Ext: segmentExt,
+							Signal: "token",
 						},
 					},
 				},
@@ -259,23 +255,35 @@ func TestMobileFuse_CreateRequest(t *testing.T) {
 
 func TestMobileFuse_ParseBids(t *testing.T) {
 	rawResponse := `{
-		"id": "47611e59-e05b-4e1e-9074-5a65eb4501e4",
-		"seatbid": [
+	  "id": "32612272f2a17a9789aee929a9a20b94",
+	  "bidid": "f5bec35899734ce7f17e4bdc56c91117",
+	  "seatbid": [
+		{
+		  "bid": [
 			{
-				"bid": [
-					{
-						"id": "0",
-						"impid": "6579ca7b-7e2c-48b6-8915-46efa6530fb5",
-						"price": 1.5,
-						"nurl": "https://api.gov-static.tech/Ad/AdxEvent?sid=0&sslot=10182906-10163778&adtype=4",
-						"lurl": "https://api.gov-static.tech/Ad/AdxEvent?sid=0&sslot=10182906-10163778",
-						"adm": "0692d0a0efdbd5bd470dafea742cef6a1f6b840c5c83240e165bc33a038b3d5487e25a52",
-						"adid": "Bigoad5e0471131b8a4e3c",
-						"crid": "e2d42134881d5b45134f3cf77989dec7"
-					}
-				]
+			  "id": "9f21299b7b7b6ad7fe30226748c57abf_banner",
+			  "adomain": [
+				"mobilefuse.com"
+			  ],
+			  "impid": "1",
+			  "crid": "test_js_interstitial",
+			  "h": 480,
+			  "price": 1.904,
+			  "w": 320,
+			  "lurl": "https://mfx-us-east-1.mobilefuse.com/lurl?i=60f859c11e497f9afb51877bec9c391c_0&loss=${AUCTION_LOSS}&price=${AUCTION_PRICE}",
+			  "ext": {
+				"mf": {
+				  "format": "instl",
+				  "media_type": "banner"
+				},
+				"signaldata": "H4sIAAAAAAAAA41Qy27CMBD8lcqqOBESm0dwBFQV6gGpKhW0t0iRYzbCkMSW16FUiH/v0l565LaPmZ3ZuTCzYxkbigkXIhWVUDxVMp1KBSCFVFKJpJQj1mfaNSzjA5mMqPa/rAAYigMWpg3gMZhgVE3I8O2AtqVqW/DUqx0x2QyJ5cIDej3P2T4Eh1ke53FTnaMOI1AYIj5obGlqqDqEgbZNHh8w+vLKOfBPZj5JqulYas5hJNNKqqoc82malqClHkquiyRni1ke/yktSBrOznhAlg0nSdJntUUsOl+TnXsN1AS/S7p3Oz5/vDx/Lj9W67fidb3dXnvOGw3/pu+b1fLlSs6aLgBlyCnM2uhjUcJenYz1t+Bs2BOirC3N8WhcgaBtu6M3xn12Ypm4/gBBRP5ctwEAAA=="
+			  },
+			  "exp": 3600
 			}
-		]
+		  ],
+		  "seat": ""
+		}
+	  ]
 	}`
 	adapter := buildAdapter()
 
@@ -297,14 +305,14 @@ func TestMobileFuse_ParseBids(t *testing.T) {
 					Status:      200,
 					RawResponse: rawResponse,
 					Bid: &adapters.BidDemandResponse{
-						ID:       "0",
-						ImpID:    "6579ca7b-7e2c-48b6-8915-46efa6530fb5",
-						Price:    1.5,
-						Payload:  "0692d0a0efdbd5bd470dafea742cef6a1f6b840c5c83240e165bc33a038b3d5487e25a52",
+						ID:       "9f21299b7b7b6ad7fe30226748c57abf_banner",
+						ImpID:    "1",
+						Price:    1.904,
+						Payload:  "{\"adm\":\"\",\"signaldata\":\"H4sIAAAAAAAAA41Qy27CMBD8lcqqOBESm0dwBFQV6gGpKhW0t0iRYzbCkMSW16FUiH/v0l565LaPmZ3ZuTCzYxkbigkXIhWVUDxVMp1KBSCFVFKJpJQj1mfaNSzjA5mMqPa/rAAYigMWpg3gMZhgVE3I8O2AtqVqW/DUqx0x2QyJ5cIDej3P2T4Eh1ke53FTnaMOI1AYIj5obGlqqDqEgbZNHh8w+vLKOfBPZj5JqulYas5hJNNKqqoc82malqClHkquiyRni1ke/yktSBrOznhAlg0nSdJntUUsOl+TnXsN1AS/S7p3Oz5/vDx/Lj9W67fidb3dXnvOGw3/pu+b1fLlSs6aLgBlyCnM2uhjUcJenYz1t+Bs2BOirC3N8WhcgaBtu6M3xn12Ypm4/gBBRP5ctwEAAA==\"}",
 						DemandID: "mobilefuse",
-						AdID:     "Bigoad5e0471131b8a4e3c",
-						LURL:     "https://api.gov-static.tech/Ad/AdxEvent?sid=0&sslot=10182906-10163778",
-						NURL:     "https://api.gov-static.tech/Ad/AdxEvent?sid=0&sslot=10182906-10163778&adtype=4",
+						AdID:     "",
+						LURL:     "https://mfx-us-east-1.mobilefuse.com/lurl?i=60f859c11e497f9afb51877bec9c391c_0&loss=${AUCTION_LOSS}&price=${AUCTION_PRICE}",
+						NURL:     "",
 					},
 				},
 				Err: nil,
