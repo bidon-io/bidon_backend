@@ -13,6 +13,7 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
+	"github.com/bidon-io/bidon-backend/internal/bidding/openrtb"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	"github.com/gofrs/uuid/v5"
 	"github.com/prebid/openrtb/v19/adcom1"
@@ -67,7 +68,7 @@ func (a *MobileFuseAdapter) rewarded() *openrtb2.Imp {
 	}
 }
 
-func (a *MobileFuseAdapter) CreateRequest(request openrtb2.BidRequest, br *schema.BiddingRequest) (openrtb2.BidRequest, error) {
+func (a *MobileFuseAdapter) CreateRequest(request openrtb.BidRequest, br *schema.BiddingRequest) (openrtb.BidRequest, error) {
 	if a.TagID == "" {
 		return request, errors.New("TagID is empty")
 	}
@@ -101,19 +102,12 @@ func (a *MobileFuseAdapter) CreateRequest(request openrtb2.BidRequest, br *schem
 	request.Imp = []openrtb2.Imp{*imp}
 	request.Cur = []string{"USD"}
 
-	segmentExt, err := json.Marshal(map[string]any{
-		"signal": br.Imp.Demands[adapter.MobileFuseKey]["token"].(string),
-	})
-	if err != nil {
-		return request, err
-	}
-
-	request.User = &openrtb2.User{
-		Data: []openrtb2.Data{
+	request.User = &openrtb.User{
+		Data: []openrtb.Data{
 			{
-				Segment: []openrtb2.Segment{
+				Segment: []openrtb.Segment{
 					{
-						Ext: segmentExt,
+						Signal: br.Imp.Demands[adapter.MobileFuseKey]["token"].(string),
 					},
 				},
 			},
@@ -123,7 +117,7 @@ func (a *MobileFuseAdapter) CreateRequest(request openrtb2.BidRequest, br *schem
 	return request, nil
 }
 
-func (a *MobileFuseAdapter) ExecuteRequest(ctx context.Context, client *http.Client, request openrtb2.BidRequest) *adapters.DemandResponse {
+func (a *MobileFuseAdapter) ExecuteRequest(ctx context.Context, client *http.Client, request openrtb.BidRequest) *adapters.DemandResponse {
 	dr := &adapters.DemandResponse{
 		DemandID:  adapter.MobileFuseKey,
 		RequestID: request.ID,
@@ -193,11 +187,26 @@ func (a *MobileFuseAdapter) ParseBids(dr *adapters.DemandResponse) (*adapters.De
 	seat := bidResponse.SeatBid[0]
 	bid := seat.Bid[0]
 
+	// !!! It's important to return signal_token in payload
+	var extParam map[string]any
+	err = json.Unmarshal(bid.Ext, &extParam)
+	if err != nil {
+		return dr, err
+	}
+
+	payload, err := json.Marshal(map[string]any{
+		"signaldata": extParam["signaldata"],
+		"adm":        bid.AdM,
+	})
+	if err != nil {
+		return dr, err
+	}
+
 	dr.Bid = &adapters.BidDemandResponse{
 		ID:       bid.ID,
 		ImpID:    bid.ImpID,
 		Price:    bid.Price,
-		Payload:  bid.AdM,
+		Payload:  string(payload),
 		DemandID: adapter.MobileFuseKey,
 		AdID:     bid.AdID,
 		SeatID:   seat.Seat,
