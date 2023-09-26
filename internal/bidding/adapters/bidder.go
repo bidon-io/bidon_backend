@@ -2,21 +2,21 @@ package adapters
 
 import (
 	"context"
+	"github.com/bidon-io/bidon-backend/internal/bidding/openrtb"
 	"net/http"
 
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
-	"github.com/prebid/openrtb/v19/openrtb2"
 )
 
 type BidderInterface interface {
 	// ParseConfig(config *json.RawMessage) error
 
 	// CreateRequest makes the HTTP requests which should be made to fetch bids.
-	CreateRequest(openrtb2.BidRequest, *schema.BiddingRequest) (openrtb2.BidRequest, error)
+	CreateRequest(openrtb.BidRequest, *schema.BiddingRequest) (openrtb.BidRequest, error)
 
 	// ExecuteRequest sends request to bidder endpoint.
-	ExecuteRequest(context.Context, *http.Client, openrtb2.BidRequest) *DemandResponse
+	ExecuteRequest(context.Context, *http.Client, openrtb.BidRequest) *DemandResponse
 
 	// ParseBids unpacks the server's response into Bids.
 	ParseBids(*DemandResponse) (*DemandResponse, error)

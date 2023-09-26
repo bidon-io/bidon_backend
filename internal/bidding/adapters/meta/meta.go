@@ -16,6 +16,7 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
+	"github.com/bidon-io/bidon-backend/internal/bidding/openrtb"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	"github.com/gofrs/uuid/v5"
 	"github.com/prebid/openrtb/v19/adcom1"
@@ -90,7 +91,7 @@ func (a *MetaAdapter) rewarded(br *schema.BiddingRequest) *openrtb2.Imp {
 	}
 }
 
-func (a *MetaAdapter) CreateRequest(request openrtb2.BidRequest, br *schema.BiddingRequest) (openrtb2.BidRequest, error) {
+func (a *MetaAdapter) CreateRequest(request openrtb.BidRequest, br *schema.BiddingRequest) (openrtb.BidRequest, error) {
 	secure := int8(1)
 
 	var imp *openrtb2.Imp
@@ -120,7 +121,7 @@ func (a *MetaAdapter) CreateRequest(request openrtb2.BidRequest, br *schema.Bidd
 	imp.BidFloorCur = "USD"
 
 	request.Imp = []openrtb2.Imp{*imp}
-	request.User = &openrtb2.User{
+	request.User = &openrtb.User{
 		BuyerUID: br.Imp.Demands[adapter.MetaKey]["token"].(string),
 	}
 	request.Cur = []string{"USD"}
@@ -140,7 +141,7 @@ func (a *MetaAdapter) CreateRequest(request openrtb2.BidRequest, br *schema.Bidd
 	return request, nil
 }
 
-func (a *MetaAdapter) ExecuteRequest(ctx context.Context, client *http.Client, request openrtb2.BidRequest) *adapters.DemandResponse {
+func (a *MetaAdapter) ExecuteRequest(ctx context.Context, client *http.Client, request openrtb.BidRequest) *adapters.DemandResponse {
 	dr := &adapters.DemandResponse{
 		DemandID:  adapter.MetaKey,
 		RequestID: request.ID,
