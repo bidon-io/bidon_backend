@@ -151,7 +151,7 @@ const demandSourceAccounts = computed(() =>
   )
 );
 
-// compute demand source api key from account type (e.g. "Admob::Admob" => "admob")
+// compute demand source api key from account type (e.g. "DemandSource::Admob" => "admob")
 // in order to fetch extra fields schema specific to the demand source
 const apiKey = computed(() =>
   accountType.value ? accountType.value.split("::")[1].toLowerCase() : ""

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_09_21_073317) do
+ActiveRecord::Schema[7.0].define(version: 2023_09_25_131907) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -101,7 +101,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_09_21_073317) do
 
   create_table "demand_source_accounts", force: :cascade do |t|
     t.bigint "demand_source_id", null: false
-    t.bigint "user_id", null: false
+    t.bigint "user_id"
     t.string "type", null: false
     t.jsonb "extra", default: {}
     t.boolean "bidding", default: false
