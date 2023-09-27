@@ -11,11 +11,9 @@ import { ResourceTableFields } from "@/constants";
 
 const columns = [
   ResourceTableFields.PublicUid,
+  ResourceTableFields.DemandSource,
   ResourceTableFields.User,
   ResourceTableFields.Label,
-  { field: "type", header: "Type" },
-  ResourceTableFields.DemandSource,
-  { field: "isBidding", header: "Bidding" },
 ];
 const resourcesPath = "/demand_source_accounts";
 </script>

@@ -1,38 +1,41 @@
 <template>
-  <template v-if="apiKey == 'admob'">
+  <template v-if="apiKey === 'admob'">
     <VeeFormFieldWrapper field="extra.adUnitId" label="Ad Unit Id" required />
   </template>
-  <template v-if="apiKey == 'applovin'">
+  <template v-if="apiKey === 'applovin'">
     <VeeFormFieldWrapper field="extra.zoneId" label="Zone Id" required />
   </template>
-  <template v-if="apiKey == 'amazon'">
+  <template v-if="apiKey === 'amazon'">
     <VeeFormFieldWrapper field="extra.slotUuid" label="Slot Uuid" required />
   </template>
-  <template v-if="apiKey == 'bigoads'">
+  <template v-if="apiKey === 'bidmachine'">
+    <VeeFormFieldWrapper field="extra.adUnitId" label="Ad Unit Id" required />
+  </template>
+  <template v-if="apiKey === 'bigoads'">
     <VeeFormFieldWrapper field="extra.slotId" label="Slot Id" required />
   </template>
-  <template v-if="apiKey == 'dtexchange'">
-    <VeeFormFieldWrapper
-      field="extra.plcementId"
-      label="Placement Id"
-      required
-    />
-  </template>
-  <template v-if="apiKey == 'inmobi'">
+  <template v-if="apiKey === 'dtexchange'">
     <VeeFormFieldWrapper
       field="extra.placementId"
       label="Placement Id"
       required
     />
   </template>
-  <template v-if="apiKey == 'meta'">
+  <template v-if="apiKey === 'inmobi'">
     <VeeFormFieldWrapper
       field="extra.placementId"
       label="Placement Id"
       required
     />
   </template>
-  <template v-if="apiKey == 'mintegral'">
+  <template v-if="apiKey === 'meta'">
+    <VeeFormFieldWrapper
+      field="extra.placementId"
+      label="Placement Id"
+      required
+    />
+  </template>
+  <template v-if="apiKey === 'mintegral'">
     <VeeFormFieldWrapper
       field="extra.placementId"
       label="Placement Id"
@@ -40,29 +43,26 @@
     />
     <VeeFormFieldWrapper field="extra.adUnitId" label="Ad Unit Id" required />
   </template>
-  <template v-if="apiKey == 'unityads'">
+  <template v-if="apiKey === 'mobilefuse'">
     <VeeFormFieldWrapper
       field="extra.placementId"
       label="Placement Id"
       required
     />
   </template>
-  <template v-if="apiKey == 'vungle'">
+  <template v-if="apiKey === 'unityads'">
     <VeeFormFieldWrapper
       field="extra.placementId"
       label="Placement Id"
       required
     />
   </template>
-  <template v-if="apiKey == 'mobilefuse'">
+  <template v-if="apiKey === 'vungle'">
     <VeeFormFieldWrapper
       field="extra.placementId"
       label="Placement Id"
       required
     />
-  </template>
-  <template v-if="apiKey == 'bidmachine'">
-    <VeeFormFieldWrapper field="extra.adUnitId" label="Ad Unit Id" required />
   </template>
 </template>
 
@@ -91,11 +91,14 @@ const dataSchemas = {
   amazon: yup.object({
     slotUuid: yup.string().required().label("Slot Uuid"),
   }),
+  bidmachine: yup.object({
+    adUnitId: yup.string().required().label("Ad Unit Id"),
+  }),
   bigoads: yup.object({
     slotId: yup.string().required().label("Slot Id"),
   }),
   dtexchange: yup.object({
-    plcementId: yup.string().required().label("Placement Id"),
+    placementId: yup.string().required().label("Placement Id"),
   }),
   inmobi: yup.object({
     placementId: yup.string().required().label("Placement Id"),
@@ -107,17 +110,14 @@ const dataSchemas = {
     placementId: yup.string().required().label("Placement Id"),
     adUnitId: yup.string().required().label("Ad Unit Id"),
   }),
+  mobilefuse: yup.object({
+    placementId: yup.string().required().label("Placement Id"),
+  }),
   unityads: yup.object({
     placementId: yup.string().required().label("Placement Id"),
   }),
   vungle: yup.object({
     placementId: yup.string().required().label("Placement Id"),
-  }),
-  mobilefuse: yup.object({
-    placementId: yup.string().required().label("Placement Id"),
-  }),
-  bidmachine: yup.object({
-    adUnitId: yup.string().required().label("Ad Unit Id"),
   }),
 };
 

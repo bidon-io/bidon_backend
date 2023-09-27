@@ -138,7 +138,7 @@ type DemandSourceAccount struct {
 	Model
 	DemandSourceID int64          `gorm:"column:demand_source_id;type:bigint;not null"`
 	DemandSource   DemandSource   `gorm:"foreignKey:DemandSourceID"`
-	UserID         int64          `gorm:"column:user_id;type:bigint;not null"`
+	UserID         int64          `gorm:"column:user_id;type:bigint"`
 	User           User           `gorm:"foreignKey:UserID"`
 	Label          string         `gorm:"column:label;type:varchar;not null"`
 	Type           string         `gorm:"column:type;type:varchar;not null"`

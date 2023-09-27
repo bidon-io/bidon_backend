@@ -58,7 +58,11 @@ func (s *privateResourceScope[Resource]) list(ctx context.Context) ([]Resource, 
 
 func (s *privateResourceScope[Resource]) find(ctx context.Context, id int64) (*Resource, error) {
 	if s.authCtx.IsAdmin() {
-		return s.repo.Find(ctx, id)
+		if id == 0 {
+			return nil, nil
+		} else {
+			return s.repo.Find(ctx, id)
+		}
 	}
 
 	return nil, errors.New("unauthorized")
