@@ -27,7 +27,7 @@ const resource = response.data;
 const fields = [
   ResourceCardFields.PublicUid,
   ResourceCardFields.DemandSource,
-  ResourceCardFields.User,
+  ResourceCardFields.Owner,
   { label: "Label", key: "label" },
   { label: "Extra", key: "extra", type: "textarea" },
 ];

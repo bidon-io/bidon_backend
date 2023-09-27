@@ -22,8 +22,11 @@ const resource = response.data;
 
 const fields = [
   ResourceCardFields.PublicUid,
-  { label: "Platform Id", key: "platformId" },
-  { label: "Human Name", key: "humanName" },
+  { label: "App Key", key: "appKey" },
+  ResourceCardFields.Owner,
+  { label: "App Name", key: "humanName" },
+  { label: "Platform", key: "platformId" },
+  { label: "Bundle ID / Package Name", key: "packageName" },
   {
     key: "lineItems",
     label: "Line Items",
@@ -46,9 +49,5 @@ const fields = [
       }),
     },
   },
-  { label: "Package Name", key: "packageName" },
-  ResourceCardFields.User,
-  { label: "App Key", key: "appKey" },
-  { label: "Settings", key: "settings", type: "textarea" },
 ];
 </script>

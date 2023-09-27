@@ -19,10 +19,9 @@
         :selected-api-key="apiKey"
         required
       />
-      <UserDropdown
+      <OwnerWithSharedDropdown
         v-if="currentUser.isAdmin"
         v-model="userId"
-        label="Owner"
         :error="errors.userId"
       />
       <FormField label="Label" :error="errors.label" required>
@@ -40,6 +39,7 @@
 <script setup>
 import * as yup from "yup";
 import { useAuthStore } from "@/stores/AuthStore";
+import OwnerWithSharedDropdown from "~/components/form/OwnerWithSharedDropdown.vue";
 
 const props = defineProps({
   value: {

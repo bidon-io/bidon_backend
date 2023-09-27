@@ -24,16 +24,12 @@ func TestAppRepo_List(t *testing.T) {
 			HumanName:   "App 1",
 			PackageName: "com.example.app1",
 			UserID:      users[0].ID,
-			AppKey:      "qwerty",
-			Settings:    map[string]any{"setting1": 1, "setting2": 2},
 		},
 		{
 			PlatformID:  admin.AndroidPlatformID,
 			HumanName:   "App 2",
 			PackageName: "com.example.app2",
 			UserID:      users[1].ID,
-			AppKey:      "asdfg",
-			Settings:    map[string]any{"setting1": 1, "setting2": 2},
 		},
 	}
 
@@ -131,8 +127,6 @@ func TestAppRepo_Find(t *testing.T) {
 		HumanName:   "App 1",
 		PackageName: "com.example.app1",
 		UserID:      user.ID,
-		AppKey:      "qwerty",
-		Settings:    map[string]any{"setting1": 1, "setting2": 2},
 	}
 
 	want, err := repo.Create(context.Background(), attrs)
@@ -246,8 +240,6 @@ func TestAppRepo_Update(t *testing.T) {
 		HumanName:   "App 1",
 		PackageName: "com.example.app1",
 		UserID:      user.ID,
-		AppKey:      "qwerty",
-		Settings:    map[string]any{"setting1": 1, "setting2": 2},
 	}
 
 	app, err := repo.Create(context.Background(), &attrs)
@@ -283,8 +275,6 @@ func TestAppRepo_Delete(t *testing.T) {
 		HumanName:   "App 1",
 		PackageName: "com.example.app1",
 		UserID:      user.ID,
-		AppKey:      "qwerty",
-		Settings:    map[string]any{"setting1": 1, "setting2": 2},
 	}
 	app, err := repo.Create(context.Background(), attrs)
 	if err != nil {

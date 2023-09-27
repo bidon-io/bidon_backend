@@ -1,5 +1,5 @@
 <template>
-  <FormField label="User" :error="error" :required="required">
+  <FormField label="Owner" :error="error" :required="required">
     <Dropdown
       v-model="value"
       :options="users"
