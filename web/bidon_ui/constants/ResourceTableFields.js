@@ -123,6 +123,16 @@ export const ResourceTableFields = {
       placeholder: "Human Name",
     },
   },
+  AppName: {
+    field: "humanName",
+    header: "App Name",
+    filter: {
+      field: "humanName",
+      type: "input",
+      matchMode: FilterMatchMode.CONTAINS,
+      placeholder: "App Name",
+    },
+  },
   Label: {
     field: "label",
     header: "Label",
@@ -162,9 +172,9 @@ export const ResourceTableFields = {
       ],
     },
   },
-  User: {
+  Owner: {
     field: "userId",
-    header: "User",
+    header: "Owner",
     link: {
       basePath: "/users",
       extractLinkData: ({ user }) => ({
@@ -177,7 +187,7 @@ export const ResourceTableFields = {
       field: "userId",
       type: "select",
       matchMode: FilterMatchMode.EQUALS,
-      placeholder: "User",
+      placeholder: "Owner",
       extractOptions: (records) => [
         ...new Map(
           records.map(({ user }) => [

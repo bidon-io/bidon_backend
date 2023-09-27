@@ -2,7 +2,9 @@ package adminstore
 
 import (
 	"context"
+	"crypto/rand"
 	"database/sql"
+	"encoding/hex"
 	"strconv"
 
 	"github.com/bidon-io/bidon-backend/internal/admin"
@@ -49,8 +51,8 @@ func (m appMapper) dbModel(a *admin.AppAttrs, id int64) *db.App {
 	}
 
 	appKey := sql.NullString{}
-	if a.AppKey != "" {
-		appKey.String = a.AppKey
+	if id == 0 {
+		appKey.String, _ = m.generateAppKey()
 		appKey.Valid = true
 	}
 
@@ -67,7 +69,6 @@ func (m appMapper) dbModel(a *admin.AppAttrs, id int64) *db.App {
 		HumanName:   a.HumanName,
 		PackageName: packageName,
 		AppKey:      appKey,
-		Settings:    a.Settings,
 		PublicUID:   publicUID,
 	}
 }
@@ -89,6 +90,13 @@ func (m appMapper) resourceAttrs(a *db.App) admin.AppAttrs {
 		HumanName:   a.HumanName,
 		PackageName: a.PackageName.String,
 		AppKey:      a.AppKey.String,
-		Settings:    a.Settings,
 	}
+}
+
+func (m appMapper) generateAppKey() (string, error) {
+	keyBytes := make([]byte, 24)
+	if _, err := rand.Read(keyBytes); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(keyBytes), nil
 }

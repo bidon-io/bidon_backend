@@ -8,8 +8,11 @@ import { ResourceTableFields } from "@/constants";
 
 const columns = [
   ResourceTableFields.PublicUid,
-  { field: "platformId", header: "Platform Id" },
-  ResourceTableFields.HumanName,
+  { field: "appKey", header: "App Key" },
+  ResourceTableFields.Owner,
+  ResourceTableFields.AppName,
+  { field: "platformId", header: "Platform" },
+  { field: "packageName", header: "Bundle ID / Package Name" },
   {
     field: "",
     header: "Line Items",
@@ -30,9 +33,6 @@ const columns = [
       }),
     },
   },
-  { field: "packageName", header: "Package Name" },
-  ResourceTableFields.User,
-  { field: "appKey", header: "App Key" },
 ];
 const resourcesPath = "/apps";
 </script>
