@@ -187,32 +187,25 @@ func (a *MobileFuseAdapter) ParseBids(dr *adapters.DemandResponse) (*adapters.De
 	seat := bidResponse.SeatBid[0]
 	bid := seat.Bid[0]
 
-	// !!! It's important to return signal_token in payload
 	var extParam map[string]any
 	err = json.Unmarshal(bid.Ext, &extParam)
 	if err != nil {
 		return dr, err
 	}
-
-	payload, err := json.Marshal(map[string]any{
-		"signaldata": extParam["signaldata"],
-		"adm":        bid.AdM,
-	})
-	if err != nil {
-		return dr, err
-	}
+	signaldata := extParam["signaldata"].(string)
 
 	dr.Bid = &adapters.BidDemandResponse{
-		ID:       bid.ID,
-		ImpID:    bid.ImpID,
-		Price:    bid.Price,
-		Payload:  string(payload),
-		DemandID: adapter.MobileFuseKey,
-		AdID:     bid.AdID,
-		SeatID:   seat.Seat,
-		LURL:     bid.LURL,
-		NURL:     bid.NURL,
-		BURL:     bid.BURL,
+		ID:         bid.ID,
+		ImpID:      bid.ImpID,
+		Price:      bid.Price,
+		Payload:    bid.AdM,
+		Signaldata: signaldata,
+		DemandID:   adapter.MobileFuseKey,
+		AdID:       bid.AdID,
+		SeatID:     seat.Seat,
+		LURL:       bid.LURL,
+		NURL:       bid.NURL,
+		BURL:       bid.BURL,
 	}
 
 	return dr, nil
