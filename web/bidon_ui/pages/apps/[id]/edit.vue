@@ -3,7 +3,12 @@
     <NavigationContainer>
       <GoBackButton :path="resourcePath" />
     </NavigationContainer>
-    <AppForm v-if="isReady" :value="resource" @submit="handleSubmit" />
+    <AppForm
+      v-if="isReady"
+      :value="resource"
+      :submit-error="error"
+      @submit="handleSubmit"
+    />
   </PageContainer>
 </template>
 
@@ -20,8 +25,10 @@ const { state: resource, isReady } = useAsyncState(async () => {
   return response.data;
 });
 
+const error = ref(null);
 const handleSubmit = useUpdateResource({
   path: resourcePath,
-  message: "App Updated!",
+  message: "App updated!",
+  onError: async (e) => (error.value = e),
 });
 </script>
