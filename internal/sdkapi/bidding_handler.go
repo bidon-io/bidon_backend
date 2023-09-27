@@ -46,6 +46,7 @@ type Bid struct {
 
 type Demand struct {
 	Payload     string `json:"payload"`
+	Signaldata  string `json:"signaldata"`
 	UnitID      string `json:"unit_id,omitempty"`
 	SlotID      string `json:"slot_id,omitempty"`
 	PlacementID string `json:"placement_id,omitempty"`
@@ -196,6 +197,12 @@ func buildDemandInfo(demandResponse adapters.DemandResponse) Demand {
 		return Demand{
 			Payload: demandResponse.Bid.Payload,
 			SlotID:  demandResponse.TagID,
+		}
+	case adapter.MobileFuseKey:
+		return Demand{
+			Payload:     demandResponse.Bid.Payload,
+			Signaldata:  demandResponse.Bid.Signaldata,
+			PlacementID: demandResponse.TagID,
 		}
 	default:
 		return Demand{
