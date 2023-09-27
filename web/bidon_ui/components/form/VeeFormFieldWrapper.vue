@@ -1,6 +1,16 @@
 <template>
   <FormField :label="label" :error="errorMessage" :required="required">
-    <InputText v-model="value" :type="type" :placeholder="label" />
+    <InputText
+      v-if="type === 'text'"
+      v-model="value"
+      :type="type"
+      :placeholder="label"
+    />
+    <TextareaJSON
+      v-if="type === 'array'"
+      v-model="value"
+      :placeholder="label"
+    />
   </FormField>
 </template>
 
@@ -27,4 +37,5 @@ const props = defineProps({
 });
 
 const { value, errorMessage } = useField(props.field);
+if (props.type === "array" && !value.value) value.value = [];
 </script>

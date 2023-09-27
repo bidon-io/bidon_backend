@@ -26,11 +26,9 @@ const resource = response.data;
 
 const fields = [
   ResourceCardFields.PublicUid,
+  ResourceCardFields.DemandSource,
   ResourceCardFields.User,
   { label: "Label", key: "label" },
-  { label: "Type", key: "type" },
-  ResourceCardFields.DemandSource,
-  { label: "IsBidding", key: "isBidding" },
   { label: "Extra", key: "extra", type: "textarea" },
 ];
 </script>
