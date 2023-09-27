@@ -1,5 +1,10 @@
 <template>
-  <FormField label="Demand source" :error="error" :required="required">
+  <FormField
+    v-show="show"
+    label="Demand source"
+    :error="error"
+    :required="required"
+  >
     <Dropdown
       v-model="value"
       :options="options"
@@ -24,6 +29,14 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  show: {
+    type: Boolean,
+    default: true,
+  },
+  selectedApiKey: {
+    type: String,
+    default: "",
+  },
   modelValue: {
     type: [Number, null],
     default: null,
@@ -39,6 +52,17 @@ const value = computed({
     emit("update:modelValue", value);
   },
 });
+
+watch(
+  () => props.selectedApiKey,
+  (apiKey) => {
+    if (!apiKey) {
+      return;
+    }
+    const demandSource = options.value.find((o) => o.apiKey === apiKey);
+    emit("update:modelValue", demandSource.id);
+  }
+);
 
 const options = ref([]);
 axios

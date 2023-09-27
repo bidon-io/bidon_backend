@@ -2,7 +2,6 @@ package admin
 
 import (
 	"context"
-
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	v8n "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/go-ozzo/ozzo-validation/v4/is"
@@ -35,7 +34,7 @@ func NewDemandSourceAccountService(store Store) *DemandSourceAccountService {
 	s.policy = newDemandSourceAccountPolicy(store)
 
 	s.prepareCreateAttrs = func(authCtx AuthContext, attrs *DemandSourceAccountAttrs) {
-		if attrs.UserID == 0 {
+		if attrs.UserID == 0 && !authCtx.IsAdmin() {
 			attrs.UserID = authCtx.UserID()
 		}
 	}
@@ -156,18 +155,22 @@ func (v *demandSourceAccountValidator) extraRule(demandSource *DemandSource) v8n
 			v8n.Key("publisher_id", v8n.Required, isString),
 			v8n.Key("endpoint", v8n.Required, is.URL),
 		)
+	case adapter.InmobiKey:
+		rule = v8n.Map(
+			v8n.Key("account_id", v8n.Required, isString),
+		)
 	case adapter.MintegralKey:
 		rule = v8n.Map(
 			v8n.Key("app_key", v8n.Required, isString),
 			v8n.Key("publisher_id", v8n.Required, isString),
 		)
-	case adapter.VungleKey:
-		rule = v8n.Map(
-			v8n.Key("account_id", v8n.Required, isString),
-		)
 	case adapter.MobileFuseKey:
 		rule = v8n.Map(
 			v8n.Key("publisher_id", v8n.Required, isString),
+		)
+	case adapter.VungleKey:
+		rule = v8n.Map(
+			v8n.Key("account_id", v8n.Required, isString),
 		)
 	}
 

@@ -48,17 +48,17 @@ const value = computed({
   },
 });
 const options = ref([
-  { label: "Bidmachine", value: "DemandSourceAccount::BidMachine" },
   { label: "Admob", value: "DemandSourceAccount::Admob" },
+  { label: "Amazon", value: "DemandSourceAccount::Amazon" },
   { label: "Applovin", value: "DemandSourceAccount::Applovin" },
+  { label: "Bidmachine", value: "DemandSourceAccount::BidMachine" },
+  { label: "BigoAds", value: "DemandSourceAccount::BigoAds" },
   { label: "DTExchange", value: "DemandSourceAccount::DtExchange" },
+  { label: "Inmobi", value: "DemandSourceAccount::Inmobi" },
+  { label: "Meta", value: "DemandSourceAccount::Meta" },
+  { label: "Mintegral", value: "DemandSourceAccount::Mintegral" },
+  { label: "MobileFuse", value: "DemandSourceAccount::MobileFuse" },
   { label: "UnityAds", value: "DemandSourceAccount::UnityAds" },
   { label: "Vungle", value: "DemandSourceAccount::Vungle" },
-  { label: "Mintegral", value: "DemandSourceAccount::Mintegral" },
-  { label: "BigoAds", value: "DemandSourceAccount::BigoAds" },
-  { label: "Meta", value: "DemandSourceAccount::Meta" },
-  { label: "Inmobi", value: "DemandSourceAccount::Inmobi" },
-  { label: "Amazon", value: "DemandSourceAccount::Amazon" },
-  { label: "MobileFuse", value: "DemandSourceAccount::MobileFuse" },
 ]);
 </script>
