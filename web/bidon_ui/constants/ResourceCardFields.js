@@ -57,8 +57,8 @@ export const ResourceCardFields = {
       }),
     },
   },
-  User: {
-    label: "User",
+  Owner: {
+    label: "Owner",
     key: "userId",
     type: "link",
     link: {

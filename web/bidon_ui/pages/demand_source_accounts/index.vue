@@ -12,7 +12,7 @@ import { ResourceTableFields } from "@/constants";
 const columns = [
   ResourceTableFields.PublicUid,
   ResourceTableFields.DemandSource,
-  ResourceTableFields.User,
+  ResourceTableFields.Owner,
   ResourceTableFields.Label,
 ];
 const resourcesPath = "/demand_source_accounts";
