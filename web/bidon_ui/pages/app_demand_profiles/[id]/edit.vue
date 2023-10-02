@@ -6,6 +6,7 @@
     <AppDemandProfileForm
       v-if="isReady"
       :value="resource"
+      :submit-error="error"
       @submit="handleSubmit"
     />
   </PageContainer>
@@ -24,8 +25,10 @@ const { state: resource, isReady } = useAsyncState(async () => {
   return response.data;
 });
 
+const error = ref(null);
 const handleSubmit = useUpdateResource({
   path: resourcePath,
   message: "App Demand Profile Updated!",
+  onError: async (e) => (error.value = e),
 });
 </script>
