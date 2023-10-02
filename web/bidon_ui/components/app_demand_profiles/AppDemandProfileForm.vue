@@ -1,4 +1,9 @@
 <template>
+  <transition-group name="p-message" tag="div">
+    <Message v-for="(msg, index) in errorMsgs" :key="index" severity="error">{{
+      msg
+    }}</Message>
+  </transition-group>
   <form @submit="onSubmit">
     <FormCard title="App Demand Profile">
       <AppDropdown v-model="appId" :error="errors.appId" required />
@@ -11,6 +16,7 @@
         v-model="accountId"
         :accounts="accounts"
         :error="errors.accountId"
+        :disabled="!demandSourceId"
         required
       />
       <AppDemandProfileDataFormFields
@@ -30,6 +36,10 @@ const props = defineProps({
   value: {
     type: Object,
     required: true,
+  },
+  submitError: {
+    type: [Error, null],
+    default: null,
   },
 });
 const emit = defineEmits(["submit"]);
@@ -58,14 +68,38 @@ const appId = useFieldModel("appId");
 const demandSourceId = useFieldModel("demandSourceId");
 const accountId = useFieldModel("accountId");
 
+// filter demand source accounts by demand source id
 const response = await axios.get("/demand_source_accounts");
-const accounts = ref(response.data);
+const accountsAll = response.data;
+const accounts = computed(() =>
+  accountsAll.filter(
+    (account) => account.demandSourceId === demandSourceId.value
+  )
+);
 
 const accountToTypeMapping = new Map(
-  accounts.value.map((account) => [account.id, account.type])
+  accountsAll.map((account) => [account.id, account.type])
 );
+
 const accountType = computed(
   () => accountToTypeMapping.get(accountId.value) || ""
+);
+
+watch(demandSourceId, () => (accountId.value = null));
+
+// push submit error to error messages
+const errorMsgs = ref([]);
+watch(
+  () => props.submitError,
+  () => {
+    if (!props.submitError) return;
+
+    const error = props.submitError.response.data.error;
+    const errorMessage = error
+      ? `Status Code ${error.code} ${error.message}`
+      : `Status Code ${props.submitError.status} ${props.submitError.statusText}`;
+    errorMsgs.value.push(errorMessage);
+  }
 );
 
 const onSubmit = handleSubmit((values) =>
