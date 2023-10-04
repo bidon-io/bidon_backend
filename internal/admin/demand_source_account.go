@@ -2,6 +2,7 @@ package admin
 
 import (
 	"context"
+
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	v8n "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/go-ozzo/ozzo-validation/v4/is"
@@ -147,8 +148,8 @@ func (v *demandSourceAccountValidator) extraRule(demandSource *DemandSource) v8n
 	case adapter.BidmachineKey:
 		rule = v8n.Map(
 			v8n.Key("seller_id", v8n.Required, isString),
-			v8n.Key("endpoint", v8n.Required, is.URL),
-			v8n.Key("mediation_config", v8n.Required, v8n.Each(isString)),
+			v8n.Key("endpoint", v8n.Required, Any(is.URL, is.Host)),
+			v8n.Key("mediation_config", v8n.NotNil, v8n.Each(isString)),
 		)
 	case adapter.BigoAdsKey:
 		rule = v8n.Map(

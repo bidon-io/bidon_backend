@@ -31,13 +31,31 @@ func Test_demandSourceAccountValidator_ValidateWithContext(t *testing.T) {
 			false,
 		},
 		{
-			"valid Bidmachine",
+			"valid Bidmachine 1",
 			&DemandSourceAccountAttrs{
 				DemandSourceID: 1,
 				Extra: map[string]any{
 					"seller_id":        "154",
 					"endpoint":         "x.appbaqend.com",
 					"mediation_config": []string{"foo", "bar"},
+					"foo":              "bar",
+				},
+			},
+			&DemandSource{
+				DemandSourceAttrs: DemandSourceAttrs{
+					ApiKey: string(adapter.BidmachineKey),
+				},
+			},
+			false,
+		},
+		{
+			"valid Bidmachine 2",
+			&DemandSourceAccountAttrs{
+				DemandSourceID: 1,
+				Extra: map[string]any{
+					"seller_id":        "154",
+					"endpoint":         "https://x.appbaqend.com",
+					"mediation_config": []string{},
 					"foo":              "bar",
 				},
 			},
@@ -156,12 +174,12 @@ func Test_demandSourceAccountValidator_ValidateWithContext(t *testing.T) {
 			true,
 		},
 		{
-			"invalid Bidmachine when endpoint is not URL",
+			"invalid Bidmachine when endpoint is not URL nor host",
 			&DemandSourceAccountAttrs{
 				DemandSourceID: 1,
 				Extra: map[string]any{
 					"seller_id":        "154",
-					"endpoint":         154,
+					"endpoint":         "not host nor url",
 					"mediation_config": []string{"foo", "bar"},
 				},
 			},
@@ -180,6 +198,23 @@ func Test_demandSourceAccountValidator_ValidateWithContext(t *testing.T) {
 					"seller_id":        "154",
 					"endpoint":         "https://api.test.bidmachine.io",
 					"mediation_config": []int{1, 2, 3},
+				},
+			},
+			&DemandSource{
+				DemandSourceAttrs: DemandSourceAttrs{
+					ApiKey: string(adapter.BidmachineKey),
+				},
+			},
+			true,
+		},
+		{
+			"invalid Bidmachine when mediation_config is nil",
+			&DemandSourceAccountAttrs{
+				DemandSourceID: 1,
+				Extra: map[string]any{
+					"seller_id":        "154",
+					"endpoint":         "https://api.test.bidmachine.io",
+					"mediation_config": nil,
 				},
 			},
 			&DemandSource{
