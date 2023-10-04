@@ -91,6 +91,8 @@ func (b *AdaptersConfigBuilder) Build(ctx context.Context, appID int64, adapterK
 		extra := profile.AccountExtra
 		appData := profile.AppData
 		switch key {
+		case adapter.AmazonKey:
+			adapters[key]["price_points_map"] = extra["price_points_map"]
 		case adapter.BidmachineKey:
 			adapters[key]["seller_id"] = extra["seller_id"]
 			adapters[key]["endpoint"] = extra["endpoint"]

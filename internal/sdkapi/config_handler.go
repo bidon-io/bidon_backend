@@ -223,7 +223,14 @@ func (a *InmobiInitConfig) Key() adapter.Key {
 	return adapter.InmobiKey
 }
 
+type AmazonSlot struct {
+	SlotUUID string `json:"slot_uuid,omitempty"`
+	Format   string `json:"format,omitempty"`
+}
+
 type AmazonInitConfig struct {
+	AppKey string       `json:"app_key,omitempty"`
+	Slots  []AmazonSlot `json:"slots"`
 }
 
 func (a *AmazonInitConfig) Key() adapter.Key {
