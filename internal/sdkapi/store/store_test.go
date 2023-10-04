@@ -198,7 +198,130 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Valid(t *testing.T) {
 					AccountID: "inmobi",
 					AppKey:    fmt.Sprintf("inmobi_app_%d", apps[1].ID),
 				},
-				&sdkapi.AmazonInitConfig{},
+				&sdkapi.AmazonInitConfig{
+					AppKey: fmt.Sprintf("amazon_app_%d", apps[1].ID),
+					Slots:  []sdkapi.AmazonSlot{},
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := fetcher.FetchAdapterInitConfigs(context.Background(), tt.appID, tt.adapterKeys)
+			if err != nil {
+				t.Fatalf("FetchAdapterInitConfigs() error = %v", err)
+			}
+
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Errorf("FetchAdapterInitConfigs() mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Amazon(t *testing.T) {
+	tx := testDB.Begin()
+	defer tx.Rollback()
+
+	demandSource := dbtest.Create[db.DemandSource](t, tx,
+		dbtest.DemandSourceFactory{
+			APIKey: func(i int) string { return string(adapter.AmazonKey) },
+		},
+		0,
+	)
+
+	account := dbtest.Create[db.DemandSourceAccount](t, tx,
+		dbtest.DemandSourceAccountFactory{
+			DemandSource: func(i int) db.DemandSource { return demandSource },
+			Extra: func(i int) []byte {
+				demandSource := demandSource
+				return dbtest.ValidDemandSourceAccountExtra(t, adapter.Key(demandSource.APIKey))
+			},
+		},
+		0,
+	)
+
+	app := dbtest.Create[db.App](t, tx,
+		dbtest.AppFactory{},
+		1,
+	)
+
+	_ = dbtest.Create[db.AppDemandProfile](t, tx,
+		dbtest.AppDemandProfileFactory{
+			App: func(i int) db.App {
+				return app
+			},
+			Account: func(i int) db.DemandSourceAccount {
+				return account
+			},
+			Data: func(i int) []byte {
+				return dbtest.ValidAppDemandProfileData(t, adapter.Key(demandSource.APIKey), app.ID)
+			},
+		},
+		0,
+	)
+
+	dbtest.Create[db.LineItem](t, tx,
+		dbtest.LineItemFactory{
+			App:     func(i int) db.App { return app },
+			Account: func(i int) db.DemandSourceAccount { return account },
+			AdType:  func(i int) db.AdType { return db.BannerAdType },
+			Extra: func(i int) map[string]any {
+				return map[string]any{"slot_uuid": "amazon_slot_1"}
+			},
+		}, 0)
+
+	dbtest.Create[db.LineItem](t, tx,
+		dbtest.LineItemFactory{
+			App:     func(i int) db.App { return app },
+			Account: func(i int) db.DemandSourceAccount { return account },
+			AdType:  func(i int) db.AdType { return db.InterstitialAdType },
+			Extra: func(i int) map[string]any {
+				return map[string]any{"slot_uuid": "amazon_slot_2"}
+			},
+		}, 0)
+
+	dbtest.Create[db.LineItem](t, tx,
+		dbtest.LineItemFactory{
+			App:     func(i int) db.App { return app },
+			Account: func(i int) db.DemandSourceAccount { return account },
+			AdType:  func(i int) db.AdType { return db.InterstitialAdType },
+			Extra: func(i int) map[string]any {
+				return map[string]any{"slot_uuid": "amazon_slot_3", "is_video": true}
+			},
+		}, 0)
+
+	fetcher := &AdapterInitConfigsFetcher{DB: tx}
+
+	tests := []struct {
+		name        string
+		appID       int64
+		adapterKeys []adapter.Key
+		want        []sdkapi.AdapterInitConfig
+	}{
+		{
+			name:        "amazon app with all line items",
+			appID:       app.ID,
+			adapterKeys: adapter.Keys,
+			want: []sdkapi.AdapterInitConfig{
+				&sdkapi.AmazonInitConfig{
+					AppKey: fmt.Sprintf("amazon_app_%d", app.ID),
+					Slots: []sdkapi.AmazonSlot{
+						{
+							SlotUUID: "amazon_slot_1",
+							Format:   "BANNER",
+						},
+						{
+							SlotUUID: "amazon_slot_2",
+							Format:   "INTERSTITIAL",
+						},
+						{
+							SlotUUID: "amazon_slot_3",
+							Format:   "VIDEO",
+						},
+					},
+				},
 			},
 		},
 	}

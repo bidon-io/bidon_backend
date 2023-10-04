@@ -45,7 +45,7 @@ func testHelperBiddingHandler(t *testing.T) sdkapi.BiddingHandler {
 			{
 				ID:      "ROUND_2",
 				Demands: []adapter.Key{adapter.UnityAdsKey},
-				Bidding: []adapter.Key{adapter.MetaKey},
+				Bidding: []adapter.Key{adapter.MetaKey, adapter.AmazonKey},
 				Timeout: 15000,
 			},
 			{
@@ -114,6 +114,11 @@ func testHelperBiddingHandler(t *testing.T) sdkapi.BiddingHandler {
 					"app_secret": "123",
 					"seller_id":  "123",
 					"tag_id":     "123",
+				},
+				adapter.AmazonKey: map[string]any{
+					"price_points_map": map[string]any{
+						"price_point_1": map[string]any{"price": 0.1, "price_point": "price_point_1"},
+					},
 				},
 			}, nil
 		},

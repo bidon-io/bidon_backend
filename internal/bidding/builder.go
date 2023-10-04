@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/bidon-io/bidon-backend/internal/bidding/adapters/amazon"
 	"strconv"
 
 	"github.com/bidon-io/bidon-backend/internal/ad"
@@ -55,6 +56,11 @@ type AuctionResult struct {
 	RoundNumber int
 }
 
+type AmazonSlot struct {
+	SlotUUID   string `json:"slot_uuid"`
+	PricePoint string `json:"price_point"`
+}
+
 func (b *Builder) HoldAuction(ctx context.Context, params *BuildParams) (AuctionResult, error) {
 	// get config
 	// build openrtb request
@@ -95,7 +101,7 @@ func (b *Builder) HoldAuction(ctx context.Context, params *BuildParams) (Auction
 		},
 	}
 
-	// Get apaters from request, demands from bidding request and demands from round config and merge them
+	// Get adapters from request, demands from bidding request and demands from round config and merge them
 	var roundConfig *auction.RoundConfig
 	roundNumber := 0
 	for idx, round := range config.Rounds {
@@ -117,26 +123,41 @@ func (b *Builder) HoldAuction(ctx context.Context, params *BuildParams) (Auction
 
 	auctionResult := AuctionResult{RoundNumber: roundNumber}
 
+	handleError := func(adapterKey adapter.Key, err error) {
+		demandResponse := adapters.DemandResponse{
+			DemandID: adapterKey,
+			Error:    err,
+		}
+		auctionResult.Bids = append(auctionResult.Bids, demandResponse)
+	}
 	for _, adapterKey := range adapterKeys {
+		if adapterKey == adapter.AmazonKey {
+			adapter, err := amazon.Builder(params.AdapterConfigs)
+			if err != nil {
+				handleError(adapterKey, err)
+				continue
+			}
+			demandResponses, err := adapter.FetchBids(&br)
+			if err != nil {
+				handleError(adapterKey, err)
+				continue
+			}
+			for _, dr := range demandResponses {
+				auctionResult.Bids = append(auctionResult.Bids, *dr)
+			}
+		}
+
 		// adapter build bid request from baseBidRequest
 		// adapter send bid request
 		// adapter parse bid response
 		bidder, err := b.AdaptersBuilder.Build(adapterKey, params.AdapterConfigs)
 		if err != nil {
-			demandResponse := adapters.DemandResponse{
-				DemandID: adapterKey,
-				Error:    err,
-			}
-			auctionResult.Bids = append(auctionResult.Bids, demandResponse)
+			handleError(adapterKey, err)
 			continue
 		}
 		bidRequest, err := bidder.Adapter.CreateRequest(baseBidRequest, &br)
 		if err != nil {
-			demandResponse := adapters.DemandResponse{
-				DemandID: adapterKey,
-				Error:    err,
-			}
-			auctionResult.Bids = append(auctionResult.Bids, demandResponse)
+			handleError(adapterKey, err)
 			continue
 		}
 

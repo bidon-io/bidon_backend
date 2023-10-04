@@ -49,6 +49,7 @@ type Demand struct {
 	Signaldata  string `json:"signaldata"`
 	UnitID      string `json:"unit_id,omitempty"`
 	SlotID      string `json:"slot_id,omitempty"`
+	SlotUUID    string `json:"slot_uuid,omitempty"`
 	PlacementID string `json:"placement_id,omitempty"`
 }
 
@@ -183,6 +184,10 @@ func (h *BiddingHandler) sendEvents(c echo.Context, req *request[schema.BiddingR
 
 func buildDemandInfo(demandResponse adapters.DemandResponse) Demand {
 	switch demandResponse.DemandID {
+	case adapter.AmazonKey:
+		return Demand{
+			SlotUUID: demandResponse.SlotUUID,
+		}
 	case adapter.MintegralKey:
 		return Demand{
 			Payload:     demandResponse.Bid.Payload,

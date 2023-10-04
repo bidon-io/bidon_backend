@@ -57,12 +57,27 @@ func TestAppDemandProfileFetcher_Fetch(t *testing.T) {
 			},
 			Extra: []byte(`{"unity": "unity"}`),
 		}))
+	accountAmazon := dbtest.CreateDemandSourceAccount(t, tx, dbtest.WithDemandSourceAccountOptions(
+		&db.DemandSourceAccount{
+			UserID:         user.ID,
+			DemandSourceID: demandSources[1].ID,
+			DemandSource: db.DemandSource{
+				APIKey: string(adapter.AmazonKey),
+			},
+			Extra: []byte(`{"amazon": "amazon", "price_points": [{ "name": "name", "price_point": "price_point", "price": 1.0 }]}`),
+		}))
 	profiles := []db.AppDemandProfile{
 		{
 			AppID:          apps[0].ID,
 			AccountID:      accountApplovin.ID,
 			DemandSourceID: demandSources[0].ID,
 			Account:        *accountApplovin,
+		},
+		{
+			AppID:          apps[0].ID,
+			AccountID:      accountAmazon.ID,
+			DemandSourceID: demandSources[1].ID,
+			Account:        *accountAmazon,
 		},
 		{
 			AppID:          apps[0].ID,
@@ -110,6 +125,12 @@ func TestAppDemandProfileFetcher_Fetch(t *testing.T) {
 				adapter.BidmachineKey: {
 					AccountExtra: map[string]any{"bidmachine": "bidmachine"},
 					AppData:      map[string]any{},
+				},
+				adapter.AmazonKey: {
+					AccountExtra: map[string]any{"amazon": "amazon", "price_points": []any{
+						map[string]any{"name": "name", "price_point": "price_point", "price": 1.0},
+					}},
+					AppData: map[string]any{},
 				},
 			},
 		},

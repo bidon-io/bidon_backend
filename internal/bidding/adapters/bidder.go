@@ -39,6 +39,7 @@ type DemandResponse struct {
 	Error       error
 	TagID       string
 	PlacementID string
+	SlotUUID    string
 }
 
 func (m *DemandResponse) IsBid() bool {

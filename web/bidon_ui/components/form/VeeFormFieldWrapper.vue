@@ -6,6 +6,12 @@
       :type="type"
       :placeholder="label"
     />
+    <Checkbox
+      v-if="type === 'bool'"
+      v-model="value"
+      :placeholder="label"
+      binary
+    />
     <TextareaJSON
       v-if="type === 'array'"
       v-model="value"
@@ -32,6 +38,7 @@ const props = defineProps({
   },
   type: {
     type: String,
+    validator: (value) => ["text", "bool", "json"].includes(value),
     default: "text",
   },
 });

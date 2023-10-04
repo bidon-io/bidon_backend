@@ -64,7 +64,11 @@
           placeholder="Bid Floor"
         />
       </FormField>
-      <LineItemExtraFormFields v-model:schema="extraSchema" :api-key="apiKey" />
+      <LineItemExtraFormFields
+        v-model:schema="extraSchema"
+        :api-key="apiKey"
+        :ad-type="adType"
+      />
       <FormSubmitButton :disabled="!meta.valid" />
     </FormCard>
   </form>

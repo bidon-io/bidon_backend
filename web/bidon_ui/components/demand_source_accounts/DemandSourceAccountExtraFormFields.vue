@@ -1,4 +1,7 @@
 <template>
+  <template v-if="apiKey === 'amazon'">
+    <AmazonPricePointsForm />
+  </template>
   <template v-if="apiKey === 'applovin'">
     <VeeFormFieldWrapper field="extra.sdkKey" label="SDK Key" required />
   </template>
@@ -59,6 +62,9 @@ const props = defineProps({
 const emit = defineEmits(["update:schema"]);
 
 const dataSchemas = {
+  amazon: yup.object({
+    pricePointsMap: yup.object().required().label("Price Points"),
+  }),
   applovin: yup.object({
     sdkKey: yup.string().required().label("SDK Key"),
   }),

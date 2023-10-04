@@ -78,8 +78,62 @@ func (f *AdapterInitConfigsFetcher) FetchAdapterInitConfigs(ctx context.Context,
 			applovinConfig.AppKey = applovinConfig.SDKKey
 		}
 
+		amazonConfig, ok := config.(*sdkapi.AmazonInitConfig)
+		if ok {
+			amazonConfig.Slots, err = f.fetchAmazonSlots(ctx, appID)
+			if err != nil {
+				return nil, fmt.Errorf("fetch amazon slots: %v", err)
+			}
+		}
+
 		configs = append(configs, config)
 	}
 
 	return configs, nil
+}
+
+func (f *AdapterInitConfigsFetcher) fetchAmazonSlots(ctx context.Context, appID int64) ([]sdkapi.AmazonSlot, error) {
+	var dbLineItems []db.LineItem
+
+	err := f.DB.
+		WithContext(ctx).
+		Select("line_items.id, line_items.extra, line_items.ad_type").
+		Where("app_id", appID).
+		InnerJoins("Account", f.DB.Select("id")).
+		InnerJoins("Account.DemandSource", f.DB.Select("api_key").Where("api_key", adapter.AmazonKey)).
+		Order("line_items.id").
+		Find(&dbLineItems).
+		Error
+
+	if err != nil {
+		return nil, fmt.Errorf("find line items: %v", err)
+	}
+
+	slots := make([]sdkapi.AmazonSlot, 0, len(dbLineItems))
+	for _, lineItem := range dbLineItems {
+		slot := sdkapi.AmazonSlot{}
+
+		slotUUID, ok := lineItem.Extra["slot_uuid"].(string)
+		if !ok {
+			return nil, fmt.Errorf("slot_uuid is either missing or not a string")
+		}
+		slot.SlotUUID = slotUUID
+
+		switch lineItem.AdType {
+		case db.BannerAdType:
+			slot.Format = "BANNER"
+		case db.InterstitialAdType:
+			if isVideo, ok := lineItem.Extra["is_video"].(bool); ok && isVideo {
+				slot.Format = "VIDEO"
+				break
+			}
+			slot.Format = "INTERSTITIAL"
+		default:
+			return nil, fmt.Errorf("unsupported ad type: %v", lineItem.AdType.Domain())
+		}
+
+		slots = append(slots, slot)
+	}
+
+	return slots, nil
 }

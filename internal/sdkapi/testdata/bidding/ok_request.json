@@ -3,6 +3,10 @@
         "meta": {
             "version": "0.3.0.0",
             "sdk_version": "6.15.0"
+        },
+        "amazon": {
+            "version": "0.4.0.0",
+            "sdk_version": "6.15.0"
         }
     },
     "device": {
@@ -68,6 +72,9 @@
         "demands": {
         "meta": {
             "token": "token"
+        },
+        "amazon": {
+            "token": "[{\"slotUuid\":\"uuid1\",\"pricePoint\":\"price_point_1\"},{\"slotUuid\":\"uuid2\",\"pricePoint\":\"price_point_2\"}]"
         }
         },
         "id": "f2d0dc19-b43f-43c1-8ca0-ae895ec76970",
