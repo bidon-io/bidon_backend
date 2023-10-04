@@ -15,6 +15,27 @@ func Test_demandSourceAccountValidator_ValidateWithContext(t *testing.T) {
 		wantErr      bool
 	}{
 		{
+			"valid Amazon",
+			&DemandSourceAccountAttrs{
+				DemandSourceID: 1,
+				Extra: map[string]any{
+					"price_points_map": map[string]any{
+						"price_point": map[string]any{
+							"name":        "name",
+							"price_point": "price_point",
+							"price":       1.0,
+						},
+					},
+				},
+			},
+			&DemandSource{
+				DemandSourceAttrs: DemandSourceAttrs{
+					ApiKey: string(adapter.AmazonKey),
+				},
+			},
+			false,
+		},
+		{
 			"valid Applovin",
 			&DemandSourceAccountAttrs{
 				DemandSourceID: 1,

@@ -15,6 +15,8 @@ import ConfirmationService from "primevue/confirmationservice";
 import Checkbox from "primevue/checkbox";
 import Message from "primevue/message";
 import RadioButton from "primevue/radiobutton";
+import FileUpload from "primevue/fileupload";
+import ScrollPanel from "primevue/scrollpanel";
 
 export default defineNuxtPlugin((nuxtApp) => {
   nuxtApp.vueApp.use(PrimeVue, { ripple: true });
@@ -33,4 +35,6 @@ export default defineNuxtPlugin((nuxtApp) => {
   nuxtApp.vueApp.component("Textarea", Textarea);
   nuxtApp.vueApp.component("Message", Message);
   nuxtApp.vueApp.component("RadioButton", RadioButton);
+  nuxtApp.vueApp.component("FileUpload", FileUpload);
+  nuxtApp.vueApp.component("ScrollPanel", ScrollPanel);
 });
