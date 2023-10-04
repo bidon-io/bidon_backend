@@ -82,9 +82,11 @@ const gameIdVisible = computed(
   () => props.accountType === "DemandSourceAccount::UnityAds"
 );
 const appKeyVisible = computed(() =>
-  ["DemandSourceAccount::Inmobi", "DemandSourceAccount::MobileFuse"].includes(
-    props.accountType
-  )
+  [
+    "DemandSourceAccount::Inmobi",
+    "DemandSourceAccount::MobileFuse",
+    "DemandSourceAccount::Amazon",
+  ].includes(props.accountType)
 );
 
 const { value: appId, errorMessage: appIdError } = useField("data.appId");
