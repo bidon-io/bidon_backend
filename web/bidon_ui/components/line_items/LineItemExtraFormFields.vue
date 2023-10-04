@@ -8,6 +8,9 @@
   <template v-if="apiKey === 'amazon'">
     <VeeFormFieldWrapper field="extra.slotUuid" label="Slot Uuid" required />
   </template>
+  <template v-if="apiKey === 'amazon' && adType === 'interstitial'">
+    <VeeFormFieldWrapper field="extra.isVideo" label="Is Video" type="bool" />
+  </template>
   <template v-if="apiKey === 'bidmachine'">
     <VeeFormFieldWrapper field="extra.adUnitId" label="Ad Unit Id" required />
   </template>
@@ -78,6 +81,10 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  adType: {
+    type: String,
+    required: true,
+  },
 });
 const emit = defineEmits(["update:schema"]);
 
@@ -90,6 +97,7 @@ const dataSchemas = {
   }),
   amazon: yup.object({
     slotUuid: yup.string().required().label("Slot Uuid"),
+    isVideo: yup.boolean().label("Is Video"),
   }),
   bidmachine: yup.object({
     adUnitId: yup.string().required().label("Ad Unit Id"),
@@ -120,6 +128,8 @@ const dataSchemas = {
     placementId: yup.string().required().label("Placement Id"),
   }),
 };
+
+watch(props, () => console.log("AdType + ApiKet", props.apiKey, props.adType));
 
 const schema = computed(() => dataSchemas[props.apiKey] || yup.object());
 watchEffect(() => {

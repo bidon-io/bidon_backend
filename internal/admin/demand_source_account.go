@@ -141,6 +141,12 @@ func (v *demandSourceAccountValidator) extraRule(demandSource *DemandSource) v8n
 	var rule v8n.MapRule
 
 	switch adapter.Key(demandSource.ApiKey) {
+	case adapter.AmazonKey:
+		rule = v8n.Map(v8n.Key("price_points_map", isMap, v8n.Each(v8n.Map(
+			v8n.Key("name", v8n.Required, isString),
+			v8n.Key("price_point", v8n.Required, isString),
+			v8n.Key("price", v8n.Required, isFloat),
+		))))
 	case adapter.ApplovinKey:
 		rule = v8n.Map(
 			v8n.Key("sdk_key", v8n.Required, isString),
