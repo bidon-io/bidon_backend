@@ -6,7 +6,8 @@
       accept=".csv"
       :auto="true"
       :choose-label="label"
-      @upload="onUpload"
+      custom-upload
+      @uploader="onUpload"
     />
     <ScrollPanel
       v-if="content.length"
