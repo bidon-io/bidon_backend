@@ -51,16 +51,16 @@ func TestAdapter_FetchBids(t *testing.T) {
 							adapter.AmazonKey: {
 								"token": `[
 									{
-										"slotUuid": "slot_uuid_1",
-										"pricePoint": "price_point_1"
+										"slot_uuid": "slot_uuid_1",
+										"price_point": "price_point_1"
 									},
 									{
-										"slotUuid": "slot_uuid_2",
-										"pricePoint": "price_point_2"
+										"slot_uuid": "slot_uuid_2",
+										"price_point": "price_point_2"
 									},
 									{
-										"slotUuid": "slot_uuid_3",
-										"pricePoint": "price_point_3"
+										"slot_uuid": "slot_uuid_3",
+										"price_point": "price_point_3"
 									}
 								]`,
 							},
