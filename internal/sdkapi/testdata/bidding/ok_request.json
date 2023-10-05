@@ -74,7 +74,7 @@
             "token": "token"
         },
         "amazon": {
-            "token": "[{\"slotUuid\":\"uuid1\",\"pricePoint\":\"price_point_1\"},{\"slotUuid\":\"uuid2\",\"pricePoint\":\"price_point_2\"}]"
+            "token": "[{\"slot_uuid\":\"uuid1\",\"price_point\":\"price_point_1\"},{\"slot_uuid\":\"uuid2\",\"price_point\":\"price_point_2\"}]"
         }
         },
         "id": "f2d0dc19-b43f-43c1-8ca0-ae895ec76970",

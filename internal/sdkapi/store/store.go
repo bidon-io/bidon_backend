@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/bidon-io/bidon-backend/internal/ad"
 
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/db"
@@ -97,7 +98,7 @@ func (f *AdapterInitConfigsFetcher) fetchAmazonSlots(ctx context.Context, appID 
 
 	err := f.DB.
 		WithContext(ctx).
-		Select("line_items.id, line_items.extra, line_items.ad_type").
+		Select("line_items.id, line_items.extra, line_items.ad_type, line_items.format").
 		Where("app_id", appID).
 		InnerJoins("Account", f.DB.Select("id")).
 		InnerJoins("Account.DemandSource", f.DB.Select("api_key").Where("api_key", adapter.AmazonKey)).
@@ -121,6 +122,10 @@ func (f *AdapterInitConfigsFetcher) fetchAmazonSlots(ctx context.Context, appID 
 
 		switch lineItem.AdType {
 		case db.BannerAdType:
+			if lineItem.Format.String == string(ad.MRECFormat) {
+				slot.Format = "MREC"
+				break
+			}
 			slot.Format = "BANNER"
 		case db.InterstitialAdType:
 			if isVideo, ok := lineItem.Extra["is_video"].(bool); ok && isVideo {
