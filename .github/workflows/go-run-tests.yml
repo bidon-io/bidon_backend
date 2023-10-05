@@ -1,6 +1,10 @@
 name: Go / Run Tests
 
-on: workflow_call
+on:
+  workflow_call:
+  push:
+    branches:
+      - "main"
 
 jobs:
   test:
