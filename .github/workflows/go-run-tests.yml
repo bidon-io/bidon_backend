@@ -1,0 +1,24 @@
+name: Go / Run Tests
+
+on: workflow_call
+
+jobs:
+  test:
+    runs-on: [self-hosted]
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+
+      - run: docker compose -f docker-compose.go-test.yml run -v $(pwd)/testcov:/app/testcov --rm bidon-test
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_BIDON_BACKEND_TOKEN }}
+          url: ${{ secrets.CODECOV_URL }}
+          directory: ./testcov/
+          fail_ci_if_error: true
+
+      - run: docker compose -f docker-compose.go-test.yml down --rmi local -v
+        if: always()
