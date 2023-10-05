@@ -10,8 +10,8 @@ import (
 )
 
 type Slot struct {
-	SlotUUID   string `json:"slotUuid"`
-	PricePoint string `json:"pricePoint"`
+	SlotUUID   string `json:"slot_uuid"`
+	PricePoint string `json:"price_point"`
 }
 
 type PricePointsMap map[string]PricePoint

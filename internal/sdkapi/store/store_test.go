@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/bidon-io/bidon-backend/internal/ad"
 	"os"
 	"testing"
 
@@ -268,7 +269,23 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Amazon(t *testing.T) 
 			Account: func(i int) db.DemandSourceAccount { return account },
 			AdType:  func(i int) db.AdType { return db.BannerAdType },
 			Extra: func(i int) map[string]any {
-				return map[string]any{"slot_uuid": "amazon_slot_1"}
+				return map[string]any{"slot_uuid": "amazon_slot_banner"}
+			},
+		}, 0)
+
+	dbtest.Create[db.LineItem](t, tx,
+		dbtest.LineItemFactory{
+			App:     func(i int) db.App { return app },
+			Account: func(i int) db.DemandSourceAccount { return account },
+			AdType:  func(i int) db.AdType { return db.BannerAdType },
+			Format: func(i int) sql.NullString {
+				return sql.NullString{
+					String: string(ad.MRECFormat),
+					Valid:  true,
+				}
+			},
+			Extra: func(i int) map[string]any {
+				return map[string]any{"slot_uuid": "amazon_slot_mrec"}
 			},
 		}, 0)
 
@@ -278,7 +295,7 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Amazon(t *testing.T) 
 			Account: func(i int) db.DemandSourceAccount { return account },
 			AdType:  func(i int) db.AdType { return db.InterstitialAdType },
 			Extra: func(i int) map[string]any {
-				return map[string]any{"slot_uuid": "amazon_slot_2"}
+				return map[string]any{"slot_uuid": "amazon_slot_interstitial"}
 			},
 		}, 0)
 
@@ -288,7 +305,7 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Amazon(t *testing.T) 
 			Account: func(i int) db.DemandSourceAccount { return account },
 			AdType:  func(i int) db.AdType { return db.InterstitialAdType },
 			Extra: func(i int) map[string]any {
-				return map[string]any{"slot_uuid": "amazon_slot_3", "is_video": true}
+				return map[string]any{"slot_uuid": "amazon_slot_video", "is_video": true}
 			},
 		}, 0)
 
@@ -309,15 +326,19 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Amazon(t *testing.T) 
 					AppKey: fmt.Sprintf("amazon_app_%d", app.ID),
 					Slots: []sdkapi.AmazonSlot{
 						{
-							SlotUUID: "amazon_slot_1",
+							SlotUUID: "amazon_slot_banner",
 							Format:   "BANNER",
 						},
 						{
-							SlotUUID: "amazon_slot_2",
+							SlotUUID: "amazon_slot_mrec",
+							Format:   "MREC",
+						},
+						{
+							SlotUUID: "amazon_slot_interstitial",
 							Format:   "INTERSTITIAL",
 						},
 						{
-							SlotUUID: "amazon_slot_3",
+							SlotUUID: "amazon_slot_video",
 							Format:   "VIDEO",
 						},
 					},
