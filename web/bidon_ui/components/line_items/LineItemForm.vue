@@ -106,7 +106,7 @@ const { errors, meta, useFieldModel, handleSubmit } = useForm({
       bidFloor:
         auctionType.value !== "bidding"
           ? yup.number().positive().required().label("Bid Floor")
-          : yup.number().nullable(true).positive().label("Bid Floor"),
+          : yup.number().nullable(true).label("Bid Floor"),
       adType: yup.string().required().label("AdType"),
       format: yup
         .string()
@@ -129,7 +129,7 @@ const { errors, meta, useFieldModel, handleSubmit } = useForm({
       ? parseFloat(resource.value.bidFloor)
       : null,
     adType: resource.value.adType || "",
-    format: resource.value.format || null,
+    format: resource.value.format || "",
     accountId: resource.value.accountId || null,
     accountType: resource.value.accountType || "",
     isBidding: resource.value.isBidding || false,
