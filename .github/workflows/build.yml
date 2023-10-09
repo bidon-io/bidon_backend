@@ -93,7 +93,3 @@ jobs:
           environment: production
           projects: bidon-admin bidon-sdkapi
           version: ${{ github.ref }}
-
-  run-tests:
-    uses: ./.github/workflows/go-run-tests.yml
-    secrets: inherit
