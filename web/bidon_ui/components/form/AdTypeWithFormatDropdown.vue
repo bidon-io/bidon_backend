@@ -35,7 +35,7 @@ const options = ref([
   { label: "Adaptive banner", value: { adType: "banner", format: "ADAPTIVE" } },
   { label: "Banner", value: { adType: "banner", format: "BANNER" } },
   { label: "MREC", value: { adType: "banner", format: "MREC" } },
-  { label: "Interstitial", value: { adType: "interstitial", format: null } },
-  { label: "Rewarded", value: { adType: "rewarded", format: null } },
+  { label: "Interstitial", value: { adType: "interstitial", format: "" } },
+  { label: "Rewarded", value: { adType: "rewarded", format: "" } },
 ]);
 </script>
