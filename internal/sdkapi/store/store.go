@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+
 	"github.com/bidon-io/bidon-backend/internal/ad"
 
 	"github.com/bidon-io/bidon-backend/internal/adapter"
@@ -133,6 +134,8 @@ func (f *AdapterInitConfigsFetcher) fetchAmazonSlots(ctx context.Context, appID 
 				break
 			}
 			slot.Format = "INTERSTITIAL"
+		case db.RewardedAdType:
+			slot.Format = "REWARDED"
 		default:
 			return nil, fmt.Errorf("unsupported ad type: %v", lineItem.AdType.Domain())
 		}

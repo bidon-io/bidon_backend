@@ -2,11 +2,12 @@ package amazon
 
 import (
 	"errors"
+	"testing"
+
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	"github.com/google/go-cmp/cmp"
-	"testing"
 )
 
 func compareErrors(x, y error) bool {
@@ -101,9 +102,12 @@ func TestAdapter_FetchBids(t *testing.T) {
 			t.Errorf("%q. Adapter.FetchBids() error = %v, wantErr %v", tt.name, err, tt.wantErr)
 			continue
 		}
+
+		// ignore id and imp_id
 		for _, dr := range got {
 			if dr.Bid != nil {
-				dr.Bid.ImpID = "" // ignore imp_id
+				dr.Bid.ID = ""
+				dr.Bid.ImpID = ""
 			}
 		}
 		if diff := cmp.Diff(tt.want, got, cmp.Comparer(compareErrors)); diff != "" {
