@@ -23,6 +23,6 @@ const deleteHandle = useDeleteResource({
 
 const { getResourcePermissionsByPath } = useAuthStore();
 const permissions: ResourcePermissions = await getResourcePermissionsByPath(
-  props.path
+  props.path,
 );
 </script>

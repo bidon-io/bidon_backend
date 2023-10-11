@@ -61,7 +61,7 @@ watch(
     }
     const demandSource = options.value.find((o) => o.apiKey === apiKey);
     emit("update:modelValue", demandSource.id);
-  }
+  },
 );
 
 const options = ref([]);
