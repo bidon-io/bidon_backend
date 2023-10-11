@@ -19,6 +19,10 @@
       v-model="videoPricePoints"
       label="Video Price Points"
     />
+    <AmazonPricePointsUpload
+      v-model="rewardedPricePoints"
+      label="Rewarded Price Points"
+    />
   </div>
 </template>
 
@@ -27,11 +31,13 @@ import { useField } from "vee-validate";
 
 const { value: pricePoints } = useField("extra.pricePointsMap");
 const showUploads = ref(!pricePoints.value);
+const persistedPricePoints = pricePoints.value;
 
 const bannerPricePoints = ref([]);
 const mrecPricePoints = ref([]);
 const interstitialPricePoints = ref([]);
 const videoPricePoints = ref([]);
+const rewardedPricePoints = ref([]);
 
 const isValid = computed(() =>
   [
@@ -39,8 +45,15 @@ const isValid = computed(() =>
     mrecPricePoints.value.length,
     interstitialPricePoints.value.length,
     videoPricePoints.value.length,
+    rewardedPricePoints.value.length,
   ].every((length) => length > 0),
 );
+
+// reset pricePoints for new uploads (to make submit btn disabled), or restore persisted value
+watch(showUploads, () => {
+  if (showUploads.value) pricePoints.value = null;
+  else pricePoints.value = persistedPricePoints;
+});
 
 watchEffect(() => {
   if (!isValid.value) return;
@@ -51,6 +64,7 @@ watchEffect(() => {
       ...mrecPricePoints.value,
       ...interstitialPricePoints.value,
       ...videoPricePoints.value,
+      ...rewardedPricePoints.value,
     ]
       .filter((el) => el.pricePoint)
       .map((el) => [el.pricePoint, el]),
