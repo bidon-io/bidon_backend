@@ -65,6 +65,6 @@ const password = useFieldModel("password");
 const authStore = useAuthStore();
 
 const onSubmit = handleSubmit(
-  async ({ email, password }) => await authStore.login(email, password)
+  async ({ email, password }) => await authStore.login(email, password),
 );
 </script>

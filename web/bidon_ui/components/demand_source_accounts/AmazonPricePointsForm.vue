@@ -39,7 +39,7 @@ const isValid = computed(() =>
     mrecPricePoints.value.length,
     interstitialPricePoints.value.length,
     videoPricePoints.value.length,
-  ].every((length) => length > 0)
+  ].every((length) => length > 0),
 );
 
 watchEffect(() => {
@@ -53,7 +53,7 @@ watchEffect(() => {
       ...videoPricePoints.value,
     ]
       .filter((el) => el.pricePoint)
-      .map((el) => [el.pricePoint, el])
+      .map((el) => [el.pricePoint, el]),
   );
 });
 </script>

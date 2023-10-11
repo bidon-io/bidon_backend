@@ -15,6 +15,6 @@ const props = defineProps<{
 }>();
 const { getResourcePermissionsByPath } = useAuthStore();
 const permissions: ResourcePermissions = await getResourcePermissionsByPath(
-  props.resourcesPath
+  props.resourcesPath,
 );
 </script>

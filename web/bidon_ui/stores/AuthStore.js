@@ -12,7 +12,7 @@ export const useAuthStore = defineStore("authStore", () => {
 
   const localStorageUser = localStorage.getItem("user");
   const user = ref(
-    localStorageUser ? camelizeKeys(JSON.parse(localStorageUser)) : null
+    localStorageUser ? camelizeKeys(JSON.parse(localStorageUser)) : null,
   );
   const accessToken = ref(localStorage.getItem("accessToken") || null);
   const permissions = ref([]);

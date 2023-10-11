@@ -120,7 +120,7 @@ const { errors, meta, useFieldModel, handleSubmit } = useForm({
       accountType: yup.string().required().label("Demand Source"),
       isBidding: yup.boolean(),
       extra: extraSchema.value,
-    })
+    }),
   ),
   initialValues: {
     humanName: resource.value.humanName || "",
@@ -151,14 +151,14 @@ const response = await axios.get("/demand_source_accounts");
 const demandSourceAccountsAll = response.data;
 const demandSourceAccounts = computed(() =>
   demandSourceAccountsAll.filter(
-    (account) => account.type === accountType.value
-  )
+    (account) => account.type === accountType.value,
+  ),
 );
 
 // compute demand source api key from account type (e.g. "DemandSource::Admob" => "admob")
 // in order to fetch extra fields schema specific to the demand source
 const apiKey = computed(() =>
-  accountType.value ? accountType.value.split("::")[1].toLowerCase() : ""
+  accountType.value ? accountType.value.split("::")[1].toLowerCase() : "",
 );
 
 // reset accountId when accountType changes
@@ -186,7 +186,7 @@ watch(
       ? `Status Code ${error.code} ${error.message}`
       : `Status Code ${props.submitError.status} ${props.submitError.statusText}`;
     errorMsgs.value.push(errorMessage);
-  }
+  },
 );
 
 const onSubmit = handleSubmit((values) => emit("submit", values));
