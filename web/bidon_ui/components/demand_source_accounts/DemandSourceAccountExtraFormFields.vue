@@ -82,9 +82,9 @@ const dataSchemas = {
             yup
               .string()
               .matches(
-                /^([a-zA-Z0-9_][a-zA-Z0-9_-]{0,62})(\.[a-zA-Z0-9_][a-zA-Z0-9_-]{0,62})*[._]?$/
+                /^([a-zA-Z0-9_][a-zA-Z0-9_-]{0,62})(\.[a-zA-Z0-9_][a-zA-Z0-9_-]{0,62})*[._]?$/,
               )
-              .isValidSync(value)) // regexp is from https://github.com/asaskevich/govalidator/blob/a9d515a09cc289c60d55064edec5ef189859f172/patterns.go#L33
+              .isValidSync(value)), // regexp is from https://github.com/asaskevich/govalidator/blob/a9d515a09cc289c60d55064edec5ef189859f172/patterns.go#L33
       )
       .label("Endpoint"),
     mediationConfig: yup

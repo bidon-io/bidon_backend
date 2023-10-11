@@ -53,7 +53,7 @@ const { errors, useFieldModel, handleSubmit } = useForm({
       demandSourceId: yup.number().required().label("Deamand Source Id"),
       accountId: yup.number().required().label("Account Id"),
       data: dataSchema.value,
-    })
+    }),
   ),
   initialValues: {
     appId: resource.value.appId || null,
@@ -73,16 +73,16 @@ const response = await axios.get("/demand_source_accounts");
 const accountsAll = response.data;
 const accounts = computed(() =>
   accountsAll.filter(
-    (account) => account.demandSourceId === demandSourceId.value
-  )
+    (account) => account.demandSourceId === demandSourceId.value,
+  ),
 );
 
 const accountToTypeMapping = new Map(
-  accountsAll.map((account) => [account.id, account.type])
+  accountsAll.map((account) => [account.id, account.type]),
 );
 
 const accountType = computed(
-  () => accountToTypeMapping.get(accountId.value) || ""
+  () => accountToTypeMapping.get(accountId.value) || "",
 );
 
 watch(demandSourceId, () => (accountId.value = null));
@@ -99,10 +99,10 @@ watch(
       ? `Status Code ${error.code} ${error.message}`
       : `Status Code ${props.submitError.status} ${props.submitError.statusText}`;
     errorMsgs.value.push(errorMessage);
-  }
+  },
 );
 
 const onSubmit = handleSubmit((values) =>
-  emit("submit", { ...values, accountType: accountType.value })
+  emit("submit", { ...values, accountType: accountType.value }),
 );
 </script>

@@ -28,7 +28,7 @@ export const ResourceTableFields = {
               label: `${app?.packageName} (${app?.platformId})`,
               value: String(app?.id),
             },
-          ])
+          ]),
         ).values(),
       ],
     },
@@ -47,7 +47,7 @@ export const ResourceTableFields = {
           records.map(({ adType }) => [
             adType,
             { label: adType, value: adType },
-          ])
+          ]),
         ).values(),
       ],
     },
@@ -77,7 +77,7 @@ export const ResourceTableFields = {
               label: demandSource?.humanName,
               value: String(demandSource?.id),
             },
-          ])
+          ]),
         ).values(),
       ],
     },
@@ -108,7 +108,7 @@ export const ResourceTableFields = {
               }`,
               value: String(account?.id),
             },
-          ])
+          ]),
         ).values(),
       ],
     },
@@ -167,7 +167,7 @@ export const ResourceTableFields = {
               label: segment?.name,
               value: String(segment?.id),
             },
-          ])
+          ]),
         ).values(),
       ],
     },
@@ -196,7 +196,7 @@ export const ResourceTableFields = {
               label: user?.email,
               value: String(user?.id),
             },
-          ])
+          ]),
         ).values(),
       ],
     },

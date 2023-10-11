@@ -90,7 +90,7 @@ watch(
       ? `Status Code ${error.code} ${error.message}`
       : `Status Code ${props.submitError.status} ${props.submitError.statusText}`;
     errorMsgs.value.push(errorMessage);
-  }
+  },
 );
 
 const onSubmit = handleSubmit((values) => emit("submit", values));

@@ -26,7 +26,7 @@ api.interceptors.response.use(
       window.location.reload();
     }
     throw error;
-  }
+  },
 );
 
 // Axios middleware to convert all api requests to snake_case and add authorization header

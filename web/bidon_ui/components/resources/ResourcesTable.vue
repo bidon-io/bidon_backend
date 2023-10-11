@@ -45,7 +45,9 @@
         <Dropdown
           v-if="column.filter.type === 'select'"
           v-model="filterModel.value"
-          :options="filtersOptions[column.filter.field as keyof typeof filtersOptions]"
+          :options="
+            filtersOptions[column.filter.field as keyof typeof filtersOptions]
+          "
           option-label="label"
           option-value="value"
           :placeholder="column.filter.placeholder"
@@ -131,7 +133,7 @@ const route = useRoute();
 const router = useRouter();
 const { getResourcePermissionsByPath } = useAuthStore();
 const permissions: ResourcePermissions = await getResourcePermissionsByPath(
-  props.resourcesPath
+  props.resourcesPath,
 );
 
 const filters = ref(
@@ -146,8 +148,8 @@ const filters = ref(
           value: route.query[filter.field],
         },
       }),
-      {}
-    )
+      {},
+    ),
 );
 
 const getFilterOptions = (filteredResources: object[]) =>
@@ -159,7 +161,7 @@ const getFilterOptions = (filteredResources: object[]) =>
         ...result,
         [filter.field || ""]: filter.extractOptions(filteredResources) || [],
       }),
-      {}
+      {},
     );
 
 const filtersOptions = ref(getFilterOptions(resources.value));
@@ -176,7 +178,7 @@ watch(filters, () => {
         ...result,
         [key]: (filter as Filter).value,
       }),
-      {}
+      {},
     );
 
   router.push({ query });
@@ -186,7 +188,7 @@ const deleteHandle = useDeleteResource({
   path: props.resourcesPath,
   hook: (id: number) =>
     (resources.value = resources.value.filter(
-      (item: { id: number }) => item.id !== id
+      (item: { id: number }) => item.id !== id,
     )),
 });
 </script>

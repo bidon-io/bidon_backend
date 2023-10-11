@@ -74,6 +74,6 @@ watch(
   () => props.accounts,
   (accounts) => {
     options.value = buildOptions(accounts);
-  }
+  },
 );
 </script>

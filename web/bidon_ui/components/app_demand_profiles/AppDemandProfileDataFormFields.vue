@@ -73,20 +73,20 @@ const appIdVisible = computed(() =>
     "DemandSourceAccount::Vungle",
     "DemandSourceAccount::Meta",
     "DemandSourceAccount::Mintegral",
-  ].includes(props.accountType)
+  ].includes(props.accountType),
 );
 const appSecretVisible = computed(
-  () => props.accountType === "DemandSourceAccount::Meta"
+  () => props.accountType === "DemandSourceAccount::Meta",
 );
 const gameIdVisible = computed(
-  () => props.accountType === "DemandSourceAccount::UnityAds"
+  () => props.accountType === "DemandSourceAccount::UnityAds",
 );
 const appKeyVisible = computed(() =>
   [
     "DemandSourceAccount::Inmobi",
     "DemandSourceAccount::MobileFuse",
     "DemandSourceAccount::Amazon",
-  ].includes(props.accountType)
+  ].includes(props.accountType),
 );
 
 const { value: appId, errorMessage: appIdError } = useField("data.appId");
