@@ -88,7 +88,7 @@ const demandSourceId = useFieldModel("demandSourceId");
 // compute demand source api key from account type (e.g. "DemandSource::Admob" => "admob")
 // in order to fetch extra fields schema specific to the demand source
 const apiKey = computed(() =>
-  type.value ? type.value.split("::")[1].toLowerCase() : ""
+  type.value ? type.value.split("::")[1].toLowerCase() : "",
 );
 
 // push submit error to error messages
@@ -103,7 +103,7 @@ watch(
       ? `Status Code ${error.code} ${error.message}`
       : `Status Code ${props.submitError.status} ${props.submitError.statusText}`;
     errorMsgs.value.push(errorMessage);
-  }
+  },
 );
 
 const onSubmit = handleSubmit((values) => emit("submit", values));
