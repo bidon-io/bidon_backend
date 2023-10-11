@@ -4,9 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/bidon-io/bidon-backend/internal/ad"
 	"os"
 	"testing"
+
+	"github.com/bidon-io/bidon-backend/internal/ad"
 
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/db"
@@ -309,6 +310,16 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Amazon(t *testing.T) 
 			},
 		}, 0)
 
+	dbtest.Create[db.LineItem](t, tx,
+		dbtest.LineItemFactory{
+			App:     func(i int) db.App { return app },
+			Account: func(i int) db.DemandSourceAccount { return account },
+			AdType:  func(i int) db.AdType { return db.RewardedAdType },
+			Extra: func(i int) map[string]any {
+				return map[string]any{"slot_uuid": "amazon_slot_rewarded"}
+			},
+		}, 0)
+
 	fetcher := &AdapterInitConfigsFetcher{DB: tx}
 
 	tests := []struct {
@@ -340,6 +351,10 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Amazon(t *testing.T) 
 						{
 							SlotUUID: "amazon_slot_video",
 							Format:   "VIDEO",
+						},
+						{
+							SlotUUID: "amazon_slot_rewarded",
+							Format:   "REWARDED",
 						},
 					},
 				},
