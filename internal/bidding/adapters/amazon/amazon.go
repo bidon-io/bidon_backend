@@ -3,6 +3,7 @@ package amazon
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
@@ -36,12 +37,14 @@ func (a *Adapter) FetchBids(br *schema.BiddingRequest) ([]*adapters.DemandRespon
 	demandResponses := make([]*adapters.DemandResponse, 0, len(slots))
 	for _, slot := range slots {
 		if pricePoint, ok := a.PricePointsMap[slot.PricePoint]; ok {
-			impId, _ := uuid.NewV4()
+			ID, _ := uuid.NewV4()
+			impID, _ := uuid.NewV4()
 			demandResponse := adapters.DemandResponse{
 				DemandID: adapter.AmazonKey,
 				SlotUUID: slot.SlotUUID,
 				Bid: &adapters.BidDemandResponse{
-					ImpID: impId.String(),
+					ID:    ID.String(),
+					ImpID: impID.String(),
 					Price: pricePoint.Price,
 				},
 			}
