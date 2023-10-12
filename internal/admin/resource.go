@@ -81,8 +81,8 @@ func (s *ResourceService[Resource, ResourceData, ResourceAttrs]) List(ctx contex
 	}
 
 	resources := make([]Resource, len(data))
-	for i, r := range data {
-		resources[i] = s.prepareResource(authCtx, &r)
+	for i := range data {
+		resources[i] = s.prepareResource(authCtx, &data[i])
 	}
 
 	return resources, nil
