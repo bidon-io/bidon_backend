@@ -9,6 +9,13 @@ import (
 	"github.com/go-ozzo/ozzo-validation/v4/is"
 )
 
+const UserResourceKey = "user"
+
+type UserResource struct {
+	*User
+	Permissions ResourceInstancePermissions `json:"_permissions"`
+}
+
 type User struct {
 	ID        int64  `json:"id"`
 	PublicUID string `json:"public_uid"`
@@ -22,13 +29,19 @@ type UserAttrs struct {
 	Password string `json:"password"`
 }
 
-type UserService = ResourceService[User, UserAttrs]
+type UserService struct {
+	*ResourceService[UserResource, User, UserAttrs]
+}
 
 func NewUserService(store Store) *UserService {
 	s := &UserService{
-		repo:   store.Users(),
-		policy: newUserPolicy(store),
+		ResourceService: &ResourceService[UserResource, User, UserAttrs]{},
 	}
+
+	s.resourceKey = UserResourceKey
+
+	s.repo = store.Users()
+	s.policy = newUserPolicy(store)
 
 	s.getValidator = func(attrs *UserAttrs) v8n.ValidatableWithContext {
 		return &userAttrsValidator{
@@ -82,6 +95,20 @@ func (p *userPolicy) authorizeUpdate(_ context.Context, _ AuthContext, _ *User, 
 
 func (p *userPolicy) authorizeDelete(_ context.Context, _ AuthContext, _ *User) error {
 	return nil
+}
+
+func (p *userPolicy) permissions(authCtx AuthContext) ResourcePermissions {
+	return ResourcePermissions{
+		Read:   authCtx.IsAdmin(),
+		Create: authCtx.IsAdmin(),
+	}
+}
+
+func (p *userPolicy) instancePermissions(authCtx AuthContext, _ *User) ResourceInstancePermissions {
+	return ResourceInstancePermissions{
+		Update: authCtx.IsAdmin(),
+		Delete: authCtx.IsAdmin(),
+	}
 }
 
 type userAttrsValidator struct {

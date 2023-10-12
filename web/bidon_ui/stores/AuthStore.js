@@ -1,7 +1,6 @@
 import { defineStore } from "pinia";
 import { camelizeKeys } from "humps";
 import axios from "axios";
-import authorizedApi from "@/services/ApiService.js";
 import { useToast } from "primevue/usetoast";
 import { API_URL } from "@/constants/index.js";
 
@@ -15,7 +14,6 @@ export const useAuthStore = defineStore("authStore", () => {
     localStorageUser ? camelizeKeys(JSON.parse(localStorageUser)) : null,
   );
   const accessToken = ref(localStorage.getItem("accessToken") || null);
-  const permissions = ref([]);
 
   async function login(email, password) {
     api
@@ -45,28 +43,10 @@ export const useAuthStore = defineStore("authStore", () => {
     router.push("/login");
   }
 
-  async function getResourcesPermissions() {
-    if (permissions.value.length > 0) return permissions.value;
-
-    const response = await authorizedApi.get("/permissions");
-    permissions.value = response.data;
-
-    return permissions.value;
-  }
-
-  async function getResourcePermissionsByPath(path) {
-    const permissions = await getResourcesPermissions();
-    return (
-      permissions.find((permission) => permission.path === path)?.actions || {}
-    );
-  }
-
   return {
     user,
     accessToken,
     login,
     logout,
-    getResourcesPermissions,
-    getResourcePermissionsByPath,
   };
 });

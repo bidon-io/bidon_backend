@@ -7,6 +7,13 @@ import (
 	v8n "github.com/go-ozzo/ozzo-validation/v4"
 )
 
+const AppDemandProfileResourceKey = "app_demand_profile"
+
+type AppDemandProfileResource struct {
+	*AppDemandProfile
+	Permissions ResourceInstancePermissions `json:"_permissions"`
+}
+
 type AppDemandProfile struct {
 	ID        int64  `json:"id"`
 	PublicUID string `json:"public_uid"`
@@ -24,14 +31,26 @@ type AppDemandProfileAttrs struct {
 	AccountType    string         `json:"account_type"`
 }
 
-type AppDemandProfileService = ResourceService[AppDemandProfile, AppDemandProfileAttrs]
+type AppDemandProfileService struct {
+	*ResourceService[AppDemandProfileResource, AppDemandProfile, AppDemandProfileAttrs]
+}
 
 func NewAppDemandProfileService(store Store) *AppDemandProfileService {
 	s := &AppDemandProfileService{
-		repo: store.AppDemandProfiles(),
+		ResourceService: &ResourceService[AppDemandProfileResource, AppDemandProfile, AppDemandProfileAttrs]{},
 	}
 
+	s.resourceKey = AppDemandProfileResourceKey
+
+	s.repo = store.AppDemandProfiles()
 	s.policy = newAppDemandProfilePolicy(store)
+
+	s.prepareResource = func(authCtx AuthContext, profile *AppDemandProfile) AppDemandProfileResource {
+		return AppDemandProfileResource{
+			AppDemandProfile: profile,
+			Permissions:      s.policy.instancePermissions(authCtx, profile),
+		}
+	}
 
 	s.getValidator = func(attrs *AppDemandProfileAttrs) v8n.ValidatableWithContext {
 		return &appDemandProfileAttrsValidator{
@@ -133,6 +152,20 @@ func (p *appDemandProfilePolicy) authorizeUpdate(ctx context.Context, authCtx Au
 
 func (p *appDemandProfilePolicy) authorizeDelete(_ context.Context, _ AuthContext, _ *AppDemandProfile) error {
 	return nil
+}
+
+func (p *appDemandProfilePolicy) permissions(_ AuthContext) ResourcePermissions {
+	return ResourcePermissions{
+		Read:   true,
+		Create: true,
+	}
+}
+
+func (p *appDemandProfilePolicy) instancePermissions(_ AuthContext, _ *AppDemandProfile) ResourceInstancePermissions {
+	return ResourceInstancePermissions{
+		Update: true,
+		Delete: true,
+	}
 }
 
 type appDemandProfileAttrsValidator struct {

@@ -2,6 +2,13 @@ package admin
 
 import "context"
 
+const CountryResourceKey = "country"
+
+type CountryResource struct {
+	*Country
+	Permissions ResourceInstancePermissions `json:"_permissions"`
+}
+
 type Country struct {
 	ID int64 `json:"id"`
 	CountryAttrs
@@ -13,13 +20,28 @@ type CountryAttrs struct {
 	Alpha3Code string `json:"alpha3_code"`
 }
 
-type CountryService = ResourceService[Country, CountryAttrs]
+type CountryService struct {
+	*ResourceService[CountryResource, Country, CountryAttrs]
+}
 
 func NewCountryService(store Store) *CountryService {
-	return &CountryService{
-		repo:   store.Countries(),
-		policy: newCountryPolicy(store),
+	s := &CountryService{
+		ResourceService: &ResourceService[CountryResource, Country, CountryAttrs]{},
 	}
+
+	s.resourceKey = CountryResourceKey
+
+	s.repo = store.Countries()
+	s.policy = newCountryPolicy(store)
+
+	s.prepareResource = func(authCtx AuthContext, country *Country) CountryResource {
+		return CountryResource{
+			Country:     country,
+			Permissions: s.policy.instancePermissions(authCtx, country),
+		}
+	}
+
+	return s
 }
 
 type CountryRepo interface {
@@ -64,4 +86,18 @@ func (p *countryPolicy) authorizeUpdate(_ context.Context, _ AuthContext, _ *Cou
 
 func (p *countryPolicy) authorizeDelete(_ context.Context, _ AuthContext, _ *Country) error {
 	return nil
+}
+
+func (p *countryPolicy) permissions(authCtx AuthContext) ResourcePermissions {
+	return ResourcePermissions{
+		Read:   true,
+		Create: authCtx.IsAdmin(),
+	}
+}
+
+func (p *countryPolicy) instancePermissions(authCtx AuthContext, _ *Country) ResourceInstancePermissions {
+	return ResourceInstancePermissions{
+		Update: authCtx.IsAdmin(),
+		Delete: authCtx.IsAdmin(),
+	}
 }
