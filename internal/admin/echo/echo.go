@@ -74,6 +74,40 @@ func RegisterAuthService(g *echo.Group, service *auth.Service) {
 }
 
 func RegisterAdminService(g *echo.Group, service *admin.Service) {
+	g.GET("/rest/resources", func(c echo.Context) error {
+		authCtx, err := getAuthContext(c)
+		if err != nil {
+			return err
+		}
+
+		services := []interface {
+			Meta(context.Context, admin.AuthContext) admin.ResourceMeta
+		}{
+			service.AppService,
+			service.AppDemandProfileService,
+			service.AuctionConfigurationService,
+			service.CountryService,
+			service.DemandSourceService,
+			service.DemandSourceAccountService,
+			service.LineItemService,
+			service.SegmentService,
+			service.UserService,
+		}
+
+		response := make(map[string]admin.ResourceMeta, len(services))
+
+		for _, s := range services {
+			meta := s.Meta(c.Request().Context(), authCtx)
+			if !meta.Permissions.Read {
+				continue
+			}
+
+			response[meta.Key] = meta
+		}
+
+		return c.JSON(http.StatusOK, response)
+	})
+
 	resourceRoutes := []resourceRoute{
 		{
 			group:   g.Group("/apps"),
@@ -120,8 +154,6 @@ func RegisterAdminService(g *echo.Group, service *admin.Service) {
 		r.group.PATCH("/:id", r.handler.update)
 		r.group.DELETE("/:id", r.handler.delete)
 	}
-
-	g.GET("/permissions", getPermissionsHandler)
 }
 
 type resourceRoute struct {
@@ -137,35 +169,25 @@ type resourceHandler interface {
 	delete(c echo.Context) error
 }
 
-type appHandler = resourceServiceHandler[admin.App, admin.AppAttrs]
-type appDemandProfileHandler = resourceServiceHandler[admin.AppDemandProfile, admin.AppDemandProfileAttrs]
-type auctionConfigurationHandler = resourceServiceHandler[admin.AuctionConfiguration, admin.AuctionConfigurationAttrs]
-type countryHandler = resourceServiceHandler[admin.Country, admin.CountryAttrs]
-type demandSourceHandler = resourceServiceHandler[admin.DemandSource, admin.DemandSourceAttrs]
-type demandSourceAccountHandler = resourceServiceHandler[admin.DemandSourceAccount, admin.DemandSourceAccountAttrs]
-type lineItemHandler = resourceServiceHandler[admin.LineItem, admin.LineItemAttrs]
-type segmentHandler = resourceServiceHandler[admin.Segment, admin.SegmentAttrs]
-type userHandler = resourceServiceHandler[admin.User, admin.UserAttrs]
+type appHandler = resourceServiceHandler[admin.AppResource, admin.App, admin.AppAttrs]
+type appDemandProfileHandler = resourceServiceHandler[admin.AppDemandProfileResource, admin.AppDemandProfile, admin.AppDemandProfileAttrs]
+type auctionConfigurationHandler = resourceServiceHandler[admin.AuctionConfigurationResource, admin.AuctionConfiguration, admin.AuctionConfigurationAttrs]
+type countryHandler = resourceServiceHandler[admin.CountryResource, admin.Country, admin.CountryAttrs]
+type demandSourceHandler = resourceServiceHandler[admin.DemandSourceResource, admin.DemandSource, admin.DemandSourceAttrs]
+type demandSourceAccountHandler = resourceServiceHandler[admin.DemandSourceAccountResource, admin.DemandSourceAccount, admin.DemandSourceAccountAttrs]
+type lineItemHandler = resourceServiceHandler[admin.LineItemResource, admin.LineItem, admin.LineItemAttrs]
+type segmentHandler = resourceServiceHandler[admin.SegmentResource, admin.Segment, admin.SegmentAttrs]
+type userHandler = resourceServiceHandler[admin.UserResource, admin.User, admin.UserAttrs]
 
-func getPermissionsHandler(c echo.Context) error {
-	authCtx, err := getAuthContext(c)
-	if err != nil {
-		return err
-	}
-	permissions := admin.GetPermissions(authCtx)
-
-	return c.JSON(http.StatusOK, permissions)
+type resourceServiceHandler[Resource, ResourceData, ResourceAttrs any] struct {
+	service resourceService[Resource, ResourceData, ResourceAttrs]
 }
 
-type resourceServiceHandler[Resource, ResourceAttrs any] struct {
-	service resourceService[Resource, ResourceAttrs]
-}
-
-type resourceService[Resource, ResourceAttrs any] interface {
+type resourceService[Resource, ResourceData, ResourceAttrs any] interface {
 	List(ctx context.Context, authCtx admin.AuthContext) ([]Resource, error)
 	Find(ctx context.Context, authCtx admin.AuthContext, id int64) (*Resource, error)
-	Create(ctx context.Context, authCtx admin.AuthContext, attrs *ResourceAttrs) (*Resource, error)
-	Update(ctx context.Context, authCtx admin.AuthContext, id int64, attrs *ResourceAttrs) (*Resource, error)
+	Create(ctx context.Context, authCtx admin.AuthContext, attrs *ResourceAttrs) (*ResourceData, error)
+	Update(ctx context.Context, authCtx admin.AuthContext, id int64, attrs *ResourceAttrs) (*ResourceData, error)
 	Delete(ctx context.Context, authCtx admin.AuthContext, id int64) error
 }
 
@@ -180,7 +202,7 @@ func (s stubAuthContext) IsAdmin() bool {
 	return true
 }
 
-func (s *resourceServiceHandler[Resource, ResourceAttrs]) list(c echo.Context) error {
+func (s *resourceServiceHandler[Resource, ResourceData, ResourceAttrs]) list(c echo.Context) error {
 	authCtx, err := getAuthContext(c)
 	if err != nil {
 		return err
@@ -194,7 +216,7 @@ func (s *resourceServiceHandler[Resource, ResourceAttrs]) list(c echo.Context) e
 	return c.JSON(http.StatusOK, resources)
 }
 
-func (s *resourceServiceHandler[Resource, ResourceAttrs]) create(c echo.Context) error {
+func (s *resourceServiceHandler[Resource, ResourceData, ResourceAttrs]) create(c echo.Context) error {
 	authCtx, err := getAuthContext(c)
 	if err != nil {
 		return err
@@ -218,7 +240,7 @@ func (s *resourceServiceHandler[Resource, ResourceAttrs]) create(c echo.Context)
 	return c.JSON(http.StatusCreated, resource)
 }
 
-func (s *resourceServiceHandler[Resource, ResourceAttrs]) get(c echo.Context) error {
+func (s *resourceServiceHandler[Resource, ResourceData, ResourceAttrs]) get(c echo.Context) error {
 	authCtx, err := getAuthContext(c)
 	if err != nil {
 		return err
@@ -237,7 +259,7 @@ func (s *resourceServiceHandler[Resource, ResourceAttrs]) get(c echo.Context) er
 	return c.JSON(http.StatusOK, resource)
 }
 
-func (s *resourceServiceHandler[Resource, ResourceAttrs]) update(c echo.Context) error {
+func (s *resourceServiceHandler[Resource, ResourceData, ResourceAttrs]) update(c echo.Context) error {
 	authCtx, err := getAuthContext(c)
 	if err != nil {
 		return err
@@ -266,7 +288,7 @@ func (s *resourceServiceHandler[Resource, ResourceAttrs]) update(c echo.Context)
 	return c.JSON(http.StatusOK, resource)
 }
 
-func (s *resourceServiceHandler[Resource, ResourceAttrs]) delete(c echo.Context) error {
+func (s *resourceServiceHandler[Resource, ResourceData, ResourceAttrs]) delete(c echo.Context) error {
 	authCtx, err := getAuthContext(c)
 
 	id, err := strconv.Atoi(c.Param("id"))

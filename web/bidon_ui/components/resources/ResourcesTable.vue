@@ -64,21 +64,20 @@
       <template #body="slotProps">
         <div class="flex justify-between">
           <NuxtLink
-            v-if="permissions.read"
             :key="slotProps.data.id"
             :to="`${resourcesPath}/${slotProps.data.id}`"
           >
             <i class="pi pi-eye" style="color: slateblue"></i>
           </NuxtLink>
           <NuxtLink
-            v-if="permissions.update"
+            v-if="slotProps.data._permissions.update"
             :key="slotProps.data.id"
             :to="`${resourcesPath}/${slotProps.data.id}/edit`"
           >
             <i class="pi pi-pencil" style="color: green"></i>
           </NuxtLink>
           <a
-            v-if="permissions.delete"
+            v-if="slotProps.data._permissions.delete"
             :key="slotProps.data.id"
             href="_"
             @:click.prevent="deleteHandle(slotProps.data.id)"
@@ -94,9 +93,7 @@
 <script setup lang="ts">
 import { FilterMatchModeOptions } from "primevue/api";
 
-import axios from "@/services/ApiService.js";
 import useDeleteResource from "@/composables/useDeleteResource";
-import { useAuthStore } from "~/stores/AuthStore";
 
 interface Filter {
   field: string;
@@ -125,16 +122,14 @@ const props = defineProps<{
   columns: Column[];
 }>();
 
-const response = await axios.get(props.resourcesPath);
-const resources = ref(response.data);
+// eslint-disable-next-line  @typescript-eslint/no-explicit-any
+const response = await $apiFetch<any[]>(props.resourcesPath);
+
+const resources = ref(response);
 const selectedResources = ref([]);
 
 const route = useRoute();
 const router = useRouter();
-const { getResourcePermissionsByPath } = useAuthStore();
-const permissions: ResourcePermissions = await getResourcePermissionsByPath(
-  props.resourcesPath,
-);
 
 const filters = ref(
   props.columns

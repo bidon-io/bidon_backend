@@ -307,6 +307,12 @@ var _ resourcePolicy[any, any] = &resourcePolicyMock[any, any]{}
 //			getReadScopeFunc: func(authContext AuthContext) resourceScope[Resource] {
 //				panic("mock out the getReadScope method")
 //			},
+//			instancePermissionsFunc: func(authContext AuthContext, v *Resource) ResourceInstancePermissions {
+//				panic("mock out the instancePermissions method")
+//			},
+//			permissionsFunc: func(authContext AuthContext) ResourcePermissions {
+//				panic("mock out the permissions method")
+//			},
 //		}
 //
 //		// use mockedresourcePolicy in code that requires resourcePolicy
@@ -328,6 +334,12 @@ type resourcePolicyMock[Resource any, ResourceAttrs any] struct {
 
 	// getReadScopeFunc mocks the getReadScope method.
 	getReadScopeFunc func(authContext AuthContext) resourceScope[Resource]
+
+	// instancePermissionsFunc mocks the instancePermissions method.
+	instancePermissionsFunc func(authContext AuthContext, v *Resource) ResourceInstancePermissions
+
+	// permissionsFunc mocks the permissions method.
+	permissionsFunc func(authContext AuthContext) ResourcePermissions
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -370,12 +382,26 @@ type resourcePolicyMock[Resource any, ResourceAttrs any] struct {
 			// AuthContext is the authContext argument value.
 			AuthContext AuthContext
 		}
+		// instancePermissions holds details about calls to the instancePermissions method.
+		instancePermissions []struct {
+			// AuthContext is the authContext argument value.
+			AuthContext AuthContext
+			// V is the v argument value.
+			V *Resource
+		}
+		// permissions holds details about calls to the permissions method.
+		permissions []struct {
+			// AuthContext is the authContext argument value.
+			AuthContext AuthContext
+		}
 	}
-	lockauthorizeCreate sync.RWMutex
-	lockauthorizeDelete sync.RWMutex
-	lockauthorizeUpdate sync.RWMutex
-	lockgetManageScope  sync.RWMutex
-	lockgetReadScope    sync.RWMutex
+	lockauthorizeCreate     sync.RWMutex
+	lockauthorizeDelete     sync.RWMutex
+	lockauthorizeUpdate     sync.RWMutex
+	lockgetManageScope      sync.RWMutex
+	lockgetReadScope        sync.RWMutex
+	lockinstancePermissions sync.RWMutex
+	lockpermissions         sync.RWMutex
 }
 
 // authorizeCreate calls authorizeCreateFunc.
@@ -563,6 +589,74 @@ func (mock *resourcePolicyMock[Resource, ResourceAttrs]) getReadScopeCalls() []s
 	mock.lockgetReadScope.RLock()
 	calls = mock.calls.getReadScope
 	mock.lockgetReadScope.RUnlock()
+	return calls
+}
+
+// instancePermissions calls instancePermissionsFunc.
+func (mock *resourcePolicyMock[Resource, ResourceAttrs]) instancePermissions(authContext AuthContext, v *Resource) ResourceInstancePermissions {
+	if mock.instancePermissionsFunc == nil {
+		panic("resourcePolicyMock.instancePermissionsFunc: method is nil but resourcePolicy.instancePermissions was just called")
+	}
+	callInfo := struct {
+		AuthContext AuthContext
+		V           *Resource
+	}{
+		AuthContext: authContext,
+		V:           v,
+	}
+	mock.lockinstancePermissions.Lock()
+	mock.calls.instancePermissions = append(mock.calls.instancePermissions, callInfo)
+	mock.lockinstancePermissions.Unlock()
+	return mock.instancePermissionsFunc(authContext, v)
+}
+
+// instancePermissionsCalls gets all the calls that were made to instancePermissions.
+// Check the length with:
+//
+//	len(mockedresourcePolicy.instancePermissionsCalls())
+func (mock *resourcePolicyMock[Resource, ResourceAttrs]) instancePermissionsCalls() []struct {
+	AuthContext AuthContext
+	V           *Resource
+} {
+	var calls []struct {
+		AuthContext AuthContext
+		V           *Resource
+	}
+	mock.lockinstancePermissions.RLock()
+	calls = mock.calls.instancePermissions
+	mock.lockinstancePermissions.RUnlock()
+	return calls
+}
+
+// permissions calls permissionsFunc.
+func (mock *resourcePolicyMock[Resource, ResourceAttrs]) permissions(authContext AuthContext) ResourcePermissions {
+	if mock.permissionsFunc == nil {
+		panic("resourcePolicyMock.permissionsFunc: method is nil but resourcePolicy.permissions was just called")
+	}
+	callInfo := struct {
+		AuthContext AuthContext
+	}{
+		AuthContext: authContext,
+	}
+	mock.lockpermissions.Lock()
+	mock.calls.permissions = append(mock.calls.permissions, callInfo)
+	mock.lockpermissions.Unlock()
+	return mock.permissionsFunc(authContext)
+}
+
+// permissionsCalls gets all the calls that were made to permissions.
+// Check the length with:
+//
+//	len(mockedresourcePolicy.permissionsCalls())
+func (mock *resourcePolicyMock[Resource, ResourceAttrs]) permissionsCalls() []struct {
+	AuthContext AuthContext
+} {
+	var calls []struct {
+		AuthContext AuthContext
+	}
+	mock.lockpermissions.RLock()
+	calls = mock.calls.permissions
+	mock.lockpermissions.RUnlock()
 	return calls
 }
 

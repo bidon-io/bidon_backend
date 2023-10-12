@@ -37,6 +37,7 @@
     "@vueuse/core": "^10.5.0",
     "axios": "^1.5.1",
     "humps": "^2.0.1",
+    "inflection": "^3.0.0",
     "pinia": "^2.1.6",
     "primeicons": "^6.0.1",
     "primevue": "3.34.0",

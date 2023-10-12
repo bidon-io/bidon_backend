@@ -1,26 +1,28 @@
 <template>
   <nav class="mt-6">
     <NuxtLink
-      v-for="item in menuItems"
-      :key="item.resourceNname"
-      :to="item.path"
+      v-for="resource in resources.state"
+      :key="resource.key"
+      :to="resourcePath(resource.key)"
       :class="[
         'flex items-center mt-4 px-6 py-2 text-gray-600 hover:bg-gray-700 hover:bg-opacity-25 hover:text-gray-100',
-        route.path === item.path
+        route.path === resourcePath(resource.key)
           ? 'bg-gray-700 bg-opacity-25 text-blue-100'
           : '',
       ]"
     >
-      <span>{{ item.resourceName }}</span>
+      <span>{{ pluralize(titleize(resource.key)) }}</span>
     </NuxtLink>
   </nav>
 </template>
 
-<script setup>
-import { useAuthStore } from "@/stores/AuthStore";
+<script setup lang="ts">
+import { pluralize, titleize } from "inflection";
 
-const { getResourcesPermissions } = useAuthStore();
-const { data: menuItems } = useAsyncData(getResourcesPermissions);
-
+const resources = useResources();
 const route = useRoute();
+
+function resourcePath(key: string) {
+  return `/${pluralize(key)}`;
+}
 </script>

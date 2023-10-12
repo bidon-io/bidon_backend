@@ -15,7 +15,9 @@ api.interceptors.response.use(
       response.data &&
       response.headers["content-type"].includes("application/json")
     ) {
-      response.data = camelizeKeys(response.data);
+      response.data = camelizeKeys(response.data, (key, convert, options) =>
+        key[0] === "_" ? key : convert(key, options),
+      );
     }
 
     return response;
