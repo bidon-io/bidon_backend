@@ -51,8 +51,8 @@ func TestResourceService_List(t *testing.T) {
 	}
 
 	want := make([]TestResource, len(data))
-	for i, r := range data {
-		want[i] = s.prepareResource(nil, &r)
+	for i := range data {
+		want[i] = s.prepareResource(nil, &data[i])
 	}
 
 	resources, _ := s.List(context.Background(), nil)
