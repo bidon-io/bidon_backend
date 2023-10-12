@@ -9,22 +9,22 @@ import (
 )
 
 func TestPublicResourceScope(t *testing.T) {
-	want := []TestResource{
+	want := []TestResourceData{
 		{ID: 1, TestResourceAttrs: TestResourceAttrs{Name: "test1"}},
 		{ID: 2, TestResourceAttrs: TestResourceAttrs{Name: "test1"}},
 	}
 
 	type repo struct {
-		*AllResourceQuerierMock[TestResource]
+		*AllResourceQuerierMock[TestResourceData]
 	}
 
-	s := &publicResourceScope[TestResource]{
+	s := &publicResourceScope[TestResourceData]{
 		repo: &repo{
-			&AllResourceQuerierMock[TestResource]{
-				ListFunc: func(_ context.Context) ([]TestResource, error) {
+			&AllResourceQuerierMock[TestResourceData]{
+				ListFunc: func(_ context.Context) ([]TestResourceData, error) {
 					return want, nil
 				},
-				FindFunc: func(_ context.Context, id int64) (*TestResource, error) {
+				FindFunc: func(_ context.Context, id int64) (*TestResourceData, error) {
 					if id != want[0].ID {
 						t.Errorf("Find() got = %v, want %v", id, want[0].ID)
 					}
@@ -47,22 +47,22 @@ func TestPublicResourceScope(t *testing.T) {
 }
 
 func TestPrivateResourceScope(t *testing.T) {
-	want := []TestResource{
+	want := []TestResourceData{
 		{ID: 1, TestResourceAttrs: TestResourceAttrs{Name: "test1"}},
 		{ID: 2, TestResourceAttrs: TestResourceAttrs{Name: "test1"}},
 	}
 
 	type repo struct {
-		*AllResourceQuerierMock[TestResource]
+		*AllResourceQuerierMock[TestResourceData]
 	}
 
-	s := &privateResourceScope[TestResource]{
+	s := &privateResourceScope[TestResourceData]{
 		repo: &repo{
-			&AllResourceQuerierMock[TestResource]{
-				ListFunc: func(_ context.Context) ([]TestResource, error) {
+			&AllResourceQuerierMock[TestResourceData]{
+				ListFunc: func(_ context.Context) ([]TestResourceData, error) {
 					return want, nil
 				},
-				FindFunc: func(_ context.Context, id int64) (*TestResource, error) {
+				FindFunc: func(_ context.Context, id int64) (*TestResourceData, error) {
 					if id != want[0].ID {
 						t.Errorf("Find() got = %v, want %v", id, want[0].ID)
 					}
@@ -124,25 +124,25 @@ func TestPrivateResourceScope(t *testing.T) {
 }
 
 func TestOwnedResourceScope_list(t *testing.T) {
-	testResources := []TestResource{
+	testResources := []TestResourceData{
 		{ID: 1, TestResourceAttrs: TestResourceAttrs{Name: "test1"}},
 		{ID: 2, TestResourceAttrs: TestResourceAttrs{Name: "test2"}},
 	}
 
 	type repo struct {
-		*AllResourceQuerierMock[TestResource]
-		*OwnedResourceQuerierMock[TestResource]
+		*AllResourceQuerierMock[TestResourceData]
+		*OwnedResourceQuerierMock[TestResourceData]
 	}
 
-	s := &ownedResourceScope[TestResource]{
+	s := &ownedResourceScope[TestResourceData]{
 		repo: &repo{
-			&AllResourceQuerierMock[TestResource]{
-				ListFunc: func(_ context.Context) ([]TestResource, error) {
+			&AllResourceQuerierMock[TestResourceData]{
+				ListFunc: func(_ context.Context) ([]TestResourceData, error) {
 					return testResources, nil
 				},
 			},
-			&OwnedResourceQuerierMock[TestResource]{
-				ListOwnedByUserFunc: func(_ context.Context, userID int64) ([]TestResource, error) {
+			&OwnedResourceQuerierMock[TestResourceData]{
+				ListOwnedByUserFunc: func(_ context.Context, userID int64) ([]TestResourceData, error) {
 					if userID != 1 {
 						t.Errorf("ListOwnedByUser() got = %v, want %v", userID, 1)
 					}
@@ -156,7 +156,7 @@ func TestOwnedResourceScope_list(t *testing.T) {
 	tests := []struct {
 		name    string
 		authCtx AuthContext
-		want    []TestResource
+		want    []TestResourceData
 	}{
 		{
 			"admin user",
@@ -165,7 +165,7 @@ func TestOwnedResourceScope_list(t *testing.T) {
 					return true
 				},
 			},
-			[]TestResource{
+			[]TestResourceData{
 				{ID: 1, TestResourceAttrs: TestResourceAttrs{Name: "test1"}},
 				{ID: 2, TestResourceAttrs: TestResourceAttrs{Name: "test2"}},
 			},
@@ -180,7 +180,7 @@ func TestOwnedResourceScope_list(t *testing.T) {
 					return 1
 				},
 			},
-			[]TestResource{
+			[]TestResourceData{
 				{ID: 1, TestResourceAttrs: TestResourceAttrs{Name: "test1"}},
 			},
 		},
@@ -199,20 +199,20 @@ func TestOwnedResourceScope_list(t *testing.T) {
 }
 
 func TestOwnedResourceScope_find(t *testing.T) {
-	testResources := []TestResource{
+	testResources := []TestResourceData{
 		{ID: 1, TestResourceAttrs: TestResourceAttrs{Name: "test1"}},
 		{ID: 2, TestResourceAttrs: TestResourceAttrs{Name: "test2"}},
 	}
 
 	type repo struct {
-		*AllResourceQuerierMock[TestResource]
-		*OwnedResourceQuerierMock[TestResource]
+		*AllResourceQuerierMock[TestResourceData]
+		*OwnedResourceQuerierMock[TestResourceData]
 	}
 
-	s := &ownedResourceScope[TestResource]{
+	s := &ownedResourceScope[TestResourceData]{
 		repo: &repo{
-			&AllResourceQuerierMock[TestResource]{
-				FindFunc: func(_ context.Context, id int64) (*TestResource, error) {
+			&AllResourceQuerierMock[TestResourceData]{
+				FindFunc: func(_ context.Context, id int64) (*TestResourceData, error) {
 					for i := range testResources {
 						r := &testResources[i]
 						if r.ID == id {
@@ -223,8 +223,8 @@ func TestOwnedResourceScope_find(t *testing.T) {
 					return nil, errors.New("not found")
 				},
 			},
-			&OwnedResourceQuerierMock[TestResource]{
-				FindOwnedByUserFunc: func(_ context.Context, userID, id int64) (*TestResource, error) {
+			&OwnedResourceQuerierMock[TestResourceData]{
+				FindOwnedByUserFunc: func(_ context.Context, userID, id int64) (*TestResourceData, error) {
 					for i := range testResources[:len(testResources)/2] {
 						r := &testResources[i]
 						if r.ID == id {
@@ -242,7 +242,7 @@ func TestOwnedResourceScope_find(t *testing.T) {
 		name    string
 		authCtx AuthContext
 		id      int64
-		want    *TestResource
+		want    *TestResourceData
 		wantErr bool
 	}{
 		{
@@ -253,7 +253,7 @@ func TestOwnedResourceScope_find(t *testing.T) {
 				},
 			},
 			1,
-			&TestResource{ID: 1, TestResourceAttrs: TestResourceAttrs{Name: "test1"}},
+			&TestResourceData{ID: 1, TestResourceAttrs: TestResourceAttrs{Name: "test1"}},
 			false,
 		},
 		{
@@ -267,7 +267,7 @@ func TestOwnedResourceScope_find(t *testing.T) {
 				},
 			},
 			1,
-			&TestResource{ID: 1, TestResourceAttrs: TestResourceAttrs{Name: "test1"}},
+			&TestResourceData{ID: 1, TestResourceAttrs: TestResourceAttrs{Name: "test1"}},
 			false,
 		},
 		{
@@ -303,25 +303,25 @@ func TestOwnedResourceScope_find(t *testing.T) {
 }
 
 func TestOwnedOrSharedResourceScope_list(t *testing.T) {
-	testResources := []TestResource{
+	testResources := []TestResourceData{
 		{ID: 1, TestResourceAttrs: TestResourceAttrs{Name: "test1"}},
 		{ID: 2, TestResourceAttrs: TestResourceAttrs{Name: "test2"}},
 	}
 
 	type repo struct {
-		*AllResourceQuerierMock[TestResource]
-		*OwnedOrSharedResourceQuerierMock[TestResource]
+		*AllResourceQuerierMock[TestResourceData]
+		*OwnedOrSharedResourceQuerierMock[TestResourceData]
 	}
 
-	s := &ownedOrSharedResourceScope[TestResource]{
+	s := &ownedOrSharedResourceScope[TestResourceData]{
 		repo: &repo{
-			&AllResourceQuerierMock[TestResource]{
-				ListFunc: func(_ context.Context) ([]TestResource, error) {
+			&AllResourceQuerierMock[TestResourceData]{
+				ListFunc: func(_ context.Context) ([]TestResourceData, error) {
 					return testResources, nil
 				},
 			},
-			&OwnedOrSharedResourceQuerierMock[TestResource]{
-				ListOwnedByUserOrSharedFunc: func(_ context.Context, userID int64) ([]TestResource, error) {
+			&OwnedOrSharedResourceQuerierMock[TestResourceData]{
+				ListOwnedByUserOrSharedFunc: func(_ context.Context, userID int64) ([]TestResourceData, error) {
 					if userID != 1 {
 						t.Errorf("ListOwnedByUserOrShared() got = %v, want %v", userID, 1)
 					}
@@ -335,7 +335,7 @@ func TestOwnedOrSharedResourceScope_list(t *testing.T) {
 	tests := []struct {
 		name    string
 		authCtx AuthContext
-		want    []TestResource
+		want    []TestResourceData
 	}{
 		{
 			"admin user",
@@ -344,7 +344,7 @@ func TestOwnedOrSharedResourceScope_list(t *testing.T) {
 					return true
 				},
 			},
-			[]TestResource{
+			[]TestResourceData{
 				{ID: 1, TestResourceAttrs: TestResourceAttrs{Name: "test1"}},
 				{ID: 2, TestResourceAttrs: TestResourceAttrs{Name: "test2"}},
 			},
@@ -359,7 +359,7 @@ func TestOwnedOrSharedResourceScope_list(t *testing.T) {
 					return 1
 				},
 			},
-			[]TestResource{
+			[]TestResourceData{
 				{ID: 1, TestResourceAttrs: TestResourceAttrs{Name: "test1"}},
 			},
 		},
@@ -378,20 +378,20 @@ func TestOwnedOrSharedResourceScope_list(t *testing.T) {
 }
 
 func TestOwnedOrSharedResourceScope_find(t *testing.T) {
-	testResources := []TestResource{
+	testResources := []TestResourceData{
 		{ID: 1, TestResourceAttrs: TestResourceAttrs{Name: "test1"}},
 		{ID: 2, TestResourceAttrs: TestResourceAttrs{Name: "test2"}},
 	}
 
 	type repo struct {
-		*AllResourceQuerierMock[TestResource]
-		*OwnedOrSharedResourceQuerierMock[TestResource]
+		*AllResourceQuerierMock[TestResourceData]
+		*OwnedOrSharedResourceQuerierMock[TestResourceData]
 	}
 
-	s := &ownedOrSharedResourceScope[TestResource]{
+	s := &ownedOrSharedResourceScope[TestResourceData]{
 		repo: &repo{
-			&AllResourceQuerierMock[TestResource]{
-				FindFunc: func(_ context.Context, id int64) (*TestResource, error) {
+			&AllResourceQuerierMock[TestResourceData]{
+				FindFunc: func(_ context.Context, id int64) (*TestResourceData, error) {
 					for i := range testResources {
 						r := &testResources[i]
 						if r.ID == id {
@@ -402,8 +402,8 @@ func TestOwnedOrSharedResourceScope_find(t *testing.T) {
 					return nil, errors.New("not found")
 				},
 			},
-			&OwnedOrSharedResourceQuerierMock[TestResource]{
-				FindOwnedByUserOrSharedFunc: func(_ context.Context, userID, id int64) (*TestResource, error) {
+			&OwnedOrSharedResourceQuerierMock[TestResourceData]{
+				FindOwnedByUserOrSharedFunc: func(_ context.Context, userID, id int64) (*TestResourceData, error) {
 					for i := range testResources[:len(testResources)/2] {
 						r := &testResources[i]
 						if r.ID == id {
@@ -421,7 +421,7 @@ func TestOwnedOrSharedResourceScope_find(t *testing.T) {
 		name    string
 		authCtx AuthContext
 		id      int64
-		want    *TestResource
+		want    *TestResourceData
 		wantErr bool
 	}{
 		{
@@ -432,7 +432,7 @@ func TestOwnedOrSharedResourceScope_find(t *testing.T) {
 				},
 			},
 			1,
-			&TestResource{ID: 1, TestResourceAttrs: TestResourceAttrs{Name: "test1"}},
+			&TestResourceData{ID: 1, TestResourceAttrs: TestResourceAttrs{Name: "test1"}},
 			false,
 		},
 		{
@@ -446,7 +446,7 @@ func TestOwnedOrSharedResourceScope_find(t *testing.T) {
 				},
 			},
 			1,
-			&TestResource{ID: 1, TestResourceAttrs: TestResourceAttrs{Name: "test1"}},
+			&TestResourceData{ID: 1, TestResourceAttrs: TestResourceAttrs{Name: "test1"}},
 			false,
 		},
 		{

@@ -9,6 +9,13 @@ import (
 	"github.com/shopspring/decimal"
 )
 
+const LineItemResourceKey = "line_item"
+
+type LineItemResource struct {
+	*LineItem
+	Permissions ResourceInstancePermissions `json:"_permissions"`
+}
+
 type LineItem struct {
 	ID        int64  `json:"id"`
 	PublicUID string `json:"public_uid"`
@@ -30,14 +37,26 @@ type LineItemAttrs struct {
 	Extra       map[string]any   `json:"extra"`
 }
 
-type LineItemService = ResourceService[LineItem, LineItemAttrs]
+type LineItemService struct {
+	*ResourceService[LineItemResource, LineItem, LineItemAttrs]
+}
 
 func NewLineItemService(store Store) *LineItemService {
 	s := &LineItemService{
-		repo: store.LineItems(),
+		ResourceService: &ResourceService[LineItemResource, LineItem, LineItemAttrs]{},
 	}
 
+	s.resourceKey = LineItemResourceKey
+
+	s.repo = store.LineItems()
 	s.policy = newLineItemPolicy(store)
+
+	s.prepareResource = func(authCtx AuthContext, lineItem *LineItem) LineItemResource {
+		return LineItemResource{
+			LineItem:    lineItem,
+			Permissions: s.policy.instancePermissions(authCtx, lineItem),
+		}
+	}
 
 	s.getValidator = func(attrs *LineItemAttrs) v8n.ValidatableWithContext {
 		return &lineItemAttrsValidator{
@@ -123,6 +142,20 @@ func (p *lineItemPolicy) authorizeUpdate(ctx context.Context, authCtx AuthContex
 
 func (p *lineItemPolicy) authorizeDelete(_ context.Context, _ AuthContext, _ *LineItem) error {
 	return nil
+}
+
+func (p *lineItemPolicy) permissions(_ AuthContext) ResourcePermissions {
+	return ResourcePermissions{
+		Read:   true,
+		Create: true,
+	}
+}
+
+func (p *lineItemPolicy) instancePermissions(_ AuthContext, _ *LineItem) ResourceInstancePermissions {
+	return ResourceInstancePermissions{
+		Update: true,
+		Delete: true,
+	}
 }
 
 type lineItemAttrsValidator struct {

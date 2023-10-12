@@ -8,6 +8,13 @@ import (
 	"github.com/go-ozzo/ozzo-validation/v4/is"
 )
 
+const DemandSourceAccountResourceKey = "demand_source_account"
+
+type DemandSourceAccountResource struct {
+	*DemandSourceAccount
+	Permissions ResourceInstancePermissions `json:"_permissions"`
+}
+
 type DemandSourceAccount struct {
 	ID        int64  `json:"id"`
 	PublicUID string `json:"public_uid"`
@@ -25,14 +32,26 @@ type DemandSourceAccountAttrs struct {
 	Extra          map[string]any `json:"extra"`
 }
 
-type DemandSourceAccountService = ResourceService[DemandSourceAccount, DemandSourceAccountAttrs]
+type DemandSourceAccountService struct {
+	*ResourceService[DemandSourceAccountResource, DemandSourceAccount, DemandSourceAccountAttrs]
+}
 
 func NewDemandSourceAccountService(store Store) *DemandSourceAccountService {
 	s := &DemandSourceAccountService{
-		repo: store.DemandSourceAccounts(),
+		ResourceService: &ResourceService[DemandSourceAccountResource, DemandSourceAccount, DemandSourceAccountAttrs]{},
 	}
 
+	s.resourceKey = DemandSourceAccountResourceKey
+
+	s.repo = store.DemandSourceAccounts()
 	s.policy = newDemandSourceAccountPolicy(store)
+
+	s.prepareResource = func(authCtx AuthContext, account *DemandSourceAccount) DemandSourceAccountResource {
+		return DemandSourceAccountResource{
+			DemandSourceAccount: account,
+			Permissions:         s.policy.instancePermissions(authCtx, account),
+		}
+	}
 
 	s.prepareCreateAttrs = func(authCtx AuthContext, attrs *DemandSourceAccountAttrs) {
 		if attrs.UserID == 0 && !authCtx.IsAdmin() {
@@ -118,6 +137,20 @@ func (p *demandSourceAccountPolicy) authorizeUpdate(ctx context.Context, authCtx
 
 func (p *demandSourceAccountPolicy) authorizeDelete(_ context.Context, _ AuthContext, _ *DemandSourceAccount) error {
 	return nil
+}
+
+func (p *demandSourceAccountPolicy) permissions(_ AuthContext) ResourcePermissions {
+	return ResourcePermissions{
+		Read:   true,
+		Create: true,
+	}
+}
+
+func (p *demandSourceAccountPolicy) instancePermissions(authCtx AuthContext, account *DemandSourceAccount) ResourceInstancePermissions {
+	return ResourceInstancePermissions{
+		Update: authCtx.IsAdmin() || authCtx.UserID() == account.UserID,
+		Delete: authCtx.IsAdmin() || authCtx.UserID() == account.UserID,
+	}
 }
 
 type demandSourceAccountValidator struct {

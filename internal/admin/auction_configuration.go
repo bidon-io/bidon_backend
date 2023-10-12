@@ -7,6 +7,13 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/auction"
 )
 
+const AuctionConfigurationResourceKey = "auction_configuration"
+
+type AuctionConfigurationResource struct {
+	*AuctionConfiguration
+	Permissions ResourceInstancePermissions `json:"_permissions"`
+}
+
 type AuctionConfiguration struct {
 	ID        int64  `json:"id"`
 	PublicUID string `json:"public_uid"`
@@ -26,13 +33,28 @@ type AuctionConfigurationAttrs struct {
 	ExternalWinNotifications *bool                 `json:"external_win_notifications"`
 }
 
-type AuctionConfigurationService = ResourceService[AuctionConfiguration, AuctionConfigurationAttrs]
+type AuctionConfigurationService struct {
+	*ResourceService[AuctionConfigurationResource, AuctionConfiguration, AuctionConfigurationAttrs]
+}
 
 func NewAuctionConfigurationService(store Store) *AuctionConfigurationService {
-	return &AuctionConfigurationService{
-		repo:   store.AuctionConfigurations(),
-		policy: newAuctionConfigurationPolicy(store),
+	s := &AuctionConfigurationService{
+		ResourceService: &ResourceService[AuctionConfigurationResource, AuctionConfiguration, AuctionConfigurationAttrs]{},
 	}
+
+	s.resourceKey = AuctionConfigurationResourceKey
+
+	s.repo = store.AuctionConfigurations()
+	s.policy = newAuctionConfigurationPolicy(store)
+
+	s.prepareResource = func(authCtx AuthContext, config *AuctionConfiguration) AuctionConfigurationResource {
+		return AuctionConfigurationResource{
+			AuctionConfiguration: config,
+			Permissions:          s.policy.instancePermissions(authCtx, config),
+		}
+	}
+
+	return s
 }
 
 type AuctionConfigurationRepo interface {
@@ -111,4 +133,18 @@ func (p *auctionConfigurationPolicy) authorizeUpdate(ctx context.Context, authCt
 
 func (p *auctionConfigurationPolicy) authorizeDelete(_ context.Context, _ AuthContext, _ *AuctionConfiguration) error {
 	return nil
+}
+
+func (p *auctionConfigurationPolicy) permissions(_ AuthContext) ResourcePermissions {
+	return ResourcePermissions{
+		Read:   true,
+		Create: true,
+	}
+}
+
+func (p *auctionConfigurationPolicy) instancePermissions(_ AuthContext, _ *AuctionConfiguration) ResourceInstancePermissions {
+	return ResourceInstancePermissions{
+		Update: true,
+		Delete: true,
+	}
 }

@@ -2,8 +2,16 @@
   <PageContainer>
     <NavigationContainer>
       <GoBackButton :path="resourcesPath" />
-      <DestroyButton :id="id" :path="resourcesPath" />
-      <EditButton :id="id" :path="resourcesPath" />
+      <DestroyButton
+        v-if="resource._permissions.delete"
+        :id="id"
+        :path="resourcesPath"
+      />
+      <EditButton
+        v-if="resource._permissions.update"
+        :id="id"
+        :path="resourcesPath"
+      />
     </NavigationContainer>
     <ResourceCard title="Line Item" :fields="fields" :resource="resource" />
   </PageContainer>

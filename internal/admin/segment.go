@@ -7,6 +7,13 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/segment"
 )
 
+const SegmentResourceKey = "segment"
+
+type SegmentResource struct {
+	*Segment
+	Permissions ResourceInstancePermissions `json:"_permissions"`
+}
+
 type Segment struct {
 	ID        int64  `json:"id"`
 	PublicUID string `json:"public_uid"`
@@ -23,13 +30,28 @@ type SegmentAttrs struct {
 	Priority    int32            `json:"priority"`
 }
 
-type SegmentService = ResourceService[Segment, SegmentAttrs]
+type SegmentService struct {
+	*ResourceService[SegmentResource, Segment, SegmentAttrs]
+}
 
 func NewSegmentService(store Store) *SegmentService {
-	return &SegmentService{
-		repo:   store.Segments(),
-		policy: newSegmentPolicy(store),
+	s := &SegmentService{
+		ResourceService: &ResourceService[SegmentResource, Segment, SegmentAttrs]{},
 	}
+
+	s.resourceKey = SegmentResourceKey
+
+	s.repo = store.Segments()
+	s.policy = newSegmentPolicy(store)
+
+	s.prepareResource = func(authCtx AuthContext, segment *Segment) SegmentResource {
+		return SegmentResource{
+			Segment:     segment,
+			Permissions: s.policy.instancePermissions(authCtx, segment),
+		}
+	}
+
+	return s
 }
 
 type SegmentRepo interface {
@@ -90,4 +112,18 @@ func (p *segmentPolicy) authorizeUpdate(ctx context.Context, authCtx AuthContext
 
 func (p *segmentPolicy) authorizeDelete(_ context.Context, _ AuthContext, _ *Segment) error {
 	return nil
+}
+
+func (p *segmentPolicy) permissions(_ AuthContext) ResourcePermissions {
+	return ResourcePermissions{
+		Read:   true,
+		Create: true,
+	}
+}
+
+func (p *segmentPolicy) instancePermissions(_ AuthContext, _ *Segment) ResourceInstancePermissions {
+	return ResourceInstancePermissions{
+		Update: true,
+		Delete: true,
+	}
 }

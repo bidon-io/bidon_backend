@@ -6,6 +6,13 @@ import (
 	"context"
 )
 
+const AppResourceKey = "app"
+
+type AppResource struct {
+	*App
+	Permissions ResourceInstancePermissions `json:"_permissions"`
+}
+
 type App struct {
 	ID        int64  `json:"id"`
 	PublicUID string `json:"public_uid"`
@@ -29,19 +36,34 @@ const (
 	AndroidPlatformID PlatformID = "android"
 )
 
-type AppService = ResourceService[App, AppAttrs]
+type AppService struct {
+	*ResourceService[AppResource, App, AppAttrs]
+}
 
 func NewAppService(store Store) *AppService {
-	return &AppService{
-		repo:   store.Apps(),
-		policy: newAppPolicy(store),
-
-		prepareCreateAttrs: func(authCtx AuthContext, attrs *AppAttrs) {
-			if attrs.UserID == 0 {
-				attrs.UserID = authCtx.UserID()
-			}
-		},
+	s := &AppService{
+		ResourceService: &ResourceService[AppResource, App, AppAttrs]{},
 	}
+
+	s.resourceKey = AppResourceKey
+
+	s.repo = store.Apps()
+	s.policy = newAppPolicy(store)
+
+	s.prepareResource = func(authCtx AuthContext, app *App) AppResource {
+		return AppResource{
+			App:         app,
+			Permissions: s.policy.instancePermissions(authCtx, app),
+		}
+	}
+
+	s.prepareCreateAttrs = func(authCtx AuthContext, attrs *AppAttrs) {
+		if attrs.UserID == 0 {
+			attrs.UserID = authCtx.UserID()
+		}
+	}
+
+	return s
 }
 
 type AppRepo interface {
@@ -100,4 +122,18 @@ func (p *appPolicy) authorizeUpdate(ctx context.Context, authCtx AuthContext, ap
 
 func (p *appPolicy) authorizeDelete(_ context.Context, _ AuthContext, _ *App) error {
 	return nil
+}
+
+func (p *appPolicy) permissions(_ AuthContext) ResourcePermissions {
+	return ResourcePermissions{
+		Read:   true,
+		Create: true,
+	}
+}
+
+func (p *appPolicy) instancePermissions(_ AuthContext, _ *App) ResourceInstancePermissions {
+	return ResourceInstancePermissions{
+		Update: true,
+		Delete: true,
+	}
 }
