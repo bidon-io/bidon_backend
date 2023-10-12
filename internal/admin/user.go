@@ -43,6 +43,13 @@ func NewUserService(store Store) *UserService {
 	s.repo = store.Users()
 	s.policy = newUserPolicy(store)
 
+	s.prepareResource = func(authCtx AuthContext, user *User) UserResource {
+		return UserResource{
+			User:        user,
+			Permissions: s.policy.instancePermissions(authCtx, user),
+		}
+	}
+
 	s.getValidator = func(attrs *UserAttrs) v8n.ValidatableWithContext {
 		return &userAttrsValidator{
 			attrs: attrs,
