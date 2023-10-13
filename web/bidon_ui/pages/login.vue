@@ -46,8 +46,6 @@
 <script setup>
 import * as yup from "yup";
 
-import { useAuthStore } from "@/stores/AuthStore.js";
-
 definePageMeta({
   layout: "auth",
 });

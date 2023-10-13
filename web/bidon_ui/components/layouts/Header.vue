@@ -11,20 +11,21 @@
             </span>
           </div>
         </div>
-        <Button
-          v-if="user"
-          label="Log out"
-          icon="pi pi-sign-out"
-          text
-          @click="logout"
-        />
+        <div v-if="currentUser" class="flex items-center">
+          <div>
+            <span>{{ currentUser.email }}</span>
+            <span class="text-red-500 font-bold pl-1">
+              {{ currentUser.isAdmin ? "[Admin]" : "" }}
+            </span>
+          </div>
+
+          <Button label="Log out" icon="pi pi-sign-out" text @click="logout" />
+        </div>
       </div>
     </div>
   </header>
 </template>
 
 <script setup>
-import { useAuthStore } from "@/stores/AuthStore.js";
-
-const { user, logout } = useAuthStore();
+const { currentUser, logout } = useAuthStore();
 </script>

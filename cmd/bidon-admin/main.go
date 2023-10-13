@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/alexedwards/scs/goredisstore"
 	"github.com/bidon-io/bidon-backend/cmd/bidon-admin/web"
 	"github.com/bidon-io/bidon-backend/config"
 	"github.com/bidon-io/bidon-backend/internal/admin"
@@ -22,6 +23,7 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/redis/go-redis/v9"
 )
 
 func main() {
@@ -59,11 +61,20 @@ func main() {
 	configureCORS(e)
 
 	store := adminstore.New(db)
-	authService := auth.NewAuthService(store.UserRepo, auth.Config{
+	authConfig := auth.Config{
 		SecretKey:         []byte(os.Getenv("APP_SECRET")),
 		SuperUserLogin:    []byte(os.Getenv("SUPERUSER_LOGIN")),
 		SuperUserPassword: []byte(os.Getenv("SUPERUSER_PASSWORD")),
-	})
+	}
+
+	if config.Env == config.ProdEnv {
+		redisURL := os.Getenv("REDIS_URL")
+		rdb := redis.NewClient(&redis.Options{
+			Addr: redisURL,
+		})
+		authConfig.SessionStore = goredisstore.New(rdb)
+	}
+	authService := auth.NewAuthService(store.UserRepo, authConfig)
 	adminService := admin.NewService(store)
 
 	authGroup := e.Group("/auth")

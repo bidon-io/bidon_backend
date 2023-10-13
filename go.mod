@@ -3,6 +3,8 @@ module github.com/bidon-io/bidon-backend
 go 1.21
 
 require (
+	github.com/alexedwards/scs/goredisstore v0.0.0-20230902070821-95fa2ac9d520
+	github.com/alexedwards/scs/v2 v2.5.1
 	github.com/bwmarrin/snowflake v0.3.0
 	github.com/cenkalti/backoff/v4 v4.2.1
 	github.com/getsentry/sentry-go v0.24.1
@@ -20,6 +22,7 @@ require (
 	github.com/prebid/openrtb/v19 v19.0.0
 	github.com/redis/go-redis/v9 v9.1.0
 	github.com/shopspring/decimal v1.3.1
+	github.com/spazzymoto/echo-scs-session v1.0.0
 	github.com/twmb/franz-go v1.15.0
 	github.com/uptrace/opentelemetry-go-extra/otelgorm v0.2.2
 	go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho v0.44.0
@@ -67,5 +70,4 @@ require (
 	golang.org/x/text v0.13.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	gorm.io/driver/mysql v1.5.1 // indirect
-	moul.io/http2curl v1.0.0 // indirect
 )
