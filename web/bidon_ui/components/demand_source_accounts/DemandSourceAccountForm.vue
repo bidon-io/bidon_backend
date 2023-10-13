@@ -38,7 +38,6 @@
 
 <script setup>
 import * as yup from "yup";
-import { useAuthStore } from "@/stores/AuthStore";
 import OwnerWithSharedDropdown from "~/components/form/OwnerWithSharedDropdown.vue";
 
 const props = defineProps({
@@ -55,7 +54,7 @@ const emit = defineEmits(["submit"]);
 const resource = ref(props.value);
 const extraSchema = ref(yup.object());
 
-const { user: currentUser } = useAuthStore();
+const { currentUser } = useAuthStore();
 
 const { errors, meta, useFieldModel, handleSubmit } = useForm({
   validationSchema: computed(() => {

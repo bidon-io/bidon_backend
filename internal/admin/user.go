@@ -74,10 +74,24 @@ func newUserPolicy(store Store) *userPolicy {
 	}
 }
 
+type userReadScope struct {
+	*privateResourceScope[User]
+}
+
+func (s *userReadScope) find(ctx context.Context, id int64) (*User, error) {
+	if s.privateResourceScope.authCtx.UserID() == id {
+		return s.privateResourceScope.repo.Find(ctx, id)
+	}
+
+	return s.privateResourceScope.find(ctx, id)
+}
+
 func (p *userPolicy) getReadScope(authCtx AuthContext) resourceScope[User] {
-	return &privateResourceScope[User]{
-		repo:    p.repo,
-		authCtx: authCtx,
+	return &userReadScope{
+		&privateResourceScope[User]{
+			repo:    p.repo,
+			authCtx: authCtx,
+		},
 	}
 }
 

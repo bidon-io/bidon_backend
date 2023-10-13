@@ -35,7 +35,6 @@
 
 <script setup>
 import * as yup from "yup";
-import { useAuthStore } from "@/stores/AuthStore";
 
 const props = defineProps({
   value: {
@@ -50,7 +49,7 @@ const props = defineProps({
 const emit = defineEmits(["submit"]);
 const resource = ref(props.value);
 
-const { user: currentUser } = useAuthStore();
+const { currentUser } = useAuthStore();
 let validationFields = {
   platformId: yup.string().required().label("Platform"),
   humanName: yup.string().required().label("Owner Name"),
