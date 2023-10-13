@@ -69,9 +69,11 @@ func main() {
 
 	if config.Env == config.ProdEnv {
 		redisURL := os.Getenv("REDIS_URL")
-		rdb := redis.NewClient(&redis.Options{
-			Addr: redisURL,
-		})
+		opts, err := redis.ParseURL(redisURL)
+		if err != nil {
+			log.Fatalf("redis.ParseURL(%v): %v", redisURL, err)
+		}
+		rdb := redis.NewClient(opts)
 		authConfig.SessionStore = goredisstore.New(rdb)
 	}
 	authService := auth.NewAuthService(store.UserRepo, authConfig)
