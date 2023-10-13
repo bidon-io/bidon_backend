@@ -1,17 +1,11 @@
 import { API_URL } from "~/constants";
 import { camelizeKeys } from "humps";
-import { useAuthStore } from "~/stores/AuthStore";
+import { $fetch } from "ofetch";
 
 export const $apiFetch = $fetch.create({
   baseURL: `${API_URL}api`,
-  onRequest({ options }) {
-    const auth = useAuthStore();
-    if (auth.accessToken) {
-      options.headers = {
-        ...options.headers,
-        Authorization: `Bearer ${auth.accessToken}`,
-      };
-    }
+  headers: {
+    "X-Bidon-App": "web",
   },
   onResponse({ response }) {
     if (
@@ -23,10 +17,10 @@ export const $apiFetch = $fetch.create({
       );
     }
   },
-  onResponseError({ response }) {
+  async onResponseError({ response }) {
     if (response.status === 401) {
-      useAuthStore().logout();
-      window.location.reload();
+      useAuthStore().setUnauthorized();
+      await navigateTo("/login");
     }
   },
 });
