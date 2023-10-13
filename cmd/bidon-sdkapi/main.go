@@ -56,9 +56,12 @@ func main() {
 	}
 
 	redisURL := os.Getenv("REDIS_URL")
-	rdb := redis.NewClient(&redis.Options{
-		Addr: redisURL,
-	})
+	opts, err := redis.ParseURL(redisURL)
+	if err != nil {
+		log.Printf("REDIS_URL parsing failed, using default options: %v", err)
+		opts = &redis.Options{}
+	}
+	rdb := redis.NewClient(opts)
 
 	var maxMindDB *maxminddb.Reader
 
