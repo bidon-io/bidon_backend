@@ -121,6 +121,7 @@ func newBaseRequest(request *schema.BaseRequest, geoData geocoder.GeoData) Reque
 		Os:                          request.Device.OS,
 		OsVersion:                   request.Device.OSVersion,
 		ConnectionType:              request.Device.ConnectionType,
+		DeviceType:                  string(request.Device.Type),
 		SessionID:                   request.Session.ID,
 		SessionUptime:               request.Session.Uptime(),
 		Bundle:                      request.App.Bundle,
@@ -318,6 +319,7 @@ type RequestEvent struct {
 	Os                          string  `json:"os"`
 	OsVersion                   string  `json:"os_version"`
 	ConnectionType              string  `json:"connection_type"`
+	DeviceType                  string  `json:"device_type"`
 	SessionID                   string  `json:"session_id"`
 	SessionUptime               int     `json:"session_uptime"`
 	Bundle                      string  `json:"bundle"`

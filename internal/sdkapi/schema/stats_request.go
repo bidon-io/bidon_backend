@@ -1,8 +1,9 @@
 package schema
 
 import (
-	"github.com/bidon-io/bidon-backend/internal/ad"
 	"strconv"
+
+	"github.com/bidon-io/bidon-backend/internal/ad"
 )
 
 type StatsRequest struct {
@@ -50,6 +51,7 @@ type StatsResult struct {
 	WinnerID        string  `json:"winner_id"`
 	RoundID         string  `json:"round_id"`
 	ECPM            float64 `json:"ecpm"`
+	BidType         string  `json:"bid_type" validate:"omitempty,oneof=rtb cpm"`
 	AuctionStartTS  int     `json:"auction_start_ts"`
 	AuctionFinishTS int     `json:"auction_finish_ts"`
 }
@@ -58,12 +60,19 @@ func (s StatsResult) Map() map[string]any {
 	m := map[string]any{
 		"status":            s.Status,
 		"winner_id":         s.WinnerID,
+		"round_id":          s.RoundID,
 		"ecpm":              s.ECPM,
+		"bid_type":          s.BidType,
+		"bidding":           s.IsBidding(),
 		"auction_start_ts":  s.AuctionStartTS,
 		"auction_finish_ts": s.AuctionFinishTS,
 	}
 
 	return m
+}
+
+func (s StatsResult) IsBidding() bool {
+	return s.BidType == "rtb"
 }
 
 func (s StatsResult) IsSuccess() bool {
