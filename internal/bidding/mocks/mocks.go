@@ -5,7 +5,6 @@ package mocks
 
 import (
 	"context"
-	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/bidding"
@@ -24,8 +23,8 @@ var _ bidding.ConfigMatcher = &ConfigMatcherMock{}
 //
 //		// make and configure a mocked bidding.ConfigMatcher
 //		mockedConfigMatcher := &ConfigMatcherMock{
-//			MatchFunc: func(ctx context.Context, appID int64, adType ad.Type, segmentID int64) (*auction.Config, error) {
-//				panic("mock out the Match method")
+//			MatchByIdFunc: func(ctx context.Context, appID int64, id int64) *auction.Config {
+//				panic("mock out the MatchById method")
 //			},
 //		}
 //
@@ -34,67 +33,61 @@ var _ bidding.ConfigMatcher = &ConfigMatcherMock{}
 //
 //	}
 type ConfigMatcherMock struct {
-	// MatchFunc mocks the Match method.
-	MatchFunc func(ctx context.Context, appID int64, adType ad.Type, segmentID int64) (*auction.Config, error)
+	// MatchByIdFunc mocks the MatchById method.
+	MatchByIdFunc func(ctx context.Context, appID int64, id int64) *auction.Config
 
 	// calls tracks calls to the methods.
 	calls struct {
-		// Match holds details about calls to the Match method.
-		Match []struct {
+		// MatchById holds details about calls to the MatchById method.
+		MatchById []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// AppID is the appID argument value.
 			AppID int64
-			// AdType is the adType argument value.
-			AdType ad.Type
-			// SegmentID is the segmentID argument value.
-			SegmentID int64
+			// ID is the id argument value.
+			ID int64
 		}
 	}
-	lockMatch sync.RWMutex
+	lockMatchById sync.RWMutex
 }
 
-// Match calls MatchFunc.
-func (mock *ConfigMatcherMock) Match(ctx context.Context, appID int64, adType ad.Type, segmentID int64) (*auction.Config, error) {
-	if mock.MatchFunc == nil {
-		panic("ConfigMatcherMock.MatchFunc: method is nil but ConfigMatcher.Match was just called")
+// MatchById calls MatchByIdFunc.
+func (mock *ConfigMatcherMock) MatchById(ctx context.Context, appID int64, id int64) *auction.Config {
+	if mock.MatchByIdFunc == nil {
+		panic("ConfigMatcherMock.MatchByIdFunc: method is nil but ConfigMatcher.MatchById was just called")
 	}
 	callInfo := struct {
-		Ctx       context.Context
-		AppID     int64
-		AdType    ad.Type
-		SegmentID int64
+		Ctx   context.Context
+		AppID int64
+		ID    int64
 	}{
-		Ctx:       ctx,
-		AppID:     appID,
-		AdType:    adType,
-		SegmentID: segmentID,
+		Ctx:   ctx,
+		AppID: appID,
+		ID:    id,
 	}
-	mock.lockMatch.Lock()
-	mock.calls.Match = append(mock.calls.Match, callInfo)
-	mock.lockMatch.Unlock()
-	return mock.MatchFunc(ctx, appID, adType, segmentID)
+	mock.lockMatchById.Lock()
+	mock.calls.MatchById = append(mock.calls.MatchById, callInfo)
+	mock.lockMatchById.Unlock()
+	return mock.MatchByIdFunc(ctx, appID, id)
 }
 
-// MatchCalls gets all the calls that were made to Match.
+// MatchByIdCalls gets all the calls that were made to MatchById.
 // Check the length with:
 //
-//	len(mockedConfigMatcher.MatchCalls())
-func (mock *ConfigMatcherMock) MatchCalls() []struct {
-	Ctx       context.Context
-	AppID     int64
-	AdType    ad.Type
-	SegmentID int64
+//	len(mockedConfigMatcher.MatchByIdCalls())
+func (mock *ConfigMatcherMock) MatchByIdCalls() []struct {
+	Ctx   context.Context
+	AppID int64
+	ID    int64
 } {
 	var calls []struct {
-		Ctx       context.Context
-		AppID     int64
-		AdType    ad.Type
-		SegmentID int64
+		Ctx   context.Context
+		AppID int64
+		ID    int64
 	}
-	mock.lockMatch.RLock()
-	calls = mock.calls.Match
-	mock.lockMatch.RUnlock()
+	mock.lockMatchById.RLock()
+	calls = mock.calls.MatchById
+	mock.lockMatchById.RUnlock()
 	return calls
 }
 

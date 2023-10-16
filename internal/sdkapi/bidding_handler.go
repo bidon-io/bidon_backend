@@ -70,13 +70,6 @@ func (h *BiddingHandler) Handle(c echo.Context) error {
 		defer cancel()
 	}
 
-	segmentParams := &segment.Params{
-		Country: req.countryCode(),
-		Ext:     req.raw.Segment.Ext,
-		AppID:   req.app.ID,
-	}
-
-	sgmnt := h.SegmentMatcher.Match(ctx, segmentParams)
 	imp := req.raw.Imp
 	adapterConfigs, err := h.AdaptersConfigBuilder.Build(ctx, req.app.ID, req.raw.Adapters.Keys(), imp)
 	if err != nil {
@@ -86,7 +79,6 @@ func (h *BiddingHandler) Handle(c echo.Context) error {
 	params := &bidding.BuildParams{
 		AppID:          req.app.ID,
 		BiddingRequest: req.raw,
-		SegmentID:      sgmnt.ID,
 		GeoData:        req.geoData,
 		AdapterConfigs: adapterConfigs,
 	}
