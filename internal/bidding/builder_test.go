@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/bidding"
@@ -18,7 +17,7 @@ import (
 
 func TestBuilder_Build(t *testing.T) {
 	configMatcher := &mocks.ConfigMatcherMock{
-		MatchFunc: func(ctx context.Context, appID int64, adType ad.Type, segmentID int64) (*auction.Config, error) {
+		MatchByIdFunc: func(ctx context.Context, appID int64, id int64) *auction.Config {
 			cfg := &auction.Config{
 				Rounds: []auction.RoundConfig{
 					{
@@ -34,7 +33,7 @@ func TestBuilder_Build(t *testing.T) {
 					},
 				},
 			}
-			return cfg, nil
+			return cfg
 		},
 	}
 
@@ -75,8 +74,7 @@ func TestBuilder_Build(t *testing.T) {
 			adaptersBuilder:     adaptersBuilder,
 			notificationHandler: notificationHanler,
 			buildParams: &bidding.BuildParams{
-				AppID:     1,
-				SegmentID: 1,
+				AppID: 1,
 				BiddingRequest: schema.BiddingRequest{
 					Imp: schema.Imp{
 						RoundID: "ROUND_2",
@@ -101,15 +99,14 @@ func TestBuilder_Build(t *testing.T) {
 			expectedError: nil,
 		},
 		{
-			name: "config matcher error",
+			name: "empty config",
 			configMatcher: &mocks.ConfigMatcherMock{
-				MatchFunc: func(ctx context.Context, appID int64, adType ad.Type, segmentID int64) (*auction.Config, error) {
-					return nil, errors.New("config matcher error")
+				MatchByIdFunc: func(ctx context.Context, appID int64, id int64) *auction.Config {
+					return nil
 				},
 			},
 			buildParams: &bidding.BuildParams{
-				AppID:     1,
-				SegmentID: 1,
+				AppID: 1,
 			},
 			expectedResult: adapters.DemandResponse{},
 			expectedError:  errors.New("config matcher error"),

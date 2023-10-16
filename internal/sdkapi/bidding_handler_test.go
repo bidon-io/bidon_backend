@@ -14,10 +14,8 @@ import (
 
 	"github.com/bidon-io/bidon-backend/config"
 
-	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/auction"
-	auctionmocks "github.com/bidon-io/bidon-backend/internal/auction/mocks"
 	"github.com/bidon-io/bidon-backend/internal/bidding"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters_builder"
 	biddingmocks "github.com/bidon-io/bidon-backend/internal/bidding/mocks"
@@ -79,9 +77,9 @@ func testHelperBiddingHandler(t *testing.T) sdkapi.BiddingHandler {
 			return geodata, nil
 		},
 	}
-	configMatcher := &auctionmocks.ConfigMatcherMock{
-		MatchFunc: func(ctx context.Context, appID int64, adType ad.Type, segmentID int64) (*auction.Config, error) {
-			return auctionConfig, nil
+	configMatcher := &biddingmocks.ConfigMatcherMock{
+		MatchByIdFunc: func(ctx context.Context, appID int64, id int64) *auction.Config {
+			return auctionConfig
 		},
 	}
 	segmentFetcher := &segmentmocks.FetcherMock{

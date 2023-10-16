@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/bidon-io/bidon-backend/internal/bidding/adapters/amazon"
 	"strconv"
 
-	"github.com/bidon-io/bidon-backend/internal/ad"
+	"github.com/bidon-io/bidon-backend/internal/bidding/adapters/amazon"
+
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
@@ -32,7 +32,7 @@ type Builder struct {
 var ErrNoBids = errors.New("no bids")
 
 type ConfigMatcher interface {
-	Match(ctx context.Context, appID int64, adType ad.Type, segmentID int64) (*auction.Config, error)
+	MatchById(ctx context.Context, appID, id int64) *auction.Config
 }
 
 type AdaptersBuilder interface {
@@ -46,7 +46,6 @@ type NotificationHandler interface {
 type BuildParams struct {
 	AppID          int64
 	BiddingRequest schema.BiddingRequest
-	SegmentID      int64
 	GeoData        geocoder.GeoData
 	AdapterConfigs adapter.ProcessedConfigsMap
 }
@@ -71,9 +70,10 @@ func (b *Builder) HoldAuction(ctx context.Context, params *BuildParams) (Auction
 	// build response
 	emptyResponse := AuctionResult{}
 	br := params.BiddingRequest
-	config, err := b.ConfigMatcher.Match(ctx, params.AppID, br.AdType, params.SegmentID)
-	if err != nil {
-		return emptyResponse, fmt.Errorf("cannot build config: %s", err)
+
+	config := b.ConfigMatcher.MatchById(ctx, params.AppID, int64(br.Imp.AuctionConfigID))
+	if config == nil {
+		return emptyResponse, fmt.Errorf("cannot find config: %d", br.Imp.AuctionConfigID)
 	}
 
 	bidId, err := uuid.NewV4()
