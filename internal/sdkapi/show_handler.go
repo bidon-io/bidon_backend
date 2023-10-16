@@ -17,6 +17,7 @@ type ShowHandler struct {
 	NotificationHandler ShowNotificationHandler
 }
 
+//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/show_mocks.go -pkg mocks . ShowNotificationHandler
 type ShowNotificationHandler interface {
 	HandleShow(ctx context.Context, imp *schema.Imp, responses []*adapters.DemandResponse) error
 }

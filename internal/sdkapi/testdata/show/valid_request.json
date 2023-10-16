@@ -1,0 +1,72 @@
+{
+  "device": {
+    "w": 1179,
+    "h": 2556,
+    "js": 1,
+    "mccmnc": "",
+    "osv": "16.2",
+    "type": "PHONE",
+    "os": "iOS",
+    "pxratio": 3,
+    "connection_type": "CELLULAR",
+    "language": "ru-US",
+    "make": "Apple",
+    "hwv": "x86_64",
+    "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
+    "ppi": 2556,
+    "model": "iPhone",
+    "carrier": ""
+  },
+  "session": {
+    "id": "CE2624BF-3B2F-42B5-86C2-20D0BED24D56",
+    "launch_monotonic_ts": 12521638000,
+    "battery": -1,
+    "memory_warnings_monotonic_ts": [],
+    "start_monotonic_ts": 12521638000,
+    "memory_warnings_ts": [],
+    "storage_free": 994662584320,
+    "monotonic_ts": 12521664000,
+    "start_ts": 1688371931187,
+    "ram_size": 17179869184,
+    "storage_used": 994662584320,
+    "launch_ts": 1688371931187,
+    "ts": 1688371957925,
+    "cpu_usage": 0.13499999046325684,
+    "ram_used": 429514752
+  },
+  "app": {
+    "skadn": [
+      "xxx.skadnetwork"
+    ],
+    "bundle": "com.app.name",
+    "key": "123",
+    "framework": "native",
+    "version": "1.0"
+  },
+  "user": {
+    "tracking_authorization_status": "AUTHORIZED",
+    "idfv": "B45801B3-543E-4C06-9E0A-0D6D2B779E39",
+    "idg": "1699A9AE-D1CC-451B-948C-70E1584F7406",
+    "idfa": "00000000-0000-0000-0000-000000000000"
+  },
+  "token": "{}",
+  "segment": {
+    "ext": "{}"
+  },
+  "regs": {
+    "coppa": false,
+    "gdpr": false,
+    "iab": {}
+  },
+  "test": false,
+  "ext": "{}",
+  "bid": {
+    "auction_configuration_id": 11,
+    "auction_id": "93be3de1-3cf7-4537-9b5e-8c8cf16c2391",
+    "demand_id": "bigoads",
+    "ecpm": 2.5,
+    "imp_id": "05316d9f-f8a5-47af-b9a9-0582eed74c3e",
+    "interstitial": {},
+    "round_id": "ROUND_INTERSTITIAL_1"
+  }
+}

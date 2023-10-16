@@ -1,0 +1,23 @@
+{
+  "app": {
+    "skadn": [
+      "xxx.skadnetwork"
+    ],
+    "bundle": "com.app.name",
+    "key": "123",
+    "framework": "native",
+    "version": "1.0"
+  },
+  "token": "{}",
+  "segment": {
+    "ext": "{}"
+  },
+  "regs": {
+    "coppa": false,
+    "gdpr": false,
+    "iab": {}
+  },
+  "test": false,
+  "ext": "{}",
+  "bid": {}
+}
