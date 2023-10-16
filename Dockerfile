@@ -1,12 +1,10 @@
 # Build UI
-FROM node:20.3-alpine AS frontend-deps
+FROM node:20-alpine AS frontend-deps
 
 WORKDIR /app
 
 COPY web/bidon_ui/package.json web/bidon_ui/yarn.lock ./
-RUN yarn install
-
-FROM frontend-deps AS frontend-builder
+RUN yarn install --frozen-lockfile
 
 ARG APP_ENV=production
 COPY web/bidon_ui .
@@ -29,7 +27,7 @@ CMD [ "go", "test", "-coverprofile=testcov/coverage.txt", "-covermode=atomic", "
 
 FROM base AS bidon-admin-builder
 
-COPY --from=frontend-builder /app/.output/public ./cmd/bidon-admin/web/ui
+COPY --from=frontend-deps /app/.output/public ./cmd/bidon-admin/web/ui
 RUN go build -o /bidon-admin ./cmd/bidon-admin
 
 FROM base AS bidon-sdkapi-builder
