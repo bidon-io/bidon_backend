@@ -1,0 +1,37 @@
+{
+  "session": {
+    "id": "CE2624BF-3B2F-42B5-86C2-20D0BED24D56",
+    "launch_monotonic_ts": 12521638000,
+    "battery": -1,
+    "memory_warnings_monotonic_ts": [],
+    "start_monotonic_ts": 12521638000,
+    "memory_warnings_ts": [],
+    "storage_free": 994662584320,
+    "monotonic_ts": 12521664000,
+    "start_ts": 1688371931187,
+    "ram_size": 17179869184,
+    "storage_used": 994662584320,
+    "launch_ts": 1688371931187,
+    "ts": 1688371957925,
+    "cpu_usage": 0.13499999046325684,
+    "ram_used": 429514752
+  },
+  "app": {
+    "skadn": [
+      "xxx.skadnetwork"
+    ],
+    "bundle": "com.app.name",
+    "key": "123",
+    "framework": "native",
+    "version": "1.0"
+  },
+  "token": "{}",
+  "regs": {
+    "coppa": false,
+    "gdpr": false,
+    "iab": {}
+  },
+  "test": false,
+  "ext": "{}",
+  "bid": {}
+}

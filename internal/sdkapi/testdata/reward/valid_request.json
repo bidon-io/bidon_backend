@@ -1,0 +1,70 @@
+{
+  "device": {
+    "w": 1179,
+    "h": 2556,
+    "js": 1,
+    "mccmnc": "",
+    "osv": "16.2",
+    "type": "PHONE",
+    "os": "iOS",
+    "pxratio": 3,
+    "connection_type": "CELLULAR",
+    "language": "ru-US",
+    "make": "Apple",
+    "hwv": "x86_64",
+    "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
+    "ppi": 2556,
+    "model": "iPhone",
+    "carrier": ""
+  },
+  "segment": {},
+  "test": false,
+  "app": {
+    "skadn": [
+      "xxx.skadnetwork"
+    ],
+    "bundle": "com.app.name",
+    "key": "123",
+    "framework": "native",
+    "version": "1.0"
+  },
+  "ext": "{}",
+  "session": {
+    "battery": 38,
+    "cpu_usage": 1,
+    "id": "c13e7158-4b9f-4496-bfe7-3117095b2289",
+    "launch_monotonic_ts": 98557305,
+    "launch_ts": 1697410398478,
+    "memory_warnings_monotonic_ts": [],
+    "memory_warnings_ts": [],
+    "start_monotonic_ts": 98557305,
+    "monotonic_ts": 99052577,
+    "ram_size": 3781476352,
+    "ram_used": 337070080,
+    "start_ts": 1697410398478,
+    "storage_free": 3227308032,
+    "storage_used": 112776634368,
+    "ts": 1697410893751
+  },
+  "user": {
+    "idg": "821f69b7-2992-4b8f-b243-7c37363b3a03",
+    "idfa": "33e5609c-10c1-4c30-820c-d74efdc245ac",
+    "tracking_authorization_status": "AUTHORIZED"
+  },
+  "token": "{}",
+  "segment": {},
+  "regs": {
+    "coppa": false,
+    "gdpr": false,
+    "iab": {}
+  },
+  "bid": {
+    "auction_configuration_id": 10,
+    "auction_id": "ff978038-2eb7-4785-a740-805d113f8300",
+    "demand_id": "bigoads",
+    "ecpm": 9.659524,
+    "imp_id": "4655c1af-4752-4c48-a3eb-d99fde60953d",
+    "rewarded": {},
+    "round_id": "ROUND_REWARDED_1"
+  }
+}

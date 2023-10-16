@@ -19,6 +19,8 @@ type StatsHandler struct {
 	NotificationHandler StatsNotificationHandler
 }
 
+//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/stats_mocks.go -pkg mocks . StatsNotificationHandler ConfigMatcher
+
 type StatsNotificationHandler interface {
 	HandleStats(context.Context, schema.Stats, auction.Config) error
 }
