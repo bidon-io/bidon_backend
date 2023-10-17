@@ -3,6 +3,10 @@ package sdkapi_test
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"os"
+	"testing"
+
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
@@ -11,17 +15,16 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	"github.com/bidon-io/bidon-backend/internal/segment"
 	segmentmocks "github.com/bidon-io/bidon-backend/internal/segment/mocks"
-	"net/http"
-	"os"
-	"testing"
 )
 
 func SetupConfigHandler() sdkapi.ConfigHandler {
 	app := sdkapi.App{ID: 1}
 	sgmnt := segment.Segment{
-		ID:      1,
-		UID:     "1",
-		Filters: []segment.Filter{segment.Filter{Type: "country", Operator: "IN", Values: []string{"US"}}},
+		ID:  1,
+		UID: "1",
+		Filters: []segment.Filter{
+			{Type: "country", Operator: "IN", Values: []string{"US"}},
+		},
 	}
 
 	segmentFetcher := &segmentmocks.FetcherMock{

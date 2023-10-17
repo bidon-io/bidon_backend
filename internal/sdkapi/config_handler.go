@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
@@ -49,11 +48,6 @@ func (h *ConfigHandler) Handle(c echo.Context) error {
 	}
 	ctx := c.Request().Context()
 
-	configEvent := event.NewConfig(&req.raw, req.geoData)
-	h.EventLogger.Log(configEvent, func(err error) {
-		logError(c, fmt.Errorf("log config event: %v", err))
-	})
-
 	segmentParams := &segment.Params{
 		Country: req.countryCode(),
 		Ext:     req.raw.Segment.Ext,
@@ -61,11 +55,13 @@ func (h *ConfigHandler) Handle(c echo.Context) error {
 	}
 
 	sgmnt := h.SegmentMatcher.Match(ctx, segmentParams)
+	req.raw.Segment.ID = sgmnt.StringID()
+	req.raw.Segment.UID = sgmnt.UID
 
-	var segmentID string
-	if sgmnt.ID != 0 {
-		segmentID = strconv.Itoa(int(sgmnt.ID))
-	}
+	configEvent := event.NewConfig(&req.raw, req.geoData)
+	h.EventLogger.Log(configEvent, func(err error) {
+		logError(c, fmt.Errorf("log config event: %v", err))
+	})
 
 	adapterInitConfigs, err := h.AdapterInitConfigsFetcher.FetchAdapterInitConfigs(ctx, req.app.ID, req.raw.Adapters.Keys())
 	if err != nil {
@@ -87,7 +83,7 @@ func (h *ConfigHandler) Handle(c echo.Context) error {
 		},
 		Placements: []any{},
 		Token:      "{}",
-		Segment:    Segment{ID: segmentID, UID: sgmnt.UID},
+		Segment:    Segment{ID: sgmnt.StringID(), UID: sgmnt.UID},
 	}
 
 	return c.JSON(http.StatusOK, resp)

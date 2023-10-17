@@ -2,9 +2,10 @@ package segment_test
 
 import (
 	"context"
-	"github.com/bidon-io/bidon-backend/internal/segment"
 	"reflect"
 	"testing"
+
+	"github.com/bidon-io/bidon-backend/internal/segment"
 
 	segmentmocks "github.com/bidon-io/bidon-backend/internal/segment/mocks"
 )
@@ -117,5 +118,25 @@ func TestMatchTwoFilters(t *testing.T) {
 	expected = segment.Segment{ID: 0}
 	if !reflect.DeepEqual(result, expected) {
 		t.Errorf("segmentMatcher.Match returned unexpected segment. Expected: %v, Got: %v", expected, result)
+	}
+}
+
+func TestSegment_StringID_known(t *testing.T) {
+	segment := segment.Segment{ID: 123}
+
+	expected := "123"
+	actual := segment.StringID()
+	if expected != actual {
+		t.Errorf("segmentMatcher.Match returned unexpected segment. Expected: %v, Got: %v", expected, actual)
+	}
+}
+
+func TestSegment_StringID_nil(t *testing.T) {
+	segment := segment.Segment{}
+
+	expected := ""
+	actual := segment.StringID()
+	if expected != actual {
+		t.Errorf("segmentMatcher.Match returned unexpected segment. Expected: %v, Got: %v", expected, actual)
 	}
 }

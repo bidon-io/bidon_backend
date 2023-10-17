@@ -3,6 +3,7 @@ package segment
 import (
 	"context"
 	"encoding/json"
+	"strconv"
 )
 
 type Ext struct {
@@ -24,6 +25,15 @@ type Segment struct {
 	ID      int64    `json:"id"`
 	UID     string   `json:"uid"`
 	Filters []Filter `json:"filters"`
+}
+
+func (s Segment) StringID() string {
+	var segmentID string
+	if s.ID != 0 {
+		segmentID = strconv.FormatInt(s.ID, 10)
+	}
+
+	return segmentID
 }
 
 type Filter struct {
