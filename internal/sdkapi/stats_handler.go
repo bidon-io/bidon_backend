@@ -65,6 +65,15 @@ func (h *StatsHandler) sendEvents(c echo.Context, req *request[schema.StatsReque
 		auctionConfigurationUID = 0
 	}
 
+	// find round by ID
+	statsPriceFloor := 0.0
+	for _, round := range stats.Rounds {
+		if round.ID == stats.Result.RoundID {
+			statsPriceFloor = round.PriceFloor
+			break
+		}
+	}
+
 	adRequestParams := event.AdRequestParams{
 		EventType:               "stats_request",
 		AdType:                  string(req.raw.AdType),
@@ -80,7 +89,7 @@ func (h *StatsHandler) sendEvents(c echo.Context, req *request[schema.StatsReque
 		LineItemUID:             0,
 		AdUnitCode:              "",
 		Ecpm:                    stats.Result.ECPM,
-		PriceFloor:              0,
+		PriceFloor:              statsPriceFloor,
 	}
 	statsRequestEvent := event.NewRequest(&req.raw.BaseRequest, adRequestParams, req.geoData)
 	h.EventLogger.Log(statsRequestEvent, func(err error) {

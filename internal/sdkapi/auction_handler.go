@@ -80,7 +80,7 @@ func (h *AuctionHandler) Handle(c echo.Context) error {
 		LineItemUID:             0,
 		AdUnitCode:              "",
 		Ecpm:                    0,
-		PriceFloor:              0,
+		PriceFloor:              req.raw.AdObject.PriceFloor,
 	}
 	aucRequestEvent := event.NewRequest(&req.raw.BaseRequest, adRequestParams, req.geoData)
 	h.EventLogger.Log(aucRequestEvent, func(err error) {
