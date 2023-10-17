@@ -40,6 +40,8 @@ func (h *AuctionHandler) Handle(c echo.Context) error {
 	}
 
 	sgmnt := h.SegmentMatcher.Match(c.Request().Context(), segmentParams)
+	req.raw.Segment.ID = sgmnt.StringID()
+	req.raw.Segment.UID = sgmnt.UID
 
 	params := &auction.BuildParams{
 		AppID:      req.app.ID,
@@ -47,8 +49,7 @@ func (h *AuctionHandler) Handle(c echo.Context) error {
 		AdFormat:   req.raw.AdObject.Format(),
 		DeviceType: req.raw.Device.Type,
 		Adapters:   req.raw.Adapters.Keys(),
-		SegmentID:  sgmnt.ID,
-		SegmentUID: sgmnt.UID,
+		Segment:    sgmnt,
 		PriceFloor: &req.raw.AdObject.PriceFloor,
 	}
 	auc, err := h.AuctionBuilder.Build(c.Request().Context(), params)
