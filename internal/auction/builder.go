@@ -3,11 +3,11 @@ package auction
 import (
 	"context"
 	"errors"
-	"strconv"
 
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/device"
+	"github.com/bidon-io/bidon-backend/internal/segment"
 )
 
 type Builder struct {
@@ -33,13 +33,12 @@ type BuildParams struct {
 	AdFormat   ad.Format
 	DeviceType device.Type
 	Adapters   []adapter.Key
-	SegmentID  int64
-	SegmentUID string
+	Segment    segment.Segment
 	PriceFloor *float64
 }
 
 func (b *Builder) Build(ctx context.Context, params *BuildParams) (*Auction, error) {
-	config, err := b.ConfigMatcher.Match(ctx, params.AppID, params.AdType, params.SegmentID)
+	config, err := b.ConfigMatcher.Match(ctx, params.AppID, params.AdType, params.Segment.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -49,20 +48,13 @@ func (b *Builder) Build(ctx context.Context, params *BuildParams) (*Auction, err
 		return nil, err
 	}
 
-	var segmentID string
-	if params.SegmentID != 0 {
-		segmentID = strconv.Itoa(int(params.SegmentID))
-	} else {
-		segmentID = ""
-	}
-
 	auction := Auction{
 		ConfigID:                 config.ID,
 		ConfigUID:                config.UID,
 		ExternalWinNotifications: config.ExternalWinNotifications,
 		Rounds:                   filterRounds(config.Rounds, params.Adapters),
 		LineItems:                lineItems,
-		Segment:                  Segment{ID: segmentID, UID: params.SegmentUID},
+		Segment:                  Segment{ID: params.Segment.StringID(), UID: params.Segment.UID},
 	}
 
 	if len(auction.Rounds) == 0 {
