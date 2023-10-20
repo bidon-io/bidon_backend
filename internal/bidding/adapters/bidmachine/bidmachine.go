@@ -126,6 +126,7 @@ func (a *BidmachineAdapter) CreateRequest(request openrtb.BidRequest, br *schema
 	imp.Ext = raw
 
 	request.Imp = []openrtb2.Imp{*imp}
+	request.Cur = []string{"USD"}
 
 	return request, nil
 }

@@ -1,7 +1,13 @@
 package vungle_test
 
 import (
+	"bytes"
+	"context"
 	"encoding/json"
+	"errors"
+	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
+	"io/ioutil"
+	"net/http"
 	"testing"
 
 	"github.com/bidon-io/bidon-backend/internal/ad"
@@ -24,8 +30,41 @@ type createRequestTestOutput struct {
 	Err     error
 }
 
+type ParseBidsTestParams struct {
+	DemandsResponse adapters.DemandResponse
+}
+
+type ParseBidsTestOutput struct {
+	DemandResponse adapters.DemandResponse
+	Err            error
+}
+
+type TestTransport func(req *http.Request) *http.Response
+
+func (f TestTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	return f(req), nil
+}
+
+func NewTestClient(tr TestTransport) *http.Client {
+	return &http.Client{
+		Transport: tr,
+	}
+}
+
 func ptr[T any](t T) *T {
 	return &t
+}
+
+func compareErrors(want, got error) bool {
+	return (want == nil) == (got == nil)
+}
+
+func buildAdapter() vungle.VungleAdapter {
+	return vungle.VungleAdapter{
+		SellerID: "1",
+		AppID:    "10182906",
+		TagID:    "10182906-10192212",
+	}
 }
 
 func buildBaseRequest() openrtb.BidRequest {
@@ -227,5 +266,178 @@ func TestVungle_CreateRequestTest(t *testing.T) {
 		})); diff != "" {
 			t.Errorf("%s: adapter.CreateRequest(ctx, %v, %v) mismatch (-want, +got):\n%s", tC.name, tC.params.BaseBidRequest, tC.params.Br, diff)
 		}
+	}
+}
+
+func TestVungleAdapter_ExecuteRequest(t *testing.T) {
+	networkAdapter := buildAdapter()
+	responseBody := []byte(`{"key": "value"`)
+
+	customClient := NewTestClient(func(req *http.Request) *http.Response {
+		if req.Method != "POST" {
+			t.Errorf("Expected POST request")
+		}
+		if req.URL.String() != "https://rtb.ads.vungle.com/bid/t/8ea3e9a" {
+			t.Errorf("Expected URL: https://rtb.ads.vungle.com/bid/t/8ea3e9a")
+		}
+		contentType := req.Header.Get("Content-Type")
+		if contentType != "application/json" {
+			t.Errorf("Expected Content-Type header: application/json")
+		}
+		openrtbHeader := req.Header.Get("X-OpenRTB-Version")
+		if openrtbHeader != "2.5" {
+			t.Errorf("Expected X-OpenRTB-Version header: 2.5")
+		}
+		return &http.Response{
+			Status:        http.StatusText(http.StatusOK),
+			StatusCode:    http.StatusOK,
+			Body:          ioutil.NopCloser(bytes.NewBuffer(responseBody)),
+			ContentLength: int64(len(responseBody)),
+		}
+	})
+	request := openrtb.BidRequest{
+		ID: "test-request-id",
+	}
+
+	response := networkAdapter.ExecuteRequest(context.Background(), customClient, request)
+
+	if response.DemandID != adapter.VungleKey {
+		t.Errorf("Expected DemandID %v, but got %v", adapter.VungleKey, response.DemandID)
+	}
+	if response.RequestID != request.ID {
+		t.Errorf("Expected RequestID %v, but got %v", request.ID, response.RequestID)
+	}
+	if response.TagID != networkAdapter.TagID {
+		t.Errorf("Expected TagID %v, but got %v", networkAdapter.TagID, response.TagID)
+	}
+	if response.Error != nil {
+		t.Errorf("Expected no error, but got an error: %v", response.Error)
+	}
+	if response.RawResponse != string(responseBody) {
+		t.Errorf("Expected client response body as RawResponse but got: %v", response.RawResponse)
+	}
+	if response.Status != http.StatusOK {
+		t.Errorf("Expected status code %d, but got %d", http.StatusOK, response.Status)
+	}
+}
+
+func TestVungle_ParseBids(t *testing.T) {
+	rawResponse := `{
+		"id": "47611e59-e05b-4e1e-9074-5a65eb4501e4",
+		"seatbid": [
+			{
+				"bid": [
+					{
+						"id": "0",
+						"impid": "6579ca7b-7e2c-48b6-8915-46efa6530fb5",
+						"price": 1.5,
+						"nurl": "https://api.gov-static.tech/Ad/AdxEvent?sid=0&sslot=10182906-10163778&adtype=4",
+						"lurl": "https://api.gov-static.tech/Ad/AdxEvent?sid=0&sslot=10182906-10163778",
+						"adm": "0692d0a0efdbd5bd470dafea742cef6a1f6b840c5c83240e165bc33a038b3d5487e25a52",
+						"adid": "Vunglead5e0471131b8a4e3c",
+						"crid": "e2d42134881d5b45134f3cf77989dec7"
+					}
+				]
+			}
+		]
+	}`
+	adapter := buildAdapter()
+
+	testCases := []struct {
+		name   string
+		params ParseBidsTestParams
+		want   ParseBidsTestOutput
+	}{
+		{
+			name: "ParseBids Success",
+			params: ParseBidsTestParams{
+				DemandsResponse: adapters.DemandResponse{
+					Status:      200,
+					RawResponse: rawResponse,
+				},
+			},
+			want: ParseBidsTestOutput{
+				DemandResponse: adapters.DemandResponse{
+					Status:      200,
+					RawResponse: rawResponse,
+					Bid: &adapters.BidDemandResponse{
+						ID:       "0",
+						ImpID:    "6579ca7b-7e2c-48b6-8915-46efa6530fb5",
+						Price:    1.5,
+						Payload:  "0692d0a0efdbd5bd470dafea742cef6a1f6b840c5c83240e165bc33a038b3d5487e25a52",
+						DemandID: "vungle",
+						AdID:     "Vunglead5e0471131b8a4e3c",
+						LURL:     "https://api.gov-static.tech/Ad/AdxEvent?sid=0&sslot=10182906-10163778",
+						NURL:     "https://api.gov-static.tech/Ad/AdxEvent?sid=0&sslot=10182906-10163778&adtype=4",
+					},
+				},
+				Err: nil,
+			},
+		},
+		{
+			name: "ParseBids Bad Request",
+			params: ParseBidsTestParams{
+				DemandsResponse: adapters.DemandResponse{
+					Status:      400,
+					RawResponse: rawResponse,
+				},
+			},
+			want: ParseBidsTestOutput{
+				DemandResponse: adapters.DemandResponse{
+					Status:      400,
+					RawResponse: rawResponse,
+				},
+				Err: errors.New("unauthorized request: 400"),
+			},
+		},
+		{
+			name: "ParseBids No Content",
+			params: ParseBidsTestParams{
+				DemandsResponse: adapters.DemandResponse{
+					Status:      204,
+					RawResponse: rawResponse,
+				},
+			},
+			want: ParseBidsTestOutput{
+				DemandResponse: adapters.DemandResponse{
+					Status:      204,
+					RawResponse: rawResponse,
+				},
+				Err: nil,
+			},
+		},
+	}
+	for _, tC := range testCases {
+		response, err := adapter.ParseBids(&tC.params.DemandsResponse)
+		got := ParseBidsTestOutput{
+			DemandResponse: *response,
+			Err:            err,
+		}
+		if diff := cmp.Diff(tC.want, got, cmp.Comparer(compareErrors)); diff != "" {
+			t.Errorf("%s: adapter.ParseBids(ctx, %v) mismatch (-want, +got):\n%s", tC.name, tC.params.DemandsResponse, diff)
+		}
+	}
+}
+
+func TestVungle_Builder(t *testing.T) {
+	client := &http.Client{}
+	bigoCfg := adapter.ProcessedConfigsMap{
+		adapter.VungleKey: map[string]any{
+			"seller_id": "1",
+			"app_id":    "10182906",
+			"tag_id":    "10182906-10192212",
+		},
+	}
+	bidder, err := vungle.Builder(bigoCfg, client)
+	wantAdapter := buildAdapter()
+	wantBidder := &adapters.Bidder{
+		Adapter: &wantAdapter,
+		Client:  client,
+	}
+	if err != nil {
+		t.Errorf("Error building adapter: %v", err)
+	}
+	if diff := cmp.Diff(wantBidder, bidder); diff != "" {
+		t.Errorf("builder(bigoCfg, client) mismatch (-want, +got):\n%s", diff)
 	}
 }
