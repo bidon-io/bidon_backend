@@ -1,7 +1,10 @@
 package mobilefuse_test
 
 import (
+	"bytes"
+	"context"
 	"errors"
+	"io/ioutil"
 	"net/http"
 	"testing"
 
@@ -35,11 +38,22 @@ type ParseBidsTestOutput struct {
 	Err            error
 }
 
+type TestTransport func(req *http.Request) *http.Response
+
+func (f TestTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	return f(req), nil
+}
+
+func NewTestClient(tr TestTransport) *http.Client {
+	return &http.Client{
+		Transport: tr,
+	}
+}
+
 func ptr[T any](t T) *T {
 	return &t
 }
 
-// compareErrors checks for error occurrence.
 func compareErrors(want, got error) bool {
 	return (want == nil) == (got == nil)
 }
@@ -250,6 +264,54 @@ func TestMobileFuse_CreateRequest(t *testing.T) {
 		if diff := cmp.Diff(tC.want, got, cmp.Comparer(compareErrors)); diff != "" {
 			t.Errorf("%s: adapter.CreateRequest(ctx, %v, %v) mismatch (-want, +got):\n%s", tC.name, tC.params.BaseBidRequest, tC.params.Br, diff)
 		}
+	}
+}
+
+func TestMobileFuseAdapter_ExecuteRequest(t *testing.T) {
+	networkAdapter := buildAdapter()
+	responseBody := []byte(`{"key": "value"`)
+
+	customClient := NewTestClient(func(req *http.Request) *http.Response {
+		if req.Method != "POST" {
+			t.Errorf("Expected POST request")
+		}
+		if req.URL.String() != "https://mfx.mobilefuse.com/openrtb?ssp=4020" {
+			t.Errorf("Expected URL: https://mfx.mobilefuse.com/openrtb?ssp=4020")
+		}
+		contentType := req.Header.Get("Content-Type")
+		if contentType != "application/json" {
+			t.Errorf("Expected Content-Type header: application/json")
+		}
+		return &http.Response{
+			Status:        http.StatusText(http.StatusOK),
+			StatusCode:    http.StatusOK,
+			Body:          ioutil.NopCloser(bytes.NewBuffer(responseBody)),
+			ContentLength: int64(len(responseBody)),
+		}
+	})
+	request := openrtb.BidRequest{
+		ID: "test-request-id",
+	}
+
+	response := networkAdapter.ExecuteRequest(context.Background(), customClient, request)
+
+	if response.DemandID != adapter.MobileFuseKey {
+		t.Errorf("Expected DemandID %v, but got %v", adapter.MobileFuseKey, response.DemandID)
+	}
+	if response.RequestID != request.ID {
+		t.Errorf("Expected RequestID %v, but got %v", request.ID, response.RequestID)
+	}
+	if response.TagID != networkAdapter.TagID {
+		t.Errorf("Expected TagID %v, but got %v", networkAdapter.TagID, response.TagID)
+	}
+	if response.Error != nil {
+		t.Errorf("Expected no error, but got an error: %v", response.Error)
+	}
+	if response.RawResponse != string(responseBody) {
+		t.Errorf("Expected client response body as RawResponse but got: %v", response.RawResponse)
+	}
+	if response.Status != http.StatusOK {
+		t.Errorf("Expected status code %d, but got %d", http.StatusOK, response.Status)
 	}
 }
 

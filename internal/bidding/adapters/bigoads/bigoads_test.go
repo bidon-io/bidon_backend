@@ -1,8 +1,11 @@
 package bigoads_test
 
 import (
+	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
+	"io/ioutil"
 	"net/http"
 	"testing"
 
@@ -36,11 +39,22 @@ type ParseBidsTestOutput struct {
 	Err            error
 }
 
+type TestTransport func(req *http.Request) *http.Response
+
+func (f TestTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	return f(req), nil
+}
+
+func NewTestClient(tr TestTransport) *http.Client {
+	return &http.Client{
+		Transport: tr,
+	}
+}
+
 func ptr[T any](t T) *T {
 	return &t
 }
 
-// compareErrors checks for error occurrence.
 func compareErrors(want, got error) bool {
 	return (want == nil) == (got == nil)
 }
@@ -247,6 +261,57 @@ func TestBigoAds_CreateRequest(t *testing.T) {
 	}
 }
 
+func TestBigoAdsAdapter_ExecuteRequest(t *testing.T) {
+	networkAdapter := buildAdapter()
+	responseBody := []byte(`{"key": "value"`)
+
+	customClient := NewTestClient(func(req *http.Request) *http.Response {
+		if req.Method != "POST" {
+			t.Errorf("Expected POST request")
+		}
+		if req.URL.String() != "https://api.gov-static.tech/Ad/GetUniAdS2s?id=200104" {
+			t.Errorf("Expected URL: https://api.gov-static.tech/Ad/GetUniAdS2s?id=200104")
+		}
+		contentType := req.Header.Get("Content-Type")
+		if contentType != "application/json" {
+			t.Errorf("Expected Content-Type header: application/json")
+		}
+		return &http.Response{
+			Status:        http.StatusText(http.StatusOK),
+			StatusCode:    http.StatusOK,
+			Body:          ioutil.NopCloser(bytes.NewBuffer(responseBody)),
+			ContentLength: int64(len(responseBody)),
+		}
+	})
+	request := openrtb.BidRequest{
+		ID: "test-request-id",
+	}
+
+	response := networkAdapter.ExecuteRequest(context.Background(), customClient, request)
+
+	if response.DemandID != adapter.BigoAdsKey {
+		t.Errorf("Expected DemandID %v, but got %v", adapter.BigoAdsKey, response.DemandID)
+	}
+	if response.RequestID != request.ID {
+		t.Errorf("Expected RequestID %v, but got %v", request.ID, response.RequestID)
+	}
+	if response.TagID != networkAdapter.TagID {
+		t.Errorf("Expected TagID %v, but got %v", networkAdapter.TagID, response.TagID)
+	}
+	if response.PlacementID != networkAdapter.PlacementID {
+		t.Errorf("Expected PlacementID %v, but got %v", networkAdapter.PlacementID, response.PlacementID)
+	}
+	if response.Error != nil {
+		t.Errorf("Expected no error, but got an error: %v", response.Error)
+	}
+	if response.RawResponse != string(responseBody) {
+		t.Errorf("Expected client response body as RawResponse but got: %v", response.RawResponse)
+	}
+	if response.Status != http.StatusOK {
+		t.Errorf("Expected status code %d, but got %d", http.StatusOK, response.Status)
+	}
+}
+
 func TestBigoAds_ParseBids(t *testing.T) {
 	rawResponse := `{
 		"id": "47611e59-e05b-4e1e-9074-5a65eb4501e4",
@@ -317,7 +382,7 @@ func TestBigoAds_ParseBids(t *testing.T) {
 			},
 		},
 		{
-			name: "ParseBids No Conten",
+			name: "ParseBids No Content",
 			params: ParseBidsTestParams{
 				DemandsResponse: adapters.DemandResponse{
 					Status:      204,
