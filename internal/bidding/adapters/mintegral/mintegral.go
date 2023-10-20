@@ -159,7 +159,6 @@ func (a *MintegralAdapter) ExecuteRequest(ctx context.Context, client *http.Clie
 		return dr
 	}
 	httpReq.Header.Add("Content-Type", "application/json")
-	// It's important to set openrtb header to 2.5
 	httpReq.Header.Add("openrtb", "2.5")
 
 	httpResp, err := client.Do(httpReq)

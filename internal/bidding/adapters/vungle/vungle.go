@@ -154,7 +154,6 @@ func (a *VungleAdapter) ExecuteRequest(ctx context.Context, client *http.Client,
 		return dr
 	}
 	httpReq.Header.Add("Content-Type", "application/json")
-	// It's important to set  X-OpenRTB-Version header to 2.5
 	httpReq.Header.Add("X-OpenRTB-Version", "2.5")
 
 	httpResp, err := client.Do(httpReq)
