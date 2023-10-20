@@ -115,3 +115,79 @@ func TestAdapter_FetchBids(t *testing.T) {
 		}
 	}
 }
+
+func TestBuilder(t *testing.T) {
+	tests := []struct {
+		name        string
+		config      adapter.ProcessedConfigsMap
+		expected    *Adapter
+		expectError bool
+	}{
+		{
+			name: "Valid Configuration",
+			config: adapter.ProcessedConfigsMap{
+				adapter.AmazonKey: map[string]interface{}{
+					"price_points_map": map[string]interface{}{
+						"00n9g200_zzz": map[string]interface{}{
+							"name":        "Interstitial",
+							"price":       0.5,
+							"price_point": "00n9g200_zzz",
+						},
+						"02bz0000_xxx": map[string]interface{}{
+							"name":        "banner",
+							"price":       0.7,
+							"price_point": "02bz0000_xxx",
+						},
+					},
+				},
+			},
+			expected: &Adapter{
+				PricePointsMap: PricePointsMap{
+					"00n9g200_zzz": {
+						Price:      0.5,
+						PricePoint: "00n9g200_zzz",
+					},
+					"02bz0000_xxx": {
+						Price:      0.7,
+						PricePoint: "02bz0000_xxx",
+					},
+				},
+			},
+			expectError: false,
+		},
+		{
+			name: "Invalid Configuration",
+			config: adapter.ProcessedConfigsMap{
+				adapter.AmazonKey: map[string]interface{}{
+					"price_points_map": "invalid", // Invalid value, should be a map.
+				},
+			},
+			expected:    nil,
+			expectError: true,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			adpt, err := Builder(test.config)
+
+			if test.expectError {
+				if err == nil {
+					t.Fatal("Expected an error, but got no error")
+				}
+			} else {
+				if err != nil {
+					t.Fatalf("Expected no error, but got an error: %v", err)
+				}
+
+				if adpt == nil {
+					t.Fatal("Expected non-nil Adapter, but got nil")
+				}
+
+				if diff := cmp.Diff(test.expected.PricePointsMap, adpt.PricePointsMap); diff != "" {
+					t.Fatalf("PricePointsMap mismatch. Got %v, expected %v", adpt.PricePointsMap, test.expected.PricePointsMap)
+				}
+			}
+		})
+	}
+}
