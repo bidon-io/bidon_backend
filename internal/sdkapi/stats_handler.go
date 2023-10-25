@@ -67,9 +67,11 @@ func (h *StatsHandler) sendEvents(c echo.Context, req *request[schema.StatsReque
 
 	// find round by ID
 	statsPriceFloor := 0.0
-	for _, round := range stats.Rounds {
+	statsRoundNumber := 0
+	for idx, round := range stats.Rounds {
 		if round.ID == stats.Result.RoundID {
 			statsPriceFloor = round.PriceFloor
+			statsRoundNumber = idx
 			break
 		}
 	}
@@ -82,7 +84,7 @@ func (h *StatsHandler) sendEvents(c echo.Context, req *request[schema.StatsReque
 		AuctionConfigurationUID: int64(auctionConfigurationUID),
 		Status:                  stats.Result.Status,
 		RoundID:                 stats.Result.RoundID,
-		RoundNumber:             0,
+		RoundNumber:             statsRoundNumber,
 		ImpID:                   "",
 		DemandID:                stats.Result.WinnerID,
 		AdUnitID:                0,
