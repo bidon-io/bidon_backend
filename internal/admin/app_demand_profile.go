@@ -1,5 +1,7 @@
 package admin
 
+//go:generate go run -mod=mod github.com/matryer/moq@latest -out app_demand_profile_mocks_test.go . AppDemandProfileRepo
+
 import (
 	"context"
 
