@@ -215,8 +215,13 @@ func (a *MobileFuseAdapter) ParseBids(dr *adapters.DemandResponse) (*adapters.De
 func Builder(cfg adapter.ProcessedConfigsMap, client *http.Client) (*adapters.Bidder, error) {
 	mobileFuseCfg := cfg[adapter.MobileFuseKey]
 
+	tagID, ok := mobileFuseCfg["tag_id"].(string)
+	if !ok {
+		tagID = ""
+	}
+
 	adpt := &MobileFuseAdapter{
-		TagID: mobileFuseCfg["tag_id"].(string),
+		TagID: tagID,
 	}
 
 	bidder := &adapters.Bidder{

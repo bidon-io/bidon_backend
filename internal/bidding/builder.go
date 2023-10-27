@@ -155,6 +155,7 @@ func (b *Builder) HoldAuction(ctx context.Context, params *BuildParams) (Auction
 			handleError(adapterKey, err)
 			continue
 		}
+
 		bidRequest, err := bidder.Adapter.CreateRequest(baseBidRequest, &br)
 		if err != nil {
 			handleError(adapterKey, err)
