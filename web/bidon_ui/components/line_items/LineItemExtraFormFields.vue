@@ -6,10 +6,10 @@
     <VeeFormFieldWrapper field="extra.zoneId" label="Zone Id" required />
   </template>
   <template v-if="apiKey === 'amazon'">
-    <VeeFormFieldWrapper field="extra.slotUuid" label="Slot Uuid" required />
-  </template>
-  <template v-if="apiKey === 'amazon' && adType === 'interstitial'">
-    <VeeFormFieldWrapper field="extra.isVideo" label="Is Video" type="bool" />
+    <LineItemsAmazonExtraFields
+      :ad-type-with-format="adTypeWithFormat"
+      required
+    />
   </template>
   <template v-if="apiKey === 'bidmachine'">
     <VeeFormFieldWrapper field="extra.adUnitId" label="Ad Unit Id" required />
@@ -83,6 +83,10 @@ const props = defineProps({
   },
   adType: {
     type: String,
+    required: true,
+  },
+  adTypeWithFormat: {
+    type: Object,
     required: true,
   },
 });

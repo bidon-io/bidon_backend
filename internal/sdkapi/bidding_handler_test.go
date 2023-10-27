@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/bidon-io/bidon-backend/internal/adapter/store"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -99,9 +100,28 @@ func testHelperBiddingHandler(t *testing.T) sdkapi.BiddingHandler {
 			MaxIdleConnsPerHost: 50,
 		},
 	}
+	adUnitsMap := &store.AdUnitsMap{
+		adapter.MetaKey: []auction.AdUnit{
+			{
+				DemandID:   "meta",
+				Label:      "meta",
+				PriceFloor: 0.1,
+				UID:        "123_meta",
+				Extra: map[string]any{
+					"placement_id": "123",
+				},
+			},
+		},
+	}
+
+	adUnitsMapBuilder := &sdkapimocks.AdUnitsMapBuilderMock{
+		BuildFunc: func(ctx context.Context, appID int64, adapterKeys []adapter.Key, imp schema.Imp) (store.AdUnitsMap, error) {
+			return *adUnitsMap, nil
+		},
+	}
 
 	adapterConfigBuilder := &sdkapimocks.AdaptersConfigBuilderMock{
-		BuildFunc: func(ctx context.Context, appID int64, adapterKeys []adapter.Key, imp schema.Imp) (adapter.ProcessedConfigsMap, error) {
+		BuildFunc: func(ctx context.Context, appID int64, adapterKeys []adapter.Key, imp schema.Imp, adUnitsMap *store.AdUnitsMap) (adapter.ProcessedConfigsMap, error) {
 			return adapter.ProcessedConfigsMap{
 				adapter.ApplovinKey: map[string]any{
 					"app_key": "123",
@@ -142,6 +162,7 @@ func testHelperBiddingHandler(t *testing.T) sdkapi.BiddingHandler {
 			NotificationHandler: notificationMock,
 		},
 		AdaptersConfigBuilder: adapterConfigBuilder,
+		AdUnitsMapBuilder:     adUnitsMapBuilder,
 		EventLogger:           &event.Logger{Engine: &engine.Log{}},
 	}
 	return handler
@@ -163,6 +184,7 @@ func TestBiddingHandler_OK(t *testing.T) {
 	// Create a new HTTP request
 	req := httptest.NewRequest(http.MethodPost, "/bidding/interstitial", strings.NewReader(string(requestJson[:])))
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("X-Bidon-Version", "0.4.0")
 
 	// Create a new HTTP response recorder
 	rec := httptest.NewRecorder()

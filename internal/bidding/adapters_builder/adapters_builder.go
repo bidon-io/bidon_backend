@@ -3,9 +3,9 @@ package adapters_builder
 import (
 	"context"
 	"fmt"
+	"github.com/bidon-io/bidon-backend/internal/adapter/store"
 	"net/http"
 
-	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 
 	"github.com/bidon-io/bidon-backend/internal/adapter"
@@ -51,20 +51,15 @@ func BuildBiddingAdapters(client *http.Client) AdaptersBuilder {
 	}
 }
 
-//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/mocks.go -pkg mocks . ConfigurationFetcher LineItemsMatcher
+//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/mocks.go -pkg mocks . ConfigurationFetcher
 
 type ConfigurationFetcher interface {
 	// Fetch is used get one profile per adapter key, if present
 	Fetch(ctx context.Context, appID int64, adapterKeys []adapter.Key) (adapter.RawConfigsMap, error)
 }
 
-type LineItemsMatcher interface {
-	Match(ctx context.Context, params *auction.BuildParams) ([]auction.LineItem, error)
-}
-
 type AdaptersConfigBuilder struct {
 	ConfigurationFetcher ConfigurationFetcher
-	LineItemsMatcher     LineItemsMatcher
 }
 
 func NewAdapters(keys []adapter.Key) adapter.ProcessedConfigsMap {
@@ -76,12 +71,12 @@ func NewAdapters(keys []adapter.Key) adapter.ProcessedConfigsMap {
 	return adapters
 }
 
-func (b *AdaptersConfigBuilder) Build(ctx context.Context, appID int64, adapterKeys []adapter.Key, imp schema.Imp) (adapter.ProcessedConfigsMap, error) {
+func (b *AdaptersConfigBuilder) Build(ctx context.Context, appID int64, adapterKeys []adapter.Key, imp schema.Imp, adUnitsMap *store.AdUnitsMap) (adapter.ProcessedConfigsMap, error) {
 	profiles, err := b.ConfigurationFetcher.Fetch(ctx, appID, adapterKeys)
 	if err != nil {
 		return nil, err
 	}
-	lineItemsMap, err := b.buildLineItemsMap(ctx, appID, adapterKeys, imp)
+
 	if err != nil {
 		return nil, err
 	}
@@ -103,9 +98,9 @@ func (b *AdaptersConfigBuilder) Build(ctx context.Context, appID int64, adapterK
 			adapters[key]["tag_id"] = ""
 			adapters[key]["placement_id"] = ""
 
-			if lineItem, ok := lineItemsMap[key]; ok {
-				adapters[key]["tag_id"] = lineItem.AdUnitID
-				adapters[key]["placement_id"] = lineItem.AdUnitID
+			if adUnits, ok := (*adUnitsMap)[key]; ok {
+				adapters[key]["tag_id"] = adUnits[0].Extra["slot_id"]
+				adapters[key]["placement_id"] = adUnits[0].Extra["placement_id"]
 			}
 		case adapter.MintegralKey:
 			adapters[key]["app_id"] = appData["app_id"]
@@ -113,31 +108,31 @@ func (b *AdaptersConfigBuilder) Build(ctx context.Context, appID int64, adapterK
 			adapters[key]["tag_id"] = ""
 			adapters[key]["placement_id"] = ""
 
-			if lineItem, ok := lineItemsMap[key]; ok {
-				adapters[key]["tag_id"] = lineItem.AdUnitID
-				adapters[key]["placement_id"] = lineItem.PlacementID
+			if adUnits, ok := (*adUnitsMap)[key]; ok {
+				adapters[key]["tag_id"] = adUnits[0].Extra["ad_unit_id"]
+				adapters[key]["placement_id"] = adUnits[0].Extra["placement_id"]
 			}
 		case adapter.VungleKey:
 			adapters[key]["app_id"] = appData["app_id"]
 			adapters[key]["seller_id"] = extra["account_id"]
 			adapters[key]["tag_id"] = ""
 
-			if lineItem, ok := lineItemsMap[key]; ok {
-				adapters[key]["tag_id"] = lineItem.AdUnitID
+			if adUnits, ok := (*adUnitsMap)[key]; ok {
+				adapters[key]["tag_id"] = adUnits[0].Extra["placement_id"]
 			}
 		case adapter.MetaKey:
 			adapters[key]["app_id"] = appData["app_id"]
 			adapters[key]["app_secret"] = appData["app_secret"]
 			adapters[key]["tag_id"] = ""
 
-			if lineItem, ok := lineItemsMap[key]; ok {
-				adapters[key]["tag_id"] = lineItem.AdUnitID
+			if adUnits, ok := (*adUnitsMap)[key]; ok {
+				adapters[key]["tag_id"] = adUnits[0].Extra["placement_id"]
 			}
 		case adapter.MobileFuseKey:
 			adapters[key]["tag_id"] = ""
 
-			if lineItem, ok := lineItemsMap[key]; ok {
-				adapters[key]["tag_id"] = lineItem.AdUnitID
+			if adUnits, ok := (*adUnitsMap)[key]; ok {
+				adapters[key]["tag_id"] = adUnits[0].Extra["placement_id"]
 			}
 		default:
 			adapters[key] = extra
@@ -145,26 +140,4 @@ func (b *AdaptersConfigBuilder) Build(ctx context.Context, appID int64, adapterK
 	}
 
 	return adapters, nil
-}
-
-func (b *AdaptersConfigBuilder) buildLineItemsMap(ctx context.Context, appID int64, adapterKeys []adapter.Key, imp schema.Imp) (map[adapter.Key]auction.LineItem, error) {
-	lineItems, err := b.LineItemsMatcher.Match(ctx, &auction.BuildParams{
-		Adapters: adapterKeys,
-		AppID:    appID,
-		AdType:   imp.Type(),
-		AdFormat: imp.Format(),
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	// adapter key to lineItem map
-	lineItemsMap := make(map[adapter.Key]auction.LineItem)
-	for _, item := range lineItems {
-		if _, exists := lineItemsMap[adapter.Key(item.ID)]; !exists {
-			lineItemsMap[adapter.Key(item.ID)] = item
-		}
-	}
-
-	return lineItemsMap, nil
 }
