@@ -3,8 +3,6 @@ package sdkapi
 import (
 	"context"
 	"fmt"
-	"github.com/bidon-io/bidon-backend/internal/adapter/store"
-	"github.com/bidon-io/bidon-backend/internal/auction"
 	"net/http"
 	"sort"
 	"strconv"
@@ -23,19 +21,14 @@ type BiddingHandler struct {
 	*BaseHandler[schema.BiddingRequest, *schema.BiddingRequest]
 	BiddingBuilder        *bidding.Builder
 	SegmentMatcher        *segment.Matcher
-	AdUnitsMapBuilder     AdUnitsMapBuilder
 	AdaptersConfigBuilder AdaptersConfigBuilder
 	EventLogger           *event.Logger
 }
 
-//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/bidding_mocks.go -pkg mocks . AdaptersConfigBuilder AdUnitsMapBuilder
+//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/bidding_mocks.go -pkg mocks . AdaptersConfigBuilder
 
 type AdaptersConfigBuilder interface {
-	Build(ctx context.Context, appID int64, adapterKeys []adapter.Key, imp schema.Imp, adUnitsMap *store.AdUnitsMap) (adapter.ProcessedConfigsMap, error)
-}
-
-type AdUnitsMapBuilder interface {
-	Build(ctx context.Context, appID int64, adapterKeys []adapter.Key, imp schema.Imp) (store.AdUnitsMap, error)
+	Build(ctx context.Context, appID int64, adapterKeys []adapter.Key, imp schema.Imp) (adapter.ProcessedConfigsMap, error)
 }
 
 type BiddingResponse struct {
@@ -47,8 +40,7 @@ type Bid struct {
 	ID      string                 `json:"id"`
 	ImpID   string                 `json:"impid"`
 	Price   float64                `json:"price"`
-	Demands map[adapter.Key]Demand `json:"demands,omitempty"` // Deprecated: uses AdUnit instead of Demands since SDK 0.5
-	AdUnit  AdUnit                 `json:"ad_unit,omitempty"`
+	Demands map[adapter.Key]Demand `json:"demands"`
 	Ext     map[string]interface{} `json:"ext,omitempty"` // TODO: remove interface{} with concrete type
 }
 
@@ -59,13 +51,6 @@ type Demand struct {
 	SlotID      string `json:"slot_id,omitempty"`
 	SlotUUID    string `json:"slot_uuid,omitempty"`
 	PlacementID string `json:"placement_id,omitempty"`
-}
-
-type AdUnit struct {
-	DemandID adapter.Key    `json:"demand_id"`
-	UID      string         `json:"uid"`
-	Label    string         `json:"label"`
-	Extra    map[string]any `json:"ext"`
 }
 
 func (h *BiddingHandler) Handle(c echo.Context) error {
@@ -86,8 +71,7 @@ func (h *BiddingHandler) Handle(c echo.Context) error {
 	}
 
 	imp := req.raw.Imp
-	adUnitsMap, err := h.AdUnitsMapBuilder.Build(ctx, req.app.ID, req.raw.Adapters.Keys(), imp)
-	adapterConfigs, err := h.AdaptersConfigBuilder.Build(ctx, req.app.ID, req.raw.Adapters.Keys(), imp, &adUnitsMap)
+	adapterConfigs, err := h.AdaptersConfigBuilder.Build(ctx, req.app.ID, req.raw.Adapters.Keys(), imp)
 	if err != nil {
 		return err
 	}
@@ -110,48 +94,6 @@ func (h *BiddingHandler) Handle(c echo.Context) error {
 		Status: "NO_BID",
 	}
 
-	sdkVersion, err := req.raw.GetSDKVersionSemver()
-	if err != nil {
-		return ErrInvalidSDKVersion
-	}
-
-	if Version05GTEConstraint.Check(sdkVersion) {
-		h.buildBids(auctionResult, imp, &adUnitsMap, &response)
-	} else {
-		h.buildBidsDeprecated(auctionResult, imp, &response)
-	}
-	// Sort bids by price descending
-	sort.Slice(response.Bids, func(i, j int) bool {
-		return response.Bids[i].Price > response.Bids[j].Price
-	})
-
-	return c.JSON(http.StatusOK, response)
-}
-
-func (h *BiddingHandler) buildBids(auctionResult bidding.AuctionResult, imp schema.Imp, adUnitsMap *store.AdUnitsMap, response *BiddingResponse) {
-	for _, result := range auctionResult.Bids {
-		if result.IsBid() && result.Bid.Price >= imp.GetBidFloor() {
-
-			adUnit, err := selectAdUnit(result, adUnitsMap)
-			if err != nil {
-				continue
-			}
-			response.Bids = append(response.Bids, Bid{
-				ID:     result.Bid.ID,
-				ImpID:  result.Bid.ImpID,
-				Price:  result.Bid.Price,
-				AdUnit: *adUnit,
-				Ext: map[string]any{
-					"payload": result.Bid.Payload,
-				},
-			})
-			response.Status = "SUCCESS"
-		}
-	}
-}
-
-// Deprecated: uses AdUnit instead of Demands since SDK 0.5
-func (h *BiddingHandler) buildBidsDeprecated(auctionResult bidding.AuctionResult, imp schema.Imp, response *BiddingResponse) {
 	for _, result := range auctionResult.Bids {
 		if result.IsBid() && result.Bid.Price >= imp.GetBidFloor() {
 			response.Bids = append(response.Bids, Bid{
@@ -165,6 +107,12 @@ func (h *BiddingHandler) buildBidsDeprecated(auctionResult bidding.AuctionResult
 			response.Status = "SUCCESS"
 		}
 	}
+	// Sort bids by price descending
+	sort.Slice(response.Bids, func(i, j int) bool {
+		return response.Bids[i].Price > response.Bids[j].Price
+	})
+
+	return c.JSON(http.StatusOK, response)
 }
 
 func (h *BiddingHandler) sendEvents(c echo.Context, req *request[schema.BiddingRequest, *schema.BiddingRequest], auctionResult *bidding.AuctionResult) {
@@ -188,7 +136,6 @@ func (h *BiddingHandler) sendEvents(c echo.Context, req *request[schema.BiddingR
 			DemandID:                string(result.DemandID),
 			AdUnitID:                0,
 			LineItemUID:             0,
-			LineItemLabel:           "",
 			AdUnitCode:              "",
 			Ecpm:                    0,
 			PriceFloor:              imp.GetBidFloor(),
@@ -214,7 +161,6 @@ func (h *BiddingHandler) sendEvents(c echo.Context, req *request[schema.BiddingR
 				DemandID:                string(result.DemandID),
 				AdUnitID:                0,
 				LineItemUID:             0,
-				LineItemLabel:           "",
 				AdUnitCode:              result.TagID,
 				Ecpm:                    result.Bid.Price,
 				PriceFloor:              imp.GetBidFloor(),
@@ -228,39 +174,6 @@ func (h *BiddingHandler) sendEvents(c echo.Context, req *request[schema.BiddingR
 	}
 }
 
-func selectAdUnit(demandResponse adapters.DemandResponse, adUnitsMap *store.AdUnitsMap) (*AdUnit, error) {
-	adUnits, ok := (*adUnitsMap)[demandResponse.DemandID]
-	if !ok {
-		return nil, fmt.Errorf("ad units not found for demand %s", demandResponse.DemandID)
-	}
-	if demandResponse.DemandID == adapter.AmazonKey {
-		return selectAmazonAdUnit(demandResponse.SlotUUID, adUnits)
-	}
-
-	adUnit := adUnits[0]
-	return &AdUnit{
-		DemandID: demandResponse.DemandID,
-		UID:      adUnit.UID,
-		Label:    adUnit.Label,
-		Extra:    adUnit.Extra,
-	}, nil
-}
-
-func selectAmazonAdUnit(slotUUID string, adUnits []auction.AdUnit) (*AdUnit, error) {
-	for _, adUnit := range adUnits {
-		if slotUUID == adUnit.Extra["slot_uuid"] {
-			return &AdUnit{
-				UID:   adUnit.UID,
-				Label: adUnit.Label,
-				Extra: adUnit.Extra,
-			}, nil
-		}
-	}
-
-	return nil, fmt.Errorf("ad unit not found for slot_uuid %s", slotUUID)
-}
-
-// Deprecated: uses AdUnit instead of Demands since SDK 0.5
 func buildDemandInfo(demandResponse adapters.DemandResponse) Demand {
 	switch demandResponse.DemandID {
 	case adapter.AmazonKey:

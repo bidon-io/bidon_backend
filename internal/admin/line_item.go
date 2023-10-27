@@ -338,11 +338,6 @@ func (v *lineItemAttrsValidator) extraRule(account *DemandSourceAccount) v8n.Rul
 		rule = v8n.Map(
 			v8n.Key("ad_unit_id", v8n.Required, isString),
 		)
-	case adapter.AmazonKey:
-		rule = v8n.Map(
-			v8n.Key("slot_uuid", v8n.Required, isString),
-			v8n.Key("format", v8n.Required, isString, v8n.In("BANNER", "MREC", "INTERSTITIAL", "VIDEO", "REWARDED")),
-		)
 	case adapter.ApplovinKey:
 		rule = v8n.Map(
 			v8n.Key("zone_id", v8n.Required, isString),
