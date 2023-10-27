@@ -78,7 +78,7 @@ func (h *ConfigHandler) Handle(c echo.Context) error {
 
 	resp := &ConfigResponse{
 		Init: ConfigResponseInit{
-			TMax:     5000,
+			TMax:     10000,
 			Adapters: adapters,
 		},
 		Placements: []any{},
