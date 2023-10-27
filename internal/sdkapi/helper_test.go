@@ -16,11 +16,6 @@ type Handler interface {
 	Handle(c echo.Context) error
 }
 
-type RequestOptions struct {
-	Headers map[string]string
-	Params  map[string]string
-}
-
 func GeocoderMock() *mocks.GeocoderMock {
 	geodata := geocoder.GeoData{CountryCode: "US"}
 	return &mocks.GeocoderMock{
@@ -39,7 +34,7 @@ func AppFetcherMock() *mocks.AppFetcherMock {
 	}
 }
 
-func ExecuteRequest(t *testing.T, handler Handler, method, path, body string, options *RequestOptions) (*httptest.ResponseRecorder, error) {
+func ExecuteRequest(t *testing.T, handler Handler, method, path, body string, params map[string]string) (*httptest.ResponseRecorder, error) {
 	t.Helper()
 
 	req := httptest.NewRequest(method, path, strings.NewReader(body))
@@ -49,16 +44,10 @@ func ExecuteRequest(t *testing.T, handler Handler, method, path, body string, op
 	e := config.Echo()
 	c := e.NewContext(req, rec)
 
-	if options != nil {
-		// Set headers in Echo context If any.
-		for k, v := range options.Headers {
-			c.Request().Header.Set(k, v)
-		}
-		// Set path parameters in Echo context If any.
-		for k, v := range options.Params {
-			c.SetParamNames(k)
-			c.SetParamValues(v)
-		}
+	// Set path parameters in Echo context If any.
+	for k, v := range params {
+		c.SetParamNames(k)
+		c.SetParamValues(v)
 	}
 
 	err := handler.Handle(c)

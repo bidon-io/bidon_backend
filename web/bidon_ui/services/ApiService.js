@@ -29,7 +29,6 @@ api.interceptors.response.use(
       useAuthStore().setUnauthorized();
       return navigateTo("/login");
     }
-    throw error;
   },
 );
 

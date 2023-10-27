@@ -15,10 +15,9 @@ import (
 
 type AuctionHandler struct {
 	*BaseHandler[schema.AuctionRequest, *schema.AuctionRequest]
-	AuctionBuilder   *auction.Builder
-	AuctionBuilderV2 *auction.BuilderV2
-	SegmentMatcher   *segment.Matcher
-	EventLogger      *event.Logger
+	AuctionBuilder *auction.Builder
+	SegmentMatcher *segment.Matcher
+	EventLogger    *event.Logger
 }
 
 type AuctionResponse struct {
@@ -53,19 +52,7 @@ func (h *AuctionHandler) Handle(c echo.Context) error {
 		Segment:    sgmnt,
 		PriceFloor: &req.raw.AdObject.PriceFloor,
 	}
-
-	sdkVersion, err := req.raw.GetSDKVersionSemver()
-	if err != nil {
-		return ErrInvalidSDKVersion
-	}
-
-	var auc *auction.Auction
-	if Version05GTEConstraint.Check(sdkVersion) {
-		auc, err = h.AuctionBuilderV2.Build(c.Request().Context(), params)
-	} else {
-		auc, err = h.AuctionBuilder.Build(c.Request().Context(), params)
-	}
-
+	auc, err := h.AuctionBuilder.Build(c.Request().Context(), params)
 	if err != nil {
 		if errors.Is(err, auction.ErrNoAdsFound) {
 			err = ErrNoAdsFound
@@ -91,7 +78,6 @@ func (h *AuctionHandler) Handle(c echo.Context) error {
 		DemandID:                "",
 		AdUnitID:                0,
 		LineItemUID:             0,
-		LineItemLabel:           "",
 		AdUnitCode:              "",
 		Ecpm:                    0,
 		PriceFloor:              req.raw.AdObject.PriceFloor,

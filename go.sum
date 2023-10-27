@@ -1,5 +1,3 @@
-github.com/Masterminds/semver/v3 v3.2.1 h1:RN9w6+7QoMeJVGyfmbcgs28Br8cvmnucEXnY0rYXWg0=
-github.com/Masterminds/semver/v3 v3.2.1/go.mod h1:qvl/7zhW3nngYb5+80sSMF+FG2BjYrf8m9wsX0PNOMQ=
 github.com/alexedwards/scs/goredisstore v0.0.0-20230902070821-95fa2ac9d520 h1:s5Z32lo4Tv5zRf7dUtwlL7Ow0C1Md7LgFy+aCqozOjI=
 github.com/alexedwards/scs/goredisstore v0.0.0-20230902070821-95fa2ac9d520/go.mod h1:ovMqA1cbRPYuGLSeyFGmD8HbbfzN5hXG4WahAmkf/5A=
 github.com/alexedwards/scs/v2 v2.4.0/go.mod h1:ToaROZxyKukJKT/xLcVQAChi5k6+Pn1Gvmdl7h3RRj8=

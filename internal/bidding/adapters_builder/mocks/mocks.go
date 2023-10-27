@@ -6,6 +6,7 @@ package mocks
 import (
 	"context"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
+	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters_builder"
 	"sync"
 )
@@ -85,5 +86,77 @@ func (mock *ConfigurationFetcherMock) FetchCalls() []struct {
 	mock.lockFetch.RLock()
 	calls = mock.calls.Fetch
 	mock.lockFetch.RUnlock()
+	return calls
+}
+
+// Ensure, that LineItemsMatcherMock does implement adapters_builder.LineItemsMatcher.
+// If this is not the case, regenerate this file with moq.
+var _ adapters_builder.LineItemsMatcher = &LineItemsMatcherMock{}
+
+// LineItemsMatcherMock is a mock implementation of adapters_builder.LineItemsMatcher.
+//
+//	func TestSomethingThatUsesLineItemsMatcher(t *testing.T) {
+//
+//		// make and configure a mocked adapters_builder.LineItemsMatcher
+//		mockedLineItemsMatcher := &LineItemsMatcherMock{
+//			MatchFunc: func(ctx context.Context, params *auction.BuildParams) ([]auction.LineItem, error) {
+//				panic("mock out the Match method")
+//			},
+//		}
+//
+//		// use mockedLineItemsMatcher in code that requires adapters_builder.LineItemsMatcher
+//		// and then make assertions.
+//
+//	}
+type LineItemsMatcherMock struct {
+	// MatchFunc mocks the Match method.
+	MatchFunc func(ctx context.Context, params *auction.BuildParams) ([]auction.LineItem, error)
+
+	// calls tracks calls to the methods.
+	calls struct {
+		// Match holds details about calls to the Match method.
+		Match []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Params is the params argument value.
+			Params *auction.BuildParams
+		}
+	}
+	lockMatch sync.RWMutex
+}
+
+// Match calls MatchFunc.
+func (mock *LineItemsMatcherMock) Match(ctx context.Context, params *auction.BuildParams) ([]auction.LineItem, error) {
+	if mock.MatchFunc == nil {
+		panic("LineItemsMatcherMock.MatchFunc: method is nil but LineItemsMatcher.Match was just called")
+	}
+	callInfo := struct {
+		Ctx    context.Context
+		Params *auction.BuildParams
+	}{
+		Ctx:    ctx,
+		Params: params,
+	}
+	mock.lockMatch.Lock()
+	mock.calls.Match = append(mock.calls.Match, callInfo)
+	mock.lockMatch.Unlock()
+	return mock.MatchFunc(ctx, params)
+}
+
+// MatchCalls gets all the calls that were made to Match.
+// Check the length with:
+//
+//	len(mockedLineItemsMatcher.MatchCalls())
+func (mock *LineItemsMatcherMock) MatchCalls() []struct {
+	Ctx    context.Context
+	Params *auction.BuildParams
+} {
+	var calls []struct {
+		Ctx    context.Context
+		Params *auction.BuildParams
+	}
+	mock.lockMatch.RLock()
+	calls = mock.calls.Match
+	mock.lockMatch.RUnlock()
 	return calls
 }
