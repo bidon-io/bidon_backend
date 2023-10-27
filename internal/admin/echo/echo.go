@@ -201,6 +201,9 @@ func RegisterAdminService(g *echo.Group, service *admin.Service) {
 		r.group.PATCH("/:id", r.handler.update)
 		r.group.DELETE("/:id", r.handler.delete)
 	}
+
+	lineItemImportHandler := &lineItemImportHandler{service.LineItemService}
+	g.POST("/line_items/import", lineItemImportHandler.handleImport)
 }
 
 type resourceRoute struct {
@@ -432,4 +435,43 @@ func (h *userHandler) get(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, resource)
+}
+
+type lineItemImportHandler struct {
+	service *admin.LineItemService
+}
+
+func (h *lineItemImportHandler) handleImport(c echo.Context) error {
+	authCtx, err := getAuthContext(c)
+	if err != nil {
+		return err
+	}
+
+	attrs := admin.LineItemImportCSVAttrs{}
+	if err := c.Bind(&attrs); err != nil {
+		return err
+	}
+
+	fileHeader, err := c.FormFile("csv")
+	if err != nil {
+		return err
+	}
+
+	file, err := fileHeader.Open()
+	if err != nil {
+		return fmt.Errorf("open csv file: %v", err)
+	}
+	defer func() {
+		err := file.Close()
+		if err != nil {
+			c.Logger().Errorf("close csv file: %v", err)
+		}
+	}()
+
+	err = h.service.ImportCSV(c.Request().Context(), authCtx, file, attrs)
+	if err != nil {
+		return fmt.Errorf("import csv: %v", err)
+	}
+
+	return c.NoContent(http.StatusNoContent)
 }
