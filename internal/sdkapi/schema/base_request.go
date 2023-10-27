@@ -1,6 +1,9 @@
 package schema
 
-import "strings"
+import (
+	"github.com/Masterminds/semver/v3"
+	"strings"
+)
 
 type BaseRequest struct {
 	Device      Device       `json:"device" validate:"required"`
@@ -66,4 +69,8 @@ func (r *BaseRequest) NormalizeValues() {
 
 func (r *BaseRequest) SetSDKVersion(version string) {
 	r.App.SDKVersion = version
+}
+
+func (r *BaseRequest) GetSDKVersionSemver() (*semver.Version, error) {
+	return semver.NewVersion(r.App.SDKVersion)
 }

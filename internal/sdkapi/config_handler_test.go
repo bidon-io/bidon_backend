@@ -3,6 +3,7 @@ package sdkapi_test
 import (
 	"context"
 	"fmt"
+	"github.com/Masterminds/semver/v3"
 	"net/http"
 	"os"
 	"testing"
@@ -36,7 +37,7 @@ func SetupConfigHandler() sdkapi.ConfigHandler {
 		Fetcher: segmentFetcher,
 	}
 	adapterInitConfigsFetcher := &mocks.AdapterInitConfigsFetcherMock{
-		FetchAdapterInitConfigsFunc: func(ctx context.Context, appID int64, adapterKeys []adapter.Key) ([]sdkapi.AdapterInitConfig, error) {
+		FetchAdapterInitConfigsFunc: func(ctx context.Context, appID int64, adapterKeys []adapter.Key, sdkVersion *semver.Version) ([]sdkapi.AdapterInitConfig, error) {
 			return []sdkapi.AdapterInitConfig{
 				&sdkapi.AdmobInitConfig{
 					AppID: fmt.Sprintf("admob_app_%d", app.ID),
@@ -79,18 +80,34 @@ func SetupConfigHandler() sdkapi.ConfigHandler {
 func TestConfigHandler_Handle(t *testing.T) {
 	tests := []struct {
 		name         string
+		sdkVersion   string
 		requestPath  string
 		expectedCode int
 		wantErr      bool
 	}{
 		{
 			name:         "valid request",
+			sdkVersion:   "0.4.0",
 			requestPath:  "testdata/config/valid_request.json",
 			expectedCode: http.StatusOK,
 		},
 		{
 			name:         "invalid request",
+			sdkVersion:   "0.4.0",
 			requestPath:  "testdata/config/invalid_request.json",
+			expectedCode: http.StatusUnprocessableEntity,
+			wantErr:      true,
+		},
+		{
+			name:         "valid request",
+			sdkVersion:   "0.5.0",
+			requestPath:  "testdata/config/valid_request.json",
+			expectedCode: http.StatusOK,
+		},
+		{
+			name:         "invalid sdk version",
+			sdkVersion:   "",
+			requestPath:  "testdata/config/valid_request.json",
 			expectedCode: http.StatusUnprocessableEntity,
 			wantErr:      true,
 		},
@@ -103,7 +120,11 @@ func TestConfigHandler_Handle(t *testing.T) {
 				t.Fatalf("Error reading request file: %v", err)
 			}
 			handler := SetupConfigHandler()
-			rec, err := ExecuteRequest(t, &handler, http.MethodPost, "/config", string(reqBody), nil)
+			rec, err := ExecuteRequest(t, &handler, http.MethodPost, "/config", string(reqBody), &RequestOptions{
+				Headers: map[string]string{
+					"X-Bidon-Version": tt.sdkVersion,
+				},
+			})
 
 			if (err != nil) != tt.wantErr {
 				t.Fatalf("Expected error %v, got: %v", tt.wantErr, err)
