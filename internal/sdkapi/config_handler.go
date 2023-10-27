@@ -3,6 +3,7 @@ package sdkapi
 import (
 	"context"
 	"fmt"
+	"github.com/Masterminds/semver/v3"
 	"net/http"
 
 	"github.com/bidon-io/bidon-backend/internal/adapter"
@@ -21,7 +22,7 @@ type ConfigHandler struct {
 
 //go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/config_mocks.go -pkg mocks . AdapterInitConfigsFetcher
 type AdapterInitConfigsFetcher interface {
-	FetchAdapterInitConfigs(ctx context.Context, appID int64, adapterKeys []adapter.Key) ([]AdapterInitConfig, error)
+	FetchAdapterInitConfigs(ctx context.Context, appID int64, adapterKeys []adapter.Key, sdkVersion *semver.Version) ([]AdapterInitConfig, error)
 }
 
 type ConfigResponse struct {
@@ -63,7 +64,12 @@ func (h *ConfigHandler) Handle(c echo.Context) error {
 		logError(c, fmt.Errorf("log config event: %v", err))
 	})
 
-	adapterInitConfigs, err := h.AdapterInitConfigsFetcher.FetchAdapterInitConfigs(ctx, req.app.ID, req.raw.Adapters.Keys())
+	sdkVersion, err := req.raw.GetSDKVersionSemver()
+	if err != nil {
+		return ErrInvalidSDKVersion
+	}
+
+	adapterInitConfigs, err := h.AdapterInitConfigsFetcher.FetchAdapterInitConfigs(ctx, req.app.ID, req.raw.Adapters.Keys(), sdkVersion)
 	if err != nil {
 		return err
 	}
@@ -220,6 +226,7 @@ func (a *InmobiInitConfig) Key() adapter.Key {
 	return adapter.InmobiKey
 }
 
+// Deprecated in 0.5.0
 type AmazonSlot struct {
 	SlotUUID string `json:"slot_uuid,omitempty"`
 	Format   string `json:"format,omitempty"`
@@ -227,7 +234,7 @@ type AmazonSlot struct {
 
 type AmazonInitConfig struct {
 	AppKey string       `json:"app_key,omitempty"`
-	Slots  []AmazonSlot `json:"slots"`
+	Slots  []AmazonSlot `json:"slots"` // Deprecated in 0.5.0
 }
 
 func (a *AmazonInitConfig) Key() adapter.Key {

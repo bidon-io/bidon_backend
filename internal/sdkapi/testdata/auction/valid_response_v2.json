@@ -1,0 +1,59 @@
+{
+  "auction_configuration_id": 1,
+  "auction_configuration_uid": "1701972528521547776",
+  "external_win_notifications": false,
+  "rounds": [
+    {
+      "id": "ROUND_1",
+      "demands": [
+        "bidmachine"
+      ],
+      "bidding": [],
+      "timeout": 15000
+    },
+    {
+      "id": "ROUND_2",
+      "demands": [
+        "unityads"
+      ],
+      "bidding": [
+        "bidmachine"
+      ],
+      "timeout": 15000
+    },
+    {
+      "id": "ROUND_4",
+      "demands": [
+        "unityads"
+      ],
+      "bidding": [],
+      "timeout": 15000
+    },
+    {
+      "id": "ROUND_5",
+      "demands": [],
+      "bidding": [
+        "bidmachine"
+      ],
+      "timeout": 15000
+    }
+  ],
+  "ad_units": [
+    {
+      "demand_id": "test",
+      "uid": "1701972528521547776",
+      "price_floor": 0.1,
+      "label": "test",
+      "ext": {
+        "placement_id": "test_id"
+      }
+    }
+  ],
+  "segment": {
+    "id": "1",
+    "uid": "1701972528521547776"
+  },
+  "token": "{}",
+  "pricefloor": 0.66,
+  "auction_id": "fe91db30-013d-40ff-b9b8-2e99519dd5e0"
+}

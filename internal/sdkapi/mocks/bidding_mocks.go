@@ -6,6 +6,7 @@ package mocks
 import (
 	"context"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
+	"github.com/bidon-io/bidon-backend/internal/adapter/store"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	"sync"
@@ -21,7 +22,7 @@ var _ sdkapi.AdaptersConfigBuilder = &AdaptersConfigBuilderMock{}
 //
 //		// make and configure a mocked sdkapi.AdaptersConfigBuilder
 //		mockedAdaptersConfigBuilder := &AdaptersConfigBuilderMock{
-//			BuildFunc: func(ctx context.Context, appID int64, adapterKeys []adapter.Key, imp schema.Imp) (adapter.ProcessedConfigsMap, error) {
+//			BuildFunc: func(ctx context.Context, appID int64, adapterKeys []adapter.Key, imp schema.Imp, adUnitsMap *store.AdUnitsMap) (adapter.ProcessedConfigsMap, error) {
 //				panic("mock out the Build method")
 //			},
 //		}
@@ -32,7 +33,97 @@ var _ sdkapi.AdaptersConfigBuilder = &AdaptersConfigBuilderMock{}
 //	}
 type AdaptersConfigBuilderMock struct {
 	// BuildFunc mocks the Build method.
-	BuildFunc func(ctx context.Context, appID int64, adapterKeys []adapter.Key, imp schema.Imp) (adapter.ProcessedConfigsMap, error)
+	BuildFunc func(ctx context.Context, appID int64, adapterKeys []adapter.Key, imp schema.Imp, adUnitsMap *store.AdUnitsMap) (adapter.ProcessedConfigsMap, error)
+
+	// calls tracks calls to the methods.
+	calls struct {
+		// Build holds details about calls to the Build method.
+		Build []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// AppID is the appID argument value.
+			AppID int64
+			// AdapterKeys is the adapterKeys argument value.
+			AdapterKeys []adapter.Key
+			// Imp is the imp argument value.
+			Imp schema.Imp
+			// AdUnitsMap is the adUnitsMap argument value.
+			AdUnitsMap *store.AdUnitsMap
+		}
+	}
+	lockBuild sync.RWMutex
+}
+
+// Build calls BuildFunc.
+func (mock *AdaptersConfigBuilderMock) Build(ctx context.Context, appID int64, adapterKeys []adapter.Key, imp schema.Imp, adUnitsMap *store.AdUnitsMap) (adapter.ProcessedConfigsMap, error) {
+	if mock.BuildFunc == nil {
+		panic("AdaptersConfigBuilderMock.BuildFunc: method is nil but AdaptersConfigBuilder.Build was just called")
+	}
+	callInfo := struct {
+		Ctx         context.Context
+		AppID       int64
+		AdapterKeys []adapter.Key
+		Imp         schema.Imp
+		AdUnitsMap  *store.AdUnitsMap
+	}{
+		Ctx:         ctx,
+		AppID:       appID,
+		AdapterKeys: adapterKeys,
+		Imp:         imp,
+		AdUnitsMap:  adUnitsMap,
+	}
+	mock.lockBuild.Lock()
+	mock.calls.Build = append(mock.calls.Build, callInfo)
+	mock.lockBuild.Unlock()
+	return mock.BuildFunc(ctx, appID, adapterKeys, imp, adUnitsMap)
+}
+
+// BuildCalls gets all the calls that were made to Build.
+// Check the length with:
+//
+//	len(mockedAdaptersConfigBuilder.BuildCalls())
+func (mock *AdaptersConfigBuilderMock) BuildCalls() []struct {
+	Ctx         context.Context
+	AppID       int64
+	AdapterKeys []adapter.Key
+	Imp         schema.Imp
+	AdUnitsMap  *store.AdUnitsMap
+} {
+	var calls []struct {
+		Ctx         context.Context
+		AppID       int64
+		AdapterKeys []adapter.Key
+		Imp         schema.Imp
+		AdUnitsMap  *store.AdUnitsMap
+	}
+	mock.lockBuild.RLock()
+	calls = mock.calls.Build
+	mock.lockBuild.RUnlock()
+	return calls
+}
+
+// Ensure, that AdUnitsMapBuilderMock does implement sdkapi.AdUnitsMapBuilder.
+// If this is not the case, regenerate this file with moq.
+var _ sdkapi.AdUnitsMapBuilder = &AdUnitsMapBuilderMock{}
+
+// AdUnitsMapBuilderMock is a mock implementation of sdkapi.AdUnitsMapBuilder.
+//
+//	func TestSomethingThatUsesAdUnitsMapBuilder(t *testing.T) {
+//
+//		// make and configure a mocked sdkapi.AdUnitsMapBuilder
+//		mockedAdUnitsMapBuilder := &AdUnitsMapBuilderMock{
+//			BuildFunc: func(ctx context.Context, appID int64, adapterKeys []adapter.Key, imp schema.Imp) (store.AdUnitsMap, error) {
+//				panic("mock out the Build method")
+//			},
+//		}
+//
+//		// use mockedAdUnitsMapBuilder in code that requires sdkapi.AdUnitsMapBuilder
+//		// and then make assertions.
+//
+//	}
+type AdUnitsMapBuilderMock struct {
+	// BuildFunc mocks the Build method.
+	BuildFunc func(ctx context.Context, appID int64, adapterKeys []adapter.Key, imp schema.Imp) (store.AdUnitsMap, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -52,9 +143,9 @@ type AdaptersConfigBuilderMock struct {
 }
 
 // Build calls BuildFunc.
-func (mock *AdaptersConfigBuilderMock) Build(ctx context.Context, appID int64, adapterKeys []adapter.Key, imp schema.Imp) (adapter.ProcessedConfigsMap, error) {
+func (mock *AdUnitsMapBuilderMock) Build(ctx context.Context, appID int64, adapterKeys []adapter.Key, imp schema.Imp) (store.AdUnitsMap, error) {
 	if mock.BuildFunc == nil {
-		panic("AdaptersConfigBuilderMock.BuildFunc: method is nil but AdaptersConfigBuilder.Build was just called")
+		panic("AdUnitsMapBuilderMock.BuildFunc: method is nil but AdUnitsMapBuilder.Build was just called")
 	}
 	callInfo := struct {
 		Ctx         context.Context
@@ -76,8 +167,8 @@ func (mock *AdaptersConfigBuilderMock) Build(ctx context.Context, appID int64, a
 // BuildCalls gets all the calls that were made to Build.
 // Check the length with:
 //
-//	len(mockedAdaptersConfigBuilder.BuildCalls())
-func (mock *AdaptersConfigBuilderMock) BuildCalls() []struct {
+//	len(mockedAdUnitsMapBuilder.BuildCalls())
+func (mock *AdUnitsMapBuilderMock) BuildCalls() []struct {
 	Ctx         context.Context
 	AppID       int64
 	AdapterKeys []adapter.Key

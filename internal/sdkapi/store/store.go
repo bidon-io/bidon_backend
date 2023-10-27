@@ -5,8 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-
-	"github.com/bidon-io/bidon-backend/internal/ad"
+	"github.com/Masterminds/semver/v3"
 
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/db"
@@ -42,7 +41,7 @@ type AdapterInitConfigsFetcher struct {
 	DB *db.DB
 }
 
-func (f *AdapterInitConfigsFetcher) FetchAdapterInitConfigs(ctx context.Context, appID int64, adapterKeys []adapter.Key) ([]sdkapi.AdapterInitConfig, error) {
+func (f *AdapterInitConfigsFetcher) FetchAdapterInitConfigs(ctx context.Context, appID int64, adapterKeys []adapter.Key, sdkVersion *semver.Version) ([]sdkapi.AdapterInitConfig, error) {
 	var dbProfiles []db.AppDemandProfile
 
 	err := f.DB.
@@ -80,11 +79,14 @@ func (f *AdapterInitConfigsFetcher) FetchAdapterInitConfigs(ctx context.Context,
 			applovinConfig.AppKey = applovinConfig.SDKKey
 		}
 
-		amazonConfig, ok := config.(*sdkapi.AmazonInitConfig)
-		if ok {
-			amazonConfig.Slots, err = f.fetchAmazonSlots(ctx, appID)
-			if err != nil {
-				return nil, fmt.Errorf("fetch amazon slots: %v", err)
+		// TODO: remove this block when we drop support for 0.4.x
+		if !sdkapi.Version05GTEConstraint.Check(sdkVersion) {
+			amazonConfig, ok := config.(*sdkapi.AmazonInitConfig)
+			if ok {
+				amazonConfig.Slots, err = f.fetchAmazonSlots(ctx, appID)
+				if err != nil {
+					return nil, fmt.Errorf("fetch amazon slots: %v", err)
+				}
 			}
 		}
 
@@ -94,6 +96,7 @@ func (f *AdapterInitConfigsFetcher) FetchAdapterInitConfigs(ctx context.Context,
 	return configs, nil
 }
 
+// Deprecated: amazon slots moved to the auction as of 0.5.0
 func (f *AdapterInitConfigsFetcher) fetchAmazonSlots(ctx context.Context, appID int64) ([]sdkapi.AmazonSlot, error) {
 	var dbLineItems []db.LineItem
 
@@ -121,24 +124,11 @@ func (f *AdapterInitConfigsFetcher) fetchAmazonSlots(ctx context.Context, appID 
 		}
 		slot.SlotUUID = slotUUID
 
-		switch lineItem.AdType {
-		case db.BannerAdType:
-			if lineItem.Format.String == string(ad.MRECFormat) {
-				slot.Format = "MREC"
-				break
-			}
-			slot.Format = "BANNER"
-		case db.InterstitialAdType:
-			if isVideo, ok := lineItem.Extra["is_video"].(bool); ok && isVideo {
-				slot.Format = "VIDEO"
-				break
-			}
-			slot.Format = "INTERSTITIAL"
-		case db.RewardedAdType:
-			slot.Format = "REWARDED"
-		default:
-			return nil, fmt.Errorf("unsupported ad type: %v", lineItem.AdType.Domain())
+		format, ok := lineItem.Extra["format"].(string)
+		if !ok {
+			return nil, fmt.Errorf("format is either missing or not a string")
 		}
+		slot.Format = format
 
 		slots = append(slots, slot)
 	}
