@@ -94,28 +94,28 @@ func (mock *ConfigMatcherMock) MatchCalls() []struct {
 	return calls
 }
 
-// Ensure, that AdUnitsMatcherMock does implement auction.AdUnitsMatcher.
+// Ensure, that LineItemsMatcherMock does implement auction.LineItemsMatcher.
 // If this is not the case, regenerate this file with moq.
-var _ auction.AdUnitsMatcher = &AdUnitsMatcherMock{}
+var _ auction.LineItemsMatcher = &LineItemsMatcherMock{}
 
-// AdUnitsMatcherMock is a mock implementation of auction.AdUnitsMatcher.
+// LineItemsMatcherMock is a mock implementation of auction.LineItemsMatcher.
 //
-//	func TestSomethingThatUsesAdUnitsMatcher(t *testing.T) {
+//	func TestSomethingThatUsesLineItemsMatcher(t *testing.T) {
 //
-//		// make and configure a mocked auction.AdUnitsMatcher
-//		mockedAdUnitsMatcher := &AdUnitsMatcherMock{
-//			MatchFunc: func(ctx context.Context, params *auction.BuildParams) ([]auction.AdUnit, error) {
+//		// make and configure a mocked auction.LineItemsMatcher
+//		mockedLineItemsMatcher := &LineItemsMatcherMock{
+//			MatchFunc: func(ctx context.Context, params *auction.BuildParams) ([]auction.LineItem, error) {
 //				panic("mock out the Match method")
 //			},
 //		}
 //
-//		// use mockedAdUnitsMatcher in code that requires auction.AdUnitsMatcher
+//		// use mockedLineItemsMatcher in code that requires auction.LineItemsMatcher
 //		// and then make assertions.
 //
 //	}
-type AdUnitsMatcherMock struct {
+type LineItemsMatcherMock struct {
 	// MatchFunc mocks the Match method.
-	MatchFunc func(ctx context.Context, params *auction.BuildParams) ([]auction.AdUnit, error)
+	MatchFunc func(ctx context.Context, params *auction.BuildParams) ([]auction.LineItem, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -131,9 +131,9 @@ type AdUnitsMatcherMock struct {
 }
 
 // Match calls MatchFunc.
-func (mock *AdUnitsMatcherMock) Match(ctx context.Context, params *auction.BuildParams) ([]auction.AdUnit, error) {
+func (mock *LineItemsMatcherMock) Match(ctx context.Context, params *auction.BuildParams) ([]auction.LineItem, error) {
 	if mock.MatchFunc == nil {
-		panic("AdUnitsMatcherMock.MatchFunc: method is nil but AdUnitsMatcher.Match was just called")
+		panic("LineItemsMatcherMock.MatchFunc: method is nil but LineItemsMatcher.Match was just called")
 	}
 	callInfo := struct {
 		Ctx    context.Context
@@ -151,8 +151,8 @@ func (mock *AdUnitsMatcherMock) Match(ctx context.Context, params *auction.Build
 // MatchCalls gets all the calls that were made to Match.
 // Check the length with:
 //
-//	len(mockedAdUnitsMatcher.MatchCalls())
-func (mock *AdUnitsMatcherMock) MatchCalls() []struct {
+//	len(mockedLineItemsMatcher.MatchCalls())
+func (mock *LineItemsMatcherMock) MatchCalls() []struct {
 	Ctx    context.Context
 	Params *auction.BuildParams
 } {

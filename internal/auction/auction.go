@@ -9,8 +9,7 @@ type Auction struct {
 	ConfigUID                string        `json:"auction_configuration_uid"`
 	ExternalWinNotifications bool          `json:"external_win_notifications"`
 	Rounds                   []RoundConfig `json:"rounds"`
-	LineItems                []LineItem    `json:"line_items,omitempty"` // Deprecated: use AdUnits instead
-	AdUnits                  []AdUnit      `json:"ad_units,omitempty"`
+	LineItems                []LineItem    `json:"line_items"`
 	Segment                  Segment       `json:"segment"`
 }
 type Config struct {
@@ -36,14 +35,6 @@ type LineItem struct {
 	ZonedID     string  `json:"zoned_id"`
 	SlotUUID    string  `json:"slot_uuid"`
 	SlotID      string  `json:"slot_id"`
-}
-
-type AdUnit struct {
-	DemandID   string         `json:"demand_id"`
-	UID        string         `json:"uid"`
-	Label      string         `json:"label"`
-	PriceFloor float64        `json:"price_floor"`
-	Extra      map[string]any `json:"ext"`
 }
 
 type Segment struct {
