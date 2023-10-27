@@ -5,10 +5,6 @@ import (
 	"testing"
 )
 
-func ptr[T any](t T) *T {
-	return &t
-}
-
 func Test_userAttrsValidator_ValidateWithContext(t *testing.T) {
 	tests := []struct {
 		name    string

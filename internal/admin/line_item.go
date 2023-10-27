@@ -2,10 +2,15 @@ package admin
 
 import (
 	"context"
+	"errors"
+	"fmt"
+	"io"
+	"strings"
 
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	v8n "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/jszwec/csvutil"
 	"github.com/shopspring/decimal"
 )
 
@@ -39,12 +44,15 @@ type LineItemAttrs struct {
 
 type LineItemService struct {
 	*ResourceService[LineItemResource, LineItem, LineItemAttrs]
+	store Store
 }
 
 func NewLineItemService(store Store) *LineItemService {
 	s := &LineItemService{
 		ResourceService: &ResourceService[LineItemResource, LineItem, LineItemAttrs]{},
 	}
+
+	s.store = store
 
 	s.resourceKey = LineItemResourceKey
 
@@ -68,10 +76,157 @@ func NewLineItemService(store Store) *LineItemService {
 	return s
 }
 
+type LineItemImportCSVAttrs struct {
+	AppID     int64 `form:"app_id"`
+	AccountID int64 `form:"account_id"`
+	IsBidding bool  `form:"is_bidding"`
+}
+
+type admobLineItemCSV struct {
+	AdFormat string          `csv:"ad_format"`
+	BidFloor decimal.Decimal `csv:"bid_floor"`
+	AdUnitID string          `csv:"ad_unit_id"`
+}
+
+func (csv admobLineItemCSV) buildLineItemAttrs(account *DemandSourceAccount, attrs LineItemImportCSVAttrs) (LineItemAttrs, error) {
+	adType, format := parseCSVAdFormat(csv.AdFormat)
+	if adType == ad.UnknownType {
+		return LineItemAttrs{}, fmt.Errorf("unknown ad format %q", csv.AdFormat)
+	}
+
+	lineItemAttrs := LineItemAttrs{
+		HumanName:   strings.ToLower(fmt.Sprintf("%v_%v_%v", account.DemandSource.ApiKey, csv.AdFormat, csv.BidFloor)),
+		AppID:       attrs.AppID,
+		BidFloor:    &csv.BidFloor,
+		AdType:      adType,
+		Format:      format,
+		AccountID:   account.ID,
+		AccountType: account.Type,
+		Code:        &csv.AdUnitID,
+		IsBidding:   &attrs.IsBidding,
+		Extra: map[string]any{
+			"ad_unit_id": csv.AdUnitID,
+		},
+	}
+
+	return lineItemAttrs, nil
+}
+
+type dtExchangeLineItemCSV struct {
+	AdFormat    string          `csv:"ad_format"`
+	BidFloor    decimal.Decimal `csv:"bid_floor"`
+	PlacementID string          `csv:"placement_id"`
+}
+
+func (csv dtExchangeLineItemCSV) buildLineItemAttrs(account *DemandSourceAccount, attrs LineItemImportCSVAttrs) (LineItemAttrs, error) {
+	adType, format := parseCSVAdFormat(csv.AdFormat)
+	if adType == ad.UnknownType {
+		return LineItemAttrs{}, fmt.Errorf("unknown ad format %q", csv.AdFormat)
+	}
+
+	lineItemAttrs := LineItemAttrs{
+		HumanName:   strings.ToLower(fmt.Sprintf("%v_%v_%v", account.DemandSource.ApiKey, csv.AdFormat, csv.BidFloor)),
+		AppID:       attrs.AppID,
+		BidFloor:    &csv.BidFloor,
+		AdType:      adType,
+		Format:      format,
+		AccountID:   account.ID,
+		AccountType: account.Type,
+		Code:        nil,
+		IsBidding:   &attrs.IsBidding,
+		Extra: map[string]any{
+			"placement_id": csv.PlacementID,
+		},
+	}
+
+	return lineItemAttrs, nil
+}
+
+func parseCSVAdFormat(adFormat string) (ad.Type, *ad.Format) {
+	switch strings.ToLower(adFormat) {
+	case "banner":
+		return ad.BannerType, ptr(ad.BannerFormat)
+	case "interstitial":
+		return ad.InterstitialType, nil
+	case "rewarded":
+		return ad.RewardedType, nil
+	default:
+		return ad.UnknownType, nil
+	}
+}
+
+func ptr[T any](v T) *T {
+	return &v
+}
+
+type LineItemCSV interface {
+	buildLineItemAttrs(account *DemandSourceAccount, attrs LineItemImportCSVAttrs) (LineItemAttrs, error)
+}
+
+func (s *LineItemService) ImportCSV(ctx context.Context, _ AuthContext, reader io.Reader, attrs LineItemImportCSVAttrs) error {
+	account, err := s.store.DemandSourceAccounts().Find(ctx, attrs.AccountID)
+	if err != nil {
+		return fmt.Errorf("find account: %v", err)
+	}
+
+	csvInput, err := io.ReadAll(reader)
+	if err != nil {
+		return fmt.Errorf("read csv: %v", err)
+	}
+
+	var csvLineItems []LineItemCSV
+	switch adapter.Key(account.DemandSource.ApiKey) {
+	case adapter.AdmobKey:
+		var admobLineItems []admobLineItemCSV
+		err = csvutil.Unmarshal(csvInput, &admobLineItems)
+		if err != nil {
+			return fmt.Errorf("unmarshal csv: %v", err)
+		}
+
+		csvLineItems = make([]LineItemCSV, len(admobLineItems))
+		for i, admobLineItem := range admobLineItems {
+			csvLineItems[i] = admobLineItem
+		}
+	case adapter.DTExchangeKey:
+		var dtExchangeLineItems []dtExchangeLineItemCSV
+		err = csvutil.Unmarshal(csvInput, &dtExchangeLineItems)
+		if err != nil {
+			return fmt.Errorf("unmarshal csv: %v", err)
+		}
+
+		csvLineItems = make([]LineItemCSV, len(dtExchangeLineItems))
+		for i, dtExchangeLineItem := range dtExchangeLineItems {
+			csvLineItems[i] = dtExchangeLineItem
+		}
+	default:
+		return fmt.Errorf("unsupported demand source: %s", account.DemandSource.ApiKey)
+	}
+	if len(csvLineItems) == 0 {
+		return errors.New("csv empty")
+	}
+
+	lineItemsAttrs := make([]LineItemAttrs, len(csvLineItems))
+	for i, csvLineItem := range csvLineItems {
+		lineItemsAttrs[i], err = csvLineItem.buildLineItemAttrs(account, attrs)
+		if err != nil {
+			return fmt.Errorf("build line item attrs: %v", err)
+		}
+	}
+
+	err = s.store.LineItems().CreateMany(ctx, lineItemsAttrs)
+	if err != nil {
+		return fmt.Errorf("create line items: %v", err)
+	}
+
+	return nil
+}
+
 type LineItemRepo interface {
 	AllResourceQuerier[LineItem]
 	OwnedResourceQuerier[LineItem]
 	ResourceManipulator[LineItem, LineItemAttrs]
+
+	CreateMany(ctx context.Context, items []LineItemAttrs) error
 }
 
 type lineItemPolicy struct {

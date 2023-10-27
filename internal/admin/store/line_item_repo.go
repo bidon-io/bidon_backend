@@ -40,6 +40,14 @@ func (r *LineItemRepo) FindOwnedByUser(ctx context.Context, userID int64, id int
 	})
 }
 
+func (r *LineItemRepo) CreateMany(ctx context.Context, items []admin.LineItemAttrs) error {
+	dbItems := make([]*db.LineItem, len(items))
+	for i := range items {
+		dbItems[i] = r.mapper.dbModel(&items[i], 0)
+	}
+	return r.db.WithContext(ctx).Create(&dbItems).Error
+}
+
 type lineItemMapper struct {
 	db *db.DB
 }
