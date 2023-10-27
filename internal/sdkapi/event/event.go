@@ -81,6 +81,7 @@ func NewRequest(request *schema.BaseRequest, adRequestParams AdRequestParams, ge
 	requestEvent.Bidding = adRequestParams.Bidding
 	requestEvent.AdUnitID = adRequestParams.AdUnitID
 	requestEvent.LineItemUID = adRequestParams.LineItemUID
+	requestEvent.LineItemLabel = adRequestParams.LineItemLabel
 	requestEvent.AdUnitCode = adRequestParams.AdUnitCode
 	requestEvent.Ecpm = adRequestParams.Ecpm
 	requestEvent.PriceFloor = adRequestParams.PriceFloor
@@ -287,6 +288,7 @@ type AdRequestParams struct {
 	Bidding                 bool
 	AdUnitID                int
 	LineItemUID             int64
+	LineItemLabel           string
 	AdUnitCode              string
 	Ecpm                    float64
 	PriceFloor              float64
@@ -309,6 +311,7 @@ type RequestEvent struct {
 	Bidding                     bool    `json:"bidding"`
 	AdUnitID                    int     `json:"ad_unit_id"`
 	LineItemUID                 int64   `json:"line_item_uid"`
+	LineItemLabel               string  `json:"line_item_label"`
 	AdUnitCode                  string  `json:"ad_unit_code"`
 	Ecpm                        float64 `json:"ecpm"`
 	PriceFloor                  float64 `json:"price_floor"`
