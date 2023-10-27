@@ -229,12 +229,20 @@ func Builder(cfg adapter.ProcessedConfigsMap, client *http.Client) (*adapters.Bi
 	if !ok || appID == "" {
 		return nil, fmt.Errorf("missing app_id param for %s adapter", adapter.BigoAdsKey)
 	}
+	tagID, ok := bigoCfg["tag_id"].(string)
+	if !ok || tagID == "" {
+		return nil, fmt.Errorf("missing tag_id param for %s adapter", adapter.BigoAdsKey)
+	}
+	placementID, ok := bigoCfg["placement_id"].(string)
+	if !ok {
+		placementID = ""
+	}
 
 	adpt := &BigoAdsAdapter{
 		SellerID:    sellerID,
 		AppID:       appID,
-		TagID:       bigoCfg["tag_id"].(string),
-		PlacementID: bigoCfg["placement_id"].(string),
+		TagID:       tagID,
+		PlacementID: placementID,
 	}
 
 	bidder := &adapters.Bidder{

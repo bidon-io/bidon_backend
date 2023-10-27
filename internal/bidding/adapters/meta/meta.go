@@ -239,11 +239,15 @@ func Builder(cfg adapter.ProcessedConfigsMap, client *http.Client) (*adapters.Bi
 	if !ok || appID == "" {
 		return nil, fmt.Errorf("missing app_secret param for %s adapter", adapter.MetaKey)
 	}
+	tagID, ok := mCfg["tag_id"].(string)
+	if !ok {
+		tagID = ""
+	}
 
 	adpt := &MetaAdapter{
 		AppID:     appID,
 		AppSecret: appSecret,
-		TagID:     mCfg["tag_id"].(string),
+		TagID:     tagID,
 	}
 
 	bidder := adapters.Bidder{

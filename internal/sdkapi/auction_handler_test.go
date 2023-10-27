@@ -4,14 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/google/go-cmp/cmp"
 	"net/http"
-	"net/http/httptest"
 	"os"
-	"reflect"
-	"strings"
 	"testing"
-
-	"github.com/bidon-io/bidon-backend/config"
 
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
@@ -65,6 +61,17 @@ func testHelperAuctionHandler(t *testing.T) *sdkapi.AuctionHandler {
 	lineItems := []auction.LineItem{
 		{ID: "test", UID: "1701972528521547776", PriceFloor: 0.1, PlacementID: "", AdUnitID: "test_id"},
 	}
+	adUnits := []auction.AdUnit{
+		{
+			DemandID:   "test",
+			UID:        "1701972528521547776",
+			Label:      "test",
+			PriceFloor: 0.1,
+			Extra: map[string]any{
+				"placement_id": "test_id",
+			},
+		},
+	}
 	segments := []segment.Segment{
 		{
 			ID:      1,
@@ -93,6 +100,11 @@ func testHelperAuctionHandler(t *testing.T) *sdkapi.AuctionHandler {
 			return lineItems, nil
 		},
 	}
+	adUnitsMatcher := &auctionmocks.AdUnitsMatcherMock{
+		MatchFunc: func(ctx context.Context, params *auction.BuildParams) ([]auction.AdUnit, error) {
+			return adUnits, nil
+		},
+	}
 	segmentFetcher := &segmentmocks.FetcherMock{
 		FetchFunc: func(ctx context.Context, appID int64) ([]segment.Segment, error) {
 			return segments, nil
@@ -101,6 +113,10 @@ func testHelperAuctionHandler(t *testing.T) *sdkapi.AuctionHandler {
 	auctionBuilder := &auction.Builder{
 		ConfigMatcher:    configMatcher,
 		LineItemsMatcher: lineItemsMatcher,
+	}
+	auctionBuilderV2 := &auction.BuilderV2{
+		ConfigMatcher:  configMatcher,
+		AdUnitsMatcher: adUnitsMatcher,
 	}
 	segmentMatcher := &segment.Matcher{
 		Fetcher: segmentFetcher,
@@ -113,53 +129,21 @@ func testHelperAuctionHandler(t *testing.T) *sdkapi.AuctionHandler {
 			AppFetcher: appFetcher,
 			Geocoder:   gcoder,
 		},
-		AuctionBuilder: auctionBuilder,
-		SegmentMatcher: segmentMatcher,
-		EventLogger:    &event.Logger{Engine: &engine.Log{}},
+		AuctionBuilder:   auctionBuilder,
+		AuctionBuilderV2: auctionBuilderV2,
+		SegmentMatcher:   segmentMatcher,
+		EventLogger:      &event.Logger{Engine: &engine.Log{}},
 	}
 
 	return handler
 }
 
-func TestAuctionHandler_OK(t *testing.T) {
-	handler := testHelperAuctionHandler(t)
+func checkResponses(t *testing.T, expectedResponseJson, actualResponseJson []byte) {
+	t.Helper()
 
-	// Read request and response from file
-	requestJson, err := os.ReadFile("testdata/auction/valid_request.json")
-	if err != nil {
-		t.Fatalf("Error reading request file: %v", err)
-	}
-	expectedResponseJson, err := os.ReadFile("testdata/auction/valid_response.json")
-	if err != nil {
-		t.Fatalf("Error reading response file: %v", err)
-	}
-
-	// Create a new HTTP request
-	req := httptest.NewRequest(http.MethodPost, "/auction/interstitial", strings.NewReader(string(requestJson[:])))
-	req.Header.Set("Content-Type", "application/json")
-
-	// Create a new HTTP response recorder
-	rec := httptest.NewRecorder()
-
-	// Create a new Echo instance and context
-	e := config.Echo()
-	c := e.NewContext(req, rec)
-
-	// Call the Handle method
-	err = handler.Handle(c)
-	if err != nil {
-		t.Fatalf("Handle method returned an error: %v", err)
-	}
-
-	// Check that the response status code is HTTP 200 OK
-	if rec.Code != http.StatusOK {
-		t.Errorf("Http status is not ok (200). Received: %v", rec.Code)
-	}
-
-	// Read response body from file
 	var actualResponse interface{}
 	var expectedResponse interface{}
-	err = json.Unmarshal(rec.Body.Bytes(), &actualResponse)
+	err := json.Unmarshal(actualResponseJson, &actualResponse)
 	if err != nil {
 		t.Fatalf("Failed to parse JSON1: %s", err)
 	}
@@ -168,35 +152,88 @@ func TestAuctionHandler_OK(t *testing.T) {
 		t.Fatalf("Failed to parse JSON2: %s", err)
 	}
 
-	// Check that the response body is what we expect
-	if !reflect.DeepEqual(actualResponse, expectedResponse) {
-		t.Errorf("Response mismatch. Expected: %v. Received: %v", expectedResponse, actualResponse)
+	if diff := cmp.Diff(actualResponse, expectedResponse); diff != "" {
+		t.Errorf("Response mismatch (-want, +got):\n%s", diff)
 	}
 }
 
-func TestAuctionHandler_ErrNoAdsFound(t *testing.T) {
-	handler := testHelperAuctionHandler(t)
-
-	// Read request and response from file
-	requestJson, err := os.ReadFile("testdata/auction/noads_request.json")
-	if err != nil {
-		t.Fatalf("Error reading request file: %v", err)
+func TestAuctionHandler_Handle(t *testing.T) {
+	tests := []struct {
+		name                 string
+		sdkVersion           string
+		requestPath          string
+		expectedResponsePath string
+		expectedStatusCode   int
+		wantErr              bool
+		err                  error
+	}{
+		{
+			name:                 "OK version 0,4",
+			sdkVersion:           "0.4.0",
+			requestPath:          "testdata/auction/valid_request.json",
+			expectedResponsePath: "testdata/auction/valid_response.json",
+			expectedStatusCode:   http.StatusOK,
+			wantErr:              false,
+		},
+		{
+			name:               "Err NoAdsFound version 0,4",
+			sdkVersion:         "0.4.0",
+			requestPath:        "testdata/auction/noads_request.json",
+			expectedStatusCode: http.StatusUnprocessableEntity,
+			wantErr:            true,
+			err:                sdkapi.ErrNoAdsFound,
+		},
+		{
+			name:                 "OK version 0,5",
+			sdkVersion:           "0.5",
+			requestPath:          "testdata/auction/valid_request.json",
+			expectedResponsePath: "testdata/auction/valid_response_v2.json",
+			expectedStatusCode:   http.StatusOK,
+			wantErr:              false,
+		},
+		{
+			name:               "Err NoAdsFound version 0,5",
+			sdkVersion:         "0.5",
+			requestPath:        "testdata/auction/noads_request.json",
+			expectedStatusCode: http.StatusUnprocessableEntity,
+			wantErr:            true,
+			err:                sdkapi.ErrNoAdsFound,
+		}, {
+			name:               "Err Invalid SDKVesrion",
+			sdkVersion:         "",
+			requestPath:        "testdata/auction/valid_request.json",
+			expectedStatusCode: http.StatusUnprocessableEntity,
+			wantErr:            true,
+			err:                sdkapi.ErrInvalidSDKVersion,
+		},
 	}
 
-	// Create a new HTTP request
-	req := httptest.NewRequest(http.MethodPost, "/auction/interstitial", strings.NewReader(string(requestJson[:])))
-	req.Header.Set("Content-Type", "application/json")
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			reqBody, err := os.ReadFile(tt.requestPath)
+			if err != nil {
+				t.Fatalf("Error reading request file: %v", err)
+			}
 
-	// Create a new HTTP response recorder
-	rec := httptest.NewRecorder()
+			handler := testHelperAuctionHandler(t)
+			rec, err := ExecuteRequest(t, handler, http.MethodPost, "/auction/interstitial", string(reqBody), &RequestOptions{
+				Headers: map[string]string{
+					"X-Bidon-Version": tt.sdkVersion,
+				},
+			})
+			CheckResponseCode(t, err, rec.Code, tt.expectedStatusCode)
 
-	// Create a new Echo instance and context
-	e := config.Echo()
-	c := e.NewContext(req, rec)
-
-	// Check that Handle method returns a ErrNoAdsFound error
-	err = handler.Handle(c)
-	if errors.Is(err, auction.ErrNoAdsFound) {
-		t.Errorf("Handle method didn't return a ErrNoAdsFound error. Received: %v", err)
+			if tt.wantErr {
+				if !errors.Is(err, tt.err) {
+					t.Errorf("Expected error %v, got: %v", tt.err, err)
+				}
+			} else {
+				expectedResponseJson, err := os.ReadFile(tt.expectedResponsePath)
+				if err != nil {
+					t.Fatalf("Error reading response file: %v", err)
+				}
+				checkResponses(t, expectedResponseJson, rec.Body.Bytes())
+			}
+		})
 	}
 }

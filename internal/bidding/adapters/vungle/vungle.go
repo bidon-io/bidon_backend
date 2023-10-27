@@ -233,11 +233,15 @@ func Builder(cfg adapter.ProcessedConfigsMap, client *http.Client) (*adapters.Bi
 	if !ok || appID == "" {
 		return nil, fmt.Errorf("missing app_id param for %s adapter", adapter.VungleKey)
 	}
+	tagID, ok := vCfg["tag_id"].(string)
+	if !ok {
+		tagID = ""
+	}
 
 	adpt := &VungleAdapter{
 		SellerID: sellerID,
 		AppID:    appID,
-		TagID:    vCfg["tag_id"].(string),
+		TagID:    tagID,
 	}
 
 	bidder := adapters.Bidder{
