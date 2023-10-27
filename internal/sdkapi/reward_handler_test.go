@@ -49,9 +49,7 @@ func TestRewardHandler_Handle(t *testing.T) {
 			handler := SetupRewardHandler()
 			rec, err := ExecuteRequest(
 				t, &handler, http.MethodPost, "/reward/rewarded",
-				string(reqBody), &RequestOptions{
-					Params: map[string]string{"ad_type": "rewarded"},
-				},
+				string(reqBody), map[string]string{"ad_type": "rewarded"},
 			)
 
 			if (err != nil) != tt.wantErr {

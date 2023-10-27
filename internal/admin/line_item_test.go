@@ -33,24 +33,6 @@ func Test_lineItemAttrsValidator_ValidateWithContext(t *testing.T) {
 			false,
 		},
 		{
-			"valid Amazon",
-			&LineItemAttrs{
-				AccountID: 1,
-				Extra: map[string]any{
-					"slot_uuid": "26069ec0-4151-4194-a181-7a0017efdf28",
-					"format":    "VIDEO",
-				},
-			},
-			&DemandSourceAccount{
-				DemandSource: DemandSource{
-					DemandSourceAttrs: DemandSourceAttrs{
-						ApiKey: string(adapter.AmazonKey),
-					},
-				},
-			},
-			false,
-		},
-		{
 			"valid Applovin",
 			&LineItemAttrs{
 				AccountID: 1,

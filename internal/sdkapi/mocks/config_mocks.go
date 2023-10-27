@@ -5,7 +5,6 @@ package mocks
 
 import (
 	"context"
-	"github.com/Masterminds/semver/v3"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
 	"sync"
@@ -21,7 +20,7 @@ var _ sdkapi.AdapterInitConfigsFetcher = &AdapterInitConfigsFetcherMock{}
 //
 //		// make and configure a mocked sdkapi.AdapterInitConfigsFetcher
 //		mockedAdapterInitConfigsFetcher := &AdapterInitConfigsFetcherMock{
-//			FetchAdapterInitConfigsFunc: func(ctx context.Context, appID int64, adapterKeys []adapter.Key, sdkVersion *semver.Version) ([]sdkapi.AdapterInitConfig, error) {
+//			FetchAdapterInitConfigsFunc: func(ctx context.Context, appID int64, adapterKeys []adapter.Key) ([]sdkapi.AdapterInitConfig, error) {
 //				panic("mock out the FetchAdapterInitConfigs method")
 //			},
 //		}
@@ -32,7 +31,7 @@ var _ sdkapi.AdapterInitConfigsFetcher = &AdapterInitConfigsFetcherMock{}
 //	}
 type AdapterInitConfigsFetcherMock struct {
 	// FetchAdapterInitConfigsFunc mocks the FetchAdapterInitConfigs method.
-	FetchAdapterInitConfigsFunc func(ctx context.Context, appID int64, adapterKeys []adapter.Key, sdkVersion *semver.Version) ([]sdkapi.AdapterInitConfig, error)
+	FetchAdapterInitConfigsFunc func(ctx context.Context, appID int64, adapterKeys []adapter.Key) ([]sdkapi.AdapterInitConfig, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -44,15 +43,13 @@ type AdapterInitConfigsFetcherMock struct {
 			AppID int64
 			// AdapterKeys is the adapterKeys argument value.
 			AdapterKeys []adapter.Key
-			// SdkVersion is the sdkVersion argument value.
-			SdkVersion *semver.Version
 		}
 	}
 	lockFetchAdapterInitConfigs sync.RWMutex
 }
 
 // FetchAdapterInitConfigs calls FetchAdapterInitConfigsFunc.
-func (mock *AdapterInitConfigsFetcherMock) FetchAdapterInitConfigs(ctx context.Context, appID int64, adapterKeys []adapter.Key, sdkVersion *semver.Version) ([]sdkapi.AdapterInitConfig, error) {
+func (mock *AdapterInitConfigsFetcherMock) FetchAdapterInitConfigs(ctx context.Context, appID int64, adapterKeys []adapter.Key) ([]sdkapi.AdapterInitConfig, error) {
 	if mock.FetchAdapterInitConfigsFunc == nil {
 		panic("AdapterInitConfigsFetcherMock.FetchAdapterInitConfigsFunc: method is nil but AdapterInitConfigsFetcher.FetchAdapterInitConfigs was just called")
 	}
@@ -60,17 +57,15 @@ func (mock *AdapterInitConfigsFetcherMock) FetchAdapterInitConfigs(ctx context.C
 		Ctx         context.Context
 		AppID       int64
 		AdapterKeys []adapter.Key
-		SdkVersion  *semver.Version
 	}{
 		Ctx:         ctx,
 		AppID:       appID,
 		AdapterKeys: adapterKeys,
-		SdkVersion:  sdkVersion,
 	}
 	mock.lockFetchAdapterInitConfigs.Lock()
 	mock.calls.FetchAdapterInitConfigs = append(mock.calls.FetchAdapterInitConfigs, callInfo)
 	mock.lockFetchAdapterInitConfigs.Unlock()
-	return mock.FetchAdapterInitConfigsFunc(ctx, appID, adapterKeys, sdkVersion)
+	return mock.FetchAdapterInitConfigsFunc(ctx, appID, adapterKeys)
 }
 
 // FetchAdapterInitConfigsCalls gets all the calls that were made to FetchAdapterInitConfigs.
@@ -81,13 +76,11 @@ func (mock *AdapterInitConfigsFetcherMock) FetchAdapterInitConfigsCalls() []stru
 	Ctx         context.Context
 	AppID       int64
 	AdapterKeys []adapter.Key
-	SdkVersion  *semver.Version
 } {
 	var calls []struct {
 		Ctx         context.Context
 		AppID       int64
 		AdapterKeys []adapter.Key
-		SdkVersion  *semver.Version
 	}
 	mock.lockFetchAdapterInitConfigs.RLock()
 	calls = mock.calls.FetchAdapterInitConfigs
