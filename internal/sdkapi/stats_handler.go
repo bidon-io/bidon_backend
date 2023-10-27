@@ -86,11 +86,12 @@ func (h *StatsHandler) sendEvents(c echo.Context, req *request[schema.StatsReque
 		RoundID:                 stats.Result.RoundID,
 		RoundNumber:             statsRoundNumber,
 		ImpID:                   "",
-		DemandID:                stats.Result.WinnerID,
+		DemandID:                stats.Result.GetWinnerDemandID(),
 		AdUnitID:                0,
-		LineItemUID:             0,
+		LineItemUID:             int64(stats.Result.GetWinnerAdUnitUID()),
+		LineItemLabel:           stats.Result.WinnerAdUnitLabel,
 		AdUnitCode:              "",
-		Ecpm:                    stats.Result.ECPM,
+		Ecpm:                    stats.Result.GetWinnerPrice(),
 		PriceFloor:              statsPriceFloor,
 	}
 	statsRequestEvent := event.NewRequest(&req.raw.BaseRequest, adRequestParams, req.geoData)
@@ -108,11 +109,12 @@ func (h *StatsHandler) sendEvents(c echo.Context, req *request[schema.StatsReque
 			RoundID:                 round.ID,
 			RoundNumber:             roundNumber,
 			ImpID:                   "",
-			DemandID:                round.WinnerID,
+			DemandID:                round.GetWinnerDemandID(),
 			AdUnitID:                0,
-			LineItemUID:             0,
+			LineItemUID:             int64(round.GetWinnerAdUnitUID()),
+			LineItemLabel:           round.WinnerAdUnitLabel,
 			AdUnitCode:              "",
-			Ecpm:                    round.WinnerECPM,
+			Ecpm:                    round.GetWinnerPrice(),
 			PriceFloor:              round.PriceFloor,
 		}
 		if round.WinnerID != "" {
@@ -126,11 +128,6 @@ func (h *StatsHandler) sendEvents(c echo.Context, req *request[schema.StatsReque
 		})
 
 		for _, demand := range round.Demands {
-			lineItemUID, err := strconv.Atoi(demand.LineItemUID)
-			if err != nil {
-				lineItemUID = 0
-			}
-
 			adRequestParams = event.AdRequestParams{
 				EventType:               "demand_request",
 				AdType:                  string(req.raw.AdType),
@@ -143,9 +140,10 @@ func (h *StatsHandler) sendEvents(c echo.Context, req *request[schema.StatsReque
 				ImpID:                   "",
 				DemandID:                demand.ID,
 				AdUnitID:                0,
-				LineItemUID:             int64(lineItemUID),
+				LineItemUID:             int64(demand.GetAdUnitUID()),
+				LineItemLabel:           demand.AdUnitLabel,
 				AdUnitCode:              demand.AdUnitID,
-				Ecpm:                    demand.ECPM,
+				Ecpm:                    demand.GetPrice(),
 				PriceFloor:              round.PriceFloor,
 				Bidding:                 false,
 			}
@@ -168,9 +166,10 @@ func (h *StatsHandler) sendEvents(c echo.Context, req *request[schema.StatsReque
 				ImpID:                   "",
 				DemandID:                bid.ID,
 				AdUnitID:                0,
-				LineItemUID:             0,
+				LineItemUID:             int64(bid.GetAdUnitUID()),
+				LineItemLabel:           bid.AdUnitLabel,
 				AdUnitCode:              "",
-				Ecpm:                    bid.ECPM,
+				Ecpm:                    bid.GetPrice(),
 				PriceFloor:              round.PriceFloor,
 				Bidding:                 true,
 			}

@@ -68,6 +68,7 @@
         v-model:schema="extraSchema"
         :api-key="apiKey"
         :ad-type="adType"
+        :ad-type-with-format="adTypeWithFormat"
       />
       <FormSubmitButton :disabled="!meta.valid" />
     </FormCard>

@@ -242,12 +242,20 @@ func Builder(cfg adapter.ProcessedConfigsMap, client *http.Client) (*adapters.Bi
 	if !ok || appID == "" {
 		return nil, fmt.Errorf("missing app_id param for %s adapter", adapter.MintegralKey)
 	}
+	tagID, ok := mCfg["tag_id"].(string)
+	if !ok {
+		tagID = ""
+	}
+	placementID, ok := mCfg["placement_id"].(string)
+	if !ok || placementID == "" {
+		placementID = ""
+	}
 
 	adpt := &MintegralAdapter{
 		SellerID:    sellerID,
 		AppID:       appID,
-		TagID:       mCfg["tag_id"].(string),
-		PlacementID: mCfg["placement_id"].(string),
+		TagID:       tagID,
+		PlacementID: placementID,
 	}
 
 	bidder := adapters.Bidder{

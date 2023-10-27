@@ -28,11 +28,6 @@ export default function ({
     } catch (error) {
       console.error(error);
       await onError(error);
-      // toast.add({
-      //   severity: "error",
-      //   summary: "Error",
-      //   detail: error.error.message,
-      // });
     }
   };
   return handleSubmit;
