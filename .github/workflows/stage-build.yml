@@ -21,6 +21,7 @@ jobs:
 
   deploy:
     name: Deploy
+    needs: [build]
     runs-on: [self-hosted]
     steps:
       - name: Checks-out repository devops
@@ -29,6 +30,6 @@ jobs:
           repository: ${{ secrets.ANSIBLE_SECRET }}/devops
           token: ${{ secrets.PAT_RUNNER }}
 
-      - name: Deploy stage 
+      - name: Deploy stage
         working-directory: ./${{ secrets.ANSIBLE_SECRET }}/stage
         run: make bidon-backend STAGE=${{ inputs.stage-number }}
