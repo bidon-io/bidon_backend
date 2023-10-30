@@ -1,0 +1,34 @@
+name: Stage build and deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      stage-number:
+        type: choice
+        description: Stage number
+        options:
+          - ' '
+          - 1
+          - 2
+
+jobs:
+  build:
+    name: Build image
+    uses: ./.github/workflows/build.yml
+    with:
+      tag: stage${{ inputs.stage-number }}
+    secrets: inherit
+
+  deploy:
+    name: Deploy
+    runs-on: [self-hosted]
+    steps:
+      - name: Checks-out repository devops
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ secrets.ANSIBLE_SECRET }}/devops
+          token: ${{ secrets.PAT_RUNNER }}
+
+      - name: Deploy stage 
+        working-directory: ./${{ secrets.ANSIBLE_SECRET }}/stage
+        run: make bidon-backend STAGE=${{ inputs.stage-number }}
