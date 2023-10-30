@@ -1,36 +1,17 @@
 name: Build
 
 on:
-  push:
-    branches:
-      - 'main'
-  release:
-    types: [published]
+  workflow_call:
+    inputs:
+      tag:
+        type: string
+        required: true
+        default: latest
 
 jobs:
-  tag:
-    name: Set tag
-    outputs:
-      tag: ${{ steps.tag.outputs.tag }}
-    runs-on: [self-hosted]
-    steps:
-      - name: Set tag
-        id: tag
-        run: |
-          import os
-          with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
-            if '${{ github.event_name }}' == 'push':
-                print(f'TAG=main-{"${{ github.sha }}"[:8]}', file=fh)
-            elif '${{ github.event_name }}' == 'release':
-                print('TAG=${{ github.event.release.tag_name }}', file=fh)
-        shell: python
-
   build:
     name: Build image
-    needs: [tag]
     runs-on: [self-hosted]
-    env:
-      TAG: ${{ needs.tag.outputs.tag }}
     strategy:
       fail-fast: false
       matrix:
@@ -61,35 +42,4 @@ jobs:
         with:
           timeout_minutes: 12
           max_attempts: 3
-          command: make docker-build-push-prod-${{ matrix.component }} TAG=$TAG
-
-  deploy:
-    name: Deploy
-    needs: [tag, build]
-    if: always() && needs.build.result == 'success'
-    uses: ./.github/workflows/deploy.yml
-    with:
-      tag:  ${{ needs.tag.outputs.tag }}
-    secrets: inherit
-
-  sentry-release:
-    name: Create Sentry release
-    needs: [tag, build]
-    if: github.event_name == 'release'
-    runs-on: [self-hosted]
-    steps:
-      - name: Checout repo
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: Create Sentry release
-        uses: getsentry/action-release@v1
-        env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_RELEASE_AUTH_TOKEN }}
-          SENTRY_ORG: sentry
-          SENTRY_URL: ${{ secrets.SENTRY_URL }}
-        with:
-          environment: production
-          projects: bidon-admin bidon-sdkapi
-          version: ${{ github.ref }}
+          command: make docker-build-push-prod-${{ matrix.component }} TAG=${{ inputs.tag }}
