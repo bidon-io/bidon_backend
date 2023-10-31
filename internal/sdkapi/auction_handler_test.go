@@ -4,10 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/google/go-cmp/cmp"
 	"net/http"
 	"os"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
 
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
@@ -61,12 +62,13 @@ func testHelperAuctionHandler(t *testing.T) *sdkapi.AuctionHandler {
 	lineItems := []auction.LineItem{
 		{ID: "test", UID: "1701972528521547776", PriceFloor: 0.1, PlacementID: "", AdUnitID: "test_id"},
 	}
+	pf := 0.1
 	adUnits := []auction.AdUnit{
 		{
 			DemandID:   "test",
 			UID:        "1701972528521547776",
 			Label:      "test",
-			PriceFloor: 0.1,
+			PriceFloor: &pf,
 			Extra: map[string]any{
 				"placement_id": "test_id",
 			},
@@ -198,7 +200,8 @@ func TestAuctionHandler_Handle(t *testing.T) {
 			expectedStatusCode: http.StatusUnprocessableEntity,
 			wantErr:            true,
 			err:                sdkapi.ErrNoAdsFound,
-		}, {
+		},
+		{
 			name:               "Err Invalid SDKVesrion",
 			sdkVersion:         "",
 			requestPath:        "testdata/auction/valid_request.json",

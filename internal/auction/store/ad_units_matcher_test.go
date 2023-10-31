@@ -191,9 +191,10 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 			},
 			want: []auction.AdUnit{
 				{
-					DemandID: "applovin",
-					UID:      "1701972528521547776", PriceFloor: 0.1,
-					Label: "applovin-banner-banner",
+					DemandID:   "applovin",
+					UID:        "1701972528521547776",
+					PriceFloor: ptr(0.1),
+					Label:      "applovin-banner-banner",
 					Extra: map[string]any{
 						"placement_id": "applovin-banner-banner",
 					},
@@ -201,7 +202,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 				{
 					DemandID:   "applovin",
 					UID:        "1701972528521547777",
-					PriceFloor: 0.2,
+					PriceFloor: ptr(0.2),
 					Label:      "applovin-banner-adaptive",
 					Extra: map[string]any{
 						"placement_id": "applovin-banner-adaptive",
@@ -221,7 +222,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 				{
 					DemandID:   "applovin",
 					UID:        "1701972528521547777",
-					PriceFloor: 0.2,
+					PriceFloor: ptr(0.2),
 					Label:      "applovin-banner-adaptive",
 					Extra: map[string]any{
 						"placement_id": "applovin-banner-adaptive",
@@ -230,7 +231,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 				{
 					DemandID:   "applovin",
 					UID:        "1701972528521547778",
-					PriceFloor: 0.3,
+					PriceFloor: ptr(0.3),
 					Label:      "applovin-banner-leaderboard",
 					Extra: map[string]any{
 						"placement_id": "applovin-banner-leaderboard",
@@ -250,7 +251,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 				{
 					DemandID:   "applovin",
 					UID:        "1701972528521547777",
-					PriceFloor: 0.2,
+					PriceFloor: ptr(0.2),
 					Label:      "applovin-banner-adaptive",
 					Extra: map[string]any{
 						"placement_id": "applovin-banner-adaptive",
@@ -270,7 +271,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 				{
 					DemandID:   "applovin",
 					UID:        "1701972528521547779",
-					PriceFloor: 0.3,
+					PriceFloor: ptr(0.3),
 					Label:      "applovin-interstitial",
 					Extra: map[string]any{
 						"placement_id": "applovin-interstitial",
@@ -279,7 +280,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 				{
 					DemandID:   "bidmachine",
 					UID:        "1701972528521547780",
-					PriceFloor: 0.3,
+					PriceFloor: ptr(0.3),
 					Label:      "bidmachine-interstitial",
 					Extra:      map[string]any{},
 				},
@@ -297,7 +298,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 				{
 					DemandID:   "applovin",
 					UID:        "1701972528521547781",
-					PriceFloor: 0.4,
+					PriceFloor: ptr(0.4),
 					Label:      "app2-applovin-banner-mrec",
 					Extra: map[string]any{
 						"placement_id": "app2-applovin-banner-mrec",
@@ -318,7 +319,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 				{
 					DemandID:   "applovin",
 					UID:        "1701972528521547777",
-					PriceFloor: 0.2,
+					PriceFloor: ptr(0.2),
 					Label:      "applovin-banner-adaptive",
 					Extra: map[string]any{
 						"placement_id": "applovin-banner-adaptive",
