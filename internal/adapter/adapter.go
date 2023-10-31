@@ -15,32 +15,32 @@ type Config struct {
 const (
 	// Sorted alphabetically
 	AdmobKey      Key = "admob"
+	AmazonKey     Key = "amazon"
 	ApplovinKey   Key = "applovin"
 	BidmachineKey Key = "bidmachine"
+	BigoAdsKey    Key = "bigoads"
 	DTExchangeKey Key = "dtexchange"
+	InmobiKey     Key = "inmobi"
 	MetaKey       Key = "meta"
 	MintegralKey  Key = "mintegral"
 	MobileFuseKey Key = "mobilefuse"
 	UnityAdsKey   Key = "unityads"
 	VungleKey     Key = "vungle"
-	BigoAdsKey    Key = "bigoads"
-	InmobiKey     Key = "inmobi"
-	AmazonKey     Key = "amazon"
 )
 
 var Keys = []Key{
 	AdmobKey,
+	AmazonKey,
 	ApplovinKey,
 	BidmachineKey,
+	BigoAdsKey,
 	DTExchangeKey,
+	InmobiKey,
 	MetaKey,
 	MintegralKey,
 	MobileFuseKey,
 	UnityAdsKey,
 	VungleKey,
-	BigoAdsKey,
-	InmobiKey,
-	AmazonKey,
 }
 
 func GetCommonAdapters(adapters1 []Key, adapters2 []Key) []Key {
