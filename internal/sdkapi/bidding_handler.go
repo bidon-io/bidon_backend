@@ -3,12 +3,13 @@ package sdkapi
 import (
 	"context"
 	"fmt"
-	"github.com/bidon-io/bidon-backend/internal/adapter/store"
-	"github.com/bidon-io/bidon-backend/internal/auction"
 	"net/http"
 	"sort"
 	"strconv"
 	"time"
+
+	"github.com/bidon-io/bidon-backend/internal/adapter/store"
+	"github.com/bidon-io/bidon-backend/internal/auction"
 
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/bidding"
@@ -87,6 +88,10 @@ func (h *BiddingHandler) Handle(c echo.Context) error {
 
 	imp := req.raw.Imp
 	adUnitsMap, err := h.AdUnitsMapBuilder.Build(ctx, req.app.ID, req.raw.Adapters.Keys(), imp)
+	if err != nil {
+		return err
+	}
+
 	adapterConfigs, err := h.AdaptersConfigBuilder.Build(ctx, req.app.ID, req.raw.Adapters.Keys(), imp, &adUnitsMap)
 	if err != nil {
 		return err

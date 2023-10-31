@@ -43,8 +43,9 @@ func TestBuilderV2_Build(t *testing.T) {
 			},
 		},
 	}
+	pf := 0.1
 	adUnits := []auction.AdUnit{
-		{DemandID: "test", PriceFloor: 0.1, Label: "test", Extra: map[string]any{"placement_id": "test"}},
+		{DemandID: "test", PriceFloor: &pf, Label: "test", Extra: map[string]any{"placement_id": "test"}},
 	}
 
 	configFetcher := &auctionmocks.ConfigMatcherMock{
