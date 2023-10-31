@@ -327,25 +327,25 @@ func TestLineItemsMatcher_ExtraFields(t *testing.T) {
 		{
 			params: params([]adapter.Key{adapter.ApplovinKey}),
 			want: []auction.LineItem{
-				{ID: "applovin", UID: "1", PriceFloor: 0.15, AdUnitID: "code1", ZonedID: "applovin_line_item_zone_id"},
+				{ID: "applovin", UID: "2", PriceFloor: 0.15, AdUnitID: "code2", ZonedID: "applovin_line_item_zone_id"},
 			},
 		},
 		{
 			params: params([]adapter.Key{adapter.BidmachineKey}),
 			want: []auction.LineItem{
-				{ID: "bidmachine", UID: "2", PriceFloor: 0.15, AdUnitID: "code2"},
+				{ID: "bidmachine", UID: "3", PriceFloor: 0.15, AdUnitID: "code3"},
 			},
 		},
 		{
 			params: params([]adapter.Key{adapter.DTExchangeKey}),
 			want: []auction.LineItem{
-				{ID: "dtexchange", UID: "3", PriceFloor: 0.15, AdUnitID: "code3", PlacementID: "dt_exchange_line_item_placement_id"},
+				{ID: "dtexchange", UID: "5", PriceFloor: 0.15, AdUnitID: "code5", PlacementID: "dt_exchange_line_item_placement_id"},
 			},
 		},
 		{
 			params: params([]adapter.Key{adapter.MetaKey}),
 			want: []auction.LineItem{
-				{ID: "meta", UID: "4", PriceFloor: 0.15, AdUnitID: "code4", PlacementID: "meta_line_item_placement_id"},
+				{ID: "meta", UID: "7", PriceFloor: 0.15, AdUnitID: "code7", PlacementID: "meta_line_item_placement_id"},
 			},
 		},
 		{
@@ -353,7 +353,7 @@ func TestLineItemsMatcher_ExtraFields(t *testing.T) {
 			want: []auction.LineItem{
 				{
 					ID:          "mintegral",
-					UID:         "5",
+					UID:         "8",
 					PriceFloor:  0.15,
 					AdUnitID:    "mintegral_line_item_ad_unit_id",
 					PlacementID: "mintegral_line_item_placement_id",
@@ -363,31 +363,31 @@ func TestLineItemsMatcher_ExtraFields(t *testing.T) {
 		{
 			params: params([]adapter.Key{adapter.MobileFuseKey}),
 			want: []auction.LineItem{
-				{ID: "mobilefuse", UID: "6", PriceFloor: 0.15, AdUnitID: "code6", PlacementID: "mobile_fuse_line_item_placement_id"},
+				{ID: "mobilefuse", UID: "9", PriceFloor: 0.15, AdUnitID: "code9", PlacementID: "mobile_fuse_line_item_placement_id"},
 			},
 		},
 		{
 			params: params([]adapter.Key{adapter.UnityAdsKey}),
 			want: []auction.LineItem{
-				{ID: "unityads", UID: "7", PriceFloor: 0.15, AdUnitID: "code7", PlacementID: "unity_ads_line_item_placement_id"},
+				{ID: "unityads", UID: "10", PriceFloor: 0.15, AdUnitID: "code10", PlacementID: "unity_ads_line_item_placement_id"},
 			},
 		},
 		{
 			params: params([]adapter.Key{adapter.VungleKey}),
 			want: []auction.LineItem{
-				{ID: "vungle", UID: "8", PriceFloor: 0.15, AdUnitID: "code8", PlacementID: "vungle_line_item_placement_id"},
+				{ID: "vungle", UID: "11", PriceFloor: 0.15, AdUnitID: "code11", PlacementID: "vungle_line_item_placement_id"},
 			},
 		},
 		{
 			params: params([]adapter.Key{adapter.BigoAdsKey}),
 			want: []auction.LineItem{
-				{ID: "bigoads", UID: "9", PriceFloor: 0.15, AdUnitID: "code9", SlotID: "bigo_ads_line_item_slot_id"},
+				{ID: "bigoads", UID: "4", PriceFloor: 0.15, AdUnitID: "code4", SlotID: "bigo_ads_line_item_slot_id"},
 			},
 		},
 		{
 			params: params([]adapter.Key{adapter.InmobiKey}),
 			want: []auction.LineItem{
-				{ID: "inmobi", UID: "10", PriceFloor: 0.15, AdUnitID: "code10", PlacementID: "inmobi_line_item_placement_id"},
+				{ID: "inmobi", UID: "6", PriceFloor: 0.15, AdUnitID: "code6", PlacementID: "inmobi_line_item_placement_id"},
 			},
 		},
 	}

@@ -4,9 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/Masterminds/semver/v3"
 	"os"
 	"testing"
+
+	"github.com/Masterminds/semver/v3"
 
 	"github.com/bidon-io/bidon-backend/internal/ad"
 
@@ -162,6 +163,10 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Valid(t *testing.T) {
 				&sdkapi.AdmobInitConfig{
 					AppID: fmt.Sprintf("admob_app_%d", apps[0].ID),
 				},
+				&sdkapi.AmazonInitConfig{
+					AppKey: fmt.Sprintf("amazon_app_%d", apps[0].ID),
+					Slots:  []sdkapi.AmazonSlot{},
+				},
 				&sdkapi.ApplovinInitConfig{
 					AppKey: "applovin",
 					SDKKey: "applovin",
@@ -171,16 +176,11 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Valid(t *testing.T) {
 					Endpoint:        "x.appbaqend.com",
 					MediationConfig: []string{"one", "two"},
 				},
+				&sdkapi.BigoAdsInitConfig{
+					AppID: fmt.Sprintf("bigoads_app_%d", apps[0].ID),
+				},
 				&sdkapi.DTExchangeInitConfig{
 					AppID: fmt.Sprintf("dtexchange_app_%d", apps[0].ID),
-				},
-				&sdkapi.MetaInitConfig{
-					AppID:     fmt.Sprintf("meta_app_%d", apps[0].ID),
-					AppSecret: fmt.Sprintf("meta_app_%d_secret", apps[0].ID),
-				},
-				&sdkapi.MintegralInitConfig{
-					AppID:  fmt.Sprintf("mintegral_app_%d", apps[0].ID),
-					AppKey: "mintegral",
 				},
 			},
 		},
@@ -190,23 +190,24 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Valid(t *testing.T) {
 			adapterKeys: adapter.Keys,
 			sdkVersion:  "0.4.0",
 			want: []sdkapi.AdapterInitConfig{
+				&sdkapi.InmobiInitConfig{
+					AccountID: "inmobi",
+					AppKey:    fmt.Sprintf("inmobi_app_%d", apps[1].ID),
+				},
+				&sdkapi.MetaInitConfig{
+					AppID:     fmt.Sprintf("meta_app_%d", apps[1].ID),
+					AppSecret: fmt.Sprintf("meta_app_%d_secret", apps[1].ID),
+				},
+				&sdkapi.MintegralInitConfig{
+					AppID:  fmt.Sprintf("mintegral_app_%d", apps[1].ID),
+					AppKey: "mintegral",
+				},
 				&sdkapi.MobileFuseInitConfig{},
 				&sdkapi.UnityAdsInitConfig{
 					GameID: fmt.Sprintf("unityads_game_%d", apps[1].ID),
 				},
 				&sdkapi.VungleInitConfig{
 					AppID: fmt.Sprintf("vungle_app_%d", apps[1].ID),
-				},
-				&sdkapi.BigoAdsInitConfig{
-					AppID: fmt.Sprintf("bigoads_app_%d", apps[1].ID),
-				},
-				&sdkapi.InmobiInitConfig{
-					AccountID: "inmobi",
-					AppKey:    fmt.Sprintf("inmobi_app_%d", apps[1].ID),
-				},
-				&sdkapi.AmazonInitConfig{
-					AppKey: fmt.Sprintf("amazon_app_%d", apps[1].ID),
-					Slots:  []sdkapi.AmazonSlot{},
 				},
 			},
 		},

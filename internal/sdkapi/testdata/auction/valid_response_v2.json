@@ -42,7 +42,7 @@
     {
       "demand_id": "test",
       "uid": "1701972528521547776",
-      "price_floor": 0.1,
+      "pricefloor": 0.1,
       "label": "test",
       "ext": {
         "placement_id": "test_id"
