@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/bidon-io/bidon-backend/internal/adapter/store"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -12,6 +11,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/bidon-io/bidon-backend/internal/adapter/store"
 
 	"github.com/bidon-io/bidon-backend/config"
 
@@ -100,12 +101,13 @@ func testHelperBiddingHandler(t *testing.T) sdkapi.BiddingHandler {
 			MaxIdleConnsPerHost: 50,
 		},
 	}
+	pf := 0.1
 	adUnitsMap := &store.AdUnitsMap{
 		adapter.MetaKey: []auction.AdUnit{
 			{
 				DemandID:   "meta",
 				Label:      "meta",
-				PriceFloor: 0.1,
+				PriceFloor: &pf,
 				UID:        "123_meta",
 				Extra: map[string]any{
 					"placement_id": "123",

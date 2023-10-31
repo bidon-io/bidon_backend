@@ -42,7 +42,7 @@ type AdUnit struct {
 	DemandID   string         `json:"demand_id"`
 	UID        string         `json:"uid"`
 	Label      string         `json:"label"`
-	PriceFloor float64        `json:"pricefloor"`
+	PriceFloor *float64       `json:"pricefloor,omitempty"`
 	Extra      map[string]any `json:"ext"`
 }
 
