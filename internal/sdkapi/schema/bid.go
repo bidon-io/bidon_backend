@@ -1,6 +1,20 @@
 package schema
 
-import "strconv"
+import (
+	"strconv"
+)
+
+type BidType string
+
+const (
+	EmptyBidType BidType = ""
+	RTBBidType   BidType = "RTB"
+	CPMBidType   BidType = "CPM"
+)
+
+func (b BidType) String() string {
+	return string(b)
+}
 
 type Bid struct {
 	AuctionID               string                `json:"auction_id" validate:"required"`
@@ -16,7 +30,7 @@ type Bid struct {
 	AdUnitLabel             string                `json:"ad_unit_label"`
 	ECPM                    float64               `json:"ecpm" validate:"required_without=Price"` // Deprecated: use Price instead
 	Price                   float64               `json:"price" validate:"required_without=ECPM"`
-	BidType                 string                `json:"bid_type" validate:"omitempty,oneof=rtb cpm"`
+	BidType                 BidType               `json:"bid_type" validate:"omitempty,oneof=RTB CPM"`
 	RoundPriceFloor         float64               `json:"round_price_floor"`
 	AuctionPriceFloor       float64               `json:"auction_price_floor"`
 	Banner                  *BannerAdObject       `json:"banner"`
@@ -25,7 +39,7 @@ type Bid struct {
 }
 
 func (b Bid) IsBidding() bool {
-	return b.BidType == "rtb"
+	return b.BidType == RTBBidType
 }
 
 func (b Bid) GetAdUnitUID() int {
