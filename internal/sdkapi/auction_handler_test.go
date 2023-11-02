@@ -69,6 +69,7 @@ func testHelperAuctionHandler(t *testing.T) *sdkapi.AuctionHandler {
 			UID:        "1701972528521547776",
 			Label:      "test",
 			PriceFloor: &pf,
+			BidType:    schema.RTBBidType,
 			Extra: map[string]any{
 				"placement_id": "test_id",
 			},

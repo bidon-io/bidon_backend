@@ -44,6 +44,7 @@
       "uid": "1701972528521547776",
       "pricefloor": 0.1,
       "label": "test",
+      "bid_type": "RTB",
       "ext": {
         "placement_id": "test_id"
       }

@@ -2,6 +2,7 @@ package auction
 
 import (
 	"github.com/bidon-io/bidon-backend/internal/adapter"
+	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 )
 
 type Auction struct {
@@ -43,6 +44,7 @@ type AdUnit struct {
 	UID        string         `json:"uid"`
 	Label      string         `json:"label"`
 	PriceFloor *float64       `json:"pricefloor,omitempty"`
+	BidType    schema.BidType `json:"bid_type"`
 	Extra      map[string]any `json:"ext"`
 }
 

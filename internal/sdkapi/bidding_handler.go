@@ -66,6 +66,7 @@ type AdUnit struct {
 	DemandID adapter.Key    `json:"demand_id"`
 	UID      string         `json:"uid"`
 	Label    string         `json:"label"`
+	BidType  schema.BidType `json:"bid_type"`
 	Extra    map[string]any `json:"ext"`
 }
 
@@ -247,6 +248,7 @@ func selectAdUnit(demandResponse adapters.DemandResponse, adUnitsMap *store.AdUn
 		DemandID: demandResponse.DemandID,
 		UID:      adUnit.UID,
 		Label:    adUnit.Label,
+		BidType:  adUnit.BidType,
 		Extra:    adUnit.Extra,
 	}, nil
 }

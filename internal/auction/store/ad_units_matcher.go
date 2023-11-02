@@ -8,6 +8,7 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/db"
 	"github.com/bidon-io/bidon-backend/internal/device"
+	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	"gorm.io/gorm"
 )
 
@@ -22,7 +23,7 @@ func (m *AdUnitsMatcher) Match(ctx context.Context, params *auction.BuildParams)
 
 	query := m.DB.
 		WithContext(ctx).
-		Select("bid_floor", "line_items.human_name", "line_items.extra", "line_items.public_uid").
+		Select("bid_floor", "line_items.human_name", "line_items.bidding", "line_items.extra", "line_items.public_uid").
 		Where(map[string]any{
 			"app_id":  params.AppID,
 			"ad_type": db.AdTypeFromDomain(params.AdType),
@@ -66,6 +67,11 @@ func (m *AdUnitsMatcher) find(query *gorm.DB) ([]auction.AdUnit, error) {
 		adUnits[i].DemandID = dbLineItem.Account.DemandSource.APIKey
 		adUnits[i].UID = strconv.FormatInt(dbLineItem.PublicUID.Int64, 10)
 		adUnits[i].Label = dbLineItem.HumanName
+		if dbLineItem.IsBidding != nil && *dbLineItem.IsBidding {
+			adUnits[i].BidType = schema.RTBBidType
+		} else {
+			adUnits[i].BidType = schema.CPMBidType
+		}
 		if dbLineItem.BidFloor.Valid {
 			pf := dbLineItem.BidFloor.Decimal.InexactFloat64()
 			adUnits[i].PriceFloor = &pf
