@@ -1,6 +1,10 @@
 package schema
 
-import "github.com/bidon-io/bidon-backend/internal/ad"
+import (
+	"strings"
+
+	"github.com/bidon-io/bidon-backend/internal/ad"
+)
 
 type ShowRequest struct {
 	BaseRequest
@@ -22,4 +26,12 @@ func (r *ShowRequest) Map() map[string]any {
 	}
 
 	return m
+}
+
+func (b *ShowRequest) NormalizeValues() {
+	b.BaseRequest.NormalizeValues()
+
+	if b.Bid != nil {
+		b.Bid.BidType = BidType(strings.ToUpper(b.Bid.BidType.String()))
+	}
 }

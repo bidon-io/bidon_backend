@@ -12,6 +12,7 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/db"
 	"github.com/bidon-io/bidon-backend/internal/db/dbtest"
 	"github.com/bidon-io/bidon-backend/internal/device"
+	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/shopspring/decimal"
@@ -119,6 +120,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 			HumanName: "bidmachine-interstitial",
 			Code:      ptr("bidmachine-interstitial"),
 			AccountID: bidmachineAccount.ID,
+			IsBidding: ptr(true),
 			PublicUID: sql.NullInt64{
 				Int64: 1701972528521547780,
 				Valid: true,
@@ -195,6 +197,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 					UID:        "1701972528521547776",
 					PriceFloor: ptr(0.1),
 					Label:      "applovin-banner-banner",
+					BidType:    schema.CPMBidType,
 					Extra: map[string]any{
 						"placement_id": "applovin-banner-banner",
 					},
@@ -204,6 +207,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 					UID:        "1701972528521547777",
 					PriceFloor: ptr(0.2),
 					Label:      "applovin-banner-adaptive",
+					BidType:    schema.CPMBidType,
 					Extra: map[string]any{
 						"placement_id": "applovin-banner-adaptive",
 					},
@@ -224,6 +228,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 					UID:        "1701972528521547777",
 					PriceFloor: ptr(0.2),
 					Label:      "applovin-banner-adaptive",
+					BidType:    schema.CPMBidType,
 					Extra: map[string]any{
 						"placement_id": "applovin-banner-adaptive",
 					},
@@ -233,6 +238,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 					UID:        "1701972528521547778",
 					PriceFloor: ptr(0.3),
 					Label:      "applovin-banner-leaderboard",
+					BidType:    schema.CPMBidType,
 					Extra: map[string]any{
 						"placement_id": "applovin-banner-leaderboard",
 					},
@@ -253,6 +259,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 					UID:        "1701972528521547777",
 					PriceFloor: ptr(0.2),
 					Label:      "applovin-banner-adaptive",
+					BidType:    schema.CPMBidType,
 					Extra: map[string]any{
 						"placement_id": "applovin-banner-adaptive",
 					},
@@ -273,6 +280,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 					UID:        "1701972528521547779",
 					PriceFloor: ptr(0.3),
 					Label:      "applovin-interstitial",
+					BidType:    schema.CPMBidType,
 					Extra: map[string]any{
 						"placement_id": "applovin-interstitial",
 					},
@@ -282,6 +290,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 					UID:        "1701972528521547780",
 					PriceFloor: ptr(0.3),
 					Label:      "bidmachine-interstitial",
+					BidType:    schema.RTBBidType,
 					Extra:      map[string]any{},
 				},
 			},
@@ -300,6 +309,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 					UID:        "1701972528521547781",
 					PriceFloor: ptr(0.4),
 					Label:      "app2-applovin-banner-mrec",
+					BidType:    schema.CPMBidType,
 					Extra: map[string]any{
 						"placement_id": "app2-applovin-banner-mrec",
 					},
@@ -321,6 +331,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 					UID:        "1701972528521547777",
 					PriceFloor: ptr(0.2),
 					Label:      "applovin-banner-adaptive",
+					BidType:    schema.CPMBidType,
 					Extra: map[string]any{
 						"placement_id": "applovin-banner-adaptive",
 					},
