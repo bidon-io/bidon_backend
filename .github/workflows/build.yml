@@ -1,4 +1,4 @@
-name: Build
+name: xBuild
 
 on:
   workflow_call:
@@ -7,6 +7,10 @@ on:
         type: string
         required: true
         default: latest
+      registry:
+        type: string
+        required: true
+        default: ghcr.io/bidon-io
 
 jobs:
   build:
@@ -42,4 +46,4 @@ jobs:
         with:
           timeout_minutes: 12
           max_attempts: 3
-          command: make docker-build-push-prod-${{ matrix.component }} TAG=${{ inputs.tag }}
+          command: make docker-build-push-prod-${{ matrix.component }} TAG=${{ inputs.tag }} REGISTRY=${{ inputs.registry }}
