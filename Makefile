@@ -1,9 +1,9 @@
-REGISTRY = "ghcr.io/bidon-io"
+REGISTRY ?= "ghcr.io/bidon-io"
 
 docker-build-push-prod-back:
 	cd bidon_back && \
 	docker buildx build --platform linux/amd64 --provenance=false --target=prod \
-	--build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $(REGISTRY)/bidon-back:latest \
+	--build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $(REGISTRY)/bidon-back \
 	-t $(REGISTRY)/bidon-back:$(TAG) -t $(REGISTRY)/bidon-back:latest --push .
 
 docker-build-push-prod-admin:
