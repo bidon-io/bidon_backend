@@ -22,8 +22,8 @@ var _ sdkapi.AppFetcher = &AppFetcherMock{}
 //
 //		// make and configure a mocked sdkapi.AppFetcher
 //		mockedAppFetcher := &AppFetcherMock{
-//			FetchFunc: func(ctx context.Context, appKey string, appBundle string) (sdkapi.App, error) {
-//				panic("mock out the Fetch method")
+//			FetchCachedFunc: func(ctx context.Context, appKey string, appBundle string) (sdkapi.App, error) {
+//				panic("mock out the FetchCached method")
 //			},
 //		}
 //
@@ -32,13 +32,13 @@ var _ sdkapi.AppFetcher = &AppFetcherMock{}
 //
 //	}
 type AppFetcherMock struct {
-	// FetchFunc mocks the Fetch method.
-	FetchFunc func(ctx context.Context, appKey string, appBundle string) (sdkapi.App, error)
+	// FetchCachedFunc mocks the FetchCached method.
+	FetchCachedFunc func(ctx context.Context, appKey string, appBundle string) (sdkapi.App, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
-		// Fetch holds details about calls to the Fetch method.
-		Fetch []struct {
+		// FetchCached holds details about calls to the FetchCached method.
+		FetchCached []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// AppKey is the appKey argument value.
@@ -47,13 +47,13 @@ type AppFetcherMock struct {
 			AppBundle string
 		}
 	}
-	lockFetch sync.RWMutex
+	lockFetchCached sync.RWMutex
 }
 
-// Fetch calls FetchFunc.
-func (mock *AppFetcherMock) Fetch(ctx context.Context, appKey string, appBundle string) (sdkapi.App, error) {
-	if mock.FetchFunc == nil {
-		panic("AppFetcherMock.FetchFunc: method is nil but AppFetcher.Fetch was just called")
+// FetchCached calls FetchCachedFunc.
+func (mock *AppFetcherMock) FetchCached(ctx context.Context, appKey string, appBundle string) (sdkapi.App, error) {
+	if mock.FetchCachedFunc == nil {
+		panic("AppFetcherMock.FetchCachedFunc: method is nil but AppFetcher.FetchCached was just called")
 	}
 	callInfo := struct {
 		Ctx       context.Context
@@ -64,17 +64,17 @@ func (mock *AppFetcherMock) Fetch(ctx context.Context, appKey string, appBundle 
 		AppKey:    appKey,
 		AppBundle: appBundle,
 	}
-	mock.lockFetch.Lock()
-	mock.calls.Fetch = append(mock.calls.Fetch, callInfo)
-	mock.lockFetch.Unlock()
-	return mock.FetchFunc(ctx, appKey, appBundle)
+	mock.lockFetchCached.Lock()
+	mock.calls.FetchCached = append(mock.calls.FetchCached, callInfo)
+	mock.lockFetchCached.Unlock()
+	return mock.FetchCachedFunc(ctx, appKey, appBundle)
 }
 
-// FetchCalls gets all the calls that were made to Fetch.
+// FetchCachedCalls gets all the calls that were made to FetchCached.
 // Check the length with:
 //
-//	len(mockedAppFetcher.FetchCalls())
-func (mock *AppFetcherMock) FetchCalls() []struct {
+//	len(mockedAppFetcher.FetchCachedCalls())
+func (mock *AppFetcherMock) FetchCachedCalls() []struct {
 	Ctx       context.Context
 	AppKey    string
 	AppBundle string
@@ -84,9 +84,9 @@ func (mock *AppFetcherMock) FetchCalls() []struct {
 		AppKey    string
 		AppBundle string
 	}
-	mock.lockFetch.RLock()
-	calls = mock.calls.Fetch
-	mock.lockFetch.RUnlock()
+	mock.lockFetchCached.RLock()
+	calls = mock.calls.FetchCached
+	mock.lockFetchCached.RUnlock()
 	return calls
 }
 

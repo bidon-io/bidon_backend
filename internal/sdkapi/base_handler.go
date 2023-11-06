@@ -25,7 +25,7 @@ type App struct {
 //go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/mocks.go -pkg mocks . AppFetcher ConfigFetcher Geocoder
 
 type AppFetcher interface {
-	Fetch(ctx context.Context, appKey, appBundle string) (App, error)
+	FetchCached(ctx context.Context, appKey, appBundle string) (App, error)
 }
 
 type ConfigFetcher interface {
@@ -55,7 +55,7 @@ func (b *BaseHandler[T, PT]) resolveRequest(c echo.Context) (*request[T, PT], er
 
 	rawApp := req.GetApp()
 
-	app, err := b.AppFetcher.Fetch(c.Request().Context(), rawApp.Key, rawApp.Bundle)
+	app, err := b.AppFetcher.FetchCached(c.Request().Context(), rawApp.Key, rawApp.Bundle)
 	if err != nil {
 		return nil, err
 	}
