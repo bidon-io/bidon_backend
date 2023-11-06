@@ -4,18 +4,6 @@ import (
 	"strconv"
 )
 
-type BidType string
-
-const (
-	EmptyBidType BidType = ""
-	RTBBidType   BidType = "RTB"
-	CPMBidType   BidType = "CPM"
-)
-
-func (b BidType) String() string {
-	return string(b)
-}
-
 type Bid struct {
 	AuctionID               string                `json:"auction_id" validate:"required"`
 	AuctionConfigurationID  int64                 `json:"auction_configuration_id" validate:"required_without=AuctionConfigurationUID"`

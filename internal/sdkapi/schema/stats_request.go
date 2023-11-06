@@ -2,6 +2,7 @@ package schema
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/bidon-io/bidon-backend/internal/ad"
 )
@@ -19,6 +20,13 @@ func (r *StatsRequest) Map() map[string]any {
 	m["stats"] = r.Stats.Map()
 
 	return m
+}
+
+func (r *StatsRequest) NormalizeValues() {
+	r.BaseRequest.NormalizeValues()
+
+	// Some SDK versions can send lower case bid_type
+	r.Stats.Result.BidType = BidType(strings.ToUpper(r.Stats.Result.BidType.String()))
 }
 
 func (r *StatsRequest) GetAuctionConfigurationParams() (string, string) {
@@ -64,7 +72,7 @@ type StatsResult struct {
 	RoundID           string  `json:"round_id"`
 	ECPM              float64 `json:"ecpm"`
 	Price             float64 `json:"price"`
-	BidType           string  `json:"bid_type" validate:"omitempty,oneof=rtb cpm"`
+	BidType           BidType `json:"bid_type" validate:"omitempty,oneof=RTB CPM"`
 	AuctionStartTS    int     `json:"auction_start_ts"`
 	AuctionFinishTS   int     `json:"auction_finish_ts"`
 }
@@ -109,7 +117,7 @@ func (s StatsResult) GetWinnerAdUnitUID() int {
 }
 
 func (s StatsResult) IsBidding() bool {
-	return s.BidType == "rtb"
+	return s.BidType == RTBBidType
 }
 
 func (s StatsResult) IsSuccess() bool {
