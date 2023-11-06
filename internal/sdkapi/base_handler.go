@@ -110,5 +110,5 @@ func (r *request[T, PT]) countryCode() string {
 		return geo.Country
 	}
 
-	return geocoder.UNKNOWN_COUNTRY_CODE
+	return geocoder.UnknownCountryCode
 }
