@@ -29,7 +29,7 @@ func SetupLossHandler() sdkapi.LossHandler {
 		return nil
 	}
 	appFetcher := &mocks.AppFetcherMock{
-		FetchFunc: func(ctx context.Context, appKey string, appBundle string) (sdkapi.App, error) {
+		FetchCachedFunc: func(ctx context.Context, appKey string, appBundle string) (sdkapi.App, error) {
 			return app, nil
 		},
 	}
