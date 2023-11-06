@@ -73,6 +73,7 @@ func TestBuilder_Build(t *testing.T) {
 			want: &auction.Auction{
 				ConfigID:  config.ID,
 				LineItems: lineItems,
+				AdUnits:   []auction.AdUnit{},
 				Rounds: []auction.RoundConfig{
 					{ID: "ROUND_1", Demands: []adapter.Key{adapter.BidmachineKey}, Bidding: []adapter.Key{}, Timeout: 15000},
 					{ID: "ROUND_2", Demands: []adapter.Key{adapter.UnityAdsKey}, Bidding: []adapter.Key{adapter.BidmachineKey}, Timeout: 15000},
@@ -87,6 +88,7 @@ func TestBuilder_Build(t *testing.T) {
 			want: &auction.Auction{
 				ConfigID:  config.ID,
 				LineItems: lineItems,
+				AdUnits:   []auction.AdUnit{},
 				Rounds: []auction.RoundConfig{
 					{ID: "ROUND_1", Demands: []adapter.Key{adapter.ApplovinKey}, Bidding: []adapter.Key{}, Timeout: 15000},
 					{ID: "ROUND_3", Demands: []adapter.Key{adapter.ApplovinKey}, Bidding: []adapter.Key{}, Timeout: 15000},

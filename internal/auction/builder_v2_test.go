@@ -72,8 +72,9 @@ func TestBuilderV2_Build(t *testing.T) {
 			name:   "One round empty",
 			params: &auction.BuildParams{Adapters: []adapter.Key{adapter.UnityAdsKey, adapter.BidmachineKey}},
 			want: &auction.Auction{
-				ConfigID: config.ID,
-				AdUnits:  adUnits,
+				ConfigID:  config.ID,
+				AdUnits:   adUnits,
+				LineItems: []auction.LineItem{},
 				Rounds: []auction.RoundConfig{
 					{ID: "ROUND_1", Demands: []adapter.Key{adapter.BidmachineKey}, Bidding: []adapter.Key{}, Timeout: 15000},
 					{ID: "ROUND_2", Demands: []adapter.Key{adapter.UnityAdsKey}, Bidding: []adapter.Key{adapter.BidmachineKey}, Timeout: 15000},
@@ -86,8 +87,9 @@ func TestBuilderV2_Build(t *testing.T) {
 			name:   "Single adapter available",
 			params: &auction.BuildParams{Adapters: []adapter.Key{adapter.ApplovinKey}},
 			want: &auction.Auction{
-				ConfigID: config.ID,
-				AdUnits:  adUnits,
+				ConfigID:  config.ID,
+				AdUnits:   adUnits,
+				LineItems: []auction.LineItem{},
 				Rounds: []auction.RoundConfig{
 					{ID: "ROUND_1", Demands: []adapter.Key{adapter.ApplovinKey}, Bidding: []adapter.Key{}, Timeout: 15000},
 					{ID: "ROUND_3", Demands: []adapter.Key{adapter.ApplovinKey}, Bidding: []adapter.Key{}, Timeout: 15000},
