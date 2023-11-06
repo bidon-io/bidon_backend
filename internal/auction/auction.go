@@ -10,8 +10,8 @@ type Auction struct {
 	ConfigUID                string        `json:"auction_configuration_uid"`
 	ExternalWinNotifications bool          `json:"external_win_notifications"`
 	Rounds                   []RoundConfig `json:"rounds"`
-	LineItems                []LineItem    `json:"line_items,omitempty"` // Deprecated: use AdUnits instead
-	AdUnits                  []AdUnit      `json:"ad_units,omitempty"`
+	LineItems                []LineItem    `json:"line_items"` // Deprecated: use AdUnits instead
+	AdUnits                  []AdUnit      `json:"ad_units"`
 	Segment                  Segment       `json:"segment"`
 }
 type Config struct {
