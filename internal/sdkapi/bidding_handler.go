@@ -98,11 +98,17 @@ func (h *BiddingHandler) Handle(c echo.Context) error {
 		return err
 	}
 
+	auctionConfig := req.auctionConfig
+	if auctionConfig == nil {
+		return fmt.Errorf("cannot find config: %v", imp.AuctionConfigurationID)
+	}
+
 	params := &bidding.BuildParams{
 		AppID:          req.app.ID,
 		BiddingRequest: req.raw,
 		GeoData:        req.geoData,
 		AdapterConfigs: adapterConfigs,
+		AuctionConfig:  *auctionConfig,
 	}
 	auctionResult, err := h.BiddingBuilder.HoldAuction(ctx, params)
 	c.Logger().Printf("[BIDDING] bids: (%+v), err: (%s), took (%s)", auctionResult, err, time.Since(start))
@@ -175,7 +181,7 @@ func (h *BiddingHandler) buildBidsDeprecated(auctionResult bidding.AuctionResult
 
 func (h *BiddingHandler) sendEvents(c echo.Context, req *request[schema.BiddingRequest, *schema.BiddingRequest], auctionResult *bidding.AuctionResult) {
 	imp := req.raw.Imp
-	auctionConfigurationUID, err := strconv.Atoi(imp.AuctionConfigUID)
+	auctionConfigurationUID, err := strconv.Atoi(imp.AuctionConfigurationUID)
 	if err != nil {
 		auctionConfigurationUID = 0
 	}
@@ -185,7 +191,7 @@ func (h *BiddingHandler) sendEvents(c echo.Context, req *request[schema.BiddingR
 			EventType:               "bid_request",
 			AdType:                  string(req.raw.AdType),
 			AuctionID:               imp.AuctionID,
-			AuctionConfigurationID:  imp.AuctionConfigID,
+			AuctionConfigurationID:  imp.AuctionConfigurationID,
 			AuctionConfigurationUID: int64(auctionConfigurationUID),
 			Status:                  fmt.Sprint(result.Status),
 			RoundID:                 imp.RoundID,
@@ -211,7 +217,7 @@ func (h *BiddingHandler) sendEvents(c echo.Context, req *request[schema.BiddingR
 				EventType:               "bid",
 				AdType:                  string(req.raw.AdType),
 				AuctionID:               imp.AuctionID,
-				AuctionConfigurationID:  imp.AuctionConfigID,
+				AuctionConfigurationID:  imp.AuctionConfigurationID,
 				AuctionConfigurationUID: int64(auctionConfigurationUID),
 				Status:                  "SUCCESS",
 				RoundID:                 imp.RoundID,
