@@ -1,8 +1,9 @@
 package schema
 
 import (
-	"github.com/Masterminds/semver/v3"
 	"strings"
+
+	"github.com/Masterminds/semver/v3"
 )
 
 type BaseRequest struct {
@@ -73,4 +74,11 @@ func (r *BaseRequest) SetSDKVersion(version string) {
 
 func (r *BaseRequest) GetSDKVersionSemver() (*semver.Version, error) {
 	return semver.NewVersion(r.App.SDKVersion)
+}
+
+func (r *BaseRequest) GetAuctionConfigurationParams() (string, string) {
+	return "", ""
+}
+
+func (r *BaseRequest) SetAuctionConfigurationParams(id int64, uid string) {
 }

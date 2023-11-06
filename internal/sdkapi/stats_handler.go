@@ -14,19 +14,14 @@ import (
 
 type StatsHandler struct {
 	*BaseHandler[schema.StatsRequest, *schema.StatsRequest]
-	ConfigMatcher       ConfigMatcher
 	EventLogger         *event.Logger
 	NotificationHandler StatsNotificationHandler
 }
 
-//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/stats_mocks.go -pkg mocks . StatsNotificationHandler ConfigMatcher
+//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/stats_mocks.go -pkg mocks . StatsNotificationHandler
 
 type StatsNotificationHandler interface {
 	HandleStats(context.Context, schema.Stats, auction.Config) error
-}
-
-type ConfigMatcher interface {
-	MatchById(ctx context.Context, appID, id int64) *auction.Config
 }
 
 func (h *StatsHandler) Handle(c echo.Context) error {
@@ -42,8 +37,7 @@ func (h *StatsHandler) Handle(c echo.Context) error {
 
 	h.sendEvents(c, req)
 
-	ctx := c.Request().Context()
-	config := h.ConfigMatcher.MatchById(ctx, req.app.ID, int64(req.raw.Stats.AuctionConfigurationID))
+	config := req.auctionConfig
 	if config == nil {
 		logError(c, fmt.Errorf("cannot find config: %v", req.raw.Stats.AuctionConfigurationID))
 	} else {
@@ -59,6 +53,14 @@ func (h *StatsHandler) sendEvents(c echo.Context, req *request[schema.StatsReque
 	// 1 event for each round
 	// 1 event for each demand in round
 	stats := req.raw.Stats
+
+	if req.auctionConfig == nil {
+		err := fmt.Errorf(
+			"no config found for app_id:%d, id: %d, uid: %s",
+			req.app.ID, stats.AuctionConfigurationID, stats.AuctionConfigurationUID,
+		)
+		logError(c, err)
+	}
 
 	auctionConfigurationUID, err := strconv.Atoi(stats.AuctionConfigurationUID)
 	if err != nil {
@@ -80,7 +82,7 @@ func (h *StatsHandler) sendEvents(c echo.Context, req *request[schema.StatsReque
 		EventType:               "stats_request",
 		AdType:                  string(req.raw.AdType),
 		AuctionID:               stats.AuctionID,
-		AuctionConfigurationID:  int64(stats.AuctionConfigurationID),
+		AuctionConfigurationID:  stats.AuctionConfigurationID,
 		AuctionConfigurationUID: int64(auctionConfigurationUID),
 		Status:                  stats.Result.Status,
 		RoundID:                 stats.Result.RoundID,
@@ -104,7 +106,7 @@ func (h *StatsHandler) sendEvents(c echo.Context, req *request[schema.StatsReque
 			EventType:               "round_request",
 			AdType:                  string(req.raw.AdType),
 			AuctionID:               stats.AuctionID,
-			AuctionConfigurationID:  int64(stats.AuctionConfigurationID),
+			AuctionConfigurationID:  stats.AuctionConfigurationID,
 			AuctionConfigurationUID: int64(auctionConfigurationUID),
 			RoundID:                 round.ID,
 			RoundNumber:             roundNumber,
@@ -132,7 +134,7 @@ func (h *StatsHandler) sendEvents(c echo.Context, req *request[schema.StatsReque
 				EventType:               "demand_request",
 				AdType:                  string(req.raw.AdType),
 				AuctionID:               stats.AuctionID,
-				AuctionConfigurationID:  int64(stats.AuctionConfigurationID),
+				AuctionConfigurationID:  stats.AuctionConfigurationID,
 				AuctionConfigurationUID: int64(auctionConfigurationUID),
 				Status:                  demand.Status,
 				RoundID:                 round.ID,
@@ -158,7 +160,7 @@ func (h *StatsHandler) sendEvents(c echo.Context, req *request[schema.StatsReque
 				EventType:               "client_bid",
 				AdType:                  string(req.raw.AdType),
 				AuctionID:               stats.AuctionID,
-				AuctionConfigurationID:  int64(stats.AuctionConfigurationID),
+				AuctionConfigurationID:  stats.AuctionConfigurationID,
 				AuctionConfigurationUID: int64(auctionConfigurationUID),
 				Status:                  bid.Status,
 				RoundID:                 round.ID,
