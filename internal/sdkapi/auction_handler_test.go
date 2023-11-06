@@ -84,7 +84,7 @@ func testHelperAuctionHandler(t *testing.T) *sdkapi.AuctionHandler {
 	}
 
 	appFetcher := &sdkapimocks.AppFetcherMock{
-		FetchFunc: func(ctx context.Context, appKey string, appBundle string) (sdkapi.App, error) {
+		FetchCachedFunc: func(ctx context.Context, appKey string, appBundle string) (sdkapi.App, error) {
 			return app, nil
 		},
 	}
