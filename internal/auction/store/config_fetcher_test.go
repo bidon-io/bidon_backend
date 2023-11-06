@@ -243,7 +243,7 @@ func TestConfigFetcher_FetchByUIDCached(t *testing.T) {
 		},
 	}
 
-	configCache := config.NewMemoryCacheOf[*auction.Config](30*time.Second, 1*time.Second, 1*time.Hour)
+	configCache := config.NewMemoryCacheOf[*auction.Config](1 * time.Hour)
 
 	matcher := &store.ConfigFetcher{DB: tx, Cache: configCache}
 	for _, tC := range testCases {

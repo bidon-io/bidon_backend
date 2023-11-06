@@ -6,6 +6,9 @@ import (
 	"net"
 	"os"
 	"testing"
+	"time"
+
+	"github.com/bidon-io/bidon-backend/config"
 
 	"github.com/bidon-io/bidon-backend/internal/db"
 	"github.com/bidon-io/bidon-backend/internal/db/dbtest"
@@ -47,6 +50,7 @@ func TestFindGeoData(t *testing.T) {
 	geocoder := &Geocoder{
 		MaxMindDB: maxMindDB,
 		DB:        tx,
+		Cache:     config.NewMemoryCacheOf[*db.Country](1 * time.Minute),
 	}
 
 	// Define the test case input

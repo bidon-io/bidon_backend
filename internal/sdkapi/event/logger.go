@@ -3,6 +3,8 @@ package event
 import (
 	"encoding/json"
 	"fmt"
+
+	"github.com/bidon-io/bidon-backend/config"
 )
 
 type Logger struct {
@@ -14,7 +16,7 @@ type LoggerEngine interface {
 }
 
 type LogMessage struct {
-	Topic Topic
+	Topic config.Topic
 	Value []byte
 }
 

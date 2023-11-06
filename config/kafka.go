@@ -7,13 +7,25 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
 	"github.com/twmb/franz-go/pkg/kgo"
+)
+
+type Topic string
+
+const (
+	ConfigTopic   Topic = "config"
+	ShowTopic     Topic = "show"
+	ClickTopic    Topic = "click"
+	RewardTopic   Topic = "reward"
+	StatsTopic    Topic = "stats"
+	AdEventsTopic Topic = "ad_events"
+	LossTopic     Topic = "loss"
+	WinTopic      Topic = "win"
 )
 
 type KafkaConfig struct {
 	ClientOpts []kgo.Opt
-	Topics     map[event.Topic]string
+	Topics     map[Topic]string
 }
 
 func Kafka() (conf KafkaConfig, err error) {
@@ -46,15 +58,15 @@ func Kafka() (conf KafkaConfig, err error) {
 		conf.ClientOpts = append(conf.ClientOpts, kgo.ProducerLinger(time.Second*time.Duration(value)))
 	}
 
-	conf.Topics = map[event.Topic]string{
-		event.ConfigTopic:   os.Getenv("KAFKA_CONFIG_TOPIC"),
-		event.ShowTopic:     os.Getenv("KAFKA_SHOW_TOPIC"),
-		event.ClickTopic:    os.Getenv("KAFKA_CLICK_TOPIC"),
-		event.RewardTopic:   os.Getenv("KAFKA_REWARD_TOPIC"),
-		event.StatsTopic:    os.Getenv("KAFKA_STATS_TOPIC"),
-		event.LossTopic:     os.Getenv("KAFKA_LOSS_TOPIC"),
-		event.WinTopic:      os.Getenv("KAFKA_WIN_TOPIC"),
-		event.AdEventsTopic: os.Getenv("KAFKA_AD_EVENTS_TOPIC"),
+	conf.Topics = map[Topic]string{
+		ConfigTopic:   os.Getenv("KAFKA_CONFIG_TOPIC"),
+		ShowTopic:     os.Getenv("KAFKA_SHOW_TOPIC"),
+		ClickTopic:    os.Getenv("KAFKA_CLICK_TOPIC"),
+		RewardTopic:   os.Getenv("KAFKA_REWARD_TOPIC"),
+		StatsTopic:    os.Getenv("KAFKA_STATS_TOPIC"),
+		LossTopic:     os.Getenv("KAFKA_LOSS_TOPIC"),
+		WinTopic:      os.Getenv("KAFKA_WIN_TOPIC"),
+		AdEventsTopic: os.Getenv("KAFKA_AD_EVENTS_TOPIC"),
 	}
 
 	return

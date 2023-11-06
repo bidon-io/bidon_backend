@@ -4,12 +4,13 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/bidon-io/bidon-backend/config"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
 	"github.com/twmb/franz-go/pkg/kgo"
 )
 
 type Kafka struct {
-	Topics map[event.Topic]string
+	Topics map[config.Topic]string
 	Client *kgo.Client
 }
 

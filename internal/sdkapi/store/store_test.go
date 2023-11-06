@@ -4,8 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/bidon-io/bidon-backend/config"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/Masterminds/semver/v3"
 
@@ -40,7 +42,7 @@ func TestAppFetcher_Fetch(t *testing.T) {
 		t.Fatalf("Error creating app: %v", err)
 	}
 
-	fetcher := &AppFetcher{DB: tx}
+	fetcher := &AppFetcher{DB: tx, Cache: config.NewMemoryCacheOf[sdkapi.App](10 * time.Minute)}
 
 	testCases := []struct {
 		name      string
@@ -76,6 +78,11 @@ func TestAppFetcher_Fetch(t *testing.T) {
 
 	for _, tC := range testCases {
 		app, err := fetcher.Fetch(context.Background(), tC.appKey, tC.appBundle)
+		appCached, err := fetcher.FetchCached(context.Background(), tC.appKey, tC.appBundle)
+
+		if diff := cmp.Diff(app, appCached); diff != "" {
+			t.Errorf("fetcher.FetchCached -> %v mismatch (-want +got):\n%s", tC.name, diff)
+		}
 
 		var got any
 		switch tC.want.(type) {
