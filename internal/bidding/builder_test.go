@@ -2,7 +2,6 @@ package bidding_test
 
 import (
 	"context"
-	"errors"
 	"net/http"
 	"testing"
 
@@ -16,24 +15,19 @@ import (
 )
 
 func TestBuilder_Build(t *testing.T) {
-	configMatcher := &mocks.ConfigMatcherMock{
-		MatchByIdFunc: func(ctx context.Context, appID int64, id int64) *auction.Config {
-			cfg := &auction.Config{
-				Rounds: []auction.RoundConfig{
-					{
-						ID:      "ROUND_1",
-						Demands: []adapter.Key{adapter.ApplovinKey, adapter.BidmachineKey},
-						Timeout: 15000,
-					},
-					{
-						ID:      "ROUND_2",
-						Demands: []adapter.Key{adapter.UnityAdsKey},
-						Bidding: []adapter.Key{adapter.BidmachineKey},
-						Timeout: 15000,
-					},
-				},
-			}
-			return cfg
+	auctionConfig := auction.Config{
+		Rounds: []auction.RoundConfig{
+			{
+				ID:      "ROUND_1",
+				Demands: []adapter.Key{adapter.ApplovinKey, adapter.BidmachineKey},
+				Timeout: 15000,
+			},
+			{
+				ID:      "ROUND_2",
+				Demands: []adapter.Key{adapter.UnityAdsKey},
+				Bidding: []adapter.Key{adapter.BidmachineKey},
+				Timeout: 15000,
+			},
 		},
 	}
 
@@ -61,7 +55,6 @@ func TestBuilder_Build(t *testing.T) {
 
 	tests := []struct {
 		name                string
-		configMatcher       bidding.ConfigMatcher
 		adaptersBuilder     bidding.AdaptersBuilder
 		notificationHandler bidding.NotificationHandler
 		buildParams         *bidding.BuildParams
@@ -70,7 +63,6 @@ func TestBuilder_Build(t *testing.T) {
 	}{
 		{
 			name:                "successful build",
-			configMatcher:       configMatcher,
 			adaptersBuilder:     adaptersBuilder,
 			notificationHandler: notificationHanler,
 			buildParams: &bidding.BuildParams{
@@ -91,6 +83,7 @@ func TestBuilder_Build(t *testing.T) {
 						},
 					},
 				},
+				AuctionConfig: auctionConfig,
 			},
 			expectedResult: adapters.DemandResponse{
 				Status:   204,
@@ -98,25 +91,11 @@ func TestBuilder_Build(t *testing.T) {
 			},
 			expectedError: nil,
 		},
-		{
-			name: "empty config",
-			configMatcher: &mocks.ConfigMatcherMock{
-				MatchByIdFunc: func(ctx context.Context, appID int64, id int64) *auction.Config {
-					return nil
-				},
-			},
-			buildParams: &bidding.BuildParams{
-				AppID: 1,
-			},
-			expectedResult: adapters.DemandResponse{},
-			expectedError:  errors.New("config matcher error"),
-		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			builder := &bidding.Builder{
-				ConfigMatcher:       tt.configMatcher,
 				AdaptersBuilder:     tt.adaptersBuilder,
 				NotificationHandler: tt.notificationHandler,
 			}

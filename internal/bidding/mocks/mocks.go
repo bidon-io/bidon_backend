@@ -6,90 +6,11 @@ package mocks
 import (
 	"context"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
-	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/bidding"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	"sync"
 )
-
-// Ensure, that ConfigMatcherMock does implement bidding.ConfigMatcher.
-// If this is not the case, regenerate this file with moq.
-var _ bidding.ConfigMatcher = &ConfigMatcherMock{}
-
-// ConfigMatcherMock is a mock implementation of bidding.ConfigMatcher.
-//
-//	func TestSomethingThatUsesConfigMatcher(t *testing.T) {
-//
-//		// make and configure a mocked bidding.ConfigMatcher
-//		mockedConfigMatcher := &ConfigMatcherMock{
-//			MatchByIdFunc: func(ctx context.Context, appID int64, id int64) *auction.Config {
-//				panic("mock out the MatchById method")
-//			},
-//		}
-//
-//		// use mockedConfigMatcher in code that requires bidding.ConfigMatcher
-//		// and then make assertions.
-//
-//	}
-type ConfigMatcherMock struct {
-	// MatchByIdFunc mocks the MatchById method.
-	MatchByIdFunc func(ctx context.Context, appID int64, id int64) *auction.Config
-
-	// calls tracks calls to the methods.
-	calls struct {
-		// MatchById holds details about calls to the MatchById method.
-		MatchById []struct {
-			// Ctx is the ctx argument value.
-			Ctx context.Context
-			// AppID is the appID argument value.
-			AppID int64
-			// ID is the id argument value.
-			ID int64
-		}
-	}
-	lockMatchById sync.RWMutex
-}
-
-// MatchById calls MatchByIdFunc.
-func (mock *ConfigMatcherMock) MatchById(ctx context.Context, appID int64, id int64) *auction.Config {
-	if mock.MatchByIdFunc == nil {
-		panic("ConfigMatcherMock.MatchByIdFunc: method is nil but ConfigMatcher.MatchById was just called")
-	}
-	callInfo := struct {
-		Ctx   context.Context
-		AppID int64
-		ID    int64
-	}{
-		Ctx:   ctx,
-		AppID: appID,
-		ID:    id,
-	}
-	mock.lockMatchById.Lock()
-	mock.calls.MatchById = append(mock.calls.MatchById, callInfo)
-	mock.lockMatchById.Unlock()
-	return mock.MatchByIdFunc(ctx, appID, id)
-}
-
-// MatchByIdCalls gets all the calls that were made to MatchById.
-// Check the length with:
-//
-//	len(mockedConfigMatcher.MatchByIdCalls())
-func (mock *ConfigMatcherMock) MatchByIdCalls() []struct {
-	Ctx   context.Context
-	AppID int64
-	ID    int64
-} {
-	var calls []struct {
-		Ctx   context.Context
-		AppID int64
-		ID    int64
-	}
-	mock.lockMatchById.RLock()
-	calls = mock.calls.MatchById
-	mock.lockMatchById.RUnlock()
-	return calls
-}
 
 // Ensure, that AdaptersBuilderMock does implement bidding.AdaptersBuilder.
 // If this is not the case, regenerate this file with moq.
