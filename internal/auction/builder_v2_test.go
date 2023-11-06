@@ -48,7 +48,7 @@ func TestBuilderV2_Build(t *testing.T) {
 		{DemandID: "test", PriceFloor: &pf, Label: "test", Extra: map[string]any{"placement_id": "test"}},
 	}
 
-	configFetcher := &auctionmocks.ConfigMatcherMock{
+	configFetcher := &auctionmocks.ConfigFetcherMock{
 		MatchFunc: func(ctx context.Context, appID int64, adType ad.Type, segmentID int64) (*auction.Config, error) {
 			return config, nil
 		},
@@ -59,7 +59,7 @@ func TestBuilderV2_Build(t *testing.T) {
 		},
 	}
 	builder := &auction.BuilderV2{
-		ConfigMatcher:  configFetcher,
+		ConfigFetcher:  configFetcher,
 		AdUnitsMatcher: adUnitsMatcher,
 	}
 

@@ -6,7 +6,7 @@ import (
 
 // Deprecated: Builder is deprecated as of SDK version 0.5
 type Builder struct {
-	ConfigMatcher    ConfigMatcher
+	ConfigFetcher    ConfigFetcher
 	LineItemsMatcher LineItemsMatcher
 }
 
@@ -16,7 +16,7 @@ type LineItemsMatcher interface {
 }
 
 func (b *Builder) Build(ctx context.Context, params *BuildParams) (*Auction, error) {
-	config, err := b.ConfigMatcher.Match(ctx, params.AppID, params.AdType, params.Segment.ID)
+	config, err := b.ConfigFetcher.Match(ctx, params.AppID, params.AdType, params.Segment.ID)
 	if err != nil {
 		return nil, err
 	}

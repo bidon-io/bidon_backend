@@ -79,8 +79,8 @@ func testHelperBiddingHandler(t *testing.T) sdkapi.BiddingHandler {
 			return geodata, nil
 		},
 	}
-	configMatcher := &biddingmocks.ConfigMatcherMock{
-		MatchByIdFunc: func(ctx context.Context, appID int64, id int64) *auction.Config {
+	configFetcher := &sdkapimocks.ConfigFetcherMock{
+		FetchByUIDCachedFunc: func(ctx context.Context, appId int64, key string, aucUID string) *auction.Config {
 			return auctionConfig
 		},
 	}
@@ -154,12 +154,12 @@ func testHelperBiddingHandler(t *testing.T) sdkapi.BiddingHandler {
 
 	handler := sdkapi.BiddingHandler{
 		BaseHandler: &sdkapi.BaseHandler[schema.BiddingRequest, *schema.BiddingRequest]{
-			AppFetcher: appFetcher,
-			Geocoder:   geocoder,
+			AppFetcher:    appFetcher,
+			ConfigFetcher: configFetcher,
+			Geocoder:      geocoder,
 		},
 		SegmentMatcher: segmentMatcher,
 		BiddingBuilder: &bidding.Builder{
-			ConfigMatcher:       configMatcher,
 			AdaptersBuilder:     adapters_builder.BuildBiddingAdapters(biddingHttpClient),
 			NotificationHandler: notificationMock,
 		},

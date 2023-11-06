@@ -2,12 +2,13 @@ package sdkapi_test
 
 import (
 	"context"
-	"github.com/bidon-io/bidon-backend/internal/adapter"
-	"github.com/bidon-io/bidon-backend/internal/auction"
-	"github.com/bidon-io/bidon-backend/internal/sdkapi/mocks"
 	"net/http"
 	"os"
 	"testing"
+
+	"github.com/bidon-io/bidon-backend/internal/adapter"
+	"github.com/bidon-io/bidon-backend/internal/auction"
+	"github.com/bidon-io/bidon-backend/internal/sdkapi/mocks"
 
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
@@ -31,18 +32,18 @@ func SetupStatsHandler() sdkapi.StatsHandler {
 			},
 		},
 	}
-	configMatcher := &mocks.ConfigMatcherMock{
-		MatchByIdFunc: func(ctx context.Context, appID, id int64) *auction.Config {
+	configFetcher := mocks.ConfigFetcherMock{
+		FetchByUIDCachedFunc: func(ctx context.Context, appId int64, key string, aucUID string) *auction.Config {
 			return auctionConfig
 		},
 	}
 
 	return sdkapi.StatsHandler{
 		BaseHandler: &sdkapi.BaseHandler[schema.StatsRequest, *schema.StatsRequest]{
-			AppFetcher: AppFetcherMock(),
-			Geocoder:   GeocoderMock(),
+			AppFetcher:    AppFetcherMock(),
+			ConfigFetcher: &configFetcher,
+			Geocoder:      GeocoderMock(),
 		},
-		ConfigMatcher:       configMatcher,
 		EventLogger:         &event.Logger{Engine: &engine.Log{}},
 		NotificationHandler: mockHandler,
 	}

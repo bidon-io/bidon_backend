@@ -6,6 +6,7 @@ require (
 	github.com/Masterminds/semver/v3 v3.2.1
 	github.com/alexedwards/scs/goredisstore v0.0.0-20230902070821-95fa2ac9d520
 	github.com/alexedwards/scs/v2 v2.5.1
+	github.com/bool64/cache v0.4.6
 	github.com/bwmarrin/snowflake v0.3.0
 	github.com/cenkalti/backoff/v4 v4.2.1
 	github.com/getsentry/sentry-go v0.25.0

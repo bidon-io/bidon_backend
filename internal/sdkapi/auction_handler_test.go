@@ -93,9 +93,12 @@ func testHelperAuctionHandler(t *testing.T) *sdkapi.AuctionHandler {
 			return geodata, nil
 		},
 	}
-	configMatcher := &auctionmocks.ConfigMatcherMock{
+	configFetcher := &sdkapimocks.ConfigFetcherMock{
 		MatchFunc: func(ctx context.Context, appID int64, adType ad.Type, segmentID int64) (*auction.Config, error) {
 			return auctionConfig, nil
+		},
+		FetchByUIDCachedFunc: func(ctx context.Context, appId int64, key string, aucUID string) *auction.Config {
+			return nil
 		},
 	}
 	lineItemsMatcher := &auctionmocks.LineItemsMatcherMock{
@@ -114,11 +117,11 @@ func testHelperAuctionHandler(t *testing.T) *sdkapi.AuctionHandler {
 		},
 	}
 	auctionBuilder := &auction.Builder{
-		ConfigMatcher:    configMatcher,
+		ConfigFetcher:    configFetcher,
 		LineItemsMatcher: lineItemsMatcher,
 	}
 	auctionBuilderV2 := &auction.BuilderV2{
-		ConfigMatcher:  configMatcher,
+		ConfigFetcher:  configFetcher,
 		AdUnitsMatcher: adUnitsMatcher,
 	}
 	segmentMatcher := &segment.Matcher{
@@ -129,8 +132,9 @@ func testHelperAuctionHandler(t *testing.T) *sdkapi.AuctionHandler {
 
 	handler := &sdkapi.AuctionHandler{
 		BaseHandler: &sdkapi.BaseHandler[schema.AuctionRequest, *schema.AuctionRequest]{
-			AppFetcher: appFetcher,
-			Geocoder:   gcoder,
+			AppFetcher:    appFetcher,
+			ConfigFetcher: configFetcher,
+			Geocoder:      gcoder,
 		},
 		AuctionBuilder:   auctionBuilder,
 		AuctionBuilderV2: auctionBuilderV2,

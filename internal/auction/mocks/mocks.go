@@ -10,26 +10,26 @@ import (
 	"sync"
 )
 
-// Ensure, that ConfigMatcherMock does implement auction.ConfigMatcher.
+// Ensure, that ConfigFetcherMock does implement auction.ConfigFetcher.
 // If this is not the case, regenerate this file with moq.
-var _ auction.ConfigMatcher = &ConfigMatcherMock{}
+var _ auction.ConfigFetcher = &ConfigFetcherMock{}
 
-// ConfigMatcherMock is a mock implementation of auction.ConfigMatcher.
+// ConfigFetcherMock is a mock implementation of auction.ConfigFetcher.
 //
-//	func TestSomethingThatUsesConfigMatcher(t *testing.T) {
+//	func TestSomethingThatUsesConfigFetcher(t *testing.T) {
 //
-//		// make and configure a mocked auction.ConfigMatcher
-//		mockedConfigMatcher := &ConfigMatcherMock{
+//		// make and configure a mocked auction.ConfigFetcher
+//		mockedConfigFetcher := &ConfigFetcherMock{
 //			MatchFunc: func(ctx context.Context, appID int64, adType ad.Type, segmentID int64) (*auction.Config, error) {
 //				panic("mock out the Match method")
 //			},
 //		}
 //
-//		// use mockedConfigMatcher in code that requires auction.ConfigMatcher
+//		// use mockedConfigFetcher in code that requires auction.ConfigFetcher
 //		// and then make assertions.
 //
 //	}
-type ConfigMatcherMock struct {
+type ConfigFetcherMock struct {
 	// MatchFunc mocks the Match method.
 	MatchFunc func(ctx context.Context, appID int64, adType ad.Type, segmentID int64) (*auction.Config, error)
 
@@ -51,9 +51,9 @@ type ConfigMatcherMock struct {
 }
 
 // Match calls MatchFunc.
-func (mock *ConfigMatcherMock) Match(ctx context.Context, appID int64, adType ad.Type, segmentID int64) (*auction.Config, error) {
+func (mock *ConfigFetcherMock) Match(ctx context.Context, appID int64, adType ad.Type, segmentID int64) (*auction.Config, error) {
 	if mock.MatchFunc == nil {
-		panic("ConfigMatcherMock.MatchFunc: method is nil but ConfigMatcher.Match was just called")
+		panic("ConfigFetcherMock.MatchFunc: method is nil but ConfigFetcher.Match was just called")
 	}
 	callInfo := struct {
 		Ctx       context.Context
@@ -75,8 +75,8 @@ func (mock *ConfigMatcherMock) Match(ctx context.Context, appID int64, adType ad
 // MatchCalls gets all the calls that were made to Match.
 // Check the length with:
 //
-//	len(mockedConfigMatcher.MatchCalls())
-func (mock *ConfigMatcherMock) MatchCalls() []struct {
+//	len(mockedConfigFetcher.MatchCalls())
+func (mock *ConfigFetcherMock) MatchCalls() []struct {
 	Ctx       context.Context
 	AppID     int64
 	AdType    ad.Type

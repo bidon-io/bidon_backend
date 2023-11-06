@@ -22,18 +22,13 @@ import (
 )
 
 type Builder struct {
-	ConfigMatcher       ConfigMatcher
 	AdaptersBuilder     AdaptersBuilder
 	NotificationHandler NotificationHandler
 }
 
-//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/mocks.go -pkg mocks . ConfigMatcher AdaptersBuilder NotificationHandler
+//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/mocks.go -pkg mocks . AdaptersBuilder NotificationHandler
 
 var ErrNoBids = errors.New("no bids")
-
-type ConfigMatcher interface {
-	MatchById(ctx context.Context, appID, id int64) *auction.Config
-}
 
 type AdaptersBuilder interface {
 	Build(adapterKey adapter.Key, cfg adapter.ProcessedConfigsMap) (*adapters.Bidder, error)
@@ -48,6 +43,7 @@ type BuildParams struct {
 	BiddingRequest schema.BiddingRequest
 	GeoData        geocoder.GeoData
 	AdapterConfigs adapter.ProcessedConfigsMap
+	AuctionConfig  auction.Config
 }
 
 type AuctionResult struct {
@@ -70,11 +66,7 @@ func (b *Builder) HoldAuction(ctx context.Context, params *BuildParams) (Auction
 	// build response
 	emptyResponse := AuctionResult{}
 	br := params.BiddingRequest
-
-	config := b.ConfigMatcher.MatchById(ctx, params.AppID, int64(br.Imp.AuctionConfigID))
-	if config == nil {
-		return emptyResponse, fmt.Errorf("cannot find config: %d", br.Imp.AuctionConfigID)
-	}
+	config := params.AuctionConfig
 
 	bidId, err := uuid.NewV4()
 	if err != nil {

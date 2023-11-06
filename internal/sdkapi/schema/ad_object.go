@@ -3,13 +3,14 @@ package schema
 import "github.com/bidon-io/bidon-backend/internal/ad"
 
 type AdObject struct {
-	PlacementID  string                `json:"placement_id"`
-	AuctionID    string                `json:"auction_id"`
-	Orientation  string                `json:"orientation" validate:"omitempty,oneof=PORTRAIT LANDSCAPE"`
-	PriceFloor   float64               `json:"pricefloor"`
-	Banner       *BannerAdObject       `json:"banner"`
-	Interstitial *InterstitialAdObject `json:"interstitial"`
-	Rewarded     *RewardedAdObject     `json:"rewarded"`
+	PlacementID             string                `json:"placement_id"`
+	AuctionID               string                `json:"auction_id"`
+	AuctionConfigurationUID string                `json:"auction_configuration_uid"`
+	Orientation             string                `json:"orientation" validate:"omitempty,oneof=PORTRAIT LANDSCAPE"`
+	PriceFloor              float64               `json:"pricefloor"`
+	Banner                  *BannerAdObject       `json:"banner"`
+	Interstitial            *InterstitialAdObject `json:"interstitial"`
+	Rewarded                *RewardedAdObject     `json:"rewarded"`
 }
 
 func (o *AdObject) Map() map[string]any {

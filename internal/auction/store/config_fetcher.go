@@ -3,7 +3,9 @@ package store
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/auction"
@@ -11,11 +13,16 @@ import (
 	"gorm.io/gorm"
 )
 
-type ConfigMatcher struct {
-	DB *db.DB
+type ConfigFetcher struct {
+	DB    *db.DB
+	Cache cache
 }
 
-func (m *ConfigMatcher) Match(ctx context.Context, appID int64, adType ad.Type, segmentID int64) (*auction.Config, error) {
+type cache interface {
+	Get(context.Context, []byte, func(ctx context.Context) (*auction.Config, error)) (*auction.Config, error)
+}
+
+func (m *ConfigFetcher) Match(ctx context.Context, appID int64, adType ad.Type, segmentID int64) (*auction.Config, error) {
 	dbConfig := &db.AuctionConfiguration{}
 
 	query := m.DB.
@@ -51,16 +58,55 @@ func (m *ConfigMatcher) Match(ctx context.Context, appID int64, adType ad.Type, 
 	return config, nil
 }
 
-func (m *ConfigMatcher) MatchById(ctx context.Context, appID, id int64) *auction.Config {
+const ttl = time.Hour
+
+func (m *ConfigFetcher) FetchByUIDCached(ctx context.Context, appID int64, id, uid string) *auction.Config {
+	if id == "" && uid == "" {
+		return nil
+	}
+
+	key := fmt.Sprintf("%d:%s:%s", appID, id, uid)
+
+	res, err := m.Cache.Get(ctx, []byte(key), func(ctx context.Context) (*auction.Config, error) {
+		auc := m.FetchByUID(ctx, appID, id, uid)
+		if auc == nil {
+			return nil, fmt.Errorf("no config found for app_id:%d, id: %s, uid: %s", appID, id, uid)
+		} else {
+			return auc, nil
+		}
+	})
+
+	if err != nil {
+		return nil
+	} else {
+		return res
+	}
+}
+
+// FetchByUID fetches an auction configuration by its public UID or ID
+// If both id and uid are empty, returns nil
+// If both id and uid are provided, uid takes precedence
+// If no configuration is found, returns nil
+func (m *ConfigFetcher) FetchByUID(ctx context.Context, appID int64, id, uid string) *auction.Config {
+	if id == "" && uid == "" {
+		return nil
+	}
+
 	dbConfig := &db.AuctionConfiguration{}
+
+	filter := map[string]any{
+		"app_id": appID,
+	}
+	if uid != "" {
+		filter["public_uid"] = uid
+	} else {
+		filter["id"] = id
+	}
 
 	err := m.DB.
 		WithContext(ctx).
 		Select("id", "public_uid", "external_win_notifications", "rounds").
-		Where(map[string]any{
-			"app_id": appID,
-			"id":     id,
-		}).
+		Where(filter).
 		Order("created_at DESC").
 		Take(dbConfig).
 		Error

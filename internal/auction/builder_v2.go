@@ -12,15 +12,15 @@ import (
 
 // BuilderV2 is introduced for SDK version 0.5 and above, offering enhanced ad_units structure
 type BuilderV2 struct {
-	ConfigMatcher  ConfigMatcher
+	ConfigFetcher  ConfigFetcher
 	AdUnitsMatcher AdUnitsMatcher
 }
 
-//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/mocks.go -pkg mocks . ConfigMatcher AdUnitsMatcher
+//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/mocks.go -pkg mocks . ConfigFetcher AdUnitsMatcher
 
 var ErrNoAdsFound = errors.New("no ads found")
 
-type ConfigMatcher interface {
+type ConfigFetcher interface {
 	Match(ctx context.Context, appID int64, adType ad.Type, segmentID int64) (*Config, error)
 }
 
@@ -39,7 +39,7 @@ type BuildParams struct {
 }
 
 func (b *BuilderV2) Build(ctx context.Context, params *BuildParams) (*Auction, error) {
-	config, err := b.ConfigMatcher.Match(ctx, params.AppID, params.AdType, params.Segment.ID)
+	config, err := b.ConfigFetcher.Match(ctx, params.AppID, params.AdType, params.Segment.ID)
 	if err != nil {
 		return nil, err
 	}

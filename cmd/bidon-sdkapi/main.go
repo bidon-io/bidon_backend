@@ -99,6 +99,10 @@ func main() {
 	}
 	eventLogger := &event.Logger{Engine: loggerEngine}
 
+	configFetcher := &auctionstore.ConfigFetcher{
+		DB:    db,
+		Cache: config.NewMemoryCacheOf[*auction.Config](30*time.Second, 1*time.Second, 1*time.Hour),
+	}
 	appFetcher := &sdkapistore.AppFetcher{DB: db}
 	geocoder := &geocoder.Geocoder{DB: db, MaxMindDB: maxMindDB}
 	segmentMatcher := segment.Matcher{
@@ -120,24 +124,26 @@ func main() {
 
 	auctionHandler := sdkapi.AuctionHandler{
 		BaseHandler: &sdkapi.BaseHandler[schema.AuctionRequest, *schema.AuctionRequest]{
-			AppFetcher: appFetcher,
-			Geocoder:   geocoder,
+			AppFetcher:    appFetcher,
+			ConfigFetcher: configFetcher,
+			Geocoder:      geocoder,
 		},
 		SegmentMatcher: &segmentMatcher,
 		AuctionBuilder: &auction.Builder{
-			ConfigMatcher:    &auctionstore.ConfigMatcher{DB: db},
+			ConfigFetcher:    configFetcher,
 			LineItemsMatcher: &auctionstore.LineItemsMatcher{DB: db},
 		},
 		AuctionBuilderV2: &auction.BuilderV2{
-			ConfigMatcher:  &auctionstore.ConfigMatcher{DB: db},
+			ConfigFetcher:  configFetcher,
 			AdUnitsMatcher: &auctionstore.AdUnitsMatcher{DB: db},
 		},
 		EventLogger: eventLogger,
 	}
 	configHandler := sdkapi.ConfigHandler{
 		BaseHandler: &sdkapi.BaseHandler[schema.ConfigRequest, *schema.ConfigRequest]{
-			AppFetcher: appFetcher,
-			Geocoder:   geocoder,
+			AppFetcher:    appFetcher,
+			ConfigFetcher: configFetcher,
+			Geocoder:      geocoder,
 		},
 		SegmentMatcher:            &segmentMatcher,
 		AdapterInitConfigsFetcher: &sdkapistore.AdapterInitConfigsFetcher{DB: db},
@@ -145,12 +151,12 @@ func main() {
 	}
 	biddingHandler := sdkapi.BiddingHandler{
 		BaseHandler: &sdkapi.BaseHandler[schema.BiddingRequest, *schema.BiddingRequest]{
-			AppFetcher: appFetcher,
-			Geocoder:   geocoder,
+			AppFetcher:    appFetcher,
+			ConfigFetcher: configFetcher,
+			Geocoder:      geocoder,
 		},
 		SegmentMatcher: &segmentMatcher,
 		BiddingBuilder: &bidding.Builder{
-			ConfigMatcher:       &auctionstore.ConfigMatcher{DB: db},
 			AdaptersBuilder:     adapters_builder.BuildBiddingAdapters(biddingHttpClient),
 			NotificationHandler: notificationHandler,
 		},
@@ -164,47 +170,52 @@ func main() {
 	}
 	statsHandler := sdkapi.StatsHandler{
 		BaseHandler: &sdkapi.BaseHandler[schema.StatsRequest, *schema.StatsRequest]{
-			AppFetcher: appFetcher,
-			Geocoder:   geocoder,
+			AppFetcher:    appFetcher,
+			ConfigFetcher: configFetcher,
+			Geocoder:      geocoder,
 		},
-		ConfigMatcher:       &auctionstore.ConfigMatcher{DB: db},
 		EventLogger:         eventLogger,
 		NotificationHandler: notificationHandler,
 	}
 	showHandler := sdkapi.ShowHandler{
 		BaseHandler: &sdkapi.BaseHandler[schema.ShowRequest, *schema.ShowRequest]{
-			AppFetcher: appFetcher,
-			Geocoder:   geocoder,
+			AppFetcher:    appFetcher,
+			ConfigFetcher: configFetcher,
+			Geocoder:      geocoder,
 		},
 		EventLogger:         eventLogger,
 		NotificationHandler: notificationHandler,
 	}
 	clickHandler := sdkapi.ClickHandler{
 		BaseHandler: &sdkapi.BaseHandler[schema.ClickRequest, *schema.ClickRequest]{
-			AppFetcher: appFetcher,
-			Geocoder:   geocoder,
+			AppFetcher:    appFetcher,
+			ConfigFetcher: configFetcher,
+			Geocoder:      geocoder,
 		},
 		EventLogger: eventLogger,
 	}
 	rewardHandler := sdkapi.RewardHandler{
 		BaseHandler: &sdkapi.BaseHandler[schema.RewardRequest, *schema.RewardRequest]{
-			AppFetcher: appFetcher,
-			Geocoder:   geocoder,
+			AppFetcher:    appFetcher,
+			ConfigFetcher: configFetcher,
+			Geocoder:      geocoder,
 		},
 		EventLogger: eventLogger,
 	}
 	lossHandler := sdkapi.LossHandler{
 		BaseHandler: &sdkapi.BaseHandler[schema.LossRequest, *schema.LossRequest]{
-			AppFetcher: appFetcher,
-			Geocoder:   geocoder,
+			AppFetcher:    appFetcher,
+			ConfigFetcher: configFetcher,
+			Geocoder:      geocoder,
 		},
 		EventLogger:         eventLogger,
 		NotificationHandler: notificationHandler,
 	}
 	winHandler := sdkapi.WinHandler{
 		BaseHandler: &sdkapi.BaseHandler[schema.WinRequest, *schema.WinRequest]{
-			AppFetcher: appFetcher,
-			Geocoder:   geocoder,
+			AppFetcher:    appFetcher,
+			ConfigFetcher: configFetcher,
+			Geocoder:      geocoder,
 		},
 		EventLogger:         eventLogger,
 		NotificationHandler: notificationHandler,

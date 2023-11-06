@@ -1,6 +1,7 @@
 package schema
 
 import (
+	"strconv"
 	"strings"
 
 	"github.com/bidon-io/bidon-backend/internal/ad"
@@ -19,4 +20,13 @@ func (b *BiddingRequest) NormalizeValues() {
 	b.BaseRequest.NormalizeValues()
 	b.Imp.ID = strings.ToLower(b.Imp.ID)
 	b.Imp.AuctionID = strings.ToLower(b.Imp.AuctionID)
+}
+
+func (b *BiddingRequest) GetAuctionConfigurationParams() (string, string) {
+	return strconv.FormatInt(b.Imp.AuctionConfigurationID, 10), b.Imp.AuctionConfigurationUID
+}
+
+func (b *BiddingRequest) SetAuctionConfigurationParams(id int64, uid string) {
+	b.Imp.AuctionConfigurationID = id
+	b.Imp.AuctionConfigurationUID = uid
 }
