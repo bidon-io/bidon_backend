@@ -55,6 +55,7 @@ func (b *BuilderV2) Build(ctx context.Context, params *BuildParams) (*Auction, e
 		ExternalWinNotifications: config.ExternalWinNotifications,
 		Rounds:                   filterRounds(config.Rounds, params.Adapters),
 		AdUnits:                  adUnits,
+		LineItems:                []LineItem{},
 		Segment:                  Segment{ID: params.Segment.StringID(), UID: params.Segment.UID},
 	}
 
