@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/Masterminds/semver/v3"
-
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/db"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
@@ -14,7 +13,20 @@ import (
 )
 
 type AppFetcher struct {
-	DB *db.DB
+	DB    *db.DB
+	Cache cache
+}
+
+type cache interface {
+	Get(context.Context, []byte, func(ctx context.Context) (sdkapi.App, error)) (sdkapi.App, error)
+}
+
+func (f *AppFetcher) FetchCached(ctx context.Context, appKey, appBundle string) (app sdkapi.App, err error) {
+	cacheKey := fmt.Sprintf("app:%s:%s", appKey, appBundle)
+
+	return f.Cache.Get(ctx, []byte(cacheKey), func(ctx context.Context) (sdkapi.App, error) {
+		return f.Fetch(ctx, appKey, appBundle)
+	})
 }
 
 func (f *AppFetcher) Fetch(ctx context.Context, appKey, appBundle string) (app sdkapi.App, err error) {
