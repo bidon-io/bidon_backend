@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
-	"time"
 
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/auction"
@@ -57,8 +56,6 @@ func (m *ConfigFetcher) Match(ctx context.Context, appID int64, adType ad.Type, 
 
 	return config, nil
 }
-
-const ttl = time.Hour
 
 func (m *ConfigFetcher) FetchByUIDCached(ctx context.Context, appID int64, id, uid string) *auction.Config {
 	if id == "" && uid == "" {

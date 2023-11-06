@@ -8,12 +8,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bidon-io/bidon-backend/config"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/geocoder"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 )
 
 type Event interface {
-	Topic() Topic
+	Topic() config.Topic
 	Children() []Event
 	json.Marshaler
 }
@@ -21,7 +22,7 @@ type Event interface {
 func NewConfig(request *schema.ConfigRequest, geoData geocoder.GeoData) Event {
 	return &simpleEvent[*schema.ConfigRequest]{
 		timestamp: generateTimestamp(),
-		topic:     ConfigTopic,
+		topic:     config.ConfigTopic,
 		request:   request,
 		geoData:   geoData,
 	}
@@ -30,7 +31,7 @@ func NewConfig(request *schema.ConfigRequest, geoData geocoder.GeoData) Event {
 func NewShow(request *schema.ShowRequest, geoData geocoder.GeoData) Event {
 	return &simpleEvent[*schema.ShowRequest]{
 		timestamp: generateTimestamp(),
-		topic:     ShowTopic,
+		topic:     config.ShowTopic,
 		request:   request,
 		geoData:   geoData,
 	}
@@ -39,7 +40,7 @@ func NewShow(request *schema.ShowRequest, geoData geocoder.GeoData) Event {
 func NewClick(request *schema.ClickRequest, geoData geocoder.GeoData) Event {
 	return &simpleEvent[*schema.ClickRequest]{
 		timestamp: generateTimestamp(),
-		topic:     ClickTopic,
+		topic:     config.ClickTopic,
 		request:   request,
 		geoData:   geoData,
 	}
@@ -48,7 +49,7 @@ func NewClick(request *schema.ClickRequest, geoData geocoder.GeoData) Event {
 func NewReward(request *schema.RewardRequest, geoData geocoder.GeoData) Event {
 	return &simpleEvent[*schema.RewardRequest]{
 		timestamp: generateTimestamp(),
-		topic:     RewardTopic,
+		topic:     config.RewardTopic,
 		request:   request,
 		geoData:   geoData,
 	}
@@ -58,7 +59,7 @@ func NewStats(request *schema.StatsRequest, geoData geocoder.GeoData) Event {
 	return &statsEvent{
 		simpleEvent[*schema.StatsRequest]{
 			timestamp: generateTimestamp(),
-			topic:     StatsTopic,
+			topic:     config.StatsTopic,
 			request:   request,
 			geoData:   geoData,
 		},
@@ -94,7 +95,7 @@ func NewRequest(request *schema.BaseRequest, adRequestParams AdRequestParams, ge
 func NewLoss(request *schema.LossRequest, geoData geocoder.GeoData) Event {
 	return &simpleEvent[*schema.LossRequest]{
 		timestamp: generateTimestamp(),
-		topic:     LossTopic,
+		topic:     config.LossTopic,
 		request:   request,
 		geoData:   geoData,
 	}
@@ -103,7 +104,7 @@ func NewLoss(request *schema.LossRequest, geoData geocoder.GeoData) Event {
 func NewWin(request *schema.WinRequest, geoData geocoder.GeoData) Event {
 	return &simpleEvent[*schema.WinRequest]{
 		timestamp: generateTimestamp(),
-		topic:     WinTopic,
+		topic:     config.WinTopic,
 		request:   request,
 		geoData:   geoData,
 	}
@@ -147,22 +148,9 @@ func newBaseRequest(request *schema.BaseRequest, geoData geocoder.GeoData) Reque
 	}
 }
 
-type Topic string
-
-const (
-	ConfigTopic   Topic = "config"
-	ShowTopic     Topic = "show"
-	ClickTopic    Topic = "click"
-	RewardTopic   Topic = "reward"
-	StatsTopic    Topic = "stats"
-	AdEventsTopic Topic = "ad_events"
-	LossTopic     Topic = "loss"
-	WinTopic      Topic = "win"
-)
-
 type simpleEvent[T mapper] struct {
 	timestamp float64
-	topic     Topic
+	topic     config.Topic
 	request   T
 	geoData   geocoder.GeoData
 }
@@ -176,7 +164,7 @@ func (e *simpleEvent[T]) MarshalJSON() ([]byte, error) {
 	return json.Marshal(payload)
 }
 
-func (e *simpleEvent[T]) Topic() Topic {
+func (e *simpleEvent[T]) Topic() config.Topic {
 	return e.topic
 }
 
@@ -351,8 +339,8 @@ func (b RequestEvent) MarshalJSON() ([]byte, error) {
 	return json.Marshal((Alias)(b))
 }
 
-func (b RequestEvent) Topic() Topic {
-	return AdEventsTopic
+func (b RequestEvent) Topic() config.Topic {
+	return config.AdEventsTopic
 }
 
 func (b RequestEvent) Children() []Event {
