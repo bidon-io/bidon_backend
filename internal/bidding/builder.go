@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"sync"
 
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters/amazon"
 
@@ -27,8 +28,6 @@ type Builder struct {
 }
 
 //go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/mocks.go -pkg mocks . AdaptersBuilder NotificationHandler
-
-var ErrNoBids = errors.New("no bids")
 
 type AdaptersBuilder interface {
 	Build(adapterKey adapter.Key, cfg adapter.ProcessedConfigsMap) (*adapters.Bidder, error)
@@ -76,7 +75,7 @@ func (b *Builder) HoldAuction(ctx context.Context, params *BuildParams) (Auction
 		ID:   bidId.String(),
 		Test: *bool2int(br.Test),
 		AT:   1,
-		TMax: 5000,
+		TMax: br.TMax,
 		App: &openrtb2.App{
 			Ver:    br.App.Version,
 			Bundle: br.App.Bundle,
@@ -113,61 +112,91 @@ func (b *Builder) HoldAuction(ctx context.Context, params *BuildParams) (Auction
 		return emptyResponse, errors.New("no adapters matched")
 	}
 
-	auctionResult := AuctionResult{RoundNumber: roundNumber}
+	auctionResult := AuctionResult{
+		RoundNumber: roundNumber,
+		Bids:        make([]adapters.DemandResponse, 0, len(adapterKeys)),
+	}
 
+	bids := make(chan adapters.DemandResponse)
 	handleError := func(adapterKey adapter.Key, err error) {
-		demandResponse := adapters.DemandResponse{
+		bids <- adapters.DemandResponse{
 			DemandID: adapterKey,
 			Error:    err,
 		}
-		auctionResult.Bids = append(auctionResult.Bids, demandResponse)
 	}
+	wg := sync.WaitGroup{}
+
 	for _, adapterKey := range adapterKeys {
-		if adapterKey == adapter.AmazonKey {
-			adapter, err := amazon.Builder(params.AdapterConfigs)
-			if err != nil {
-				handleError(adapterKey, err)
-				continue
-			}
-			demandResponses, err := adapter.FetchBids(&br)
-			if err != nil {
-				handleError(adapterKey, err)
-				continue
-			}
-			for _, dr := range demandResponses {
-				auctionResult.Bids = append(auctionResult.Bids, *dr)
-			}
-		}
+		wg.Add(1)
+		go b.processAdapter(ctx, adapterKey, br, baseBidRequest, params, bids, &wg, handleError)
+	}
 
-		// adapter build bid request from baseBidRequest
-		// adapter send bid request
-		// adapter parse bid response
-		bidder, err := b.AdaptersBuilder.Build(adapterKey, params.AdapterConfigs)
-		if err != nil {
-			handleError(adapterKey, err)
-			continue
-		}
+	go func() {
+		wg.Wait()
+		close(bids)
+	}()
 
-		bidRequest, err := bidder.Adapter.CreateRequest(baseBidRequest, &br)
-		if err != nil {
-			handleError(adapterKey, err)
-			continue
-		}
-
-		demandResponse := bidder.Adapter.ExecuteRequest(ctx, bidder.Client, bidRequest)
-		demandResponse, err = bidder.Adapter.ParseBids(demandResponse)
-		if err != nil {
-			demandResponse.Error = err
-			auctionResult.Bids = append(auctionResult.Bids, *demandResponse)
-			continue
-		}
-
-		auctionResult.Bids = append(auctionResult.Bids, *demandResponse)
+	for bid := range bids {
+		auctionResult.Bids = append(auctionResult.Bids, bid)
 	}
 
 	b.NotificationHandler.HandleRound(ctx, &br.Imp, auctionResult)
 
 	return auctionResult, nil
+}
+
+func (b *Builder) processAdapter(
+	ctx context.Context,
+	adapterKey adapter.Key,
+	br schema.BiddingRequest,
+	baseBidRequest openrtb.BidRequest,
+	params *BuildParams,
+	bids chan adapters.DemandResponse,
+	wg *sync.WaitGroup,
+	handleError func(adapter.Key, error),
+) {
+	defer wg.Done()
+
+	if adapterKey == adapter.AmazonKey {
+		adapter, err := amazon.Builder(params.AdapterConfigs)
+		if err != nil {
+			handleError(adapterKey, err)
+			return
+		}
+		demandResponses, err := adapter.FetchBids(&br)
+		if err != nil {
+			handleError(adapterKey, err)
+			return
+		}
+		for _, demandResponse := range demandResponses {
+			bids <- *demandResponse
+		}
+	}
+
+	// adapter build bid request from baseBidRequest
+	// adapter send bid request
+	// adapter parse bid response
+	bidder, err := b.AdaptersBuilder.Build(adapterKey, params.AdapterConfigs)
+	if err != nil {
+		handleError(adapterKey, err)
+		return
+	}
+
+	bidRequest, err := bidder.Adapter.CreateRequest(baseBidRequest, &br)
+	if err != nil {
+		handleError(adapterKey, err)
+		return
+	}
+
+	demandResponse := bidder.Adapter.ExecuteRequest(ctx, bidder.Client, bidRequest)
+	if demandResponse.Error != nil {
+		bids <- *demandResponse
+		return
+	}
+
+	demandResponse, err = bidder.Adapter.ParseBids(demandResponse)
+	demandResponse.Error = err
+	bids <- *demandResponse
 }
 
 func (b *Builder) BuildDevice(device schema.Device, user schema.User, geo geocoder.GeoData) *openrtb2.Device {

@@ -42,8 +42,17 @@ type DemandResponse struct {
 	SlotUUID    string
 }
 
-func (m *DemandResponse) IsBid() bool {
-	return m.Bid != nil
+func (dr *DemandResponse) IsBid() bool {
+	return dr.Bid != nil
+}
+
+func (dr *DemandResponse) ErrorMessage() string {
+	errMsg := ""
+	if dr.Error != nil {
+		errMsg = dr.Error.Error()
+	}
+
+	return errMsg
 }
 
 type BidDemandResponse struct {
