@@ -163,7 +163,6 @@ func main() {
 			ConfigFetcher: configFetcher,
 			Geocoder:      geoCoder,
 		},
-		SegmentMatcher: &segmentMatcher,
 		BiddingBuilder: &bidding.Builder{
 			AdaptersBuilder:     adapters_builder.BuildBiddingAdapters(biddingHttpClient),
 			NotificationHandler: notificationHandler,

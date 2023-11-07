@@ -13,7 +13,7 @@ type BiddingRequest struct {
 	Adapters Adapters `json:"adapters" validate:"required"`
 	Imp      Imp      `json:"imp" validate:"required"`
 	Test     bool     `json:"test"` // Flag indicating that request is test
-	TMax     int      `json:"tmax"` // Max response time for server before timeout
+	TMax     int64    `json:"tmax"` // Max response time for server before timeout
 }
 
 func (b *BiddingRequest) NormalizeValues() {

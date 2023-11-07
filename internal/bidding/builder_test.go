@@ -2,6 +2,7 @@ package bidding_test
 
 import (
 	"context"
+	"go.uber.org/goleak"
 	"net/http"
 	"testing"
 
@@ -13,6 +14,10 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/bidding/mocks"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 )
+
+func TestMain(m *testing.M) {
+	goleak.VerifyTestMain(m)
+}
 
 func TestBuilder_Build(t *testing.T) {
 	auctionConfig := auction.Config{
@@ -46,6 +51,7 @@ func TestBuilder_Build(t *testing.T) {
 			return bidder, nil
 		},
 	}
+	defer http.DefaultClient.CloseIdleConnections()
 
 	notificationHanler := &mocks.NotificationHandlerMock{
 		HandleRoundFunc: func(ctx context.Context, imp *schema.Imp, auctionResult bidding.AuctionResult) error {

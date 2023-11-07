@@ -19,6 +19,7 @@ import (
 )
 
 var biddingAdapters = map[adapter.Key]adapters.Builder{
+	//adapter.AmazonKey:     amazon.Builder,
 	adapter.BidmachineKey: bidmachine.Builder,
 	adapter.BigoAdsKey:    bigoads.Builder,
 	adapter.MetaKey:       meta.Builder,

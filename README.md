@@ -22,6 +22,12 @@ dip bash
 docker compose down --volumes --rmi local --remove-orphans || true
 ```
 
+#### Read from kafka
+```shell
+
+docker compose exec -it kafka kafka-console-consumer --bootstrap-server=localhost:9092 --topic=bidon-ad-events --from-beginning
+```
+
 ### Start prod environment
 On `Mac M1` change `LD_PRELOAD: /usr/lib/aarch64-linux-gnu/libjemalloc.so` in `docker-compose-prod.yml`
 

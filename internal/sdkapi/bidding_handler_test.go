@@ -27,8 +27,6 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/geocoder"
 	sdkapimocks "github.com/bidon-io/bidon-backend/internal/sdkapi/mocks"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
-	"github.com/bidon-io/bidon-backend/internal/segment"
-	segmentmocks "github.com/bidon-io/bidon-backend/internal/segment/mocks"
 )
 
 func testHelperBiddingHandler(t *testing.T) sdkapi.BiddingHandler {
@@ -65,9 +63,6 @@ func testHelperBiddingHandler(t *testing.T) sdkapi.BiddingHandler {
 			},
 		},
 	}
-	segments := []segment.Segment{
-		{ID: 1, Filters: []segment.Filter{{Type: "country", Name: "country", Operator: "IN", Values: []string{"US", "UK"}}}},
-	}
 
 	appFetcher := &sdkapimocks.AppFetcherMock{
 		FetchCachedFunc: func(ctx context.Context, appKey string, appBundle string) (sdkapi.App, error) {
@@ -83,14 +78,6 @@ func testHelperBiddingHandler(t *testing.T) sdkapi.BiddingHandler {
 		FetchByUIDCachedFunc: func(ctx context.Context, appId int64, key string, aucUID string) *auction.Config {
 			return auctionConfig
 		},
-	}
-	segmentFetcher := &segmentmocks.FetcherMock{
-		FetchFunc: func(ctx context.Context, appID int64) ([]segment.Segment, error) {
-			return segments, nil
-		},
-	}
-	segmentMatcher := &segment.Matcher{
-		Fetcher: segmentFetcher,
 	}
 
 	biddingHttpClient := &http.Client{
@@ -158,7 +145,6 @@ func testHelperBiddingHandler(t *testing.T) sdkapi.BiddingHandler {
 			ConfigFetcher: configFetcher,
 			Geocoder:      geocoder,
 		},
-		SegmentMatcher: segmentMatcher,
 		BiddingBuilder: &bidding.Builder{
 			AdaptersBuilder:     adapters_builder.BuildBiddingAdapters(biddingHttpClient),
 			NotificationHandler: notificationMock,

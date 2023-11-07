@@ -16,14 +16,12 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
-	"github.com/bidon-io/bidon-backend/internal/segment"
 	"github.com/labstack/echo/v4"
 )
 
 type BiddingHandler struct {
 	*BaseHandler[schema.BiddingRequest, *schema.BiddingRequest]
 	BiddingBuilder        *bidding.Builder
-	SegmentMatcher        *segment.Matcher
 	AdUnitsMapBuilder     AdUnitsMapBuilder
 	AdaptersConfigBuilder AdaptersConfigBuilder
 	EventLogger           *event.Logger
@@ -207,6 +205,7 @@ func (h *BiddingHandler) sendEvents(c echo.Context, req *request[schema.BiddingR
 			Bidding:                 true,
 			RawRequest:              result.RawRequest,
 			RawResponse:             result.RawResponse,
+			Error:                   result.ErrorMessage(),
 		}
 		bidRequestEvent := event.NewRequest(&req.raw.BaseRequest, adRequestParams, req.geoData)
 		h.EventLogger.Log(bidRequestEvent, func(err error) {
