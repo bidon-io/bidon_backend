@@ -163,20 +163,21 @@ func (a *MintegralAdapter) ExecuteRequest(ctx context.Context, client *http.Clie
 
 	httpResp, err := client.Do(httpReq)
 	if err != nil {
-		if err == context.DeadlineExceeded {
+		if errors.Is(err, context.DeadlineExceeded) {
 			fmt.Println("Timeout")
 			// TODO: Send Timeout Notification if bidder support, eg FB
 		}
 		dr.Error = err
 		return dr
 	}
+	defer httpResp.Body.Close()
 
 	respBody, err := io.ReadAll(httpResp.Body)
 	if err != nil {
 		dr.Error = err
 		return dr
 	}
-	defer httpResp.Body.Close()
+
 	dr.RawResponse = string(respBody)
 	dr.Status = httpResp.StatusCode
 

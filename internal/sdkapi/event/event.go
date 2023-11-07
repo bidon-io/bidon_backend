@@ -88,6 +88,7 @@ func NewRequest(request *schema.BaseRequest, adRequestParams AdRequestParams, ge
 	requestEvent.PriceFloor = adRequestParams.PriceFloor
 	requestEvent.RawRequest = adRequestParams.RawRequest
 	requestEvent.RawResponse = adRequestParams.RawResponse
+	requestEvent.Error = adRequestParams.Error
 
 	return requestEvent
 }
@@ -282,6 +283,7 @@ type AdRequestParams struct {
 	PriceFloor              float64
 	RawRequest              string
 	RawResponse             string
+	Error                   string
 }
 
 type RequestEvent struct {
@@ -305,6 +307,7 @@ type RequestEvent struct {
 	PriceFloor                  float64 `json:"price_floor"`
 	RawRequest                  string  `json:"raw_request"`
 	RawResponse                 string  `json:"raw_response"`
+	Error                       string  `json:"error"`
 	Manufacturer                string  `json:"manufacturer"`
 	Model                       string  `json:"model"`
 	Os                          string  `json:"os"`
