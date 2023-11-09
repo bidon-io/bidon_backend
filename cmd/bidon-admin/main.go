@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"github.com/labstack/echo-contrib/echoprometheus"
 	"io/fs"
 	"log"
 	"net/http"
@@ -87,6 +88,9 @@ func main() {
 	config.UseCommonMiddleware(apiGroup, "bidon-admin", logger)
 	adminecho.UseAuthorization(apiGroup, authService)
 	adminecho.RegisterAdminService(apiGroup, adminService)
+
+	e.Use(echoprometheus.NewMiddleware("admin"))   // adds middleware to gather metrics
+	e.GET("/metrics", echoprometheus.NewHandler()) // adds route to serve gathered metrics
 
 	redocFileSystem, _ := fs.Sub(web.FS, "redoc")
 	redocWebServer := http.FileServer(http.FS(redocFileSystem))
