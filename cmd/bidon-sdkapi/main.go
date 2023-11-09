@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/bool64/cache"
+	"github.com/labstack/echo-contrib/echoprometheus"
 	"log"
 	"net/http"
 	"os"
@@ -233,6 +234,9 @@ func main() {
 	g := e.Group("")
 	config.UseCommonMiddleware(g, "bidon-sdkapi", logger)
 	g.Use(sdkapi.CheckBidonHeader)
+
+	e.Use(echoprometheus.NewMiddleware("sdkapi"))  // adds middleware to gather metrics
+	e.GET("/metrics", echoprometheus.NewHandler()) // adds route to serve gathered metrics
 
 	g.POST("/config", configHandler.Handle)
 	g.POST("/auction/:ad_type", auctionHandler.Handle)
