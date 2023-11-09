@@ -2,6 +2,7 @@ package notification
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -32,14 +33,19 @@ type AuctionResultRepo interface {
 	Find(ctx context.Context, auctionID string) (*AuctionResult, error)
 }
 
-// HandleRound is used to handle bidding round, it is called after all adapters have responded with bids or errors
+// HandleBiddingRound is used to handle bidding round, it is called after all adapters have responded with bids or errors
 // Results saved to redis
-func (h Handler) HandleRound(ctx context.Context, imp *schema.Imp, auctionResult bidding.AuctionResult) error {
+func (h Handler) HandleBiddingRound(ctx context.Context, imp *schema.Imp, auctionResult bidding.AuctionResult) error {
 	var bids []Bid
 	bidFloor := imp.GetBidFloor()
 
 	for _, resp := range auctionResult.Bids {
-		if resp.IsBid() {
+		if errors.Is(resp.Error, context.DeadlineExceeded) && resp.TimeoutURL != "" {
+			// Handle Timeout, currently only Meta supports this
+			bid := Bid{RequestID: resp.RequestID}
+
+			h.SendNotificationEvent(ctx, resp.TimeoutURL, bid, openrtb3.LossExpired, bidFloor, bidFloor)
+		} else if resp.IsBid() {
 			bid := Bid{
 				ID:        resp.Bid.ID,
 				ImpID:     resp.Bid.ImpID,
@@ -53,14 +59,11 @@ func (h Handler) HandleRound(ctx context.Context, imp *schema.Imp, auctionResult
 				RequestID: resp.RequestID,
 			}
 
-			if bid.Price >= bidFloor {
+			if bid.Price >= bidFloor { // Valid Bid, use for further processing
 				bids = append(bids, bid)
-			} else {
-				h.SendLoss(ctx, bid, openrtb3.LossBelowAuctionFloor, bidFloor, bidFloor)
+			} else { // Send Loss notification straight away
+				h.SendNotificationEvent(ctx, bid.LURL, bid, openrtb3.LossBelowAuctionFloor, bidFloor, bidFloor)
 			}
-		} else {
-			// TODO: maybe log no bid responses
-			continue
 		}
 	}
 
@@ -88,7 +91,7 @@ func (h Handler) HandleStats(ctx context.Context, stats schema.Stats, config auc
 	}
 
 	var winner *Bid
-	loosers := []Bid{}
+	var losers []Bid
 	lossReason := openrtb3.LossWon
 	switch stats.Result.Status {
 	case "SUCCESS": // We have winner
@@ -102,13 +105,13 @@ func (h Handler) HandleStats(ctx context.Context, stats schema.Stats, config auc
 				if bid.Price == winEcpm {
 					winner = &bid
 				} else {
-					loosers = append(loosers, bid)
+					losers = append(losers, bid)
 				}
 			}
 		}
 
 		fmt.Println(winner)
-		fmt.Println(loosers)
+		fmt.Println(losers)
 	case "FAIL":
 		lossReason = openrtb3.LossInternalError
 		fmt.Println("FAIL")
@@ -117,35 +120,37 @@ func (h Handler) HandleStats(ctx context.Context, stats schema.Stats, config auc
 		fmt.Println("AUCTION_CANCELLED")
 	}
 
-	for _, bid := range loosers {
-		h.SendLoss(ctx, bid, lossReason, 0, 0)
+	for _, bid := range losers {
+		h.SendNotificationEvent(ctx, bid.LURL, bid, lossReason, 0, 0)
 	}
 
 	return nil
 }
 
-// HandleShow is used to handle impressions
+// HandleShow is used to handle /show request
 // Send burl to demand
 func (h Handler) HandleShow(ctx context.Context, imp *schema.Imp, responses []*adapters.DemandResponse) error {
 	return nil
 }
 
+// HandleWin is used to handle /win request
 // If external_win_notification is enabled - send win/loss notifications to demands
 // If external_win_notification is disabled - do nothing
 func (h Handler) HandleWin(ctx context.Context, imp *schema.Imp, responses []*adapters.DemandResponse) error {
 	return nil
 }
 
+// HandleLoss is used to handle /loss request
 // If external_win_notification is enabled - send win/loss notifications to demands
 // If external_win_notification is disabled - do nothing
 func (h Handler) HandleLoss(ctx context.Context, imp *schema.Imp, responses []*adapters.DemandResponse) error {
 	return nil
 }
 
-func (h Handler) SendLoss(ctx context.Context, bid Bid, lossReason openrtb3.LossReason, winPrice, secondPrice float64) {
-	u, err := url.Parse(bid.LURL)
-	if bid.LURL == "" || err != nil {
-		log.Printf("failed to parse url: %s", bid.LURL)
+func (h Handler) SendNotificationEvent(ctx context.Context, notificationUrl string, bid Bid, lossReason openrtb3.LossReason, winPrice, secondPrice float64) {
+	u, err := url.Parse(notificationUrl)
+	if notificationUrl == "" || err != nil {
+		log.Printf("failed to parse url: %s", notificationUrl)
 		return
 	}
 	macroses := macrosesMap(bid, lossReason, winPrice, secondPrice)
@@ -167,7 +172,7 @@ func (h Handler) SendLoss(ctx context.Context, bid Bid, lossReason openrtb3.Loss
 	}, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 3))
 
 	if err != nil {
-		log.Printf("failed to send loss notification: %s -> %s", bid.DemandID, bid.LURL)
+		log.Printf("failed to send loss notification: %s -> %s", bid.DemandID, notificationUrl)
 	}
 }
 

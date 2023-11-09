@@ -133,10 +133,8 @@ func (a *BidmachineAdapter) CreateRequest(request openrtb.BidRequest, br *schema
 
 func (a *BidmachineAdapter) ExecuteRequest(ctx context.Context, client *http.Client, request openrtb.BidRequest) *adapters.DemandResponse {
 	dr := &adapters.DemandResponse{
-		DemandID:    adapter.BidmachineKey,
-		RequestID:   request.ID,
-		TagID:       "",
-		PlacementID: "",
+		DemandID:  adapter.BidmachineKey,
+		RequestID: request.ID,
 	}
 	requestBody, err := json.Marshal(request)
 	if err != nil {
@@ -155,10 +153,6 @@ func (a *BidmachineAdapter) ExecuteRequest(ctx context.Context, client *http.Cli
 
 	httpResp, err := client.Do(httpReq)
 	if err != nil {
-		if errors.Is(err, context.DeadlineExceeded) {
-			fmt.Println("Timeout")
-			// TODO: Send Timeout Notification if bidder support, eg FB
-		}
 		dr.Error = err
 		return dr
 	}

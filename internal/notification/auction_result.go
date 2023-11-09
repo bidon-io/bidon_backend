@@ -11,7 +11,7 @@ type AuctionResult struct {
 	Rounds    []Round `json:"rounds"`
 }
 
-func (a AuctionResult) MarshalBinary() ([]byte, error) {
+func (a *AuctionResult) MarshalBinary() ([]byte, error) {
 	return json.Marshal(a)
 }
 
@@ -20,15 +20,15 @@ func (a *AuctionResult) UnmarshalBinary(data []byte) error {
 }
 
 func (a *AuctionResult) WinningBid() float64 {
-	max := 0.0
+	maxPrice := 0.0
 	for _, round := range a.Rounds {
 		for _, bid := range round.Bids {
-			if bid.Price > max {
-				max = bid.Price
+			if bid.Price > maxPrice {
+				maxPrice = bid.Price
 			}
 		}
 	}
-	return max
+	return maxPrice
 }
 
 type Round struct {
