@@ -44,7 +44,7 @@ func TestHandler_HandleRound(t *testing.T) {
 
 	handler := notification.Handler{AuctionResultRepo: mockRepo}
 
-	err := handler.HandleRound(ctx, imp, responses)
+	err := handler.HandleBiddingRound(ctx, imp, responses)
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
@@ -176,8 +176,8 @@ func TestHandler_SendLoss(t *testing.T) {
 	// Create a Handler instance with the mock HTTP client and server
 	handler := notification.Handler{HttpClient: server.Client()}
 
-	// Call the SendLoss method with the test context and input data
-	handler.SendLoss(ctx, bid, lossReason, winPrice, secondPrice)
+	// Call the SendNotificationEvent method with the test context and input data
+	handler.SendNotificationEvent(ctx, bid.LURL, bid, lossReason, winPrice, secondPrice)
 }
 
 func TestAuctionResult_WinningBid(t *testing.T) {

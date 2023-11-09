@@ -34,7 +34,7 @@ type AdaptersBuilder interface {
 }
 
 type NotificationHandler interface {
-	HandleRound(context.Context, *schema.Imp, AuctionResult) error
+	HandleBiddingRound(context.Context, *schema.Imp, AuctionResult) error
 }
 
 type BuildParams struct {
@@ -140,7 +140,7 @@ func (b *Builder) HoldAuction(ctx context.Context, params *BuildParams) (Auction
 		auctionResult.Bids = append(auctionResult.Bids, bid)
 	}
 
-	b.NotificationHandler.HandleRound(ctx, &br.Imp, auctionResult)
+	b.NotificationHandler.HandleBiddingRound(ctx, &br.Imp, auctionResult)
 
 	return auctionResult, nil
 }
