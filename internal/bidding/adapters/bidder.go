@@ -10,8 +10,6 @@ import (
 )
 
 type BidderInterface interface {
-	// ParseConfig(config *json.RawMessage) error
-
 	// CreateRequest makes the HTTP requests which should be made to fetch bids.
 	CreateRequest(openrtb.BidRequest, *schema.BiddingRequest) (openrtb.BidRequest, error)
 
@@ -40,6 +38,7 @@ type DemandResponse struct {
 	TagID       string
 	PlacementID string
 	SlotUUID    string
+	TimeoutURL  string
 }
 
 func (dr *DemandResponse) IsBid() bool {

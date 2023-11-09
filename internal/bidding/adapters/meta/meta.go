@@ -91,6 +91,10 @@ func (a *MetaAdapter) rewarded(br *schema.BiddingRequest) *openrtb2.Imp {
 	}
 }
 
+func (a *MetaAdapter) timeoutURL() string {
+	return "https://www.facebook.com/audiencenetwork/nurl/?partner=" + platformID + "&app=" + a.AppID + "&auction=${AUCTION_ID}&ortb_loss_code=2"
+}
+
 func (a *MetaAdapter) CreateRequest(request openrtb.BidRequest, br *schema.BiddingRequest) (openrtb.BidRequest, error) {
 	secure := int8(1)
 
@@ -143,9 +147,10 @@ func (a *MetaAdapter) CreateRequest(request openrtb.BidRequest, br *schema.Biddi
 
 func (a *MetaAdapter) ExecuteRequest(ctx context.Context, client *http.Client, request openrtb.BidRequest) *adapters.DemandResponse {
 	dr := &adapters.DemandResponse{
-		DemandID:  adapter.MetaKey,
-		RequestID: request.ID,
-		TagID:     a.TagID,
+		DemandID:   adapter.MetaKey,
+		RequestID:  request.ID,
+		TimeoutURL: a.timeoutURL(),
+		TagID:      a.TagID,
 	}
 	requestBody, err := json.Marshal(request)
 	if err != nil {
@@ -164,10 +169,6 @@ func (a *MetaAdapter) ExecuteRequest(ctx context.Context, client *http.Client, r
 
 	httpResp, err := client.Do(httpReq)
 	if err != nil {
-		if errors.Is(err, context.DeadlineExceeded) {
-			fmt.Println("Timeout")
-			// TODO: Send Timeout Notification if bidder support, eg FB
-		}
 		dr.Error = err
 		return dr
 	}
