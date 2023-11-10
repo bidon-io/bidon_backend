@@ -262,9 +262,11 @@ func selectAmazonAdUnit(slotUUID string, adUnits []auction.AdUnit) (*AdUnit, err
 	for _, adUnit := range adUnits {
 		if slotUUID == adUnit.Extra["slot_uuid"] {
 			return &AdUnit{
-				UID:   adUnit.UID,
-				Label: adUnit.Label,
-				Extra: adUnit.Extra,
+				DemandID: adapter.AmazonKey,
+				UID:      adUnit.UID,
+				Label:    adUnit.Label,
+				BidType:  adUnit.BidType,
+				Extra:    adUnit.Extra,
 			}, nil
 		}
 	}
