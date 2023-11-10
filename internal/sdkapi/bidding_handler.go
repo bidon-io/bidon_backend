@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/bidon-io/bidon-backend/internal/adapter/store"
 	"github.com/bidon-io/bidon-backend/internal/auction"
 
 	"github.com/bidon-io/bidon-backend/internal/adapter"
@@ -22,19 +21,19 @@ import (
 type BiddingHandler struct {
 	*BaseHandler[schema.BiddingRequest, *schema.BiddingRequest]
 	BiddingBuilder        *bidding.Builder
-	AdUnitsMapBuilder     AdUnitsMapBuilder
+	AdUnitsMatcher        AdUnitsMatcher
 	AdaptersConfigBuilder AdaptersConfigBuilder
 	EventLogger           *event.Logger
 }
 
-//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/bidding_mocks.go -pkg mocks . AdaptersConfigBuilder AdUnitsMapBuilder
+//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/bidding_mocks.go -pkg mocks . AdaptersConfigBuilder AdUnitsMatcher
 
 type AdaptersConfigBuilder interface {
-	Build(ctx context.Context, appID int64, adapterKeys []adapter.Key, imp schema.Imp, adUnitsMap *store.AdUnitsMap) (adapter.ProcessedConfigsMap, error)
+	Build(ctx context.Context, appID int64, adapterKeys []adapter.Key, imp schema.Imp, adUnitsMap *map[adapter.Key][]auction.AdUnit) (adapter.ProcessedConfigsMap, error)
 }
 
-type AdUnitsMapBuilder interface {
-	Build(ctx context.Context, appID int64, adapterKeys []adapter.Key, imp schema.Imp) (store.AdUnitsMap, error)
+type AdUnitsMatcher interface {
+	Match(ctx context.Context, params *auction.BuildParams) ([]auction.AdUnit, error)
 }
 
 type BiddingResponse struct {
@@ -86,9 +85,21 @@ func (h *BiddingHandler) Handle(c echo.Context) error {
 	}
 
 	imp := req.raw.Imp
-	adUnitsMap, err := h.AdUnitsMapBuilder.Build(ctx, req.app.ID, req.raw.Adapters.Keys(), imp)
+	adUnits, err := h.AdUnitsMatcher.Match(ctx, &auction.BuildParams{
+		Adapters:   req.raw.Adapters.Keys(),
+		AppID:      req.app.ID,
+		AdType:     req.raw.Imp.Type(),
+		AdFormat:   req.raw.Imp.Format(),
+		DeviceType: req.raw.Device.Type,
+	})
 	if err != nil {
 		return err
+	}
+
+	adUnitsMap := make(map[adapter.Key][]auction.AdUnit)
+	for _, adUnit := range adUnits {
+		key := adapter.Key(adUnit.DemandID)
+		adUnitsMap[key] = append(adUnitsMap[key], adUnit)
 	}
 
 	adapterConfigs, err := h.AdaptersConfigBuilder.Build(ctx, req.app.ID, req.raw.Adapters.Keys(), imp, &adUnitsMap)
@@ -138,7 +149,7 @@ func (h *BiddingHandler) Handle(c echo.Context) error {
 	return c.JSON(http.StatusOK, response)
 }
 
-func (h *BiddingHandler) buildBids(auctionResult bidding.AuctionResult, imp schema.Imp, adUnitsMap *store.AdUnitsMap, response *BiddingResponse) {
+func (h *BiddingHandler) buildBids(auctionResult bidding.AuctionResult, imp schema.Imp, adUnitsMap *map[adapter.Key][]auction.AdUnit, response *BiddingResponse) {
 	for _, result := range auctionResult.Bids {
 		if result.IsBid() && result.Bid.Price >= imp.GetBidFloor() {
 
@@ -239,7 +250,7 @@ func (h *BiddingHandler) sendEvents(c echo.Context, req *request[schema.BiddingR
 	}
 }
 
-func selectAdUnit(demandResponse adapters.DemandResponse, adUnitsMap *store.AdUnitsMap) (*AdUnit, error) {
+func selectAdUnit(demandResponse adapters.DemandResponse, adUnitsMap *map[adapter.Key][]auction.AdUnit) (*AdUnit, error) {
 	adUnits, ok := (*adUnitsMap)[demandResponse.DemandID]
 	if !ok {
 		return nil, fmt.Errorf("ad units not found for demand %s", demandResponse.DemandID)

@@ -12,8 +12,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bidon-io/bidon-backend/internal/adapter/store"
-
 	"github.com/bidon-io/bidon-backend/config"
 
 	"github.com/bidon-io/bidon-backend/internal/adapter"
@@ -89,28 +87,26 @@ func testHelperBiddingHandler(t *testing.T) sdkapi.BiddingHandler {
 		},
 	}
 	pf := 0.1
-	adUnitsMap := &store.AdUnitsMap{
-		adapter.MetaKey: []auction.AdUnit{
-			{
-				DemandID:   "meta",
-				Label:      "meta",
-				PriceFloor: &pf,
-				UID:        "123_meta",
-				Extra: map[string]any{
-					"placement_id": "123",
-				},
+	adUnits := []auction.AdUnit{
+		{
+			DemandID:   "meta",
+			Label:      "meta",
+			PriceFloor: &pf,
+			UID:        "123_meta",
+			Extra: map[string]any{
+				"placement_id": "123",
 			},
 		},
 	}
 
-	adUnitsMapBuilder := &sdkapimocks.AdUnitsMapBuilderMock{
-		BuildFunc: func(ctx context.Context, appID int64, adapterKeys []adapter.Key, imp schema.Imp) (store.AdUnitsMap, error) {
-			return *adUnitsMap, nil
+	adUnitsMatcher := &sdkapimocks.AdUnitsMatcherMock{
+		MatchFunc: func(ctx context.Context, params *auction.BuildParams) ([]auction.AdUnit, error) {
+			return adUnits, nil
 		},
 	}
 
 	adapterConfigBuilder := &sdkapimocks.AdaptersConfigBuilderMock{
-		BuildFunc: func(ctx context.Context, appID int64, adapterKeys []adapter.Key, imp schema.Imp, adUnitsMap *store.AdUnitsMap) (adapter.ProcessedConfigsMap, error) {
+		BuildFunc: func(ctx context.Context, appID int64, adapterKeys []adapter.Key, imp schema.Imp, adUnitsMap *map[adapter.Key][]auction.AdUnit) (adapter.ProcessedConfigsMap, error) {
 			return adapter.ProcessedConfigsMap{
 				adapter.ApplovinKey: map[string]any{
 					"app_key": "123",
@@ -132,7 +128,7 @@ func testHelperBiddingHandler(t *testing.T) sdkapi.BiddingHandler {
 	}
 
 	notificationMock := &biddingmocks.NotificationHandlerMock{
-		HandleRoundFunc: func(context.Context, *schema.Imp, bidding.AuctionResult) error {
+		HandleBiddingRoundFunc: func(context.Context, *schema.Imp, bidding.AuctionResult) error {
 			return nil
 		},
 	}
@@ -150,7 +146,7 @@ func testHelperBiddingHandler(t *testing.T) sdkapi.BiddingHandler {
 			NotificationHandler: notificationMock,
 		},
 		AdaptersConfigBuilder: adapterConfigBuilder,
-		AdUnitsMapBuilder:     adUnitsMapBuilder,
+		AdUnitsMatcher:        adUnitsMatcher,
 		EventLogger:           &event.Logger{Engine: &engine.Log{}},
 	}
 	return handler
