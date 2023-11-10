@@ -94,7 +94,7 @@ var _ bidding.NotificationHandler = &NotificationHandlerMock{}
 //
 //		// make and configure a mocked bidding.NotificationHandler
 //		mockedNotificationHandler := &NotificationHandlerMock{
-//			HandleRoundFunc: func(contextMoqParam context.Context, imp *schema.Imp, auctionResult bidding.AuctionResult) error {
+//			HandleBiddingRoundFunc: func(contextMoqParam context.Context, imp *schema.Imp, auctionResult bidding.AuctionResult) error {
 //				panic("mock out the HandleBiddingRound method")
 //			},
 //		}
@@ -104,8 +104,8 @@ var _ bidding.NotificationHandler = &NotificationHandlerMock{}
 //
 //	}
 type NotificationHandlerMock struct {
-	// HandleRoundFunc mocks the HandleBiddingRound method.
-	HandleRoundFunc func(contextMoqParam context.Context, imp *schema.Imp, auctionResult bidding.AuctionResult) error
+	// HandleBiddingRoundFunc mocks the HandleBiddingRound method.
+	HandleBiddingRoundFunc func(contextMoqParam context.Context, imp *schema.Imp, auctionResult bidding.AuctionResult) error
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -119,13 +119,13 @@ type NotificationHandlerMock struct {
 			AuctionResult bidding.AuctionResult
 		}
 	}
-	lockHandleRound sync.RWMutex
+	lockHandleBiddingRound sync.RWMutex
 }
 
-// HandleBiddingRound calls HandleRoundFunc.
+// HandleBiddingRound calls HandleBiddingRoundFunc.
 func (mock *NotificationHandlerMock) HandleBiddingRound(contextMoqParam context.Context, imp *schema.Imp, auctionResult bidding.AuctionResult) error {
-	if mock.HandleRoundFunc == nil {
-		panic("NotificationHandlerMock.HandleRoundFunc: method is nil but NotificationHandler.HandleBiddingRound was just called")
+	if mock.HandleBiddingRoundFunc == nil {
+		panic("NotificationHandlerMock.HandleBiddingRoundFunc: method is nil but NotificationHandler.HandleBiddingRound was just called")
 	}
 	callInfo := struct {
 		ContextMoqParam context.Context
@@ -136,17 +136,17 @@ func (mock *NotificationHandlerMock) HandleBiddingRound(contextMoqParam context.
 		Imp:             imp,
 		AuctionResult:   auctionResult,
 	}
-	mock.lockHandleRound.Lock()
+	mock.lockHandleBiddingRound.Lock()
 	mock.calls.HandleBiddingRound = append(mock.calls.HandleBiddingRound, callInfo)
-	mock.lockHandleRound.Unlock()
-	return mock.HandleRoundFunc(contextMoqParam, imp, auctionResult)
+	mock.lockHandleBiddingRound.Unlock()
+	return mock.HandleBiddingRoundFunc(contextMoqParam, imp, auctionResult)
 }
 
-// HandleRoundCalls gets all the calls that were made to HandleBiddingRound.
+// HandleBiddingRoundCalls gets all the calls that were made to HandleBiddingRound.
 // Check the length with:
 //
-//	len(mockedNotificationHandler.HandleRoundCalls())
-func (mock *NotificationHandlerMock) HandleRoundCalls() []struct {
+//	len(mockedNotificationHandler.HandleBiddingRoundCalls())
+func (mock *NotificationHandlerMock) HandleBiddingRoundCalls() []struct {
 	ContextMoqParam context.Context
 	Imp             *schema.Imp
 	AuctionResult   bidding.AuctionResult
@@ -156,8 +156,8 @@ func (mock *NotificationHandlerMock) HandleRoundCalls() []struct {
 		Imp             *schema.Imp
 		AuctionResult   bidding.AuctionResult
 	}
-	mock.lockHandleRound.RLock()
+	mock.lockHandleBiddingRound.RLock()
 	calls = mock.calls.HandleBiddingRound
-	mock.lockHandleRound.RUnlock()
+	mock.lockHandleBiddingRound.RUnlock()
 	return calls
 }
