@@ -35,7 +35,7 @@
     "@vee-validate/nuxt": "^4.11.8",
     "@vee-validate/yup": "^4.11.8",
     "@vueuse/core": "^10.5.0",
-    "axios": "^1.5.1",
+    "axios": "^1.6.0",
     "humps": "^2.0.1",
     "inflection": "^3.0.0",
     "pinia": "^2.1.6",
