@@ -3,9 +3,9 @@ package adapters_builder
 import (
 	"context"
 	"fmt"
-	"github.com/bidon-io/bidon-backend/internal/adapter/store"
 	"net/http"
 
+	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 
 	"github.com/bidon-io/bidon-backend/internal/adapter"
@@ -71,7 +71,7 @@ func NewAdapters(keys []adapter.Key) adapter.ProcessedConfigsMap {
 	return adapters
 }
 
-func (b *AdaptersConfigBuilder) Build(ctx context.Context, appID int64, adapterKeys []adapter.Key, imp schema.Imp, adUnitsMap *store.AdUnitsMap) (adapter.ProcessedConfigsMap, error) {
+func (b *AdaptersConfigBuilder) Build(ctx context.Context, appID int64, adapterKeys []adapter.Key, imp schema.Imp, adUnitsMap *map[adapter.Key][]auction.AdUnit) (adapter.ProcessedConfigsMap, error) {
 	profiles, err := b.ConfigurationFetcher.Fetch(ctx, appID, adapterKeys)
 	if err != nil {
 		return nil, err
