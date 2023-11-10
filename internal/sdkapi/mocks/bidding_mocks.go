@@ -6,7 +6,7 @@ package mocks
 import (
 	"context"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
-	"github.com/bidon-io/bidon-backend/internal/adapter/store"
+	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	"sync"
@@ -22,7 +22,7 @@ var _ sdkapi.AdaptersConfigBuilder = &AdaptersConfigBuilderMock{}
 //
 //		// make and configure a mocked sdkapi.AdaptersConfigBuilder
 //		mockedAdaptersConfigBuilder := &AdaptersConfigBuilderMock{
-//			BuildFunc: func(ctx context.Context, appID int64, adapterKeys []adapter.Key, imp schema.Imp, adUnitsMap *store.AdUnitsMap) (adapter.ProcessedConfigsMap, error) {
+//			BuildFunc: func(ctx context.Context, appID int64, adapterKeys []adapter.Key, imp schema.Imp, adUnitsMap *map[adapter.Key][]auction.AdUnit) (adapter.ProcessedConfigsMap, error) {
 //				panic("mock out the Build method")
 //			},
 //		}
@@ -33,7 +33,7 @@ var _ sdkapi.AdaptersConfigBuilder = &AdaptersConfigBuilderMock{}
 //	}
 type AdaptersConfigBuilderMock struct {
 	// BuildFunc mocks the Build method.
-	BuildFunc func(ctx context.Context, appID int64, adapterKeys []adapter.Key, imp schema.Imp, adUnitsMap *store.AdUnitsMap) (adapter.ProcessedConfigsMap, error)
+	BuildFunc func(ctx context.Context, appID int64, adapterKeys []adapter.Key, imp schema.Imp, adUnitsMap *map[adapter.Key][]auction.AdUnit) (adapter.ProcessedConfigsMap, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -48,14 +48,14 @@ type AdaptersConfigBuilderMock struct {
 			// Imp is the imp argument value.
 			Imp schema.Imp
 			// AdUnitsMap is the adUnitsMap argument value.
-			AdUnitsMap *store.AdUnitsMap
+			AdUnitsMap *map[adapter.Key][]auction.AdUnit
 		}
 	}
 	lockBuild sync.RWMutex
 }
 
 // Build calls BuildFunc.
-func (mock *AdaptersConfigBuilderMock) Build(ctx context.Context, appID int64, adapterKeys []adapter.Key, imp schema.Imp, adUnitsMap *store.AdUnitsMap) (adapter.ProcessedConfigsMap, error) {
+func (mock *AdaptersConfigBuilderMock) Build(ctx context.Context, appID int64, adapterKeys []adapter.Key, imp schema.Imp, adUnitsMap *map[adapter.Key][]auction.AdUnit) (adapter.ProcessedConfigsMap, error) {
 	if mock.BuildFunc == nil {
 		panic("AdaptersConfigBuilderMock.BuildFunc: method is nil but AdaptersConfigBuilder.Build was just called")
 	}
@@ -64,7 +64,7 @@ func (mock *AdaptersConfigBuilderMock) Build(ctx context.Context, appID int64, a
 		AppID       int64
 		AdapterKeys []adapter.Key
 		Imp         schema.Imp
-		AdUnitsMap  *store.AdUnitsMap
+		AdUnitsMap  *map[adapter.Key][]auction.AdUnit
 	}{
 		Ctx:         ctx,
 		AppID:       appID,
@@ -87,14 +87,14 @@ func (mock *AdaptersConfigBuilderMock) BuildCalls() []struct {
 	AppID       int64
 	AdapterKeys []adapter.Key
 	Imp         schema.Imp
-	AdUnitsMap  *store.AdUnitsMap
+	AdUnitsMap  *map[adapter.Key][]auction.AdUnit
 } {
 	var calls []struct {
 		Ctx         context.Context
 		AppID       int64
 		AdapterKeys []adapter.Key
 		Imp         schema.Imp
-		AdUnitsMap  *store.AdUnitsMap
+		AdUnitsMap  *map[adapter.Key][]auction.AdUnit
 	}
 	mock.lockBuild.RLock()
 	calls = mock.calls.Build
@@ -102,86 +102,74 @@ func (mock *AdaptersConfigBuilderMock) BuildCalls() []struct {
 	return calls
 }
 
-// Ensure, that AdUnitsMapBuilderMock does implement sdkapi.AdUnitsMapBuilder.
+// Ensure, that AdUnitsMatcherMock does implement sdkapi.AdUnitsMatcher.
 // If this is not the case, regenerate this file with moq.
-var _ sdkapi.AdUnitsMapBuilder = &AdUnitsMapBuilderMock{}
+var _ sdkapi.AdUnitsMatcher = &AdUnitsMatcherMock{}
 
-// AdUnitsMapBuilderMock is a mock implementation of sdkapi.AdUnitsMapBuilder.
+// AdUnitsMatcherMock is a mock implementation of sdkapi.AdUnitsMatcher.
 //
-//	func TestSomethingThatUsesAdUnitsMapBuilder(t *testing.T) {
+//	func TestSomethingThatUsesAdUnitsMatcher(t *testing.T) {
 //
-//		// make and configure a mocked sdkapi.AdUnitsMapBuilder
-//		mockedAdUnitsMapBuilder := &AdUnitsMapBuilderMock{
-//			BuildFunc: func(ctx context.Context, appID int64, adapterKeys []adapter.Key, imp schema.Imp) (store.AdUnitsMap, error) {
-//				panic("mock out the Build method")
+//		// make and configure a mocked sdkapi.AdUnitsMatcher
+//		mockedAdUnitsMatcher := &AdUnitsMatcherMock{
+//			MatchFunc: func(ctx context.Context, params *auction.BuildParams) ([]auction.AdUnit, error) {
+//				panic("mock out the Match method")
 //			},
 //		}
 //
-//		// use mockedAdUnitsMapBuilder in code that requires sdkapi.AdUnitsMapBuilder
+//		// use mockedAdUnitsMatcher in code that requires sdkapi.AdUnitsMatcher
 //		// and then make assertions.
 //
 //	}
-type AdUnitsMapBuilderMock struct {
-	// BuildFunc mocks the Build method.
-	BuildFunc func(ctx context.Context, appID int64, adapterKeys []adapter.Key, imp schema.Imp) (store.AdUnitsMap, error)
+type AdUnitsMatcherMock struct {
+	// MatchFunc mocks the Match method.
+	MatchFunc func(ctx context.Context, params *auction.BuildParams) ([]auction.AdUnit, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
-		// Build holds details about calls to the Build method.
-		Build []struct {
+		// Match holds details about calls to the Match method.
+		Match []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
-			// AppID is the appID argument value.
-			AppID int64
-			// AdapterKeys is the adapterKeys argument value.
-			AdapterKeys []adapter.Key
-			// Imp is the imp argument value.
-			Imp schema.Imp
+			// Params is the params argument value.
+			Params *auction.BuildParams
 		}
 	}
-	lockBuild sync.RWMutex
+	lockMatch sync.RWMutex
 }
 
-// Build calls BuildFunc.
-func (mock *AdUnitsMapBuilderMock) Build(ctx context.Context, appID int64, adapterKeys []adapter.Key, imp schema.Imp) (store.AdUnitsMap, error) {
-	if mock.BuildFunc == nil {
-		panic("AdUnitsMapBuilderMock.BuildFunc: method is nil but AdUnitsMapBuilder.Build was just called")
+// Match calls MatchFunc.
+func (mock *AdUnitsMatcherMock) Match(ctx context.Context, params *auction.BuildParams) ([]auction.AdUnit, error) {
+	if mock.MatchFunc == nil {
+		panic("AdUnitsMatcherMock.MatchFunc: method is nil but AdUnitsMatcher.Match was just called")
 	}
 	callInfo := struct {
-		Ctx         context.Context
-		AppID       int64
-		AdapterKeys []adapter.Key
-		Imp         schema.Imp
+		Ctx    context.Context
+		Params *auction.BuildParams
 	}{
-		Ctx:         ctx,
-		AppID:       appID,
-		AdapterKeys: adapterKeys,
-		Imp:         imp,
+		Ctx:    ctx,
+		Params: params,
 	}
-	mock.lockBuild.Lock()
-	mock.calls.Build = append(mock.calls.Build, callInfo)
-	mock.lockBuild.Unlock()
-	return mock.BuildFunc(ctx, appID, adapterKeys, imp)
+	mock.lockMatch.Lock()
+	mock.calls.Match = append(mock.calls.Match, callInfo)
+	mock.lockMatch.Unlock()
+	return mock.MatchFunc(ctx, params)
 }
 
-// BuildCalls gets all the calls that were made to Build.
+// MatchCalls gets all the calls that were made to Match.
 // Check the length with:
 //
-//	len(mockedAdUnitsMapBuilder.BuildCalls())
-func (mock *AdUnitsMapBuilderMock) BuildCalls() []struct {
-	Ctx         context.Context
-	AppID       int64
-	AdapterKeys []adapter.Key
-	Imp         schema.Imp
+//	len(mockedAdUnitsMatcher.MatchCalls())
+func (mock *AdUnitsMatcherMock) MatchCalls() []struct {
+	Ctx    context.Context
+	Params *auction.BuildParams
 } {
 	var calls []struct {
-		Ctx         context.Context
-		AppID       int64
-		AdapterKeys []adapter.Key
-		Imp         schema.Imp
+		Ctx    context.Context
+		Params *auction.BuildParams
 	}
-	mock.lockBuild.RLock()
-	calls = mock.calls.Build
-	mock.lockBuild.RUnlock()
+	mock.lockMatch.RLock()
+	calls = mock.calls.Match
+	mock.lockMatch.RUnlock()
 	return calls
 }

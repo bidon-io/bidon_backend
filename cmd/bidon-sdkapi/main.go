@@ -3,12 +3,13 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/bool64/cache"
-	"github.com/labstack/echo-contrib/echoprometheus"
 	"log"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/bool64/cache"
+	"github.com/labstack/echo-contrib/echoprometheus"
 
 	"github.com/bidon-io/bidon-backend/internal/bidding"
 	"github.com/bidon-io/bidon-backend/internal/notification"
@@ -171,10 +172,8 @@ func main() {
 		AdaptersConfigBuilder: &adapters_builder.AdaptersConfigBuilder{
 			ConfigurationFetcher: &adapterstore.ConfigurationFetcher{DB: db},
 		},
-		AdUnitsMapBuilder: &adapterstore.AdUnitsMapBuilder{
-			AdUnitsMatcher: &auctionstore.AdUnitsMatcher{DB: db},
-		},
-		EventLogger: eventLogger,
+		AdUnitsMatcher: &auctionstore.AdUnitsMatcher{DB: db},
+		EventLogger:    eventLogger,
 	}
 	statsHandler := sdkapi.StatsHandler{
 		BaseHandler: &sdkapi.BaseHandler[schema.StatsRequest, *schema.StatsRequest]{
