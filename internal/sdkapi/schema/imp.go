@@ -27,6 +27,13 @@ func (o *Imp) GetBidFloor() float64 {
 	return *o.BidFloor
 }
 
+const MinBidFloor = 0.000001
+
+// GetBidFloorForBidding returns bidfloor increased by fraction of cent, so the bid is always higher than the bidfloor
+func (o *Imp) GetBidFloorForBidding() float64 {
+	return o.GetBidFloor() + MinBidFloor
+}
+
 func (o *Imp) Format() ad.Format {
 	if o.Banner != nil {
 		return o.Banner.Format

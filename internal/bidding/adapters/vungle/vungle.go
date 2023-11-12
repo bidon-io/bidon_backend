@@ -113,7 +113,7 @@ func (a *VungleAdapter) CreateRequest(request openrtb.BidRequest, br *schema.Bid
 	imp.DisplayManager = string(adapter.VungleKey)
 	imp.DisplayManagerVer = br.Adapters[adapter.VungleKey].SDKVersion
 	imp.Secure = &secure
-	imp.BidFloor = br.Imp.GetBidFloor()
+	imp.BidFloor = br.Imp.GetBidFloorForBidding()
 	imp.BidFloorCur = "USD"
 
 	vungleData := make(map[string]interface{})

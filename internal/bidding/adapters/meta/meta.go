@@ -121,7 +121,7 @@ func (a *MetaAdapter) CreateRequest(request openrtb.BidRequest, br *schema.Biddi
 	imp.DisplayManager = string(adapter.MetaKey)
 	imp.DisplayManagerVer = br.Adapters[adapter.MetaKey].SDKVersion
 	imp.Secure = &secure
-	imp.BidFloor = br.Imp.GetBidFloor()
+	imp.BidFloor = br.Imp.GetBidFloorForBidding()
 	imp.BidFloorCur = "USD"
 
 	request.Imp = []openrtb2.Imp{*imp}

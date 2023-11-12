@@ -80,10 +80,8 @@ func NewRequest(request *schema.BaseRequest, adRequestParams AdRequestParams, ge
 	requestEvent.ImpID = adRequestParams.ImpID
 	requestEvent.DemandID = adRequestParams.DemandID
 	requestEvent.Bidding = adRequestParams.Bidding
-	requestEvent.AdUnitID = adRequestParams.AdUnitID
-	requestEvent.LineItemUID = adRequestParams.LineItemUID
-	requestEvent.LineItemLabel = adRequestParams.LineItemLabel
-	requestEvent.AdUnitCode = adRequestParams.AdUnitCode
+	requestEvent.AdUnitUID = adRequestParams.AdUnitUID
+	requestEvent.AdUnitLabel = adRequestParams.AdUnitLabel
 	requestEvent.Ecpm = adRequestParams.Ecpm
 	requestEvent.PriceFloor = adRequestParams.PriceFloor
 	requestEvent.RawRequest = adRequestParams.RawRequest
@@ -275,10 +273,8 @@ type AdRequestParams struct {
 	ImpID                   string
 	DemandID                string
 	Bidding                 bool
-	AdUnitID                int
-	LineItemUID             int64
-	LineItemLabel           string
-	AdUnitCode              string
+	AdUnitUID               int64
+	AdUnitLabel             string
 	Ecpm                    float64
 	PriceFloor              float64
 	RawRequest              string
@@ -299,10 +295,8 @@ type RequestEvent struct {
 	ImpID                       string  `json:"impid"`
 	DemandID                    string  `json:"demand_id"`
 	Bidding                     bool    `json:"bidding"`
-	AdUnitID                    int     `json:"ad_unit_id"`
-	LineItemUID                 int64   `json:"line_item_uid"`
-	LineItemLabel               string  `json:"line_item_label"`
-	AdUnitCode                  string  `json:"ad_unit_code"`
+	AdUnitUID                   int64   `json:"ad_unit_uid"`
+	AdUnitLabel                 string  `json:"ad_unit_label"`
 	Ecpm                        float64 `json:"ecpm"`
 	PriceFloor                  float64 `json:"price_floor"`
 	RawRequest                  string  `json:"raw_request"`

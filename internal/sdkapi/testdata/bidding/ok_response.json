@@ -1,1 +1,22 @@
-{"status": "NO_BID"}
+{
+  "bids": [
+    {
+      "id": "123",
+      "impid": "456",
+      "price": 11,
+      "ad_unit": {
+        "demand_id": "meta",
+        "uid": "123_meta",
+        "label": "meta",
+        "bid_type": "RTB",
+        "ext": {
+          "placement_id": "123"
+        }
+      },
+      "ext": {
+        "payload": "payload"
+      }
+    }
+  ],
+  "status": "SUCCESS"
+}
