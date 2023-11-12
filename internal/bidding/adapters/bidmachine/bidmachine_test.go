@@ -132,6 +132,7 @@ func buildWantRequest(imp openrtb2.Imp) openrtb.BidRequest {
 				TagID:             "",
 				Secure:            ptr(int8(1)),
 				Ext:               json.RawMessage(`{"bid_token":"token"}`),
+				BidFloor:          schema.MinBidFloor,
 			},
 		},
 	}

@@ -70,12 +70,12 @@
         "auction_id": "1d7fa438-cd08-4849-80ed-e20d5657a5ea",
         "bidfloor": 10.0,
         "demands": {
-        "meta": {
-            "token": "token"
-        },
-        "amazon": {
-            "token": "[{\"slot_uuid\":\"uuid1\",\"price_point\":\"price_point_1\"},{\"slot_uuid\":\"uuid2\",\"price_point\":\"price_point_2\"}]"
-        }
+            "meta": {
+                "token": "token"
+            },
+            "amazon": {
+                "token": "[{\"slot_uuid\":\"uuid1\",\"price_point\":\"price_point_1\"},{\"slot_uuid\":\"uuid2\",\"price_point\":\"price_point_2\"}]"
+            }
         },
         "id": "f2d0dc19-b43f-43c1-8ca0-ae895ec76970",
         "interstitial": {},

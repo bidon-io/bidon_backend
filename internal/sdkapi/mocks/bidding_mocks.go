@@ -7,10 +7,83 @@ import (
 	"context"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/auction"
+	"github.com/bidon-io/bidon-backend/internal/bidding"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	"sync"
 )
+
+// Ensure, that BiddingBuilderMock does implement sdkapi.BiddingBuilder.
+// If this is not the case, regenerate this file with moq.
+var _ sdkapi.BiddingBuilder = &BiddingBuilderMock{}
+
+// BiddingBuilderMock is a mock implementation of sdkapi.BiddingBuilder.
+//
+//	func TestSomethingThatUsesBiddingBuilder(t *testing.T) {
+//
+//		// make and configure a mocked sdkapi.BiddingBuilder
+//		mockedBiddingBuilder := &BiddingBuilderMock{
+//			HoldAuctionFunc: func(ctx context.Context, params *bidding.BuildParams) (bidding.AuctionResult, error) {
+//				panic("mock out the HoldAuction method")
+//			},
+//		}
+//
+//		// use mockedBiddingBuilder in code that requires sdkapi.BiddingBuilder
+//		// and then make assertions.
+//
+//	}
+type BiddingBuilderMock struct {
+	// HoldAuctionFunc mocks the HoldAuction method.
+	HoldAuctionFunc func(ctx context.Context, params *bidding.BuildParams) (bidding.AuctionResult, error)
+
+	// calls tracks calls to the methods.
+	calls struct {
+		// HoldAuction holds details about calls to the HoldAuction method.
+		HoldAuction []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Params is the params argument value.
+			Params *bidding.BuildParams
+		}
+	}
+	lockHoldAuction sync.RWMutex
+}
+
+// HoldAuction calls HoldAuctionFunc.
+func (mock *BiddingBuilderMock) HoldAuction(ctx context.Context, params *bidding.BuildParams) (bidding.AuctionResult, error) {
+	if mock.HoldAuctionFunc == nil {
+		panic("BiddingBuilderMock.HoldAuctionFunc: method is nil but BiddingBuilder.HoldAuction was just called")
+	}
+	callInfo := struct {
+		Ctx    context.Context
+		Params *bidding.BuildParams
+	}{
+		Ctx:    ctx,
+		Params: params,
+	}
+	mock.lockHoldAuction.Lock()
+	mock.calls.HoldAuction = append(mock.calls.HoldAuction, callInfo)
+	mock.lockHoldAuction.Unlock()
+	return mock.HoldAuctionFunc(ctx, params)
+}
+
+// HoldAuctionCalls gets all the calls that were made to HoldAuction.
+// Check the length with:
+//
+//	len(mockedBiddingBuilder.HoldAuctionCalls())
+func (mock *BiddingBuilderMock) HoldAuctionCalls() []struct {
+	Ctx    context.Context
+	Params *bidding.BuildParams
+} {
+	var calls []struct {
+		Ctx    context.Context
+		Params *bidding.BuildParams
+	}
+	mock.lockHoldAuction.RLock()
+	calls = mock.calls.HoldAuction
+	mock.lockHoldAuction.RUnlock()
+	return calls
+}
 
 // Ensure, that AdaptersConfigBuilderMock does implement sdkapi.AdaptersConfigBuilder.
 // If this is not the case, regenerate this file with moq.

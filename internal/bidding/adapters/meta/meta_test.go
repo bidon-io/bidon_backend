@@ -134,6 +134,7 @@ func buildWantRequest(imp openrtb2.Imp) openrtb.BidRequest {
 				TagID:             "10182906",
 				BidFloorCur:       "USD",
 				Secure:            ptr(int8(1)),
+				BidFloor:          schema.MinBidFloor,
 			},
 		},
 		Ext: json.RawMessage(`{"authentication_id":"b613679a0814d9ec772f95d778c35fc5ff1697c493715653c6c712144292c5ad","platformid":"687579938617452"}`),

@@ -124,6 +124,7 @@ func buildWantRequest(imp openrtb2.Imp) openrtb.BidRequest {
 				DisplayManagerVer: "1.0.0",
 				TagID:             "10182906-10192212",
 				Secure:            ptr(int8(1)),
+				BidFloor:          schema.MinBidFloor,
 			},
 		},
 	}
