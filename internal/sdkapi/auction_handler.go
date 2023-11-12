@@ -89,10 +89,8 @@ func (h *AuctionHandler) Handle(c echo.Context) error {
 		RoundNumber:             0,
 		ImpID:                   "",
 		DemandID:                "",
-		AdUnitID:                0,
-		LineItemUID:             0,
-		LineItemLabel:           "",
-		AdUnitCode:              "",
+		AdUnitUID:               0,
+		AdUnitLabel:             "",
 		Ecpm:                    0,
 		PriceFloor:              req.raw.AdObject.PriceFloor,
 	}

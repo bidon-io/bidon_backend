@@ -115,7 +115,7 @@ func (a *MintegralAdapter) CreateRequest(request openrtb.BidRequest, br *schema.
 	imp.DisplayManager = string(adapter.MintegralKey)
 	imp.DisplayManagerVer = br.Adapters[adapter.MintegralKey].SDKVersion
 	imp.Secure = &secure
-	imp.BidFloor = br.Imp.GetBidFloor()
+	imp.BidFloor = br.Imp.GetBidFloorForBidding()
 	imp.BidFloorCur = "USD"
 
 	request.Imp = []openrtb2.Imp{*imp}

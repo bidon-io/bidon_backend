@@ -54,6 +54,14 @@ func (dr *DemandResponse) ErrorMessage() string {
 	return errMsg
 }
 
+func (dr *DemandResponse) Price() float64 {
+	price := float64(0)
+	if dr.IsBid() {
+		price = dr.Bid.Price
+	}
+	return price
+}
+
 type BidDemandResponse struct {
 	Payload    string
 	Signaldata string

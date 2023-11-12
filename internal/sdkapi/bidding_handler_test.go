@@ -4,21 +4,18 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/bidon-io/bidon-backend/config"
+	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"reflect"
 	"strings"
 	"testing"
-	"time"
-
-	"github.com/bidon-io/bidon-backend/config"
 
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/bidding"
-	"github.com/bidon-io/bidon-backend/internal/bidding/adapters_builder"
-	biddingmocks "github.com/bidon-io/bidon-backend/internal/bidding/mocks"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event/engine"
@@ -78,14 +75,6 @@ func testHelperBiddingHandler(t *testing.T) sdkapi.BiddingHandler {
 		},
 	}
 
-	biddingHttpClient := &http.Client{
-		Timeout: 5 * time.Second,
-		Transport: &http.Transport{
-			MaxConnsPerHost:     50,
-			MaxIdleConns:        50,
-			MaxIdleConnsPerHost: 50,
-		},
-	}
 	pf := 0.1
 	adUnits := []auction.AdUnit{
 		{
@@ -93,6 +82,7 @@ func testHelperBiddingHandler(t *testing.T) sdkapi.BiddingHandler {
 			Label:      "meta",
 			PriceFloor: &pf,
 			UID:        "123_meta",
+			BidType:    schema.RTBBidType,
 			Extra: map[string]any{
 				"placement_id": "123",
 			},
@@ -127,12 +117,6 @@ func testHelperBiddingHandler(t *testing.T) sdkapi.BiddingHandler {
 		},
 	}
 
-	notificationMock := &biddingmocks.NotificationHandlerMock{
-		HandleBiddingRoundFunc: func(context.Context, *schema.Imp, bidding.AuctionResult) error {
-			return nil
-		},
-	}
-
 	// Create a new AuctionHandler instance
 
 	handler := sdkapi.BiddingHandler{
@@ -141,9 +125,24 @@ func testHelperBiddingHandler(t *testing.T) sdkapi.BiddingHandler {
 			ConfigFetcher: configFetcher,
 			Geocoder:      geocoder,
 		},
-		BiddingBuilder: &bidding.Builder{
-			AdaptersBuilder:     adapters_builder.BuildBiddingAdapters(biddingHttpClient),
-			NotificationHandler: notificationMock,
+		BiddingBuilder: &sdkapimocks.BiddingBuilderMock{
+			HoldAuctionFunc: func(ctx context.Context, params *bidding.BuildParams) (bidding.AuctionResult, error) {
+				return bidding.AuctionResult{
+					RoundNumber: 0,
+					Bids: []adapters.DemandResponse{
+						{
+							DemandID: "meta",
+							Bid: &adapters.BidDemandResponse{
+								Payload:  "payload",
+								Price:    11,
+								ID:       "123",
+								ImpID:    "456",
+								DemandID: adapter.MetaKey,
+							},
+						},
+					},
+				}, nil
+			},
 		},
 		AdaptersConfigBuilder: adapterConfigBuilder,
 		AdUnitsMatcher:        adUnitsMatcher,
@@ -168,7 +167,7 @@ func TestBiddingHandler_OK(t *testing.T) {
 	// Create a new HTTP request
 	req := httptest.NewRequest(http.MethodPost, "/bidding/interstitial", strings.NewReader(string(requestJson[:])))
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("X-Bidon-Version", "0.4.0")
+	req.Header.Set("X-Bidon-Version", "0.5.0")
 
 	// Create a new HTTP response recorder
 	rec := httptest.NewRecorder()
