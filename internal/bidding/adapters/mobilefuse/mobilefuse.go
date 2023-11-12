@@ -98,7 +98,7 @@ func (a *MobileFuseAdapter) CreateRequest(request openrtb.BidRequest, br *schema
 	imp.DisplayManager = string(adapter.MobileFuseKey)
 	imp.DisplayManagerVer = br.Adapters[adapter.MobileFuseKey].SDKVersion
 	imp.Secure = &secure
-	imp.BidFloor = br.Imp.GetBidFloor()
+	imp.BidFloor = br.Imp.GetBidFloorForBidding()
 	request.Imp = []openrtb2.Imp{*imp}
 	request.Cur = []string{"USD"}
 
