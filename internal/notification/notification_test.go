@@ -20,7 +20,7 @@ import (
 func TestHandler_HandleRound(t *testing.T) {
 	ctx := context.Background()
 	floor := float64(2)
-	imp := &schema.Imp{ID: "imp-1", BidFloor: &floor}
+	imp := &schema.Imp{BidFloor: &floor}
 	responses := bidding.AuctionResult{
 		Bids: []adapters.DemandResponse{
 			{Bid: &adapters.BidDemandResponse{ID: "bid-1", ImpID: "imp-1", Price: 1.23}},
@@ -93,7 +93,7 @@ func TestHandler_HandleStats_notification_true(t *testing.T) {
 
 func TestHandler_HandleShow(t *testing.T) {
 	ctx := context.Background()
-	imp := &schema.Imp{ID: "imp-1"}
+	imp := &schema.Imp{}
 	adapters := []*adapters.DemandResponse{
 		{Bid: &adapters.BidDemandResponse{ID: "bid-1", ImpID: "imp-1", Price: 1.23, BURL: "http://example.com/burl"}},
 		{Bid: &adapters.BidDemandResponse{ID: "bid-2", ImpID: "imp-1", Price: 4.56, BURL: "http://example.com/burl"}},
@@ -110,7 +110,7 @@ func TestHandler_HandleShow(t *testing.T) {
 
 func TestHandler_HandleWin(t *testing.T) {
 	ctx := context.Background()
-	imp := &schema.Imp{ID: "imp-1"}
+	imp := &schema.Imp{}
 	adapters := []*adapters.DemandResponse{
 		{Bid: &adapters.BidDemandResponse{ID: "bid-1", ImpID: "imp-1", Price: 1.23, NURL: "http://example.com/win"}},
 		{Bid: &adapters.BidDemandResponse{ID: "bid-2", ImpID: "imp-1", Price: 4.56, NURL: "http://example.com/win"}},
@@ -127,7 +127,7 @@ func TestHandler_HandleWin(t *testing.T) {
 
 func TestHandler_HandleLoss(t *testing.T) {
 	ctx := context.Background()
-	imp := &schema.Imp{ID: "imp-1"}
+	imp := &schema.Imp{}
 	adapters := []*adapters.DemandResponse{
 		{Bid: &adapters.BidDemandResponse{ID: "bid-1", ImpID: "imp-1", Price: 1.23, LURL: "http://example.com/loss"}},
 		{Bid: &adapters.BidDemandResponse{ID: "bid-2", ImpID: "imp-1", Price: 4.56, LURL: "http://example.com/loss"}},
