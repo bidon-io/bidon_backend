@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/bidon-io/bidon-backend/internal/bidding/adapters/amazon"
 	"strconv"
 	"sync"
-
-	"github.com/bidon-io/bidon-backend/internal/bidding/adapters/amazon"
+	"time"
 
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/auction"
@@ -43,6 +43,7 @@ type BuildParams struct {
 	GeoData        geocoder.GeoData
 	AdapterConfigs adapter.ProcessedConfigsMap
 	AuctionConfig  auction.Config
+	StartTS        int64
 }
 
 type AuctionResult struct {
@@ -122,6 +123,8 @@ func (b *Builder) HoldAuction(ctx context.Context, params *BuildParams) (Auction
 		bids <- adapters.DemandResponse{
 			DemandID: adapterKey,
 			Error:    err,
+			StartTS:  params.StartTS,
+			EndTS:    time.Now().UnixMilli(),
 		}
 	}
 	wg := sync.WaitGroup{}
@@ -169,6 +172,9 @@ func (b *Builder) processAdapter(
 			return
 		}
 		for _, demandResponse := range demandResponses {
+			demandResponse.StartTS = params.StartTS
+			demandResponse.EndTS = time.Now().UnixMilli()
+
 			bids <- *demandResponse
 		}
 	}
@@ -189,6 +195,7 @@ func (b *Builder) processAdapter(
 	}
 
 	demandResponse := bidder.Adapter.ExecuteRequest(ctx, bidder.Client, bidRequest)
+	demandResponse.StartTS = params.StartTS
 	if demandResponse.Error != nil {
 		bids <- *demandResponse
 		return
@@ -196,6 +203,8 @@ func (b *Builder) processAdapter(
 
 	demandResponse, err = bidder.Adapter.ParseBids(demandResponse)
 	demandResponse.Error = err
+	demandResponse.EndTS = time.Now().UnixMilli()
+
 	bids <- *demandResponse
 }
 

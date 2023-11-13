@@ -13,15 +13,6 @@ type StatsRequest struct {
 	Stats  Stats   `json:"stats" validate:"required"`
 }
 
-func (r *StatsRequest) Map() map[string]any {
-	m := r.BaseRequest.Map()
-
-	m["ad_type"] = r.AdType
-	m["stats"] = r.Stats.Map()
-
-	return m
-}
-
 func (r *StatsRequest) NormalizeValues() {
 	r.BaseRequest.NormalizeValues()
 
@@ -46,23 +37,6 @@ type Stats struct {
 	Rounds                  []StatsRound `json:"rounds" validate:"required"`
 }
 
-func (s Stats) Map() map[string]any {
-	auctionConfigurationUID, err := strconv.Atoi(s.AuctionConfigurationUID)
-	if err != nil {
-		auctionConfigurationUID = 0
-	}
-
-	m := map[string]any{
-		"auction_id":                s.AuctionID,
-		"auction_configuration_id":  s.AuctionConfigurationID,
-		"auction_configuration_uid": auctionConfigurationUID,
-		"result":                    s.Result.Map(),
-		"rounds":                    sliceMap(s.Rounds),
-	}
-
-	return m
-}
-
 type StatsResult struct {
 	Status            string  `json:"status" validate:"required,oneof=SUCCESS FAIL AUCTION_CANCELLED"`
 	WinnerID          string  `json:"winner_id"` // Deprecated: WinnerDemandID instead
@@ -73,25 +47,8 @@ type StatsResult struct {
 	ECPM              float64 `json:"ecpm"`
 	Price             float64 `json:"price"`
 	BidType           BidType `json:"bid_type" validate:"omitempty,oneof=RTB CPM"`
-	AuctionStartTS    int     `json:"auction_start_ts"`
-	AuctionFinishTS   int     `json:"auction_finish_ts"`
-}
-
-func (s StatsResult) Map() map[string]any {
-	m := map[string]any{
-		"status":                 s.Status,
-		"winner_id":              s.GetWinnerDemandID(),
-		"winner_line_item_uid":   s.WinnerAdUnitUID,
-		"winner_line_item_label": s.WinnerAdUnitLabel,
-		"round_id":               s.RoundID,
-		"ecpm":                   s.GetWinnerPrice(),
-		"bid_type":               s.BidType,
-		"bidding":                s.IsBidding(),
-		"auction_start_ts":       s.AuctionStartTS,
-		"auction_finish_ts":      s.AuctionFinishTS,
-	}
-
-	return m
+	AuctionStartTS    int64   `json:"auction_start_ts"`
+	AuctionFinishTS   int64   `json:"auction_finish_ts"`
 }
 
 func (s StatsResult) GetWinnerDemandID() string {
@@ -159,21 +116,6 @@ func (r StatsRound) GetWinnerAdUnitUID() int {
 	return adUnitUID
 }
 
-func (r StatsRound) Map() map[string]any {
-	m := map[string]any{
-		"id":                     r.ID,
-		"pricefloor":             r.PriceFloor,
-		"demands":                sliceMap(r.Demands),
-		"bidding":                r.Bidding.Map(),
-		"winner_id":              r.GetWinnerDemandID(),
-		"winner_ecpm":            r.GetWinnerPrice(),
-		"winner_line_item_uid":   r.WinnerAdUnitUID,
-		"winner_line_item_label": r.WinnerAdUnitLabel,
-	}
-
-	return m
-}
-
 type StatsDemand struct {
 	ID           string  `json:"id" validate:"required"`
 	Status       string  `json:"status" validate:"required"`
@@ -183,10 +125,8 @@ type StatsDemand struct {
 	AdUnitLabel  string  `json:"ad_unit_label"`
 	ECPM         float64 `json:"ecpm"` // Deprecated: use Price instead
 	Price        float64 `json:"price"`
-	BidStartTS   int     `json:"bid_start_ts"`
-	BidFinishTS  int     `json:"bid_finish_ts"`
-	FillStartTS  int     `json:"fill_start_ts"`
-	FillFinishTS int     `json:"fill_finish_ts"`
+	FillStartTS  int64   `json:"fill_start_ts"`
+	FillFinishTS int64   `json:"fill_finish_ts"`
 }
 
 func (d StatsDemand) GetPrice() float64 {
@@ -211,52 +151,23 @@ func (d StatsDemand) GetAdUnitUID() int {
 	return lineItemUID
 }
 
-func (d StatsDemand) Map() map[string]any {
-	lineItemUID, err := strconv.Atoi(d.LineItemUID)
-	if err != nil {
-		lineItemUID = 0
-	}
-
-	m := map[string]any{
-		"id":             d.ID,
-		"status":         d.Status,
-		"ad_unit_id":     d.AdUnitID,
-		"line_item_uid":  lineItemUID,
-		"ecpm":           d.ECPM,
-		"bid_start_ts":   d.BidStartTS,
-		"bid_finish_ts":  d.BidFinishTS,
-		"fill_start_ts":  d.FillStartTS,
-		"fill_finish_ts": d.FillFinishTS,
-	}
-
-	return m
-}
-
 type StatsBidding struct {
-	BidStartTS  int        `json:"bid_start_ts" validate:"required"`
-	BidFinishTS int        `json:"bid_finish_ts"`
+	BidStartTS  int64      `json:"bid_start_ts" validate:"required"`
+	BidFinishTS int64      `json:"bid_finish_ts"`
 	Bids        []StatsBid `json:"bids" validate:"required"`
 }
 
-func (b StatsBidding) Map() map[string]any {
-	m := map[string]any{
-		"bid_start_ts":  b.BidStartTS,
-		"bid_finish_ts": b.BidFinishTS,
-		"bids":          sliceMap(b.Bids),
-	}
-
-	return m
-}
-
 type StatsBid struct {
-	ID           string  `json:"id" validate:"required"`
-	Status       string  `json:"status" validate:"required"`
-	ECPM         float64 `json:"ecpm" validate:"required_without=Price"` // Deprecated: use Price instead
-	Price        float64 `json:"price" validate:"required_without=ECPM"`
-	AdUnitUID    string  `json:"ad_unit_uid"`
-	AdUnitLabel  string  `json:"ad_unit_label"`
-	FillStartTS  int     `json:"fill_start_ts"`
-	FillFinishTS int     `json:"fill_finish_ts"`
+	ID            string  `json:"id" validate:"required"`
+	Status        string  `json:"status" validate:"required"`
+	ECPM          float64 `json:"ecpm" validate:"required_without=Price"` // Deprecated: use Price instead
+	Price         float64 `json:"price" validate:"required_without=ECPM"`
+	AdUnitUID     string  `json:"ad_unit_uid"`
+	AdUnitLabel   string  `json:"ad_unit_label"`
+	FillStartTS   int64   `json:"fill_start_ts"`
+	FillFinishTS  int64   `json:"fill_finish_ts"`
+	TokenStartTS  int64   `json:"token_start_ts"`
+	TokenFinishTS int64   `json:"token_finish_ts"`
 }
 
 func (b StatsBid) GetPrice() float64 {
@@ -272,18 +183,6 @@ func (b StatsBid) GetAdUnitUID() int {
 		return 0
 	}
 	return adUnitUID
-}
-
-func (b StatsBid) Map() map[string]any {
-	m := map[string]any{
-		"id":             b.ID,
-		"status":         b.Status,
-		"ecpm":           b.ECPM,
-		"fill_start_ts":  b.FillStartTS,
-		"fill_finish_ts": b.FillFinishTS,
-	}
-
-	return m
 }
 
 type mapper interface {

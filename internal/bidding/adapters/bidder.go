@@ -39,6 +39,8 @@ type DemandResponse struct {
 	PlacementID string
 	SlotUUID    string
 	TimeoutURL  string
+	StartTS     int64
+	EndTS       int64
 }
 
 func (dr *DemandResponse) IsBid() bool {

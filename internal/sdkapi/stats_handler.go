@@ -30,11 +30,6 @@ func (h *StatsHandler) Handle(c echo.Context) error {
 		return err
 	}
 
-	configEvent := event.NewStats(&req.raw, req.geoData)
-	h.EventLogger.Log(configEvent, func(err error) {
-		logError(c, fmt.Errorf("log stats event: %v", err))
-	})
-
 	h.sendEvents(c, req)
 
 	config := req.auctionConfig
@@ -93,6 +88,7 @@ func (h *StatsHandler) sendEvents(c echo.Context, req *request[schema.StatsReque
 		AdUnitLabel:             stats.Result.WinnerAdUnitLabel,
 		Ecpm:                    stats.Result.GetWinnerPrice(),
 		PriceFloor:              statsPriceFloor,
+		TimingMap:               event.TimingMap{"auction": {stats.Result.AuctionStartTS, stats.Result.AuctionFinishTS}},
 	}
 	statsRequestEvent := event.NewRequest(&req.raw.BaseRequest, adRequestParams, req.geoData)
 	h.EventLogger.Log(statsRequestEvent, func(err error) {
@@ -114,6 +110,7 @@ func (h *StatsHandler) sendEvents(c echo.Context, req *request[schema.StatsReque
 			AdUnitLabel:             round.WinnerAdUnitLabel,
 			Ecpm:                    round.GetWinnerPrice(),
 			PriceFloor:              round.PriceFloor,
+			TimingMap:               event.TimingMap{"auction": {stats.Result.AuctionStartTS, stats.Result.AuctionFinishTS}},
 		}
 		if round.WinnerID != "" {
 			adRequestParams.Status = "SUCCESS"
@@ -142,6 +139,7 @@ func (h *StatsHandler) sendEvents(c echo.Context, req *request[schema.StatsReque
 				Ecpm:                    demand.GetPrice(),
 				PriceFloor:              round.PriceFloor,
 				Bidding:                 false,
+				TimingMap:               event.TimingMap{"fill": {demand.FillStartTS, demand.FillFinishTS}},
 			}
 			demandRequestEvent := event.NewRequest(&req.raw.BaseRequest, adRequestParams, req.geoData)
 			h.EventLogger.Log(demandRequestEvent, func(err error) {
@@ -166,6 +164,11 @@ func (h *StatsHandler) sendEvents(c echo.Context, req *request[schema.StatsReque
 				Ecpm:                    bid.GetPrice(),
 				PriceFloor:              round.PriceFloor,
 				Bidding:                 true,
+				TimingMap: event.TimingMap{
+					"fill":  {bid.FillStartTS, bid.FillFinishTS},
+					"token": {bid.TokenStartTS, bid.TokenFinishTS},
+					"bid":   {round.Bidding.BidStartTS, round.Bidding.BidFinishTS},
+				},
 			}
 			demandRequestEvent := event.NewRequest(&req.raw.BaseRequest, adRequestParams, req.geoData)
 			h.EventLogger.Log(demandRequestEvent, func(err error) {
