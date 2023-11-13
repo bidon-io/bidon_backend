@@ -22,6 +22,10 @@ type Device struct {
 	Type            device.Type `json:"type" validate:"oneof=PHONE TABLET"` // TODO: add Marshal/Unmarshal to device.Type
 }
 
+func (d Device) IsTablet() bool {
+	return d.Type == device.TabletType
+}
+
 func (d Device) Map() map[string]any {
 	m := map[string]any{
 		"ua":              d.UserAgent,

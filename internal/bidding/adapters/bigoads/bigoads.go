@@ -27,22 +27,21 @@ type BigoAdsAdapter struct {
 	PlacementID string
 }
 
-var bannerFormats = map[string][2]int64{
-	"BANNER": {320, 50},
-	"MREC":   {300, 250},
-	"":       {320, 50}, // Default
+var bannerFormats = map[ad.Format][2]int64{
+	ad.BannerFormat:   {320, 50},
+	ad.MRECFormat:     {300, 250},
+	ad.AdaptiveFormat: {320, 50},
+	ad.EmptyFormat:    {320, 50}, // Default
 }
 
 func (a *BigoAdsAdapter) banner(br *schema.BiddingRequest) (*openrtb2.Imp, error) {
-	size, ok := bannerFormats[string(br.Imp.Format())]
-	if !ok {
-		return nil, errors.New("unknown banner format")
+	size, ok := bannerFormats[br.Imp.Format()]
+	if !ok || br.Imp.IsAdaptive() && br.Device.IsTablet() { // Does not support leaderboard format
+		return nil, fmt.Errorf("unknown banner format: %s", br.Imp.Format())
 	}
 
 	w, h := size[0], size[1]
-	if !br.Imp.IsPortrait() {
-		w, h = h, w
-	}
+
 	return &openrtb2.Imp{
 		Instl: 0,
 		Banner: &openrtb2.Banner{
