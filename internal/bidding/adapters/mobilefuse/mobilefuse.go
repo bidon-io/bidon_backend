@@ -24,22 +24,23 @@ type MobileFuseAdapter struct {
 	TagID string
 }
 
-var bannerFormats = map[string][2]int64{
-	"BANNER": {320, 50},
-	"MREC":   {300, 250},
-	"":       {320, 50}, // Default
+var bannerFormats = map[ad.Format][2]int64{
+	ad.BannerFormat:      {320, 50},
+	ad.LeaderboardFormat: {728, 90},
+	ad.MRECFormat:        {300, 250},
+	ad.AdaptiveFormat:    {320, 50},
+	ad.EmptyFormat:       {320, 50}, // Default
 }
 
-func (a *MobileFuseAdapter) banner(br *schema.BiddingRequest) (*openrtb2.Imp, error) {
-	size, ok := bannerFormats[string(br.Imp.Format())]
-	if !ok {
-		return nil, errors.New("unknown banner format")
+func (a *MobileFuseAdapter) banner(br *schema.BiddingRequest) *openrtb2.Imp {
+	size := bannerFormats[br.Imp.Format()]
+
+	if br.Imp.IsAdaptive() && br.Device.IsTablet() {
+		size = bannerFormats[ad.LeaderboardFormat]
 	}
 
 	w, h := size[0], size[1]
-	if !br.Imp.IsPortrait() {
-		w, h = h, w
-	}
+
 	return &openrtb2.Imp{
 		Instl: 0,
 		Banner: &openrtb2.Banner{
@@ -47,7 +48,7 @@ func (a *MobileFuseAdapter) banner(br *schema.BiddingRequest) (*openrtb2.Imp, er
 			H:   &h,
 			Pos: adcom1.PositionAboveFold.Ptr(),
 		},
-	}, nil
+	}
 }
 
 func (a *MobileFuseAdapter) interstitial() *openrtb2.Imp {
@@ -78,11 +79,7 @@ func (a *MobileFuseAdapter) CreateRequest(request openrtb.BidRequest, br *schema
 	var imp *openrtb2.Imp
 	switch br.Imp.Type() {
 	case ad.BannerType:
-		bannerImp, err := a.banner(br)
-		if err != nil {
-			return request, err
-		}
-		imp = bannerImp
+		imp = a.banner(br)
 	case ad.InterstitialType:
 		imp = a.interstitial()
 	case ad.RewardedType:

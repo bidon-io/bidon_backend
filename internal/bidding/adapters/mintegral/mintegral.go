@@ -27,12 +27,12 @@ type MintegralAdapter struct {
 	PlacementID string
 }
 
-var bannerFormats = map[string][2]int64{
-	"BANNER":      {320, 50},
-	"LEADERBOARD": {320, 50},
-	"MREC":        {300, 250},
-	"ADAPTIVE":    {320, 50},
-	"":            {320, 50}, // Default
+var bannerFormats = map[ad.Format][2]int64{
+	ad.BannerFormat:      {320, 50},
+	ad.LeaderboardFormat: {728, 90},
+	ad.MRECFormat:        {300, 250},
+	ad.AdaptiveFormat:    {320, 50},
+	ad.EmptyFormat:       {320, 50}, // Default
 }
 
 var fullscreenFormats = map[string][2]int64{
@@ -41,11 +41,14 @@ var fullscreenFormats = map[string][2]int64{
 }
 
 func (a *MintegralAdapter) banner(br *schema.BiddingRequest) *openrtb2.Imp {
-	size := bannerFormats[string(br.Imp.Format())]
-	w, h := size[0], size[1]
-	if !br.Imp.IsPortrait() {
-		w, h = h, w
+	size := bannerFormats[br.Imp.Format()]
+
+	if br.Imp.IsAdaptive() && br.Device.IsTablet() {
+		size = bannerFormats[ad.LeaderboardFormat]
 	}
+
+	w, h := size[0], size[1]
+
 	return &openrtb2.Imp{
 		Instl: 0,
 		Banner: &openrtb2.Banner{

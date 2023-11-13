@@ -201,20 +201,6 @@ func TestMobileFuse_CreateRequest(t *testing.T) {
 			},
 		},
 		{
-			name: "Banner unsupported format",
-			params: buildTestParams(
-				schema.Imp{
-					Banner: &schema.BannerAdObject{
-						Format: ad.LeaderboardFormat,
-					},
-				},
-			),
-			want: createRequestTestOutput{
-				Request: buildBaseRequest(),
-				Err:     errors.New("unknown banner format"),
-			},
-		},
-		{
 			name: "Interstitial",
 			params: buildTestParams(
 				schema.Imp{
