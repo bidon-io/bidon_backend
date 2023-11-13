@@ -148,6 +148,7 @@ func (h *BiddingHandler) Handle(c echo.Context) error {
 		GeoData:        req.geoData,
 		AdapterConfigs: adapterConfigs,
 		AuctionConfig:  *auctionConfig,
+		StartTS:        start.UnixMilli(),
 	}
 	auctionResult, err := h.BiddingBuilder.HoldAuction(ctx, params)
 	c.Logger().Printf("[BIDDING] bids: (%+v), err: (%s), took (%s)", auctionResult, err, time.Since(start))
@@ -278,6 +279,9 @@ func (h *BiddingHandler) sendEvents(
 			RawRequest:              result.RawRequest,
 			RawResponse:             result.RawResponse,
 			Error:                   result.ErrorMessage(),
+			TimingMap: event.TimingMap{
+				"bid": {result.StartTS, result.EndTS},
+			},
 		}
 		bidRequestEvent := event.NewRequest(&req.raw.BaseRequest, adRequestParams, req.geoData)
 		h.EventLogger.Log(bidRequestEvent, func(err error) {
@@ -300,6 +304,9 @@ func (h *BiddingHandler) sendEvents(
 				Ecpm:                    result.Bid.Price,
 				PriceFloor:              imp.GetBidFloor(),
 				Bidding:                 true,
+				TimingMap: event.TimingMap{
+					"bid": {result.StartTS, result.EndTS},
+				},
 			}
 			bidEvent := event.NewRequest(&req.raw.BaseRequest, adRequestParams, req.geoData)
 			h.EventLogger.Log(bidEvent, func(err error) {

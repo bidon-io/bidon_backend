@@ -13,6 +13,8 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 )
 
+type TimingMap map[string][2]int64
+
 type Event interface {
 	Topic() config.Topic
 	Children() []Event
@@ -55,17 +57,6 @@ func NewReward(request *schema.RewardRequest, geoData geocoder.GeoData) Event {
 	}
 }
 
-func NewStats(request *schema.StatsRequest, geoData geocoder.GeoData) Event {
-	return &statsEvent{
-		simpleEvent[*schema.StatsRequest]{
-			timestamp: generateTimestamp(),
-			topic:     config.StatsTopic,
-			request:   request,
-			geoData:   geoData,
-		},
-	}
-}
-
 func NewRequest(request *schema.BaseRequest, adRequestParams AdRequestParams, geoData geocoder.GeoData) RequestEvent {
 	requestEvent := newBaseRequest(request, geoData)
 
@@ -87,6 +78,7 @@ func NewRequest(request *schema.BaseRequest, adRequestParams AdRequestParams, ge
 	requestEvent.RawRequest = adRequestParams.RawRequest
 	requestEvent.RawResponse = adRequestParams.RawResponse
 	requestEvent.Error = adRequestParams.Error
+	requestEvent.TimingMap = adRequestParams.TimingMap
 
 	return requestEvent
 }
@@ -175,92 +167,6 @@ func (e *simpleEvent[T]) Children() []Event {
 	return nil
 }
 
-type statsEvent struct {
-	simpleEvent[*schema.StatsRequest]
-}
-
-func (s *statsEvent) Payload() (map[string]any, error) {
-	payload, err := s.simpleEvent.Payload()
-
-	payload["event_type"] = "stats"
-
-	return payload, err
-}
-
-func (s *statsEvent) Children() []Event {
-	children := make([]Event, 0)
-
-	for roundIndex, round := range s.request.Stats.Rounds {
-		for demandIndex := range round.Demands {
-			children = append(children, &demandResultEvent{
-				simpleEvent: s.simpleEvent,
-				roundIndex:  roundIndex,
-				demandIndex: demandIndex,
-			})
-		}
-
-		children = append(children, &roundResultEvent{
-			simpleEvent: s.simpleEvent,
-			roundIndex:  roundIndex,
-		})
-	}
-
-	return children
-}
-
-type roundResultEvent struct {
-	simpleEvent[*schema.StatsRequest]
-	roundIndex int
-}
-
-func (r roundResultEvent) Payload() (map[string]any, error) {
-	payload, err := r.simpleEvent.Payload()
-
-	round := r.request.Stats.Rounds[r.roundIndex]
-	winnerDemand := roundWinnerDemand(round)
-
-	payload["event_type"] = "round_result"
-	payload["timestamp"] = roundTimestamp(round, r.timestamp)
-	if round.WinnerID != "" {
-		payload["stats__result__status"] = "SUCCESS"
-	} else {
-		payload["stats__result__status"] = "FAIL"
-	}
-	payload["stats__result__winner_id"] = round.WinnerID
-	payload["stats__result__ad_unit_id"] = winnerDemand.AdUnitID
-	payload["stats__result__ecpm"] = round.WinnerECPM
-	payload["round_id"] = round.ID
-	payload["round_number"] = r.roundIndex
-	payload["pricefloor"] = round.PriceFloor
-
-	return payload, err
-}
-
-type demandResultEvent struct {
-	simpleEvent[*schema.StatsRequest]
-	roundIndex  int
-	demandIndex int
-}
-
-func (r *demandResultEvent) Payload() (map[string]any, error) {
-	payload, err := r.simpleEvent.Payload()
-
-	round := r.request.Stats.Rounds[r.roundIndex]
-	demand := round.Demands[r.demandIndex]
-
-	payload["event_type"] = "demand_result"
-	payload["timestamp"] = demandTimestamp(demand, r.timestamp)
-	payload["stats__result__status"] = demand.Status
-	payload["stats__result__winner_id"] = demand.ID
-	payload["stats__result__ad_unit_id"] = demand.AdUnitID
-	payload["stats__result__ecpm"] = demand.ECPM
-	payload["round_id"] = round.ID
-	payload["round_number"] = r.roundIndex
-	payload["pricefloor"] = round.PriceFloor
-
-	return payload, err
-}
-
 type AdRequestParams struct {
 	EventType               string
 	AdType                  string
@@ -280,55 +186,57 @@ type AdRequestParams struct {
 	RawRequest              string
 	RawResponse             string
 	Error                   string
+	TimingMap               TimingMap
 }
 
 type RequestEvent struct {
-	Timestamp                   float64 `json:"timestamp"`
-	EventType                   string  `json:"event_type"`
-	AdType                      string  `json:"ad_type"`
-	AuctionID                   string  `json:"auction_id"`
-	AuctionConfigurationID      int64   `json:"auction_configuration_id"`
-	AuctionConfigurationUID     int64   `json:"auction_configuration_uid"`
-	Status                      string  `json:"status"`
-	RoundID                     string  `json:"round_id"`
-	RoundNumber                 int     `json:"round_number"`
-	ImpID                       string  `json:"impid"`
-	DemandID                    string  `json:"demand_id"`
-	Bidding                     bool    `json:"bidding"`
-	AdUnitUID                   int64   `json:"ad_unit_uid"`
-	AdUnitLabel                 string  `json:"ad_unit_label"`
-	Ecpm                        float64 `json:"ecpm"`
-	PriceFloor                  float64 `json:"price_floor"`
-	RawRequest                  string  `json:"raw_request"`
-	RawResponse                 string  `json:"raw_response"`
-	Error                       string  `json:"error"`
-	Manufacturer                string  `json:"manufacturer"`
-	Model                       string  `json:"model"`
-	Os                          string  `json:"os"`
-	OsVersion                   string  `json:"os_version"`
-	ConnectionType              string  `json:"connection_type"`
-	DeviceType                  string  `json:"device_type"`
-	SessionID                   string  `json:"session_id"`
-	SessionUptime               int     `json:"session_uptime"`
-	Bundle                      string  `json:"bundle"`
-	Framework                   string  `json:"framework"`
-	FrameworkVersion            string  `json:"framework_version"`
-	PluginVersion               string  `json:"plugin_version"`
-	PackageVersion              string  `json:"package_version"`
-	SdkVersion                  string  `json:"sdk_version"`
-	IDFA                        string  `json:"idfa"`
-	IDG                         string  `json:"idg"`
-	IDFV                        string  `json:"idfv"`
-	TrackingAuthorizationStatus string  `json:"tracking_authorization_status"`
-	COPPA                       bool    `json:"coppa"`
-	GDPR                        bool    `json:"gdpr"`
-	CountryCode                 string  `json:"country_code"`
-	City                        string  `json:"city"`
-	Ip                          string  `json:"ip"`
-	CountryID                   int64   `json:"country_id"`
-	SegmentID                   string  `json:"segment_id"`
-	SegmentUID                  int64   `json:"segment_uid"`
-	Ext                         string  `json:"ext"`
+	Timestamp                   float64   `json:"timestamp"`
+	EventType                   string    `json:"event_type"`
+	AdType                      string    `json:"ad_type"`
+	AuctionID                   string    `json:"auction_id"`
+	AuctionConfigurationID      int64     `json:"auction_configuration_id"`
+	AuctionConfigurationUID     int64     `json:"auction_configuration_uid"`
+	Status                      string    `json:"status"`
+	RoundID                     string    `json:"round_id"`
+	RoundNumber                 int       `json:"round_number"`
+	ImpID                       string    `json:"impid"`
+	DemandID                    string    `json:"demand_id"`
+	Bidding                     bool      `json:"bidding"`
+	AdUnitUID                   int64     `json:"ad_unit_uid"`
+	AdUnitLabel                 string    `json:"ad_unit_label"`
+	Ecpm                        float64   `json:"ecpm"`
+	PriceFloor                  float64   `json:"price_floor"`
+	RawRequest                  string    `json:"raw_request"`
+	RawResponse                 string    `json:"raw_response"`
+	Error                       string    `json:"error"`
+	TimingMap                   TimingMap `json:"timing_map"`
+	Manufacturer                string    `json:"manufacturer"`
+	Model                       string    `json:"model"`
+	Os                          string    `json:"os"`
+	OsVersion                   string    `json:"os_version"`
+	ConnectionType              string    `json:"connection_type"`
+	DeviceType                  string    `json:"device_type"`
+	SessionID                   string    `json:"session_id"`
+	SessionUptime               int       `json:"session_uptime"`
+	Bundle                      string    `json:"bundle"`
+	Framework                   string    `json:"framework"`
+	FrameworkVersion            string    `json:"framework_version"`
+	PluginVersion               string    `json:"plugin_version"`
+	PackageVersion              string    `json:"package_version"`
+	SdkVersion                  string    `json:"sdk_version"`
+	IDFA                        string    `json:"idfa"`
+	IDG                         string    `json:"idg"`
+	IDFV                        string    `json:"idfv"`
+	TrackingAuthorizationStatus string    `json:"tracking_authorization_status"`
+	COPPA                       bool      `json:"coppa"`
+	GDPR                        bool      `json:"gdpr"`
+	CountryCode                 string    `json:"country_code"`
+	City                        string    `json:"city"`
+	Ip                          string    `json:"ip"`
+	CountryID                   int64     `json:"country_id"`
+	SegmentID                   string    `json:"segment_id"`
+	SegmentUID                  int64     `json:"segment_uid"`
+	Ext                         string    `json:"ext"`
 }
 
 func (b RequestEvent) MarshalJSON() ([]byte, error) {
@@ -430,42 +338,4 @@ func smashMap(src, dst map[string]any, nesting ...string) map[string]any {
 	}
 
 	return dst
-}
-
-func roundWinnerDemand(round schema.StatsRound) (winnerDemand schema.StatsDemand) {
-	for _, demand := range round.Demands {
-		if demand.Status == "WIN" {
-			winnerDemand = demand
-			break
-		}
-	}
-
-	return
-}
-
-func roundTimestamp(round schema.StatsRound, statsTS float64) (roundTS float64) {
-	for _, demand := range round.Demands {
-		demandTS := demandTimestamp(demand, statsTS)
-		if demandTS > roundTS {
-			roundTS = demandTS
-		}
-	}
-
-	return
-}
-
-func demandTimestamp(demand schema.StatsDemand, statsTS float64) (demandTS float64) {
-	if demand.FillFinishTS != 0 {
-		demandTS = float64(demand.FillFinishTS) / 1000
-	} else if demand.BidFinishTS != 0 {
-		demandTS = float64(demand.BidFinishTS) / 1000
-	}
-
-	// We don't really care what the timestamp is,
-	// as long as it's less than the timestamp of the stats event and is not 0
-	if demandTS == 0 || demandTS > statsTS {
-		demandTS = statsTS
-	}
-
-	return
 }
