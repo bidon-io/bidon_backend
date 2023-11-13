@@ -33,7 +33,7 @@ var bannerFormats = map[ad.Format][2]int64{
 	ad.BannerFormat:      {320, 50},
 	ad.LeaderboardFormat: {728, 90},
 	ad.MRECFormat:        {300, 250},
-	ad.AdaptiveFormat:    {320, 50},
+	ad.AdaptiveFormat:    {0, 50},
 	ad.EmptyFormat:       {320, 50}, // Default
 }
 var fullscreenFormats = map[string][2]int64{
