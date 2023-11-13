@@ -2,7 +2,7 @@
   "bids": [
     {
       "id": "123",
-      "impid": "456",
+      "imp_id": "456",
       "price": 11,
       "ad_unit": {
         "demand_id": "meta",

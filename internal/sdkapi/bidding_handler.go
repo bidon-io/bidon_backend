@@ -2,6 +2,7 @@ package sdkapi
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/Masterminds/semver/v3"
 	"net/http"
@@ -47,12 +48,31 @@ type BiddingResponse struct {
 }
 
 type Bid struct {
-	ID      string                 `json:"id"`
-	ImpID   string                 `json:"impid"`
-	Price   float64                `json:"price"`
-	Demands map[adapter.Key]Demand `json:"demands,omitempty"` // Deprecated: uses AdUnit instead of Demands since SDK 0.5
-	AdUnit  AdUnit                 `json:"ad_unit,omitempty"`
-	Ext     map[string]interface{} `json:"ext,omitempty"` // TODO: remove interface{} with concrete type
+	ID      string
+	ImpID   string
+	Price   float64
+	Demands *map[adapter.Key]Demand // Deprecated: use AdUnit instead of Demands since SDK 0.5
+	AdUnit  *AdUnit
+	Ext     map[string]interface{}
+}
+
+func (b *Bid) MarshalJSON() ([]byte, error) {
+	if b.Demands != nil {
+		return json.Marshal(map[string]interface{}{
+			"id":      b.ID,
+			"impid":   b.ImpID,
+			"price":   b.Price,
+			"demands": b.Demands,
+		})
+	} else {
+		return json.Marshal(map[string]interface{}{
+			"id":      b.ID,
+			"imp_id":  b.ImpID,
+			"price":   b.Price,
+			"ad_unit": b.AdUnit,
+			"ext":     b.Ext,
+		})
+	}
 }
 
 type Demand struct {
@@ -198,7 +218,7 @@ func (h *BiddingHandler) buildBid(demandResponse adapters.DemandResponse, adUnit
 		ID:     demandResponse.Bid.ID,
 		ImpID:  demandResponse.Bid.ImpID,
 		Price:  demandResponse.Bid.Price,
-		AdUnit: adUnit,
+		AdUnit: &adUnit,
 		Ext: map[string]any{
 			"payload": demandResponse.Bid.Payload,
 		},
@@ -211,7 +231,7 @@ func (h *BiddingHandler) buildBidDeprecated(demandResponse adapters.DemandRespon
 		ID:    demandResponse.Bid.ID,
 		ImpID: demandResponse.Bid.ImpID,
 		Price: demandResponse.Bid.Price,
-		Demands: map[adapter.Key]Demand{
+		Demands: &map[adapter.Key]Demand{
 			demandResponse.DemandID: buildDemandInfo(demandResponse),
 		},
 	}
@@ -248,7 +268,7 @@ func (h *BiddingHandler) sendEvents(
 			Status:                  fmt.Sprint(result.Status),
 			RoundID:                 imp.RoundID,
 			RoundNumber:             auctionResult.RoundNumber,
-			ImpID:                   imp.ID,
+			ImpID:                   "",
 			DemandID:                string(result.DemandID),
 			AdUnitUID:               adUnitUID,
 			AdUnitLabel:             adUnitLabel,
@@ -273,7 +293,7 @@ func (h *BiddingHandler) sendEvents(
 				Status:                  "SUCCESS",
 				RoundID:                 imp.RoundID,
 				RoundNumber:             auctionResult.RoundNumber,
-				ImpID:                   imp.ID,
+				ImpID:                   "",
 				DemandID:                string(result.DemandID),
 				AdUnitUID:               adUnitUID,
 				AdUnitLabel:             adUnitLabel,
