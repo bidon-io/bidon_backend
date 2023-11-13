@@ -18,7 +18,6 @@ type BiddingRequest struct {
 
 func (b *BiddingRequest) NormalizeValues() {
 	b.BaseRequest.NormalizeValues()
-	b.Imp.ID = strings.ToLower(b.Imp.ID)
 	b.Imp.AuctionID = strings.ToLower(b.Imp.AuctionID)
 }
 
