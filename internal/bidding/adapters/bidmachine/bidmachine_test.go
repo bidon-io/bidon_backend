@@ -171,11 +171,9 @@ func TestBidmachine_CreateRequest(t *testing.T) {
 				Request: buildWantRequest(openrtb2.Imp{
 					Instl: 0,
 					Banner: &openrtb2.Banner{
-						W:     ptr(int64(300)),
-						H:     ptr(int64(250)),
-						BType: []openrtb2.BannerAdType{},
-						BAttr: []adcom1.CreativeAttribute{1, 2, 5, 8, 9, 14, 17},
-						Pos:   adcom1.PositionAboveFold.Ptr(),
+						W:   ptr(int64(300)),
+						H:   ptr(int64(250)),
+						Pos: adcom1.PositionAboveFold.Ptr(),
 					},
 				}),
 				Err: nil,
@@ -194,11 +192,9 @@ func TestBidmachine_CreateRequest(t *testing.T) {
 				Request: buildWantRequest(openrtb2.Imp{
 					Instl: 0,
 					Banner: &openrtb2.Banner{
-						W:     ptr(int64(320)),
-						H:     ptr(int64(50)),
-						BType: []openrtb2.BannerAdType{},
-						BAttr: []adcom1.CreativeAttribute{1, 2, 5, 8, 9, 14, 17},
-						Pos:   adcom1.PositionAboveFold.Ptr(),
+						W:   ptr(int64(320)),
+						H:   ptr(int64(50)),
+						Pos: adcom1.PositionAboveFold.Ptr(),
 					},
 				}),
 				Err: nil,
@@ -217,11 +213,9 @@ func TestBidmachine_CreateRequest(t *testing.T) {
 				Request: buildWantRequest(openrtb2.Imp{
 					Instl: 0,
 					Banner: &openrtb2.Banner{
-						W:     ptr(int64(728)),
-						H:     ptr(int64(90)),
-						BType: []openrtb2.BannerAdType{},
-						BAttr: []adcom1.CreativeAttribute{1, 2, 5, 8, 9, 14, 17},
-						Pos:   adcom1.PositionAboveFold.Ptr(),
+						W:   ptr(int64(728)),
+						H:   ptr(int64(90)),
+						Pos: adcom1.PositionAboveFold.Ptr(),
 					},
 				}),
 				Err: nil,
@@ -240,11 +234,9 @@ func TestBidmachine_CreateRequest(t *testing.T) {
 				Request: buildWantRequest(openrtb2.Imp{
 					Instl: 0,
 					Banner: &openrtb2.Banner{
-						W:     ptr(int64(0)),
-						H:     ptr(int64(50)),
-						BType: []openrtb2.BannerAdType{},
-						BAttr: []adcom1.CreativeAttribute{1, 2, 5, 8, 9, 14, 17},
-						Pos:   adcom1.PositionAboveFold.Ptr(),
+						W:   ptr(int64(320)),
+						H:   ptr(int64(50)),
+						Pos: adcom1.PositionAboveFold.Ptr(),
 					},
 				}),
 				Err: nil,
@@ -263,11 +255,9 @@ func TestBidmachine_CreateRequest(t *testing.T) {
 				Request: buildWantRequest(openrtb2.Imp{
 					Instl: 0,
 					Banner: &openrtb2.Banner{
-						W:     ptr(int64(320)),
-						H:     ptr(int64(50)),
-						BType: []openrtb2.BannerAdType{},
-						BAttr: []adcom1.CreativeAttribute{1, 2, 5, 8, 9, 14, 17},
-						Pos:   adcom1.PositionAboveFold.Ptr(),
+						W:   ptr(int64(320)),
+						H:   ptr(int64(50)),
+						Pos: adcom1.PositionAboveFold.Ptr(),
 					},
 				}),
 				Err: nil,
