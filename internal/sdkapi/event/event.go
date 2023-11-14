@@ -136,6 +136,23 @@ func newBaseRequest(request *schema.BaseRequest, geoData geocoder.GeoData) Reque
 		SegmentID:                   request.Segment.ID,
 		SegmentUID:                  int64(segmentUID),
 		Ext:                         request.Ext,
+		Session: Session{
+			ID:                        request.Session.ID,
+			LaunchTS:                  request.Session.LaunchTS,
+			LaunchMonotonicTS:         request.Session.LaunchMonotonicTS,
+			StartTS:                   request.Session.StartTS,
+			StartMonotonicTS:          request.Session.StartMonotonicTS,
+			TS:                        request.Session.TS,
+			MonotonicTS:               request.Session.MonotonicTS,
+			MemoryWarningsTS:          request.Session.MemoryWarningsTS,
+			MemoryWarningsMonotonicTS: request.Session.MemoryWarningsMonotonicTS,
+			RAMUsed:                   request.Session.RAMUsed,
+			RAMSize:                   request.Session.RAMSize,
+			StorageFree:               request.Session.StorageFree,
+			StorageUsed:               request.Session.StorageUsed,
+			Battery:                   request.Session.Battery,
+			CPUUsage:                  request.Session.CPUUsage,
+		},
 	}
 }
 
@@ -237,6 +254,25 @@ type RequestEvent struct {
 	SegmentID                   string    `json:"segment_id"`
 	SegmentUID                  int64     `json:"segment_uid"`
 	Ext                         string    `json:"ext"`
+	Session                     Session   `json:"session"`
+}
+
+type Session struct {
+	ID                        string  `json:"id"`
+	LaunchTS                  int     `json:"launch_ts"`
+	LaunchMonotonicTS         int     `json:"launch_monotonic_ts"`
+	StartTS                   int     `json:"start_ts"`
+	StartMonotonicTS          int     `json:"start_monotonic_ts"`
+	TS                        int     `json:"ts"`
+	MonotonicTS               int     `json:"monotonic_ts"`
+	MemoryWarningsTS          []int   `json:"memory_warnings_ts"`
+	MemoryWarningsMonotonicTS []int   `json:"memory_warnings_monotonic_ts"`
+	RAMUsed                   int     `json:"ram_used"`
+	RAMSize                   int     `json:"ram_size"`
+	StorageFree               int     `json:"storage_free"`
+	StorageUsed               int     `json:"storage_used"`
+	Battery                   float64 `json:"battery"`
+	CPUUsage                  float64 `json:"cpu_usage"`
 }
 
 func (b RequestEvent) MarshalJSON() ([]byte, error) {
