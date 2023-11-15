@@ -440,7 +440,7 @@ func (v *lineItemAttrsValidator) extraRule(account *DemandSourceAccount) v8n.Rul
 	case adapter.MintegralKey:
 		rule = v8n.Map(
 			v8n.Key("placement_id", v8n.Required, isString),
-			v8n.Key("ad_unit_id", v8n.Required, isString),
+			v8n.Key("unit_id", v8n.Required, isString),
 		)
 	}
 
