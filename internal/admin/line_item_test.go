@@ -182,7 +182,7 @@ func Test_lineItemAttrsValidator_ValidateWithContext(t *testing.T) {
 				AccountID: 1,
 				Extra: map[string]any{
 					"placement_id": "938186",
-					"ad_unit_id":   "2567735",
+					"unit_id":      "2567735",
 					"foo":          "bar",
 				},
 			},

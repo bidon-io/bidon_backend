@@ -44,7 +44,7 @@
       label="Placement Id"
       required
     />
-    <VeeFormFieldWrapper field="extra.adUnitId" label="Ad Unit Id" required />
+    <VeeFormFieldWrapper field="extra.unitId" label="Unit Id" required />
   </template>
   <template v-if="apiKey === 'mobilefuse'">
     <VeeFormFieldWrapper
@@ -120,7 +120,7 @@ const dataSchemas = {
   }),
   mintegral: yup.object({
     placementId: yup.string().required().label("Placement Id"),
-    adUnitId: yup.string().required().label("Ad Unit Id"),
+    unitId: yup.string().required().label("Ad Unit Id"),
   }),
   mobilefuse: yup.object({
     placementId: yup.string().required().label("Placement Id"),
