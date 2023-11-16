@@ -17,7 +17,11 @@ func TestAppRepo_List(t *testing.T) {
 
 	repo := adminstore.NewAppRepo(tx)
 
-	users := dbtest.CreateUsersList(t, tx, 2)
+	users := make([]db.User, 2)
+	for i := range users {
+		users[i] = dbtest.CreateUser(t, tx)
+	}
+
 	apps := []admin.AppAttrs{
 		{
 			PlatformID:  admin.IOSPlatformID,
@@ -41,7 +45,7 @@ func TestAppRepo_List(t *testing.T) {
 		}
 
 		want[i] = *app
-		want[i].User = *adminstore.UserResource(users[i])
+		want[i].User = *adminstore.UserResource(&users[i])
 	}
 
 	got, err := repo.List(context.Background())
@@ -58,18 +62,23 @@ func TestAppRepo_ListOwnedByUser(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	users := dbtest.CreateList[db.User](t, tx, dbtest.UserFactory{}, 2)
+	users := make([]db.User, 2)
+	for i := range users {
+		users[i] = dbtest.CreateUser(t, tx)
+	}
 
-	dbFirstUserApps := dbtest.CreateList[db.App](t, tx, dbtest.AppFactory{
-		User: func(i int) db.User {
-			return users[0]
-		},
-	}, 2)
-	dbSecondUserApps := dbtest.CreateList[db.App](t, tx, dbtest.AppFactory{
-		User: func(i int) db.User {
-			return users[1]
-		},
-	}, 2)
+	dbFirstUserApps := make([]db.App, 2)
+	for i := range dbFirstUserApps {
+		dbFirstUserApps[i] = dbtest.CreateApp(t, tx, func(app *db.App) {
+			app.User = users[0]
+		})
+	}
+	dbSecondUserApps := make([]db.App, 2)
+	for i := range dbSecondUserApps {
+		dbSecondUserApps[i] = dbtest.CreateApp(t, tx, func(app *db.App) {
+			app.User = users[1]
+		})
+	}
 
 	firstUserApps := make([]admin.App, 2)
 	secondUserApps := make([]admin.App, 2)
@@ -121,7 +130,7 @@ func TestAppRepo_Find(t *testing.T) {
 
 	repo := adminstore.NewAppRepo(tx)
 
-	user := dbtest.CreateUser(t, tx, 1)
+	user := dbtest.CreateUser(t, tx)
 	attrs := &admin.AppAttrs{
 		PlatformID:  admin.IOSPlatformID,
 		HumanName:   "App 1",
@@ -133,7 +142,7 @@ func TestAppRepo_Find(t *testing.T) {
 	if err != nil {
 		t.Fatalf("repo.Create(ctx, %+v) = %v, %q; want %T, %v", attrs, nil, err, want, nil)
 	}
-	want.User = *adminstore.UserResource(user)
+	want.User = *adminstore.UserResource(&user)
 
 	got, err := repo.Find(context.Background(), want.ID)
 	if err != nil {
@@ -149,18 +158,23 @@ func TestAppRepo_FindOwnedByUser(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	users := dbtest.CreateList[db.User](t, tx, dbtest.UserFactory{}, 2)
+	users := make([]db.User, 2)
+	for i := range users {
+		users[i] = dbtest.CreateUser(t, tx)
+	}
 
-	dbFirstUserApps := dbtest.CreateList[db.App](t, tx, dbtest.AppFactory{
-		User: func(i int) db.User {
-			return users[0]
-		},
-	}, 2)
-	dbSecondUserApps := dbtest.CreateList[db.App](t, tx, dbtest.AppFactory{
-		User: func(i int) db.User {
-			return users[1]
-		},
-	}, 2)
+	dbFirstUserApps := make([]db.App, 2)
+	for i := range dbFirstUserApps {
+		dbFirstUserApps[i] = dbtest.CreateApp(t, tx, func(app *db.App) {
+			app.User = users[0]
+		})
+	}
+	dbSecondUserApps := make([]db.App, 2)
+	for i := range dbSecondUserApps {
+		dbSecondUserApps[i] = dbtest.CreateApp(t, tx, func(app *db.App) {
+			app.User = users[1]
+		})
+	}
 
 	firstUserApps := make([]admin.App, 2)
 	secondUserApps := make([]admin.App, 2)
@@ -234,7 +248,7 @@ func TestAppRepo_Update(t *testing.T) {
 
 	repo := adminstore.NewAppRepo(tx)
 
-	user := dbtest.CreateUser(t, tx, 1)
+	user := dbtest.CreateUser(t, tx)
 	attrs := admin.AppAttrs{
 		PlatformID:  admin.IOSPlatformID,
 		HumanName:   "App 1",
@@ -269,7 +283,7 @@ func TestAppRepo_Delete(t *testing.T) {
 
 	repo := adminstore.NewAppRepo(tx)
 
-	user := dbtest.CreateUser(t, tx, 1)
+	user := dbtest.CreateUser(t, tx)
 	attrs := &admin.AppAttrs{
 		PlatformID:  admin.IOSPlatformID,
 		HumanName:   "App 1",

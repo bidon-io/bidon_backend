@@ -19,9 +19,16 @@ func TestAuctionConfigurationRepo_List(t *testing.T) {
 	defer tx.Rollback()
 
 	repo := adminstore.NewAuctionConfigurationRepo(tx)
-	apps := dbtest.CreateAppsList(t, tx, 3)
-	segments := make([]*db.Segment, 3)
-	segments[0] = dbtest.CreateSegment(t, tx, 1, apps[0])
+
+	apps := make([]db.App, 3)
+	for i := range apps {
+		apps[i] = dbtest.CreateApp(t, tx)
+	}
+
+	segments := make([]db.Segment, 3)
+	segments[0] = dbtest.CreateSegment(t, tx, func(segment *db.Segment) {
+		segment.App = apps[0]
+	})
 	configs := []admin.AuctionConfigurationAttrs{
 		{
 			Name:       "Config 1",
@@ -55,9 +62,9 @@ func TestAuctionConfigurationRepo_List(t *testing.T) {
 		}
 
 		want[i] = *config
-		want[i].App = adminstore.AppAttrsWithId(apps[i])
-		if segments[i] != nil {
-			want[i].Segment = adminstore.SegmentAttrsWithId(segments[i])
+		want[i].App = adminstore.AppAttrsWithId(&apps[i])
+		if segments[i].ID != 0 {
+			want[i].Segment = adminstore.SegmentAttrsWithId(&segments[i])
 		}
 	}
 
@@ -77,7 +84,7 @@ func TestAuctionConfigurationRepo_Find(t *testing.T) {
 
 	repo := adminstore.NewAuctionConfigurationRepo(tx)
 
-	app := dbtest.CreateApp(t, tx, 1, nil)
+	app := dbtest.CreateApp(t, tx)
 	attrs := &admin.AuctionConfigurationAttrs{
 		Name:       "Config 1",
 		AppID:      app.ID,
@@ -90,7 +97,7 @@ func TestAuctionConfigurationRepo_Find(t *testing.T) {
 	if err != nil {
 		t.Fatalf("repo.Create(ctx, %+v) = %v, %q; want %T, %v", attrs, nil, err, want, nil)
 	}
-	want.App = adminstore.AppAttrsWithId(app)
+	want.App = adminstore.AppAttrsWithId(&app)
 
 	got, err := repo.Find(context.Background(), want.ID)
 	if err != nil {
@@ -108,7 +115,7 @@ func TestAuctionConfigurationRepo_Update(t *testing.T) {
 
 	repo := adminstore.NewAuctionConfigurationRepo(tx)
 
-	app := dbtest.CreateApp(t, tx, 1, nil)
+	app := dbtest.CreateApp(t, tx)
 	attrs := admin.AuctionConfigurationAttrs{
 		Name:       "Config 1",
 		AppID:      app.ID,
@@ -144,7 +151,7 @@ func TestAuctionConfigurationRepo_Delete(t *testing.T) {
 
 	repo := adminstore.NewAuctionConfigurationRepo(tx)
 
-	app := dbtest.CreateApp(t, tx, 1, nil)
+	app := dbtest.CreateApp(t, tx)
 	attrs := &admin.AuctionConfigurationAttrs{
 		Name:       "Config 1",
 		AppID:      app.ID,
