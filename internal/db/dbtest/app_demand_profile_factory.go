@@ -2,61 +2,65 @@ package dbtest
 
 import (
 	"fmt"
+	"sync/atomic"
 	"testing"
 
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/db"
 )
 
-type AppDemandProfileFactory struct {
-	App          func(int) db.App
-	Account      func(int) db.DemandSourceAccount
-	DemandSource func(int) db.DemandSource
-	Data         func(int) []byte
+var appDemandProfileCounter atomic.Uint64
+
+func appDemandProfileDefaults(n uint64) func(*db.AppDemandProfile) {
+	return func(profile *db.AppDemandProfile) {
+		if profile.AppID == 0 && profile.App.ID == 0 {
+			profile.App = BuildApp(func(app *db.App) {
+				*app = profile.App
+			})
+		}
+
+		if profile.AccountID == 0 && profile.Account.ID == 0 {
+			profile.Account = BuildDemandSourceAccount(func(account *db.DemandSourceAccount) {
+				*account = profile.Account
+			})
+		}
+		profile.AccountType = profile.Account.Type
+
+		if profile.Account.DemandSourceID != 0 {
+			profile.DemandSourceID = profile.Account.DemandSourceID
+		} else if profile.Account.DemandSource.ID != 0 {
+			profile.DemandSourceID = profile.Account.DemandSource.ID
+		} else if profile.DemandSourceID == 0 && profile.DemandSource.ID == 0 {
+			profile.DemandSource = BuildDemandSource(func(source *db.DemandSource) {
+				*source = profile.DemandSource
+			})
+		}
+
+		if profile.Data == nil {
+			profile.Data = []byte(fmt.Sprintf(`{"profile_num": %d, "foo": "bar"}`, n))
+		}
+	}
 }
 
-func (f AppDemandProfileFactory) Build(i int) db.AppDemandProfile {
-	profile := db.AppDemandProfile{}
+func BuildAppDemandProfile(opts ...func(*db.AppDemandProfile)) db.AppDemandProfile {
+	var profile db.AppDemandProfile
 
-	var app db.App
-	if f.App == nil {
-		app = AppFactory{}.Build(i)
-	} else {
-		app = f.App(i)
+	n := appDemandProfileCounter.Add(1)
+
+	opts = append(opts, appDemandProfileDefaults(n))
+	for _, opt := range opts {
+		opt(&profile)
 	}
-	profile.AppID = app.ID
-	profile.App = app
 
-	var demandSource db.DemandSource
-	if f.DemandSource == nil {
-		demandSource = DemandSourceFactory{}.Build(i)
-	} else {
-		demandSource = f.DemandSource(i)
-	}
-	profile.DemandSourceID = demandSource.ID
-	profile.DemandSource = demandSource
+	return profile
+}
 
-	var account db.DemandSourceAccount
-	if f.Account == nil {
-		account = DemandSourceAccountFactory{
-			DemandSource: func(i int) db.DemandSource {
-				return demandSource
-			},
-			User: func(i int) db.User {
-				return app.User
-			},
-		}.Build(i)
-	} else {
-		account = f.Account(i)
-	}
-	profile.AccountID = account.ID
-	profile.AccountType = account.Type
-	profile.Account = account
+func CreateAppDemandProfile(t *testing.T, tx *db.DB, opts ...func(*db.AppDemandProfile)) db.AppDemandProfile {
+	t.Helper()
 
-	if f.Data == nil {
-		profile.Data = []byte(`{"foo": "bar"}`)
-	} else {
-		profile.Data = f.Data(i)
+	profile := BuildAppDemandProfile(opts...)
+	if err := tx.Create(&profile).Error; err != nil {
+		t.Fatalf("Failed to create app demand profile: %v", err)
 	}
 
 	return profile

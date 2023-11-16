@@ -17,18 +17,23 @@ func TestAppDemandProfileRepo_List(t *testing.T) {
 
 	repo := adminstore.NewAppDemandProfileRepo(tx)
 
-	user := dbtest.CreateUser(t, tx, 1)
-	apps := make([]*db.App, 2)
+	user := dbtest.CreateUser(t, tx)
+	apps := make([]db.App, 2)
 	for i := range apps {
-		apps[i] = dbtest.CreateApp(t, tx, i, user)
+		apps[i] = dbtest.CreateApp(t, tx, func(app *db.App) {
+			app.User = user
+		})
 	}
-	demandSources := dbtest.CreateDemandSourcesList(t, tx, 2)
-	accounts := make([]*db.DemandSourceAccount, 2)
-	for i := range accounts {
-		accounts[i] = dbtest.CreateDemandSourceAccount(t, tx, dbtest.WithDemandSourceAccountOptions(&db.DemandSourceAccount{
-			UserID:         user.ID,
-			DemandSourceID: demandSources[i].ID,
-		}))
+	demandSources := make([]db.DemandSource, 2)
+	for i := range demandSources {
+		demandSources[i] = dbtest.CreateDemandSource(t, tx)
+	}
+	accounts := make([]db.DemandSourceAccount, len(demandSources))
+	for i, source := range demandSources {
+		accounts[i] = dbtest.CreateDemandSourceAccount(t, tx, func(account *db.DemandSourceAccount) {
+			account.User = user
+			account.DemandSource = source
+		})
 	}
 	profiles := []admin.AppDemandProfileAttrs{
 		{
@@ -55,9 +60,9 @@ func TestAppDemandProfileRepo_List(t *testing.T) {
 		}
 
 		want[i] = *profile
-		want[i].App = adminstore.AppAttrsWithId(apps[i])
-		want[i].DemandSource = *adminstore.DemandSourceResource(demandSources[i])
-		want[i].Account = adminstore.DemandSourceAccountAttrsWithId(accounts[i])
+		want[i].App = adminstore.AppAttrsWithId(&apps[i])
+		want[i].DemandSource = *adminstore.DemandSourceResource(&demandSources[i])
+		want[i].Account = adminstore.DemandSourceAccountAttrsWithId(&accounts[i])
 	}
 
 	got, err := repo.List(context.Background())
@@ -74,29 +79,36 @@ func TestAppDemandProfileRepo_ListOwnedByUser(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	users := dbtest.CreateList[db.User](t, tx, dbtest.UserFactory{}, 2)
+	users := make([]db.User, 2)
+	for i := range users {
+		users[i] = dbtest.CreateUser(t, tx)
+	}
 
-	firstUserApps := dbtest.CreateList[db.App](t, tx, dbtest.AppFactory{
-		User: func(i int) db.User {
-			return users[0]
-		},
-	}, 2)
-	secondUserApps := dbtest.CreateList[db.App](t, tx, dbtest.AppFactory{
-		User: func(i int) db.User {
-			return users[1]
-		},
-	}, 2)
+	firstUserApps := make([]db.App, 2)
+	for i := range firstUserApps {
+		firstUserApps[i] = dbtest.CreateApp(t, tx, func(app *db.App) {
+			app.User = users[0]
+		})
+	}
+	secondUserApps := make([]db.App, 2)
+	for i := range secondUserApps {
+		secondUserApps[i] = dbtest.CreateApp(t, tx, func(app *db.App) {
+			app.User = users[1]
+		})
+	}
 
-	dbFirstUserProfiles := dbtest.CreateList[db.AppDemandProfile](t, tx, dbtest.AppDemandProfileFactory{
-		App: func(i int) db.App {
-			return firstUserApps[i%len(firstUserApps)]
-		},
-	}, 4)
-	dbSecondUserProfiles := dbtest.CreateList[db.AppDemandProfile](t, tx, dbtest.AppDemandProfileFactory{
-		App: func(i int) db.App {
-			return secondUserApps[i%len(secondUserApps)]
-		},
-	}, 4)
+	dbFirstUserProfiles := make([]db.AppDemandProfile, 4)
+	for i := range dbFirstUserProfiles {
+		dbFirstUserProfiles[i] = dbtest.CreateAppDemandProfile(t, tx, func(profile *db.AppDemandProfile) {
+			profile.App = firstUserApps[i%len(firstUserApps)]
+		})
+	}
+	dbSecondUserProfiles := make([]db.AppDemandProfile, 4)
+	for i := range dbSecondUserProfiles {
+		dbSecondUserProfiles[i] = dbtest.CreateAppDemandProfile(t, tx, func(profile *db.AppDemandProfile) {
+			profile.App = secondUserApps[i%len(secondUserApps)]
+		})
+	}
 
 	firstUserProfiles := make([]admin.AppDemandProfile, 4)
 	secondUserProfiles := make([]admin.AppDemandProfile, 4)
@@ -148,13 +160,15 @@ func TestAppDemandProfileRepo_Find(t *testing.T) {
 
 	repo := adminstore.NewAppDemandProfileRepo(tx)
 
-	user := dbtest.CreateUser(t, tx, 1)
-	app := dbtest.CreateApp(t, tx, 1, user)
+	user := dbtest.CreateUser(t, tx)
+	app := dbtest.CreateApp(t, tx, func(app *db.App) {
+		app.User = user
+	})
 	demandSource := dbtest.CreateDemandSource(t, tx)
-	account := dbtest.CreateDemandSourceAccount(t, tx, dbtest.WithDemandSourceAccountOptions(&db.DemandSourceAccount{
-		UserID:         user.ID,
-		DemandSourceID: demandSource.ID,
-	}))
+	account := dbtest.CreateDemandSourceAccount(t, tx, func(account *db.DemandSourceAccount) {
+		account.User = user
+		account.DemandSource = demandSource
+	})
 	attrs := &admin.AppDemandProfileAttrs{
 		AppID:          app.ID,
 		DemandSourceID: demandSource.ID,
@@ -167,9 +181,9 @@ func TestAppDemandProfileRepo_Find(t *testing.T) {
 	if err != nil {
 		t.Fatalf("repo.Create(ctx, %+v) = %v, %q; want %T, %v", attrs, nil, err, want, nil)
 	}
-	want.App = adminstore.AppAttrsWithId(app)
-	want.Account = adminstore.DemandSourceAccountAttrsWithId(account)
-	want.DemandSource = *adminstore.DemandSourceResource(demandSource)
+	want.App = adminstore.AppAttrsWithId(&app)
+	want.Account = adminstore.DemandSourceAccountAttrsWithId(&account)
+	want.DemandSource = *adminstore.DemandSourceResource(&demandSource)
 
 	got, err := repo.Find(context.Background(), want.ID)
 	if err != nil {
@@ -185,29 +199,36 @@ func TestAppDemandProfileRepo_FindOwnedByUser(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	users := dbtest.CreateList[db.User](t, tx, dbtest.UserFactory{}, 2)
+	users := make([]db.User, 2)
+	for i := range users {
+		users[i] = dbtest.CreateUser(t, tx)
+	}
 
-	firstUserApps := dbtest.CreateList[db.App](t, tx, dbtest.AppFactory{
-		User: func(i int) db.User {
-			return users[0]
-		},
-	}, 2)
-	secondUserApps := dbtest.CreateList[db.App](t, tx, dbtest.AppFactory{
-		User: func(i int) db.User {
-			return users[1]
-		},
-	}, 2)
+	firstUserApps := make([]db.App, 2)
+	for i := range firstUserApps {
+		firstUserApps[i] = dbtest.CreateApp(t, tx, func(app *db.App) {
+			app.User = users[0]
+		})
+	}
+	secondUserApps := make([]db.App, 2)
+	for i := range secondUserApps {
+		secondUserApps[i] = dbtest.CreateApp(t, tx, func(app *db.App) {
+			app.User = users[1]
+		})
+	}
 
-	dbFirstUserProfiles := dbtest.CreateList[db.AppDemandProfile](t, tx, dbtest.AppDemandProfileFactory{
-		App: func(i int) db.App {
-			return firstUserApps[i%len(firstUserApps)]
-		},
-	}, 4)
-	dbSecondUserProfiles := dbtest.CreateList[db.AppDemandProfile](t, tx, dbtest.AppDemandProfileFactory{
-		App: func(i int) db.App {
-			return secondUserApps[i%len(secondUserApps)]
-		},
-	}, 4)
+	dbFirstUserProfiles := make([]db.AppDemandProfile, 4)
+	for i := range dbFirstUserProfiles {
+		dbFirstUserProfiles[i] = dbtest.CreateAppDemandProfile(t, tx, func(profile *db.AppDemandProfile) {
+			profile.App = firstUserApps[i%len(firstUserApps)]
+		})
+	}
+	dbSecondUserProfiles := make([]db.AppDemandProfile, 4)
+	for i := range dbSecondUserProfiles {
+		dbSecondUserProfiles[i] = dbtest.CreateAppDemandProfile(t, tx, func(profile *db.AppDemandProfile) {
+			profile.App = secondUserApps[i%len(secondUserApps)]
+		})
+	}
 
 	firstUserProfiles := make([]admin.AppDemandProfile, 4)
 	secondUserProfiles := make([]admin.AppDemandProfile, 4)
@@ -281,13 +302,15 @@ func TestAppDemandProfileRepo_Update(t *testing.T) {
 
 	repo := adminstore.NewAppDemandProfileRepo(tx)
 
-	user := dbtest.CreateUser(t, tx, 1)
-	app := dbtest.CreateApp(t, tx, 1, user)
+	user := dbtest.CreateUser(t, tx)
+	app := dbtest.CreateApp(t, tx, func(app *db.App) {
+		app.User = user
+	})
 	demandSource := dbtest.CreateDemandSource(t, tx)
-	account := dbtest.CreateDemandSourceAccount(t, tx, dbtest.WithDemandSourceAccountOptions(&db.DemandSourceAccount{
-		UserID:         user.ID,
-		DemandSourceID: demandSource.ID,
-	}))
+	account := dbtest.CreateDemandSourceAccount(t, tx, func(account *db.DemandSourceAccount) {
+		account.User = user
+		account.DemandSource = demandSource
+	})
 	attrs := admin.AppDemandProfileAttrs{
 		AppID:          app.ID,
 		DemandSourceID: demandSource.ID,
@@ -323,13 +346,15 @@ func TestAppDemandProfileRepo_Delete(t *testing.T) {
 
 	repo := adminstore.NewAppDemandProfileRepo(tx)
 
-	user := dbtest.CreateUser(t, tx, 1)
-	app := dbtest.CreateApp(t, tx, 1, user)
+	user := dbtest.CreateUser(t, tx)
+	app := dbtest.CreateApp(t, tx, func(app *db.App) {
+		app.User = user
+	})
 	demandSource := dbtest.CreateDemandSource(t, tx)
-	account := dbtest.CreateDemandSourceAccount(t, tx, dbtest.WithDemandSourceAccountOptions(&db.DemandSourceAccount{
-		UserID:         user.ID,
-		DemandSourceID: demandSource.ID,
-	}))
+	account := dbtest.CreateDemandSourceAccount(t, tx, func(account *db.DemandSourceAccount) {
+		account.User = user
+		account.DemandSource = demandSource
+	})
 	attrs := &admin.AppDemandProfileAttrs{
 		AppID:          app.ID,
 		DemandSourceID: demandSource.ID,

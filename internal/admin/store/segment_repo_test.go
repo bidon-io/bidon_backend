@@ -6,6 +6,7 @@ import (
 
 	"github.com/bidon-io/bidon-backend/internal/admin"
 	"github.com/bidon-io/bidon-backend/internal/admin/store"
+	"github.com/bidon-io/bidon-backend/internal/db"
 	"github.com/bidon-io/bidon-backend/internal/db/dbtest"
 	"github.com/bidon-io/bidon-backend/internal/segment"
 
@@ -18,7 +19,11 @@ func TestSegmentRepo_List(t *testing.T) {
 
 	repo := adminstore.NewSegmentRepo(tx)
 
-	apps := dbtest.CreateAppsList(t, tx, 3)
+	apps := make([]db.App, 3)
+	for i := range apps {
+		apps[i] = dbtest.CreateApp(t, tx)
+	}
+
 	segments := []admin.SegmentAttrs{
 		{
 			Name:        "Country Segment",
@@ -54,7 +59,7 @@ func TestSegmentRepo_List(t *testing.T) {
 		}
 
 		want[i] = *segment
-		want[i].App = adminstore.AppAttrsWithId(apps[i])
+		want[i].App = adminstore.AppAttrsWithId(&apps[i])
 	}
 
 	got, err := repo.List(context.Background())
@@ -73,7 +78,7 @@ func TestSegmentRepo_Find(t *testing.T) {
 
 	repo := adminstore.NewSegmentRepo(tx)
 
-	app := dbtest.CreateApp(t, tx, 1, nil)
+	app := dbtest.CreateApp(t, tx)
 	attrs := &admin.SegmentAttrs{
 		Name:        "Country Segment",
 		Description: "Desc",
@@ -86,7 +91,7 @@ func TestSegmentRepo_Find(t *testing.T) {
 	if err != nil {
 		t.Fatalf("repo.Create(ctx, %+v) = %v, %q; want %T, %v", attrs, nil, err, want, nil)
 	}
-	want.App = adminstore.AppAttrsWithId(app)
+	want.App = adminstore.AppAttrsWithId(&app)
 
 	got, err := repo.Find(context.Background(), want.ID)
 	if err != nil {
@@ -104,7 +109,7 @@ func TestSegmentRepo_Update(t *testing.T) {
 
 	repo := adminstore.NewSegmentRepo(tx)
 
-	app := dbtest.CreateApp(t, tx, 1, nil)
+	app := dbtest.CreateApp(t, tx)
 	attrs := admin.SegmentAttrs{
 		Name:        "Country Segment",
 		Description: "Desc",
@@ -144,7 +149,7 @@ func TestSegmentRepo_Delete(t *testing.T) {
 
 	repo := adminstore.NewSegmentRepo(tx)
 
-	app := dbtest.CreateApp(t, tx, 1, nil)
+	app := dbtest.CreateApp(t, tx)
 	attrs := &admin.SegmentAttrs{
 		Name:        "Country Segment",
 		Description: "Desc",

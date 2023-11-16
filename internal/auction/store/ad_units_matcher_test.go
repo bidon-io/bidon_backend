@@ -22,23 +22,24 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	apps := dbtest.CreateAppsList(t, tx, 2)
+	apps := make([]db.App, 2)
+	for i := range apps {
+		apps[i] = dbtest.CreateApp(t, tx)
+	}
 
-	applovinDemandSource := dbtest.CreateDemandSource(t, tx, dbtest.WithDemandSourceOptions(&db.DemandSource{
-		APIKey: "applovin",
-	}))
-	applovinAccount := dbtest.CreateDemandSourceAccount(t, tx, dbtest.WithDemandSourceAccountOptions(&db.DemandSourceAccount{
-		DemandSourceID: applovinDemandSource.ID,
-		DemandSource:   *applovinDemandSource,
-	}))
+	applovinDemandSource := dbtest.CreateDemandSource(t, tx, func(source *db.DemandSource) {
+		source.APIKey = string(adapter.ApplovinKey)
+	})
+	applovinAccount := dbtest.CreateDemandSourceAccount(t, tx, func(account *db.DemandSourceAccount) {
+		account.DemandSource = applovinDemandSource
+	})
 
-	bidmachineDemandSource := dbtest.CreateDemandSource(t, tx, dbtest.WithDemandSourceOptions(&db.DemandSource{
-		APIKey: "bidmachine",
-	}))
-	bidmachineAccount := dbtest.CreateDemandSourceAccount(t, tx, dbtest.WithDemandSourceAccountOptions(&db.DemandSourceAccount{
-		DemandSourceID: bidmachineDemandSource.ID,
-		DemandSource:   *bidmachineDemandSource,
-	}))
+	bidmachineDemandSource := dbtest.CreateDemandSource(t, tx, func(source *db.DemandSource) {
+		source.APIKey = string(adapter.BidmachineKey)
+	})
+	bidmachineAccount := dbtest.CreateDemandSourceAccount(t, tx, func(account *db.DemandSourceAccount) {
+		account.DemandSource = bidmachineDemandSource
+	})
 
 	lineItems := []db.LineItem{
 		{
