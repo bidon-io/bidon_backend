@@ -3,6 +3,7 @@ package store_test
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"testing"
 
 	"github.com/bidon-io/bidon-backend/internal/ad"
@@ -21,23 +22,24 @@ func TestLineItemsMatcher_Match(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	apps := dbtest.CreateAppsList(t, tx, 2)
+	apps := make([]db.App, 2)
+	for i := range apps {
+		apps[i] = dbtest.CreateApp(t, tx)
+	}
 
-	applovinDemandSource := dbtest.CreateDemandSource(t, tx, dbtest.WithDemandSourceOptions(&db.DemandSource{
-		APIKey: "applovin",
-	}))
-	applovinAccount := dbtest.CreateDemandSourceAccount(t, tx, dbtest.WithDemandSourceAccountOptions(&db.DemandSourceAccount{
-		DemandSourceID: applovinDemandSource.ID,
-		DemandSource:   *applovinDemandSource,
-	}))
+	applovinDemandSource := dbtest.CreateDemandSource(t, tx, func(source *db.DemandSource) {
+		source.APIKey = string(adapter.ApplovinKey)
+	})
+	applovinAccount := dbtest.CreateDemandSourceAccount(t, tx, func(account *db.DemandSourceAccount) {
+		account.DemandSource = applovinDemandSource
+	})
 
-	bidmachineDemandSource := dbtest.CreateDemandSource(t, tx, dbtest.WithDemandSourceOptions(&db.DemandSource{
-		APIKey: "bidmachine",
-	}))
-	bidmachineAccount := dbtest.CreateDemandSourceAccount(t, tx, dbtest.WithDemandSourceAccountOptions(&db.DemandSourceAccount{
-		DemandSourceID: bidmachineDemandSource.ID,
-		DemandSource:   *bidmachineDemandSource,
-	}))
+	bidmachineDemandSource := dbtest.CreateDemandSource(t, tx, func(source *db.DemandSource) {
+		source.APIKey = string(adapter.BidmachineKey)
+	})
+	bidmachineAccount := dbtest.CreateDemandSourceAccount(t, tx, func(account *db.DemandSourceAccount) {
+		account.DemandSource = bidmachineDemandSource
+	})
 
 	lineItems := []db.LineItem{
 		{
@@ -254,53 +256,42 @@ func TestLineItemsMatcher_ExtraFields(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	user := dbtest.Create[db.User](t, tx, dbtest.UserFactory{}, 1)
+	user := dbtest.CreateUser(t, tx)
 
 	keys := adapter.Keys
-	demandSources := dbtest.CreateList[db.DemandSource](t, tx,
-		dbtest.DemandSourceFactory{
-			APIKey: func(i int) string { return string(keys[i]) },
-		},
-		len(keys),
-	)
+	demandSources := make([]db.DemandSource, len(keys))
+	for i, key := range keys {
+		demandSources[i] = dbtest.CreateDemandSource(t, tx, func(source *db.DemandSource) {
+			source.APIKey = string(key)
+		})
+	}
 
-	accounts := dbtest.CreateList[db.DemandSourceAccount](t, tx,
-		dbtest.DemandSourceAccountFactory{
-			User:         func(i int) db.User { return user },
-			DemandSource: func(i int) db.DemandSource { return demandSources[i] },
-			Extra: func(i int) []byte {
-				demandSource := demandSources[i]
-				return dbtest.ValidDemandSourceAccountExtra(t, adapter.Key(demandSource.APIKey))
-			},
-		},
-		len(demandSources),
-	)
+	accounts := make([]db.DemandSourceAccount, len(demandSources))
+	for i, demandSource := range demandSources {
+		accounts[i] = dbtest.CreateDemandSourceAccount(t, tx, func(account *db.DemandSourceAccount) {
+			account.User = user
+			account.DemandSource = demandSource
+			account.Extra = dbtest.ValidDemandSourceAccountExtra(t, adapter.Key(demandSource.APIKey))
+		})
+	}
 
-	app := dbtest.Create[db.App](t, tx, dbtest.AppFactory{
-		User: func(i int) db.User { return user },
-	}, 1)
+	app := dbtest.CreateApp(t, tx, func(app *db.App) {
+		app.User = user
+	})
 
-	dbtest.CreateList[db.LineItem](t, tx, dbtest.LineItemFactory{
-		App: func(i int) db.App { return app },
-		Account: func(i int) db.DemandSourceAccount {
-			return accounts[i]
-		},
-		AdType: func(i int) db.AdType {
-			return db.BannerAdType
-		},
-		Format: func(i int) sql.NullString {
-			return sql.NullString{
-				String: string(ad.BannerFormat),
-				Valid:  true,
+	for i, account := range accounts {
+		dbtest.CreateLineItem(t, tx, func(lineItem *db.LineItem) {
+			lineItem.App = app
+			lineItem.Account = account
+			lineItem.BidFloor = decimal.NewNullDecimal(decimal.RequireFromString("0.15"))
+			lineItem.Extra = dbtest.ValidLineItemExtra(t, adapter.Key(demandSources[i].APIKey))
+			lineItem.Code = ptr(fmt.Sprintf("code%d", i))
+			lineItem.PublicUID = sql.NullInt64{
+				Int64: int64(i),
+				Valid: true,
 			}
-		},
-		BidFloor: func() decimal.NullDecimal {
-			return decimal.NewNullDecimal(decimal.RequireFromString("0.15"))
-		},
-		Extra: func(i int) map[string]any {
-			return dbtest.ValidLineItemExtra(t, adapter.Key(demandSources[i].APIKey))
-		},
-	}, len(accounts))
+		})
+	}
 
 	matcher := store.LineItemsMatcher{DB: tx}
 

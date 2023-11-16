@@ -18,11 +18,11 @@ func TestDemandSourceRepo_List(t *testing.T) {
 	sources := []admin.DemandSourceAttrs{
 		{
 			HumanName: "Applovin",
-			ApiKey:    "asdf",
+			ApiKey:    "applovin",
 		},
 		{
-			HumanName: "Applovin",
-			ApiKey:    "asdf",
+			HumanName: "Admob",
+			ApiKey:    "admob",
 		},
 	}
 

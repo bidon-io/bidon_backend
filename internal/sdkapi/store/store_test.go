@@ -4,10 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/bidon-io/bidon-backend/config"
 	"os"
 	"testing"
 	"time"
+
+	"github.com/bidon-io/bidon-backend/config"
 
 	"github.com/Masterminds/semver/v3"
 
@@ -32,7 +33,7 @@ func TestAppFetcher_Fetch(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	user := dbtest.CreateUser(t, tx, 1)
+	user := dbtest.CreateUser(t, tx)
 	app := &db.App{
 		UserID:      user.ID,
 		AppKey:      sql.NullString{String: "asdf", Valid: true},
@@ -104,28 +105,25 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Valid(t *testing.T) {
 
 	keys := adapter.Keys
 
-	demandSources := dbtest.CreateList[db.DemandSource](t, tx,
-		dbtest.DemandSourceFactory{
-			APIKey: func(i int) string { return string(keys[i]) },
-		},
-		len(keys),
-	)
+	demandSources := make([]db.DemandSource, len(keys))
+	for i, key := range keys {
+		demandSources[i] = dbtest.CreateDemandSource(t, tx, func(source *db.DemandSource) {
+			source.APIKey = string(key)
+		})
+	}
 
-	accounts := dbtest.CreateList[db.DemandSourceAccount](t, tx,
-		dbtest.DemandSourceAccountFactory{
-			DemandSource: func(i int) db.DemandSource { return demandSources[i] },
-			Extra: func(i int) []byte {
-				demandSource := demandSources[i]
-				return dbtest.ValidDemandSourceAccountExtra(t, adapter.Key(demandSource.APIKey))
-			},
-		},
-		len(demandSources),
-	)
+	accounts := make([]db.DemandSourceAccount, len(demandSources))
+	for i, source := range demandSources {
+		accounts[i] = dbtest.CreateDemandSourceAccount(t, tx, func(account *db.DemandSourceAccount) {
+			account.DemandSource = source
+			account.Extra = dbtest.ValidDemandSourceAccountExtra(t, adapter.Key(source.APIKey))
+		})
+	}
 
-	apps := dbtest.CreateList[db.App](t, tx,
-		dbtest.AppFactory{},
-		2,
-	)
+	apps := make([]db.App, 2)
+	for i := range apps {
+		apps[i] = dbtest.CreateApp(t, tx)
+	}
 
 	selectApp := func(i int) db.App {
 		if i < (len(accounts) / 2) {
@@ -134,23 +132,13 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Valid(t *testing.T) {
 			return apps[1]
 		}
 	}
-	_ = dbtest.CreateList[db.AppDemandProfile](t, tx,
-		dbtest.AppDemandProfileFactory{
-			App: func(i int) db.App {
-				return selectApp(i)
-			},
-			Account: func(i int) db.DemandSourceAccount {
-				return accounts[i]
-			},
-			Data: func(i int) []byte {
-				demandSource := accounts[i].DemandSource
-				app := selectApp(i)
-
-				return dbtest.ValidAppDemandProfileData(t, adapter.Key(demandSource.APIKey), app.ID)
-			},
-		},
-		len(accounts),
-	)
+	for i, account := range accounts {
+		dbtest.CreateAppDemandProfile(t, tx, func(profile *db.AppDemandProfile) {
+			profile.App = selectApp(i)
+			profile.Account = account
+			profile.Data = dbtest.ValidAppDemandProfileData(t, adapter.Key(account.DemandSource.APIKey), profile.App.ID)
+		})
+	}
 
 	fetcher := &AdapterInitConfigsFetcher{DB: tx}
 
@@ -240,99 +228,65 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Amazon(t *testing.T) 
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	demandSource := dbtest.Create[db.DemandSource](t, tx,
-		dbtest.DemandSourceFactory{
-			APIKey: func(i int) string { return string(adapter.AmazonKey) },
-		},
-		0,
-	)
+	demandSource := dbtest.CreateDemandSource(t, tx, func(source *db.DemandSource) {
+		source.APIKey = string(adapter.AmazonKey)
+	})
 
-	account := dbtest.Create[db.DemandSourceAccount](t, tx,
-		dbtest.DemandSourceAccountFactory{
-			DemandSource: func(i int) db.DemandSource { return demandSource },
-			Extra: func(i int) []byte {
-				demandSource := demandSource
-				return dbtest.ValidDemandSourceAccountExtra(t, adapter.Key(demandSource.APIKey))
-			},
-		},
-		0,
-	)
+	account := dbtest.CreateDemandSourceAccount(t, tx, func(account *db.DemandSourceAccount) {
+		account.DemandSource = demandSource
+		account.Extra = dbtest.ValidDemandSourceAccountExtra(t, adapter.Key(demandSource.APIKey))
+	})
 
-	app := dbtest.Create[db.App](t, tx,
-		dbtest.AppFactory{},
-		1,
-	)
+	app := dbtest.CreateApp(t, tx)
 
-	_ = dbtest.Create[db.AppDemandProfile](t, tx,
-		dbtest.AppDemandProfileFactory{
-			App: func(i int) db.App {
-				return app
-			},
-			Account: func(i int) db.DemandSourceAccount {
-				return account
-			},
-			Data: func(i int) []byte {
-				return dbtest.ValidAppDemandProfileData(t, adapter.Key(demandSource.APIKey), app.ID)
-			},
-		},
-		0,
-	)
+	dbtest.CreateAppDemandProfile(t, tx, func(profile *db.AppDemandProfile) {
+		profile.App = app
+		profile.Account = account
+		profile.Data = dbtest.ValidAppDemandProfileData(t, adapter.Key(demandSource.APIKey), app.ID)
+	})
 
-	dbtest.Create[db.LineItem](t, tx,
-		dbtest.LineItemFactory{
-			App:     func(i int) db.App { return app },
-			Account: func(i int) db.DemandSourceAccount { return account },
-			AdType:  func(i int) db.AdType { return db.BannerAdType },
-			Extra: func(i int) map[string]any {
-				return map[string]any{"slot_uuid": "amazon_slot_banner", "format": "BANNER"}
-			},
-		}, 0)
+	dbtest.CreateLineItem(t, tx, func(item *db.LineItem) {
+		item.App = app
+		item.Account = account
+		item.AdType = db.BannerAdType
+		item.Format = sql.NullString{
+			String: string(ad.BannerFormat),
+			Valid:  true,
+		}
+		item.Extra = map[string]any{"slot_uuid": "amazon_slot_banner", "format": "BANNER"}
+	})
 
-	dbtest.Create[db.LineItem](t, tx,
-		dbtest.LineItemFactory{
-			App:     func(i int) db.App { return app },
-			Account: func(i int) db.DemandSourceAccount { return account },
-			AdType:  func(i int) db.AdType { return db.BannerAdType },
-			Format: func(i int) sql.NullString {
-				return sql.NullString{
-					String: string(ad.MRECFormat),
-					Valid:  true,
-				}
-			},
-			Extra: func(i int) map[string]any {
-				return map[string]any{"slot_uuid": "amazon_slot_mrec", "format": "MREC"}
-			},
-		}, 0)
+	dbtest.CreateLineItem(t, tx, func(item *db.LineItem) {
+		item.App = app
+		item.Account = account
+		item.AdType = db.BannerAdType
+		item.Format = sql.NullString{
+			String: string(ad.MRECFormat),
+			Valid:  true,
+		}
+		item.Extra = map[string]any{"slot_uuid": "amazon_slot_mrec", "format": "MREC"}
+	})
 
-	dbtest.Create[db.LineItem](t, tx,
-		dbtest.LineItemFactory{
-			App:     func(i int) db.App { return app },
-			Account: func(i int) db.DemandSourceAccount { return account },
-			AdType:  func(i int) db.AdType { return db.InterstitialAdType },
-			Extra: func(i int) map[string]any {
-				return map[string]any{"slot_uuid": "amazon_slot_interstitial", "format": "INTERSTITIAL"}
-			},
-		}, 0)
+	dbtest.CreateLineItem(t, tx, func(item *db.LineItem) {
+		item.App = app
+		item.Account = account
+		item.AdType = db.InterstitialAdType
+		item.Extra = map[string]any{"slot_uuid": "amazon_slot_interstitial", "format": "INTERSTITIAL"}
+	})
 
-	dbtest.Create[db.LineItem](t, tx,
-		dbtest.LineItemFactory{
-			App:     func(i int) db.App { return app },
-			Account: func(i int) db.DemandSourceAccount { return account },
-			AdType:  func(i int) db.AdType { return db.InterstitialAdType },
-			Extra: func(i int) map[string]any {
-				return map[string]any{"slot_uuid": "amazon_slot_video", "format": "VIDEO"}
-			},
-		}, 0)
+	dbtest.CreateLineItem(t, tx, func(item *db.LineItem) {
+		item.App = app
+		item.Account = account
+		item.AdType = db.InterstitialAdType
+		item.Extra = map[string]any{"slot_uuid": "amazon_slot_video", "format": "VIDEO"}
+	})
 
-	dbtest.Create[db.LineItem](t, tx,
-		dbtest.LineItemFactory{
-			App:     func(i int) db.App { return app },
-			Account: func(i int) db.DemandSourceAccount { return account },
-			AdType:  func(i int) db.AdType { return db.RewardedAdType },
-			Extra: func(i int) map[string]any {
-				return map[string]any{"slot_uuid": "amazon_slot_rewarded", "format": "REWARDED"}
-			},
-		}, 0)
+	dbtest.CreateLineItem(t, tx, func(item *db.LineItem) {
+		item.App = app
+		item.Account = account
+		item.AdType = db.RewardedAdType
+		item.Extra = map[string]any{"slot_uuid": "amazon_slot_rewarded", "format": "REWARDED"}
+	})
 
 	fetcher := &AdapterInitConfigsFetcher{DB: tx}
 

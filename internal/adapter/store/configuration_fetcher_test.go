@@ -15,96 +15,58 @@ func TestAppDemandProfileFetcher_Fetch(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	user := dbtest.CreateUser(t, tx, 1)
-	apps := make([]*db.App, 2)
+	user := dbtest.CreateUser(t, tx)
+
+	apps := make([]db.App, 2)
 	for i := range apps {
-		apps[i] = dbtest.CreateApp(t, tx, i, user)
-	}
-	demandSources := dbtest.CreateDemandSourcesList(t, tx, 2)
-	accountApplovin := dbtest.CreateDemandSourceAccount(t, tx, dbtest.WithDemandSourceAccountOptions(
-		&db.DemandSourceAccount{
-			UserID:         user.ID,
-			DemandSourceID: demandSources[0].ID,
-			DemandSource: db.DemandSource{
-				APIKey: string(adapter.ApplovinKey),
-			},
-			Extra: []byte(`{"applovin": "applovin"}`),
-		}))
-	accountBidmachine := dbtest.CreateDemandSourceAccount(t, tx, dbtest.WithDemandSourceAccountOptions(
-		&db.DemandSourceAccount{
-			UserID:         user.ID,
-			DemandSourceID: demandSources[0].ID,
-			DemandSource: db.DemandSource{
-				APIKey: string(adapter.BidmachineKey),
-			},
-			Extra: []byte(`{"bidmachine": "bidmachine"}`),
-		}))
-	accountDtexchange := dbtest.CreateDemandSourceAccount(t, tx, dbtest.WithDemandSourceAccountOptions(
-		&db.DemandSourceAccount{
-			UserID:         user.ID,
-			DemandSourceID: demandSources[1].ID,
-			DemandSource: db.DemandSource{
-				APIKey: string(adapter.DTExchangeKey),
-			},
-			Extra: []byte(`{"dtexchange": "dtexchange"}`),
-		}))
-	accountUnity := dbtest.CreateDemandSourceAccount(t, tx, dbtest.WithDemandSourceAccountOptions(
-		&db.DemandSourceAccount{
-			UserID:         user.ID,
-			DemandSourceID: demandSources[1].ID,
-			DemandSource: db.DemandSource{
-				APIKey: string(adapter.UnityAdsKey),
-			},
-			Extra: []byte(`{"unity": "unity"}`),
-		}))
-	accountAmazon := dbtest.CreateDemandSourceAccount(t, tx, dbtest.WithDemandSourceAccountOptions(
-		&db.DemandSourceAccount{
-			UserID:         user.ID,
-			DemandSourceID: demandSources[1].ID,
-			DemandSource: db.DemandSource{
-				APIKey: string(adapter.AmazonKey),
-			},
-			Extra: []byte(`{"amazon": "amazon", "price_points": [{ "name": "name", "price_point": "price_point", "price": 1.0 }]}`),
-		}))
-	profiles := []db.AppDemandProfile{
-		{
-			AppID:          apps[0].ID,
-			AccountID:      accountApplovin.ID,
-			DemandSourceID: demandSources[0].ID,
-			Account:        *accountApplovin,
-		},
-		{
-			AppID:          apps[0].ID,
-			AccountID:      accountAmazon.ID,
-			DemandSourceID: demandSources[1].ID,
-			Account:        *accountAmazon,
-		},
-		{
-			AppID:          apps[0].ID,
-			AccountID:      accountBidmachine.ID,
-			DemandSourceID: demandSources[1].ID,
-			Account:        *accountBidmachine,
-		},
-		{
-			AppID:          apps[1].ID,
-			AccountID:      accountDtexchange.ID,
-			DemandSourceID: demandSources[0].ID,
-			Account:        *accountDtexchange,
-		},
-		{
-			AppID:          apps[1].ID,
-			AccountID:      accountUnity.ID,
-			DemandSourceID: demandSources[1].ID,
-			Account:        *accountUnity,
-		},
+		apps[i] = dbtest.CreateApp(t, tx, func(app *db.App) {
+			app.User = user
+		})
 	}
 
-	// Batch insert does not set AppDemandProfile.AccountID from created associations.
-	// But when creating individually, it works, I don't know why
-	for _, profile := range profiles {
-		if err := tx.Create(&profile).Error; err != nil {
-			t.Fatalf("failed to create test data: %v", err)
-		}
+	keys := []adapter.Key{
+		adapter.ApplovinKey,
+		adapter.UnityAdsKey,
+		adapter.BidmachineKey,
+		adapter.DTExchangeKey,
+		adapter.AmazonKey,
+	}
+
+	demandSources := make([]db.DemandSource, len(keys))
+	for i, key := range keys {
+		demandSources[i] = dbtest.CreateDemandSource(t, tx, func(source *db.DemandSource) {
+			source.APIKey = string(key)
+		})
+	}
+
+	accounts := make([]db.DemandSourceAccount, len(demandSources))
+	for i, source := range demandSources {
+		accounts[i] = dbtest.CreateDemandSourceAccount(t, tx, func(account *db.DemandSourceAccount) {
+			account.User = user
+			account.DemandSource = source
+			switch adapter.Key(source.APIKey) {
+			case adapter.ApplovinKey:
+				account.Extra = []byte(`{"applovin": "applovin"}`)
+			case adapter.UnityAdsKey:
+				account.Extra = []byte(`{"unity": "unity"}`)
+			case adapter.BidmachineKey:
+				account.Extra = []byte(`{"bidmachine": "bidmachine"}`)
+			case adapter.DTExchangeKey:
+				account.Extra = []byte(`{"dtexchange": "dtexchange"}`)
+			case adapter.AmazonKey:
+				account.Extra = []byte(`{"amazon": "amazon", "price_points": [{ "name": "name", "price_point": "price_point", "price": 1.0 }]}`)
+			default:
+				account.Extra = []byte{}
+			}
+		})
+	}
+
+	for i, account := range accounts {
+		dbtest.CreateAppDemandProfile(t, tx, func(profile *db.AppDemandProfile) {
+			profile.App = apps[i%len(apps)]
+			profile.Account = account
+			profile.Data = []byte(`{}`)
+		})
 	}
 
 	testCases := []struct {

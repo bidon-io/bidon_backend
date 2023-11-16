@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/bidon-io/bidon-backend/internal/ad"
+	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/admin"
 	"github.com/bidon-io/bidon-backend/internal/admin/store"
 	"github.com/bidon-io/bidon-backend/internal/db"
@@ -19,40 +20,39 @@ func TestLineItemRepo_List(t *testing.T) {
 
 	repo := adminstore.NewLineItemRepo(tx)
 
-	user := dbtest.CreateUser(t, tx, 1)
-	app := dbtest.CreateApp(t, tx, 1, user)
+	user := dbtest.CreateUser(t, tx)
+	app := dbtest.CreateApp(t, tx, func(app *db.App) {
+		app.User = user
+	})
 
-	applovinDemandSource := dbtest.CreateDemandSource(t, tx, dbtest.WithDemandSourceOptions(&db.DemandSource{
-		APIKey:    "applovin",
-		HumanName: "applovin",
-	}))
-	applovinAccount := dbtest.CreateDemandSourceAccount(t, tx, dbtest.WithDemandSourceAccountOptions(&db.DemandSourceAccount{
-		UserID:         user.ID,
-		DemandSourceID: applovinDemandSource.ID,
-		Type:           "DemandSourceAccount::Applovin",
-	}))
+	applovinDemandSource := dbtest.CreateDemandSource(t, tx, func(source *db.DemandSource) {
+		source.APIKey = string(adapter.ApplovinKey)
+		source.HumanName = source.APIKey
+	})
+	applovinAccount := dbtest.CreateDemandSourceAccount(t, tx, func(account *db.DemandSourceAccount) {
+		account.User = user
+		account.DemandSource = applovinDemandSource
+	})
 
-	bidmachineDemandSource := dbtest.CreateDemandSource(t, tx, dbtest.WithDemandSourceOptions(&db.DemandSource{
-		APIKey:    "bidmachine",
-		HumanName: "bidmachine",
-	}))
-	bidmachineAccount := dbtest.CreateDemandSourceAccount(t, tx, dbtest.WithDemandSourceAccountOptions(&db.DemandSourceAccount{
-		UserID:         user.ID,
-		DemandSourceID: bidmachineDemandSource.ID,
-		Type:           "DemandSourceAccount::Bidmachine",
-	}))
+	bidmachineDemandSource := dbtest.CreateDemandSource(t, tx, func(source *db.DemandSource) {
+		source.APIKey = string(adapter.BidmachineKey)
+		source.HumanName = source.APIKey
+	})
+	bidmachineAccount := dbtest.CreateDemandSourceAccount(t, tx, func(account *db.DemandSourceAccount) {
+		account.User = user
+		account.DemandSource = bidmachineDemandSource
+	})
 
-	unityAdsDemandSource := dbtest.CreateDemandSource(t, tx, dbtest.WithDemandSourceOptions(&db.DemandSource{
-		APIKey:    "unityads",
-		HumanName: "unityads",
-	}))
-	unityAdsAccount := dbtest.CreateDemandSourceAccount(t, tx, dbtest.WithDemandSourceAccountOptions(&db.DemandSourceAccount{
-		UserID:         user.ID,
-		DemandSourceID: unityAdsDemandSource.ID,
-		Type:           "DemandSourceAccount::UnityAds",
-	}))
+	unityAdsDemandSource := dbtest.CreateDemandSource(t, tx, func(source *db.DemandSource) {
+		source.APIKey = string(adapter.UnityAdsKey)
+		source.HumanName = source.APIKey
+	})
+	unityAdsAccount := dbtest.CreateDemandSourceAccount(t, tx, func(account *db.DemandSourceAccount) {
+		account.User = user
+		account.DemandSource = unityAdsDemandSource
+	})
 
-	accounts := []db.DemandSourceAccount{*applovinAccount, *bidmachineAccount, *unityAdsAccount}
+	accounts := []db.DemandSourceAccount{applovinAccount, bidmachineAccount, unityAdsAccount}
 	items := []admin.LineItemAttrs{
 		{
 			HumanName:   "banner",
@@ -98,7 +98,7 @@ func TestLineItemRepo_List(t *testing.T) {
 
 		want[i] = *item
 		want[i].Account = adminstore.DemandSourceAccountAttrsWithId(&accounts[i])
-		want[i].App = adminstore.AppAttrsWithId(app)
+		want[i].App = adminstore.AppAttrsWithId(&app)
 	}
 
 	got, err := repo.List(context.Background())
@@ -117,15 +117,14 @@ func TestLineItemRepo_Find(t *testing.T) {
 
 	repo := adminstore.NewLineItemRepo(tx)
 
-	app := dbtest.CreateApp(t, tx, 1, nil)
-	applovinDemandSource := dbtest.CreateDemandSource(t, tx, dbtest.WithDemandSourceOptions(&db.DemandSource{
-		APIKey:    "applovin",
-		HumanName: "applovin",
-	}))
-	applovinAccount := dbtest.CreateDemandSourceAccount(t, tx, dbtest.WithDemandSourceAccountOptions(&db.DemandSourceAccount{
-		DemandSourceID: applovinDemandSource.ID,
-		Type:           "DemandSourceAccount::Applovin",
-	}))
+	app := dbtest.CreateApp(t, tx)
+	applovinDemandSource := dbtest.CreateDemandSource(t, tx, func(source *db.DemandSource) {
+		source.APIKey = string(adapter.ApplovinKey)
+		source.HumanName = source.APIKey
+	})
+	applovinAccount := dbtest.CreateDemandSourceAccount(t, tx, func(account *db.DemandSourceAccount) {
+		account.DemandSource = applovinDemandSource
+	})
 
 	attrs := &admin.LineItemAttrs{
 		HumanName:   "banner",
@@ -143,8 +142,8 @@ func TestLineItemRepo_Find(t *testing.T) {
 	if err != nil {
 		t.Fatalf("repo.Create(ctx, %+v) = %v, %q; want %T, %v", attrs, nil, err, want, nil)
 	}
-	want.App = adminstore.AppAttrsWithId(app)
-	want.Account = adminstore.DemandSourceAccountAttrsWithId(applovinAccount)
+	want.App = adminstore.AppAttrsWithId(&app)
+	want.Account = adminstore.DemandSourceAccountAttrsWithId(&applovinAccount)
 
 	got, err := repo.Find(context.Background(), want.ID)
 	if err != nil {
@@ -162,16 +161,14 @@ func TestLineItemRepo_Update(t *testing.T) {
 
 	repo := adminstore.NewLineItemRepo(tx)
 
-	app := dbtest.CreateApp(t, tx, 1, nil)
-	applovinDemandSource := dbtest.CreateDemandSource(t, tx, dbtest.WithDemandSourceOptions(&db.DemandSource{
-		APIKey:    "applovin",
-		HumanName: "applovin",
-	}))
-	applovinAccount := dbtest.CreateDemandSourceAccount(t, tx, dbtest.WithDemandSourceAccountOptions(&db.DemandSourceAccount{
-		DemandSourceID: applovinDemandSource.ID,
-		DemandSource:   *applovinDemandSource,
-		Type:           "DemandSourceAccount::Applovin",
-	}))
+	app := dbtest.CreateApp(t, tx)
+	applovinDemandSource := dbtest.CreateDemandSource(t, tx, func(source *db.DemandSource) {
+		source.APIKey = string(adapter.ApplovinKey)
+		source.HumanName = source.APIKey
+	})
+	applovinAccount := dbtest.CreateDemandSourceAccount(t, tx, func(account *db.DemandSourceAccount) {
+		account.DemandSource = applovinDemandSource
+	})
 
 	attrs := admin.LineItemAttrs{
 		HumanName:   "banner",
@@ -216,16 +213,14 @@ func TestLineItemRepo_Delete(t *testing.T) {
 
 	repo := adminstore.NewLineItemRepo(tx)
 
-	app := dbtest.CreateApp(t, tx, 1, nil)
-	applovinDemandSource := dbtest.CreateDemandSource(t, tx, dbtest.WithDemandSourceOptions(&db.DemandSource{
-		APIKey:    "applovin",
-		HumanName: "applovin",
-	}))
-	applovinAccount := dbtest.CreateDemandSourceAccount(t, tx, dbtest.WithDemandSourceAccountOptions(&db.DemandSourceAccount{
-		DemandSourceID: applovinDemandSource.ID,
-		DemandSource:   *applovinDemandSource,
-		Type:           "DemandSourceAccount::Applovin",
-	}))
+	app := dbtest.CreateApp(t, tx)
+	applovinDemandSource := dbtest.CreateDemandSource(t, tx, func(source *db.DemandSource) {
+		source.APIKey = string(adapter.ApplovinKey)
+		source.HumanName = source.APIKey
+	})
+	applovinAccount := dbtest.CreateDemandSourceAccount(t, tx, func(account *db.DemandSourceAccount) {
+		account.DemandSource = applovinDemandSource
+	})
 	attrs := &admin.LineItemAttrs{
 		HumanName:   "banner",
 		AppID:       app.ID,

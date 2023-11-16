@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/admin"
 	"github.com/bidon-io/bidon-backend/internal/admin/store"
 	"github.com/bidon-io/bidon-backend/internal/db"
@@ -16,17 +17,17 @@ func TestDemandSourceAccountRepo_List(t *testing.T) {
 	defer tx.Rollback()
 
 	repo := adminstore.NewDemandSourceAccountRepo(tx)
-	demandSources := make([]*db.DemandSource, 3)
-	demandSources[0] = dbtest.CreateDemandSource(t, tx, dbtest.WithDemandSourceOptions(&db.DemandSource{
-		APIKey: "applovin",
-	}))
-	demandSources[1] = dbtest.CreateDemandSource(t, tx, dbtest.WithDemandSourceOptions(&db.DemandSource{
-		APIKey: "bidmachine",
-	}))
-	demandSources[2] = dbtest.CreateDemandSource(t, tx, dbtest.WithDemandSourceOptions(&db.DemandSource{
-		APIKey: "unityads",
-	}))
-	user := dbtest.CreateUser(t, tx, 1)
+	demandSources := make([]db.DemandSource, 3)
+	demandSources[0] = dbtest.CreateDemandSource(t, tx, func(source *db.DemandSource) {
+		source.APIKey = string(adapter.ApplovinKey)
+	})
+	demandSources[1] = dbtest.CreateDemandSource(t, tx, func(source *db.DemandSource) {
+		source.APIKey = string(adapter.BidmachineKey)
+	})
+	demandSources[2] = dbtest.CreateDemandSource(t, tx, func(source *db.DemandSource) {
+		source.APIKey = string(adapter.UnityAdsKey)
+	})
+	user := dbtest.CreateUser(t, tx)
 	accounts := []admin.DemandSourceAccountAttrs{
 		{
 			UserID:         user.ID,
@@ -59,8 +60,8 @@ func TestDemandSourceAccountRepo_List(t *testing.T) {
 		}
 
 		want[i] = *account
-		want[i].User = *adminstore.UserResource(user)
-		want[i].DemandSource = *adminstore.DemandSourceResource(demandSources[i])
+		want[i].User = *adminstore.UserResource(&user)
+		want[i].DemandSource = *adminstore.DemandSourceResource(&demandSources[i])
 	}
 
 	got, err := repo.List(context.Background())
@@ -77,18 +78,23 @@ func TestDemandSourceAccountRepo_ListOwnedByUserOrSharedRepo(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	users := dbtest.CreateList[db.User](t, tx, dbtest.UserFactory{}, 2)
+	users := make([]db.User, 2)
+	for i := range users {
+		users[i] = dbtest.CreateUser(t, tx)
+	}
 
-	dbFirstUserAccounts := dbtest.CreateList[db.DemandSourceAccount](t, tx, dbtest.DemandSourceAccountFactory{
-		User: func(i int) db.User {
-			return users[0]
-		},
-	}, 2)
-	dbSecondUserAccounts := dbtest.CreateList[db.DemandSourceAccount](t, tx, dbtest.DemandSourceAccountFactory{
-		User: func(i int) db.User {
-			return users[1]
-		},
-	}, 2)
+	dbFirstUserAccounts := make([]db.DemandSourceAccount, 2)
+	for i := range dbFirstUserAccounts {
+		dbFirstUserAccounts[i] = dbtest.CreateDemandSourceAccount(t, tx, func(account *db.DemandSourceAccount) {
+			account.User = users[0]
+		})
+	}
+	dbSecondUserAccounts := make([]db.DemandSourceAccount, 2)
+	for i := range dbSecondUserAccounts {
+		dbSecondUserAccounts[i] = dbtest.CreateDemandSourceAccount(t, tx, func(account *db.DemandSourceAccount) {
+			account.User = users[1]
+		})
+	}
 	// Need to remove constraint
 	//dbSharedAccounts := dbtest.CreateList[db.DemandSourceAccount](t, tx, dbtest.DemandSourceAccountFactory{
 	//	User: func(i int) db.User {
@@ -152,10 +158,10 @@ func TestDemandSourceAccountRepo_Find(t *testing.T) {
 
 	repo := adminstore.NewDemandSourceAccountRepo(tx)
 
-	user := dbtest.CreateUser(t, tx, 1)
-	demandSource := dbtest.CreateDemandSource(t, tx, dbtest.WithDemandSourceOptions(&db.DemandSource{
-		APIKey: "bidmachine",
-	}))
+	user := dbtest.CreateUser(t, tx)
+	demandSource := dbtest.CreateDemandSource(t, tx, func(source *db.DemandSource) {
+		source.APIKey = string(adapter.BidmachineKey)
+	})
 	attrs := &admin.DemandSourceAccountAttrs{
 		UserID:         user.ID,
 		Type:           "DemandSourceAccount::Bidmachine",
@@ -168,8 +174,8 @@ func TestDemandSourceAccountRepo_Find(t *testing.T) {
 	if err != nil {
 		t.Fatalf("repo.Create(ctx, %+v) = %v, %q; want %T, %v", attrs, nil, err, want, nil)
 	}
-	want.User = *adminstore.UserResource(user)
-	want.DemandSource = *adminstore.DemandSourceResource(demandSource)
+	want.User = *adminstore.UserResource(&user)
+	want.DemandSource = *adminstore.DemandSourceResource(&demandSource)
 
 	got, err := repo.Find(context.Background(), want.ID)
 	if err != nil {
@@ -185,18 +191,23 @@ func TestDemandSourceAccountRepo_FindOwnedByUserOrSharedRepo(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	users := dbtest.CreateList[db.User](t, tx, dbtest.UserFactory{}, 2)
+	users := make([]db.User, 2)
+	for i := range users {
+		users[i] = dbtest.CreateUser(t, tx)
+	}
 
-	dbFirstUserAccounts := dbtest.CreateList[db.DemandSourceAccount](t, tx, dbtest.DemandSourceAccountFactory{
-		User: func(i int) db.User {
-			return users[0]
-		},
-	}, 2)
-	dbSecondUserAccounts := dbtest.CreateList[db.DemandSourceAccount](t, tx, dbtest.DemandSourceAccountFactory{
-		User: func(i int) db.User {
-			return users[1]
-		},
-	}, 2)
+	dbFirstUserAccounts := make([]db.DemandSourceAccount, 2)
+	for i := range dbFirstUserAccounts {
+		dbFirstUserAccounts[i] = dbtest.CreateDemandSourceAccount(t, tx, func(account *db.DemandSourceAccount) {
+			account.User = users[0]
+		})
+	}
+	dbSecondUserAccounts := make([]db.DemandSourceAccount, 2)
+	for i := range dbSecondUserAccounts {
+		dbSecondUserAccounts[i] = dbtest.CreateDemandSourceAccount(t, tx, func(account *db.DemandSourceAccount) {
+			account.User = users[1]
+		})
+	}
 	// Need to remove constraint
 	//dbSharedAccounts := dbtest.CreateList[db.DemandSourceAccount](t, tx, dbtest.DemandSourceAccountFactory{
 	//	User: func(i int) db.User {
@@ -282,10 +293,10 @@ func TestDemandSourceAccountRepo_Update(t *testing.T) {
 
 	repo := adminstore.NewDemandSourceAccountRepo(tx)
 
-	user := dbtest.CreateUser(t, tx, 1)
-	demandSource := dbtest.CreateDemandSource(t, tx, dbtest.WithDemandSourceOptions(&db.DemandSource{
-		APIKey: "bidmachine",
-	}))
+	user := dbtest.CreateUser(t, tx)
+	demandSource := dbtest.CreateDemandSource(t, tx, func(source *db.DemandSource) {
+		source.APIKey = string(adapter.BidmachineKey)
+	})
 	attrs := admin.DemandSourceAccountAttrs{
 		UserID:         user.ID,
 		Type:           "DemandSourceAccount::Bidmachine",
@@ -323,10 +334,10 @@ func TestDemandSourceAccountRepo_Delete(t *testing.T) {
 
 	repo := adminstore.NewDemandSourceAccountRepo(tx)
 
-	user := dbtest.CreateUser(t, tx, 1)
-	demandSource := dbtest.CreateDemandSource(t, tx, dbtest.WithDemandSourceOptions(&db.DemandSource{
-		APIKey: "bidmachine",
-	}))
+	user := dbtest.CreateUser(t, tx)
+	demandSource := dbtest.CreateDemandSource(t, tx, func(source *db.DemandSource) {
+		source.APIKey = string(adapter.BidmachineKey)
+	})
 	attrs := &admin.DemandSourceAccountAttrs{
 		UserID:         user.ID,
 		Type:           "DemandSourceAccount::Bidmachine",

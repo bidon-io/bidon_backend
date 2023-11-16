@@ -3,74 +3,70 @@ package dbtest
 import (
 	"database/sql"
 	"fmt"
+	"sync/atomic"
 	"testing"
 
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/db"
 )
 
-type DemandSourceAccountFactory struct {
-	DemandSource func(int) db.DemandSource
-	User         func(int) db.User
-	Type         func(int) string
-	Extra        func(int) []byte
-	IsBidding    func(int) bool
-	IsDefault    func(int) bool
+var demandSourceAccountCounter atomic.Uint64
+
+func demandSourceAccountDefaults(n uint64) func(*db.DemandSourceAccount) {
+	return func(account *db.DemandSourceAccount) {
+		if account.DemandSourceID == 0 && account.DemandSource.ID == 0 {
+			account.DemandSource = BuildDemandSource(func(source *db.DemandSource) {
+				*source = account.DemandSource
+			})
+		}
+		if account.UserID == 0 && account.User.ID == 0 {
+			account.User = BuildUser(func(user *db.User) {
+				*user = account.User
+			})
+		}
+		if account.Label == "" {
+			account.Label = fmt.Sprintf("Test Account %d", n)
+		}
+		if account.Type == "" {
+			account.Type = fmt.Sprintf("DemandSourceAccount::%s", account.DemandSource.APIKey)
+		}
+		if account.Extra == nil {
+			account.Extra = []byte(`{"foo": "bar"}`)
+		}
+		if account.IsBidding == nil {
+			account.IsBidding = new(bool)
+		}
+		if account.IsDefault == (sql.NullBool{}) {
+			account.IsDefault = sql.NullBool{
+				Valid: true,
+				Bool:  true,
+			}
+		}
+	}
 }
 
-func (f DemandSourceAccountFactory) Build(i int) db.DemandSourceAccount {
-	a := db.DemandSourceAccount{}
+func BuildDemandSourceAccount(opts ...func(*db.DemandSourceAccount)) db.DemandSourceAccount {
+	var account db.DemandSourceAccount
 
-	var ds db.DemandSource
-	if f.DemandSource == nil {
-		ds = DemandSourceFactory{}.Build(i)
-	} else {
-		ds = f.DemandSource(i)
-	}
-	a.DemandSourceID = ds.ID
-	a.DemandSource = ds
+	n := demandSourceAccountCounter.Add(1)
 
-	var user db.User
-	if f.User == nil {
-		user = UserFactory{}.Build(i)
-	} else {
-		user = f.User(i)
-	}
-	a.UserID = user.ID
-	a.User = user
-
-	if f.Type == nil {
-		a.Type = fmt.Sprintf("DemandSourceAccount::%s", ds.APIKey)
-	} else {
-		a.Type = f.Type(i)
+	opts = append(opts, demandSourceAccountDefaults(n))
+	for _, opt := range opts {
+		opt(&account)
 	}
 
-	if f.Extra == nil {
-		a.Extra = []byte(`{"foo": "bar"}`)
-	} else {
-		a.Extra = f.Extra(i)
+	return account
+}
+
+func CreateDemandSourceAccount(t *testing.T, tx *db.DB, opts ...func(*db.DemandSourceAccount)) db.DemandSourceAccount {
+	t.Helper()
+
+	account := BuildDemandSourceAccount(opts...)
+	if err := tx.Create(&account).Error; err != nil {
+		t.Fatalf("Failed to create demand source account: %v", err)
 	}
 
-	if f.IsBidding == nil {
-		a.IsBidding = new(bool)
-	} else {
-		a.IsBidding = new(bool)
-		*a.IsBidding = f.IsBidding(i)
-	}
-
-	if f.IsDefault == nil {
-		a.IsDefault = sql.NullBool{
-			Valid: true,
-			Bool:  true,
-		}
-	} else {
-		a.IsDefault = sql.NullBool{
-			Valid: true,
-			Bool:  f.IsDefault(i),
-		}
-	}
-
-	return a
+	return account
 }
 
 func ValidDemandSourceAccountExtra(t *testing.T, key adapter.Key) []byte {

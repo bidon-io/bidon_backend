@@ -3,114 +3,91 @@ package dbtest
 import (
 	"database/sql"
 	"fmt"
+	"sync/atomic"
+	"testing"
+
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/shopspring/decimal"
-	"testing"
 
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/db"
 )
 
-type LineItemFactory struct {
-	App       func(int) db.App
-	Account   func(int) db.DemandSourceAccount
-	HumanName func(int) string
-	Code      func(int) string
-	BidFloor  func() decimal.NullDecimal
-	AdType    func(int) db.AdType
-	Format    func(int) sql.NullString
-	Extra     func(int) map[string]any
-	Width     func(int) int32
-	Height    func(int) int32
-	PublicUID func(int) sql.NullInt64
+var lineItemCounter atomic.Uint64
+
+func lineItemDefaults(n uint64) func(*db.LineItem) {
+	return func(item *db.LineItem) {
+		if item.AppID == 0 && item.App.ID == 0 {
+			item.App = BuildApp(func(app *db.App) {
+				*app = item.App
+			})
+		}
+		if item.AccountID == 0 && item.Account.ID == 0 {
+			item.Account = BuildDemandSourceAccount(func(account *db.DemandSourceAccount) {
+				*account = item.Account
+			})
+		}
+		if item.HumanName == "" {
+			item.HumanName = fmt.Sprintf("Test Line Item %d", n)
+		}
+		if item.Code == nil {
+			code := fmt.Sprintf("code%d", n)
+			item.Code = &code
+		}
+		if item.BidFloor == (decimal.NullDecimal{}) {
+			item.BidFloor = decimal.NewNullDecimal(decimal.RequireFromString("0.1"))
+		}
+		if item.AdType == 0 {
+			item.AdType = db.BannerAdType
+		}
+		if item.Extra == nil {
+			item.Extra = map[string]any{
+				"foo": "bar",
+			}
+		}
+		if item.Format == (sql.NullString{}) {
+			item.Format = sql.NullString{
+				String: string(ad.BannerFormat),
+				Valid:  true,
+			}
+		}
+		if item.Width == 0 {
+			item.Width = 320
+		}
+		if item.Height == 0 {
+			item.Height = 50
+		}
+		if item.PublicUID == (sql.NullInt64{}) {
+			item.PublicUID = sql.NullInt64{
+				Int64: int64(n),
+				Valid: true,
+			}
+		}
+	}
 }
 
-func (f LineItemFactory) Build(i int) db.LineItem {
-	li := db.LineItem{}
+func BuildLineItem(opts ...func(*db.LineItem)) db.LineItem {
+	var item db.LineItem
 
-	var app db.App
-	if f.App == nil {
-		app = AppFactory{}.Build(i)
-	} else {
-		app = f.App(i)
-	}
-	li.AppID = app.ID
-	li.App = app
+	n := lineItemCounter.Add(1)
 
-	var account db.DemandSourceAccount
-	if f.Account == nil {
-		account = DemandSourceAccountFactory{}.Build(i)
-	} else {
-		account = f.Account(i)
-	}
-	li.AccountID = account.ID
-	li.Account = account
-
-	if f.HumanName == nil {
-		li.HumanName = fmt.Sprintf("Test Line Item %d", i)
-	} else {
-		li.HumanName = f.HumanName(i)
+	opts = append(opts, lineItemDefaults(n))
+	for _, opt := range opts {
+		opt(&item)
 	}
 
-	var code string
-	if f.Code == nil {
-		code = fmt.Sprintf("code%d", i)
-	} else {
-		code = f.Code(i)
-	}
-	li.Code = &code
+	return item
+}
 
-	if f.BidFloor == nil {
-		li.BidFloor = decimal.NewNullDecimal(decimal.RequireFromString("0.1"))
-	} else {
-		li.BidFloor = f.BidFloor()
+func CreateLineItem(t *testing.T, tx *db.DB, opts ...func(*db.LineItem)) db.LineItem {
+	t.Helper()
+
+	item := BuildLineItem(opts...)
+	if err := tx.Create(&item).Error; err != nil {
+		t.Fatalf("Failed to create line item: %v", err)
 	}
 
-	if f.AdType == nil {
-		li.AdType = db.BannerAdType
-	} else {
-		li.AdType = f.AdType(i)
-	}
-
-	if f.Extra == nil {
-		li.Extra = map[string]any{
-			"foo": "bar",
-		}
-	} else {
-		li.Extra = f.Extra(i)
-	}
-
-	if f.Format == nil {
-		li.Format = sql.NullString{
-			String: string(ad.BannerFormat),
-			Valid:  true,
-		}
-	} else {
-		li.Format = f.Format(i)
-	}
-
-	if f.Width == nil {
-		li.Width = 320
-	} else {
-		li.Width = f.Width(i)
-	}
-
-	if f.Height == nil {
-		li.Height = 50
-	} else {
-		li.Height = f.Height(i)
-	}
-
-	if f.PublicUID == nil {
-		li.PublicUID = sql.NullInt64{
-			Int64: int64(i),
-			Valid: true,
-		}
-	} else {
-		li.PublicUID = f.PublicUID(i)
-	}
-
-	return li
+	return item
 }
 
 func ValidLineItemExtra(t *testing.T, key adapter.Key) map[string]any {
