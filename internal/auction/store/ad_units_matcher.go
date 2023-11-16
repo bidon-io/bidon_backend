@@ -32,7 +32,7 @@ func (m *AdUnitsMatcher) Match(ctx context.Context, params *auction.BuildParams)
 		InnerJoins("Account.DemandSource", m.DB.Select("api_key").Where(map[string]any{"api_key": params.Adapters}))
 
 	if params.PriceFloor != nil {
-		query = query.Where("(bid_floor >= ? OR bid_floor IS NULL)", params.PriceFloor)
+		query = query.Where("(bid_floor >= ? OR bid_floor IS NULL OR bid_floor = 0)", params.PriceFloor)
 	}
 
 	if params.AdType != ad.BannerType {
