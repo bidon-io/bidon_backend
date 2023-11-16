@@ -3,71 +3,67 @@ package dbtest
 import (
 	"database/sql"
 	"fmt"
+	"sync/atomic"
+	"testing"
 
 	"github.com/bidon-io/bidon-backend/internal/db"
 )
 
-type AppFactory struct {
-	User        func(int) db.User
-	PlatformID  func(int) db.PlatformID
-	HumanName   func(int) string
-	PackageName func(int) string
-	AppKey      func(int) string
-	Settings    func(int) map[string]any
+var appCounter atomic.Uint64
+
+func appDefaults(n uint64) func(*db.App) {
+	return func(app *db.App) {
+		if app.UserID == 0 && app.User.ID == 0 {
+			app.User = BuildUser(func(user *db.User) {
+				*user = app.User
+			})
+		}
+		if app.PlatformID == 0 {
+			app.PlatformID = db.AndroidPlatformID
+		}
+		if app.HumanName == "" {
+			app.HumanName = fmt.Sprintf("Test App %d", n)
+		}
+		if app.PackageName == (sql.NullString{}) {
+			app.PackageName = sql.NullString{
+				String: fmt.Sprintf("app_%d.package", n),
+				Valid:  true,
+			}
+		}
+		if app.AppKey == (sql.NullString{}) {
+			app.AppKey = sql.NullString{
+				String: fmt.Sprintf("app_%d_key", n),
+				Valid:  true,
+			}
+		}
+		if app.Settings == nil {
+			app.Settings = map[string]any{
+				"app_num": n,
+				"foo":     "bar",
+			}
+		}
+	}
 }
 
-func (f AppFactory) Build(i int) db.App {
-	app := db.App{}
+func BuildApp(opts ...func(*db.App)) db.App {
+	var app db.App
 
-	var user db.User
-	if f.User == nil {
-		user = UserFactory{}.Build(i)
-	} else {
-		user = f.User(i)
-	}
-	app.UserID = user.ID
-	app.User = user
+	n := appCounter.Add(1)
 
-	if f.PlatformID == nil {
-		app.PlatformID = db.AndroidPlatformID
-	} else {
-		app.PlatformID = f.PlatformID(i)
+	opts = append(opts, appDefaults(n))
+	for _, opt := range opts {
+		opt(&app)
 	}
 
-	if f.HumanName == nil {
-		app.HumanName = fmt.Sprintf("Test App %d", i)
-	} else {
-		app.HumanName = f.HumanName(i)
-	}
+	return app
+}
 
-	if f.PackageName == nil {
-		app.PackageName = sql.NullString{
-			String: fmt.Sprintf("app.package%d", i),
-			Valid:  true,
-		}
-	} else {
-		app.PackageName = sql.NullString{
-			String: f.PackageName(i),
-			Valid:  true,
-		}
-	}
+func CreateApp(t *testing.T, tx *db.DB, opts ...func(*db.App)) db.App {
+	t.Helper()
 
-	if f.AppKey == nil {
-		app.AppKey = sql.NullString{
-			String: fmt.Sprintf("appkey%d", i),
-			Valid:  true,
-		}
-	} else {
-		app.AppKey = sql.NullString{
-			String: f.AppKey(i),
-			Valid:  true,
-		}
-	}
-
-	if f.Settings == nil {
-		app.Settings = map[string]any{"foo": "bar"}
-	} else {
-		app.Settings = f.Settings(i)
+	app := BuildApp(opts...)
+	if err := tx.Create(&app).Error; err != nil {
+		t.Fatalf("Failed to create app: %v", err)
 	}
 
 	return app

@@ -21,7 +21,11 @@ func TestConfigFetcher_Match(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	apps := dbtest.CreateAppsList(t, tx, 3)
+	apps := make([]db.App, 3)
+	for i := range apps {
+		apps[i] = dbtest.CreateApp(t, tx)
+	}
+
 	configs := []db.AuctionConfiguration{
 		{
 			AppID:     apps[0].ID,
@@ -99,7 +103,11 @@ func TestConfigFetcher_FetchByUID(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	apps := dbtest.CreateAppsList(t, tx, 3)
+	apps := make([]db.App, 3)
+	for i := range apps {
+		apps[i] = dbtest.CreateApp(t, tx)
+	}
+
 	configs := []db.AuctionConfiguration{
 		{
 			AppID:     apps[0].ID,
@@ -178,7 +186,11 @@ func TestConfigFetcher_FetchByUIDCached(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	apps := dbtest.CreateAppsList(t, tx, 3)
+	apps := make([]db.App, 3)
+	for i := range apps {
+		apps[i] = dbtest.CreateApp(t, tx)
+	}
+
 	configs := []db.AuctionConfiguration{
 		{
 			AppID:     apps[0].ID,
