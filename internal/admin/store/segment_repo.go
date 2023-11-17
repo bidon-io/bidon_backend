@@ -2,7 +2,6 @@ package adminstore
 
 import (
 	"context"
-	"database/sql"
 	"strconv"
 
 	"github.com/bidon-io/bidon-backend/internal/admin"
@@ -44,12 +43,6 @@ type segmentMapper struct {
 
 //lint:ignore U1000 this method is used by generic struct
 func (m segmentMapper) dbModel(s *admin.SegmentAttrs, id int64) *db.Segment {
-	publicUID := sql.NullInt64{}
-	if id == 0 {
-		publicUID.Int64 = m.db.GenerateSnowflakeID()
-		publicUID.Valid = true
-	}
-
 	return &db.Segment{
 		Model:       db.Model{ID: id},
 		Name:        s.Name,
@@ -58,7 +51,6 @@ func (m segmentMapper) dbModel(s *admin.SegmentAttrs, id int64) *db.Segment {
 		Enabled:     s.Enabled,
 		AppID:       s.AppID,
 		Priority:    s.Priority,
-		PublicUID:   publicUID,
 	}
 }
 
