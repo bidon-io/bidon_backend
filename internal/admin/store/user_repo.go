@@ -2,7 +2,6 @@ package adminstore
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"strconv"
 
@@ -56,17 +55,10 @@ type userMapper struct {
 
 //lint:ignore U1000 this method is used by generic struct
 func (m userMapper) dbModel(u *admin.UserAttrs, id int64) *db.User {
-	publicUID := sql.NullInt64{}
-	if id == 0 {
-		publicUID.Int64 = m.db.GenerateSnowflakeID()
-		publicUID.Valid = true
-	}
-
 	du := &db.User{
 		Model:     db.Model{ID: id},
 		Email:     u.Email,
 		IsAdmin:   u.IsAdmin,
-		PublicUID: publicUID,
 	}
 
 	if u.Password != "" {
