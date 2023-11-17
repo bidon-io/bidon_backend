@@ -56,12 +56,6 @@ func (m appMapper) dbModel(a *admin.AppAttrs, id int64) *db.App {
 		appKey.Valid = true
 	}
 
-	publicUID := sql.NullInt64{}
-	if id == 0 {
-		publicUID.Int64 = m.db.GenerateSnowflakeID()
-		publicUID.Valid = true
-	}
-
 	return &db.App{
 		Model:       db.Model{ID: id},
 		UserID:      a.UserID,
@@ -69,7 +63,6 @@ func (m appMapper) dbModel(a *admin.AppAttrs, id int64) *db.App {
 		HumanName:   a.HumanName,
 		PackageName: packageName,
 		AppKey:      appKey,
-		PublicUID:   publicUID,
 	}
 }
 

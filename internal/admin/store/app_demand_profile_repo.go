@@ -2,7 +2,6 @@ package adminstore
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
 	"strconv"
 
@@ -46,11 +45,6 @@ type appDemandProfileMapper struct {
 //lint:ignore U1000 this method is used by generic struct
 func (m appDemandProfileMapper) dbModel(attrs *admin.AppDemandProfileAttrs, id int64) *db.AppDemandProfile {
 	data, _ := json.Marshal(attrs.Data)
-	publicUID := sql.NullInt64{}
-	if id == 0 {
-		publicUID.Int64 = m.db.GenerateSnowflakeID()
-		publicUID.Valid = true
-	}
 
 	return &db.AppDemandProfile{
 		Model:          db.Model{ID: id},
@@ -59,7 +53,6 @@ func (m appDemandProfileMapper) dbModel(attrs *admin.AppDemandProfileAttrs, id i
 		AccountID:      attrs.AccountID,
 		DemandSourceID: attrs.DemandSourceID,
 		Data:           data,
-		PublicUID:      publicUID,
 	}
 }
 

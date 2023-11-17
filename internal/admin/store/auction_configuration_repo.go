@@ -54,11 +54,6 @@ func (m auctionConfigurationMapper) dbModel(c *admin.AuctionConfigurationAttrs, 
 		segmentID.Int64 = *c.SegmentID
 		segmentID.Valid = true
 	}
-	publicUID := sql.NullInt64{}
-	if id == 0 {
-		publicUID.Int64 = m.db.GenerateSnowflakeID()
-		publicUID.Valid = true
-	}
 
 	return &db.AuctionConfiguration{
 		Model:                    db.Model{ID: id},
@@ -69,7 +64,6 @@ func (m auctionConfigurationMapper) dbModel(c *admin.AuctionConfigurationAttrs, 
 		Pricefloor:               c.Pricefloor,
 		SegmentID:                &segmentID,
 		ExternalWinNotifications: c.ExternalWinNotifications,
-		PublicUID:                publicUID,
 	}
 }
 

@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/bidon-io/bidon-backend/internal/db"
+	"github.com/bwmarrin/snowflake"
 	"github.com/joho/godotenv"
 )
 
@@ -20,7 +21,12 @@ func Prepare() *db.DB {
 		log.Printf("Did not load from .env.test file: %v", err)
 	}
 
-	testDB, err = db.Open(os.Getenv("DATABASE_URL"))
+	node, err := snowflake.NewNode(0)
+	if err != nil {
+		log.Fatalf("Error creating snowflake node: %v", err)
+	}
+
+	testDB, err = db.Open(os.Getenv("DATABASE_URL"), db.WithSnowflakeNode(node))
 	if err != nil {
 		log.Fatalf("Error connecting to the database: %v", err)
 	}

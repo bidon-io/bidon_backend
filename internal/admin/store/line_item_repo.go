@@ -66,12 +66,6 @@ func (m lineItemMapper) dbModel(i *admin.LineItemAttrs, id int64) *db.LineItem {
 		format.Valid = true
 	}
 
-	publicUID := sql.NullInt64{}
-	if id == 0 {
-		publicUID.Int64 = m.db.GenerateSnowflakeID()
-		publicUID.Valid = true
-	}
-
 	// TODO: remove this hack
 	// sets code to one of the following values: ad_unit_id, zone_id, placement_id, slot_id, slot_uuid
 	if i.Code == nil {
@@ -97,7 +91,6 @@ func (m lineItemMapper) dbModel(i *admin.LineItemAttrs, id int64) *db.LineItem {
 		Extra:       i.Extra,
 		Format:      format,
 		IsBidding:   i.IsBidding,
-		PublicUID:   publicUID,
 	}
 }
 
