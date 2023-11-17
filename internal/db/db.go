@@ -20,14 +20,13 @@ import (
 
 type DB struct {
 	*gorm.DB
-	snowflakeNode *snowflake.Node
 }
 
 type Option func(*DB)
 
 func WithSnowflakeNode(node *snowflake.Node) Option {
 	return func(db *DB) {
-		db.snowflakeNode = node
+		db.DB = db.Set(snowflakeNodeKey, node)
 	}
 }
 
@@ -51,6 +50,19 @@ func Open(databaseURL string, opts ...Option) (*DB, error) {
 	return db, nil
 }
 
+const snowflakeNodeKey = "snowflake:node"
+
+func generateSnowflakeID(db *gorm.DB) (int64, error) {
+	node, ok := db.Get(snowflakeNodeKey)
+	if !ok {
+		return 0, fmt.Errorf("snowflake node not set")
+	}
+	if node, ok := node.(*snowflake.Node); ok {
+		return node.Generate().Int64(), nil
+	}
+	return 0, fmt.Errorf("snowflake node has wrong type")
+}
+
 func (db *DB) Begin(opts ...*sql.TxOptions) *DB {
 	return &DB{DB: db.DB.Begin(opts...)}
 }
@@ -71,14 +83,6 @@ func (db *DB) AutoMigrate() error {
 		&Segment{},
 		&User{},
 	)
-}
-
-func (db *DB) GenerateSnowflakeID() int64 {
-	if db.snowflakeNode == nil {
-		return 0
-	}
-
-	return db.snowflakeNode.Generate().Int64()
 }
 
 // Model is different from default gorm.Model, because we already have schema from Rails

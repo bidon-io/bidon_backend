@@ -2,7 +2,6 @@ package adminstore
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
 	"strconv"
 
@@ -57,12 +56,6 @@ type demandSourceAccountMapper struct {
 func (m demandSourceAccountMapper) dbModel(a *admin.DemandSourceAccountAttrs, id int64) *db.DemandSourceAccount {
 	extra, _ := json.Marshal(a.Extra)
 
-	publicUID := sql.NullInt64{}
-	if id == 0 {
-		publicUID.Int64 = m.db.GenerateSnowflakeID()
-		publicUID.Valid = true
-	}
-
 	return &db.DemandSourceAccount{
 		Model:          db.Model{ID: id},
 		DemandSourceID: a.DemandSourceID,
@@ -71,7 +64,6 @@ func (m demandSourceAccountMapper) dbModel(a *admin.DemandSourceAccountAttrs, id
 		Type:           a.Type,
 		Extra:          extra,
 		IsBidding:      a.IsBidding,
-		PublicUID:      publicUID,
 	}
 }
 
