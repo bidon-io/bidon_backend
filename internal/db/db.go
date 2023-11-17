@@ -43,8 +43,14 @@ func Open(databaseURL string, opts ...Option) (*DB, error) {
 
 	db := &DB{DB: gormDB}
 
-	for _, opt := range opts {
-		opt(db)
+	if len(opts) > 0 {
+		for _, opt := range opts {
+			opt(db)
+		}
+		// Mark as safe to share after applying options
+		// Calling Session() is important
+		// For more information refer to https://gorm.io/docs/method_chaining.html#New-Session-Method
+		db.DB = db.Session(&gorm.Session{})
 	}
 
 	return db, nil
