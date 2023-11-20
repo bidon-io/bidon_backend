@@ -182,21 +182,21 @@ type RequestEvent struct {
 }
 
 type Session struct {
-	ID                        string  `json:"id"`
-	LaunchTS                  int     `json:"launch_ts"`
-	LaunchMonotonicTS         int     `json:"launch_monotonic_ts"`
-	StartTS                   int     `json:"start_ts"`
-	StartMonotonicTS          int     `json:"start_monotonic_ts"`
-	TS                        int     `json:"ts"`
-	MonotonicTS               int     `json:"monotonic_ts"`
-	MemoryWarningsTS          []int   `json:"memory_warnings_ts"`
-	MemoryWarningsMonotonicTS []int   `json:"memory_warnings_monotonic_ts"`
-	RAMUsed                   int     `json:"ram_used"`
-	RAMSize                   int     `json:"ram_size"`
-	StorageFree               int     `json:"storage_free"`
-	StorageUsed               int     `json:"storage_used"`
-	Battery                   float64 `json:"battery"`
-	CPUUsage                  float64 `json:"cpu_usage"`
+	ID                        string   `json:"id"`
+	LaunchTS                  int      `json:"launch_ts"`
+	LaunchMonotonicTS         int      `json:"launch_monotonic_ts"`
+	StartTS                   int      `json:"start_ts"`
+	StartMonotonicTS          int      `json:"start_monotonic_ts"`
+	TS                        int      `json:"ts"`
+	MonotonicTS               int      `json:"monotonic_ts"`
+	MemoryWarningsTS          []int    `json:"memory_warnings_ts"`
+	MemoryWarningsMonotonicTS []int    `json:"memory_warnings_monotonic_ts"`
+	RAMUsed                   int      `json:"ram_used"`
+	RAMSize                   int      `json:"ram_size"`
+	StorageFree               int      `json:"storage_free"`
+	StorageUsed               int      `json:"storage_used"`
+	Battery                   float64  `json:"battery"`
+	CPUUsage                  *float64 `json:"cpu_usage"`
 }
 
 func (e RequestEvent) MarshalJSON() ([]byte, error) {
