@@ -49,15 +49,7 @@ func (h *StatsHandler) sendEvents(c echo.Context, req *request[schema.StatsReque
 	// 1 event for each demand in round
 	stats := req.raw.Stats
 
-	if req.auctionConfig == nil {
-		err := fmt.Errorf(
-			"no config found for app_id:%d, id: %d, uid: %s",
-			req.app.ID, stats.AuctionConfigurationID, stats.AuctionConfigurationUID,
-		)
-		logError(c, err)
-	}
-
-	auctionConfigurationUID, err := strconv.Atoi(stats.AuctionConfigurationUID)
+	auctionConfigurationUID, err := strconv.ParseInt(stats.AuctionConfigurationUID, 10, 64)
 	if err != nil {
 		auctionConfigurationUID = 0
 	}
@@ -78,7 +70,7 @@ func (h *StatsHandler) sendEvents(c echo.Context, req *request[schema.StatsReque
 		AdType:                  string(req.raw.AdType),
 		AuctionID:               stats.AuctionID,
 		AuctionConfigurationID:  stats.AuctionConfigurationID,
-		AuctionConfigurationUID: int64(auctionConfigurationUID),
+		AuctionConfigurationUID: auctionConfigurationUID,
 		Status:                  stats.Result.Status,
 		RoundID:                 stats.Result.RoundID,
 		RoundNumber:             statsRoundNumber,
@@ -86,7 +78,7 @@ func (h *StatsHandler) sendEvents(c echo.Context, req *request[schema.StatsReque
 		DemandID:                stats.Result.GetWinnerDemandID(),
 		AdUnitUID:               int64(stats.Result.GetWinnerAdUnitUID()),
 		AdUnitLabel:             stats.Result.WinnerAdUnitLabel,
-		Ecpm:                    stats.Result.GetWinnerPrice(),
+		ECPM:                    stats.Result.GetWinnerPrice(),
 		PriceFloor:              statsPriceFloor,
 		TimingMap:               event.TimingMap{"auction": {stats.Result.AuctionStartTS, stats.Result.AuctionFinishTS}},
 	}
@@ -101,14 +93,14 @@ func (h *StatsHandler) sendEvents(c echo.Context, req *request[schema.StatsReque
 			AdType:                  string(req.raw.AdType),
 			AuctionID:               stats.AuctionID,
 			AuctionConfigurationID:  stats.AuctionConfigurationID,
-			AuctionConfigurationUID: int64(auctionConfigurationUID),
+			AuctionConfigurationUID: auctionConfigurationUID,
 			RoundID:                 round.ID,
 			RoundNumber:             roundNumber,
 			ImpID:                   "",
 			DemandID:                round.GetWinnerDemandID(),
 			AdUnitUID:               int64(round.GetWinnerAdUnitUID()),
 			AdUnitLabel:             round.WinnerAdUnitLabel,
-			Ecpm:                    round.GetWinnerPrice(),
+			ECPM:                    round.GetWinnerPrice(),
 			PriceFloor:              round.PriceFloor,
 			TimingMap:               event.TimingMap{"auction": {stats.Result.AuctionStartTS, stats.Result.AuctionFinishTS}},
 		}
@@ -128,7 +120,7 @@ func (h *StatsHandler) sendEvents(c echo.Context, req *request[schema.StatsReque
 				AdType:                  string(req.raw.AdType),
 				AuctionID:               stats.AuctionID,
 				AuctionConfigurationID:  stats.AuctionConfigurationID,
-				AuctionConfigurationUID: int64(auctionConfigurationUID),
+				AuctionConfigurationUID: auctionConfigurationUID,
 				Status:                  demand.Status,
 				RoundID:                 round.ID,
 				RoundNumber:             roundNumber,
@@ -136,7 +128,7 @@ func (h *StatsHandler) sendEvents(c echo.Context, req *request[schema.StatsReque
 				DemandID:                demand.ID,
 				AdUnitUID:               int64(demand.GetAdUnitUID()),
 				AdUnitLabel:             demand.AdUnitLabel,
-				Ecpm:                    demand.GetPrice(),
+				ECPM:                    demand.GetPrice(),
 				PriceFloor:              round.PriceFloor,
 				Bidding:                 false,
 				TimingMap:               event.TimingMap{"fill": {demand.FillStartTS, demand.FillFinishTS}},
@@ -153,7 +145,7 @@ func (h *StatsHandler) sendEvents(c echo.Context, req *request[schema.StatsReque
 				AdType:                  string(req.raw.AdType),
 				AuctionID:               stats.AuctionID,
 				AuctionConfigurationID:  stats.AuctionConfigurationID,
-				AuctionConfigurationUID: int64(auctionConfigurationUID),
+				AuctionConfigurationUID: auctionConfigurationUID,
 				Status:                  bid.Status,
 				RoundID:                 round.ID,
 				RoundNumber:             roundNumber,
@@ -161,7 +153,7 @@ func (h *StatsHandler) sendEvents(c echo.Context, req *request[schema.StatsReque
 				DemandID:                bid.ID,
 				AdUnitUID:               int64(bid.GetAdUnitUID()),
 				AdUnitLabel:             bid.AdUnitLabel,
-				Ecpm:                    bid.GetPrice(),
+				ECPM:                    bid.GetPrice(),
 				PriceFloor:              round.PriceFloor,
 				Bidding:                 true,
 				TimingMap: event.TimingMap{

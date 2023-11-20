@@ -2,10 +2,7 @@ package event
 
 import (
 	"encoding/json"
-	"fmt"
-	"slices"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/bidon-io/bidon-backend/config"
@@ -17,44 +14,7 @@ type TimingMap map[string][2]int64
 
 type Event interface {
 	Topic() config.Topic
-	Children() []Event
 	json.Marshaler
-}
-
-func NewConfig(request *schema.ConfigRequest, geoData geocoder.GeoData) Event {
-	return &simpleEvent[*schema.ConfigRequest]{
-		timestamp: generateTimestamp(),
-		topic:     config.ConfigTopic,
-		request:   request,
-		geoData:   geoData,
-	}
-}
-
-func NewShow(request *schema.ShowRequest, geoData geocoder.GeoData) Event {
-	return &simpleEvent[*schema.ShowRequest]{
-		timestamp: generateTimestamp(),
-		topic:     config.ShowTopic,
-		request:   request,
-		geoData:   geoData,
-	}
-}
-
-func NewClick(request *schema.ClickRequest, geoData geocoder.GeoData) Event {
-	return &simpleEvent[*schema.ClickRequest]{
-		timestamp: generateTimestamp(),
-		topic:     config.ClickTopic,
-		request:   request,
-		geoData:   geoData,
-	}
-}
-
-func NewReward(request *schema.RewardRequest, geoData geocoder.GeoData) Event {
-	return &simpleEvent[*schema.RewardRequest]{
-		timestamp: generateTimestamp(),
-		topic:     config.RewardTopic,
-		request:   request,
-		geoData:   geoData,
-	}
 }
 
 func NewRequest(request *schema.BaseRequest, adRequestParams AdRequestParams, geoData geocoder.GeoData) RequestEvent {
@@ -73,32 +33,20 @@ func NewRequest(request *schema.BaseRequest, adRequestParams AdRequestParams, ge
 	requestEvent.Bidding = adRequestParams.Bidding
 	requestEvent.AdUnitUID = adRequestParams.AdUnitUID
 	requestEvent.AdUnitLabel = adRequestParams.AdUnitLabel
-	requestEvent.Ecpm = adRequestParams.Ecpm
+	requestEvent.ECPM = adRequestParams.ECPM
 	requestEvent.PriceFloor = adRequestParams.PriceFloor
 	requestEvent.RawRequest = adRequestParams.RawRequest
 	requestEvent.RawResponse = adRequestParams.RawResponse
 	requestEvent.Error = adRequestParams.Error
-	requestEvent.TimingMap = adRequestParams.TimingMap
+	if adRequestParams.TimingMap == nil {
+		requestEvent.TimingMap = make(TimingMap)
+	} else {
+		requestEvent.TimingMap = adRequestParams.TimingMap
+	}
+	requestEvent.ExternalWinnerDemandID = adRequestParams.ExternalWinnerDemandID
+	requestEvent.ExternalWinnerEcpm = adRequestParams.ExternalWinnerEcpm
 
 	return requestEvent
-}
-
-func NewLoss(request *schema.LossRequest, geoData geocoder.GeoData) Event {
-	return &simpleEvent[*schema.LossRequest]{
-		timestamp: generateTimestamp(),
-		topic:     config.LossTopic,
-		request:   request,
-		geoData:   geoData,
-	}
-}
-
-func NewWin(request *schema.WinRequest, geoData geocoder.GeoData) Event {
-	return &simpleEvent[*schema.WinRequest]{
-		timestamp: generateTimestamp(),
-		topic:     config.WinTopic,
-		request:   request,
-		geoData:   geoData,
-	}
 }
 
 func newBaseRequest(request *schema.BaseRequest, geoData geocoder.GeoData) RequestEvent {
@@ -156,34 +104,6 @@ func newBaseRequest(request *schema.BaseRequest, geoData geocoder.GeoData) Reque
 	}
 }
 
-type simpleEvent[T mapper] struct {
-	timestamp float64
-	topic     config.Topic
-	request   T
-	geoData   geocoder.GeoData
-}
-
-func (e *simpleEvent[T]) MarshalJSON() ([]byte, error) {
-	payload, err := e.Payload()
-	if err != nil {
-		return nil, err
-	}
-
-	return json.Marshal(payload)
-}
-
-func (e *simpleEvent[T]) Topic() config.Topic {
-	return e.topic
-}
-
-func (e *simpleEvent[T]) Payload() (map[string]any, error) {
-	return prepareEventPayload(e.timestamp, e.request, e.geoData)
-}
-
-func (e *simpleEvent[T]) Children() []Event {
-	return nil
-}
-
 type AdRequestParams struct {
 	EventType               string
 	AdType                  string
@@ -198,12 +118,14 @@ type AdRequestParams struct {
 	Bidding                 bool
 	AdUnitUID               int64
 	AdUnitLabel             string
-	Ecpm                    float64
+	ECPM                    float64
 	PriceFloor              float64
 	RawRequest              string
 	RawResponse             string
 	Error                   string
 	TimingMap               TimingMap
+	ExternalWinnerDemandID  string
+	ExternalWinnerEcpm      float64
 }
 
 type RequestEvent struct {
@@ -221,12 +143,14 @@ type RequestEvent struct {
 	Bidding                     bool      `json:"bidding"`
 	AdUnitUID                   int64     `json:"ad_unit_uid"`
 	AdUnitLabel                 string    `json:"ad_unit_label"`
-	Ecpm                        float64   `json:"ecpm"`
+	ECPM                        float64   `json:"ecpm"`
 	PriceFloor                  float64   `json:"price_floor"`
 	RawRequest                  string    `json:"raw_request"`
 	RawResponse                 string    `json:"raw_response"`
 	Error                       string    `json:"error"`
 	TimingMap                   TimingMap `json:"timing_map"`
+	ExternalWinnerDemandID      string    `json:"external_winner_demand_id"`
+	ExternalWinnerEcpm          float64   `json:"external_winner_ecpm"`
 	Manufacturer                string    `json:"manufacturer"`
 	Model                       string    `json:"model"`
 	Os                          string    `json:"os"`
@@ -275,103 +199,15 @@ type Session struct {
 	CPUUsage                  float64 `json:"cpu_usage"`
 }
 
-func (b RequestEvent) MarshalJSON() ([]byte, error) {
+func (e RequestEvent) MarshalJSON() ([]byte, error) {
 	type Alias RequestEvent
-	return json.Marshal((Alias)(b))
+	return json.Marshal((Alias)(e))
 }
 
-func (b RequestEvent) Topic() config.Topic {
+func (e RequestEvent) Topic() config.Topic {
 	return config.AdEventsTopic
-}
-
-func (b RequestEvent) Children() []Event {
-	return nil
 }
 
 func generateTimestamp() float64 {
 	return float64(time.Now().UnixNano()) / 1e9
-}
-
-type mapper interface {
-	Map() map[string]any
-}
-
-func prepareEventPayload(timestamp float64, requestMapper mapper, geoData geocoder.GeoData) (map[string]any, error) {
-	requestMap := requestMapper.Map()
-
-	requestMap["timestamp"] = timestamp
-
-	geo, _ := requestMap["geo"].(map[string]any)
-	requestMap["geo"] = enhanceEventGeo(geo, geoData)
-
-	ext, _ := requestMap["ext"].(string)
-	eventExt, err := unmarshalEventExt(ext)
-	requestMap["ext"] = eventExt
-
-	if _, showPresent := requestMap["show"]; !showPresent {
-		if bid, bidPresent := requestMap["bid"]; bidPresent {
-			requestMap["show"] = bid
-		}
-	}
-
-	return smashMap(requestMap, nil), err
-}
-
-func enhanceEventGeo(geo map[string]any, geoData geocoder.GeoData) map[string]any {
-	if geo == nil {
-		geo = make(map[string]any)
-	}
-
-	if geoData != (geocoder.GeoData{}) {
-		geo["ip"] = geoData.IPString
-		geo["country"] = geoData.CountryCode
-		geo["country_id"] = geoData.CountryID
-	}
-
-	return geo
-}
-
-func unmarshalEventExt(ext string) (map[string]any, error) {
-	result := make(map[string]any)
-
-	if ext == "" {
-		return result, nil
-	}
-
-	err := json.Unmarshal([]byte(ext), &result)
-	if err != nil {
-		return result, fmt.Errorf("unmarshal ext: %v", err)
-	}
-
-	return result, nil
-}
-
-func smashMap(src, dst map[string]any, nesting ...string) map[string]any {
-	if dst == nil {
-		dst = make(map[string]any)
-	}
-	prefix := strings.Join(nesting, "__")
-
-	for key, value := range src {
-		switch mapValue := value.(type) {
-		case map[string]any:
-			n := slices.Clone(nesting)
-			n = append(n, key)
-			smashMap(mapValue, dst, n...)
-		case []map[string]any:
-			for i, v := range mapValue {
-				n := slices.Clone(nesting)
-				n = append(n, fmt.Sprintf("%s__%d", key, i))
-				smashMap(v, dst, n...)
-			}
-		default:
-			if prefix != "" {
-				dst[fmt.Sprintf("%s__%s", prefix, key)] = value
-			} else {
-				dst[key] = value
-			}
-		}
-	}
-
-	return dst
 }

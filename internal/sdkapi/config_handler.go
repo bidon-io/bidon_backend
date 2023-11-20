@@ -59,10 +59,7 @@ func (h *ConfigHandler) Handle(c echo.Context) error {
 	req.raw.Segment.ID = sgmnt.StringID()
 	req.raw.Segment.UID = sgmnt.UID
 
-	configEvent := event.NewConfig(&req.raw, req.geoData)
-	h.EventLogger.Log(configEvent, func(err error) {
-		logError(c, fmt.Errorf("log config event: %v", err))
-	})
+	h.sendEvents(c, req)
 
 	sdkVersion, err := req.raw.GetSDKVersionSemver()
 	if err != nil {
@@ -93,6 +90,16 @@ func (h *ConfigHandler) Handle(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, resp)
+}
+
+func (h *ConfigHandler) sendEvents(c echo.Context, req *request[schema.ConfigRequest, *schema.ConfigRequest]) {
+	adRequestParams := event.AdRequestParams{
+		EventType: "config",
+	}
+	configRequestEvent := event.NewRequest(&req.raw.BaseRequest, adRequestParams, req.geoData)
+	h.EventLogger.Log(configRequestEvent, func(err error) {
+		logError(c, fmt.Errorf("log config event: %v", err))
+	})
 }
 
 type AdapterInitConfig interface {
