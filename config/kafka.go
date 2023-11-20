@@ -13,14 +13,7 @@ import (
 type Topic string
 
 const (
-	ConfigTopic   Topic = "config"
-	ShowTopic     Topic = "show"
-	ClickTopic    Topic = "click"
-	RewardTopic   Topic = "reward"
-	StatsTopic    Topic = "stats"
 	AdEventsTopic Topic = "ad_events"
-	LossTopic     Topic = "loss"
-	WinTopic      Topic = "win"
 )
 
 type KafkaConfig struct {
@@ -59,13 +52,6 @@ func Kafka() (conf KafkaConfig, err error) {
 	}
 
 	conf.Topics = map[Topic]string{
-		ConfigTopic:   os.Getenv("KAFKA_CONFIG_TOPIC"),
-		ShowTopic:     os.Getenv("KAFKA_SHOW_TOPIC"),
-		ClickTopic:    os.Getenv("KAFKA_CLICK_TOPIC"),
-		RewardTopic:   os.Getenv("KAFKA_REWARD_TOPIC"),
-		StatsTopic:    os.Getenv("KAFKA_STATS_TOPIC"),
-		LossTopic:     os.Getenv("KAFKA_LOSS_TOPIC"),
-		WinTopic:      os.Getenv("KAFKA_WIN_TOPIC"),
 		AdEventsTopic: os.Getenv("KAFKA_AD_EVENTS_TOPIC"),
 	}
 
