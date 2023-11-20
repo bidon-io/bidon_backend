@@ -67,7 +67,7 @@ func (m *AdUnitsMatcher) find(query *gorm.DB) ([]auction.AdUnit, error) {
 		adUnits[i].DemandID = dbLineItem.Account.DemandSource.APIKey
 		adUnits[i].UID = strconv.FormatInt(dbLineItem.PublicUID.Int64, 10)
 		adUnits[i].Label = dbLineItem.HumanName
-		if dbLineItem.IsBidding != nil && *dbLineItem.IsBidding {
+		if dbLineItem.IsBidding.Valid && dbLineItem.IsBidding.Bool {
 			adUnits[i].BidType = schema.RTBBidType
 		} else {
 			adUnits[i].BidType = schema.CPMBidType

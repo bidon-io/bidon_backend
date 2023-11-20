@@ -66,6 +66,12 @@ func (m lineItemMapper) dbModel(i *admin.LineItemAttrs, id int64) *db.LineItem {
 		format.Valid = true
 	}
 
+	var isBidding sql.NullBool
+	if i.IsBidding != nil {
+		isBidding.Bool = *i.IsBidding
+		isBidding.Valid = true
+	}
+
 	// TODO: remove this hack
 	// sets code to one of the following values: ad_unit_id, zone_id, placement_id, slot_id, slot_uuid
 	if i.Code == nil {
@@ -80,7 +86,7 @@ func (m lineItemMapper) dbModel(i *admin.LineItemAttrs, id int64) *db.LineItem {
 	}
 
 	return &db.LineItem{
-		Model:       db.Model{ID: id},
+		ID:          id,
 		AppID:       i.AppID,
 		AccountType: i.AccountType,
 		AccountID:   i.AccountID,
@@ -90,7 +96,7 @@ func (m lineItemMapper) dbModel(i *admin.LineItemAttrs, id int64) *db.LineItem {
 		AdType:      db.AdTypeFromDomain(i.AdType),
 		Extra:       i.Extra,
 		Format:      format,
-		IsBidding:   i.IsBidding,
+		IsBidding:   isBidding,
 	}
 }
 
@@ -122,7 +128,7 @@ func (m lineItemMapper) resourceAttrs(i *db.LineItem) admin.LineItemAttrs {
 		AccountID:   i.AccountID,
 		AccountType: i.AccountType,
 		Code:        i.Code,
-		IsBidding:   i.IsBidding,
+		IsBidding:   &i.IsBidding.Bool,
 		Extra:       i.Extra,
 	}
 }

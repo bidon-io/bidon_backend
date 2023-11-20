@@ -3,7 +3,7 @@ package config
 import "go.uber.org/zap"
 
 func NewLogger() (*zap.Logger, error) {
-	if Env == ProdEnv {
+	if GetEnv() == ProdEnv {
 		return zap.NewProduction()
 	}
 

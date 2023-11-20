@@ -56,7 +56,7 @@ func (m auctionConfigurationMapper) dbModel(c *admin.AuctionConfigurationAttrs, 
 	}
 
 	return &db.AuctionConfiguration{
-		Model:                    db.Model{ID: id},
+		ID:                       id,
 		Name:                     name,
 		AppID:                    c.AppID,
 		AdType:                   db.AdTypeFromDomain(c.AdType),

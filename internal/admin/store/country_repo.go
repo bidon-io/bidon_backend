@@ -28,7 +28,7 @@ func (m countryMapper) dbModel(a *admin.CountryAttrs, id int64) *db.Country {
 	}
 
 	return &db.Country{
-		Model:      db.Model{ID: id},
+		ID:         id,
 		Alpha2Code: a.Alpha2Code,
 		Alpha3Code: a.Alpha3Code,
 		HumanName:  humanName,

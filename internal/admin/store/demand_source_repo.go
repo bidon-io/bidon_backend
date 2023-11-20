@@ -20,7 +20,7 @@ type demandSourceMapper struct{}
 //lint:ignore U1000 this method is used by generic struct
 func (m demandSourceMapper) dbModel(s *admin.DemandSourceAttrs, id int64) *db.DemandSource {
 	return &db.DemandSource{
-		Model:     db.Model{ID: id},
+		ID:        id,
 		APIKey:    s.ApiKey,
 		HumanName: s.HumanName,
 	}

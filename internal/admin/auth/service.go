@@ -32,7 +32,7 @@ func NewAuthService(userRepo UserRepo, config Config) *Service {
 	sm := scs.New()
 
 	sm.Lifetime = 72 * time.Hour
-	sm.Cookie.Secure = appconfig.Env == appconfig.ProdEnv
+	sm.Cookie.Secure = appconfig.GetEnv() == appconfig.ProdEnv
 	if config.SessionStore != nil {
 		sm.Store = config.SessionStore
 	}

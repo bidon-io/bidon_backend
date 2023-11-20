@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/labstack/echo-contrib/echoprometheus"
 	"io/fs"
 	"log"
 	"net/http"
@@ -22,6 +21,7 @@ import (
 	"github.com/bwmarrin/snowflake"
 	"github.com/getsentry/sentry-go"
 	_ "github.com/joho/godotenv/autoload"
+	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/redis/go-redis/v9"
@@ -68,7 +68,7 @@ func main() {
 		SuperUserPassword: []byte(os.Getenv("SUPERUSER_PASSWORD")),
 	}
 
-	if config.Env == config.ProdEnv {
+	if config.GetEnv() == config.ProdEnv {
 		redisURL := os.Getenv("REDIS_URL")
 		opts, err := redis.ParseURL(redisURL)
 		if err != nil {

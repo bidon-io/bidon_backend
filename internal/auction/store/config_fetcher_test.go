@@ -41,7 +41,7 @@ func TestConfigFetcher_Match(t *testing.T) {
 			AppID:     apps[2].ID,
 			PublicUID: sql.NullInt64{Int64: 3333333333333333333, Valid: true},
 			AdType:    db.InterstitialAdType,
-			Model:     db.Model{CreatedAt: time.Now()},
+			CreatedAt: time.Now(),
 		},
 	}
 	if err := tx.Create(&configs).Error; err != nil {
@@ -123,7 +123,7 @@ func TestConfigFetcher_FetchByUID(t *testing.T) {
 			AppID:     apps[2].ID,
 			PublicUID: sql.NullInt64{Int64: 3333333333333333333, Valid: true},
 			AdType:    db.InterstitialAdType,
-			Model:     db.Model{CreatedAt: time.Now()},
+			CreatedAt: time.Now(),
 		},
 	}
 	if err := tx.Create(&configs).Error; err != nil {
@@ -206,7 +206,7 @@ func TestConfigFetcher_FetchByUIDCached(t *testing.T) {
 			AppID:     apps[2].ID,
 			PublicUID: sql.NullInt64{Int64: 3333333333333333333, Valid: true},
 			AdType:    db.InterstitialAdType,
-			Model:     db.Model{CreatedAt: time.Now()},
+			CreatedAt: time.Now(),
 		},
 	}
 	if err := tx.Create(&configs).Error; err != nil {

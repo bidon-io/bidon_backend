@@ -1,19 +1,41 @@
 // Package config provides configuration for different parts of Bidon services, that is shared between them
 package config
 
-import "os"
+import (
+	"log"
+	"os"
 
-var Env = getEnv()
-
-const (
-	ProdEnv = "production"
-	DevEnv  = "development"
+	"github.com/joho/godotenv"
 )
 
-func getEnv() string {
-	if os.Getenv("ENVIRONMENT") == ProdEnv {
-		return ProdEnv
-	}
+const (
+	ProdEnv    = "production"
+	DevEnv     = "development"
+	TestEnv    = "test"
+	UnknownEnv = ""
+)
 
-	return DevEnv
+func GetEnv() string {
+	switch env := os.Getenv("ENVIRONMENT"); env {
+	case ProdEnv:
+		return ProdEnv
+	case TestEnv:
+		return TestEnv
+	case DevEnv:
+		return DevEnv
+	default:
+		return UnknownEnv
+	}
+}
+
+func LoadEnvFile() {
+	var err error
+	if GetEnv() == TestEnv {
+		err = godotenv.Load(".env.test")
+	} else {
+		err = godotenv.Load()
+	}
+	if err != nil {
+		log.Printf("Did not load .env file: %v", err)
+	}
 }

@@ -121,7 +121,10 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 			HumanName: "bidmachine-interstitial",
 			Code:      ptr("bidmachine-interstitial"),
 			AccountID: bidmachineAccount.ID,
-			IsBidding: ptr(true),
+			IsBidding: sql.NullBool{
+				Bool:  true,
+				Valid: true,
+			},
 			PublicUID: sql.NullInt64{
 				Int64: 1701972528521547780,
 				Valid: true,
