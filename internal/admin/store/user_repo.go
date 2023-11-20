@@ -56,9 +56,9 @@ type userMapper struct {
 //lint:ignore U1000 this method is used by generic struct
 func (m userMapper) dbModel(u *admin.UserAttrs, id int64) *db.User {
 	du := &db.User{
-		Model:     db.Model{ID: id},
-		Email:     u.Email,
-		IsAdmin:   u.IsAdmin,
+		ID:      id,
+		Email:   u.Email,
+		IsAdmin: u.IsAdmin,
 	}
 
 	if u.Password != "" {

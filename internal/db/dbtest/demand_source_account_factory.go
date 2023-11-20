@@ -24,8 +24,11 @@ func demandSourceAccountDefaults(n uint64) func(*db.DemandSourceAccount) {
 				*user = account.User
 			})
 		}
-		if account.Label == "" {
-			account.Label = fmt.Sprintf("Test Account %d", n)
+		if account.Label == (sql.NullString{}) {
+			account.Label = sql.NullString{
+				String: fmt.Sprintf("Test Account %d", n),
+				Valid:  true,
+			}
 		}
 		if account.Type == "" {
 			account.Type = fmt.Sprintf("DemandSourceAccount::%s", account.DemandSource.APIKey)
@@ -33,8 +36,11 @@ func demandSourceAccountDefaults(n uint64) func(*db.DemandSourceAccount) {
 		if account.Extra == nil {
 			account.Extra = []byte(`{"foo": "bar"}`)
 		}
-		if account.IsBidding == nil {
-			account.IsBidding = new(bool)
+		if account.IsBidding == (sql.NullBool{}) {
+			account.IsBidding = sql.NullBool{
+				Bool:  false,
+				Valid: true,
+			}
 		}
 		if account.IsDefault == (sql.NullBool{}) {
 			account.IsDefault = sql.NullBool{

@@ -47,7 +47,7 @@ func (m appDemandProfileMapper) dbModel(attrs *admin.AppDemandProfileAttrs, id i
 	data, _ := json.Marshal(attrs.Data)
 
 	return &db.AppDemandProfile{
-		Model:          db.Model{ID: id},
+		ID:             id,
 		AppID:          attrs.AppID,
 		AccountType:    attrs.AccountType,
 		AccountID:      attrs.AccountID,
