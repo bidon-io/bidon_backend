@@ -26,12 +26,7 @@ x-bidon-environment: &bidon-environment
   KAFKA_DELIVERY_THRESHOLD: 100
   KAFKA_DELIVERY_INTERVAL: 30
   KAFKA_REGISTRY_URL: http://schema-registry:8081
-  KAFKA_CLICK_TOPIC: click
-  KAFKA_REWARD_TOPIC: reward
-  KAFKA_SHOW_TOPIC: show
-  KAFKA_STATS_TOPIC: stats
-  KAFKA_LOSS_TOPIC: loss
-  KAFKA_CONFIG_TOPIC: bidon-config
+  KAFKA_AD_EVENTS_TOPIC: ad-events
   MAXMIND_GEOIP_FILE_PATH: /app/public/system/GeoLite2-City.mmdb
   SYPEX_GEOIP_FILE_PATH: /app/public/system/SxGeoCity.dat
 

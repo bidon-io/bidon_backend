@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
@@ -28,10 +29,38 @@ func (h *WinHandler) Handle(c echo.Context) error {
 		return err
 	}
 
-	winEvent := event.NewWin(&req.raw, req.geoData)
-	h.EventLogger.Log(winEvent, func(err error) {
-		logError(c, fmt.Errorf("log win event: %v", err))
-	})
+	h.sendEvents(c, req)
 
 	return c.JSON(http.StatusOK, map[string]any{"success": true})
+}
+
+func (h *WinHandler) sendEvents(c echo.Context, req *request[schema.WinRequest, *schema.WinRequest]) {
+	bid := req.raw.Bid
+
+	auctionConfigurationUID, err := strconv.ParseInt(bid.AuctionConfigurationUID, 10, 64)
+	if err != nil {
+		auctionConfigurationUID = 0
+	}
+
+	adRequestParams := event.AdRequestParams{
+		EventType:               "win",
+		AdType:                  string(req.raw.AdType),
+		AuctionID:               bid.AuctionID,
+		AuctionConfigurationID:  bid.AuctionConfigurationID,
+		AuctionConfigurationUID: auctionConfigurationUID,
+		Status:                  "",
+		RoundID:                 bid.RoundID,
+		RoundNumber:             bid.RoundIndex,
+		ImpID:                   bid.ImpID,
+		DemandID:                bid.DemandID,
+		AdUnitUID:               int64(bid.GetAdUnitUID()),
+		AdUnitLabel:             bid.AdUnitLabel,
+		ECPM:                    bid.GetPrice(),
+		PriceFloor:              bid.AuctionPriceFloor,
+		Bidding:                 bid.IsBidding(),
+	}
+	demandRequestEvent := event.NewRequest(&req.raw.BaseRequest, adRequestParams, req.geoData)
+	h.EventLogger.Log(demandRequestEvent, func(err error) {
+		logError(c, fmt.Errorf("log win event: %v", err))
+	})
 }
