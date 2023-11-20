@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_09_25_131907) do
+ActiveRecord::Schema[7.0].define(version: 2023_11_20_143101) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -87,6 +87,12 @@ ActiveRecord::Schema[7.0].define(version: 2023_09_25_131907) do
     t.index ["app_id"], name: "index_auction_configurations_on_app_id"
     t.index ["public_uid"], name: "index_auction_configurations_on_public_uid", unique: true
     t.index ["segment_id"], name: "index_auction_configurations_on_segment_id"
+  end
+
+  create_table "bidon_migrations", id: :serial, force: :cascade do |t|
+    t.bigint "version_id", null: false
+    t.boolean "is_applied", null: false
+    t.datetime "tstamp", precision: nil, default: -> { "now()" }
   end
 
   create_table "countries", force: :cascade do |t|
