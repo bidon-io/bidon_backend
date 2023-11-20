@@ -57,7 +57,7 @@ func (m appMapper) dbModel(a *admin.AppAttrs, id int64) *db.App {
 	}
 
 	return &db.App{
-		Model:       db.Model{ID: id},
+		ID:          id,
 		UserID:      a.UserID,
 		PlatformID:  dbPlatformID(a.PlatformID),
 		HumanName:   a.HumanName,

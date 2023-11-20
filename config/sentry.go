@@ -13,15 +13,16 @@ type SentryConfig struct {
 }
 
 func Sentry() SentryConfig {
+	env := GetEnv()
 	return SentryConfig{
 		ClientOptions: sentry.ClientOptions{
 			Dsn:              os.Getenv("SENTRY_DSN"),
-			Debug:            Env != ProdEnv,
+			Debug:            env != ProdEnv,
 			AttachStacktrace: true,
 			EnableTracing:    true,
 			TracesSampleRate: 1.0,
 			SendDefaultPII:   true,
-			Environment:      Env,
+			Environment:      env,
 		},
 		FlushTimeout: 2 * time.Second,
 	}
