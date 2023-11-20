@@ -105,7 +105,7 @@ func (b *AdaptersConfigBuilder) Build(ctx context.Context, appID int64, adapterK
 			adapters[key]["seller_id"] = extra["publisher_id"]
 
 			if adUnits, ok := (*adUnitsMap)[key]; ok {
-				adapters[key]["tag_id"] = adUnits[0].Extra["ad_unit_id"]
+				adapters[key]["tag_id"] = adUnits[0].Extra["unit_id"]
 				adapters[key]["placement_id"] = adUnits[0].Extra["placement_id"]
 			}
 		case adapter.VungleKey:
