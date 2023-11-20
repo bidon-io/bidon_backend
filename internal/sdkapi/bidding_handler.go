@@ -273,7 +273,7 @@ func (h *BiddingHandler) sendEvents(
 			DemandID:                string(result.DemandID),
 			AdUnitUID:               adUnitUID,
 			AdUnitLabel:             adUnitLabel,
-			Ecpm:                    result.Price(),
+			ECPM:                    result.Price(),
 			PriceFloor:              imp.GetBidFloor(),
 			Bidding:                 true,
 			RawRequest:              result.RawRequest,
@@ -301,7 +301,7 @@ func (h *BiddingHandler) sendEvents(
 				DemandID:                string(result.DemandID),
 				AdUnitUID:               adUnitUID,
 				AdUnitLabel:             adUnitLabel,
-				Ecpm:                    result.Bid.Price,
+				ECPM:                    result.Bid.Price,
 				PriceFloor:              imp.GetBidFloor(),
 				Bidding:                 true,
 				TimingMap: event.TimingMap{
