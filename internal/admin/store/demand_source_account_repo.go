@@ -2,6 +2,7 @@ package adminstore
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"strconv"
 
@@ -56,14 +57,26 @@ type demandSourceAccountMapper struct {
 func (m demandSourceAccountMapper) dbModel(a *admin.DemandSourceAccountAttrs, id int64) *db.DemandSourceAccount {
 	extra, _ := json.Marshal(a.Extra)
 
+	var label sql.NullString
+	if a.Label != "" {
+		label.String = a.Label
+		label.Valid = true
+	}
+
+	var isBidding sql.NullBool
+	if a.IsBidding != nil {
+		isBidding.Bool = *a.IsBidding
+		isBidding.Valid = true
+	}
+
 	return &db.DemandSourceAccount{
-		Model:          db.Model{ID: id},
+		ID:             id,
 		DemandSourceID: a.DemandSourceID,
-		Label:          a.Label,
+		Label:          label,
 		UserID:         a.UserID,
 		Type:           a.Type,
 		Extra:          extra,
-		IsBidding:      a.IsBidding,
+		IsBidding:      isBidding,
 	}
 }
 
@@ -87,10 +100,10 @@ func (m demandSourceAccountMapper) resourceAttrs(a *db.DemandSourceAccount) admi
 
 	return admin.DemandSourceAccountAttrs{
 		UserID:         a.UserID,
-		Label:          a.Label,
+		Label:          a.Label.String,
 		Type:           a.Type,
 		DemandSourceID: a.DemandSourceID,
-		IsBidding:      a.IsBidding,
+		IsBidding:      &a.IsBidding.Bool,
 		Extra:          extra,
 	}
 }

@@ -9,8 +9,9 @@ import (
 	"os"
 
 	_ "github.com/bidon-io/bidon-backend/cmd/bidon-migrate/migrations"
+	"github.com/bidon-io/bidon-backend/config"
+	"github.com/bidon-io/bidon-backend/internal/db/gen"
 	_ "github.com/jackc/pgx/v5/stdlib"
-	_ "github.com/joho/godotenv/autoload"
 	"github.com/pressly/goose/v3"
 )
 
@@ -25,6 +26,7 @@ Options:
 	usageCommands = `
 Commands:
     create NAME [go|sql] Creates new migration file with the current timestamp
+	generate-models	     Generates models from the DB schema
     up                   Migrate the DB to the most recent version available
     up-by-one            Migrate the DB up by 1
     up-to VERSION        Migrate the DB to a specific VERSION
@@ -60,10 +62,13 @@ func main() {
 		return
 	}
 
+	config.LoadEnvFile()
+
 	if *verbose {
 		goose.SetVerbose(true)
 	}
 
+	// Handle commands that do not need DB connection
 	switch args[0] {
 	case "create":
 		if err := goose.Run(args[0], nil, migrationsDir, args[1:]...); err != nil {
@@ -86,6 +91,13 @@ func main() {
 		}
 	}()
 
+	// Handle custom commands that need DB connection
+	switch args[0] {
+	case "generate-models":
+		gen.GenerateModels(db)
+		return
+	}
+
 	goose.SetBaseFS(sqlMigrations)
 	goose.SetTableName(tableName)
 
@@ -98,5 +110,9 @@ func main() {
 	)
 	if err != nil {
 		log.Fatal(err)
+	}
+	// Generate models after migration tasks in dev environment
+	if config.GetEnv() == config.DevEnv {
+		gen.GenerateModels(db)
 	}
 }
