@@ -63,6 +63,15 @@ func main() {
 	}
 
 	config.LoadEnvFile()
+	if config.GetEnv() == config.UnknownEnv {
+		log.Fatal("ENVIRONMENT is required")
+	}
+
+	if config.GetEnv() == config.ProdEnv && os.Getenv("IKNOWWHATIAMDOING") != "yes" {
+		if args[0] != "status" && args[0] != "version" && args[0] != "up" {
+			log.Fatal("only 'status', 'version' and 'up' commands are allowed in production environment. Use 'IKNOWWHATIAMDOING=yes' to override.")
+		}
+	}
 
 	if *verbose {
 		goose.SetVerbose(true)
