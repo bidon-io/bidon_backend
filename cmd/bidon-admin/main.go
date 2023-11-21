@@ -97,15 +97,21 @@ func main() {
 	e.GET("/redoc/*", echo.WrapHandler(http.StripPrefix("/redoc/", redocWebServer)))
 
 	uiFileSystem, _ := fs.Sub(web.FS, "ui")
-	uiWebServer := http.FileServer(http.FS(uiFileSystem))
-	e.GET("/*", func(c echo.Context) error {
-		_, err := uiFileSystem.Open(strings.TrimPrefix(c.Request().URL.Path, "/"))
-		if err != nil {
-			c.Request().URL.Path = "/"
-		}
-		echo.WrapHandler(uiWebServer)(c)
+	uiWebServer := echo.WrapHandler(http.FileServer(http.FS(uiFileSystem)))
+	e.GET("/*", uiWebServer, func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			file, err := uiFileSystem.Open(strings.TrimPrefix(c.Request().URL.Path, "/"))
+			if err != nil {
+				c.Request().URL.Path = "/"
+				return next(c)
+			}
+			err = file.Close()
+			if err != nil {
+				c.Logger().Warnf("Web server file.Close(): %v", err)
+			}
 
-		return nil
+			return next(c)
+		}
 	})
 
 	port := os.Getenv("PORT")
