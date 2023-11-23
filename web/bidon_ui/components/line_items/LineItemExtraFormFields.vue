@@ -18,11 +18,7 @@
     <VeeFormFieldWrapper field="extra.slotId" label="Slot Id" required />
   </template>
   <template v-if="apiKey === 'dtexchange'">
-    <VeeFormFieldWrapper
-      field="extra.placementId"
-      label="Placement Id"
-      required
-    />
+    <VeeFormFieldWrapper field="extra.spotId" label="Spot Id" required />
   </template>
   <template v-if="apiKey === 'inmobi'">
     <VeeFormFieldWrapper
@@ -110,7 +106,7 @@ const dataSchemas = {
     slotId: yup.string().required().label("Slot Id"),
   }),
   dtexchange: yup.object({
-    placementId: yup.string().required().label("Placement Id"),
+    spotId: yup.string().required().label("Spot Id"),
   }),
   inmobi: yup.object({
     placementId: yup.string().required().label("Placement Id"),

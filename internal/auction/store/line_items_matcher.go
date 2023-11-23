@@ -68,19 +68,29 @@ func (m *LineItemsMatcher) find(query *gorm.DB) ([]auction.LineItem, error) {
 		lineItems[i].PriceFloor = dbLineItem.BidFloor.Decimal.InexactFloat64()
 		lineItems[i].AdUnitID = *dbLineItem.Code
 
-		adUnitId, ok := dbLineItem.Extra["ad_unit_id"].(string)
+		adUnitID, ok := dbLineItem.Extra["ad_unit_id"].(string)
 		if ok {
-			lineItems[i].AdUnitID = adUnitId
+			lineItems[i].AdUnitID = adUnitID
 		}
 
-		placementId, ok := dbLineItem.Extra["placement_id"].(string)
+		unitID, ok := dbLineItem.Extra["unit_id"].(string)
 		if ok {
-			lineItems[i].PlacementID = placementId
+			lineItems[i].AdUnitID = unitID
 		}
 
-		zoneId, ok := dbLineItem.Extra["zone_id"].(string)
+		placementID, ok := dbLineItem.Extra["placement_id"].(string)
 		if ok {
-			lineItems[i].ZonedID = zoneId
+			lineItems[i].PlacementID = placementID
+		}
+
+		spotID, ok := dbLineItem.Extra["spot_id"].(string)
+		if ok {
+			lineItems[i].PlacementID = spotID
+		}
+
+		zoneID, ok := dbLineItem.Extra["zone_id"].(string)
+		if ok {
+			lineItems[i].ZonedID = zoneID
 		}
 
 		slotUUID, ok := dbLineItem.Extra["slot_uuid"].(string)

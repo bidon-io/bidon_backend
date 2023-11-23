@@ -75,7 +75,7 @@ func (m lineItemMapper) dbModel(i *admin.LineItemAttrs, id int64) *db.LineItem {
 	// TODO: remove this hack
 	// sets code to one of the following values: ad_unit_id, zone_id, placement_id, slot_id, slot_uuid
 	if i.Code == nil {
-		keysToCheck := []string{"zone_id", "placement_id", "slot_id", "slot_uuid", "ad_unit_id", "unit_id"}
+		keysToCheck := []string{"zone_id", "placement_id", "slot_id", "slot_uuid", "ad_unit_id", "unit_id", "spot_id"}
 
 		for _, key := range keysToCheck {
 			if value, ok := i.Extra[key].(string); ok {
