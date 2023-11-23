@@ -110,7 +110,7 @@ func ValidLineItemExtra(t *testing.T, key adapter.Key) map[string]any {
 		}
 	case adapter.DTExchangeKey:
 		return map[string]any{
-			"placement_id": "dt_exchange_line_item_placement_id",
+			"spot_id": "dt_exchange_line_item_spot_id",
 		}
 	case adapter.MetaKey:
 		return map[string]any{
@@ -119,7 +119,7 @@ func ValidLineItemExtra(t *testing.T, key adapter.Key) map[string]any {
 	case adapter.MintegralKey:
 		return map[string]any{
 			"placement_id": "mintegral_line_item_placement_id",
-			"ad_unit_id":   "mintegral_line_item_ad_unit_id",
+			"unit_id":      "mintegral_line_item_unit_id",
 		}
 	case adapter.UnityAdsKey:
 		return map[string]any{
