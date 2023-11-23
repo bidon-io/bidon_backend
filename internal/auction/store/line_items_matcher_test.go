@@ -330,7 +330,7 @@ func TestLineItemsMatcher_ExtraFields(t *testing.T) {
 		{
 			params: params([]adapter.Key{adapter.DTExchangeKey}),
 			want: []auction.LineItem{
-				{ID: "dtexchange", UID: "5", PriceFloor: 0.15, AdUnitID: "code5", PlacementID: "dt_exchange_line_item_placement_id"},
+				{ID: "dtexchange", UID: "5", PriceFloor: 0.15, AdUnitID: "code5", PlacementID: "dt_exchange_line_item_spot_id"},
 			},
 		},
 		{
@@ -346,7 +346,7 @@ func TestLineItemsMatcher_ExtraFields(t *testing.T) {
 					ID:          "mintegral",
 					UID:         "8",
 					PriceFloor:  0.15,
-					AdUnitID:    "mintegral_line_item_ad_unit_id",
+					AdUnitID:    "mintegral_line_item_unit_id",
 					PlacementID: "mintegral_line_item_placement_id",
 				},
 			},

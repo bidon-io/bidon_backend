@@ -91,8 +91,8 @@ func Test_lineItemAttrsValidator_ValidateWithContext(t *testing.T) {
 			&LineItemAttrs{
 				AccountID: 1,
 				Extra: map[string]any{
-					"placement_id": "1187213",
-					"foo":          "bar",
+					"spot_id": "1187213",
+					"foo":     "bar",
 				},
 			},
 			&DemandSourceAccount{
