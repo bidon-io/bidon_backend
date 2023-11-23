@@ -113,9 +113,9 @@ func (csv admobLineItemCSV) buildLineItemAttrs(account *DemandSourceAccount, att
 }
 
 type dtExchangeLineItemCSV struct {
-	AdFormat    string          `csv:"ad_format"`
-	BidFloor    decimal.Decimal `csv:"bid_floor"`
-	PlacementID string          `csv:"placement_id"`
+	AdFormat string          `csv:"ad_format"`
+	BidFloor decimal.Decimal `csv:"bid_floor"`
+	SpotID   string          `csv:"spot_id"`
 }
 
 func (csv dtExchangeLineItemCSV) buildLineItemAttrs(account *DemandSourceAccount, attrs LineItemImportCSVAttrs) (LineItemAttrs, error) {
@@ -132,10 +132,10 @@ func (csv dtExchangeLineItemCSV) buildLineItemAttrs(account *DemandSourceAccount
 		Format:      format,
 		AccountID:   account.ID,
 		AccountType: account.Type,
-		Code:        &csv.PlacementID,
+		Code:        &csv.SpotID,
 		IsBidding:   &attrs.IsBidding,
 		Extra: map[string]any{
-			"placement_id": csv.PlacementID,
+			"spot_id": csv.SpotID,
 		},
 	}
 
@@ -433,9 +433,13 @@ func (v *lineItemAttrsValidator) extraRule(account *DemandSourceAccount) v8n.Rul
 		rule = v8n.Map(
 			v8n.Key("slot_id", v8n.Required, isString),
 		)
-	case adapter.DTExchangeKey, adapter.MetaKey, adapter.UnityAdsKey, adapter.VungleKey, adapter.MobileFuseKey:
+	case adapter.MetaKey, adapter.UnityAdsKey, adapter.VungleKey, adapter.MobileFuseKey:
 		rule = v8n.Map(
 			v8n.Key("placement_id", v8n.Required, isString),
+		)
+	case adapter.DTExchangeKey:
+		rule = v8n.Map(
+			v8n.Key("spot_id", v8n.Required, isString),
 		)
 	case adapter.MintegralKey:
 		rule = v8n.Map(
