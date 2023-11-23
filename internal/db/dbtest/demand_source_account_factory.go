@@ -3,16 +3,13 @@ package dbtest
 import (
 	"database/sql"
 	"fmt"
-	"sync/atomic"
 	"testing"
 
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/db"
 )
 
-var demandSourceAccountCounter atomic.Uint64
-
-func demandSourceAccountDefaults(n uint64) func(*db.DemandSourceAccount) {
+func demandSourceAccountDefaults(n uint32) func(*db.DemandSourceAccount) {
 	return func(account *db.DemandSourceAccount) {
 		if account.DemandSourceID == 0 && account.DemandSource.ID == 0 {
 			account.DemandSource = BuildDemandSource(func(source *db.DemandSource) {
@@ -54,7 +51,7 @@ func demandSourceAccountDefaults(n uint64) func(*db.DemandSourceAccount) {
 func BuildDemandSourceAccount(opts ...func(*db.DemandSourceAccount)) db.DemandSourceAccount {
 	var account db.DemandSourceAccount
 
-	n := demandSourceAccountCounter.Add(1)
+	n := counter.get("demand_source_account")
 
 	opts = append(opts, demandSourceAccountDefaults(n))
 	for _, opt := range opts {

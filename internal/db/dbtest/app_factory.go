@@ -3,15 +3,12 @@ package dbtest
 import (
 	"database/sql"
 	"fmt"
-	"sync/atomic"
 	"testing"
 
 	"github.com/bidon-io/bidon-backend/internal/db"
 )
 
-var appCounter atomic.Uint64
-
-func appDefaults(n uint64) func(*db.App) {
+func appDefaults(n uint32) func(*db.App) {
 	return func(app *db.App) {
 		if app.UserID == 0 && app.User.ID == 0 {
 			app.User = BuildUser(func(user *db.User) {
@@ -48,7 +45,7 @@ func appDefaults(n uint64) func(*db.App) {
 func BuildApp(opts ...func(*db.App)) db.App {
 	var app db.App
 
-	n := appCounter.Add(1)
+	n := counter.get("app")
 
 	opts = append(opts, appDefaults(n))
 	for _, opt := range opts {
