@@ -3,7 +3,6 @@ package dbtest
 import (
 	"database/sql"
 	"fmt"
-	"sync/atomic"
 	"testing"
 
 	"github.com/bidon-io/bidon-backend/internal/ad"
@@ -13,9 +12,7 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/db"
 )
 
-var lineItemCounter atomic.Uint64
-
-func lineItemDefaults(n uint64) func(*db.LineItem) {
+func lineItemDefaults(n uint32) func(*db.LineItem) {
 	return func(item *db.LineItem) {
 		if item.AppID == 0 && item.App.ID == 0 {
 			item.App = BuildApp(func(app *db.App) {
@@ -69,7 +66,7 @@ func lineItemDefaults(n uint64) func(*db.LineItem) {
 func BuildLineItem(opts ...func(*db.LineItem)) db.LineItem {
 	var item db.LineItem
 
-	n := lineItemCounter.Add(1)
+	n := counter.get("line_item")
 
 	opts = append(opts, lineItemDefaults(n))
 	for _, opt := range opts {

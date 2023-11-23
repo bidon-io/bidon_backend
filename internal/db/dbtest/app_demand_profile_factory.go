@@ -2,16 +2,13 @@ package dbtest
 
 import (
 	"fmt"
-	"sync/atomic"
 	"testing"
 
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/db"
 )
 
-var appDemandProfileCounter atomic.Uint64
-
-func appDemandProfileDefaults(n uint64) func(*db.AppDemandProfile) {
+func appDemandProfileDefaults(n uint32) func(*db.AppDemandProfile) {
 	return func(profile *db.AppDemandProfile) {
 		if profile.AppID == 0 && profile.App.ID == 0 {
 			profile.App = BuildApp(func(app *db.App) {
@@ -45,7 +42,7 @@ func appDemandProfileDefaults(n uint64) func(*db.AppDemandProfile) {
 func BuildAppDemandProfile(opts ...func(*db.AppDemandProfile)) db.AppDemandProfile {
 	var profile db.AppDemandProfile
 
-	n := appDemandProfileCounter.Add(1)
+	n := counter.get("app_demand_profile")
 
 	opts = append(opts, appDemandProfileDefaults(n))
 	for _, opt := range opts {
