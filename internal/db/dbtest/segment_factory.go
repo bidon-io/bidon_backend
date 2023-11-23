@@ -2,16 +2,13 @@ package dbtest
 
 import (
 	"fmt"
-	"sync/atomic"
 	"testing"
 
 	"github.com/bidon-io/bidon-backend/internal/db"
 	"github.com/bidon-io/bidon-backend/internal/segment"
 )
 
-var segmentCounter atomic.Uint64
-
-func segmentDefaults(n uint64) func(*db.Segment) {
+func segmentDefaults(n uint32) func(*db.Segment) {
 	return func(seg *db.Segment) {
 		if seg.AppID == 0 && seg.App.ID == 0 {
 			seg.App = BuildApp(func(app *db.App) {
@@ -33,7 +30,7 @@ func segmentDefaults(n uint64) func(*db.Segment) {
 func BuildSegment(opts ...func(*db.Segment)) db.Segment {
 	var seg db.Segment
 
-	n := segmentCounter.Add(1)
+	n := counter.get("segment")
 
 	opts = append(opts, segmentDefaults(n))
 	for _, opt := range opts {

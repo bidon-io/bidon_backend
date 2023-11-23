@@ -2,15 +2,12 @@ package dbtest
 
 import (
 	"fmt"
-	"sync/atomic"
 	"testing"
 
 	"github.com/bidon-io/bidon-backend/internal/db"
 )
 
-var demandSourceCounter atomic.Uint64
-
-func demandSourceDefaults(n uint64) func(*db.DemandSource) {
+func demandSourceDefaults(n uint32) func(*db.DemandSource) {
 	return func(source *db.DemandSource) {
 		if source.APIKey == "" {
 			source.APIKey = fmt.Sprintf("apikey%d", n)
@@ -24,7 +21,7 @@ func demandSourceDefaults(n uint64) func(*db.DemandSource) {
 func BuildDemandSource(opts ...func(*db.DemandSource)) db.DemandSource {
 	var source db.DemandSource
 
-	n := demandSourceCounter.Add(1)
+	n := counter.get("demand_source")
 
 	opts = append(opts, demandSourceDefaults(n))
 	for _, opt := range opts {
