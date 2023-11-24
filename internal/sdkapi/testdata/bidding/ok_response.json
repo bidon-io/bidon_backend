@@ -1,6 +1,23 @@
 {
   "bids": [
     {
+      "id": "333",
+      "imp_id": "444",
+      "price": 12,
+      "ad_unit": {
+        "bid_type": "RTB",
+        "demand_id": "mobilefuse",
+        "label": "mobilefuse",
+        "uid": "123_mobilefuse",
+        "ext": {
+          "placement_id": "123"
+        }
+      },
+      "ext": {
+        "signaldata": "signal_data"
+      }
+    },
+    {
       "id": "123",
       "imp_id": "456",
       "price": 11,
@@ -16,6 +33,21 @@
       "ext": {
         "payload": "payload"
       }
+    },
+    {
+      "id": "111",
+      "imp_id": "222",
+      "price": 10,
+      "ad_unit": {
+        "bid_type": "RTB",
+        "demand_id": "amazon",
+        "label": "amazon",
+        "uid": "123_amazon",
+        "ext": {
+          "slot_uuid": "uuid1"
+        }
+      },
+      "ext": {}
     }
   ],
   "status": "SUCCESS"

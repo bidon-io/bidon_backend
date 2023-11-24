@@ -7,6 +7,10 @@
         "amazon": {
             "version": "0.4.0.0",
             "sdk_version": "6.15.0"
+        },
+        "mobilfuse": {
+            "version": "0.5.0.0",
+            "sdk_version": "6.15.0"
         }
     },
     "device": {
@@ -75,6 +79,9 @@
             },
             "amazon": {
                 "token": "[{\"slot_uuid\":\"uuid1\",\"price_point\":\"price_point_1\"},{\"slot_uuid\":\"uuid2\",\"price_point\":\"price_point_2\"}]"
+            },
+            "mobilefuse": {
+                "token": "token"
             }
         },
         "id": "f2d0dc19-b43f-43c1-8ca0-ae895ec76970",
