@@ -3,8 +3,9 @@ package adminstore
 import (
 	"context"
 	"database/sql"
-	"encoding/base32"
+	"math/big"
 	"strconv"
+	"strings"
 
 	"github.com/bidon-io/bidon-backend/internal/admin"
 	"github.com/bidon-io/bidon-backend/internal/db"
@@ -78,12 +79,10 @@ func (m auctionConfigurationMapper) resource(c *db.AuctionConfiguration) admin.A
 		}
 	}
 
-	publicUIDString := strconv.FormatInt(c.PublicUID.Int64, 10)
-
 	return admin.AuctionConfiguration{
 		ID:                        c.ID,
-		PublicUID:                 publicUIDString,
-		AuctionKey:                base32.StdEncoding.EncodeToString([]byte(publicUIDString)),
+		PublicUID:                 strconv.FormatInt(c.PublicUID.Int64, 10),
+		AuctionKey:                strings.ToUpper(big.NewInt(c.PublicUID.Int64).Text(32)),
 		AuctionConfigurationAttrs: m.resourceAttrs(c),
 		App: admin.App{
 			ID:       c.App.ID,

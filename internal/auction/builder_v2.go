@@ -2,8 +2,8 @@ package auction
 
 import (
 	"context"
-	"encoding/base32"
 	"errors"
+	"math/big"
 
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
@@ -43,15 +43,15 @@ type BuildParams struct {
 }
 
 func (b *BuilderV2) Build(ctx context.Context, params *BuildParams) (*Auction, error) {
-	// if AuctionKey is passed then use configFetcher.FetchByAuctionKey method else use Match
 	var config *Config
 	var err error
 	if params.AuctionKey != "" {
-		publicUid, err := base32.StdEncoding.DecodeString(params.AuctionKey)
-		if err != nil {
-			return nil, err
+		publicUid, success := new(big.Int).SetString(params.AuctionKey, 32)
+		if !success {
+			return nil, InvalidAuctionKey
 		}
-		config = b.ConfigFetcher.FetchByUIDCached(ctx, params.AppID, "0", string(publicUid))
+
+		config = b.ConfigFetcher.FetchByUIDCached(ctx, params.AppID, "0", publicUid.String())
 		if config == nil {
 			return nil, InvalidAuctionKey
 		}

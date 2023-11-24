@@ -54,7 +54,7 @@ func TestBuilderV2_Build(t *testing.T) {
 			return config, nil
 		},
 		FetchByUIDCachedFunc: func(ctx context.Context, appId int64, key string, aucUID string) *auction.Config {
-			if aucUID == "1111111111111111111" {
+			if aucUID == "1688565055735595008" {
 				return config
 			} else {
 				return nil
@@ -117,7 +117,7 @@ func TestBuilderV2_Build(t *testing.T) {
 		},
 		{
 			name:   "Has auction for AuctionKey",
-			params: &auction.BuildParams{AuctionKey: "GEYTCMJRGEYTCMJRGEYTCMJRGEYTCMI=", Adapters: []adapter.Key{adapter.ApplovinKey}},
+			params: &auction.BuildParams{AuctionKey: "1ERNSV33K4000", Adapters: []adapter.Key{adapter.ApplovinKey}},
 			want: &auction.Auction{
 				ConfigID:  config.ID,
 				AdUnits:   adUnits,
@@ -132,7 +132,7 @@ func TestBuilderV2_Build(t *testing.T) {
 		},
 		{
 			name:    "No auction for AuctionKey",
-			params:  &auction.BuildParams{AuctionKey: "GMZTGMZTGMZTGMZTGMZTGMZTGMZTGMY=", Adapters: []adapter.Key{adapter.ApplovinKey}},
+			params:  &auction.BuildParams{AuctionKey: "1F60CVMI00400", Adapters: []adapter.Key{adapter.ApplovinKey}},
 			want:    nil,
 			wantErr: true,
 			err:     auction.InvalidAuctionKey,
