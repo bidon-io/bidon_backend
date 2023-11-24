@@ -8,6 +8,7 @@ type AdObject struct {
 	AuctionConfigurationUID string                `json:"auction_configuration_uid"`
 	Orientation             string                `json:"orientation" validate:"omitempty,oneof=PORTRAIT LANDSCAPE"`
 	PriceFloor              float64               `json:"pricefloor"`
+	AuctionKey              string                `json:"auction_key"`
 	Banner                  *BannerAdObject       `json:"banner"`
 	Interstitial            *InterstitialAdObject `json:"interstitial"`
 	Rewarded                *RewardedAdObject     `json:"rewarded"`

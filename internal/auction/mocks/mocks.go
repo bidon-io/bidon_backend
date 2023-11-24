@@ -20,6 +20,9 @@ var _ auction.ConfigFetcher = &ConfigFetcherMock{}
 //
 //		// make and configure a mocked auction.ConfigFetcher
 //		mockedConfigFetcher := &ConfigFetcherMock{
+//			FetchByUIDCachedFunc: func(ctx context.Context, appId int64, id string, uid string) *auction.Config {
+//				panic("mock out the FetchByUIDCached method")
+//			},
 //			MatchFunc: func(ctx context.Context, appID int64, adType ad.Type, segmentID int64) (*auction.Config, error) {
 //				panic("mock out the Match method")
 //			},
@@ -30,11 +33,25 @@ var _ auction.ConfigFetcher = &ConfigFetcherMock{}
 //
 //	}
 type ConfigFetcherMock struct {
+	// FetchByUIDCachedFunc mocks the FetchByUIDCached method.
+	FetchByUIDCachedFunc func(ctx context.Context, appId int64, id string, uid string) *auction.Config
+
 	// MatchFunc mocks the Match method.
 	MatchFunc func(ctx context.Context, appID int64, adType ad.Type, segmentID int64) (*auction.Config, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
+		// FetchByUIDCached holds details about calls to the FetchByUIDCached method.
+		FetchByUIDCached []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// AppId is the appId argument value.
+			AppId int64
+			// ID is the id argument value.
+			ID string
+			// UID is the uid argument value.
+			UID string
+		}
 		// Match holds details about calls to the Match method.
 		Match []struct {
 			// Ctx is the ctx argument value.
@@ -47,7 +64,52 @@ type ConfigFetcherMock struct {
 			SegmentID int64
 		}
 	}
-	lockMatch sync.RWMutex
+	lockFetchByUIDCached sync.RWMutex
+	lockMatch            sync.RWMutex
+}
+
+// FetchByUIDCached calls FetchByUIDCachedFunc.
+func (mock *ConfigFetcherMock) FetchByUIDCached(ctx context.Context, appId int64, id string, uid string) *auction.Config {
+	if mock.FetchByUIDCachedFunc == nil {
+		panic("ConfigFetcherMock.FetchByUIDCachedFunc: method is nil but ConfigFetcher.FetchByUIDCached was just called")
+	}
+	callInfo := struct {
+		Ctx   context.Context
+		AppId int64
+		ID    string
+		UID   string
+	}{
+		Ctx:   ctx,
+		AppId: appId,
+		ID:    id,
+		UID:   uid,
+	}
+	mock.lockFetchByUIDCached.Lock()
+	mock.calls.FetchByUIDCached = append(mock.calls.FetchByUIDCached, callInfo)
+	mock.lockFetchByUIDCached.Unlock()
+	return mock.FetchByUIDCachedFunc(ctx, appId, id, uid)
+}
+
+// FetchByUIDCachedCalls gets all the calls that were made to FetchByUIDCached.
+// Check the length with:
+//
+//	len(mockedConfigFetcher.FetchByUIDCachedCalls())
+func (mock *ConfigFetcherMock) FetchByUIDCachedCalls() []struct {
+	Ctx   context.Context
+	AppId int64
+	ID    string
+	UID   string
+} {
+	var calls []struct {
+		Ctx   context.Context
+		AppId int64
+		ID    string
+		UID   string
+	}
+	mock.lockFetchByUIDCached.RLock()
+	calls = mock.calls.FetchByUIDCached
+	mock.lockFetchByUIDCached.RUnlock()
+	return calls
 }
 
 // Match calls MatchFunc.
