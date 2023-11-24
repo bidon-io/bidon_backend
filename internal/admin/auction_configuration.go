@@ -15,8 +15,9 @@ type AuctionConfigurationResource struct {
 }
 
 type AuctionConfiguration struct {
-	ID        int64  `json:"id"`
-	PublicUID string `json:"public_uid"`
+	ID         int64  `json:"id"`
+	PublicUID  string `json:"public_uid"`
+	AuctionKey string `json:"auction_key"`
 	AuctionConfigurationAttrs
 	App     App      `json:"app"`
 	Segment *Segment `json:"segment"`
