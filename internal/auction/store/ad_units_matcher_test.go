@@ -117,7 +117,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 		{
 			AppID:     apps[0].ID,
 			AdType:    db.InterstitialAdType,
-			BidFloor:  decimal.NewNullDecimal(decimal.RequireFromString("0.3")),
+			BidFloor:  decimal.NewNullDecimal(decimal.RequireFromString("0.0")),
 			HumanName: "bidmachine-interstitial",
 			Code:      ptr("bidmachine-interstitial"),
 			AccountID: bidmachineAccount.ID,
@@ -277,6 +277,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 				AdFormat:   ad.EmptyFormat,
 				DeviceType: device.PhoneType,
 				Adapters:   []adapter.Key{adapter.ApplovinKey, adapter.BidmachineKey},
+				PriceFloor: ptr(0.2),
 			},
 			want: []auction.AdUnit{
 				{
@@ -292,7 +293,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 				{
 					DemandID:   "bidmachine",
 					UID:        "1701972528521547780",
-					PriceFloor: ptr(0.3),
+					PriceFloor: nil,
 					Label:      "bidmachine-interstitial",
 					BidType:    schema.RTBBidType,
 					Extra:      map[string]any{},
