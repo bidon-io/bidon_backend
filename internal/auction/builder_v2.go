@@ -2,6 +2,7 @@ package auction
 
 import (
 	"context"
+	"encoding/base32"
 	"errors"
 
 	"github.com/bidon-io/bidon-backend/internal/ad"
@@ -19,9 +20,11 @@ type BuilderV2 struct {
 //go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/mocks.go -pkg mocks . ConfigFetcher AdUnitsMatcher
 
 var ErrNoAdsFound = errors.New("no ads found")
+var InvalidAuctionKey = errors.New("invalid auction_key")
 
 type ConfigFetcher interface {
 	Match(ctx context.Context, appID int64, adType ad.Type, segmentID int64) (*Config, error)
+	FetchByUIDCached(ctx context.Context, appId int64, id, uid string) *Config
 }
 
 type AdUnitsMatcher interface {
@@ -36,10 +39,26 @@ type BuildParams struct {
 	Adapters   []adapter.Key
 	Segment    segment.Segment
 	PriceFloor *float64
+	AuctionKey string
 }
 
 func (b *BuilderV2) Build(ctx context.Context, params *BuildParams) (*Auction, error) {
-	config, err := b.ConfigFetcher.Match(ctx, params.AppID, params.AdType, params.Segment.ID)
+	// if AuctionKey is passed then use configFetcher.FetchByAuctionKey method else use Match
+	var config *Config
+	var err error
+	if params.AuctionKey != "" {
+		publicUid, err := base32.StdEncoding.DecodeString(params.AuctionKey)
+		if err != nil {
+			return nil, err
+		}
+		config = b.ConfigFetcher.FetchByUIDCached(ctx, params.AppID, "0", string(publicUid))
+		if config == nil {
+			return nil, InvalidAuctionKey
+		}
+	} else {
+		config, err = b.ConfigFetcher.Match(ctx, params.AppID, params.AdType, params.Segment.ID)
+	}
+
 	if err != nil {
 		return nil, err
 	}

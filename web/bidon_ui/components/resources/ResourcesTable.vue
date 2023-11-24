@@ -19,13 +19,20 @@
       :field="column.field"
       :header="column.header"
       :sortable="column.sortable"
+      :copyable="column.copyable"
       :filter-field="column.filter?.field"
       :show-filter-menu="false"
     >
       <template
-        v-if="column.link || column.associatedResourcesLink"
-        #body="{ data }"
+        v-if="column.link || column.associatedResourcesLink || column.copyable"
+        #body="{ data, field }"
       >
+        <div v-if="column.copyable">
+          <button @click="copyField(data[field])">
+            <i class="pi pi-copy" style="color: slateblue"></i>
+          </button>
+          <span>{{ data[field] }}</span>
+        </div>
         <ResourceLink v-if="column.link" :link="column.link" :data="data" />
         <AssociatedResourcesLink
           v-if="column.associatedResourcesLink"
@@ -113,6 +120,7 @@ interface Column {
   field: string;
   filter?: Filter;
   sortable?: boolean;
+  copyable?: boolean;
   link?: ResourceLink;
   associatedResourcesLink: AssociatedResourcesLink;
 }
@@ -186,4 +194,8 @@ const deleteHandle = useDeleteResource({
       (item: { id: number }) => item.id !== id,
     )),
 });
+
+const copyField = (field) => {
+  navigator.clipboard.writeText(field);
+};
 </script>

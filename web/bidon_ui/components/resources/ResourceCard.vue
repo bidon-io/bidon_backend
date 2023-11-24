@@ -2,6 +2,12 @@
   <FormCard :title="title">
     <FormField v-for="field in fields" :key="field.key" :label="field.label">
       <div v-if="!field.type" class="text-gray-900">
+        <button
+          v-if="field.copyable"
+          @click="copyField(localResource[field.key])"
+        >
+          <i class="pi pi-copy" style="color: slateblue"></i>
+        </button>
         {{ localResource[field.key] }}
       </div>
       <ResourceLink
@@ -40,5 +46,10 @@ const props = defineProps({
     required: true,
   },
 });
+
 const localResource = ref(props.resource);
+
+const copyField = (field) => {
+  navigator.clipboard.writeText(field);
+};
 </script>

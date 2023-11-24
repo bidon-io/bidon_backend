@@ -36,6 +36,7 @@ const fields = [
   ResourceCardFields.PublicUid,
   ResourceCardFields.App,
   { label: "Name", key: "name" },
+  { label: "Auction Key", key: "auctionKey", copyable: true },
   { label: "Ad type", key: "adType" },
   { label: "Price floor", key: "pricefloor" },
   { label: "Rounds", key: "rounds", type: "textarea" },

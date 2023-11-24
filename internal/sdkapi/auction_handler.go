@@ -52,6 +52,7 @@ func (h *AuctionHandler) Handle(c echo.Context) error {
 		Adapters:   req.raw.Adapters.Keys(),
 		Segment:    sgmnt,
 		PriceFloor: &req.raw.AdObject.PriceFloor,
+		AuctionKey: req.raw.AdObject.AuctionKey,
 	}
 
 	sdkVersion, err := req.raw.GetSDKVersionSemver()
