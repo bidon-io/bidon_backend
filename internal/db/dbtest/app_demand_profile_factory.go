@@ -77,6 +77,8 @@ func ValidAppDemandProfileData(t *testing.T, key adapter.Key, appID int64) []byt
 		return []byte(fmt.Sprintf(`{"app_id": "bigoads_app_%d", "foo": "bar"}`, appID))
 	case adapter.DTExchangeKey:
 		return []byte(fmt.Sprintf(`{"app_id": "dtexchange_app_%d", "foo": "bar"}`, appID))
+	case adapter.GAMKey:
+		return []byte(fmt.Sprintf(`{"app_id": "gam_app_%d", "foo": "bar"}`, appID))
 	case adapter.MetaKey:
 		return []byte(fmt.Sprintf(`{"app_id": "meta_app_%d", "app_secret": "meta_app_%d_secret", "foo": "bar"}`, appID, appID))
 	case adapter.MintegralKey:

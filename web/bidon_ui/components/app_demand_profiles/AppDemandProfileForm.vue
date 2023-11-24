@@ -23,7 +23,7 @@
         v-model:schema="dataSchema"
         :account-type="accountType"
       />
-      <FormSubmitButton />
+      <FormSubmitButton :disabled="!meta.valid" />
     </FormCard>
   </form>
 </template>
@@ -46,7 +46,7 @@ const emit = defineEmits(["submit"]);
 const resource = ref(props.value);
 
 const dataSchema = ref(yup.object());
-const { errors, useFieldModel, handleSubmit } = useForm({
+const { errors, meta, useFieldModel, handleSubmit } = useForm({
   validationSchema: computed(() =>
     yup.object({
       appId: yup.number().required().label("App Id"),

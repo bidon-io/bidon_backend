@@ -63,6 +63,22 @@ func Test_appDemandProfileAttrsValidator_ValidateWithContext(t *testing.T) {
 			false,
 		},
 		{
+			"valid GAM",
+			&AppDemandProfileAttrs{
+				DemandSourceID: 1,
+				Data: map[string]any{
+					"app_id": "ca-app-pub-7174718190807894~2828867145",
+					"foo":    "bar",
+				},
+			},
+			&DemandSource{
+				DemandSourceAttrs: DemandSourceAttrs{
+					ApiKey: string(adapter.GAMKey),
+				},
+			},
+			false,
+		},
+		{
 			"valid Mintegral",
 			&AppDemandProfileAttrs{
 				DemandSourceID: 1,

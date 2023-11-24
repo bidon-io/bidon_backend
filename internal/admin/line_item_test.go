@@ -105,6 +105,24 @@ func Test_lineItemAttrsValidator_ValidateWithContext(t *testing.T) {
 			false,
 		},
 		{
+			"valid GAM",
+			&LineItemAttrs{
+				AccountID: 1,
+				Extra: map[string]any{
+					"ad_unit_id": "/111/Bidon/Interstitials/0.4 USD",
+					"foo":        "bar",
+				},
+			},
+			&DemandSourceAccount{
+				DemandSource: DemandSource{
+					DemandSourceAttrs: DemandSourceAttrs{
+						ApiKey: string(adapter.GAMKey),
+					},
+				},
+			},
+			false,
+		},
+		{
 			"valid Meta",
 			&LineItemAttrs{
 				AccountID: 1,
