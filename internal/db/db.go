@@ -4,6 +4,9 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"fmt"
+	"log"
+	"os"
+	"time"
 
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bwmarrin/snowflake"
@@ -15,40 +18,56 @@ import (
 
 type DB struct {
 	*gorm.DB
+
+	snowflakeNode *snowflake.Node
+
+	ignoreRecordNotFoundError bool
 }
 
 type Option func(*DB)
 
 func WithSnowflakeNode(node *snowflake.Node) Option {
 	return func(db *DB) {
-		db.DB = db.Set(snowflakeNodeKey, node)
+		db.snowflakeNode = node
+	}
+}
+
+func WithIgnoreRecordNotFoundError() Option {
+	return func(db *DB) {
+		db.ignoreRecordNotFoundError = true
 	}
 }
 
 func Open(databaseURL string, opts ...Option) (*DB, error) {
-	gormDB, err := gorm.Open(postgres.Open(databaseURL))
+	var db DB
+
+	if len(opts) > 0 {
+		for _, opt := range opts {
+			opt(&db)
+		}
+	}
+
+	gormDB, err := gorm.Open(postgres.Open(databaseURL), &gorm.Config{
+		Logger: newLogger(db.ignoreRecordNotFoundError),
+	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to open database: %v", err)
 	}
 
 	err = gormDB.Use(otelgorm.NewPlugin())
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to use otelgorm plugin: %v", err)
 	}
 
-	db := &DB{DB: gormDB}
-
-	if len(opts) > 0 {
-		for _, opt := range opts {
-			opt(db)
-		}
-		// Mark as safe to share after applying options
+	if db.snowflakeNode != nil {
+		// Mark as safe to share after applying settings
 		// Calling Session() is important
 		// For more information refer to https://gorm.io/docs/method_chaining.html#New-Session-Method
-		db.DB = db.Session(&gorm.Session{})
+		gormDB = gormDB.Set(snowflakeNodeKey, db.snowflakeNode).Session(&gorm.Session{})
 	}
 
-	return db, nil
+	db.DB = gormDB
+	return &db, nil
 }
 
 const snowflakeNodeKey = "snowflake:node"
@@ -153,4 +172,14 @@ func (id *PlatformID) Scan(v any) (err error) {
 
 func (id PlatformID) Value() (driver.Value, error) {
 	return int64(id), nil
+}
+
+func newLogger(ignoreRecordNotFoundError bool) logger.Interface {
+	// Same as logger.Default
+	return logger.New(log.New(os.Stdout, "\r\n", log.LstdFlags), logger.Config{
+		SlowThreshold:             200 * time.Millisecond,
+		LogLevel:                  logger.Warn,
+		IgnoreRecordNotFoundError: ignoreRecordNotFoundError,
+		Colorful:                  true,
+	})
 }
