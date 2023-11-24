@@ -32,7 +32,7 @@ func (m *AdUnitsMatcher) Match(ctx context.Context, params *auction.BuildParams)
 		InnerJoins("Account.DemandSource", m.DB.Select("api_key").Where(map[string]any{"api_key": params.Adapters}))
 
 	if params.PriceFloor != nil {
-		query = query.Where("(bid_floor >= ? OR bid_floor IS NULL OR bid_floor = 0)", params.PriceFloor)
+		query = query.Where("(bid_floor >= ? OR line_items.bidding)", params.PriceFloor)
 	}
 
 	if params.AdType != ad.BannerType {
@@ -67,12 +67,13 @@ func (m *AdUnitsMatcher) find(query *gorm.DB) ([]auction.AdUnit, error) {
 		adUnits[i].DemandID = dbLineItem.Account.DemandSource.APIKey
 		adUnits[i].UID = strconv.FormatInt(dbLineItem.PublicUID.Int64, 10)
 		adUnits[i].Label = dbLineItem.HumanName
-		if dbLineItem.IsBidding.Valid && dbLineItem.IsBidding.Bool {
+		isRTB := dbLineItem.IsBidding.Valid && dbLineItem.IsBidding.Bool
+		if isRTB {
 			adUnits[i].BidType = schema.RTBBidType
 		} else {
 			adUnits[i].BidType = schema.CPMBidType
 		}
-		if dbLineItem.BidFloor.Valid {
+		if dbLineItem.BidFloor.Valid && !isRTB {
 			pf := dbLineItem.BidFloor.Decimal.InexactFloat64()
 			adUnits[i].PriceFloor = &pf
 		}
