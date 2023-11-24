@@ -6,10 +6,10 @@ import (
 	"errors"
 	"github.com/bidon-io/bidon-backend/config"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
+	"github.com/google/go-cmp/cmp"
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"reflect"
 	"strings"
 	"testing"
 
@@ -78,10 +78,30 @@ func testHelperBiddingHandler(t *testing.T) sdkapi.BiddingHandler {
 	pf := 0.1
 	adUnits := []auction.AdUnit{
 		{
+			DemandID:   "amazon",
+			Label:      "amazon",
+			PriceFloor: &pf,
+			UID:        "123_amazon",
+			BidType:    schema.RTBBidType,
+			Extra: map[string]any{
+				"slot_uuid": "uuid1",
+			},
+		},
+		{
 			DemandID:   "meta",
 			Label:      "meta",
 			PriceFloor: &pf,
 			UID:        "123_meta",
+			BidType:    schema.RTBBidType,
+			Extra: map[string]any{
+				"placement_id": "123",
+			},
+		},
+		{
+			DemandID:   "mobilefuse",
+			Label:      "mobilefuse",
+			PriceFloor: &pf,
+			UID:        "123_mobilefuse",
 			BidType:    schema.RTBBidType,
 			Extra: map[string]any{
 				"placement_id": "123",
@@ -108,6 +128,9 @@ func testHelperBiddingHandler(t *testing.T) sdkapi.BiddingHandler {
 					"seller_id":  "123",
 					"tag_id":     "123",
 				},
+				adapter.MobileFuseKey: map[string]any{
+					"tag_id": "123",
+				},
 				adapter.AmazonKey: map[string]any{
 					"price_points_map": map[string]any{
 						"price_point_1": map[string]any{"price": 0.1, "price_point": "price_point_1"},
@@ -131,6 +154,16 @@ func testHelperBiddingHandler(t *testing.T) sdkapi.BiddingHandler {
 					RoundNumber: 0,
 					Bids: []adapters.DemandResponse{
 						{
+							DemandID: "amazon",
+							SlotUUID: "uuid1",
+							Bid: &adapters.BidDemandResponse{
+								Price:    10,
+								ID:       "111",
+								ImpID:    "222",
+								DemandID: adapter.MetaKey,
+							},
+						},
+						{
 							DemandID: "meta",
 							Bid: &adapters.BidDemandResponse{
 								Payload:  "payload",
@@ -138,6 +171,16 @@ func testHelperBiddingHandler(t *testing.T) sdkapi.BiddingHandler {
 								ID:       "123",
 								ImpID:    "456",
 								DemandID: adapter.MetaKey,
+							},
+						},
+						{
+							DemandID: "mobilefuse",
+							Bid: &adapters.BidDemandResponse{
+								Price:      12,
+								ID:         "333",
+								ImpID:      "444",
+								DemandID:   adapter.MobileFuseKey,
+								Signaldata: "signal_data",
 							},
 						},
 					},
@@ -200,8 +243,8 @@ func TestBiddingHandler_OK(t *testing.T) {
 	}
 
 	// Check that the response body is what we expect
-	if !reflect.DeepEqual(actualResponse, expectedResponse) {
-		t.Errorf("Response mismatch. Expected: %v. Received: %v", expectedResponse, actualResponse)
+	if diff := cmp.Diff(expectedResponse, actualResponse); diff != "" {
+		t.Fatalf("Response mismatch (-want, +got):\n%s", diff)
 	}
 }
 
