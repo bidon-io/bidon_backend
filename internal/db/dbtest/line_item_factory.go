@@ -109,6 +109,10 @@ func ValidLineItemExtra(t *testing.T, key adapter.Key) map[string]any {
 		return map[string]any{
 			"spot_id": "dt_exchange_line_item_spot_id",
 		}
+	case adapter.GAMKey:
+		return map[string]any{
+			"ad_unit_id": "gam_line_item",
+		}
 	case adapter.MetaKey:
 		return map[string]any{
 			"placement_id": "meta_line_item_placement_id",
