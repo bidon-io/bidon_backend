@@ -105,6 +105,22 @@ func Test_demandSourceAccountValidator_ValidateWithContext(t *testing.T) {
 			false,
 		},
 		{
+			"valid GAM",
+			&DemandSourceAccountAttrs{
+				DemandSourceID: 1,
+				Extra: map[string]any{
+					"network_code": "22897248651",
+					"foo":          "bar",
+				},
+			},
+			&DemandSource{
+				DemandSourceAttrs: DemandSourceAttrs{
+					ApiKey: string(adapter.GAMKey),
+				},
+			},
+			false,
+		},
+		{
 			"valid Mintegral",
 			&DemandSourceAccountAttrs{
 				DemandSourceID: 1,

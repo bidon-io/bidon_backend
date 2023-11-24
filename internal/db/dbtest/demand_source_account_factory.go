@@ -86,6 +86,8 @@ func ValidDemandSourceAccountExtra(t *testing.T, key adapter.Key) []byte {
 		return []byte(`{"publisher_id": "1", "endpoint": "https://example.com", "foo": "bar"}`)
 	case adapter.DTExchangeKey:
 		return []byte(`{"foo": "bar"}`)
+	case adapter.GAMKey:
+		return []byte(`{"network_code": "111", "foo": "bar"}`)
 	case adapter.MetaKey:
 		return []byte(`{"foo": "bar"}`)
 	case adapter.MintegralKey:

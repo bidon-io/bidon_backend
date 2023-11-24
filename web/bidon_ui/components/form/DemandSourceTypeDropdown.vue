@@ -54,6 +54,7 @@ const options = ref([
   { label: "Bidmachine", value: "DemandSourceAccount::BidMachine" },
   { label: "BigoAds", value: "DemandSourceAccount::BigoAds" },
   { label: "DTExchange", value: "DemandSourceAccount::DtExchange" },
+  { label: "Google Ad Manager", value: "DemandSourceAccount::GAM" },
   { label: "Inmobi", value: "DemandSourceAccount::Inmobi" },
   { label: "Meta", value: "DemandSourceAccount::Meta" },
   { label: "Mintegral", value: "DemandSourceAccount::Mintegral" },

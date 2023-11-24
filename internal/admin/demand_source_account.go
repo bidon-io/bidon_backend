@@ -195,6 +195,10 @@ func (v *demandSourceAccountValidator) extraRule(demandSource *DemandSource) v8n
 			v8n.Key("publisher_id", v8n.Required, isString),
 			v8n.Key("endpoint", v8n.Required, is.URL),
 		)
+	case adapter.GAMKey:
+		rule = v8n.Map(
+			v8n.Key("network_code", v8n.Required, isString),
+		)
 	case adapter.InmobiKey:
 		rule = v8n.Map(
 			v8n.Key("account_id", v8n.Required, isString),

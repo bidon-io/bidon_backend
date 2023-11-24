@@ -30,6 +30,7 @@ func TestAppDemandProfileFetcher_Fetch(t *testing.T) {
 		adapter.BidmachineKey,
 		adapter.DTExchangeKey,
 		adapter.AmazonKey,
+		adapter.GAMKey,
 	}
 
 	demandSources := make([]db.DemandSource, len(keys))
@@ -55,6 +56,8 @@ func TestAppDemandProfileFetcher_Fetch(t *testing.T) {
 				account.Extra = []byte(`{"dtexchange": "dtexchange"}`)
 			case adapter.AmazonKey:
 				account.Extra = []byte(`{"amazon": "amazon", "price_points": [{ "name": "name", "price_point": "price_point", "price": 1.0 }]}`)
+			case adapter.GAMKey:
+				account.Extra = []byte(`{"network_code": "111"}`)
 			default:
 				account.Extra = []byte{}
 			}
@@ -114,12 +117,20 @@ func TestAppDemandProfileFetcher_Fetch(t *testing.T) {
 			want:        adapter.RawConfigsMap{},
 		},
 		{
-			name:        "One key, App 2",
+			name:        "All keys, App 2",
 			appID:       apps[1].ID,
-			adapterKeys: []adapter.Key{adapter.DTExchangeKey},
+			adapterKeys: adapter.Keys,
 			want: adapter.RawConfigsMap{
 				adapter.DTExchangeKey: {
 					AccountExtra: map[string]any{"dtexchange": "dtexchange"},
+					AppData:      map[string]any{},
+				},
+				adapter.GAMKey: {
+					AccountExtra: map[string]any{"network_code": "111"},
+					AppData:      map[string]any{},
+				},
+				adapter.UnityAdsKey: {
+					AccountExtra: map[string]any{"unity": "unity"},
 					AppData:      map[string]any{},
 				},
 			},

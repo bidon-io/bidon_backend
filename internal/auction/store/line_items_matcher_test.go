@@ -334,9 +334,15 @@ func TestLineItemsMatcher_ExtraFields(t *testing.T) {
 			},
 		},
 		{
+			params: params([]adapter.Key{adapter.GAMKey}),
+			want: []auction.LineItem{
+				{ID: "gam", UID: "6", PriceFloor: 0.15, AdUnitID: "gam_line_item"},
+			},
+		},
+		{
 			params: params([]adapter.Key{adapter.MetaKey}),
 			want: []auction.LineItem{
-				{ID: "meta", UID: "7", PriceFloor: 0.15, AdUnitID: "code7", PlacementID: "meta_line_item_placement_id"},
+				{ID: "meta", UID: "8", PriceFloor: 0.15, AdUnitID: "code8", PlacementID: "meta_line_item_placement_id"},
 			},
 		},
 		{
@@ -344,7 +350,7 @@ func TestLineItemsMatcher_ExtraFields(t *testing.T) {
 			want: []auction.LineItem{
 				{
 					ID:          "mintegral",
-					UID:         "8",
+					UID:         "9",
 					PriceFloor:  0.15,
 					AdUnitID:    "mintegral_line_item_unit_id",
 					PlacementID: "mintegral_line_item_placement_id",
@@ -354,19 +360,19 @@ func TestLineItemsMatcher_ExtraFields(t *testing.T) {
 		{
 			params: params([]adapter.Key{adapter.MobileFuseKey}),
 			want: []auction.LineItem{
-				{ID: "mobilefuse", UID: "9", PriceFloor: 0.15, AdUnitID: "code9", PlacementID: "mobile_fuse_line_item_placement_id"},
+				{ID: "mobilefuse", UID: "10", PriceFloor: 0.15, AdUnitID: "code10", PlacementID: "mobile_fuse_line_item_placement_id"},
 			},
 		},
 		{
 			params: params([]adapter.Key{adapter.UnityAdsKey}),
 			want: []auction.LineItem{
-				{ID: "unityads", UID: "10", PriceFloor: 0.15, AdUnitID: "code10", PlacementID: "unity_ads_line_item_placement_id"},
+				{ID: "unityads", UID: "11", PriceFloor: 0.15, AdUnitID: "code11", PlacementID: "unity_ads_line_item_placement_id"},
 			},
 		},
 		{
 			params: params([]adapter.Key{adapter.VungleKey}),
 			want: []auction.LineItem{
-				{ID: "vungle", UID: "11", PriceFloor: 0.15, AdUnitID: "code11", PlacementID: "vungle_line_item_placement_id"},
+				{ID: "vungle", UID: "12", PriceFloor: 0.15, AdUnitID: "code12", PlacementID: "vungle_line_item_placement_id"},
 			},
 		},
 		{
@@ -378,7 +384,7 @@ func TestLineItemsMatcher_ExtraFields(t *testing.T) {
 		{
 			params: params([]adapter.Key{adapter.InmobiKey}),
 			want: []auction.LineItem{
-				{ID: "inmobi", UID: "6", PriceFloor: 0.15, AdUnitID: "code6", PlacementID: "inmobi_line_item_placement_id"},
+				{ID: "inmobi", UID: "7", PriceFloor: 0.15, AdUnitID: "code7", PlacementID: "inmobi_line_item_placement_id"},
 			},
 		},
 	}

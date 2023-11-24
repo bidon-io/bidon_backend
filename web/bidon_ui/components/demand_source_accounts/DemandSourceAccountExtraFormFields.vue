@@ -23,6 +23,13 @@
     />
     <VeeFormFieldWrapper field="extra.endpoint" label="Endpoint" required />
   </template>
+  <template v-if="apiKey === 'gam'">
+    <VeeFormFieldWrapper
+      field="extra.networkCode"
+      label="Network Code"
+      required
+    />
+  </template>
   <template v-if="apiKey === 'inmobi'">
     <VeeFormFieldWrapper field="extra.accountId" label="Account ID" required />
   </template>
@@ -96,6 +103,9 @@ const dataSchemas = {
   bigoads: yup.object({
     publisherId: yup.string().required().label("Publisher Id"),
     endpoint: yup.string().url().required().label("Endpoint"),
+  }),
+  inmobi: yup.object({
+    networkCode: yup.string().required().label("Network Code"),
   }),
   inmobi: yup.object({
     accountId: yup.string().required().label("Account Id"),
