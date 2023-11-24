@@ -220,9 +220,7 @@ func (h *BiddingHandler) buildBid(demandResponse adapters.DemandResponse, adUnit
 		ImpID:  demandResponse.Bid.ImpID,
 		Price:  demandResponse.Bid.Price,
 		AdUnit: &adUnit,
-		Ext: map[string]any{
-			"payload": demandResponse.Bid.Payload,
-		},
+		Ext:    buildDemandExt(demandResponse),
 	}
 }
 
@@ -368,6 +366,21 @@ func buildDemandInfo(demandResponse adapters.DemandResponse) Demand {
 		return Demand{
 			Payload:     demandResponse.Bid.Payload,
 			PlacementID: demandResponse.TagID,
+		}
+	}
+}
+
+func buildDemandExt(demandResponse adapters.DemandResponse) map[string]any {
+	switch demandResponse.DemandID {
+	case adapter.AmazonKey:
+		return map[string]any{}
+	case adapter.MobileFuseKey:
+		return map[string]any{
+			"signaldata": demandResponse.Bid.Signaldata,
+		}
+	default:
+		return map[string]any{
+			"payload": demandResponse.Bid.Payload,
 		}
 	}
 }
