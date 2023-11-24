@@ -20,6 +20,7 @@ const (
 	BidmachineKey Key = "bidmachine"
 	BigoAdsKey    Key = "bigoads"
 	DTExchangeKey Key = "dtexchange"
+	GAMKey        Key = "gam"
 	InmobiKey     Key = "inmobi"
 	MetaKey       Key = "meta"
 	MintegralKey  Key = "mintegral"
@@ -35,6 +36,7 @@ var Keys = []Key{
 	BidmachineKey,
 	BigoAdsKey,
 	DTExchangeKey,
+	GAMKey,
 	InmobiKey,
 	MetaKey,
 	MintegralKey,
