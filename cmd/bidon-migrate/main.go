@@ -47,6 +47,7 @@ func usage() {
 
 var (
 	verbose = flag.Bool("v", false, "enable verbose mode")
+	noGen   = flag.Bool("no-gen", false, "disable model generation")
 
 	//go:embed migrations/*.sql
 	sqlMigrations embed.FS
@@ -121,7 +122,7 @@ func main() {
 		log.Fatal(err)
 	}
 	// Generate models after migration tasks in dev environment
-	if config.GetEnv() == config.DevEnv {
+	if config.GetEnv() == config.DevEnv && !*noGen {
 		gen.GenerateModels(db)
 	}
 }

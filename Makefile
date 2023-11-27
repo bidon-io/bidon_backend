@@ -1,5 +1,9 @@
 REGISTRY ?= "ghcr.io/bidon-io"
 
+.PHONY: test
+test:
+	docker compose run --rm go-test
+
 docker-build-push-prod-back:
 	cd bidon_back && \
 	docker buildx build --platform linux/amd64 --provenance=false --target=prod \
