@@ -45,10 +45,6 @@ jobs:
         working-directory: ./${{ secrets.ANSIBLE_SECRET }}/prod
         run: make bidon-data-migration TAG=$TAG
 
-      - name: Deploy backend
-        working-directory: ./${{ secrets.ANSIBLE_SECRET }}/prod
-        run: make bidon-backend TAG=$TAG
-
       - name: Deploy admin
         working-directory: ./${{ secrets.ANSIBLE_SECRET }}/prod
         run: make bidon-admin TAG=$TAG

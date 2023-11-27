@@ -26,7 +26,7 @@ Options:
 	usageCommands = `
 Commands:
     create NAME [go|sql] Creates new migration file with the current timestamp
-	generate-models	     Generates models from the DB schema
+    generate-models      Generates models from the DB schema
     up                   Migrate the DB to the most recent version available
     up-by-one            Migrate the DB up by 1
     up-to VERSION        Migrate the DB to a specific VERSION
