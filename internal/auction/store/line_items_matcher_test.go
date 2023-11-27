@@ -3,7 +3,6 @@ package store_test
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"testing"
 
 	"github.com/bidon-io/bidon-backend/internal/ad"
@@ -49,7 +48,6 @@ func TestLineItemsMatcher_Match(t *testing.T) {
 				String: string(ad.BannerFormat),
 				Valid:  true,
 			},
-			Code:      ptr("applovin-banner-banner"),
 			BidFloor:  decimal.NewNullDecimal(decimal.RequireFromString("0.1")),
 			AccountID: applovinAccount.ID,
 			PublicUID: sql.NullInt64{
@@ -64,7 +62,6 @@ func TestLineItemsMatcher_Match(t *testing.T) {
 				String: string(ad.AdaptiveFormat),
 				Valid:  true,
 			},
-			Code:      ptr("applovin-banner-adaptive"),
 			BidFloor:  decimal.NewNullDecimal(decimal.RequireFromString("0.2")),
 			AccountID: applovinAccount.ID,
 			PublicUID: sql.NullInt64{
@@ -79,7 +76,6 @@ func TestLineItemsMatcher_Match(t *testing.T) {
 				String: string(ad.LeaderboardFormat),
 				Valid:  true,
 			},
-			Code:      ptr("applovin-banner-leaderboard"),
 			BidFloor:  decimal.NewNullDecimal(decimal.RequireFromString("0.3")),
 			AccountID: applovinAccount.ID,
 			PublicUID: sql.NullInt64{
@@ -90,7 +86,6 @@ func TestLineItemsMatcher_Match(t *testing.T) {
 		{
 			AppID:     apps[0].ID,
 			AdType:    db.InterstitialAdType,
-			Code:      ptr("applovin-interstitial"),
 			BidFloor:  decimal.NewNullDecimal(decimal.RequireFromString("0.3")),
 			AccountID: applovinAccount.ID,
 			PublicUID: sql.NullInt64{
@@ -101,7 +96,6 @@ func TestLineItemsMatcher_Match(t *testing.T) {
 		{
 			AppID:     apps[0].ID,
 			AdType:    db.InterstitialAdType,
-			Code:      ptr("bidmachine-interstitial"),
 			BidFloor:  decimal.NewNullDecimal(decimal.RequireFromString("0.3")),
 			AccountID: bidmachineAccount.ID,
 			PublicUID: sql.NullInt64{
@@ -116,7 +110,6 @@ func TestLineItemsMatcher_Match(t *testing.T) {
 				String: string(ad.MRECFormat),
 				Valid:  true,
 			},
-			Code:      ptr("app2-applovin-banner-mrec"),
 			BidFloor:  decimal.NewNullDecimal(decimal.RequireFromString("0.4")),
 			AccountID: applovinAccount.ID,
 			PublicUID: sql.NullInt64{
@@ -131,7 +124,6 @@ func TestLineItemsMatcher_Match(t *testing.T) {
 				String: string(ad.MRECFormat),
 				Valid:  true,
 			},
-			Code:      ptr("app2-bidmachine-banner-mrec"),
 			BidFloor:  decimal.NewNullDecimal(decimal.RequireFromString("0.4")),
 			AccountID: bidmachineAccount.ID,
 			PublicUID: sql.NullInt64{
@@ -170,8 +162,8 @@ func TestLineItemsMatcher_Match(t *testing.T) {
 				Adapters:   []adapter.Key{adapter.ApplovinKey},
 			},
 			want: []auction.LineItem{
-				{ID: "applovin", UID: "1701972528521547776", PriceFloor: 0.1, AdUnitID: "applovin-banner-banner"},
-				{ID: "applovin", UID: "1701972528521547777", PriceFloor: 0.2, AdUnitID: "applovin-banner-adaptive"},
+				{ID: "applovin", UID: "1701972528521547776", PriceFloor: 0.1},
+				{ID: "applovin", UID: "1701972528521547777", PriceFloor: 0.2},
 			},
 		},
 		{
@@ -183,8 +175,8 @@ func TestLineItemsMatcher_Match(t *testing.T) {
 				Adapters:   []adapter.Key{adapter.ApplovinKey},
 			},
 			want: []auction.LineItem{
-				{ID: "applovin", UID: "1701972528521547777", PriceFloor: 0.2, AdUnitID: "applovin-banner-adaptive"},
-				{ID: "applovin", UID: "1701972528521547778", PriceFloor: 0.3, AdUnitID: "applovin-banner-leaderboard"},
+				{ID: "applovin", UID: "1701972528521547777", PriceFloor: 0.2},
+				{ID: "applovin", UID: "1701972528521547778", PriceFloor: 0.3},
 			},
 		},
 		{
@@ -196,7 +188,7 @@ func TestLineItemsMatcher_Match(t *testing.T) {
 				Adapters:   []adapter.Key{adapter.ApplovinKey},
 			},
 			want: []auction.LineItem{
-				{ID: "applovin", UID: "1701972528521547777", PriceFloor: 0.2, AdUnitID: "applovin-banner-adaptive"},
+				{ID: "applovin", UID: "1701972528521547777", PriceFloor: 0.2},
 			},
 		},
 		{
@@ -208,8 +200,8 @@ func TestLineItemsMatcher_Match(t *testing.T) {
 				Adapters:   []adapter.Key{adapter.ApplovinKey, adapter.BidmachineKey},
 			},
 			want: []auction.LineItem{
-				{ID: "applovin", UID: "1701972528521547779", PriceFloor: 0.3, AdUnitID: "applovin-interstitial"},
-				{ID: "bidmachine", UID: "1701972528521547780", PriceFloor: 0.3, AdUnitID: "bidmachine-interstitial"},
+				{ID: "applovin", UID: "1701972528521547779", PriceFloor: 0.3},
+				{ID: "bidmachine", UID: "1701972528521547780", PriceFloor: 0.3},
 			},
 		},
 		{
@@ -221,7 +213,7 @@ func TestLineItemsMatcher_Match(t *testing.T) {
 				Adapters:   []adapter.Key{adapter.ApplovinKey},
 			},
 			want: []auction.LineItem{
-				{ID: "applovin", UID: "1701972528521547781", PriceFloor: 0.4, AdUnitID: "app2-applovin-banner-mrec"},
+				{ID: "applovin", UID: "1701972528521547781", PriceFloor: 0.4},
 			},
 		},
 		{
@@ -234,7 +226,7 @@ func TestLineItemsMatcher_Match(t *testing.T) {
 				PriceFloor: &pf,
 			},
 			want: []auction.LineItem{
-				{ID: "applovin", UID: "1701972528521547777", PriceFloor: 0.2, AdUnitID: "applovin-banner-adaptive"},
+				{ID: "applovin", UID: "1701972528521547777", PriceFloor: 0.2},
 			},
 		},
 	}
@@ -285,7 +277,6 @@ func TestLineItemsMatcher_ExtraFields(t *testing.T) {
 			lineItem.Account = account
 			lineItem.BidFloor = decimal.NewNullDecimal(decimal.RequireFromString("0.15"))
 			lineItem.Extra = dbtest.ValidLineItemExtra(t, adapter.Key(demandSources[i].APIKey))
-			lineItem.Code = ptr(fmt.Sprintf("code%d", i))
 			lineItem.PublicUID = sql.NullInt64{
 				Int64: int64(i),
 				Valid: true,
@@ -318,19 +309,19 @@ func TestLineItemsMatcher_ExtraFields(t *testing.T) {
 		{
 			params: params([]adapter.Key{adapter.ApplovinKey}),
 			want: []auction.LineItem{
-				{ID: "applovin", UID: "2", PriceFloor: 0.15, AdUnitID: "code2", ZonedID: "applovin_line_item_zone_id"},
+				{ID: "applovin", UID: "2", PriceFloor: 0.15, ZonedID: "applovin_line_item_zone_id"},
 			},
 		},
 		{
 			params: params([]adapter.Key{adapter.BidmachineKey}),
 			want: []auction.LineItem{
-				{ID: "bidmachine", UID: "3", PriceFloor: 0.15, AdUnitID: "code3"},
+				{ID: "bidmachine", UID: "3", PriceFloor: 0.15},
 			},
 		},
 		{
 			params: params([]adapter.Key{adapter.DTExchangeKey}),
 			want: []auction.LineItem{
-				{ID: "dtexchange", UID: "5", PriceFloor: 0.15, AdUnitID: "code5", PlacementID: "dt_exchange_line_item_spot_id"},
+				{ID: "dtexchange", UID: "5", PriceFloor: 0.15, PlacementID: "dt_exchange_line_item_spot_id"},
 			},
 		},
 		{
@@ -342,7 +333,7 @@ func TestLineItemsMatcher_ExtraFields(t *testing.T) {
 		{
 			params: params([]adapter.Key{adapter.MetaKey}),
 			want: []auction.LineItem{
-				{ID: "meta", UID: "8", PriceFloor: 0.15, AdUnitID: "code8", PlacementID: "meta_line_item_placement_id"},
+				{ID: "meta", UID: "8", PriceFloor: 0.15, PlacementID: "meta_line_item_placement_id"},
 			},
 		},
 		{
@@ -360,31 +351,31 @@ func TestLineItemsMatcher_ExtraFields(t *testing.T) {
 		{
 			params: params([]adapter.Key{adapter.MobileFuseKey}),
 			want: []auction.LineItem{
-				{ID: "mobilefuse", UID: "10", PriceFloor: 0.15, AdUnitID: "code10", PlacementID: "mobile_fuse_line_item_placement_id"},
+				{ID: "mobilefuse", UID: "10", PriceFloor: 0.15, PlacementID: "mobile_fuse_line_item_placement_id"},
 			},
 		},
 		{
 			params: params([]adapter.Key{adapter.UnityAdsKey}),
 			want: []auction.LineItem{
-				{ID: "unityads", UID: "11", PriceFloor: 0.15, AdUnitID: "code11", PlacementID: "unity_ads_line_item_placement_id"},
+				{ID: "unityads", UID: "11", PriceFloor: 0.15, PlacementID: "unity_ads_line_item_placement_id"},
 			},
 		},
 		{
 			params: params([]adapter.Key{adapter.VungleKey}),
 			want: []auction.LineItem{
-				{ID: "vungle", UID: "12", PriceFloor: 0.15, AdUnitID: "code12", PlacementID: "vungle_line_item_placement_id"},
+				{ID: "vungle", UID: "12", PriceFloor: 0.15, PlacementID: "vungle_line_item_placement_id"},
 			},
 		},
 		{
 			params: params([]adapter.Key{adapter.BigoAdsKey}),
 			want: []auction.LineItem{
-				{ID: "bigoads", UID: "4", PriceFloor: 0.15, AdUnitID: "code4", SlotID: "bigo_ads_line_item_slot_id"},
+				{ID: "bigoads", UID: "4", PriceFloor: 0.15, SlotID: "bigo_ads_line_item_slot_id"},
 			},
 		},
 		{
 			params: params([]adapter.Key{adapter.InmobiKey}),
 			want: []auction.LineItem{
-				{ID: "inmobi", UID: "7", PriceFloor: 0.15, AdUnitID: "code7", PlacementID: "inmobi_line_item_placement_id"},
+				{ID: "inmobi", UID: "7", PriceFloor: 0.15, PlacementID: "inmobi_line_item_placement_id"},
 			},
 		},
 	}

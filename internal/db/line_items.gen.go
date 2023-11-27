@@ -20,7 +20,6 @@ type LineItem struct {
 	AccountType string              `gorm:"column:account_type;type:character varying;not null;index:index_line_items_on_account,priority:1" json:"account_type"`
 	AccountID   int64               `gorm:"column:account_id;type:bigint;not null;index:index_line_items_on_account,priority:2" json:"account_id"`
 	HumanName   string              `gorm:"column:human_name;type:character varying;not null" json:"human_name"`
-	Code        *string             `gorm:"column:code;type:character varying;not null" json:"code"`
 	BidFloor    decimal.NullDecimal `gorm:"column:bid_floor;type:numeric" json:"bid_floor"`
 	AdType      AdType              `gorm:"column:ad_type;type:integer;not null" json:"ad_type"`
 	Extra       map[string]any      `gorm:"column:extra;type:jsonb;default:'{}';serializer:json" json:"extra"`
