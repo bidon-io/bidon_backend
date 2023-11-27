@@ -53,11 +53,6 @@ func Prepare() *db.DB {
 		log.Fatalf("Error connecting to the database: %v", err)
 	}
 
-	err = testDB.AutoMigrate()
-	if err != nil {
-		log.Fatalf("Error migrating the database: %v", err)
-	}
-
 	return testDB
 }
 

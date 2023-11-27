@@ -91,20 +91,6 @@ func (db *DB) SetDebug() {
 	db.Logger = db.Logger.LogMode(logger.Info)
 }
 
-func (db *DB) AutoMigrate() error {
-	return db.DB.AutoMigrate(
-		&App{},
-		&AppDemandProfile{},
-		&AuctionConfiguration{},
-		&Country{},
-		&DemandSourceAccount{},
-		&DemandSource{},
-		&LineItem{},
-		&Segment{},
-		&User{},
-	)
-}
-
 type AdType int32
 
 const (
