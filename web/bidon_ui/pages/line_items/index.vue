@@ -15,7 +15,6 @@ const columns = [
   { field: "format", header: "Format" },
   ResourceTableFields.DemandSourceAccount,
   ResourceTableFields.AccountType,
-  { field: "code", header: "Code" },
 ];
 const resourcesPath = "/line_items";
 </script>

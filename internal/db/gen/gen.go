@@ -87,7 +87,6 @@ func GenerateModels(db *sql.DB) {
 		"line_items",
 		gen.FieldRelate(field.BelongsTo, "App", app, &field.RelateConfig{}),
 		gen.FieldRelate(field.BelongsTo, "Account", demandSourceAccount, &field.RelateConfig{}),
-		gen.FieldType("code", "*string"),
 		gen.FieldType("ad_type", "AdType"),
 		gen.FieldType("extra", "map[string]any"),
 		gen.FieldGORMTag("extra", func(tag field.GormTag) field.GormTag {
