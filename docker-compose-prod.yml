@@ -1,5 +1,3 @@
----
-version: "3.9"
 x-restart-policy: &restart-policy
   restart: unless-stopped
 x-logging: &default-logging
@@ -7,28 +5,6 @@ x-logging: &default-logging
     max-size: "100m"
     max-file: "5"
   driver: json-file
-x-bidon-environment: &bidon-environment
-  MALLOC_ARENA_MAX: 2
-  PIDFILE: /tmp/server.pid
-  RAILS_ENV: production
-  RAILS_LOG_TO_STDOUT: 1
-  RAILS_PUMA_WORKER_COUNT: 2
-  RAILS_THREADS_COUNT: 2
-  SECRET_KEY_BASE: ${SECRET_KEY_BASE}
-  PG_DATABASE: bidon
-  PG_USERNAME: bidon
-  PG_PASSWORD: ${PG_PASSWORD:-password}
-  PG_HOST: postgres
-  PG_PORT: 5432
-  REDIS_URL: redis://redis:6379/0
-  KAFKA_BROKERS_LIST: kafka:9092
-  KAFKA_CLIENT_ID: bidon_dev
-  KAFKA_DELIVERY_THRESHOLD: 100
-  KAFKA_DELIVERY_INTERVAL: 30
-  KAFKA_REGISTRY_URL: http://schema-registry:8081
-  KAFKA_AD_EVENTS_TOPIC: ad-events
-  MAXMIND_GEOIP_FILE_PATH: /app/public/system/GeoLite2-City.mmdb
-  SYPEX_GEOIP_FILE_PATH: /app/public/system/SxGeoCity.dat
 
 services:
   geodb-maxmind:
@@ -110,22 +86,39 @@ services:
     logging: *default-logging
     <<: *restart-policy
 
-  db-migration:
-    image: ghcr.io/bidon-io/bidon-back:latest
-    command: bin/rails db:prepare
+  bidon-migrate:
+    image: ghcr.io/bidon-io/bidon-migrate:latest
+    command: up
     depends_on:
       - postgres
     environment:
-      PG_DATABASE: bidon
-      PG_USERNAME: bidon
-      PG_PASSWORD: ${PG_PASSWORD:-password}
-      PG_HOST: postgres
-      PG_PORT: 5432
+      ENVIRONMENT: production
+      DATABASE_URL: postgres://bidon:${PG_PASSWORD:-password}@postgres:5432/bidon
     logging: *default-logging
 
-  bidon-backend:
-    image: ghcr.io/bidon-io/bidon-back:latest
-    command: bundle exec puma -C /app/config/puma.rb -p 3200
+  bidon-admin:
+    image: ghcr.io/bidon-io/bidon-admin:latest
+    depends_on:
+      postgres:
+        condition: service_started
+      redis:
+        condition: service_started
+      bidon-migrate:
+        condition: service_completed_successfully
+    environment:
+      PORT: 3200
+      ENVIRONMENT: production
+      APP_SECRET: ${APP_SECRET}
+      SNOWFLAKE_NODE_ID: ${SNOWFLAKE_NODE_ID}
+      DATABASE_URL: postgres://bidon:${PG_PASSWORD:-password}@postgres:5432/bidon
+      REDIS_URL: redis://redis:6379/0
+    ports:
+      - "3200:3200"
+    logging: *default-logging
+    <<: *restart-policy
+
+  bidon-sdkapi:
+    image: ghcr.io/bidon-io/bidon-sdkapi:latest
     depends_on:
       kafka:
         condition: service_started
@@ -135,15 +128,28 @@ services:
         condition: service_started
       redis:
         condition: service_started
-      db-migration:
+      bidon-migrate:
         condition: service_completed_successfully
     environment:
-      <<: *bidon-environment
-      ALLOWED_HOSTS: app.bidon.org
-    logging: *default-logging
+      PORT: 3100
+      ENVIRONMENT: production
+      DATABASE_URL: postgres://bidon:${PG_PASSWORD:-password}@postgres:5432/bidon
+      REDIS_URL: redis://redis:6379/0
+      USE_KAFKA: "true"
+      KAFKA_BROKERS_LIST: kafka:9092
+      KAFKA_CLIENT_ID: bidon_dev
+      KAFKA_BATCH_MAX_BYTES:
+      KAFKA_DELIVERY_INTERVAL: 5
+      KAFKA_AD_EVENTS_TOPIC: ad-events
+      USE_GEOCODING: "true"
+      MAXMIND_GEOIP_FILE_PATH: /public/system/GeoLite2-City.mmdb
     ports:
-      - 3200:3200
+      - "3100:3100"
+    volumes:
+      - geodb:/public/system
+    logging: *default-logging
     <<: *restart-policy
+
 volumes:
   geodb:
   postgres-data:

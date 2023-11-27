@@ -5,36 +5,18 @@
 #   git config --global core.excludesfile '~/.gitignore_global'
 /.idea
 
-# Ignore bundler config.
-/.bundle
-
-/**/public/assets/*
-
 # Ignore all logfiles and tempfiles.
 /**/log/*
 /**/tmp/*
 !/**/log/.keep
 !/**/tmp/.keep
 
-# Ignore pidfiles, but keep the directory.
-/**/tmp/pids/*
-!/**/tmp/pids/
-!/**/tmp/pids/.keep
-
 /**/.env
 /**/.env.test
-
-# Ignore master key for decrypting credentials and more.
-/**/config/master.key
 
 # Ignore UI static files, but keep the directory
 /cmd/bidon-admin/web/ui
 !/cmd/bidon-admin/web/ui/index.html
-
-# Ignore rspec test output/
-/**/test
-
-.irb_history
 
 .DS_Store
 
