@@ -27,10 +27,6 @@ func lineItemDefaults(n uint32) func(*db.LineItem) {
 		if item.HumanName == "" {
 			item.HumanName = fmt.Sprintf("Test Line Item %d", n)
 		}
-		if item.Code == nil {
-			code := fmt.Sprintf("code%d", n)
-			item.Code = &code
-		}
 		if item.BidFloor == (decimal.NullDecimal{}) {
 			item.BidFloor = decimal.NewNullDecimal(decimal.RequireFromString("0.1"))
 		}

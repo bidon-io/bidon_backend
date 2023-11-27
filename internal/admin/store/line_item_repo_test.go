@@ -62,7 +62,6 @@ func TestLineItemRepo_List(t *testing.T) {
 			Format:      ptr(ad.BannerFormat),
 			AccountID:   applovinAccount.ID,
 			AccountType: applovinAccount.Type,
-			Code:        ptr("12345"),
 			Extra:       map[string]any{"key": "value"},
 		},
 		{
@@ -73,7 +72,6 @@ func TestLineItemRepo_List(t *testing.T) {
 			Format:      ptr(ad.EmptyFormat),
 			AccountID:   bidmachineAccount.ID,
 			AccountType: bidmachineAccount.Type,
-			Code:        ptr(""),
 			Extra:       map[string]any{"key": "value"},
 		},
 		{
@@ -84,7 +82,6 @@ func TestLineItemRepo_List(t *testing.T) {
 			Format:      ptr(ad.EmptyFormat),
 			AccountID:   unityAdsAccount.ID,
 			AccountType: unityAdsAccount.Type,
-			Code:        ptr("54321"),
 			Extra:       map[string]any{"key": "value"},
 		},
 	}
@@ -134,7 +131,6 @@ func TestLineItemRepo_Find(t *testing.T) {
 		Format:      ptr(ad.BannerFormat),
 		AccountID:   applovinAccount.ID,
 		AccountType: applovinAccount.Type,
-		Code:        ptr("12345"),
 		Extra:       map[string]any{"key": "value"},
 	}
 
@@ -178,7 +174,6 @@ func TestLineItemRepo_Update(t *testing.T) {
 		Format:      ptr(ad.BannerFormat),
 		AccountID:   applovinAccount.ID,
 		AccountType: applovinAccount.Type,
-		Code:        ptr("12345"),
 		Extra:       map[string]any{"key": "value"},
 	}
 
@@ -190,12 +185,10 @@ func TestLineItemRepo_Update(t *testing.T) {
 	want := item
 	want.BidFloor = ptr(decimal.Decimal{})
 	want.Format = ptr(ad.EmptyFormat)
-	want.Code = ptr("")
 
 	updateParams := &admin.LineItemAttrs{
 		BidFloor: want.BidFloor,
 		Format:   want.Format,
-		Code:     want.Code,
 	}
 	got, err := repo.Update(context.Background(), item.ID, updateParams)
 	if err != nil {
@@ -229,7 +222,6 @@ func TestLineItemRepo_Delete(t *testing.T) {
 		Format:      ptr(ad.BannerFormat),
 		AccountID:   applovinAccount.ID,
 		AccountType: applovinAccount.Type,
-		Code:        ptr("12345"),
 		Extra:       map[string]any{"key": "value"},
 	}
 	item, err := repo.Create(context.Background(), attrs)
