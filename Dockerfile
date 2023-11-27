@@ -19,12 +19,6 @@ RUN go mod download
 
 COPY . .
 
-FROM base AS test
-
-# Run tests for each package sequantially, because each test package that accesses the database runs database.AutoMigrate.
-# Fix this by running migrations before tests as a separate step.
-CMD [ "go", "test", "-coverprofile=testcov/coverage.txt", "-covermode=atomic", "-p", "1", "./..." ]
-
 FROM base AS bidon-admin-builder
 
 COPY --from=frontend-deps /app/.output/public ./cmd/bidon-admin/web/ui

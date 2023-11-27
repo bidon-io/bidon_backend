@@ -1,42 +1,50 @@
-x-back: &back
-  image: 'bidon/bidon_back'
-  build:
-    context: './bidon_back'
-    target: dev
-    args:
-      RUBY_VERSION: '3.1.2'
-  stdin_open: true
-  tty: true
-  volumes:
-    - ./bidon_back:/app:cached
-    - back_bundle:/usr/local/bundle
-    - back_rails_cache:/app/tmp/cache
-    - back_history:/usr/local/hist
-  env_file: './bidon_back/.env'
-  environment:
-    HISTFILE: /usr/local/hist/.bash_history
-    IRB_HISTFILE: /usr/local/hist/.irb_history
-    BOOTSNAP_CACHE_DIR: /usr/local/bundle/_bootsnap
-    EDITOR: vi
-  depends_on:
-    - postgres
-    - redis
-    - kafka
-    - debezium
-
 services:
-  rails_back:
-    <<: *back
-    command: rails
+  migrate:
+    image: golang:alpine
+    volumes:
+      - .:/app
+      - gomodcache:/go/pkg/mod
+      - gocache:/root/.cache/go-build
+    working_dir: /app
+    command: go run ./cmd/bidon-migrate -no-gen up
+    depends_on:
+      - postgres
+    environment:
+      ENVIRONMENT: development
+      DATABASE_URL: postgres://bidon:pass@postgres:5432/bidon
 
-  web_back:
-    <<: *back
-    command: rails server -b 0.0.0.0
-    ports:
-      - '3200:3000'
+  migrate-test:
+    image: golang:alpine
+    volumes:
+      - .:/app
+      - gomodcache:/go/pkg/mod
+      - gocache:/root/.cache/go-build
+    working_dir: /app
+    command: go run ./cmd/bidon-migrate up
+    depends_on:
+      - postgres-test
+    environment:
+      ENVIRONMENT: test
+      DATABASE_URL: postgres://bidon:pass@postgres-test:5432/bidon_test
+
+  go-test:
+    profiles: ['test']
+    image: golang:alpine
+    volumes:
+      - .:/app
+      - gomodcache:/go/pkg/mod
+      - gocache:/root/.cache/go-build
+    working_dir: /app
+    entrypoint: ["go", "test"]
+    command: ./...
+    depends_on:
+      migrate-test:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: postgres://bidon:pass@postgres-test:5432/bidon_test
 
   postgres:
-    image: quay.io/debezium/postgres:14-alpine
+    image: postgres:14-alpine
     ports:
       - '5434:5432'
     volumes:
@@ -46,7 +54,21 @@ services:
       POSTGRES_USER: bidon
       POSTGRES_PASSWORD: pass
     healthcheck:
-      test: pg_isready -U postgres -h 127.0.0.1
+      test: pg_isready -U bidon -d bidon
+      interval: 5s
+
+  postgres-test:
+    image: postgres:14-alpine
+    ports:
+      - '5435:5432'
+    volumes:
+      - pgdata-test:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: bidon_test
+      POSTGRES_USER: bidon
+      POSTGRES_PASSWORD: pass
+    healthcheck:
+      test: pg_isready -U bidon -d bidon_test
       interval: 5s
 
   redis:
@@ -110,23 +132,9 @@ services:
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'kafka:29092'
       SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
 
-  debezium:
-    image: quay.io/debezium/connect:1.9
-    ports:
-      - 8083:8083
-    depends_on:
-      - kafka
-      - postgres
-    environment:
-      - BOOTSTRAP_SERVERS=kafka:29092
-      - GROUP_ID=1
-      - CONFIG_STORAGE_TOPIC=connect_configs
-      - OFFSET_STORAGE_TOPIC=connect_offsets
-      - STATUS_STORAGE_TOPIC=source_connect_statuses
-
 volumes:
   pgdata:
+  pgdata-test:
+  gomodcache:
+  gocache:
   redisdata:
-  back_bundle:
-  back_rails_cache:
-  back_history:
