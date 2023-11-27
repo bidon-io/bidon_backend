@@ -11,9 +11,6 @@
       required
     />
   </template>
-  <template v-if="apiKey === 'bidmachine'">
-    <VeeFormFieldWrapper field="extra.adUnitId" label="Ad Unit Id" required />
-  </template>
   <template v-if="apiKey === 'bigoads'">
     <VeeFormFieldWrapper field="extra.slotId" label="Slot Id" required />
   </template>
@@ -102,9 +99,7 @@ const dataSchemas = {
     slotUuid: yup.string().required().label("Slot Uuid"),
     isVideo: yup.boolean().label("Is Video"),
   }),
-  bidmachine: yup.object({
-    adUnitId: yup.string().required().label("Ad Unit Id"),
-  }),
+  bidmachine: yup.object({}),
   bigoads: yup.object({
     slotId: yup.string().required().label("Slot Id"),
   }),

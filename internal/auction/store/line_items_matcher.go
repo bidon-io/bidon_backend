@@ -22,7 +22,7 @@ func (m *LineItemsMatcher) Match(ctx context.Context, params *auction.BuildParam
 
 	query := m.DB.
 		WithContext(ctx).
-		Select("bid_floor", "code", "line_items.extra", "line_items.public_uid").
+		Select("bid_floor", "line_items.extra", "line_items.public_uid").
 		Where(map[string]any{
 			"app_id":  params.AppID,
 			"ad_type": db.AdTypeFromDomain(params.AdType),
@@ -66,7 +66,6 @@ func (m *LineItemsMatcher) find(query *gorm.DB) ([]auction.LineItem, error) {
 		lineItems[i].ID = dbLineItem.Account.DemandSource.APIKey
 		lineItems[i].UID = strconv.FormatInt(dbLineItem.PublicUID.Int64, 10)
 		lineItems[i].PriceFloor = dbLineItem.BidFloor.Decimal.InexactFloat64()
-		lineItems[i].AdUnitID = *dbLineItem.Code
 
 		adUnitID, ok := dbLineItem.Extra["ad_unit_id"].(string)
 		if ok {

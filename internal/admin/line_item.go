@@ -37,7 +37,6 @@ type LineItemAttrs struct {
 	Format      *ad.Format       `json:"format"`
 	AccountID   int64            `json:"account_id"`
 	AccountType string           `json:"account_type"`
-	Code        *string          `json:"code"`
 	IsBidding   *bool            `json:"is_bidding"`
 	Extra       map[string]any   `json:"extra"`
 }
@@ -102,7 +101,6 @@ func (csv admobLineItemCSV) buildLineItemAttrs(account *DemandSourceAccount, att
 		Format:      format,
 		AccountID:   account.ID,
 		AccountType: account.Type,
-		Code:        &csv.AdUnitID,
 		IsBidding:   &attrs.IsBidding,
 		Extra: map[string]any{
 			"ad_unit_id": csv.AdUnitID,
@@ -132,7 +130,6 @@ func (csv dtExchangeLineItemCSV) buildLineItemAttrs(account *DemandSourceAccount
 		Format:      format,
 		AccountID:   account.ID,
 		AccountType: account.Type,
-		Code:        &csv.SpotID,
 		IsBidding:   &attrs.IsBidding,
 		Extra: map[string]any{
 			"spot_id": csv.SpotID,
@@ -162,7 +159,6 @@ func (csv gamLineItemCSV) buildLineItemAttrs(account *DemandSourceAccount, attrs
 		Format:      format,
 		AccountID:   account.ID,
 		AccountType: account.Type,
-		Code:        &csv.AdUnitID,
 		IsBidding:   &attrs.IsBidding,
 		Extra: map[string]any{
 			"ad_unit_id": csv.AdUnitID,
@@ -192,7 +188,6 @@ func (csv inmobiLineItemCSV) buildLineItemAttrs(account *DemandSourceAccount, at
 		Format:      format,
 		AccountID:   account.ID,
 		AccountType: account.Type,
-		Code:        &csv.PlacementID,
 		IsBidding:   &attrs.IsBidding,
 		Extra: map[string]any{
 			"placement_id": csv.PlacementID,
@@ -222,7 +217,6 @@ func (csv unityAdsLineItemCSV) buildLineItemAttrs(account *DemandSourceAccount, 
 		Format:      format,
 		AccountID:   account.ID,
 		AccountType: account.Type,
-		Code:        &csv.PlacementID,
 		IsBidding:   &attrs.IsBidding,
 		Extra: map[string]any{
 			"placement_id": csv.PlacementID,

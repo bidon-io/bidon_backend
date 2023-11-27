@@ -72,26 +72,12 @@ func (m lineItemMapper) dbModel(i *admin.LineItemAttrs, id int64) *db.LineItem {
 		isBidding.Valid = true
 	}
 
-	// TODO: remove this hack
-	// sets code to one of the following values: ad_unit_id, zone_id, placement_id, slot_id, slot_uuid
-	if i.Code == nil {
-		keysToCheck := []string{"zone_id", "placement_id", "slot_id", "slot_uuid", "ad_unit_id", "unit_id", "spot_id"}
-
-		for _, key := range keysToCheck {
-			if value, ok := i.Extra[key].(string); ok {
-				i.Code = &value
-				break
-			}
-		}
-	}
-
 	return &db.LineItem{
 		ID:          id,
 		AppID:       i.AppID,
 		AccountType: i.AccountType,
 		AccountID:   i.AccountID,
 		HumanName:   i.HumanName,
-		Code:        i.Code,
 		BidFloor:    bidFloor,
 		AdType:      db.AdTypeFromDomain(i.AdType),
 		Extra:       i.Extra,
@@ -127,7 +113,6 @@ func (m lineItemMapper) resourceAttrs(i *db.LineItem) admin.LineItemAttrs {
 		Format:      &format,
 		AccountID:   i.AccountID,
 		AccountType: i.AccountType,
-		Code:        i.Code,
 		IsBidding:   &i.IsBidding.Bool,
 		Extra:       i.Extra,
 	}

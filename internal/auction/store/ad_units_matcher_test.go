@@ -50,7 +50,6 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 				Valid:  true,
 			},
 			HumanName: "applovin-banner-banner",
-			Code:      ptr("applovin-banner-banner"),
 			BidFloor:  decimal.NewNullDecimal(decimal.RequireFromString("0.1")),
 			AccountID: applovinAccount.ID,
 			PublicUID: sql.NullInt64{
@@ -69,7 +68,6 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 				Valid:  true,
 			},
 			HumanName: "applovin-banner-adaptive",
-			Code:      ptr("applovin-banner-adaptive"),
 			BidFloor:  decimal.NewNullDecimal(decimal.RequireFromString("0.2")),
 			AccountID: applovinAccount.ID,
 			PublicUID: sql.NullInt64{
@@ -88,7 +86,6 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 				Valid:  true,
 			},
 			HumanName: "applovin-banner-leaderboard",
-			Code:      ptr("applovin-banner-leaderboard"),
 			BidFloor:  decimal.NewNullDecimal(decimal.RequireFromString("0.3")),
 			AccountID: applovinAccount.ID,
 			PublicUID: sql.NullInt64{
@@ -104,7 +101,6 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 			AdType:    db.InterstitialAdType,
 			BidFloor:  decimal.NewNullDecimal(decimal.RequireFromString("0.3")),
 			HumanName: "applovin-interstitial",
-			Code:      ptr("applovin-interstitial"),
 			AccountID: applovinAccount.ID,
 			PublicUID: sql.NullInt64{
 				Int64: 1701972528521547779,
@@ -119,7 +115,6 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 			AdType:    db.InterstitialAdType,
 			BidFloor:  decimal.NewNullDecimal(decimal.RequireFromString("0.0")),
 			HumanName: "bidmachine-interstitial",
-			Code:      ptr("bidmachine-interstitial"),
 			AccountID: bidmachineAccount.ID,
 			IsBidding: sql.NullBool{
 				Bool:  true,
@@ -138,7 +133,6 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 				Valid:  true,
 			},
 			HumanName: "app2-applovin-banner-mrec",
-			Code:      ptr("app2-applovin-banner-mrec"),
 			BidFloor:  decimal.NewNullDecimal(decimal.RequireFromString("0.4")),
 			AccountID: applovinAccount.ID,
 			PublicUID: sql.NullInt64{
@@ -157,7 +151,6 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 				Valid:  true,
 			},
 			HumanName: "app2-bidmachine-banner-mrec",
-			Code:      ptr("app2-bidmachine-banner-mrec"),
 			BidFloor:  decimal.NewNullDecimal(decimal.RequireFromString("0.4")),
 			AccountID: bidmachineAccount.ID,
 			PublicUID: sql.NullInt64{
