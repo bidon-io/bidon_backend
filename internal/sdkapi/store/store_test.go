@@ -147,6 +147,7 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Valid(t *testing.T) {
 		appID       int64
 		adapterKeys []adapter.Key
 		sdkVersion  string
+		setOrder    bool
 		want        []sdkapi.AdapterInitConfig
 	}{
 		{
@@ -154,6 +155,7 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Valid(t *testing.T) {
 			appID:       apps[0].ID,
 			adapterKeys: adapter.Keys,
 			sdkVersion:  "0.4.0",
+			setOrder:    false,
 			want: []sdkapi.AdapterInitConfig{
 				&sdkapi.AdmobInitConfig{
 					AppID: fmt.Sprintf("admob_app_%d", apps[0].ID),
@@ -184,6 +186,7 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Valid(t *testing.T) {
 			appID:       apps[1].ID,
 			adapterKeys: adapter.Keys,
 			sdkVersion:  "0.4.0",
+			setOrder:    false,
 			want: []sdkapi.AdapterInitConfig{
 				&sdkapi.GAMInitConfig{
 					NetworkCode: "111",
@@ -210,12 +213,52 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Valid(t *testing.T) {
 				},
 			},
 		},
+		{
+			name:        "setOrder = true",
+			appID:       apps[1].ID,
+			adapterKeys: adapter.Keys,
+			sdkVersion:  "0.4.0",
+			setOrder:    true,
+			want: []sdkapi.AdapterInitConfig{
+				&sdkapi.GAMInitConfig{
+					NetworkCode: "111",
+					AppID:       fmt.Sprintf("gam_app_%d", apps[1].ID),
+					Order:       1,
+				},
+				&sdkapi.InmobiInitConfig{
+					AccountID: "inmobi",
+					AppKey:    fmt.Sprintf("inmobi_app_%d", apps[1].ID),
+					Order:     3,
+				},
+				&sdkapi.MetaInitConfig{
+					AppID:     fmt.Sprintf("meta_app_%d", apps[1].ID),
+					AppSecret: fmt.Sprintf("meta_app_%d_secret", apps[1].ID),
+					Order:     0,
+				},
+				&sdkapi.MintegralInitConfig{
+					AppID:  fmt.Sprintf("mintegral_app_%d", apps[1].ID),
+					AppKey: "mintegral",
+					Order:  3,
+				},
+				&sdkapi.MobileFuseInitConfig{
+					Order: 3,
+				},
+				&sdkapi.UnityAdsInitConfig{
+					GameID: fmt.Sprintf("unityads_game_%d", apps[1].ID),
+					Order:  2,
+				},
+				&sdkapi.VungleInitConfig{
+					AppID: fmt.Sprintf("vungle_app_%d", apps[1].ID),
+					Order: 2,
+				},
+			},
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			sdkVersion, _ := semver.NewVersion(tt.sdkVersion)
-			got, err := fetcher.FetchAdapterInitConfigs(context.Background(), tt.appID, tt.adapterKeys, sdkVersion)
+			got, err := fetcher.FetchAdapterInitConfigs(context.Background(), tt.appID, tt.adapterKeys, sdkVersion, tt.setOrder)
 			if err != nil {
 				t.Fatalf("FetchAdapterInitConfigs() error = %v", err)
 			}
@@ -351,7 +394,7 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Amazon(t *testing.T) 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			sdkVersion, _ := semver.NewVersion(tt.sdkVersion)
-			got, err := fetcher.FetchAdapterInitConfigs(context.Background(), tt.appID, tt.adapterKeys, sdkVersion)
+			got, err := fetcher.FetchAdapterInitConfigs(context.Background(), tt.appID, tt.adapterKeys, sdkVersion, false)
 			if err != nil {
 				t.Fatalf("FetchAdapterInitConfigs() error = %v", err)
 			}
