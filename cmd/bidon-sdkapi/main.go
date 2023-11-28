@@ -104,7 +104,7 @@ func main() {
 
 	configFetcher := &auctionstore.ConfigFetcher{
 		DB:    db,
-		Cache: config.NewMemoryCacheOf[*auction.Config](1 * time.Hour),
+		Cache: config.NewMemoryCacheOf[*auction.Config](10 * time.Minute),
 	}
 	appFetcher := &sdkapistore.AppFetcher{
 		DB:    db,
@@ -116,7 +116,10 @@ func main() {
 		Cache:     config.NewMemoryCacheOf[*dbpkg.Country](cache.UnlimitedTTL), // We don't update countries
 	}
 	segmentMatcher := segment.Matcher{
-		Fetcher: &segmentstore.SegmentFetcher{DB: db},
+		Fetcher: &segmentstore.SegmentFetcher{
+			DB:    db,
+			Cache: config.NewMemoryCacheOf[[]segment.Segment](10 * time.Minute),
+		},
 	}
 
 	biddingHttpClient := &http.Client{

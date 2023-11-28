@@ -29,7 +29,7 @@ func SetupConfigHandler() sdkapi.ConfigHandler {
 	}
 
 	segmentFetcher := &segmentmocks.FetcherMock{
-		FetchFunc: func(ctx context.Context, appID int64) ([]segment.Segment, error) {
+		FetchCachedFunc: func(ctx context.Context, appID int64) ([]segment.Segment, error) {
 			return []segment.Segment{sgmnt}, nil
 		},
 	}
