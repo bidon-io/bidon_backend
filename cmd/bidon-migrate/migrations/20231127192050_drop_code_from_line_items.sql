@@ -5,5 +5,5 @@ ALTER TABLE line_items DROP COLUMN code;
 
 -- +goose Down
 -- +goose StatementBegin
-ALTER TABLE line_items ADD COLUMN code VARCHAR(255) NOT NULL;
+ALTER TABLE line_items ADD COLUMN code VARCHAR;
 -- +goose StatementEnd
