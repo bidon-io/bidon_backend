@@ -23,7 +23,7 @@ func TestMatchTwoFilters(t *testing.T) {
 	}
 
 	segmentFetcher := &segmentmocks.FetcherMock{
-		FetchFunc: func(ctx context.Context, appID int64) ([]segment.Segment, error) {
+		FetchCachedFunc: func(ctx context.Context, appID int64) ([]segment.Segment, error) {
 			return segments, nil
 		},
 	}
@@ -67,7 +67,7 @@ func TestMatchTwoFilters(t *testing.T) {
 	}
 
 	segmentFetcher = &segmentmocks.FetcherMock{
-		FetchFunc: func(ctx context.Context, appID int64) ([]segment.Segment, error) {
+		FetchCachedFunc: func(ctx context.Context, appID int64) ([]segment.Segment, error) {
 			return segments, nil
 		},
 	}
@@ -100,7 +100,7 @@ func TestMatchTwoFilters(t *testing.T) {
 	}
 
 	segmentFetcher = &segmentmocks.FetcherMock{
-		FetchFunc: func(ctx context.Context, appID int64) ([]segment.Segment, error) {
+		FetchCachedFunc: func(ctx context.Context, appID int64) ([]segment.Segment, error) {
 			return segments, nil
 		},
 	}

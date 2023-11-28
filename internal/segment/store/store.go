@@ -8,7 +8,18 @@ import (
 )
 
 type SegmentFetcher struct {
-	DB *db.DB
+	DB    *db.DB
+	Cache cache
+}
+
+type cache interface {
+	Get(context.Context, []byte, func(ctx context.Context) ([]segment.Segment, error)) ([]segment.Segment, error)
+}
+
+func (f *SegmentFetcher) FetchCached(ctx context.Context, appID int64) ([]segment.Segment, error) {
+	return f.Cache.Get(ctx, []byte(strconv.FormatInt(appID, 10)), func(ctx context.Context) ([]segment.Segment, error) {
+		return f.Fetch(ctx, appID)
+	})
 }
 
 func (f *SegmentFetcher) Fetch(ctx context.Context, appID int64) ([]segment.Segment, error) {

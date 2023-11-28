@@ -19,8 +19,8 @@ var _ segment.Fetcher = &FetcherMock{}
 //
 //		// make and configure a mocked segment.Fetcher
 //		mockedFetcher := &FetcherMock{
-//			FetchFunc: func(ctx context.Context, appID int64) ([]segment.Segment, error) {
-//				panic("mock out the Fetch method")
+//			FetchCachedFunc: func(ctx context.Context, appID int64) ([]segment.Segment, error) {
+//				panic("mock out the FetchCached method")
 //			},
 //		}
 //
@@ -29,26 +29,26 @@ var _ segment.Fetcher = &FetcherMock{}
 //
 //	}
 type FetcherMock struct {
-	// FetchFunc mocks the Fetch method.
-	FetchFunc func(ctx context.Context, appID int64) ([]segment.Segment, error)
+	// FetchCachedFunc mocks the FetchCached method.
+	FetchCachedFunc func(ctx context.Context, appID int64) ([]segment.Segment, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
-		// Fetch holds details about calls to the Fetch method.
-		Fetch []struct {
+		// FetchCached holds details about calls to the FetchCached method.
+		FetchCached []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// AppID is the appID argument value.
 			AppID int64
 		}
 	}
-	lockFetch sync.RWMutex
+	lockFetchCached sync.RWMutex
 }
 
-// Fetch calls FetchFunc.
-func (mock *FetcherMock) Fetch(ctx context.Context, appID int64) ([]segment.Segment, error) {
-	if mock.FetchFunc == nil {
-		panic("FetcherMock.FetchFunc: method is nil but Fetcher.Fetch was just called")
+// FetchCached calls FetchCachedFunc.
+func (mock *FetcherMock) FetchCached(ctx context.Context, appID int64) ([]segment.Segment, error) {
+	if mock.FetchCachedFunc == nil {
+		panic("FetcherMock.FetchCachedFunc: method is nil but Fetcher.FetchCached was just called")
 	}
 	callInfo := struct {
 		Ctx   context.Context
@@ -57,17 +57,17 @@ func (mock *FetcherMock) Fetch(ctx context.Context, appID int64) ([]segment.Segm
 		Ctx:   ctx,
 		AppID: appID,
 	}
-	mock.lockFetch.Lock()
-	mock.calls.Fetch = append(mock.calls.Fetch, callInfo)
-	mock.lockFetch.Unlock()
-	return mock.FetchFunc(ctx, appID)
+	mock.lockFetchCached.Lock()
+	mock.calls.FetchCached = append(mock.calls.FetchCached, callInfo)
+	mock.lockFetchCached.Unlock()
+	return mock.FetchCachedFunc(ctx, appID)
 }
 
-// FetchCalls gets all the calls that were made to Fetch.
+// FetchCachedCalls gets all the calls that were made to FetchCached.
 // Check the length with:
 //
-//	len(mockedFetcher.FetchCalls())
-func (mock *FetcherMock) FetchCalls() []struct {
+//	len(mockedFetcher.FetchCachedCalls())
+func (mock *FetcherMock) FetchCachedCalls() []struct {
 	Ctx   context.Context
 	AppID int64
 } {
@@ -75,8 +75,8 @@ func (mock *FetcherMock) FetchCalls() []struct {
 		Ctx   context.Context
 		AppID int64
 	}
-	mock.lockFetch.RLock()
-	calls = mock.calls.Fetch
-	mock.lockFetch.RUnlock()
+	mock.lockFetchCached.RLock()
+	calls = mock.calls.FetchCached
+	mock.lockFetchCached.RUnlock()
 	return calls
 }
