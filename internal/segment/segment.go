@@ -50,11 +50,11 @@ type Matcher struct {
 //go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/mocks.go -pkg mocks . Fetcher
 
 type Fetcher interface {
-	Fetch(ctx context.Context, appID int64) ([]Segment, error)
+	FetchCached(ctx context.Context, appID int64) ([]Segment, error)
 }
 
 func (m *Matcher) Match(ctx context.Context, params *Params) Segment {
-	sgmnts, err := m.Fetcher.Fetch(ctx, params.AppID)
+	sgmnts, err := m.Fetcher.FetchCached(ctx, params.AppID)
 	if err != nil {
 		return Segment{ID: 0}
 	}
