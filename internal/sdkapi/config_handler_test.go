@@ -37,7 +37,7 @@ func SetupConfigHandler() sdkapi.ConfigHandler {
 		Fetcher: segmentFetcher,
 	}
 	adapterInitConfigsFetcher := &mocks.AdapterInitConfigsFetcherMock{
-		FetchAdapterInitConfigsFunc: func(ctx context.Context, appID int64, adapterKeys []adapter.Key, sdkVersion *semver.Version) ([]sdkapi.AdapterInitConfig, error) {
+		FetchAdapterInitConfigsFunc: func(ctx context.Context, appID int64, adapterKeys []adapter.Key, sdkVersion *semver.Version, setOrder bool) ([]sdkapi.AdapterInitConfig, error) {
 			return []sdkapi.AdapterInitConfig{
 				&sdkapi.AdmobInitConfig{
 					AppID: fmt.Sprintf("admob_app_%d", app.ID),
@@ -51,8 +51,15 @@ func SetupConfigHandler() sdkapi.ConfigHandler {
 					Endpoint:        "x.appbaqend.com",
 					MediationConfig: []string{"one", "two"},
 				},
+				&sdkapi.BigoAdsInitConfig{
+					AppID: fmt.Sprintf("bigo_app_%d", app.ID),
+				},
 				&sdkapi.DTExchangeInitConfig{
 					AppID: fmt.Sprintf("dtexchange_app_%d", app.ID),
+				},
+				&sdkapi.GAMInitConfig{
+					AppID:       fmt.Sprintf("dtexchange_app_%d", app.ID),
+					NetworkCode: "network_code",
 				},
 				&sdkapi.MetaInitConfig{
 					AppID:     fmt.Sprintf("meta_app_%d", app.ID),
@@ -61,6 +68,23 @@ func SetupConfigHandler() sdkapi.ConfigHandler {
 				&sdkapi.MintegralInitConfig{
 					AppID:  fmt.Sprintf("mintegral_app_%d", app.ID),
 					AppKey: "mintegral",
+				},
+				&sdkapi.UnityAdsInitConfig{
+					GameID: fmt.Sprintf("unity_game_%d", app.ID),
+				},
+				&sdkapi.VungleInitConfig{
+					AppID: fmt.Sprintf("vungle_app_%d", app.ID),
+				},
+				&sdkapi.MobileFuseInitConfig{
+					PublisherID: fmt.Sprintf("mobilefuse_publisher_%d", app.ID),
+					AppKey:      fmt.Sprintf("mobilefuse_app_%d", app.ID),
+				},
+				&sdkapi.InmobiInitConfig{
+					AccountID: fmt.Sprintf("inmobi_account_%d", app.ID),
+					AppKey:    fmt.Sprintf("inmobi_app_%d", app.ID),
+				},
+				&sdkapi.AmazonInitConfig{
+					AppKey: fmt.Sprintf("amazon_app_%d", app.ID),
 				},
 			}, nil
 		},
@@ -102,6 +126,12 @@ func TestConfigHandler_Handle(t *testing.T) {
 			name:         "valid request",
 			sdkVersion:   "0.5.0",
 			requestPath:  "testdata/config/valid_request.json",
+			expectedCode: http.StatusOK,
+		},
+		{
+			name:         "valid request android",
+			sdkVersion:   "0.5.0",
+			requestPath:  "testdata/config/valid_request_android.json",
 			expectedCode: http.StatusOK,
 		},
 		{

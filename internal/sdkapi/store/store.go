@@ -53,7 +53,7 @@ type AdapterInitConfigsFetcher struct {
 	DB *db.DB
 }
 
-func (f *AdapterInitConfigsFetcher) FetchAdapterInitConfigs(ctx context.Context, appID int64, adapterKeys []adapter.Key, sdkVersion *semver.Version) ([]sdkapi.AdapterInitConfig, error) {
+func (f *AdapterInitConfigsFetcher) FetchAdapterInitConfigs(ctx context.Context, appID int64, adapterKeys []adapter.Key, sdkVersion *semver.Version, setOrder bool) ([]sdkapi.AdapterInitConfig, error) {
 	var dbProfiles []db.AppDemandProfile
 
 	err := f.DB.
@@ -71,7 +71,7 @@ func (f *AdapterInitConfigsFetcher) FetchAdapterInitConfigs(ctx context.Context,
 	configs := make([]sdkapi.AdapterInitConfig, 0, len(dbProfiles))
 	for _, profile := range dbProfiles {
 		adapterKey := adapter.Key(profile.Account.DemandSource.APIKey)
-		config, err := sdkapi.NewAdapterInitConfig(adapterKey)
+		config, err := sdkapi.NewAdapterInitConfig(adapterKey, setOrder)
 		if err != nil {
 			return nil, fmt.Errorf("new AdapterInitConfig: %w", err)
 		}
