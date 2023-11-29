@@ -141,6 +141,7 @@ services:
       KAFKA_BATCH_MAX_BYTES:
       KAFKA_DELIVERY_INTERVAL: 5
       KAFKA_AD_EVENTS_TOPIC: ad-events
+      KAFKA_NOTIFICATION_EVENTS_TOPIC: notification-events
       USE_GEOCODING: "true"
       MAXMIND_GEOIP_FILE_PATH: /public/system/GeoLite2-City.mmdb
     ports:

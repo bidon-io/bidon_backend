@@ -96,11 +96,12 @@ func (h *ConfigHandler) Handle(c echo.Context) error {
 	return c.JSON(http.StatusOK, resp)
 }
 
-func prepareConfigEvent(req *request[schema.ConfigRequest, *schema.ConfigRequest]) *event.RequestEvent {
+func prepareConfigEvent(req *request[schema.ConfigRequest, *schema.ConfigRequest]) *event.AdEvent {
 	adRequestParams := event.AdRequestParams{
 		EventType: "config",
 	}
-	return event.NewRequest(&req.raw.BaseRequest, adRequestParams, req.geoData)
+
+	return event.NewAdEvent(&req.raw.BaseRequest, adRequestParams, req.geoData)
 }
 
 type AdapterInitConfig interface {

@@ -15,7 +15,7 @@ type Event interface {
 	Topic() config.Topic
 }
 
-func NewRequest(request *schema.BaseRequest, adRequestParams AdRequestParams, geoData geocoder.GeoData) *RequestEvent {
+func NewAdEvent(request *schema.BaseRequest, adRequestParams AdRequestParams, geoData geocoder.GeoData) *AdEvent {
 	requestEvent := newBaseRequest(request, geoData)
 
 	requestEvent.EventType = adRequestParams.EventType
@@ -48,13 +48,13 @@ func NewRequest(request *schema.BaseRequest, adRequestParams AdRequestParams, ge
 	return requestEvent
 }
 
-func newBaseRequest(request *schema.BaseRequest, geoData geocoder.GeoData) *RequestEvent {
+func newBaseRequest(request *schema.BaseRequest, geoData geocoder.GeoData) *AdEvent {
 	segmentUID, err := strconv.Atoi(request.Segment.UID)
 	if err != nil {
 		segmentUID = 0
 	}
 
-	return &RequestEvent{
+	return &AdEvent{
 		Timestamp:                   generateTimestamp(),
 		Manufacturer:                request.Device.Manufacturer,
 		Model:                       request.Device.Model,
@@ -128,7 +128,7 @@ type AdRequestParams struct {
 	ExternalWinnerEcpm      float64
 }
 
-type RequestEvent struct {
+type AdEvent struct {
 	Timestamp                   float64   `json:"timestamp"`
 	EventType                   string    `json:"event_type"`
 	AdType                      string    `json:"ad_type"`
@@ -200,10 +200,59 @@ type Session struct {
 	CPUUsage                  *float64 `json:"cpu_usage"`
 }
 
-func (e *RequestEvent) Topic() config.Topic {
+func (e *AdEvent) Topic() config.Topic {
 	return config.AdEventsTopic
 }
 
 func generateTimestamp() float64 {
 	return float64(time.Now().UnixNano()) / 1e9
+}
+
+func NewNotificationEvent(params NotificationParams) *NotificationEvent {
+	errorString := ""
+	if params.Error != nil {
+		errorString = params.Error.Error()
+	}
+
+	return &NotificationEvent{
+		Timestamp:   generateTimestamp(),
+		EventType:   params.EventType,
+		ImpID:       params.ImpID,
+		DemandID:    params.DemandID,
+		LossReason:  params.LossReason,
+		FirstPrice:  params.FirstPrice,
+		SecondPrice: params.SecondPrice,
+		URL:         params.URL,
+		TemplateURL: params.TemplateURL,
+		Error:       errorString,
+	}
+}
+
+type NotificationParams struct {
+	EventType   string
+	ImpID       string
+	DemandID    string
+	LossReason  int64
+	FirstPrice  float64
+	SecondPrice float64
+	URL         string
+	TemplateURL string
+	Error       error
+}
+
+type NotificationEvent struct {
+	Timestamp   float64 `json:"timestamp"`
+	EventType   string  `json:"event_type"`
+	ImpID       string  `json:"imp_id"`
+	DemandID    string  `json:"demand_id"`
+	LossReason  int64   `json:"loss_reason"`
+	FirstPrice  float64 `json:"first_price"`
+	SecondPrice float64 `json:"second_price"`
+	URL         string  `json:"url"`
+	TemplateURL string  `json:"template_url"`
+	Error       string  `json:"error"`
+}
+
+func (e *NotificationEvent) Topic() config.Topic {
+	return config.NotificationEventsTopic
 }

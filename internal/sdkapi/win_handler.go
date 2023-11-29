@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	"github.com/labstack/echo/v4"
@@ -20,7 +19,7 @@ type WinHandler struct {
 
 //go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/win_mocks.go -pkg mocks . WinNotificationHandler
 type WinNotificationHandler interface {
-	HandleWin(context.Context, *schema.Imp, []*adapters.DemandResponse) error
+	HandleWin(ctx context.Context, bid *schema.Bid) error
 }
 
 func (h *WinHandler) Handle(c echo.Context) error {
@@ -37,7 +36,7 @@ func (h *WinHandler) Handle(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]any{"success": true})
 }
 
-func prepareWinEvent(req *request[schema.WinRequest, *schema.WinRequest]) *event.RequestEvent {
+func prepareWinEvent(req *request[schema.WinRequest, *schema.WinRequest]) *event.AdEvent {
 	bid := req.raw.Bid
 
 	auctionConfigurationUID, err := strconv.ParseInt(bid.AuctionConfigurationUID, 10, 64)
@@ -63,5 +62,6 @@ func prepareWinEvent(req *request[schema.WinRequest, *schema.WinRequest]) *event
 		PriceFloor:              bid.AuctionPriceFloor,
 		Bidding:                 bid.IsBidding(),
 	}
-	return event.NewRequest(&req.raw.BaseRequest, adRequestParams, req.geoData)
+
+	return event.NewAdEvent(&req.raw.BaseRequest, adRequestParams, req.geoData)
 }

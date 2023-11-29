@@ -128,14 +128,17 @@ func main() {
 	biddingHttpClient := &http.Client{
 		Timeout: 5 * time.Second,
 		Transport: &http.Transport{
-			MaxConnsPerHost:     50,
-			MaxIdleConns:        50,
+			MaxConnsPerHost:     200,
+			MaxIdleConns:        200,
 			MaxIdleConnsPerHost: 50, // TODO: Move to config
 		},
 	}
 	notificationHandler := notification.Handler{
 		AuctionResultRepo: notificationstore.AuctionResultRepo{Redis: rdb},
-		HttpClient:        biddingHttpClient,
+		Sender: notification.EventSender{
+			HttpClient:  biddingHttpClient,
+			EventLogger: eventLogger,
+		},
 	}
 
 	auctionHandler := sdkapi.AuctionHandler{

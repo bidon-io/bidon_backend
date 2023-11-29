@@ -162,6 +162,10 @@ func (d StatsDemand) GetAdUnitUID() int {
 	return lineItemUID
 }
 
+func (d StatsDemand) IsFill() bool {
+	return d.Status == "WIN" || d.Status == "LOSE"
+}
+
 type StatsBidding struct {
 	BidStartTS  int64      `json:"bid_start_ts" validate:"required"`
 	BidFinishTS int64      `json:"bid_finish_ts"`
@@ -194,6 +198,10 @@ func (b StatsBid) GetAdUnitUID() int {
 		return 0
 	}
 	return adUnitUID
+}
+
+func (b StatsBid) IsFill() bool {
+	return b.Status == "WIN" || b.Status == "LOSE"
 }
 
 type mapper interface {
