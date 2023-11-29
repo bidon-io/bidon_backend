@@ -29,12 +29,15 @@ func (h *LossHandler) Handle(c echo.Context) error {
 		return err
 	}
 
-	h.sendEvents(c, req)
+	adEvent := prepareLossEvent(req)
+	h.EventLogger.Log(adEvent, func(err error) {
+		logError(c, fmt.Errorf("log loss event: %v", err))
+	})
 
 	return c.JSON(http.StatusOK, map[string]any{"success": true})
 }
 
-func (h *LossHandler) sendEvents(c echo.Context, req *request[schema.LossRequest, *schema.LossRequest]) {
+func prepareLossEvent(req *request[schema.LossRequest, *schema.LossRequest]) *event.RequestEvent {
 	bid := req.raw.Bid
 
 	auctionConfigurationUID, err := strconv.ParseInt(bid.AuctionConfigurationUID, 10, 64)
@@ -45,6 +48,7 @@ func (h *LossHandler) sendEvents(c echo.Context, req *request[schema.LossRequest
 	adRequestParams := event.AdRequestParams{
 		EventType:               "loss",
 		AdType:                  string(req.raw.AdType),
+		AdFormat:                string(bid.Format()),
 		AuctionID:               bid.AuctionID,
 		AuctionConfigurationID:  bid.AuctionConfigurationID,
 		AuctionConfigurationUID: auctionConfigurationUID,
@@ -61,8 +65,5 @@ func (h *LossHandler) sendEvents(c echo.Context, req *request[schema.LossRequest
 		ExternalWinnerDemandID:  req.raw.ExternalWinner.DemandID,
 		ExternalWinnerEcpm:      req.raw.ExternalWinner.ECPM,
 	}
-	adEvent := event.NewRequest(&req.raw.BaseRequest, adRequestParams, req.geoData)
-	h.EventLogger.Log(adEvent, func(err error) {
-		logError(c, fmt.Errorf("log loss event: %v", err))
-	})
+	return event.NewRequest(&req.raw.BaseRequest, adRequestParams, req.geoData)
 }

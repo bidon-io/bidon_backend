@@ -2,6 +2,8 @@ package schema
 
 import (
 	"strconv"
+
+	"github.com/bidon-io/bidon-backend/internal/ad"
 )
 
 type Bid struct {
@@ -26,11 +28,11 @@ type Bid struct {
 	Rewarded                *RewardedAdObject     `json:"rewarded"`
 }
 
-func (b Bid) IsBidding() bool {
+func (b *Bid) IsBidding() bool {
 	return b.BidType == RTBBidType
 }
 
-func (b Bid) GetAdUnitUID() int {
+func (b *Bid) GetAdUnitUID() int {
 	var adUnitUIDStr string
 	if b.AdUnitUID != "" {
 		adUnitUIDStr = b.AdUnitUID
@@ -45,14 +47,22 @@ func (b Bid) GetAdUnitUID() int {
 	return adUnitUID
 }
 
-func (b Bid) GetPrice() float64 {
+func (b *Bid) GetPrice() float64 {
 	if b.Price != 0 {
 		return b.Price
 	}
 	return b.ECPM
 }
 
-func (b Bid) Map() map[string]any {
+func (b *Bid) Format() ad.Format {
+	if b.Banner != nil {
+		return b.Banner.Format
+	}
+
+	return ad.EmptyFormat
+}
+
+func (b *Bid) Map() map[string]any {
 	auctionConfigurationUID, err := strconv.Atoi(b.AuctionConfigurationUID)
 	if err != nil {
 		auctionConfigurationUID = 0

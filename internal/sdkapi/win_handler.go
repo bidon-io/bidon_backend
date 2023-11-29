@@ -29,12 +29,15 @@ func (h *WinHandler) Handle(c echo.Context) error {
 		return err
 	}
 
-	h.sendEvents(c, req)
+	demandRequestEvent := prepareWinEvent(req)
+	h.EventLogger.Log(demandRequestEvent, func(err error) {
+		logError(c, fmt.Errorf("log win event: %v", err))
+	})
 
 	return c.JSON(http.StatusOK, map[string]any{"success": true})
 }
 
-func (h *WinHandler) sendEvents(c echo.Context, req *request[schema.WinRequest, *schema.WinRequest]) {
+func prepareWinEvent(req *request[schema.WinRequest, *schema.WinRequest]) *event.RequestEvent {
 	bid := req.raw.Bid
 
 	auctionConfigurationUID, err := strconv.ParseInt(bid.AuctionConfigurationUID, 10, 64)
@@ -45,6 +48,7 @@ func (h *WinHandler) sendEvents(c echo.Context, req *request[schema.WinRequest, 
 	adRequestParams := event.AdRequestParams{
 		EventType:               "win",
 		AdType:                  string(req.raw.AdType),
+		AdFormat:                string(bid.Format()),
 		AuctionID:               bid.AuctionID,
 		AuctionConfigurationID:  bid.AuctionConfigurationID,
 		AuctionConfigurationUID: auctionConfigurationUID,
@@ -59,8 +63,5 @@ func (h *WinHandler) sendEvents(c echo.Context, req *request[schema.WinRequest, 
 		PriceFloor:              bid.AuctionPriceFloor,
 		Bidding:                 bid.IsBidding(),
 	}
-	demandRequestEvent := event.NewRequest(&req.raw.BaseRequest, adRequestParams, req.geoData)
-	h.EventLogger.Log(demandRequestEvent, func(err error) {
-		logError(c, fmt.Errorf("log win event: %v", err))
-	})
+	return event.NewRequest(&req.raw.BaseRequest, adRequestParams, req.geoData)
 }

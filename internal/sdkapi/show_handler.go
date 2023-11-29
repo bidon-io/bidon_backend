@@ -29,12 +29,15 @@ func (h *ShowHandler) Handle(c echo.Context) error {
 		return err
 	}
 
-	h.sendEvents(c, req)
+	demandRequestEvent := prepareShowEvent(req)
+	h.EventLogger.Log(demandRequestEvent, func(err error) {
+		logError(c, fmt.Errorf("log show event: %v", err))
+	})
 
 	return c.JSON(http.StatusOK, map[string]any{"success": true})
 }
 
-func (h *ShowHandler) sendEvents(c echo.Context, req *request[schema.ShowRequest, *schema.ShowRequest]) {
+func prepareShowEvent(req *request[schema.ShowRequest, *schema.ShowRequest]) *event.RequestEvent {
 	bid := req.raw.Bid
 
 	auctionConfigurationUID, err := strconv.ParseInt(bid.AuctionConfigurationUID, 10, 64)
@@ -45,6 +48,7 @@ func (h *ShowHandler) sendEvents(c echo.Context, req *request[schema.ShowRequest
 	adRequestParams := event.AdRequestParams{
 		EventType:               "show",
 		AdType:                  string(req.raw.AdType),
+		AdFormat:                string(bid.Format()),
 		AuctionID:               bid.AuctionID,
 		AuctionConfigurationID:  bid.AuctionConfigurationID,
 		AuctionConfigurationUID: auctionConfigurationUID,
@@ -59,8 +63,5 @@ func (h *ShowHandler) sendEvents(c echo.Context, req *request[schema.ShowRequest
 		PriceFloor:              bid.AuctionPriceFloor,
 		Bidding:                 bid.IsBidding(),
 	}
-	demandRequestEvent := event.NewRequest(&req.raw.BaseRequest, adRequestParams, req.geoData)
-	h.EventLogger.Log(demandRequestEvent, func(err error) {
-		logError(c, fmt.Errorf("log show event: %v", err))
-	})
+	return event.NewRequest(&req.raw.BaseRequest, adRequestParams, req.geoData)
 }

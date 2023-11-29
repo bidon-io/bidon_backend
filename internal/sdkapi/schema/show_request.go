@@ -29,12 +29,12 @@ func (r *ShowRequest) Map() map[string]any {
 	return m
 }
 
-func (b *ShowRequest) NormalizeValues() {
-	b.BaseRequest.NormalizeValues()
+func (r *ShowRequest) NormalizeValues() {
+	r.BaseRequest.NormalizeValues()
 
-	if b.Bid != nil {
+	if r.Bid != nil {
 		// Some SDK versions can send lower case bid_type
-		b.Bid.BidType = BidType(strings.ToUpper(b.Bid.BidType.String()))
+		r.Bid.BidType = BidType(strings.ToUpper(r.Bid.BidType.String()))
 	}
 }
 

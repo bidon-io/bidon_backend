@@ -1,7 +1,6 @@
 package event
 
 import (
-	"encoding/json"
 	"strconv"
 	"time"
 
@@ -14,15 +13,15 @@ type TimingMap map[string][2]int64
 
 type Event interface {
 	Topic() config.Topic
-	json.Marshaler
 }
 
-func NewRequest(request *schema.BaseRequest, adRequestParams AdRequestParams, geoData geocoder.GeoData) RequestEvent {
+func NewRequest(request *schema.BaseRequest, adRequestParams AdRequestParams, geoData geocoder.GeoData) *RequestEvent {
 	requestEvent := newBaseRequest(request, geoData)
 
 	requestEvent.EventType = adRequestParams.EventType
 	requestEvent.Status = adRequestParams.Status
 	requestEvent.AdType = adRequestParams.AdType
+	requestEvent.AdFormat = adRequestParams.AdFormat
 	requestEvent.AuctionID = adRequestParams.AuctionID
 	requestEvent.AuctionConfigurationID = adRequestParams.AuctionConfigurationID
 	requestEvent.AuctionConfigurationUID = adRequestParams.AuctionConfigurationUID
@@ -49,13 +48,13 @@ func NewRequest(request *schema.BaseRequest, adRequestParams AdRequestParams, ge
 	return requestEvent
 }
 
-func newBaseRequest(request *schema.BaseRequest, geoData geocoder.GeoData) RequestEvent {
+func newBaseRequest(request *schema.BaseRequest, geoData geocoder.GeoData) *RequestEvent {
 	segmentUID, err := strconv.Atoi(request.Segment.UID)
 	if err != nil {
 		segmentUID = 0
 	}
 
-	return RequestEvent{
+	return &RequestEvent{
 		Timestamp:                   generateTimestamp(),
 		Manufacturer:                request.Device.Manufacturer,
 		Model:                       request.Device.Model,
@@ -107,6 +106,7 @@ func newBaseRequest(request *schema.BaseRequest, geoData geocoder.GeoData) Reque
 type AdRequestParams struct {
 	EventType               string
 	AdType                  string
+	AdFormat                string
 	AuctionID               string
 	AuctionConfigurationID  int64
 	AuctionConfigurationUID int64
@@ -132,6 +132,7 @@ type RequestEvent struct {
 	Timestamp                   float64   `json:"timestamp"`
 	EventType                   string    `json:"event_type"`
 	AdType                      string    `json:"ad_type"`
+	AdFormat                    string    `json:"ad_format"`
 	AuctionID                   string    `json:"auction_id"`
 	AuctionConfigurationID      int64     `json:"auction_configuration_id"`
 	AuctionConfigurationUID     int64     `json:"auction_configuration_uid"`
@@ -199,12 +200,7 @@ type Session struct {
 	CPUUsage                  *float64 `json:"cpu_usage"`
 }
 
-func (e RequestEvent) MarshalJSON() ([]byte, error) {
-	type Alias RequestEvent
-	return json.Marshal((Alias)(e))
-}
-
-func (e RequestEvent) Topic() config.Topic {
+func (e *RequestEvent) Topic() config.Topic {
 	return config.AdEventsTopic
 }
 
