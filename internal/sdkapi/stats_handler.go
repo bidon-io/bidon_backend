@@ -21,7 +21,7 @@ type StatsHandler struct {
 //go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/stats_mocks.go -pkg mocks . StatsNotificationHandler
 
 type StatsNotificationHandler interface {
-	HandleStats(context.Context, schema.Stats, auction.Config) error
+	HandleStats(context.Context, schema.Stats, *auction.Config)
 }
 
 func (h *StatsHandler) Handle(c echo.Context) error {
@@ -37,18 +37,12 @@ func (h *StatsHandler) Handle(c echo.Context) error {
 		})
 	}
 
-	config := req.auctionConfig
-	if config == nil {
-		logError(c, fmt.Errorf("cannot find config: %v", req.raw.Stats.AuctionConfigurationID))
-	} else {
-		_ = ""
-		// h.NotificationHandler.HandleStats(ctx, req.raw.Stats, *config)
-	}
+	h.NotificationHandler.HandleStats(c.Request().Context(), req.raw.Stats, req.auctionConfig)
 
 	return c.JSON(http.StatusOK, map[string]any{"success": true})
 }
 
-func prepareStatsEvents(req *request[schema.StatsRequest, *schema.StatsRequest]) []*event.RequestEvent {
+func prepareStatsEvents(req *request[schema.StatsRequest, *schema.StatsRequest]) []*event.AdEvent {
 	// 1 event whole auction
 	// 1 event for each round
 	// 1 event for each demand in round
@@ -71,7 +65,7 @@ func prepareStatsEvents(req *request[schema.StatsRequest, *schema.StatsRequest])
 	}
 
 	// 1 event whole auction + 1 event for each round + at least 1 event for each demand in round
-	events := make([]*event.RequestEvent, 0, 1+len(stats.Rounds)*2)
+	events := make([]*event.AdEvent, 0, 1+len(stats.Rounds)*2)
 
 	adRequestParams := event.AdRequestParams{
 		EventType:               "stats_request",
@@ -91,7 +85,7 @@ func prepareStatsEvents(req *request[schema.StatsRequest, *schema.StatsRequest])
 		PriceFloor:              statsPriceFloor,
 		TimingMap:               event.TimingMap{"auction": {stats.Result.AuctionStartTS, stats.Result.AuctionFinishTS}},
 	}
-	events = append(events, event.NewRequest(&req.raw.BaseRequest, adRequestParams, req.geoData))
+	events = append(events, event.NewAdEvent(&req.raw.BaseRequest, adRequestParams, req.geoData))
 
 	for roundNumber, round := range stats.Rounds {
 		adRequestParams = event.AdRequestParams{
@@ -116,7 +110,7 @@ func prepareStatsEvents(req *request[schema.StatsRequest, *schema.StatsRequest])
 		} else {
 			adRequestParams.Status = "FAIL"
 		}
-		events = append(events, event.NewRequest(&req.raw.BaseRequest, adRequestParams, req.geoData))
+		events = append(events, event.NewAdEvent(&req.raw.BaseRequest, adRequestParams, req.geoData))
 
 		for _, demand := range round.Demands {
 			adRequestParams = event.AdRequestParams{
@@ -138,7 +132,7 @@ func prepareStatsEvents(req *request[schema.StatsRequest, *schema.StatsRequest])
 				Bidding:                 false,
 				TimingMap:               event.TimingMap{"fill": {demand.FillStartTS, demand.FillFinishTS}},
 			}
-			events = append(events, event.NewRequest(&req.raw.BaseRequest, adRequestParams, req.geoData))
+			events = append(events, event.NewAdEvent(&req.raw.BaseRequest, adRequestParams, req.geoData))
 		}
 
 		for _, bid := range round.Bidding.Bids {
@@ -165,7 +159,7 @@ func prepareStatsEvents(req *request[schema.StatsRequest, *schema.StatsRequest])
 					"bid":   {round.Bidding.BidStartTS, round.Bidding.BidFinishTS},
 				},
 			}
-			events = append(events, event.NewRequest(&req.raw.BaseRequest, adRequestParams, req.geoData))
+			events = append(events, event.NewAdEvent(&req.raw.BaseRequest, adRequestParams, req.geoData))
 		}
 	}
 

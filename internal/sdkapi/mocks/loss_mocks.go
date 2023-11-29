@@ -5,7 +5,6 @@ package mocks
 
 import (
 	"context"
-	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	"sync"
@@ -21,7 +20,7 @@ var _ sdkapi.LossNotificationHandler = &LossNotificationHandlerMock{}
 //
 //		// make and configure a mocked sdkapi.LossNotificationHandler
 //		mockedLossNotificationHandler := &LossNotificationHandlerMock{
-//			HandleLossFunc: func(contextMoqParam context.Context, imp *schema.Imp, demandResponses []*adapters.DemandResponse) error {
+//			HandleLossFunc: func(ctx context.Context, bid *schema.Bid) error {
 //				panic("mock out the HandleLoss method")
 //			},
 //		}
@@ -32,41 +31,37 @@ var _ sdkapi.LossNotificationHandler = &LossNotificationHandlerMock{}
 //	}
 type LossNotificationHandlerMock struct {
 	// HandleLossFunc mocks the HandleLoss method.
-	HandleLossFunc func(contextMoqParam context.Context, imp *schema.Imp, demandResponses []*adapters.DemandResponse) error
+	HandleLossFunc func(ctx context.Context, bid *schema.Bid) error
 
 	// calls tracks calls to the methods.
 	calls struct {
 		// HandleLoss holds details about calls to the HandleLoss method.
 		HandleLoss []struct {
-			// ContextMoqParam is the contextMoqParam argument value.
-			ContextMoqParam context.Context
-			// Imp is the imp argument value.
-			Imp *schema.Imp
-			// DemandResponses is the demandResponses argument value.
-			DemandResponses []*adapters.DemandResponse
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Bid is the bid argument value.
+			Bid *schema.Bid
 		}
 	}
 	lockHandleLoss sync.RWMutex
 }
 
 // HandleLoss calls HandleLossFunc.
-func (mock *LossNotificationHandlerMock) HandleLoss(contextMoqParam context.Context, imp *schema.Imp, demandResponses []*adapters.DemandResponse) error {
+func (mock *LossNotificationHandlerMock) HandleLoss(ctx context.Context, bid *schema.Bid) error {
 	if mock.HandleLossFunc == nil {
 		panic("LossNotificationHandlerMock.HandleLossFunc: method is nil but LossNotificationHandler.HandleLoss was just called")
 	}
 	callInfo := struct {
-		ContextMoqParam context.Context
-		Imp             *schema.Imp
-		DemandResponses []*adapters.DemandResponse
+		Ctx context.Context
+		Bid *schema.Bid
 	}{
-		ContextMoqParam: contextMoqParam,
-		Imp:             imp,
-		DemandResponses: demandResponses,
+		Ctx: ctx,
+		Bid: bid,
 	}
 	mock.lockHandleLoss.Lock()
 	mock.calls.HandleLoss = append(mock.calls.HandleLoss, callInfo)
 	mock.lockHandleLoss.Unlock()
-	return mock.HandleLossFunc(contextMoqParam, imp, demandResponses)
+	return mock.HandleLossFunc(ctx, bid)
 }
 
 // HandleLossCalls gets all the calls that were made to HandleLoss.
@@ -74,14 +69,12 @@ func (mock *LossNotificationHandlerMock) HandleLoss(contextMoqParam context.Cont
 //
 //	len(mockedLossNotificationHandler.HandleLossCalls())
 func (mock *LossNotificationHandlerMock) HandleLossCalls() []struct {
-	ContextMoqParam context.Context
-	Imp             *schema.Imp
-	DemandResponses []*adapters.DemandResponse
+	Ctx context.Context
+	Bid *schema.Bid
 } {
 	var calls []struct {
-		ContextMoqParam context.Context
-		Imp             *schema.Imp
-		DemandResponses []*adapters.DemandResponse
+		Ctx context.Context
+		Bid *schema.Bid
 	}
 	mock.lockHandleLoss.RLock()
 	calls = mock.calls.HandleLoss

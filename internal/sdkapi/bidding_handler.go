@@ -244,14 +244,14 @@ func prepareBiddingEvents(
 	req *request[schema.BiddingRequest, *schema.BiddingRequest],
 	auctionResult *bidding.AuctionResult,
 	adUnitsMap *map[adapter.Key][]auction.AdUnit,
-) []*event.RequestEvent {
+) []*event.AdEvent {
 	imp := req.raw.Imp
 	auctionConfigurationUID, err := strconv.Atoi(imp.AuctionConfigurationUID)
 	if err != nil {
 		auctionConfigurationUID = 0
 	}
 
-	events := make([]*event.RequestEvent, 0, len(auctionResult.Bids))
+	events := make([]*event.AdEvent, 0, len(auctionResult.Bids))
 	for _, result := range auctionResult.Bids {
 		adUnit, _ := selectAdUnit(result, adUnitsMap)
 		adUnitUID := int64(0)
@@ -286,7 +286,7 @@ func prepareBiddingEvents(
 				"bid": {result.StartTS, result.EndTS},
 			},
 		}
-		events = append(events, event.NewRequest(&req.raw.BaseRequest, adRequestParams, req.geoData))
+		events = append(events, event.NewAdEvent(&req.raw.BaseRequest, adRequestParams, req.geoData))
 		if result.IsBid() {
 			adRequestParams = event.AdRequestParams{
 				EventType:               "bid",
@@ -309,7 +309,7 @@ func prepareBiddingEvents(
 					"bid": {result.StartTS, result.EndTS},
 				},
 			}
-			events = append(events, event.NewRequest(&req.raw.BaseRequest, adRequestParams, req.geoData))
+			events = append(events, event.NewAdEvent(&req.raw.BaseRequest, adRequestParams, req.geoData))
 		}
 	}
 

@@ -5,7 +5,6 @@ package mocks
 
 import (
 	"context"
-	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	"sync"
@@ -21,7 +20,7 @@ var _ sdkapi.ShowNotificationHandler = &ShowNotificationHandlerMock{}
 //
 //		// make and configure a mocked sdkapi.ShowNotificationHandler
 //		mockedShowNotificationHandler := &ShowNotificationHandlerMock{
-//			HandleShowFunc: func(ctx context.Context, imp *schema.Imp, responses []*adapters.DemandResponse) error {
+//			HandleShowFunc: func(contextMoqParam context.Context, bid *schema.Bid)  {
 //				panic("mock out the HandleShow method")
 //			},
 //		}
@@ -32,41 +31,37 @@ var _ sdkapi.ShowNotificationHandler = &ShowNotificationHandlerMock{}
 //	}
 type ShowNotificationHandlerMock struct {
 	// HandleShowFunc mocks the HandleShow method.
-	HandleShowFunc func(ctx context.Context, imp *schema.Imp, responses []*adapters.DemandResponse) error
+	HandleShowFunc func(contextMoqParam context.Context, bid *schema.Bid)
 
 	// calls tracks calls to the methods.
 	calls struct {
 		// HandleShow holds details about calls to the HandleShow method.
 		HandleShow []struct {
-			// Ctx is the ctx argument value.
-			Ctx context.Context
-			// Imp is the imp argument value.
-			Imp *schema.Imp
-			// Responses is the responses argument value.
-			Responses []*adapters.DemandResponse
+			// ContextMoqParam is the contextMoqParam argument value.
+			ContextMoqParam context.Context
+			// Bid is the bid argument value.
+			Bid *schema.Bid
 		}
 	}
 	lockHandleShow sync.RWMutex
 }
 
 // HandleShow calls HandleShowFunc.
-func (mock *ShowNotificationHandlerMock) HandleShow(ctx context.Context, imp *schema.Imp, responses []*adapters.DemandResponse) error {
+func (mock *ShowNotificationHandlerMock) HandleShow(contextMoqParam context.Context, bid *schema.Bid) {
 	if mock.HandleShowFunc == nil {
 		panic("ShowNotificationHandlerMock.HandleShowFunc: method is nil but ShowNotificationHandler.HandleShow was just called")
 	}
 	callInfo := struct {
-		Ctx       context.Context
-		Imp       *schema.Imp
-		Responses []*adapters.DemandResponse
+		ContextMoqParam context.Context
+		Bid             *schema.Bid
 	}{
-		Ctx:       ctx,
-		Imp:       imp,
-		Responses: responses,
+		ContextMoqParam: contextMoqParam,
+		Bid:             bid,
 	}
 	mock.lockHandleShow.Lock()
 	mock.calls.HandleShow = append(mock.calls.HandleShow, callInfo)
 	mock.lockHandleShow.Unlock()
-	return mock.HandleShowFunc(ctx, imp, responses)
+	mock.HandleShowFunc(contextMoqParam, bid)
 }
 
 // HandleShowCalls gets all the calls that were made to HandleShow.
@@ -74,14 +69,12 @@ func (mock *ShowNotificationHandlerMock) HandleShow(ctx context.Context, imp *sc
 //
 //	len(mockedShowNotificationHandler.HandleShowCalls())
 func (mock *ShowNotificationHandlerMock) HandleShowCalls() []struct {
-	Ctx       context.Context
-	Imp       *schema.Imp
-	Responses []*adapters.DemandResponse
+	ContextMoqParam context.Context
+	Bid             *schema.Bid
 } {
 	var calls []struct {
-		Ctx       context.Context
-		Imp       *schema.Imp
-		Responses []*adapters.DemandResponse
+		ContextMoqParam context.Context
+		Bid             *schema.Bid
 	}
 	mock.lockHandleShow.RLock()
 	calls = mock.calls.HandleShow

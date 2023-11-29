@@ -2,7 +2,6 @@ package sdkapi_test
 
 import (
 	"context"
-	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/mocks"
 	"net/http"
 	"os"
@@ -16,9 +15,7 @@ import (
 
 func SetupShowHandler() sdkapi.ShowHandler {
 	mockHandler := &mocks.ShowNotificationHandlerMock{}
-	mockHandler.HandleShowFunc = func(ctx context.Context, imp *schema.Imp, responses []*adapters.DemandResponse) error {
-		return nil
-	}
+	mockHandler.HandleShowFunc = func(ctx context.Context, imp *schema.Bid) {}
 	return sdkapi.ShowHandler{
 		BaseHandler: &sdkapi.BaseHandler[schema.ShowRequest, *schema.ShowRequest]{
 			AppFetcher: AppFetcherMock(),
