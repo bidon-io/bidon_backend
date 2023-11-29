@@ -137,3 +137,75 @@ func (mock *AuctionResultRepoMock) FindCalls() []struct {
 	mock.lockFind.RUnlock()
 	return calls
 }
+
+// Ensure, that SenderMock does implement notification.Sender.
+// If this is not the case, regenerate this file with moq.
+var _ notification.Sender = &SenderMock{}
+
+// SenderMock is a mock implementation of notification.Sender.
+//
+//	func TestSomethingThatUsesSender(t *testing.T) {
+//
+//		// make and configure a mocked notification.Sender
+//		mockedSender := &SenderMock{
+//			SendEventFunc: func(ctx context.Context, p notification.Params)  {
+//				panic("mock out the SendEvent method")
+//			},
+//		}
+//
+//		// use mockedSender in code that requires notification.Sender
+//		// and then make assertions.
+//
+//	}
+type SenderMock struct {
+	// SendEventFunc mocks the SendEvent method.
+	SendEventFunc func(ctx context.Context, p notification.Params)
+
+	// calls tracks calls to the methods.
+	calls struct {
+		// SendEvent holds details about calls to the SendEvent method.
+		SendEvent []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// P is the p argument value.
+			P notification.Params
+		}
+	}
+	lockSendEvent sync.RWMutex
+}
+
+// SendEvent calls SendEventFunc.
+func (mock *SenderMock) SendEvent(ctx context.Context, p notification.Params) {
+	if mock.SendEventFunc == nil {
+		panic("SenderMock.SendEventFunc: method is nil but Sender.SendEvent was just called")
+	}
+	callInfo := struct {
+		Ctx context.Context
+		P   notification.Params
+	}{
+		Ctx: ctx,
+		P:   p,
+	}
+	mock.lockSendEvent.Lock()
+	mock.calls.SendEvent = append(mock.calls.SendEvent, callInfo)
+	mock.lockSendEvent.Unlock()
+	mock.SendEventFunc(ctx, p)
+}
+
+// SendEventCalls gets all the calls that were made to SendEvent.
+// Check the length with:
+//
+//	len(mockedSender.SendEventCalls())
+func (mock *SenderMock) SendEventCalls() []struct {
+	Ctx context.Context
+	P   notification.Params
+} {
+	var calls []struct {
+		Ctx context.Context
+		P   notification.Params
+	}
+	mock.lockSendEvent.RLock()
+	calls = mock.calls.SendEvent
+	mock.lockSendEvent.RUnlock()
+	return calls
+}

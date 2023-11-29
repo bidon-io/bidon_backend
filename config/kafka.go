@@ -13,7 +13,8 @@ import (
 type Topic string
 
 const (
-	AdEventsTopic Topic = "ad_events"
+	AdEventsTopic           Topic = "ad_events"
+	NotificationEventsTopic Topic = "notification_events"
 )
 
 type KafkaConfig struct {
@@ -52,7 +53,8 @@ func Kafka() (conf KafkaConfig, err error) {
 	}
 
 	conf.Topics = map[Topic]string{
-		AdEventsTopic: os.Getenv("KAFKA_AD_EVENTS_TOPIC"),
+		AdEventsTopic:           os.Getenv("KAFKA_AD_EVENTS_TOPIC"),
+		NotificationEventsTopic: os.Getenv("KAFKA_NOTIFICATION_EVENTS_TOPIC"),
 	}
 
 	return

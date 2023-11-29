@@ -95,7 +95,7 @@ func (h *AuctionHandler) Handle(c echo.Context) error {
 	return c.JSON(http.StatusOK, response)
 }
 
-func prepareAuctionRequestEvent(req *request[schema.AuctionRequest, *schema.AuctionRequest], auc *auction.Auction, auctionConfigurationUID int) *event.RequestEvent {
+func prepareAuctionRequestEvent(req *request[schema.AuctionRequest, *schema.AuctionRequest], auc *auction.Auction, auctionConfigurationUID int) *event.AdEvent {
 	adRequestParams := event.AdRequestParams{
 		EventType:               "auction_request",
 		AdType:                  string(req.raw.AdType),
@@ -113,5 +113,6 @@ func prepareAuctionRequestEvent(req *request[schema.AuctionRequest, *schema.Auct
 		ECPM:                    0,
 		PriceFloor:              req.raw.AdObject.PriceFloor,
 	}
-	return event.NewRequest(&req.raw.BaseRequest, adRequestParams, req.geoData)
+
+	return event.NewAdEvent(&req.raw.BaseRequest, adRequestParams, req.geoData)
 }

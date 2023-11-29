@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	"github.com/bidon-io/bidon-backend/config"
-	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event/engine"
@@ -25,7 +24,7 @@ func SetupWinHandler() sdkapi.WinHandler {
 
 	// Create a mock WinNotificationHandler
 	mockHandler := &mocks.WinNotificationHandlerMock{}
-	mockHandler.HandleWinFunc = func(ctx context.Context, imp *schema.Imp, responses []*adapters.DemandResponse) error {
+	mockHandler.HandleWinFunc = func(ctx context.Context, imp *schema.Bid) error {
 		return nil
 	}
 	appFetcher := &mocks.AppFetcherMock{

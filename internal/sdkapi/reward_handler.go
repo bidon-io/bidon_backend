@@ -29,7 +29,7 @@ func (h *RewardHandler) Handle(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]any{"success": true})
 }
 
-func prepareRewardEvent(req *request[schema.RewardRequest, *schema.RewardRequest]) *event.RequestEvent {
+func prepareRewardEvent(req *request[schema.RewardRequest, *schema.RewardRequest]) *event.AdEvent {
 	bid := req.raw.Bid
 
 	auctionConfigurationUID, err := strconv.ParseInt(bid.AuctionConfigurationUID, 10, 64)
@@ -56,5 +56,5 @@ func prepareRewardEvent(req *request[schema.RewardRequest, *schema.RewardRequest
 		Bidding:                 bid.IsBidding(),
 	}
 
-	return event.NewRequest(&req.raw.BaseRequest, adRequestParams, req.geoData)
+	return event.NewAdEvent(&req.raw.BaseRequest, adRequestParams, req.geoData)
 }

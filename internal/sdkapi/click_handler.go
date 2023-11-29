@@ -29,7 +29,7 @@ func (h *ClickHandler) Handle(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]any{"success": true})
 }
 
-func prepareClickEvent(req *request[schema.ClickRequest, *schema.ClickRequest]) *event.RequestEvent {
+func prepareClickEvent(req *request[schema.ClickRequest, *schema.ClickRequest]) *event.AdEvent {
 	bid := req.raw.Bid
 
 	auctionConfigurationUID, err := strconv.ParseInt(bid.AuctionConfigurationUID, 10, 64)
@@ -56,5 +56,5 @@ func prepareClickEvent(req *request[schema.ClickRequest, *schema.ClickRequest]) 
 		Bidding:                 bid.IsBidding(),
 	}
 
-	return event.NewRequest(&req.raw.BaseRequest, adRequestParams, req.geoData)
+	return event.NewAdEvent(&req.raw.BaseRequest, adRequestParams, req.geoData)
 }

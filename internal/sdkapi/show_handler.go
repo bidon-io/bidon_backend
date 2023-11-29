@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	"github.com/labstack/echo/v4"
@@ -20,7 +19,7 @@ type ShowHandler struct {
 
 //go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/show_mocks.go -pkg mocks . ShowNotificationHandler
 type ShowNotificationHandler interface {
-	HandleShow(ctx context.Context, imp *schema.Imp, responses []*adapters.DemandResponse) error
+	HandleShow(context.Context, *schema.Bid)
 }
 
 func (h *ShowHandler) Handle(c echo.Context) error {
@@ -34,10 +33,12 @@ func (h *ShowHandler) Handle(c echo.Context) error {
 		logError(c, fmt.Errorf("log show event: %v", err))
 	})
 
+	h.NotificationHandler.HandleShow(c.Request().Context(), req.raw.Bid)
+
 	return c.JSON(http.StatusOK, map[string]any{"success": true})
 }
 
-func prepareShowEvent(req *request[schema.ShowRequest, *schema.ShowRequest]) *event.RequestEvent {
+func prepareShowEvent(req *request[schema.ShowRequest, *schema.ShowRequest]) *event.AdEvent {
 	bid := req.raw.Bid
 
 	auctionConfigurationUID, err := strconv.ParseInt(bid.AuctionConfigurationUID, 10, 64)
@@ -63,5 +64,6 @@ func prepareShowEvent(req *request[schema.ShowRequest, *schema.ShowRequest]) *ev
 		PriceFloor:              bid.AuctionPriceFloor,
 		Bidding:                 bid.IsBidding(),
 	}
-	return event.NewRequest(&req.raw.BaseRequest, adRequestParams, req.geoData)
+
+	return event.NewAdEvent(&req.raw.BaseRequest, adRequestParams, req.geoData)
 }

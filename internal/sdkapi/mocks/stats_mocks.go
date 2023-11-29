@@ -21,7 +21,7 @@ var _ sdkapi.StatsNotificationHandler = &StatsNotificationHandlerMock{}
 //
 //		// make and configure a mocked sdkapi.StatsNotificationHandler
 //		mockedStatsNotificationHandler := &StatsNotificationHandlerMock{
-//			HandleStatsFunc: func(contextMoqParam context.Context, stats schema.Stats, config auction.Config) error {
+//			HandleStatsFunc: func(contextMoqParam context.Context, stats schema.Stats, config *auction.Config)  {
 //				panic("mock out the HandleStats method")
 //			},
 //		}
@@ -32,7 +32,7 @@ var _ sdkapi.StatsNotificationHandler = &StatsNotificationHandlerMock{}
 //	}
 type StatsNotificationHandlerMock struct {
 	// HandleStatsFunc mocks the HandleStats method.
-	HandleStatsFunc func(contextMoqParam context.Context, stats schema.Stats, config auction.Config) error
+	HandleStatsFunc func(contextMoqParam context.Context, stats schema.Stats, config *auction.Config)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -43,21 +43,21 @@ type StatsNotificationHandlerMock struct {
 			// Stats is the stats argument value.
 			Stats schema.Stats
 			// Config is the config argument value.
-			Config auction.Config
+			Config *auction.Config
 		}
 	}
 	lockHandleStats sync.RWMutex
 }
 
 // HandleStats calls HandleStatsFunc.
-func (mock *StatsNotificationHandlerMock) HandleStats(contextMoqParam context.Context, stats schema.Stats, config auction.Config) error {
+func (mock *StatsNotificationHandlerMock) HandleStats(contextMoqParam context.Context, stats schema.Stats, config *auction.Config) {
 	if mock.HandleStatsFunc == nil {
 		panic("StatsNotificationHandlerMock.HandleStatsFunc: method is nil but StatsNotificationHandler.HandleStats was just called")
 	}
 	callInfo := struct {
 		ContextMoqParam context.Context
 		Stats           schema.Stats
-		Config          auction.Config
+		Config          *auction.Config
 	}{
 		ContextMoqParam: contextMoqParam,
 		Stats:           stats,
@@ -66,7 +66,7 @@ func (mock *StatsNotificationHandlerMock) HandleStats(contextMoqParam context.Co
 	mock.lockHandleStats.Lock()
 	mock.calls.HandleStats = append(mock.calls.HandleStats, callInfo)
 	mock.lockHandleStats.Unlock()
-	return mock.HandleStatsFunc(contextMoqParam, stats, config)
+	mock.HandleStatsFunc(contextMoqParam, stats, config)
 }
 
 // HandleStatsCalls gets all the calls that were made to HandleStats.
@@ -76,12 +76,12 @@ func (mock *StatsNotificationHandlerMock) HandleStats(contextMoqParam context.Co
 func (mock *StatsNotificationHandlerMock) HandleStatsCalls() []struct {
 	ContextMoqParam context.Context
 	Stats           schema.Stats
-	Config          auction.Config
+	Config          *auction.Config
 } {
 	var calls []struct {
 		ContextMoqParam context.Context
 		Stats           schema.Stats
-		Config          auction.Config
+		Config          *auction.Config
 	}
 	mock.lockHandleStats.RLock()
 	calls = mock.calls.HandleStats

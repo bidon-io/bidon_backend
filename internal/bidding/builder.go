@@ -196,6 +196,7 @@ func (b *Builder) processAdapter(
 
 	demandResponse := bidder.Adapter.ExecuteRequest(ctx, bidder.Client, bidRequest)
 	demandResponse.StartTS = params.StartTS
+	demandResponse.EndTS = time.Now().UnixMilli()
 	if demandResponse.Error != nil {
 		bids <- *demandResponse
 		return
@@ -203,7 +204,6 @@ func (b *Builder) processAdapter(
 
 	demandResponse, err = bidder.Adapter.ParseBids(demandResponse)
 	demandResponse.Error = err
-	demandResponse.EndTS = time.Now().UnixMilli()
 
 	bids <- *demandResponse
 }
