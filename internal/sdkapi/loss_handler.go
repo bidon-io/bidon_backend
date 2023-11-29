@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	"github.com/labstack/echo/v4"
@@ -20,7 +19,7 @@ type LossHandler struct {
 
 //go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/loss_mocks.go -pkg mocks . LossNotificationHandler
 type LossNotificationHandler interface {
-	HandleLoss(context.Context, *schema.Imp, []*adapters.DemandResponse) error
+	HandleLoss(ctx context.Context, bid *schema.Bid) error
 }
 
 func (h *LossHandler) Handle(c echo.Context) error {
@@ -37,7 +36,7 @@ func (h *LossHandler) Handle(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]any{"success": true})
 }
 
-func prepareLossEvent(req *request[schema.LossRequest, *schema.LossRequest]) *event.RequestEvent {
+func prepareLossEvent(req *request[schema.LossRequest, *schema.LossRequest]) *event.AdEvent {
 	bid := req.raw.Bid
 
 	auctionConfigurationUID, err := strconv.ParseInt(bid.AuctionConfigurationUID, 10, 64)
@@ -65,5 +64,6 @@ func prepareLossEvent(req *request[schema.LossRequest, *schema.LossRequest]) *ev
 		ExternalWinnerDemandID:  req.raw.ExternalWinner.DemandID,
 		ExternalWinnerEcpm:      req.raw.ExternalWinner.ECPM,
 	}
-	return event.NewRequest(&req.raw.BaseRequest, adRequestParams, req.geoData)
+
+	return event.NewAdEvent(&req.raw.BaseRequest, adRequestParams, req.geoData)
 }

@@ -5,7 +5,6 @@ package mocks
 
 import (
 	"context"
-	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	"sync"
@@ -21,7 +20,7 @@ var _ sdkapi.WinNotificationHandler = &WinNotificationHandlerMock{}
 //
 //		// make and configure a mocked sdkapi.WinNotificationHandler
 //		mockedWinNotificationHandler := &WinNotificationHandlerMock{
-//			HandleWinFunc: func(contextMoqParam context.Context, imp *schema.Imp, demandResponses []*adapters.DemandResponse) error {
+//			HandleWinFunc: func(ctx context.Context, bid *schema.Bid) error {
 //				panic("mock out the HandleWin method")
 //			},
 //		}
@@ -32,41 +31,37 @@ var _ sdkapi.WinNotificationHandler = &WinNotificationHandlerMock{}
 //	}
 type WinNotificationHandlerMock struct {
 	// HandleWinFunc mocks the HandleWin method.
-	HandleWinFunc func(contextMoqParam context.Context, imp *schema.Imp, demandResponses []*adapters.DemandResponse) error
+	HandleWinFunc func(ctx context.Context, bid *schema.Bid) error
 
 	// calls tracks calls to the methods.
 	calls struct {
 		// HandleWin holds details about calls to the HandleWin method.
 		HandleWin []struct {
-			// ContextMoqParam is the contextMoqParam argument value.
-			ContextMoqParam context.Context
-			// Imp is the imp argument value.
-			Imp *schema.Imp
-			// DemandResponses is the demandResponses argument value.
-			DemandResponses []*adapters.DemandResponse
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Bid is the bid argument value.
+			Bid *schema.Bid
 		}
 	}
 	lockHandleWin sync.RWMutex
 }
 
 // HandleWin calls HandleWinFunc.
-func (mock *WinNotificationHandlerMock) HandleWin(contextMoqParam context.Context, imp *schema.Imp, demandResponses []*adapters.DemandResponse) error {
+func (mock *WinNotificationHandlerMock) HandleWin(ctx context.Context, bid *schema.Bid) error {
 	if mock.HandleWinFunc == nil {
 		panic("WinNotificationHandlerMock.HandleWinFunc: method is nil but WinNotificationHandler.HandleWin was just called")
 	}
 	callInfo := struct {
-		ContextMoqParam context.Context
-		Imp             *schema.Imp
-		DemandResponses []*adapters.DemandResponse
+		Ctx context.Context
+		Bid *schema.Bid
 	}{
-		ContextMoqParam: contextMoqParam,
-		Imp:             imp,
-		DemandResponses: demandResponses,
+		Ctx: ctx,
+		Bid: bid,
 	}
 	mock.lockHandleWin.Lock()
 	mock.calls.HandleWin = append(mock.calls.HandleWin, callInfo)
 	mock.lockHandleWin.Unlock()
-	return mock.HandleWinFunc(contextMoqParam, imp, demandResponses)
+	return mock.HandleWinFunc(ctx, bid)
 }
 
 // HandleWinCalls gets all the calls that were made to HandleWin.
@@ -74,14 +69,12 @@ func (mock *WinNotificationHandlerMock) HandleWin(contextMoqParam context.Contex
 //
 //	len(mockedWinNotificationHandler.HandleWinCalls())
 func (mock *WinNotificationHandlerMock) HandleWinCalls() []struct {
-	ContextMoqParam context.Context
-	Imp             *schema.Imp
-	DemandResponses []*adapters.DemandResponse
+	Ctx context.Context
+	Bid *schema.Bid
 } {
 	var calls []struct {
-		ContextMoqParam context.Context
-		Imp             *schema.Imp
-		DemandResponses []*adapters.DemandResponse
+		Ctx context.Context
+		Bid *schema.Bid
 	}
 	mock.lockHandleWin.RLock()
 	calls = mock.calls.HandleWin
