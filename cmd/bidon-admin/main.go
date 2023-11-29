@@ -1,14 +1,18 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io/fs"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
 	"strconv"
 	"strings"
+	"syscall"
+	"time"
 
 	"github.com/alexedwards/scs/goredisstore"
 	"github.com/bidon-io/bidon-backend/cmd/bidon-admin/web"
@@ -119,7 +123,23 @@ func main() {
 		port = "1323"
 	}
 	addr := fmt.Sprintf(":%s", port)
-	e.Logger.Fatal(e.Start(addr))
+
+	go func() {
+		err := e.Start(addr)
+		if !errors.Is(err, http.ErrServerClosed) {
+			e.Logger.Fatalf("failed to start http server: %v", err)
+		}
+		e.Logger.Warn(err)
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if err := e.Shutdown(ctx); err != nil {
+		e.Logger.Errorf("failed to gracefully shutdown http server: %v", err)
+	}
 }
 
 func configureCORS(e *echo.Echo) {
