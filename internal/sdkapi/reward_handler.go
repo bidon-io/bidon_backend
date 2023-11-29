@@ -21,12 +21,15 @@ func (h *RewardHandler) Handle(c echo.Context) error {
 		return err
 	}
 
-	h.sendEvents(c, req)
+	adEvent := prepareRewardEvent(req)
+	h.EventLogger.Log(adEvent, func(err error) {
+		logError(c, fmt.Errorf("log reward event: %v", err))
+	})
 
 	return c.JSON(http.StatusOK, map[string]any{"success": true})
 }
 
-func (h *RewardHandler) sendEvents(c echo.Context, req *request[schema.RewardRequest, *schema.RewardRequest]) {
+func prepareRewardEvent(req *request[schema.RewardRequest, *schema.RewardRequest]) *event.RequestEvent {
 	bid := req.raw.Bid
 
 	auctionConfigurationUID, err := strconv.ParseInt(bid.AuctionConfigurationUID, 10, 64)
@@ -37,6 +40,7 @@ func (h *RewardHandler) sendEvents(c echo.Context, req *request[schema.RewardReq
 	adRequestParams := event.AdRequestParams{
 		EventType:               "reward",
 		AdType:                  string(req.raw.AdType),
+		AdFormat:                string(bid.Format()),
 		AuctionID:               bid.AuctionID,
 		AuctionConfigurationID:  bid.AuctionConfigurationID,
 		AuctionConfigurationUID: auctionConfigurationUID,
@@ -52,8 +56,5 @@ func (h *RewardHandler) sendEvents(c echo.Context, req *request[schema.RewardReq
 		Bidding:                 bid.IsBidding(),
 	}
 
-	adEvent := event.NewRequest(&req.raw.BaseRequest, adRequestParams, req.geoData)
-	h.EventLogger.Log(adEvent, func(err error) {
-		logError(c, fmt.Errorf("log reward event: %v", err))
-	})
+	return event.NewRequest(&req.raw.BaseRequest, adRequestParams, req.geoData)
 }
