@@ -21,12 +21,15 @@ func (h *ClickHandler) Handle(c echo.Context) error {
 		return err
 	}
 
-	h.sendEvents(c, req)
+	adEvent := prepareClickEvent(req)
+	h.EventLogger.Log(adEvent, func(err error) {
+		logError(c, fmt.Errorf("log click event: %v", err))
+	})
 
 	return c.JSON(http.StatusOK, map[string]any{"success": true})
 }
 
-func (h *ClickHandler) sendEvents(c echo.Context, req *request[schema.ClickRequest, *schema.ClickRequest]) {
+func prepareClickEvent(req *request[schema.ClickRequest, *schema.ClickRequest]) *event.RequestEvent {
 	bid := req.raw.Bid
 
 	auctionConfigurationUID, err := strconv.ParseInt(bid.AuctionConfigurationUID, 10, 64)
@@ -37,6 +40,7 @@ func (h *ClickHandler) sendEvents(c echo.Context, req *request[schema.ClickReque
 	adRequestParams := event.AdRequestParams{
 		EventType:               "click",
 		AdType:                  string(req.raw.AdType),
+		AdFormat:                string(bid.Format()),
 		AuctionID:               bid.AuctionID,
 		AuctionConfigurationID:  bid.AuctionConfigurationID,
 		AuctionConfigurationUID: auctionConfigurationUID,
@@ -51,8 +55,6 @@ func (h *ClickHandler) sendEvents(c echo.Context, req *request[schema.ClickReque
 		PriceFloor:              bid.AuctionPriceFloor,
 		Bidding:                 bid.IsBidding(),
 	}
-	adEvent := event.NewRequest(&req.raw.BaseRequest, adRequestParams, req.geoData)
-	h.EventLogger.Log(adEvent, func(err error) {
-		logError(c, fmt.Errorf("log click event: %v", err))
-	})
+
+	return event.NewRequest(&req.raw.BaseRequest, adRequestParams, req.geoData)
 }

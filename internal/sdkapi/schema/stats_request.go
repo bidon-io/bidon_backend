@@ -38,34 +38,37 @@ type Stats struct {
 }
 
 type StatsResult struct {
-	Status            string  `json:"status" validate:"required,oneof=SUCCESS FAIL AUCTION_CANCELLED"`
-	WinnerID          string  `json:"winner_id"` // Deprecated: WinnerDemandID instead
-	WinnerDemandID    string  `json:"winner_demand_id"`
-	WinnerAdUnitUID   string  `json:"winner_ad_unit_uid"`
-	WinnerAdUnitLabel string  `json:"winner_ad_unit_label"`
-	RoundID           string  `json:"round_id"`
-	ECPM              float64 `json:"ecpm"`
-	Price             float64 `json:"price"`
-	BidType           BidType `json:"bid_type" validate:"omitempty,oneof=RTB CPM"`
-	AuctionStartTS    int64   `json:"auction_start_ts"`
-	AuctionFinishTS   int64   `json:"auction_finish_ts"`
+	Status            string                `json:"status" validate:"required,oneof=SUCCESS FAIL AUCTION_CANCELLED"`
+	WinnerID          string                `json:"winner_id"` // Deprecated: WinnerDemandID instead
+	WinnerDemandID    string                `json:"winner_demand_id"`
+	WinnerAdUnitUID   string                `json:"winner_ad_unit_uid"`
+	WinnerAdUnitLabel string                `json:"winner_ad_unit_label"`
+	RoundID           string                `json:"round_id"`
+	ECPM              float64               `json:"ecpm"`
+	Price             float64               `json:"price"`
+	BidType           BidType               `json:"bid_type" validate:"omitempty,oneof=RTB CPM"`
+	AuctionStartTS    int64                 `json:"auction_start_ts"`
+	AuctionFinishTS   int64                 `json:"auction_finish_ts"`
+	Banner            *BannerAdObject       `json:"banner"`
+	Interstitial      *InterstitialAdObject `json:"interstitial"`
+	Rewarded          *RewardedAdObject     `json:"rewarded"`
 }
 
-func (s StatsResult) GetWinnerDemandID() string {
+func (s *StatsResult) GetWinnerDemandID() string {
 	if s.WinnerDemandID != "" {
 		return s.WinnerDemandID
 	}
 	return s.WinnerID
 }
 
-func (s StatsResult) GetWinnerPrice() float64 {
+func (s *StatsResult) GetWinnerPrice() float64 {
 	if s.Price != 0 {
 		return s.Price
 	}
 	return s.ECPM
 }
 
-func (s StatsResult) GetWinnerAdUnitUID() int {
+func (s *StatsResult) GetWinnerAdUnitUID() int {
 	adUnitUID, err := strconv.Atoi(s.WinnerAdUnitUID)
 	if err != nil {
 		return 0
@@ -73,12 +76,20 @@ func (s StatsResult) GetWinnerAdUnitUID() int {
 	return adUnitUID
 }
 
-func (s StatsResult) IsBidding() bool {
+func (s *StatsResult) IsBidding() bool {
 	return s.BidType == RTBBidType
 }
 
-func (s StatsResult) IsSuccess() bool {
+func (s *StatsResult) IsSuccess() bool {
 	return s.Status == "SUCCESS"
+}
+
+func (s *StatsResult) Format() ad.Format {
+	if s.Banner != nil {
+		return s.Banner.Format
+	}
+
+	return ad.EmptyFormat
 }
 
 type StatsRound struct {
