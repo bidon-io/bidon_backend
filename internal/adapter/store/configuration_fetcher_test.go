@@ -2,7 +2,9 @@ package store_test
 
 import (
 	"context"
+	"github.com/bidon-io/bidon-backend/config"
 	"testing"
+	"time"
 
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/adapter/store"
@@ -11,7 +13,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-func TestAppDemandProfileFetcher_Fetch(t *testing.T) {
+func TestAppDemandProfileFetcher_FetchCached(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
@@ -137,10 +139,13 @@ func TestAppDemandProfileFetcher_Fetch(t *testing.T) {
 		},
 	}
 
-	fetcher := store.ConfigurationFetcher{DB: tx}
+	fetcher := store.ConfigurationFetcher{
+		DB:    tx,
+		Cache: config.NewMemoryCacheOf[adapter.RawConfigsMap](10 * time.Minute),
+	}
 
 	for _, tC := range testCases {
-		got, err := fetcher.Fetch(context.Background(), tC.appID, tC.adapterKeys)
+		got, err := fetcher.FetchCached(context.Background(), tC.appID, tC.adapterKeys)
 		if err != nil {
 			t.Fatalf("failed to fetch app demand profiles: %v", err)
 		}

@@ -54,8 +54,8 @@ func BuildBiddingAdapters(client *http.Client) AdaptersBuilder {
 //go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/mocks.go -pkg mocks . ConfigurationFetcher
 
 type ConfigurationFetcher interface {
-	// Fetch is used get one profile per adapter key, if present
-	Fetch(ctx context.Context, appID int64, adapterKeys []adapter.Key) (adapter.RawConfigsMap, error)
+	// FetchCached is used get one profile per adapter key, if present
+	FetchCached(ctx context.Context, appID int64, adapterKeys []adapter.Key) (adapter.RawConfigsMap, error)
 }
 
 type AdaptersConfigBuilder struct {
@@ -72,7 +72,7 @@ func NewAdapters(keys []adapter.Key) adapter.ProcessedConfigsMap {
 }
 
 func (b *AdaptersConfigBuilder) Build(ctx context.Context, appID int64, adapterKeys []adapter.Key, imp schema.Imp, adUnitsMap *map[adapter.Key][]auction.AdUnit) (adapter.ProcessedConfigsMap, error) {
-	profiles, err := b.ConfigurationFetcher.Fetch(ctx, appID, adapterKeys)
+	profiles, err := b.ConfigurationFetcher.FetchCached(ctx, appID, adapterKeys)
 	if err != nil {
 		return nil, err
 	}

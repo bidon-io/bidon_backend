@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"log"
 	"net/http"
 	"os"
@@ -179,7 +180,10 @@ func main() {
 			NotificationHandler: notificationHandler,
 		},
 		AdaptersConfigBuilder: &adapters_builder.AdaptersConfigBuilder{
-			ConfigurationFetcher: &adapterstore.ConfigurationFetcher{DB: db},
+			ConfigurationFetcher: &adapterstore.ConfigurationFetcher{
+				DB:    db,
+				Cache: config.NewMemoryCacheOf[adapter.RawConfigsMap](10 * time.Minute),
+			},
 		},
 		AdUnitsMatcher: &auctionstore.AdUnitsMatcher{DB: db},
 		EventLogger:    eventLogger,
