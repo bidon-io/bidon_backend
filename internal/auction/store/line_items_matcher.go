@@ -80,28 +80,40 @@ func (m *LineItemsMatcher) find(query *gorm.DB) ([]auction.LineItem, error) {
 		placementID, ok := dbLineItem.Extra["placement_id"].(string)
 		if ok {
 			lineItems[i].PlacementID = placementID
+			setAdUnitIDIfEmpty(&lineItems[i], placementID)
 		}
 
 		spotID, ok := dbLineItem.Extra["spot_id"].(string)
 		if ok {
 			lineItems[i].PlacementID = spotID
+			setAdUnitIDIfEmpty(&lineItems[i], spotID)
 		}
 
 		zoneID, ok := dbLineItem.Extra["zone_id"].(string)
 		if ok {
 			lineItems[i].ZonedID = zoneID
+			setAdUnitIDIfEmpty(&lineItems[i], zoneID)
 		}
 
 		slotUUID, ok := dbLineItem.Extra["slot_uuid"].(string)
 		if ok {
 			lineItems[i].SlotUUID = slotUUID
+			setAdUnitIDIfEmpty(&lineItems[i], slotUUID)
 		}
 
 		slotID, ok := dbLineItem.Extra["slot_id"].(string)
 		if ok {
 			lineItems[i].SlotID = slotID
+			setAdUnitIDIfEmpty(&lineItems[i], slotID)
 		}
+
 	}
 
 	return lineItems, nil
+}
+
+func setAdUnitIDIfEmpty(lineItem *auction.LineItem, value string) {
+	if lineItem.AdUnitID == "" {
+		lineItem.AdUnitID = value
+	}
 }
