@@ -54,8 +54,8 @@ func TestBuilder_Build(t *testing.T) {
 	}
 	defer http.DefaultClient.CloseIdleConnections()
 
-	notificationHanler := &mocks.NotificationHandlerMock{
-		HandleBiddingRoundFunc: func(ctx context.Context, imp *schema.Imp, auctionResult bidding.AuctionResult) error {
+	notificationHandler := &mocks.NotificationHandlerMock{
+		HandleBiddingRoundFunc: func(_ context.Context, _ *schema.Imp, _ bidding.AuctionResult, _ string, _ string) error {
 			return nil
 		},
 	}
@@ -71,7 +71,7 @@ func TestBuilder_Build(t *testing.T) {
 		{
 			name:                "successful build",
 			adaptersBuilder:     adaptersBuilder,
-			notificationHandler: notificationHanler,
+			notificationHandler: notificationHandler,
 			buildParams: &bidding.BuildParams{
 				AppID: 1,
 				BiddingRequest: schema.BiddingRequest{
