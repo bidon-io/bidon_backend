@@ -3,7 +3,9 @@ package store_test
 import (
 	"context"
 	"database/sql"
+	"github.com/bidon-io/bidon-backend/config"
 	"testing"
+	"time"
 
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
@@ -163,7 +165,10 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 		t.Fatalf("Error creating line items (%+v): %v", lineItems, err)
 	}
 
-	matcher := store.AdUnitsMatcher{DB: tx}
+	matcher := store.AdUnitsMatcher{
+		DB:    tx,
+		Cache: config.NewMemoryCacheOf[[]auction.AdUnit](time.Minute),
+	}
 	pf := 0.15
 
 	testCases := []struct {
@@ -339,7 +344,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 	}
 
 	for _, tC := range testCases {
-		got, err := matcher.Match(context.Background(), tC.params)
+		got, err := matcher.MatchCached(context.Background(), tC.params)
 		if err != nil {
 			t.Errorf("Error matching line items: %v", err)
 		}

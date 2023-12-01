@@ -12,7 +12,7 @@ type Builder struct {
 
 //go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/mocks_deprecated.go -pkg mocks . LineItemsMatcher
 type LineItemsMatcher interface {
-	Match(ctx context.Context, params *BuildParams) ([]LineItem, error)
+	MatchCached(ctx context.Context, params *BuildParams) ([]LineItem, error)
 }
 
 func (b *Builder) Build(ctx context.Context, params *BuildParams) (*Auction, error) {
@@ -21,7 +21,7 @@ func (b *Builder) Build(ctx context.Context, params *BuildParams) (*Auction, err
 		return nil, err
 	}
 
-	lineItems, err := b.LineItemsMatcher.Match(ctx, params)
+	lineItems, err := b.LineItemsMatcher.MatchCached(ctx, params)
 	if err != nil {
 		return nil, err
 	}

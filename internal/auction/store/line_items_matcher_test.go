@@ -3,7 +3,9 @@ package store_test
 import (
 	"context"
 	"database/sql"
+	"github.com/bidon-io/bidon-backend/config"
 	"testing"
+	"time"
 
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
@@ -17,7 +19,7 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-func TestLineItemsMatcher_Match(t *testing.T) {
+func TestLineItemsMatcher_MatchCached(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
@@ -136,7 +138,10 @@ func TestLineItemsMatcher_Match(t *testing.T) {
 		t.Fatalf("Error creating line items (%+v): %v", lineItems, err)
 	}
 
-	matcher := store.LineItemsMatcher{DB: tx}
+	matcher := store.LineItemsMatcher{
+		DB:    tx,
+		Cache: config.NewMemoryCacheOf[[]auction.LineItem](time.Minute),
+	}
 	pf := 0.15
 
 	testCases := []struct {
@@ -232,7 +237,7 @@ func TestLineItemsMatcher_Match(t *testing.T) {
 	}
 
 	for _, tC := range testCases {
-		got, err := matcher.Match(context.Background(), tC.params)
+		got, err := matcher.MatchCached(context.Background(), tC.params)
 		if err != nil {
 			t.Errorf("Error matching line items: %v", err)
 		}
@@ -284,7 +289,10 @@ func TestLineItemsMatcher_ExtraFields(t *testing.T) {
 		})
 	}
 
-	matcher := store.LineItemsMatcher{DB: tx}
+	matcher := store.LineItemsMatcher{
+		DB:    tx,
+		Cache: config.NewMemoryCacheOf[[]auction.LineItem](time.Minute),
+	}
 
 	params := func(adapters []adapter.Key) *auction.BuildParams {
 		return &auction.BuildParams{

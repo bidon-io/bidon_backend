@@ -38,7 +38,7 @@ type AdaptersConfigBuilder interface {
 }
 
 type AdUnitsMatcher interface {
-	Match(ctx context.Context, params *auction.BuildParams) ([]auction.AdUnit, error)
+	MatchCached(ctx context.Context, params *auction.BuildParams) ([]auction.AdUnit, error)
 }
 
 type BiddingResponse struct {
@@ -114,7 +114,7 @@ func (h *BiddingHandler) Handle(c echo.Context) error {
 	}
 
 	imp := req.raw.Imp
-	adUnits, err := h.AdUnitsMatcher.Match(ctx, &auction.BuildParams{
+	adUnits, err := h.AdUnitsMatcher.MatchCached(ctx, &auction.BuildParams{
 		Adapters:   req.raw.Adapters.Keys(),
 		AppID:      req.app.ID,
 		AdType:     req.raw.Imp.Type(),

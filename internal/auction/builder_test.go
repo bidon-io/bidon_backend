@@ -53,7 +53,7 @@ func TestBuilder_Build(t *testing.T) {
 		},
 	}
 	lineItemsMatcher := &auctionmocks.LineItemsMatcherMock{
-		MatchFunc: func(ctx context.Context, params *auction.BuildParams) ([]auction.LineItem, error) {
+		MatchCachedFunc: func(ctx context.Context, params *auction.BuildParams) ([]auction.LineItem, error) {
 			return lineItems, nil
 		},
 	}

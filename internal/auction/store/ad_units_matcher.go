@@ -2,6 +2,9 @@ package store
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/json"
+	"sort"
 	"strconv"
 
 	"github.com/bidon-io/bidon-backend/internal/ad"
@@ -13,7 +16,18 @@ import (
 )
 
 type AdUnitsMatcher struct {
-	DB *db.DB
+	DB    *db.DB
+	Cache cache[[]auction.AdUnit]
+}
+
+func (m *AdUnitsMatcher) MatchCached(ctx context.Context, params *auction.BuildParams) ([]auction.AdUnit, error) {
+	key, err := m.cacheKey(*params)
+	if err != nil {
+		return nil, err
+	}
+	return m.Cache.Get(ctx, key, func(ctx context.Context) ([]auction.AdUnit, error) {
+		return m.Match(ctx, params)
+	})
 }
 
 func (m *AdUnitsMatcher) Match(ctx context.Context, params *auction.BuildParams) ([]auction.AdUnit, error) {
@@ -81,4 +95,19 @@ func (m *AdUnitsMatcher) find(query *gorm.DB) ([]auction.AdUnit, error) {
 	}
 
 	return adUnits, nil
+}
+
+func (m *AdUnitsMatcher) cacheKey(params auction.BuildParams) ([]byte, error) {
+	// Sort adapter keys to get deterministic cache key
+	sort.Slice(params.Adapters, func(i, j int) bool {
+		return params.Adapters[i] < params.Adapters[j]
+	})
+	jsonData, err := json.Marshal(params)
+
+	if err != nil {
+		return nil, err
+	}
+
+	hash := sha256.Sum256(jsonData)
+	return hash[:], nil
 }
