@@ -14,11 +14,7 @@ import (
 
 type ConfigFetcher struct {
 	DB    *db.DB
-	Cache cache
-}
-
-type cache interface {
-	Get(context.Context, []byte, func(ctx context.Context) (*auction.Config, error)) (*auction.Config, error)
+	Cache cache[*auction.Config]
 }
 
 func (m *ConfigFetcher) Match(ctx context.Context, appID int64, adType ad.Type, segmentID int64) (*auction.Config, error) {
