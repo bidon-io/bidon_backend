@@ -20,7 +20,7 @@ var _ sdkapi.ShowNotificationHandler = &ShowNotificationHandlerMock{}
 //
 //		// make and configure a mocked sdkapi.ShowNotificationHandler
 //		mockedShowNotificationHandler := &ShowNotificationHandlerMock{
-//			HandleShowFunc: func(contextMoqParam context.Context, bid *schema.Bid)  {
+//			HandleShowFunc: func(contextMoqParam context.Context, bid *schema.Bid, s1 string, s2 string)  {
 //				panic("mock out the HandleShow method")
 //			},
 //		}
@@ -31,7 +31,7 @@ var _ sdkapi.ShowNotificationHandler = &ShowNotificationHandlerMock{}
 //	}
 type ShowNotificationHandlerMock struct {
 	// HandleShowFunc mocks the HandleShow method.
-	HandleShowFunc func(contextMoqParam context.Context, bid *schema.Bid)
+	HandleShowFunc func(contextMoqParam context.Context, bid *schema.Bid, s1 string, s2 string)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -41,27 +41,35 @@ type ShowNotificationHandlerMock struct {
 			ContextMoqParam context.Context
 			// Bid is the bid argument value.
 			Bid *schema.Bid
+			// S1 is the s1 argument value.
+			S1 string
+			// S2 is the s2 argument value.
+			S2 string
 		}
 	}
 	lockHandleShow sync.RWMutex
 }
 
 // HandleShow calls HandleShowFunc.
-func (mock *ShowNotificationHandlerMock) HandleShow(contextMoqParam context.Context, bid *schema.Bid) {
+func (mock *ShowNotificationHandlerMock) HandleShow(contextMoqParam context.Context, bid *schema.Bid, s1 string, s2 string) {
 	if mock.HandleShowFunc == nil {
 		panic("ShowNotificationHandlerMock.HandleShowFunc: method is nil but ShowNotificationHandler.HandleShow was just called")
 	}
 	callInfo := struct {
 		ContextMoqParam context.Context
 		Bid             *schema.Bid
+		S1              string
+		S2              string
 	}{
 		ContextMoqParam: contextMoqParam,
 		Bid:             bid,
+		S1:              s1,
+		S2:              s2,
 	}
 	mock.lockHandleShow.Lock()
 	mock.calls.HandleShow = append(mock.calls.HandleShow, callInfo)
 	mock.lockHandleShow.Unlock()
-	mock.HandleShowFunc(contextMoqParam, bid)
+	mock.HandleShowFunc(contextMoqParam, bid, s1, s2)
 }
 
 // HandleShowCalls gets all the calls that were made to HandleShow.
@@ -71,10 +79,14 @@ func (mock *ShowNotificationHandlerMock) HandleShow(contextMoqParam context.Cont
 func (mock *ShowNotificationHandlerMock) HandleShowCalls() []struct {
 	ContextMoqParam context.Context
 	Bid             *schema.Bid
+	S1              string
+	S2              string
 } {
 	var calls []struct {
 		ContextMoqParam context.Context
 		Bid             *schema.Bid
+		S1              string
+		S2              string
 	}
 	mock.lockHandleShow.RLock()
 	calls = mock.calls.HandleShow
