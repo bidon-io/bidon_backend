@@ -21,7 +21,7 @@ type StatsHandler struct {
 //go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/stats_mocks.go -pkg mocks . StatsNotificationHandler
 
 type StatsNotificationHandler interface {
-	HandleStats(context.Context, schema.Stats, *auction.Config)
+	HandleStats(context.Context, schema.Stats, *auction.Config, string, string)
 }
 
 func (h *StatsHandler) Handle(c echo.Context) error {
@@ -37,7 +37,7 @@ func (h *StatsHandler) Handle(c echo.Context) error {
 		})
 	}
 
-	h.NotificationHandler.HandleStats(c.Request().Context(), req.raw.Stats, req.auctionConfig)
+	h.NotificationHandler.HandleStats(c.Request().Context(), req.raw.Stats, req.auctionConfig, req.raw.App.Bundle, string(req.raw.AdType))
 
 	return c.JSON(http.StatusOK, map[string]any{"success": true})
 }

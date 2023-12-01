@@ -131,7 +131,7 @@ func main() {
 		Transport: &http.Transport{
 			MaxConnsPerHost:     200,
 			MaxIdleConns:        200,
-			MaxIdleConnsPerHost: 50, // TODO: Move to config
+			MaxIdleConnsPerHost: 200, // TODO: Move to config
 		},
 	}
 	notificationHandler := notification.Handler{
