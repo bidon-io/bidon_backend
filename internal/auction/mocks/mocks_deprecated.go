@@ -19,8 +19,8 @@ var _ auction.LineItemsMatcher = &LineItemsMatcherMock{}
 //
 //		// make and configure a mocked auction.LineItemsMatcher
 //		mockedLineItemsMatcher := &LineItemsMatcherMock{
-//			MatchFunc: func(ctx context.Context, params *auction.BuildParams) ([]auction.LineItem, error) {
-//				panic("mock out the Match method")
+//			MatchCachedFunc: func(ctx context.Context, params *auction.BuildParams) ([]auction.LineItem, error) {
+//				panic("mock out the MatchCached method")
 //			},
 //		}
 //
@@ -29,26 +29,26 @@ var _ auction.LineItemsMatcher = &LineItemsMatcherMock{}
 //
 //	}
 type LineItemsMatcherMock struct {
-	// MatchFunc mocks the Match method.
-	MatchFunc func(ctx context.Context, params *auction.BuildParams) ([]auction.LineItem, error)
+	// MatchCachedFunc mocks the MatchCached method.
+	MatchCachedFunc func(ctx context.Context, params *auction.BuildParams) ([]auction.LineItem, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
-		// Match holds details about calls to the Match method.
-		Match []struct {
+		// MatchCached holds details about calls to the MatchCached method.
+		MatchCached []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// Params is the params argument value.
 			Params *auction.BuildParams
 		}
 	}
-	lockMatch sync.RWMutex
+	lockMatchCached sync.RWMutex
 }
 
-// Match calls MatchFunc.
-func (mock *LineItemsMatcherMock) Match(ctx context.Context, params *auction.BuildParams) ([]auction.LineItem, error) {
-	if mock.MatchFunc == nil {
-		panic("LineItemsMatcherMock.MatchFunc: method is nil but LineItemsMatcher.Match was just called")
+// MatchCached calls MatchCachedFunc.
+func (mock *LineItemsMatcherMock) MatchCached(ctx context.Context, params *auction.BuildParams) ([]auction.LineItem, error) {
+	if mock.MatchCachedFunc == nil {
+		panic("LineItemsMatcherMock.MatchCachedFunc: method is nil but LineItemsMatcher.MatchCached was just called")
 	}
 	callInfo := struct {
 		Ctx    context.Context
@@ -57,17 +57,17 @@ func (mock *LineItemsMatcherMock) Match(ctx context.Context, params *auction.Bui
 		Ctx:    ctx,
 		Params: params,
 	}
-	mock.lockMatch.Lock()
-	mock.calls.Match = append(mock.calls.Match, callInfo)
-	mock.lockMatch.Unlock()
-	return mock.MatchFunc(ctx, params)
+	mock.lockMatchCached.Lock()
+	mock.calls.MatchCached = append(mock.calls.MatchCached, callInfo)
+	mock.lockMatchCached.Unlock()
+	return mock.MatchCachedFunc(ctx, params)
 }
 
-// MatchCalls gets all the calls that were made to Match.
+// MatchCachedCalls gets all the calls that were made to MatchCached.
 // Check the length with:
 //
-//	len(mockedLineItemsMatcher.MatchCalls())
-func (mock *LineItemsMatcherMock) MatchCalls() []struct {
+//	len(mockedLineItemsMatcher.MatchCachedCalls())
+func (mock *LineItemsMatcherMock) MatchCachedCalls() []struct {
 	Ctx    context.Context
 	Params *auction.BuildParams
 } {
@@ -75,8 +75,8 @@ func (mock *LineItemsMatcherMock) MatchCalls() []struct {
 		Ctx    context.Context
 		Params *auction.BuildParams
 	}
-	mock.lockMatch.RLock()
-	calls = mock.calls.Match
-	mock.lockMatch.RUnlock()
+	mock.lockMatchCached.RLock()
+	calls = mock.calls.MatchCached
+	mock.lockMatchCached.RUnlock()
 	return calls
 }
