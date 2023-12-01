@@ -102,12 +102,12 @@ func testHelperAuctionHandler(t *testing.T) *sdkapi.AuctionHandler {
 		},
 	}
 	lineItemsMatcher := &auctionmocks.LineItemsMatcherMock{
-		MatchFunc: func(ctx context.Context, params *auction.BuildParams) ([]auction.LineItem, error) {
+		MatchCachedFunc: func(ctx context.Context, params *auction.BuildParams) ([]auction.LineItem, error) {
 			return lineItems, nil
 		},
 	}
 	adUnitsMatcher := &auctionmocks.AdUnitsMatcherMock{
-		MatchFunc: func(ctx context.Context, params *auction.BuildParams) ([]auction.AdUnit, error) {
+		MatchCachedFunc: func(ctx context.Context, params *auction.BuildParams) ([]auction.AdUnit, error) {
 			return adUnits, nil
 		},
 	}

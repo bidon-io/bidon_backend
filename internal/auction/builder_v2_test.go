@@ -62,7 +62,7 @@ func TestBuilderV2_Build(t *testing.T) {
 		},
 	}
 	adUnitsMatcher := &auctionmocks.AdUnitsMatcherMock{
-		MatchFunc: func(ctx context.Context, params *auction.BuildParams) ([]auction.AdUnit, error) {
+		MatchCachedFunc: func(ctx context.Context, params *auction.BuildParams) ([]auction.AdUnit, error) {
 			return adUnits, nil
 		},
 	}

@@ -28,7 +28,7 @@ type ConfigFetcher interface {
 }
 
 type AdUnitsMatcher interface {
-	Match(ctx context.Context, params *BuildParams) ([]AdUnit, error)
+	MatchCached(ctx context.Context, params *BuildParams) ([]AdUnit, error)
 }
 
 type BuildParams struct {
@@ -63,7 +63,7 @@ func (b *BuilderV2) Build(ctx context.Context, params *BuildParams) (*Auction, e
 		return nil, err
 	}
 
-	adUnits, err := b.AdUnitsMatcher.Match(ctx, params)
+	adUnits, err := b.AdUnitsMatcher.MatchCached(ctx, params)
 	if err != nil {
 		return nil, err
 	}

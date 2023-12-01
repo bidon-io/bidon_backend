@@ -110,7 +110,7 @@ func testHelperBiddingHandler(t *testing.T) sdkapi.BiddingHandler {
 	}
 
 	adUnitsMatcher := &sdkapimocks.AdUnitsMatcherMock{
-		MatchFunc: func(ctx context.Context, params *auction.BuildParams) ([]auction.AdUnit, error) {
+		MatchCachedFunc: func(ctx context.Context, params *auction.BuildParams) ([]auction.AdUnit, error) {
 			return adUnits, nil
 		},
 	}
