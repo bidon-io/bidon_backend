@@ -54,7 +54,7 @@ func TestHandler_HandleBiddingRound(t *testing.T) {
 		Sender:            sender,
 	}
 
-	err := handler.HandleBiddingRound(ctx, imp, responses)
+	err := handler.HandleBiddingRound(ctx, imp, responses, "bundle-1", "banner")
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
@@ -118,7 +118,7 @@ func TestHandler_HandleStats_WinBid(t *testing.T) {
 
 	handler := notification.Handler{AuctionResultRepo: mockRepo, Sender: sender}
 
-	handler.HandleStats(ctx, imp, &config)
+	handler.HandleStats(ctx, imp, &config, "bundle-1", "banner")
 
 	if waitTimeout(wg, 1*time.Second) {
 		t.Errorf("timeout waiting for events, sent event lower than expected")
@@ -179,7 +179,7 @@ func TestHandler_HandleStats_Loss(t *testing.T) {
 		Sender:            sender,
 	}
 
-	handler.HandleStats(ctx, imp, &config)
+	handler.HandleStats(ctx, imp, &config, "bundle-1", "banner")
 
 	if waitTimeout(wg, 1*time.Second) {
 		t.Errorf("timeout waiting for events, sent event lower than expected")
@@ -218,7 +218,7 @@ func TestHandler_HandleShow_BiddingImpression(t *testing.T) {
 		Sender:            sender,
 	}
 
-	handler.HandleShow(ctx, impression)
+	handler.HandleShow(ctx, impression, "bundle-1", "banner")
 }
 
 func TestHandler_HandleShow_NonBiddingImpression(t *testing.T) {
@@ -237,7 +237,7 @@ func TestHandler_HandleShow_NonBiddingImpression(t *testing.T) {
 		Sender:            sender,
 	}
 
-	handler.HandleShow(ctx, impression)
+	handler.HandleShow(ctx, impression, "bundle-1", "banner")
 }
 
 func TestHandler_HandleShow_AuctionResultNotFound(t *testing.T) {
@@ -261,7 +261,7 @@ func TestHandler_HandleShow_AuctionResultNotFound(t *testing.T) {
 		Sender:            sender,
 	}
 
-	handler.HandleShow(ctx, impression)
+	handler.HandleShow(ctx, impression, "bundle-1", "banner")
 }
 
 func TestHandler_HandleWin(t *testing.T) {

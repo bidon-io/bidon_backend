@@ -29,7 +29,7 @@ type Sender interface {
 
 // HandleBiddingRound is used to handle bidding round, it is called after all adapters have responded with bids or errors
 // Results saved to redis
-func (h Handler) HandleBiddingRound(ctx context.Context, imp *schema.Imp, auctionResult bidding.AuctionResult) error {
+func (h Handler) HandleBiddingRound(ctx context.Context, imp *schema.Imp, auctionResult bidding.AuctionResult, bundle, adType string) error {
 	var bids []Bid
 	bidFloor := imp.GetBidFloor()
 
@@ -37,7 +37,10 @@ func (h Handler) HandleBiddingRound(ctx context.Context, imp *schema.Imp, auctio
 		if errors.Is(resp.Error, context.DeadlineExceeded) && resp.TimeoutURL != "" {
 			// Handle Timeout, currently only Meta supports this
 			p := Params{
-				NotificationType: "LURL",
+				Bundle:           bundle,
+				AdType:           adType,
+				AuctionID:        imp.AuctionID,
+				NotificationType: "TimeoutURL",
 				URL:              resp.TimeoutURL,
 				Bid:              Bid{RequestID: resp.RequestID},
 				Reason:           openrtb3.LossExpired,
@@ -63,7 +66,10 @@ func (h Handler) HandleBiddingRound(ctx context.Context, imp *schema.Imp, auctio
 			if bid.Price >= bidFloor { // Valid Bid, use for further processing
 				bids = append(bids, bid)
 			} else { // Send Loss notification straight away
-				h.Sender.SendEvent(ctx, Params{
+				go h.Sender.SendEvent(ctx, Params{
+					Bundle:           bundle,
+					AdType:           adType,
+					AuctionID:        imp.AuctionID,
 					NotificationType: "LURL",
 					URL:              bid.LURL,
 					Bid:              bid,
@@ -82,7 +88,7 @@ func (h Handler) HandleBiddingRound(ctx context.Context, imp *schema.Imp, auctio
 // Finalize results of auction in redis
 // If external_win_notification is enabled - do nothing, wait /win or /loss request
 // If external_win_notification is disabled - send win/loss notifications to demands
-func (h Handler) HandleStats(ctx context.Context, stats schema.Stats, config *auction.Config) {
+func (h Handler) HandleStats(ctx context.Context, stats schema.Stats, config *auction.Config, bundle, adType string) {
 	if config == nil {
 		log.Printf("HandleStats: cannot find config: %v", stats.AuctionConfigurationID)
 		return
@@ -144,6 +150,9 @@ func (h Handler) HandleStats(ctx context.Context, stats schema.Stats, config *au
 			for _, bid := range round.Bids {
 				if bid.Price == firstPrice {
 					notifications = append(notifications, Params{
+						Bundle:           bundle,
+						AdType:           adType,
+						AuctionID:        stats.AuctionID,
 						NotificationType: "NURL",
 						URL:              bid.NURL,
 						Bid:              bid,
@@ -153,6 +162,9 @@ func (h Handler) HandleStats(ctx context.Context, stats schema.Stats, config *au
 					})
 				} else {
 					notifications = append(notifications, Params{
+						Bundle:           bundle,
+						AdType:           adType,
+						AuctionID:        stats.AuctionID,
 						NotificationType: "LURL",
 						URL:              bid.LURL,
 						Bid:              bid,
@@ -169,6 +181,9 @@ func (h Handler) HandleStats(ctx context.Context, stats schema.Stats, config *au
 			// Find all bids for this round
 			for _, bid := range round.Bids {
 				notifications = append(notifications, Params{
+					Bundle:           bundle,
+					AdType:           adType,
+					AuctionID:        stats.AuctionID,
 					NotificationType: "LURL",
 					URL:              bid.LURL,
 					Bid:              bid,
@@ -183,6 +198,9 @@ func (h Handler) HandleStats(ctx context.Context, stats schema.Stats, config *au
 			// Find all bids for this round
 			for _, bid := range round.Bids {
 				notifications = append(notifications, Params{
+					Bundle:           bundle,
+					AdType:           adType,
+					AuctionID:        stats.AuctionID,
 					NotificationType: "LURL",
 					URL:              bid.LURL,
 					Bid:              bid,
@@ -201,7 +219,7 @@ func (h Handler) HandleStats(ctx context.Context, stats schema.Stats, config *au
 
 // HandleShow is used to handle /show request
 // Send burl to demand
-func (h Handler) HandleShow(ctx context.Context, impression *schema.Bid) {
+func (h Handler) HandleShow(ctx context.Context, impression *schema.Bid, bundle, adType string) {
 	if !impression.IsBidding() {
 		// Not bidding, do nothing
 		return
@@ -221,7 +239,10 @@ func (h Handler) HandleShow(ctx context.Context, impression *schema.Bid) {
 	for _, round := range auctionResult.Rounds {
 		for _, bid := range round.Bids {
 			if bid.Price == impression.GetPrice() {
-				h.Sender.SendEvent(ctx, Params{
+				go h.Sender.SendEvent(ctx, Params{
+					Bundle:           bundle,
+					AdType:           adType,
+					AuctionID:        impression.AuctionID,
 					NotificationType: "BURL",
 					URL:              bid.BURL,
 					Bid:              bid,

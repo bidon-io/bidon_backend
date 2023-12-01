@@ -13,6 +13,9 @@ import (
 )
 
 type Params struct {
+	Bundle           string
+	AdType           string
+	AuctionID        string
 	NotificationType string
 	URL              string
 	Bid              Bid
@@ -58,8 +61,12 @@ func (es EventSender) SendEvent(ctx context.Context, p Params) {
 	e := event.NewNotificationEvent(event.NotificationParams{
 		EventType:   p.NotificationType,
 		ImpID:       p.Bid.ImpID,
+		Bundle:      p.Bundle,
+		AdType:      p.AdType,
+		AuctionID:   p.AuctionID,
 		DemandID:    string(p.Bid.DemandID),
 		LossReason:  int64(p.Reason),
+		Price:       p.Bid.Price,
 		FirstPrice:  p.FirstPrice,
 		SecondPrice: p.SecondPrice,
 		URL:         u.String(),

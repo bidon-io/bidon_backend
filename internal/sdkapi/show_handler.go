@@ -19,7 +19,7 @@ type ShowHandler struct {
 
 //go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/show_mocks.go -pkg mocks . ShowNotificationHandler
 type ShowNotificationHandler interface {
-	HandleShow(context.Context, *schema.Bid)
+	HandleShow(context.Context, *schema.Bid, string, string)
 }
 
 func (h *ShowHandler) Handle(c echo.Context) error {
@@ -33,7 +33,7 @@ func (h *ShowHandler) Handle(c echo.Context) error {
 		logError(c, fmt.Errorf("log show event: %v", err))
 	})
 
-	h.NotificationHandler.HandleShow(c.Request().Context(), req.raw.Bid)
+	h.NotificationHandler.HandleShow(c.Request().Context(), req.raw.Bid, req.raw.App.Bundle, string(req.raw.AdType))
 
 	return c.JSON(http.StatusOK, map[string]any{"success": true})
 }

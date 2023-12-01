@@ -18,7 +18,8 @@ import (
 
 func SetupStatsHandler() sdkapi.StatsHandler {
 	mockHandler := &mocks.StatsNotificationHandlerMock{}
-	mockHandler.HandleStatsFunc = func(contextMoqParam context.Context, stats schema.Stats, config *auction.Config) {}
+	mockHandler.HandleStatsFunc = func(contextMoqParam context.Context, stats schema.Stats, config *auction.Config, _ string, _ string) {
+	}
 	auctionConfig := &auction.Config{
 		ID:  1,
 		UID: "123",

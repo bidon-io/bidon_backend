@@ -15,7 +15,7 @@ import (
 
 func SetupShowHandler() sdkapi.ShowHandler {
 	mockHandler := &mocks.ShowNotificationHandlerMock{}
-	mockHandler.HandleShowFunc = func(ctx context.Context, imp *schema.Bid) {}
+	mockHandler.HandleShowFunc = func(ctx context.Context, imp *schema.Bid, _ string, _ string) {}
 	return sdkapi.ShowHandler{
 		BaseHandler: &sdkapi.BaseHandler[schema.ShowRequest, *schema.ShowRequest]{
 			AppFetcher: AppFetcherMock(),

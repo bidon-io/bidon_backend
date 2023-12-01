@@ -218,8 +218,12 @@ func NewNotificationEvent(params NotificationParams) *NotificationEvent {
 		Timestamp:   generateTimestamp(),
 		EventType:   params.EventType,
 		ImpID:       params.ImpID,
+		Bundle:      params.Bundle,
+		AdType:      params.AdType,
+		AuctionID:   params.AuctionID,
 		DemandID:    params.DemandID,
 		LossReason:  params.LossReason,
+		Price:       params.Price,
 		FirstPrice:  params.FirstPrice,
 		SecondPrice: params.SecondPrice,
 		URL:         params.URL,
@@ -231,8 +235,12 @@ func NewNotificationEvent(params NotificationParams) *NotificationEvent {
 type NotificationParams struct {
 	EventType   string
 	ImpID       string
+	Bundle      string
+	AdType      string
+	AuctionID   string
 	DemandID    string
 	LossReason  int64
+	Price       float64
 	FirstPrice  float64
 	SecondPrice float64
 	URL         string
@@ -243,9 +251,13 @@ type NotificationParams struct {
 type NotificationEvent struct {
 	Timestamp   float64 `json:"timestamp"`
 	EventType   string  `json:"event_type"`
-	ImpID       string  `json:"imp_id"`
+	Bundle      string  `json:"bundle"`
+	AdType      string  `json:"ad_type"`
 	DemandID    string  `json:"demand_id"`
+	AuctionID   string  `json:"auction_id"`
+	ImpID       string  `json:"imp_id"`
 	LossReason  int64   `json:"loss_reason"`
+	Price       float64 `json:"ecpm"`
 	FirstPrice  float64 `json:"first_price"`
 	SecondPrice float64 `json:"second_price"`
 	URL         string  `json:"url"`
