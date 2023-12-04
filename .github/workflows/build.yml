@@ -36,7 +36,7 @@ jobs:
           password: ${{ secrets.PAT_RUNNER }}
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Checks-out repository
         uses: actions/checkout@v3
