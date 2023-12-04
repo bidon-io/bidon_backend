@@ -26,7 +26,7 @@ jobs:
     runs-on: [self-hosted]
     steps:
       - name: Checks-out repository devops
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: ${{ secrets.ANSIBLE_SECRET }}/devops
           token: ${{ secrets.PAT_RUNNER }}
