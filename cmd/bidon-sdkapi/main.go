@@ -38,6 +38,7 @@ import (
 	segmentstore "github.com/bidon-io/bidon-backend/internal/segment/store"
 	"github.com/getsentry/sentry-go"
 	_ "github.com/joho/godotenv/autoload"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
 func main() {
@@ -128,11 +129,11 @@ func main() {
 
 	biddingHttpClient := &http.Client{
 		Timeout: 5 * time.Second,
-		Transport: &http.Transport{
+		Transport: otelhttp.NewTransport(&http.Transport{
 			MaxConnsPerHost:     200,
 			MaxIdleConns:        200,
 			MaxIdleConnsPerHost: 200, // TODO: Move to config
-		},
+		}),
 	}
 	notificationHandler := notification.Handler{
 		AuctionResultRepo: notificationstore.AuctionResultRepo{Redis: rdb},
