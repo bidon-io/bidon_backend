@@ -35,7 +35,6 @@ jobs:
         with:
           repository: ${{ secrets.ANSIBLE_SECRET }}/devops
           token: ${{ secrets.PAT_RUNNER }}
-          ref: DO-1852/fix
 
       - name: Refresh DB
         if: ${{ inputs.refresh-db == true }}
