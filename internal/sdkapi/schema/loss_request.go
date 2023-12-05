@@ -6,6 +6,6 @@ type LossRequest struct {
 }
 
 type ExternalWinner struct {
-	DemandID string  `json:"demand_id" validate:"required"`
+	DemandID string  `json:"demand_id"`
 	ECPM     float64 `json:"ecpm" validate:"required"`
 }
