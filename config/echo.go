@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"log/slog"
 	"net/http"
 
 	"github.com/getsentry/sentry-go"
@@ -10,7 +11,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho"
-	"go.uber.org/zap"
 )
 
 func Echo() *echo.Echo {
@@ -26,7 +26,7 @@ func Echo() *echo.Echo {
 	return e
 }
 
-func UseCommonMiddleware(g *echo.Group, service string, logger *zap.Logger) {
+func UseCommonMiddleware(g *echo.Group, service string, logger *slog.Logger) {
 	g.Use(otelecho.Middleware(service))
 
 	g.Use(middleware.RequestID())
@@ -96,14 +96,14 @@ func (v *echoValidator) Validate(i any) error {
 	return nil
 }
 
-func echoBodyDump(logger *zap.Logger) echo.MiddlewareFunc {
+func echoBodyDump(logger *slog.Logger) echo.MiddlewareFunc {
 	return middleware.BodyDump(func(c echo.Context, reqBody, resBody []byte) {
 		c.Set("reqBody", reqBody)
 		c.Set("resBody", resBody)
 	})
 }
 
-func echoRequestLogger(logger *zap.Logger) echo.MiddlewareFunc {
+func echoRequestLogger(logger *slog.Logger) echo.MiddlewareFunc {
 	return middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
 		LogRequestID: true,
 		LogRemoteIP:  true,
@@ -119,17 +119,17 @@ func echoRequestLogger(logger *zap.Logger) echo.MiddlewareFunc {
 			resBody, _ := c.Get("resBody").([]byte)
 
 			logger.Info("request",
-				zap.String("id", v.RequestID),
-				zap.String("remote_ip", v.RemoteIP),
-				zap.String("host", v.Host),
-				zap.String("method", v.Method),
-				zap.String("uri", v.URI),
-				zap.String("user_agent", v.UserAgent),
-				zap.Int("status", v.Status),
-				zap.NamedError("error", v.Error),
-				zap.Duration("latency", v.Latency),
-				zap.ByteString("request_body", reqBody),
-				zap.ByteString("response_body", resBody),
+				slog.String("id", v.RequestID),
+				slog.String("remote_ip", v.RemoteIP),
+				slog.String("host", v.Host),
+				slog.String("method", v.Method),
+				slog.String("uri", v.URI),
+				slog.String("user_agent", v.UserAgent),
+				slog.Int("status", v.Status),
+				slog.Any("error", v.Error),
+				slog.Duration("latency", v.Latency),
+				slog.Any("request_body", reqBody),
+				slog.Any("response_body", resBody),
 			)
 
 			return nil
