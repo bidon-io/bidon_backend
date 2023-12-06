@@ -1,6 +1,6 @@
 module github.com/bidon-io/bidon-backend
 
-go 1.21
+go 1.21.0
 
 require (
 	github.com/Masterminds/semver/v3 v3.2.1
@@ -23,6 +23,7 @@ require (
 	github.com/labstack/echo-contrib v0.15.0
 	github.com/labstack/echo-jwt/v4 v4.2.0
 	github.com/labstack/echo/v4 v4.11.3
+	github.com/orandin/slog-gorm v1.0.1
 	github.com/oschwald/maxminddb-golang v1.12.0
 	github.com/prebid/openrtb/v19 v19.0.0
 	github.com/pressly/goose/v3 v3.16.0
@@ -37,6 +38,7 @@ require (
 	go.opentelemetry.io/otel/sdk v1.21.0
 	go.uber.org/goleak v1.3.0
 	go.uber.org/zap v1.26.0
+	go.uber.org/zap/exp v0.2.0
 	golang.org/x/crypto v0.15.0
 	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa
 	gorm.io/datatypes v1.2.0
@@ -69,7 +71,6 @@ require (
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/matttproud/golang_protobuf_extensions/v2 v2.0.0 // indirect
-	github.com/orandin/slog-gorm v1.0.1 // indirect
 	github.com/pierrec/lz4/v4 v4.1.18 // indirect
 	github.com/prometheus/client_golang v1.17.0 // indirect
 	github.com/prometheus/client_model v0.5.0 // indirect
