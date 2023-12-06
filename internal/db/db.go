@@ -4,7 +4,8 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"fmt"
-	"log"
+	slogGorm "github.com/orandin/slog-gorm"
+	"log/slog"
 	"os"
 	"time"
 
@@ -161,11 +162,15 @@ func (id PlatformID) Value() (driver.Value, error) {
 }
 
 func newLogger(ignoreRecordNotFoundError bool) logger.Interface {
-	// Same as logger.Default
-	return logger.New(log.New(os.Stdout, "\r\n", log.LstdFlags), logger.Config{
-		SlowThreshold:             200 * time.Millisecond,
-		LogLevel:                  logger.Warn,
-		IgnoreRecordNotFoundError: ignoreRecordNotFoundError,
-		Colorful:                  true,
-	})
+	loggerOptions := []slogGorm.Option{
+		slogGorm.WithLogger(slog.New(slog.NewJSONHandler(os.Stdout, nil))),
+		slogGorm.WithSlowThreshold(200 * time.Millisecond),
+		slogGorm.SetLogLevel(slogGorm.DefaultLogType, slog.LevelWarn),
+	}
+
+	if !ignoreRecordNotFoundError {
+		loggerOptions = append(loggerOptions, slogGorm.WithRecordNotFoundError())
+	}
+
+	return slogGorm.New(loggerOptions...)
 }
