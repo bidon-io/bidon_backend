@@ -29,22 +29,24 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/redis/go-redis/v9"
+	"go.uber.org/zap/exp/zapslog"
 )
 
 func main() {
 	config.ConfigureOTel()
 
-	logger, err := config.NewLogger()
+	zapL, err := config.NewZapLogger()
 	if err != nil {
 		slog.Error("config.NewLogger()", "error", err)
 		os.Exit(1)
 	}
 	defer func() {
-		err := logger.Sync()
+		err := zapL.Sync()
 		if err != nil {
 			slog.Info("logger.Sync()", "error", err)
 		}
 	}()
+	logger := slog.New(zapslog.NewHandler(zapL.Core(), nil))
 
 	sentryConf := config.Sentry()
 	err = sentry.Init(sentryConf.ClientOptions)
