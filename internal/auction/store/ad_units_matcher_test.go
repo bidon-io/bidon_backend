@@ -271,6 +271,68 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 		{
 			params: &auction.BuildParams{
 				AppID:      apps[0].ID,
+				AdType:     ad.BannerType,
+				AdFormat:   ad.BannerFormat,
+				DeviceType: device.TabletType,
+				Adapters:   []adapter.Key{adapter.ApplovinKey},
+			},
+			want: []auction.AdUnit{
+				{
+					DemandID:   "applovin",
+					UID:        "1701972528521547776",
+					PriceFloor: ptr(0.1),
+					Label:      "applovin-banner-banner",
+					BidType:    schema.CPMBidType,
+					Extra: map[string]any{
+						"placement_id": "applovin-banner-banner",
+					},
+				},
+				{
+					DemandID:   "applovin",
+					UID:        "1701972528521547777",
+					PriceFloor: ptr(0.2),
+					Label:      "applovin-banner-adaptive",
+					BidType:    schema.CPMBidType,
+					Extra: map[string]any{
+						"placement_id": "applovin-banner-adaptive",
+					},
+				},
+			},
+		},
+		{
+			params: &auction.BuildParams{
+				AppID:      apps[0].ID,
+				AdType:     ad.BannerType,
+				AdFormat:   ad.LeaderboardFormat,
+				DeviceType: device.TabletType,
+				Adapters:   []adapter.Key{adapter.ApplovinKey},
+			},
+			want: []auction.AdUnit{
+				{
+					DemandID:   "applovin",
+					UID:        "1701972528521547778",
+					PriceFloor: ptr(0.3),
+					Label:      "applovin-banner-leaderboard",
+					BidType:    schema.CPMBidType,
+					Extra: map[string]any{
+						"placement_id": "applovin-banner-leaderboard",
+					},
+				},
+				{
+					DemandID:   "applovin",
+					UID:        "1701972528521547777",
+					PriceFloor: ptr(0.2),
+					Label:      "applovin-banner-adaptive",
+					BidType:    schema.CPMBidType,
+					Extra: map[string]any{
+						"placement_id": "applovin-banner-adaptive",
+					},
+				},
+			},
+		},
+		{
+			params: &auction.BuildParams{
+				AppID:      apps[0].ID,
 				AdType:     ad.InterstitialType,
 				AdFormat:   ad.EmptyFormat,
 				DeviceType: device.PhoneType,

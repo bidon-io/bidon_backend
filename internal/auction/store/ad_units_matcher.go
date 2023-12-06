@@ -53,16 +53,7 @@ func (m *AdUnitsMatcher) Match(ctx context.Context, params *auction.BuildParams)
 		return m.find(query)
 	}
 
-	adFormats := []ad.Format{params.AdFormat}
-	if params.AdFormat == ad.AdaptiveFormat {
-		switch params.DeviceType {
-		case device.TabletType:
-			adFormats = append(adFormats, ad.LeaderboardFormat)
-		case device.PhoneType:
-			adFormats = append(adFormats, ad.BannerFormat)
-		}
-	}
-
+	adFormats := m.selectAdFormats(params)
 	query = query.Where(map[string]any{"format": adFormats})
 
 	return m.find(query)
@@ -110,4 +101,21 @@ func (m *AdUnitsMatcher) cacheKey(params auction.BuildParams) ([]byte, error) {
 
 	hash := sha256.Sum256(jsonData)
 	return hash[:], nil
+}
+
+func (m *AdUnitsMatcher) selectAdFormats(params *auction.BuildParams) []ad.Format {
+	adFormats := []ad.Format{params.AdFormat}
+	switch params.AdFormat {
+	case ad.AdaptiveFormat:
+		switch params.DeviceType {
+		case device.TabletType:
+			adFormats = append(adFormats, ad.LeaderboardFormat)
+		case device.PhoneType:
+			adFormats = append(adFormats, ad.BannerFormat)
+		}
+	case ad.BannerFormat, ad.LeaderboardFormat:
+		adFormats = append(adFormats, ad.AdaptiveFormat)
+	}
+
+	return adFormats
 }
