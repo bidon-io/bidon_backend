@@ -39,17 +39,19 @@ import (
 	"github.com/getsentry/sentry-go"
 	_ "github.com/joho/godotenv/autoload"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"go.uber.org/zap/exp/zapslog"
 )
 
 func main() {
 	config.ConfigureOTel()
 
-	logger, err := config.NewLogger()
+	zapL, err := config.NewZapLogger()
 	if err != nil {
 		slog.Error("config.NewLogger()", "error", err)
 		os.Exit(1)
 	}
-	defer logger.Sync()
+	defer zapL.Sync()
+	logger := slog.New(zapslog.NewHandler(zapL.Core(), nil))
 
 	sentryConf := config.Sentry()
 	err = sentry.Init(sentryConf.ClientOptions)
