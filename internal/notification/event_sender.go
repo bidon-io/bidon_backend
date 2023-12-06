@@ -6,7 +6,7 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
 	"github.com/cenkalti/backoff/v4"
 	"github.com/prebid/openrtb/v19/openrtb3"
-	"log"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -32,13 +32,13 @@ type EventSender struct {
 func (es EventSender) SendEvent(ctx context.Context, p Params) {
 	u, err := url.Parse(p.URL)
 	if p.URL == "" || err != nil {
-		log.Printf("SendNotificationEvent: failed to parse URL type %s: %s", p.NotificationType, p.URL)
+		slog.Info("SendNotificationEvent: failed to parse URL type", "notificationType", p.NotificationType, "url", p.URL)
 		return
 	}
 	macroses := macrosesMap(p.Bid, p.Reason, p.FirstPrice, p.SecondPrice)
 	params, err := url.ParseQuery(u.RawQuery)
 	if err != nil {
-		log.Printf("SendNotificationEvent: failed to parse params: %s", u.RawQuery)
+		slog.Info("SendNotificationEvent: failed to parse params", "params", u.RawQuery)
 		return
 	}
 	for param := range params {
@@ -50,7 +50,7 @@ func (es EventSender) SendEvent(ctx context.Context, p Params) {
 	err = backoff.Retry(func() error {
 		httpResp, err := es.HttpClient.Get(u.String())
 		if err != nil {
-			log.Printf("SendNotificationEvent: send failed: %v", err)
+			slog.Info("SendNotificationEvent: send failed", "error", err)
 			return err
 		}
 		defer httpResp.Body.Close()
@@ -74,11 +74,11 @@ func (es EventSender) SendEvent(ctx context.Context, p Params) {
 		Error:       err,
 	})
 	es.EventLogger.Log(e, func(err error) {
-		log.Printf("SendNotificationEvent: log notification event: %v", err)
+		slog.Info("SendNotificationEvent: log notification event", "error", err)
 	})
 
 	if err != nil {
-		log.Printf("SendNotificationEvent: failed to send loss notification: %s -> %s", p.Bid.DemandID, p.URL)
+		slog.Info("SendNotificationEvent: failed to send loss notification", "demandID", p.Bid.DemandID, "url", p.URL)
 	}
 }
 

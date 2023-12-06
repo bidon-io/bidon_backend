@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -36,30 +36,34 @@ func main() {
 
 	logger, err := config.NewLogger()
 	if err != nil {
-		log.Fatalf("config.NewLogger(): %v", err)
+		slog.Error("config.NewLogger()", "error", err)
+		os.Exit(1)
 	}
 	defer func() {
 		err := logger.Sync()
 		if err != nil {
-			log.Printf("logger.Sync(): %v", err)
+			slog.Info("logger.Sync()", "error", err)
 		}
 	}()
 
 	sentryConf := config.Sentry()
 	err = sentry.Init(sentryConf.ClientOptions)
 	if err != nil {
-		log.Fatalf("sentry.Init(%+v): %v", sentryConf.ClientOptions, err)
+		slog.Error("sentry.Init()", "error", err, "clientOptions", sentryConf.ClientOptions)
+		os.Exit(1)
 	}
 	defer sentry.Flush(sentryConf.FlushTimeout)
 
 	dbURL := os.Getenv("DATABASE_URL")
 	snowflakeNode, err := prepareSnowflakeNode()
 	if err != nil {
-		log.Fatalf("prepareSnowflakeNode(): %v", err)
+		slog.Error("prepareSnowflakeNode()", "error", err)
+		os.Exit(1)
 	}
 	db, err := db.Open(dbURL, db.WithSnowflakeNode(snowflakeNode))
 	if err != nil {
-		log.Fatalf("db.Open(%v): %v", dbURL, err)
+		slog.Error("db.Open()", "error", err, "dbURL", dbURL)
+		os.Exit(1)
 	}
 
 	e := config.Echo()
@@ -76,7 +80,8 @@ func main() {
 		redisURL := os.Getenv("REDIS_URL")
 		opts, err := redis.ParseURL(redisURL)
 		if err != nil {
-			log.Fatalf("redis.ParseURL(%v): %v", redisURL, err)
+			slog.Error("redis.ParseURL()", "error", err, "redisURL", redisURL)
+			os.Exit(1)
 		}
 		rdb := redis.NewClient(opts)
 		authConfig.SessionStore = goredisstore.New(rdb)
