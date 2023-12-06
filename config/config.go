@@ -2,7 +2,7 @@
 package config
 
 import (
-	"log"
+	"log/slog"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -36,6 +36,6 @@ func LoadEnvFile() {
 		err = godotenv.Load()
 	}
 	if err != nil {
-		log.Printf("Did not load .env file: %v", err)
+		slog.Info("Did not load .env file", "error", err)
 	}
 }

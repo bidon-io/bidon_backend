@@ -2,7 +2,8 @@ package gen
 
 import (
 	"database/sql"
-	"log"
+	"log/slog"
+	"os"
 	"path/filepath"
 	"runtime"
 
@@ -142,13 +143,15 @@ func newGenerator(sqlDB *sql.DB, config gen.Config) *gen.Generator {
 
 	db, err := gorm.Open(postgres.New(postgres.Config{Conn: sqlDB}))
 	if err != nil {
-		log.Fatal("open GORM db: ", err)
+		slog.Error("open GORM db", "error", err)
+		os.Exit(1)
 	}
 	g.UseDB(db)
 
 	_, filename, _, ok := runtime.Caller(0)
 	if !ok {
-		log.Fatal("failed to get current file path")
+		slog.Error("failed to get current file path")
+		os.Exit(1)
 	}
 	g.ModelPkgPath = filepath.Join(filename, "../..")
 
