@@ -234,6 +234,32 @@ func TestLineItemsMatcher_MatchCached(t *testing.T) {
 				{ID: "applovin", UID: "1701972528521547777", PriceFloor: 0.2},
 			},
 		},
+		{
+			params: &auction.BuildParams{
+				AppID:      apps[0].ID,
+				AdType:     ad.BannerType,
+				AdFormat:   ad.BannerFormat,
+				DeviceType: device.PhoneType,
+				Adapters:   []adapter.Key{adapter.ApplovinKey},
+			},
+			want: []auction.LineItem{
+				{ID: "applovin", UID: "1701972528521547776", PriceFloor: 0.1},
+				{ID: "applovin", UID: "1701972528521547777", PriceFloor: 0.2},
+			},
+		},
+		{
+			params: &auction.BuildParams{
+				AppID:      apps[0].ID,
+				AdType:     ad.BannerType,
+				AdFormat:   ad.LeaderboardFormat,
+				DeviceType: device.TabletType,
+				Adapters:   []adapter.Key{adapter.ApplovinKey},
+			},
+			want: []auction.LineItem{
+				{ID: "applovin", UID: "1701972528521547777", PriceFloor: 0.2},
+				{ID: "applovin", UID: "1701972528521547778", PriceFloor: 0.3},
+			},
+		},
 	}
 
 	for _, tC := range testCases {
