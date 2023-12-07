@@ -50,7 +50,7 @@
           @input="filterCallback()"
         />
         <Dropdown
-          v-if="column.filter.type === 'select'"
+          v-if="['select', 'select-filter'].includes(column.filter.type)"
           v-model="filterModel.value"
           :options="
             filtersOptions[column.filter.field as keyof typeof filtersOptions]
@@ -60,6 +60,7 @@
           :placeholder="column.filter.placeholder"
           class="p-column-filter"
           :show-clear="true"
+          :filter="column.filter.type === 'select-filter'"
           @change="filterCallback()"
         />
       </template>
@@ -106,7 +107,7 @@ interface Filter {
   field: string;
   value?: string;
   matchMode: keyof FilterMatchModeOptions;
-  type: "input" | "select";
+  type: "input" | "select" | "select-filter";
   placeholder: string;
 }
 
@@ -157,7 +158,11 @@ const filters = ref(
 
 const getFilterOptions = (filteredResources: object[]) =>
   props.columns
-    .filter((column) => column.filter && column.filter.type === "select")
+    .filter(
+      (column) =>
+        column.filter &&
+        ["select", "select-filter"].includes(column.filter.type),
+    )
     .map((column) => column.filter as SelectFilter)
     .reduce(
       (result, filter) => ({
