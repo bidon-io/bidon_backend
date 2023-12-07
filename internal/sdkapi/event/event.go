@@ -54,10 +54,18 @@ func newBaseRequest(request *schema.BaseRequest, geoData geocoder.GeoData) *AdEv
 		segmentUID = 0
 	}
 
+	var model string
+	if request.Device.OS == "android" {
+		model = request.Device.Model
+	} else {
+		// for iOS and iPadOS, use hardware version like "iPad7,11" instead of model that is just "iPad"
+		model = request.Device.HardwareVersion
+	}
+
 	return &AdEvent{
 		Timestamp:                   generateTimestamp(),
 		Manufacturer:                request.Device.Manufacturer,
-		Model:                       request.Device.Model,
+		Model:                       model,
 		Os:                          request.Device.OS,
 		OsVersion:                   request.Device.OSVersion,
 		ConnectionType:              request.Device.ConnectionType,
