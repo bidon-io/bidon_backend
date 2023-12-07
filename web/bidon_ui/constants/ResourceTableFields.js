@@ -17,7 +17,7 @@ export const ResourceTableFields = {
     },
     filter: {
       field: "appId",
-      type: "select",
+      type: "select-filter",
       matchMode: FilterMatchMode.EQUALS,
       placeholder: "App",
       extractOptions: (records) => [
@@ -95,7 +95,7 @@ export const ResourceTableFields = {
     },
     filter: {
       field: "accountId",
-      type: "select",
+      type: "select-filter",
       matchMode: FilterMatchMode.EQUALS,
       placeholder: "Account",
       extractOptions: (records) => [
@@ -156,7 +156,7 @@ export const ResourceTableFields = {
     },
     filter: {
       field: "segmentId",
-      type: "select",
+      type: "select-filter",
       matchMode: FilterMatchMode.EQUALS,
       placeholder: "Segment",
       extractOptions: (records) => [
@@ -185,7 +185,7 @@ export const ResourceTableFields = {
     },
     filter: {
       field: "userId",
-      type: "select",
+      type: "select-filter",
       matchMode: FilterMatchMode.EQUALS,
       placeholder: "Owner",
       extractOptions: (records) => [
