@@ -46,12 +46,14 @@ import (
 func main() {
 	config.ConfigureOTel()
 
-	zapL, err := config.NewZapLogger()
+	zapLogger, err := config.NewZapLogger()
 	if err != nil {
-		log.Fatalf("config.NewLogger(): %v", err)
+		log.Fatalf("config.NewZapLogger(): %v", err)
 	}
-	defer zapL.Sync()
-	logger := slog.New(zapslog.NewHandler(zapL.Core(), nil))
+	defer zapLogger.Sync()
+
+	slogLogger := slog.New(zapslog.NewHandler(zapLogger.Core(), nil))
+	slog.SetDefault(slogLogger)
 
 	sentryConf := config.Sentry()
 	err = sentry.Init(sentryConf.ClientOptions)
@@ -255,7 +257,7 @@ func main() {
 	e := config.Echo()
 
 	g := e.Group("")
-	config.UseCommonMiddleware(g, "bidon-sdkapi", logger)
+	config.UseCommonMiddleware(g, "bidon-sdkapi", zapLogger)
 	g.Use(sdkapi.CheckBidonHeader)
 
 	e.Use(echoprometheus.NewMiddleware("sdkapi"))  // adds middleware to gather metrics

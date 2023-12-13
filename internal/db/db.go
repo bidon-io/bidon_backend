@@ -4,9 +4,7 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"fmt"
-	slogGorm "github.com/orandin/slog-gorm"
-	"log/slog"
-	"os"
+	"go.uber.org/zap"
 	"time"
 
 	"github.com/bidon-io/bidon-backend/internal/ad"
@@ -15,6 +13,7 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
+	"moul.io/zapgorm2"
 )
 
 type DB struct {
@@ -162,15 +161,14 @@ func (id PlatformID) Value() (driver.Value, error) {
 }
 
 func newLogger(ignoreRecordNotFoundError bool) logger.Interface {
-	loggerOptions := []slogGorm.Option{
-		slogGorm.WithLogger(slog.New(slog.NewJSONHandler(os.Stdout, nil))),
-		slogGorm.WithSlowThreshold(200 * time.Millisecond),
-		slogGorm.SetLogLevel(slogGorm.DefaultLogType, slog.LevelWarn),
+	zapLogger := zapgorm2.Logger{
+		ZapLogger:                 zap.L(),
+		LogLevel:                  logger.Warn,
+		SlowThreshold:             200 * time.Millisecond,
+		SkipCallerLookup:          false,
+		IgnoreRecordNotFoundError: ignoreRecordNotFoundError,
+		Context:                   nil,
 	}
-
-	if !ignoreRecordNotFoundError {
-		loggerOptions = append(loggerOptions, slogGorm.WithRecordNotFoundError())
-	}
-
-	return slogGorm.New(loggerOptions...)
+	zapLogger.SetAsDefault()
+	return zapLogger
 }
