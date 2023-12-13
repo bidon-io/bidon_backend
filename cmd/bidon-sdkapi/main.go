@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
+	"log"
 	"log/slog"
 	"net/http"
 	"os"
@@ -47,8 +48,7 @@ func main() {
 
 	zapL, err := config.NewZapLogger()
 	if err != nil {
-		slog.Error("config.NewLogger()", "error", err)
-		os.Exit(1)
+		log.Fatalf("config.NewLogger(): %v", err)
 	}
 	defer zapL.Sync()
 	logger := slog.New(zapslog.NewHandler(zapL.Core(), nil))
@@ -56,22 +56,20 @@ func main() {
 	sentryConf := config.Sentry()
 	err = sentry.Init(sentryConf.ClientOptions)
 	if err != nil {
-		slog.Error("sentry.Init()", "error", err, "clientOptions", sentryConf.ClientOptions)
-		os.Exit(1)
+		log.Fatalf("sentry.Init(%+v): %v", sentryConf.ClientOptions, err)
 	}
 	defer sentry.Flush(sentryConf.FlushTimeout)
 
 	dbURL := os.Getenv("DATABASE_URL")
 	db, err := dbpkg.Open(dbURL)
 	if err != nil {
-		slog.Error("db.Open()", "error", err, "dbURL", dbURL)
-		os.Exit(1)
+		log.Fatalf("db.Open(%v): %v", dbURL, err)
 	}
 
 	redisURL := os.Getenv("REDIS_URL")
 	opts, err := redis.ParseURL(redisURL)
 	if err != nil {
-		slog.Info("REDIS_URL parsing failed, using default options", "error", err)
+		log.Printf("REDIS_URL parsing failed, using default options: %v", err)
 		opts = &redis.Options{}
 	}
 	rdb := redis.NewClient(opts)
@@ -81,8 +79,7 @@ func main() {
 	if os.Getenv("USE_GEOCODING") == "true" {
 		maxMindDB, err = maxminddb.Open(os.Getenv("MAXMIND_GEOIP_FILE_PATH"))
 		if err != nil {
-			slog.Error("maxminddb.Open()", "error", err, "maxmindGeoIPFilePath", os.Getenv("MAXMIND_GEOIP_FILE_PATH"))
-			os.Exit(1)
+			log.Fatalf("maxminddb.Open(%v): %v", os.Getenv("MAXMIND_GEOIP_FILE_PATH"), err)
 		}
 	}
 
@@ -90,14 +87,12 @@ func main() {
 	if os.Getenv("USE_KAFKA") == "true" {
 		conf, err := config.Kafka()
 		if err != nil {
-			slog.Error("config.Kafka()", "error", err)
-			os.Exit(1)
+			log.Fatalf("config.Kafka(): %v", err)
 		}
 
 		client, err := kgo.NewClient(conf.ClientOpts...)
 		if err != nil {
-			slog.Error("kgo.NewClient()", "error", err)
-			os.Exit(1)
+			log.Fatalf("kgo.NewClient(): %v", err)
 		}
 		defer func() {
 			ctx, ctxCancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -105,7 +100,7 @@ func main() {
 
 			err := client.Flush(ctx)
 			if err != nil {
-				slog.Info("client.Flush()", "error", err)
+				log.Printf("client.Flush(): %v", err)
 			}
 		}()
 

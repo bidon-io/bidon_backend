@@ -5,7 +5,7 @@ import (
 	"embed"
 	"flag"
 	"fmt"
-	"log/slog"
+	"log"
 	"os"
 
 	_ "github.com/bidon-io/bidon-backend/cmd/bidon-migrate/migrations"
@@ -65,14 +65,12 @@ func main() {
 
 	config.LoadEnvFile()
 	if config.GetEnv() == config.UnknownEnv {
-		slog.Error("ENVIRONMENT is required")
-		os.Exit(1)
+		log.Fatal("ENVIRONMENT is required")
 	}
 
 	if config.GetEnv() == config.ProdEnv && os.Getenv("IKNOWWHATIAMDOING") != "yes" {
 		if args[0] != "status" && args[0] != "version" && args[0] != "up" {
-			slog.Error("only 'status', 'version' and 'up' commands are allowed in production environment. Use 'IKNOWWHATIAMDOING=yes' to override.")
-			os.Exit(1)
+			log.Fatal("only 'status', 'version' and 'up' commands are allowed in production environment. Use 'IKNOWWHATIAMDOING=yes' to override.")
 		}
 	}
 
@@ -84,26 +82,22 @@ func main() {
 	switch args[0] {
 	case "create":
 		if err := goose.Run(args[0], nil, migrationsDir, args[1:]...); err != nil {
-			slog.Error("goose.Run()", "error", err)
-			os.Exit(1)
+			log.Fatal(err)
 		}
 		return
 	}
 
 	databaseURL := os.Getenv("DATABASE_URL")
 	if databaseURL == "" {
-		slog.Error("missing DATABASE_URL environment variable")
-		os.Exit(1)
+		log.Fatal("missing DATABASE_URL environment variable")
 	}
 	db, err := sql.Open("pgx", databaseURL)
 	if err != nil {
-		slog.Error("failed to open DB", "error", err)
-		os.Exit(1)
+		log.Fatal("failed to open DB: ", err)
 	}
 	defer func() {
 		if err := db.Close(); err != nil {
-			slog.Error("failed to close DB", "error", err)
-			os.Exit(1)
+			log.Fatal("failed to close DB: ", err)
 		}
 	}()
 
@@ -125,8 +119,7 @@ func main() {
 		goose.WithAllowMissing(),
 	)
 	if err != nil {
-		slog.Error("goose.RunWithOptions()", "error", err)
-		os.Exit(1)
+		log.Fatal(err)
 	}
 	// Generate models after migration tasks in dev environment
 	if config.GetEnv() == config.DevEnv && !*noGen {
