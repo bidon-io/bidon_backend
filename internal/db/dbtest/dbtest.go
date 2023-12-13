@@ -3,7 +3,7 @@ package dbtest
 
 import (
 	"hash/fnv"
-	"log/slog"
+	"log"
 	"os"
 	"runtime"
 	"sync"
@@ -35,14 +35,13 @@ func Prepare() *db.DB {
 
 	err = godotenv.Load("../../../.env.test")
 	if err != nil {
-		slog.Info("Did not load from .env.test file", "error", err)
+		log.Printf("Did not load from .env.test file: %v", err)
 	}
 
 	nodeID := int64(hashNum >> 22) // max value is 1023 or 10 bits
 	node, err := snowflake.NewNode(nodeID)
 	if err != nil {
-		slog.Error("Error creating snowflake node:", "error", err)
-		os.Exit(1)
+		log.Fatalf("Error creating snowflake node: %v", err)
 	}
 
 	testDB, err = db.Open(
@@ -51,8 +50,7 @@ func Prepare() *db.DB {
 		db.WithSnowflakeNode(node),
 	)
 	if err != nil {
-		slog.Error("Error connecting to the database", "error", err)
-		os.Exit(1)
+		log.Fatalf("Error connecting to the database: %v", err)
 	}
 
 	return testDB
