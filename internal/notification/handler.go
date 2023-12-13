@@ -8,7 +8,7 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	"github.com/prebid/openrtb/v19/openrtb3"
 	"golang.org/x/exp/slices"
-	"log/slog"
+	"log"
 )
 
 type Handler struct {
@@ -90,7 +90,7 @@ func (h Handler) HandleBiddingRound(ctx context.Context, imp *schema.Imp, auctio
 // If external_win_notification is disabled - send win/loss notifications to demands
 func (h Handler) HandleStats(ctx context.Context, stats schema.Stats, config *auction.Config, bundle, adType string) {
 	if config == nil {
-		slog.Info("HandleStats: cannot find config", "auctionConfigurationID", stats.AuctionConfigurationID)
+		log.Printf("HandleStats: cannot find config: %v", stats.AuctionConfigurationID)
 		return
 	}
 
@@ -102,12 +102,12 @@ func (h Handler) HandleStats(ctx context.Context, stats schema.Stats, config *au
 	// Get AuctionResult from redis
 	auctionResult, err := h.AuctionResultRepo.Find(ctx, stats.AuctionID)
 	if err != nil {
-		slog.Info("HandleStats: AuctionResult exception", "error", err)
+		log.Printf("HandleStats: AuctionResult exception: %s", err)
 		return
 	}
 
 	if auctionResult == nil {
-		slog.Info("HandleStats: AuctionResult not found", "auctionID", stats.AuctionID)
+		log.Printf("HandleStats: AuctionResult not found: %s", stats.AuctionID)
 		return
 	}
 
@@ -132,7 +132,7 @@ func (h Handler) HandleStats(ctx context.Context, stats schema.Stats, config *au
 	var firstPrice, secondPrice float64
 
 	if len(prices) == 0 {
-		slog.Info("HandleStats: no valid prices", "auctionID", stats.AuctionID)
+		log.Printf("HandleStats: no valid prices: %s", stats.AuctionID)
 		return
 	} else if len(prices) == 1 {
 		firstPrice = prices[0]
@@ -227,12 +227,12 @@ func (h Handler) HandleShow(ctx context.Context, impression *schema.Bid, bundle,
 
 	auctionResult, err := h.AuctionResultRepo.Find(ctx, impression.AuctionID)
 	if err != nil {
-		slog.Info("HandleShow: AuctionResult exception", "error", err)
+		log.Printf("HandleShow: AuctionResult exception: %s", err)
 		return
 	}
 
 	if auctionResult == nil {
-		slog.Info("HandleShow: AuctionResult not found", "auctionID", impression.AuctionID)
+		log.Printf("HandleShow: AuctionResult not found: %s", impression.AuctionID)
 		return
 	}
 
