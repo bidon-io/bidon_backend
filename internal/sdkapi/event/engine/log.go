@@ -1,7 +1,7 @@
 package engine
 
 import (
-	"log/slog"
+	"log"
 
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
 )
@@ -11,5 +11,5 @@ type Log struct{}
 func (e *Log) Produce(message event.LogMessage, _ func(error)) {
 	topic := message.Topic
 	value := message.Value
-	slog.Info("PRODUCE EVENT", "topic", topic, "value", value)
+	log.Printf("PRODUCE EVENT %T(%v): %s", topic, topic, value)
 }
