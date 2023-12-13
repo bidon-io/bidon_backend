@@ -23,7 +23,6 @@ require (
 	github.com/labstack/echo-contrib v0.15.0
 	github.com/labstack/echo-jwt/v4 v4.2.0
 	github.com/labstack/echo/v4 v4.11.3
-	github.com/orandin/slog-gorm v1.0.1
 	github.com/oschwald/maxminddb-golang v1.12.0
 	github.com/prebid/openrtb/v19 v19.0.0
 	github.com/pressly/goose/v3 v3.16.0
@@ -45,6 +44,7 @@ require (
 	gorm.io/driver/postgres v1.5.3
 	gorm.io/gen v0.3.23
 	gorm.io/gorm v1.25.5
+	moul.io/zapgorm2 v1.3.0
 )
 
 require (

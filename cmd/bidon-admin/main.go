@@ -36,17 +36,19 @@ import (
 func main() {
 	config.ConfigureOTel()
 
-	zapL, err := config.NewZapLogger()
+	zapLogger, err := config.NewZapLogger()
 	if err != nil {
-		log.Fatalf("config.NewLogger(): %v", err)
+		log.Fatalf("config.NewZapLogger(): %v", err)
 	}
 	defer func() {
-		err := zapL.Sync()
+		err := zapLogger.Sync()
 		if err != nil {
 			log.Printf("logger.Sync(): %v", err)
 		}
 	}()
-	logger := slog.New(zapslog.NewHandler(zapL.Core(), nil))
+
+	slogLogger := slog.New(zapslog.NewHandler(zapLogger.Core(), nil))
+	slog.SetDefault(slogLogger)
 
 	sentryConf := config.Sentry()
 	err = sentry.Init(sentryConf.ClientOptions)
@@ -88,11 +90,11 @@ func main() {
 	adminService := admin.NewService(store)
 
 	authGroup := e.Group("/auth")
-	config.UseCommonMiddleware(authGroup, "bidon-admin", logger)
+	config.UseCommonMiddleware(authGroup, "bidon-admin", zapLogger)
 	adminecho.RegisterAuthService(authGroup, authService)
 
 	apiGroup := e.Group("/api")
-	config.UseCommonMiddleware(apiGroup, "bidon-admin", logger)
+	config.UseCommonMiddleware(apiGroup, "bidon-admin", zapLogger)
 	adminecho.UseAuthorization(apiGroup, authService)
 	adminecho.RegisterAdminService(apiGroup, adminService)
 
