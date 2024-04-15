@@ -18,3 +18,5 @@ docker-build-push-prod-migrate:
 	docker buildx build --platform linux/amd64 --provenance=false \
 	--target bidon-migrate --cache-to type=inline --cache-from $(REGISTRY)/bidon-migrate \
 	-t $(REGISTRY)/bidon-migrate:$(TAG) -t $(REGISTRY)/bidon-migrate:latest --push .
+
+# test
