@@ -27,7 +27,10 @@ type Adapter struct {
 }
 
 func (a *Adapter) FetchBids(br *schema.BiddingRequest) ([]*adapters.DemandResponse, error) {
-	slotsJSON := br.Imp.Demands[adapter.AmazonKey]["token"].(string)
+	slotsJSON, ok := br.Imp.Demands[adapter.AmazonKey]["token"].(string)
+	if !ok {
+		return nil, fmt.Errorf("no token in request")
+	}
 	var slots []Slot
 	err := json.Unmarshal([]byte(slotsJSON), &slots)
 	if err != nil {
