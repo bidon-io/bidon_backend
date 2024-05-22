@@ -2,13 +2,10 @@ package sdkapi_test
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"net/http"
 	"os"
 	"testing"
-
-	"github.com/google/go-cmp/cmp"
 
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
@@ -145,25 +142,6 @@ func testHelperAuctionHandler(t *testing.T) *sdkapi.AuctionHandler {
 	return handler
 }
 
-func checkResponses(t *testing.T, expectedResponseJson, actualResponseJson []byte) {
-	t.Helper()
-
-	var actualResponse interface{}
-	var expectedResponse interface{}
-	err := json.Unmarshal(actualResponseJson, &actualResponse)
-	if err != nil {
-		t.Fatalf("Failed to parse JSON1: %s", err)
-	}
-	err = json.Unmarshal(expectedResponseJson, &expectedResponse)
-	if err != nil {
-		t.Fatalf("Failed to parse JSON2: %s", err)
-	}
-
-	if diff := cmp.Diff(actualResponse, expectedResponse); diff != "" {
-		t.Errorf("Response mismatch (-want, +got):\n%s", diff)
-	}
-}
-
 func TestAuctionHandler_Handle(t *testing.T) {
 	tests := []struct {
 		name                 string
@@ -240,7 +218,7 @@ func TestAuctionHandler_Handle(t *testing.T) {
 				if err != nil {
 					t.Fatalf("Error reading response file: %v", err)
 				}
-				checkResponses(t, expectedResponseJson, rec.Body.Bytes())
+				CheckResponses(t, expectedResponseJson, rec.Body.Bytes())
 			}
 		})
 	}

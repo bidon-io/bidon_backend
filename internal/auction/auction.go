@@ -48,6 +48,13 @@ type AdUnit struct {
 	Extra      map[string]any `json:"ext"`
 }
 
+func (a *AdUnit) GetPriceFloor() float64 {
+	if a.PriceFloor == nil {
+		return 0
+	}
+	return *a.PriceFloor
+}
+
 type Segment struct {
 	ID  string `json:"id"`
 	UID string `json:"uid"`
