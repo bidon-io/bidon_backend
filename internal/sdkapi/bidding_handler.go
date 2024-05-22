@@ -180,7 +180,7 @@ func (h *BiddingHandler) buildResponse(auctionResult bidding.AuctionResult, imp 
 			var bid *Bid
 
 			if Version05GTEConstraint.Check(sdkVersion) {
-				bid = h.buildBid(result, &adUnitsMap)
+				bid = buildBid(result, &adUnitsMap)
 			} else {
 				bid = h.buildBidDeprecated(result)
 			}
@@ -201,7 +201,7 @@ func (h *BiddingHandler) buildResponse(auctionResult bidding.AuctionResult, imp 
 	return response, nil
 }
 
-func (h *BiddingHandler) buildBid(demandResponse adapters.DemandResponse, adUnitsMap *map[adapter.Key][]auction.AdUnit) *Bid {
+func buildBid(demandResponse adapters.DemandResponse, adUnitsMap *map[adapter.Key][]auction.AdUnit) *Bid {
 	storeAdUnit, err := selectAdUnit(demandResponse, adUnitsMap)
 	if err != nil {
 		return nil

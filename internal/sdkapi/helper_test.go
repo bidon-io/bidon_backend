@@ -2,10 +2,12 @@ package sdkapi_test
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/bidon-io/bidon-backend/config"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/geocoder"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/mocks"
+	"github.com/google/go-cmp/cmp"
 	"github.com/labstack/echo/v4"
 	"net/http/httptest"
 	"strings"
@@ -82,5 +84,25 @@ func CheckResponseCode(t *testing.T, err error, actualCode int, expectedCode int
 		}
 	} else {
 		t.Fatalf("An unexpected error occurred: %v", err)
+	}
+}
+
+// CheckResponses is a helper function to assert the response body.
+func CheckResponses(t *testing.T, expectedResponseJson, actualResponseJson []byte) {
+	t.Helper()
+
+	var actualResponse interface{}
+	var expectedResponse interface{}
+	err := json.Unmarshal(actualResponseJson, &actualResponse)
+	if err != nil {
+		t.Fatalf("Failed to parse JSON1: %s", err)
+	}
+	err = json.Unmarshal(expectedResponseJson, &expectedResponse)
+	if err != nil {
+		t.Fatalf("Failed to parse JSON2: %s", err)
+	}
+
+	if diff := cmp.Diff(actualResponse, expectedResponse); diff != "" {
+		t.Errorf("Response mismatch (-want, +got):\n%s", diff)
 	}
 }
