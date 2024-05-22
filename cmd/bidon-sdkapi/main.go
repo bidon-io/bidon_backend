@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
+	"github.com/bidon-io/bidon-backend/internal/auctionv2"
 	"log"
 	"net/http"
 	"os"
@@ -177,24 +178,41 @@ func main() {
 		AdapterInitConfigsFetcher: &sdkapistore.AdapterInitConfigsFetcher{DB: db},
 		EventLogger:               eventLogger,
 	}
+	biddingBuilder := &bidding.Builder{
+		AdaptersBuilder:     adapters_builder.BuildBiddingAdapters(biddingHttpClient),
+		NotificationHandler: notificationHandler,
+	}
+	biddingAdaptersCfgBuilder := &adapters_builder.AdaptersConfigBuilder{
+		ConfigurationFetcher: &adapterstore.ConfigurationFetcher{
+			DB:    db,
+			Cache: config.NewMemoryCacheOf[adapter.RawConfigsMap](10 * time.Minute),
+		},
+	}
 	biddingHandler := sdkapi.BiddingHandler{
 		BaseHandler: &sdkapi.BaseHandler[schema.BiddingRequest, *schema.BiddingRequest]{
 			AppFetcher:    appFetcher,
 			ConfigFetcher: configFetcher,
 			Geocoder:      geoCoder,
 		},
-		BiddingBuilder: &bidding.Builder{
-			AdaptersBuilder:     adapters_builder.BuildBiddingAdapters(biddingHttpClient),
-			NotificationHandler: notificationHandler,
+		BiddingBuilder:        biddingBuilder,
+		AdaptersConfigBuilder: biddingAdaptersCfgBuilder,
+		AdUnitsMatcher:        adUnitsMatcher,
+		EventLogger:           eventLogger,
+	}
+	auctionHandlerV2 := sdkapi.AuctionHandlerV2{
+		BaseHandler: &sdkapi.BaseHandler[schema.AuctionV2Request, *schema.AuctionV2Request]{
+			AppFetcher:    appFetcher,
+			ConfigFetcher: configFetcher,
+			Geocoder:      geoCoder,
 		},
-		AdaptersConfigBuilder: &adapters_builder.AdaptersConfigBuilder{
-			ConfigurationFetcher: &adapterstore.ConfigurationFetcher{
-				DB:    db,
-				Cache: config.NewMemoryCacheOf[adapter.RawConfigsMap](10 * time.Minute),
-			},
+		SegmentMatcher: &segmentMatcher,
+		AuctionBuilder: &auctionv2.Builder{
+			ConfigFetcher:                configFetcher,
+			AdUnitsMatcher:               adUnitsMatcher,
+			BiddingBuilder:               biddingBuilder,
+			BiddingAdaptersConfigBuilder: biddingAdaptersCfgBuilder,
 		},
-		AdUnitsMatcher: adUnitsMatcher,
-		EventLogger:    eventLogger,
+		EventLogger: eventLogger,
 	}
 	statsHandler := sdkapi.StatsHandler{
 		BaseHandler: &sdkapi.BaseHandler[schema.StatsRequest, *schema.StatsRequest]{
@@ -260,6 +278,7 @@ func main() {
 
 	g.POST("/config", configHandler.Handle)
 	g.POST("/auction/:ad_type", auctionHandler.Handle)
+	g.POST("/v2/auction/:ad_type", auctionHandlerV2.Handle)
 	g.POST("/bidding/:ad_type", biddingHandler.Handle)
 	g.POST("/stats/:ad_type", statsHandler.Handle)
 	g.POST("/show/:ad_type", showHandler.Handle)
