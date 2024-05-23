@@ -25,7 +25,7 @@ import (
 	segmentmocks "github.com/bidon-io/bidon-backend/internal/segment/mocks"
 )
 
-func testHelperAuctionV2Handler(t *testing.T) *sdkapi.AuctionHandlerV2 {
+func testHelperAuctionV2Handler(t *testing.T) *sdkapi.AuctionV2Handler {
 	app := sdkapi.App{ID: 1}
 	geodata := geocoder.GeoData{CountryCode: "US"}
 	segments := []segment.Segment{
@@ -192,7 +192,7 @@ func testHelperAuctionV2Handler(t *testing.T) *sdkapi.AuctionHandlerV2 {
 		BiddingAdaptersConfigBuilder: biddingAdaptersConfigBuilder,
 	}
 
-	handler := &sdkapi.AuctionHandlerV2{
+	handler := &sdkapi.AuctionV2Handler{
 		BaseHandler: &sdkapi.BaseHandler[schema.AuctionV2Request, *schema.AuctionV2Request]{
 			AppFetcher:    appFetcher,
 			ConfigFetcher: configFetcher,
