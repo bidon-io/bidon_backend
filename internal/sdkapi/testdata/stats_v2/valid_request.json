@@ -1,0 +1,114 @@
+{
+  "device": {
+    "w": 1179,
+    "h": 2556,
+    "js": 1,
+    "mccmnc": "",
+    "osv": "16.2",
+    "type": "PHONE",
+    "os": "iOS",
+    "pxratio": 3,
+    "connection_type": "CELLULAR",
+    "language": "ru-US",
+    "make": "Apple",
+    "hwv": "x86_64",
+    "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
+    "ppi": 2556,
+    "model": "iPhone",
+    "carrier": ""
+  },
+  "segment": {},
+  "test": false,
+  "app": {
+    "skadn": [
+      "xxx.skadnetwork"
+    ],
+    "bundle": "com.app.name",
+    "key": "123",
+    "framework": "native",
+    "version": "1.0"
+  },
+  "token": "{}",
+  "session": {
+    "battery": 37,
+    "cpu_usage": 0.70329005,
+    "id": "eb0eba3d-613c-45ac-9a30-c7545d1bbd7b",
+    "launch_monotonic_ts": 98842349,
+    "launch_ts": 1697415389754,
+    "memory_warnings_monotonic_ts": [],
+    "memory_warnings_ts": [],
+    "start_monotonic_ts": 98842349,
+    "monotonic_ts": 100246984,
+    "ram_size": 3694419968,
+    "ram_used": 509616128,
+    "start_ts": 1697415389754,
+    "storage_free": 29028323328,
+    "storage_used": 24649330688,
+    "ts": 1697416794389
+  },
+  "user": {
+    "idg": "ca26b34e-5208-4c6d-9621-061b0672596a",
+    "idfa": "248890dc-56bc-4dd5-afc3-e2672b14633e",
+    "tracking_authorization_status": "AUTHORIZED"
+  },
+  "regs": {
+    "coppa": false,
+    "gdpr": false,
+    "iab": {}
+  },
+  "ext": "{}",
+  "stats": {
+    "auction_configuration_id": 15,
+    "auction_pricefloor": 0.124096186841276,
+    "auction_id": "73609330-0908-4a47-9456-d46981aafeac",
+    "result": {
+      "auction_finish_ts": 1697416794384,
+      "auction_start_ts": 1697416792473,
+      "price": 0.4,
+      "status": "SUCCESS",
+      "winner_demand_id": "applovin",
+      "winner_ad_unit_uid": "df67188e8f43829c",
+      "winner_ad_unit_label": "applovin_banner_mergeblock",
+      "banner": {
+        "format": "BANNER"
+      }
+    },
+    "ad_units": [
+      {
+        "demand_id": "amazon",
+        "bid_type": "RTB",
+        "status": "NO_BID"
+      },
+      {
+        "price": 0.4,
+        "fill_start_ts": 1697416793127,
+        "fill_finish_ts": 1697416793563,
+        "demand_id": "applovin",
+        "bid_type": "CPM",
+        "ad_unit_uid": "df67188e8f43829c",
+        "ad_unit_label": "applovin_banner_mergeblock",
+        "status": "WIN"
+      },
+      {
+        "price": 0.3,
+        "fill_start_ts": 1697416793158,
+        "fill_finish_ts": 1697416793955,
+        "demand_id": "dtexchange",
+        "bid_type": "CPM",
+        "ad_unit_uid": "1252532",
+        "ad_unit_label": "dtexchange_banner_mergeblock",
+        "status": "NO_FILL"
+      },
+      {
+        "price": 0.124096186841276,
+        "fill_start_ts": 1697416793126,
+        "fill_finish_ts": 1697416794380,
+        "demand_id": "bidmachine",
+        "bid_type": "CPM",
+        "ad_unit_uid": "123456",
+        "ad_unit_label": "bidmachine_banner_mergeblock",
+        "status": "NO_FILL"
+      }
+    ]
+  }
+}

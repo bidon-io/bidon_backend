@@ -16,7 +16,7 @@ import (
 	"strconv"
 )
 
-type AuctionHandlerV2 struct {
+type AuctionV2Handler struct {
 	*BaseHandler[schema.AuctionV2Request, *schema.AuctionV2Request]
 	AuctionBuilder        *auctionv2.Builder
 	SegmentMatcher        *segment.Matcher
@@ -37,7 +37,7 @@ type AuctionV2Response struct {
 	AuctionID                string           `json:"auction_id"`
 }
 
-func (h *AuctionHandlerV2) Handle(c echo.Context) error {
+func (h *AuctionV2Handler) Handle(c echo.Context) error {
 	req, err := h.resolveRequest(c)
 	if err != nil {
 		return err
@@ -91,7 +91,7 @@ func (h *AuctionHandlerV2) Handle(c echo.Context) error {
 	return c.JSON(http.StatusOK, response)
 }
 
-func (h *AuctionHandlerV2) buildResponse(
+func (h *AuctionV2Handler) buildResponse(
 	req *request[schema.AuctionV2Request, *schema.AuctionV2Request],
 	auctionResult *auctionv2.AuctionResult,
 	adUnitsMap *map[adapter.Key][]auction.AdUnit,
@@ -131,7 +131,7 @@ func (h *AuctionHandlerV2) buildResponse(
 	return &response, nil
 }
 
-func (h *AuctionHandlerV2) logEvents(
+func (h *AuctionV2Handler) logEvents(
 	c echo.Context,
 	req *request[schema.AuctionV2Request, *schema.AuctionV2Request],
 	auctionResult *auctionv2.AuctionResult,
