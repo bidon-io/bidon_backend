@@ -73,9 +73,9 @@
   },
   "test": false,
   "tmax": 500,
-  "imp": {
+  "ad_object": {
     "auction_id": "1d7fa438-cd08-4849-80ed-e20d5657a5ea",
-    "pricefloor": 0.001,
+    "auction_pricefloor": 0.001,
     "demands": {
       "meta": {
         "token": "token"
