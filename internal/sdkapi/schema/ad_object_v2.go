@@ -6,7 +6,7 @@ import (
 )
 
 type AdObjectV2 struct {
-	AuctionID               string                         `json:"auction_id" validate:"required,uuid4"`
+	AuctionID               string                         `json:"auction_id" validate:"required"`
 	AuctionConfigurationID  int64                          `json:"auction_configuration_id"`
 	AuctionConfigurationUID string                         `json:"auction_configuration_uid"`
 	PriceFloor              float64                        `json:"auction_pricefloor" validate:"required,gte=0"`
