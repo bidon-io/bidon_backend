@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/Masterminds/semver/v3"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/db"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
@@ -53,7 +52,7 @@ type AdapterInitConfigsFetcher struct {
 	DB *db.DB
 }
 
-func (f *AdapterInitConfigsFetcher) FetchAdapterInitConfigs(ctx context.Context, appID int64, adapterKeys []adapter.Key, sdkVersion *semver.Version, setOrder bool) ([]sdkapi.AdapterInitConfig, error) {
+func (f *AdapterInitConfigsFetcher) FetchAdapterInitConfigs(ctx context.Context, appID int64, adapterKeys []adapter.Key, setAmazonSlots bool, setOrder bool) ([]sdkapi.AdapterInitConfig, error) {
 	var dbProfiles []db.AppDemandProfile
 
 	err := f.DB.
@@ -91,8 +90,7 @@ func (f *AdapterInitConfigsFetcher) FetchAdapterInitConfigs(ctx context.Context,
 			applovinConfig.AppKey = applovinConfig.SDKKey
 		}
 
-		// TODO: remove this block when we drop support for 0.4.x
-		if !sdkapi.Version05GTEConstraint.Check(sdkVersion) {
+		if setAmazonSlots {
 			amazonConfig, ok := config.(*sdkapi.AmazonInitConfig)
 			if ok {
 				amazonConfig.Slots, err = f.fetchAmazonSlots(ctx, appID)
@@ -108,7 +106,6 @@ func (f *AdapterInitConfigsFetcher) FetchAdapterInitConfigs(ctx context.Context,
 	return configs, nil
 }
 
-// Deprecated: amazon slots moved to the auction as of 0.5.0
 func (f *AdapterInitConfigsFetcher) fetchAmazonSlots(ctx context.Context, appID int64) ([]sdkapi.AmazonSlot, error) {
 	var dbLineItems []db.LineItem
 

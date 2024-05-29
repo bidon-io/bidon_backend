@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/Masterminds/semver/v3"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
@@ -22,7 +21,7 @@ type ConfigHandler struct {
 
 //go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/config_mocks.go -pkg mocks . AdapterInitConfigsFetcher
 type AdapterInitConfigsFetcher interface {
-	FetchAdapterInitConfigs(ctx context.Context, appID int64, adapterKeys []adapter.Key, sdkVersion *semver.Version, setOrder bool) ([]AdapterInitConfig, error)
+	FetchAdapterInitConfigs(ctx context.Context, appID int64, adapterKeys []adapter.Key, setAmazonSlots bool, setOrder bool) ([]AdapterInitConfig, error)
 }
 
 type ConfigResponse struct {
@@ -69,8 +68,9 @@ func (h *ConfigHandler) Handle(c echo.Context) error {
 		return ErrInvalidSDKVersion
 	}
 
-	setOrder := req.raw.Device.OS == "android"
-	adapterInitConfigs, err := h.AdapterInitConfigsFetcher.FetchAdapterInitConfigs(ctx, req.app.ID, req.raw.Adapters.Keys(), sdkVersion, setOrder)
+	setOrder := req.raw.Device.OS == "android"               // Set order for Android devices only
+	setAmazonSlots := !Version05Constraint.Check(sdkVersion) // Do not set Amazon slots for SDK version 0.5.x
+	adapterInitConfigs, err := h.AdapterInitConfigsFetcher.FetchAdapterInitConfigs(ctx, req.app.ID, req.raw.Adapters.Keys(), setAmazonSlots, setOrder)
 	if err != nil {
 		return err
 	}
