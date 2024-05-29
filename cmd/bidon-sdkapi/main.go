@@ -305,6 +305,7 @@ func main() {
 	// API v2 endpoints
 	g.POST("/v2/auction/:ad_type", auctionV2Handler.Handle)
 	g.POST("/v2/stats/:ad_type", statsV2Handler.Handle)
+	g.POST("/v2/config", configHandler.Handle)
 
 	// Legacy endpoints
 	g.POST("/:ad_type/auction", auctionHandler.Handle)

@@ -5,7 +5,6 @@ package mocks
 
 import (
 	"context"
-	"github.com/Masterminds/semver/v3"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
 	"sync"
@@ -21,7 +20,7 @@ var _ sdkapi.AdapterInitConfigsFetcher = &AdapterInitConfigsFetcherMock{}
 //
 //		// make and configure a mocked sdkapi.AdapterInitConfigsFetcher
 //		mockedAdapterInitConfigsFetcher := &AdapterInitConfigsFetcherMock{
-//			FetchAdapterInitConfigsFunc: func(ctx context.Context, appID int64, adapterKeys []adapter.Key, sdkVersion *semver.Version, setOrder bool) ([]sdkapi.AdapterInitConfig, error) {
+//			FetchAdapterInitConfigsFunc: func(ctx context.Context, appID int64, adapterKeys []adapter.Key, setAmazonSlots bool, setOrder bool) ([]sdkapi.AdapterInitConfig, error) {
 //				panic("mock out the FetchAdapterInitConfigs method")
 //			},
 //		}
@@ -32,7 +31,7 @@ var _ sdkapi.AdapterInitConfigsFetcher = &AdapterInitConfigsFetcherMock{}
 //	}
 type AdapterInitConfigsFetcherMock struct {
 	// FetchAdapterInitConfigsFunc mocks the FetchAdapterInitConfigs method.
-	FetchAdapterInitConfigsFunc func(ctx context.Context, appID int64, adapterKeys []adapter.Key, sdkVersion *semver.Version, setOrder bool) ([]sdkapi.AdapterInitConfig, error)
+	FetchAdapterInitConfigsFunc func(ctx context.Context, appID int64, adapterKeys []adapter.Key, setAmazonSlots bool, setOrder bool) ([]sdkapi.AdapterInitConfig, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -44,8 +43,8 @@ type AdapterInitConfigsFetcherMock struct {
 			AppID int64
 			// AdapterKeys is the adapterKeys argument value.
 			AdapterKeys []adapter.Key
-			// SdkVersion is the sdkVersion argument value.
-			SdkVersion *semver.Version
+			// SetAmazonSlots is the setAmazonSlots argument value.
+			SetAmazonSlots bool
 			// SetOrder is the setOrder argument value.
 			SetOrder bool
 		}
@@ -54,27 +53,27 @@ type AdapterInitConfigsFetcherMock struct {
 }
 
 // FetchAdapterInitConfigs calls FetchAdapterInitConfigsFunc.
-func (mock *AdapterInitConfigsFetcherMock) FetchAdapterInitConfigs(ctx context.Context, appID int64, adapterKeys []adapter.Key, sdkVersion *semver.Version, setOrder bool) ([]sdkapi.AdapterInitConfig, error) {
+func (mock *AdapterInitConfigsFetcherMock) FetchAdapterInitConfigs(ctx context.Context, appID int64, adapterKeys []adapter.Key, setAmazonSlots bool, setOrder bool) ([]sdkapi.AdapterInitConfig, error) {
 	if mock.FetchAdapterInitConfigsFunc == nil {
 		panic("AdapterInitConfigsFetcherMock.FetchAdapterInitConfigsFunc: method is nil but AdapterInitConfigsFetcher.FetchAdapterInitConfigs was just called")
 	}
 	callInfo := struct {
-		Ctx         context.Context
-		AppID       int64
-		AdapterKeys []adapter.Key
-		SdkVersion  *semver.Version
-		SetOrder    bool
+		Ctx            context.Context
+		AppID          int64
+		AdapterKeys    []adapter.Key
+		SetAmazonSlots bool
+		SetOrder       bool
 	}{
-		Ctx:         ctx,
-		AppID:       appID,
-		AdapterKeys: adapterKeys,
-		SdkVersion:  sdkVersion,
-		SetOrder:    setOrder,
+		Ctx:            ctx,
+		AppID:          appID,
+		AdapterKeys:    adapterKeys,
+		SetAmazonSlots: setAmazonSlots,
+		SetOrder:       setOrder,
 	}
 	mock.lockFetchAdapterInitConfigs.Lock()
 	mock.calls.FetchAdapterInitConfigs = append(mock.calls.FetchAdapterInitConfigs, callInfo)
 	mock.lockFetchAdapterInitConfigs.Unlock()
-	return mock.FetchAdapterInitConfigsFunc(ctx, appID, adapterKeys, sdkVersion, setOrder)
+	return mock.FetchAdapterInitConfigsFunc(ctx, appID, adapterKeys, setAmazonSlots, setOrder)
 }
 
 // FetchAdapterInitConfigsCalls gets all the calls that were made to FetchAdapterInitConfigs.
@@ -82,18 +81,18 @@ func (mock *AdapterInitConfigsFetcherMock) FetchAdapterInitConfigs(ctx context.C
 //
 //	len(mockedAdapterInitConfigsFetcher.FetchAdapterInitConfigsCalls())
 func (mock *AdapterInitConfigsFetcherMock) FetchAdapterInitConfigsCalls() []struct {
-	Ctx         context.Context
-	AppID       int64
-	AdapterKeys []adapter.Key
-	SdkVersion  *semver.Version
-	SetOrder    bool
+	Ctx            context.Context
+	AppID          int64
+	AdapterKeys    []adapter.Key
+	SetAmazonSlots bool
+	SetOrder       bool
 } {
 	var calls []struct {
-		Ctx         context.Context
-		AppID       int64
-		AdapterKeys []adapter.Key
-		SdkVersion  *semver.Version
-		SetOrder    bool
+		Ctx            context.Context
+		AppID          int64
+		AdapterKeys    []adapter.Key
+		SetAmazonSlots bool
+		SetOrder       bool
 	}
 	mock.lockFetchAdapterInitConfigs.RLock()
 	calls = mock.calls.FetchAdapterInitConfigs

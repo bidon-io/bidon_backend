@@ -3,7 +3,6 @@ package sdkapi_test
 import (
 	"context"
 	"fmt"
-	"github.com/Masterminds/semver/v3"
 	"net/http"
 	"os"
 	"testing"
@@ -37,7 +36,7 @@ func SetupConfigHandler() sdkapi.ConfigHandler {
 		Fetcher: segmentFetcher,
 	}
 	adapterInitConfigsFetcher := &mocks.AdapterInitConfigsFetcherMock{
-		FetchAdapterInitConfigsFunc: func(ctx context.Context, appID int64, adapterKeys []adapter.Key, sdkVersion *semver.Version, setOrder bool) ([]sdkapi.AdapterInitConfig, error) {
+		FetchAdapterInitConfigsFunc: func(ctx context.Context, appID int64, adapterKeys []adapter.Key, setAmazonSlots bool, setOrder bool) ([]sdkapi.AdapterInitConfig, error) {
 			return []sdkapi.AdapterInitConfig{
 				&sdkapi.AdmobInitConfig{
 					AppID: fmt.Sprintf("admob_app_%d", app.ID),
@@ -132,6 +131,12 @@ func TestConfigHandler_Handle(t *testing.T) {
 			name:         "valid request android",
 			sdkVersion:   "0.5.0",
 			requestPath:  "testdata/config/valid_request_android.json",
+			expectedCode: http.StatusOK,
+		},
+		{
+			name:         "valid request",
+			sdkVersion:   "0.6.0",
+			requestPath:  "testdata/config/valid_request.json",
 			expectedCode: http.StatusOK,
 		},
 		{
