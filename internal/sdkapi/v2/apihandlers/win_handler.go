@@ -1,0 +1,68 @@
+package apihandlers
+
+import (
+	"context"
+	"fmt"
+	"github.com/bidon-io/bidon-backend/internal/sdkapi"
+	"net/http"
+	"strconv"
+
+	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
+	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
+	"github.com/labstack/echo/v4"
+)
+
+type WinHandler struct {
+	*BaseHandler[schema.WinRequest, *schema.WinRequest]
+	EventLogger         *event.Logger
+	NotificationHandler WinNotificationHandler
+}
+
+//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/win_mocks.go -pkg mocks . WinNotificationHandler
+type WinNotificationHandler interface {
+	HandleWin(ctx context.Context, bid *schema.Bid) error
+}
+
+func (h *WinHandler) Handle(c echo.Context) error {
+	req, err := h.resolveRequest(c)
+	if err != nil {
+		return err
+	}
+
+	demandRequestEvent := prepareWinEvent(req)
+	h.EventLogger.Log(demandRequestEvent, func(err error) {
+		sdkapi.LogError(c, fmt.Errorf("log win event: %v", err))
+	})
+
+	return c.JSON(http.StatusOK, map[string]any{"success": true})
+}
+
+func prepareWinEvent(req *request[schema.WinRequest, *schema.WinRequest]) *event.AdEvent {
+	bid := req.raw.Bid
+
+	auctionConfigurationUID, err := strconv.ParseInt(bid.AuctionConfigurationUID, 10, 64)
+	if err != nil {
+		auctionConfigurationUID = 0
+	}
+
+	adRequestParams := event.AdRequestParams{
+		EventType:               "win",
+		AdType:                  string(req.raw.AdType),
+		AdFormat:                string(bid.Format()),
+		AuctionID:               bid.AuctionID,
+		AuctionConfigurationID:  bid.AuctionConfigurationID,
+		AuctionConfigurationUID: auctionConfigurationUID,
+		Status:                  "",
+		RoundID:                 bid.RoundID,
+		RoundNumber:             bid.RoundIndex,
+		ImpID:                   bid.ImpID,
+		DemandID:                bid.DemandID,
+		AdUnitUID:               int64(bid.GetAdUnitUID()),
+		AdUnitLabel:             bid.AdUnitLabel,
+		ECPM:                    bid.GetPrice(),
+		PriceFloor:              bid.AuctionPriceFloor,
+		Bidding:                 bid.IsBidding(),
+	}
+
+	return event.NewAdEvent(&req.raw.BaseRequest, adRequestParams, req.geoData)
+}
