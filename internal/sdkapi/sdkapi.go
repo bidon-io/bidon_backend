@@ -8,6 +8,11 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// App represents an app for the purposes of the SDK API
+type App struct {
+	ID int64
+}
+
 func CheckBidonHeader(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		if c.Request().Header.Get("X-Bidon-Version") == "" {
@@ -18,7 +23,7 @@ func CheckBidonHeader(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
-func logError(c echo.Context, err error) {
+func LogError(c echo.Context, err error) {
 	c.Logger().Error(err)
 
 	hub := sentryecho.GetHubFromContext(c)
