@@ -5,7 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
-	"github.com/bidon-io/bidon-backend/internal/auctionv2"
+	v1 "github.com/bidon-io/bidon-backend/internal/sdkapi/v1"
+	v2 "github.com/bidon-io/bidon-backend/internal/sdkapi/v2"
 	"log"
 	"net/http"
 	"os"
@@ -21,7 +22,6 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event/engine"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/geocoder"
-	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	"github.com/bidon-io/bidon-backend/internal/segment"
 	"github.com/oschwald/maxminddb-golang"
 	"github.com/redis/go-redis/v9"
@@ -108,6 +108,11 @@ func main() {
 	}
 	eventLogger := &event.Logger{Engine: loggerEngine}
 
+	geoCoder := &geocoder.Geocoder{
+		DB:        db,
+		MaxMindDB: maxMindDB,
+		Cache:     config.NewMemoryCacheOf[*dbpkg.Country](cache.UnlimitedTTL), // We don't update countries
+	}
 	configFetcher := &auctionstore.ConfigFetcher{
 		DB:    db,
 		Cache: config.NewMemoryCacheOf[*auction.Config](10 * time.Minute),
@@ -116,18 +121,12 @@ func main() {
 		DB:    db,
 		Cache: config.NewMemoryCacheOf[sdkapi.App](10 * time.Minute),
 	}
-	geoCoder := &geocoder.Geocoder{
-		DB:        db,
-		MaxMindDB: maxMindDB,
-		Cache:     config.NewMemoryCacheOf[*dbpkg.Country](cache.UnlimitedTTL), // We don't update countries
-	}
-	segmentMatcher := segment.Matcher{
+	segmentMatcher := &segment.Matcher{
 		Fetcher: &segmentstore.SegmentFetcher{
 			DB:    db,
 			Cache: config.NewMemoryCacheOf[[]segment.Segment](10 * time.Minute),
 		},
 	}
-
 	biddingHttpClient := &http.Client{
 		Timeout: 5 * time.Second,
 		Transport: otelhttp.NewTransport(&http.Transport{
@@ -150,40 +149,9 @@ func main() {
 			EventLogger: eventLogger,
 		},
 	}
-
 	adUnitsMatcher := &auctionstore.AdUnitsMatcher{
 		DB:    db,
 		Cache: config.NewMemoryCacheOf[[]auction.AdUnit](10 * time.Minute),
-	}
-	auctionHandler := sdkapi.AuctionHandler{
-		BaseHandler: &sdkapi.BaseHandler[schema.AuctionRequest, *schema.AuctionRequest]{
-			AppFetcher:    appFetcher,
-			ConfigFetcher: configFetcher,
-			Geocoder:      geoCoder,
-		},
-		SegmentMatcher: &segmentMatcher,
-		AuctionBuilder: &auction.Builder{
-			ConfigFetcher: configFetcher,
-			LineItemsMatcher: &auctionstore.LineItemsMatcher{
-				DB:    db,
-				Cache: config.NewMemoryCacheOf[[]auction.LineItem](10 * time.Minute),
-			},
-		},
-		AuctionBuilderV2: &auction.BuilderV2{
-			ConfigFetcher:  configFetcher,
-			AdUnitsMatcher: adUnitsMatcher,
-		},
-		EventLogger: eventLogger,
-	}
-	configHandler := sdkapi.ConfigHandler{
-		BaseHandler: &sdkapi.BaseHandler[schema.ConfigRequest, *schema.ConfigRequest]{
-			AppFetcher:    appFetcher,
-			ConfigFetcher: configFetcher,
-			Geocoder:      geoCoder,
-		},
-		SegmentMatcher:            &segmentMatcher,
-		AdapterInitConfigsFetcher: &sdkapistore.AdapterInitConfigsFetcher{DB: db},
-		EventLogger:               eventLogger,
 	}
 	biddingBuilder := &bidding.Builder{
 		AdaptersBuilder:     adapters_builder.BuildBiddingAdapters(biddingHttpClient),
@@ -195,124 +163,60 @@ func main() {
 			Cache: config.NewMemoryCacheOf[adapter.RawConfigsMap](10 * time.Minute),
 		},
 	}
-	biddingHandler := sdkapi.BiddingHandler{
-		BaseHandler: &sdkapi.BaseHandler[schema.BiddingRequest, *schema.BiddingRequest]{
-			AppFetcher:    appFetcher,
-			ConfigFetcher: configFetcher,
-			Geocoder:      geoCoder,
-		},
-		BiddingBuilder:        biddingBuilder,
-		AdaptersConfigBuilder: biddingAdaptersCfgBuilder,
-		AdUnitsMatcher:        adUnitsMatcher,
-		EventLogger:           eventLogger,
+	lineItemsMatcher := &auctionstore.LineItemsMatcher{
+		DB:    db,
+		Cache: config.NewMemoryCacheOf[[]auction.LineItem](10 * time.Minute),
 	}
-	auctionV2Handler := sdkapi.AuctionV2Handler{
-		BaseHandler: &sdkapi.BaseHandler[schema.AuctionV2Request, *schema.AuctionV2Request]{
-			AppFetcher:    appFetcher,
-			ConfigFetcher: configFetcher,
-			Geocoder:      geoCoder,
-		},
-		SegmentMatcher: &segmentMatcher,
-		AuctionBuilder: &auctionv2.Builder{
-			ConfigFetcher:                configFetcher,
-			AdUnitsMatcher:               adUnitsMatcher,
-			BiddingBuilder:               biddingBuilder,
-			BiddingAdaptersConfigBuilder: biddingAdaptersCfgBuilder,
-		},
-		EventLogger: eventLogger,
-	}
-	statsHandler := sdkapi.StatsHandler{
-		BaseHandler: &sdkapi.BaseHandler[schema.StatsRequest, *schema.StatsRequest]{
-			AppFetcher:    appFetcher,
-			ConfigFetcher: configFetcher,
-			Geocoder:      geoCoder,
-		},
-		EventLogger:         eventLogger,
-		NotificationHandler: notificationHandler,
-	}
-	statsV2Handler := sdkapi.StatsV2Handler{
-		BaseHandler: &sdkapi.BaseHandler[schema.StatsV2Request, *schema.StatsV2Request]{
-			AppFetcher:    appFetcher,
-			ConfigFetcher: configFetcher,
-			Geocoder:      geoCoder,
-		},
-		EventLogger:         eventLogger,
-		NotificationHandler: notificationHandlerV2,
-	}
-	showHandler := sdkapi.ShowHandler{
-		BaseHandler: &sdkapi.BaseHandler[schema.ShowRequest, *schema.ShowRequest]{
-			AppFetcher:    appFetcher,
-			ConfigFetcher: configFetcher,
-			Geocoder:      geoCoder,
-		},
-		EventLogger:         eventLogger,
-		NotificationHandler: notificationHandler,
-	}
-	clickHandler := sdkapi.ClickHandler{
-		BaseHandler: &sdkapi.BaseHandler[schema.ClickRequest, *schema.ClickRequest]{
-			AppFetcher:    appFetcher,
-			ConfigFetcher: configFetcher,
-			Geocoder:      geoCoder,
-		},
-		EventLogger: eventLogger,
-	}
-	rewardHandler := sdkapi.RewardHandler{
-		BaseHandler: &sdkapi.BaseHandler[schema.RewardRequest, *schema.RewardRequest]{
-			AppFetcher:    appFetcher,
-			ConfigFetcher: configFetcher,
-			Geocoder:      geoCoder,
-		},
-		EventLogger: eventLogger,
-	}
-	lossHandler := sdkapi.LossHandler{
-		BaseHandler: &sdkapi.BaseHandler[schema.LossRequest, *schema.LossRequest]{
-			AppFetcher:    appFetcher,
-			ConfigFetcher: configFetcher,
-			Geocoder:      geoCoder,
-		},
-		EventLogger:         eventLogger,
-		NotificationHandler: notificationHandler,
-	}
-	winHandler := sdkapi.WinHandler{
-		BaseHandler: &sdkapi.BaseHandler[schema.WinRequest, *schema.WinRequest]{
-			AppFetcher:    appFetcher,
-			ConfigFetcher: configFetcher,
-			Geocoder:      geoCoder,
-		},
-		EventLogger:         eventLogger,
-		NotificationHandler: notificationHandler,
+	adapterInitConfigsFetcher := &sdkapistore.AdapterInitConfigsFetcher{DB: db}
+	configurationFetcher := &adapterstore.ConfigurationFetcher{
+		DB:    db,
+		Cache: config.NewMemoryCacheOf[adapter.RawConfigsMap](10 * time.Minute),
 	}
 
 	e := config.Echo()
 
-	g := e.Group("")
-	config.UseCommonMiddleware(g, "bidon-sdkapi", logger)
-	g.Use(sdkapi.CheckBidonHeader)
+	v1Group := e.Group("")
+	config.UseCommonMiddleware(v1Group, "bidon-sdkapi", logger)
+	v1Group.Use(sdkapi.CheckBidonHeader)
+
+	routerV1 := v1.Router{
+		ConfigFetcher:             configFetcher,
+		AppFetcher:                appFetcher,
+		SegmentMatcher:            segmentMatcher,
+		BiddingBuilder:            biddingBuilder,
+		BiddingAdaptersCfgBuilder: biddingAdaptersCfgBuilder,
+		AdUnitsMatcher:            adUnitsMatcher,
+		NotificationHandler:       notificationHandler,
+		GeoCoder:                  geoCoder,
+		EventLogger:               eventLogger,
+		LineItemsMatcher:          lineItemsMatcher,
+		AdapterInitConfigsFetcher: adapterInitConfigsFetcher,
+		ConfigurationFetcher:      configurationFetcher,
+	}
+	routerV1.RegisterRoutes(v1Group)
+
+	v2Group := e.Group("/v2")
+	config.UseCommonMiddleware(v2Group, "bidon-sdkapi", logger)
+	v2Group.Use(sdkapi.CheckBidonHeader)
+	routerV2 := v2.Router{
+		ConfigFetcher:             configFetcher,
+		AppFetcher:                appFetcher,
+		SegmentMatcher:            segmentMatcher,
+		BiddingBuilder:            biddingBuilder,
+		BiddingAdaptersCfgBuilder: biddingAdaptersCfgBuilder,
+		AdUnitsMatcher:            adUnitsMatcher,
+		NotificationHandler:       notificationHandler,
+		NotificationHandlerV2:     notificationHandlerV2,
+		GeoCoder:                  geoCoder,
+		EventLogger:               eventLogger,
+		LineItemsMatcher:          lineItemsMatcher,
+		AdapterInitConfigsFetcher: adapterInitConfigsFetcher,
+		ConfigurationFetcher:      configurationFetcher,
+	}
+	routerV2.RegisterRoutes(v2Group)
 
 	e.Use(echoprometheus.NewMiddleware("sdkapi"))  // adds middleware to gather metrics
 	e.GET("/metrics", echoprometheus.NewHandler()) // adds route to serve gathered metrics
-
-	g.POST("/config", configHandler.Handle)
-	g.POST("/auction/:ad_type", auctionHandler.Handle)
-	g.POST("/bidding/:ad_type", biddingHandler.Handle)
-	g.POST("/stats/:ad_type", statsHandler.Handle)
-	g.POST("/show/:ad_type", showHandler.Handle)
-	g.POST("/click/:ad_type", clickHandler.Handle)
-	g.POST("/reward/:ad_type", rewardHandler.Handle)
-	g.POST("/loss/:ad_type", lossHandler.Handle)
-	g.POST("/win/:ad_type", winHandler.Handle)
-
-	// API v2 endpoints
-	g.POST("/v2/auction/:ad_type", auctionV2Handler.Handle)
-	g.POST("/v2/stats/:ad_type", statsV2Handler.Handle)
-	g.POST("/v2/config", configHandler.Handle)
-
-	// Legacy endpoints
-	g.POST("/:ad_type/auction", auctionHandler.Handle)
-	g.POST("/:ad_type/stats", statsHandler.Handle)
-	g.POST("/:ad_type/show", showHandler.Handle)
-	g.POST("/:ad_type/click", clickHandler.Handle)
-	g.POST("/:ad_type/reward", rewardHandler.Handle)
 
 	port := os.Getenv("PORT")
 	if port == "" {
