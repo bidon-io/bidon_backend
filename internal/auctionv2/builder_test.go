@@ -1,0 +1,248 @@
+package auctionv2_test
+
+import (
+	"context"
+	"errors"
+	"github.com/bidon-io/bidon-backend/internal/auctionv2"
+	"github.com/bidon-io/bidon-backend/internal/auctionv2/mocks"
+	"github.com/bidon-io/bidon-backend/internal/bidding"
+	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
+	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
+	"testing"
+
+	"github.com/bidon-io/bidon-backend/internal/ad"
+	"github.com/bidon-io/bidon-backend/internal/adapter"
+	"github.com/bidon-io/bidon-backend/internal/auction"
+	"github.com/google/go-cmp/cmp"
+)
+
+type BuilderMocks struct {
+	ConfigFetcher                *mocks.ConfigFetcherMock
+	AdUnitsMatcher               *mocks.AdUnitsMatcherMock
+	BiddingBuilder               *mocks.BiddingBuilderMock
+	BiddingAdaptersConfigBuilder *mocks.BiddingAdaptersConfigBuilderMock
+}
+
+type BuilderOption func(*BuilderMocks)
+
+func WithConfigFetcher(cf *mocks.ConfigFetcherMock) BuilderOption {
+	return func(b *BuilderMocks) {
+		b.ConfigFetcher = cf
+	}
+}
+
+func WithAdUnitsMatcher(au *mocks.AdUnitsMatcherMock) BuilderOption {
+	return func(b *BuilderMocks) {
+		b.AdUnitsMatcher = au
+	}
+}
+
+func WithBiddingBuilder(bb *mocks.BiddingBuilderMock) BuilderOption {
+	return func(b *BuilderMocks) {
+		b.BiddingBuilder = bb
+	}
+}
+
+func testHelperDefaultAuctionBuilderMocks() *BuilderMocks {
+	auctionConfig := &auction.Config{
+		ID: 1,
+		Rounds: []auction.RoundConfig{
+			{
+				ID:      "ROUND_1",
+				Demands: []adapter.Key{adapter.GAMKey, adapter.DTExchangeKey},
+				Bidding: []adapter.Key{adapter.BidmachineKey, adapter.AmazonKey, adapter.MetaKey},
+				Timeout: 15000,
+			},
+		},
+	}
+	pf := 0.1
+	adUnits := []auction.AdUnit{
+		{
+			DemandID:   "gam",
+			Label:      "gam",
+			PriceFloor: &pf,
+			UID:        "123_gam",
+			BidType:    schema.CPMBidType,
+			Extra: map[string]any{
+				"placement_id": "123",
+			},
+		},
+	}
+	configFetcher := &mocks.ConfigFetcherMock{
+		MatchFunc: func(ctx context.Context, appID int64, adType ad.Type, segmentID int64) (*auction.Config, error) {
+			return auctionConfig, nil
+		},
+	}
+	adUnitsMatcher := &mocks.AdUnitsMatcherMock{
+		MatchCachedFunc: func(ctx context.Context, params *auction.BuildParams) ([]auction.AdUnit, error) {
+			return adUnits, nil
+		},
+	}
+	biddingAdaptersConfigBuilder := &mocks.BiddingAdaptersConfigBuilderMock{
+		BuildFunc: func(ctx context.Context, appID int64, adapterKeys []adapter.Key, imp schema.Imp, adUnitsMap *map[adapter.Key][]auction.AdUnit) (adapter.ProcessedConfigsMap, error) {
+			return adapter.ProcessedConfigsMap{}, nil
+		},
+	}
+	biddingBuilder := &mocks.BiddingBuilderMock{
+		HoldAuctionFunc: func(ctx context.Context, params *bidding.BuildParams) (bidding.AuctionResult, error) {
+			return bidding.AuctionResult{
+				RoundNumber: 0,
+				Bids:        []adapters.DemandResponse{},
+			}, nil
+		},
+	}
+
+	return &BuilderMocks{
+		ConfigFetcher:                configFetcher,
+		AdUnitsMatcher:               adUnitsMatcher,
+		BiddingBuilder:               biddingBuilder,
+		BiddingAdaptersConfigBuilder: biddingAdaptersConfigBuilder,
+	}
+}
+
+func ptr[T any](t T) *T {
+	return &t
+}
+
+func testHelperAuctionBuilder(opts ...BuilderOption) *auctionv2.Builder {
+	m := testHelperDefaultAuctionBuilderMocks()
+
+	for _, opt := range opts {
+		opt(m)
+	}
+
+	return &auctionv2.Builder{
+		ConfigFetcher:                m.ConfigFetcher,
+		AdUnitsMatcher:               m.AdUnitsMatcher,
+		BiddingBuilder:               m.BiddingBuilder,
+		BiddingAdaptersConfigBuilder: m.BiddingAdaptersConfigBuilder,
+	}
+}
+
+func TestBuilder_Build2(t *testing.T) {
+	request := &schema.AuctionV2Request{}
+	testCases := []struct {
+		name    string
+		builder *auctionv2.Builder
+		params  *auctionv2.BuildParams
+		want    *auctionv2.AuctionResult
+		wantErr bool
+		err     error
+	}{
+		{
+			name: "Success",
+			builder: testHelperAuctionBuilder(WithBiddingBuilder(&mocks.BiddingBuilderMock{
+				HoldAuctionFunc: func(ctx context.Context, params *bidding.BuildParams) (bidding.AuctionResult, error) {
+					return bidding.AuctionResult{
+						RoundNumber: 0,
+						Bids: []adapters.DemandResponse{
+							{DemandID: "bidmachine", Bid: &adapters.BidDemandResponse{}},
+						},
+					}, nil
+				},
+			})),
+			params: &auctionv2.BuildParams{Adapters: []adapter.Key{adapter.GAMKey, adapter.BidmachineKey}, MergedAuctionRequest: request},
+			want: &auctionv2.AuctionResult{
+				AuctionConfiguration: &auction.Config{
+					ID: 1,
+					Rounds: []auction.RoundConfig{
+						{
+							ID:      "ROUND_1",
+							Demands: []adapter.Key{adapter.GAMKey, adapter.DTExchangeKey},
+							Bidding: []adapter.Key{adapter.BidmachineKey, adapter.AmazonKey, adapter.MetaKey},
+							Timeout: 15000,
+						},
+					},
+				},
+				AdUnits: &[]auction.AdUnit{
+					{
+						DemandID:   "gam",
+						UID:        "123_gam",
+						Label:      "gam",
+						PriceFloor: ptr(0.1),
+						BidType:    "CPM",
+						Extra:      map[string]any{"placement_id": string("123")},
+					},
+				},
+				BiddingAuctionResult: &bidding.AuctionResult{
+					Bids: []adapters.DemandResponse{
+						{DemandID: "bidmachine", Bid: &adapters.BidDemandResponse{}},
+					},
+				},
+			},
+		},
+		{
+			name: "No Biding Adapters Matched",
+			builder: testHelperAuctionBuilder(WithBiddingBuilder(&mocks.BiddingBuilderMock{
+				HoldAuctionFunc: func(ctx context.Context, params *bidding.BuildParams) (bidding.AuctionResult, error) {
+					return bidding.AuctionResult{}, bidding.ErrNoAdaptersMatched
+				},
+			})),
+			params: &auctionv2.BuildParams{Adapters: []adapter.Key{adapter.GAMKey, adapter.BidmachineKey}, MergedAuctionRequest: request},
+			want: &auctionv2.AuctionResult{
+				AuctionConfiguration: &auction.Config{
+					ID: 1,
+					Rounds: []auction.RoundConfig{
+						{
+							ID:      "ROUND_1",
+							Demands: []adapter.Key{adapter.GAMKey, adapter.DTExchangeKey},
+							Bidding: []adapter.Key{adapter.BidmachineKey, adapter.AmazonKey, adapter.MetaKey},
+							Timeout: 15000,
+						},
+					},
+				},
+				AdUnits: &[]auction.AdUnit{
+					{
+						DemandID:   "gam",
+						UID:        "123_gam",
+						Label:      "gam",
+						PriceFloor: ptr(0.1),
+						BidType:    "CPM",
+						Extra:      map[string]any{"placement_id": string("123")},
+					},
+				},
+				BiddingAuctionResult: &bidding.AuctionResult{},
+			},
+		},
+		{
+			name: "No Ads Found",
+			builder: testHelperAuctionBuilder(
+				WithAdUnitsMatcher(&mocks.AdUnitsMatcherMock{
+					MatchCachedFunc: func(ctx context.Context, params *auction.BuildParams) ([]auction.AdUnit, error) {
+						return []auction.AdUnit{}, nil
+					},
+				}),
+				WithBiddingBuilder(&mocks.BiddingBuilderMock{
+					HoldAuctionFunc: func(ctx context.Context, params *bidding.BuildParams) (bidding.AuctionResult, error) {
+						return bidding.AuctionResult{}, nil
+					},
+				}),
+			),
+			params:  &auctionv2.BuildParams{Adapters: []adapter.Key{adapter.GAMKey, adapter.BidmachineKey}, MergedAuctionRequest: request},
+			wantErr: true,
+			err:     auction.ErrNoAdsFound,
+		},
+	}
+
+	for _, tC := range testCases {
+		got, err := tC.builder.Build(context.Background(), tC.params)
+
+		if !tC.wantErr {
+			got.Stat = nil // Stat is not deterministic
+		}
+
+		if tC.wantErr {
+			if !errors.Is(err, tC.err) {
+				t.Errorf("Expected error %v, got: %v", tC.err, err)
+			}
+		} else {
+			if err != nil {
+				t.Errorf("Error Build: %v", err)
+			}
+
+			if diff := cmp.Diff(tC.want, got); diff != "" {
+				t.Errorf("builder.Build -> %+v mismatch \n(-want, +got)\n%s", tC.name, diff)
+			}
+		}
+	}
+}

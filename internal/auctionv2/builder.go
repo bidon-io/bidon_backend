@@ -2,6 +2,7 @@ package auctionv2
 
 import (
 	"context"
+	"errors"
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/auction"
@@ -116,8 +117,11 @@ func (b *Builder) Build(ctx context.Context, params *BuildParams) (*AuctionResul
 		AuctionConfig:  *auctionConfig,
 		StartTS:        start.UnixMilli(),
 	})
-	if err != nil {
+	if err != nil && !errors.Is(err, bidding.ErrNoAdaptersMatched) {
 		return nil, err
+	}
+	if len(adUnits) == 0 && len(biddingAuctionResult.Bids) == 0 {
+		return nil, auction.ErrNoAdsFound
 	}
 	end := time.Now()
 
