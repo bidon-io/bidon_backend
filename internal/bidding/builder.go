@@ -27,6 +27,8 @@ type Builder struct {
 	NotificationHandler NotificationHandler
 }
 
+var ErrNoAdaptersMatched = errors.New("no adapters matched")
+
 //go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/mocks.go -pkg mocks . AdaptersBuilder NotificationHandler
 
 type AdaptersBuilder interface {
@@ -110,7 +112,7 @@ func (b *Builder) HoldAuction(ctx context.Context, params *BuildParams) (Auction
 	adapterKeys = adapter.GetCommonAdapters(adapterKeys, maps.Keys(br.Imp.Demands))
 
 	if len(adapterKeys) == 0 {
-		return emptyResponse, errors.New("no adapters matched")
+		return emptyResponse, ErrNoAdaptersMatched
 	}
 
 	auctionResult := AuctionResult{
