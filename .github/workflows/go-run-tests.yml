@@ -17,7 +17,7 @@ jobs:
       - run: docker compose run -v $(pwd)/testcov:/app/testcov --rm go-test -coverprofile=testcov/coverage.out -covermode=atomic ./...
 
       - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_BIDON_BACKEND_TOKEN }}
           url: ${{ secrets.CODECOV_URL }}
