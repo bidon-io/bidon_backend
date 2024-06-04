@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"fmt"
+	"github.com/bidon-io/bidon-backend/internal/adapter"
+	"github.com/lib/pq"
 	"log"
 	"os"
 	"time"
@@ -168,4 +170,12 @@ func newLogger(ignoreRecordNotFoundError bool) logger.Interface {
 		IgnoreRecordNotFoundError: ignoreRecordNotFoundError,
 		Colorful:                  true,
 	})
+}
+
+func StringArrayToAdapterKeys(p *pq.StringArray) []adapter.Key {
+	keys := make([]adapter.Key, len(*p))
+	for i, key := range *p {
+		keys[i] = adapter.Key(key)
+	}
+	return keys
 }
