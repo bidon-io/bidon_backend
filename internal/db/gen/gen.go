@@ -79,6 +79,9 @@ func GenerateModels(db *sql.DB) {
 		gen.FieldGORMTag("external_win_notifications", func(tag field.GormTag) field.GormTag {
 			return tag.Set("default", "false")
 		}),
+		gen.FieldType("demands", "pq.StringArray"),
+		gen.FieldType("biddings", "pq.StringArray"),
+		gen.FieldType("ad_unit_ids", "pq.Int64Array"),
 	)
 
 	g.GenerateModel("countries")
