@@ -88,6 +88,9 @@ func (h *AuctionHandler) Handle(c echo.Context) error {
 		if errors.Is(err, auction.ErrNoAdsFound) {
 			err = sdkapi.ErrNoAdsFound
 		}
+		if errors.Is(err, auction.InvalidAuctionKey) {
+			err = sdkapi.ErrInvalidAuctionKey
+		}
 
 		return err
 	}
