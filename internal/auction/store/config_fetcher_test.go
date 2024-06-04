@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/lib/pq"
 	"strconv"
 	"testing"
 	"time"
@@ -21,7 +22,7 @@ func TestConfigFetcher_Match(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	apps := make([]db.App, 3)
+	apps := make([]db.App, 4)
 	for i := range apps {
 		apps[i] = dbtest.CreateApp(t, tx)
 	}
@@ -43,13 +44,23 @@ func TestConfigFetcher_Match(t *testing.T) {
 			AdType:    db.InterstitialAdType,
 			CreatedAt: time.Now(),
 		},
+		{
+			AppID:     apps[3].ID,
+			PublicUID: sql.NullInt64{Int64: 4444444444444444444, Valid: true},
+			AdType:    db.InterstitialAdType,
+			CreatedAt: time.Now(),
+			Demands:   pq.StringArray{"gam", "dtexchange"},
+			Biddings:  pq.StringArray{"bidmachine", "mintegral"},
+			AdUnitIds: pq.Int64Array{1, 2, 3},
+		},
 	}
 	if err := tx.Create(&configs).Error; err != nil {
 		t.Fatalf("Error creating configs: %v", err)
 	}
 	app1BannerConfig := &configs[0]
 	app2BannerConfig := &configs[1]
-	latestConfig := &configs[2]
+	app2InterstitialConfig := &configs[2]
+	app3InterstitialConfig := &configs[3]
 
 	type args struct {
 		appID     int64
@@ -63,25 +74,46 @@ func TestConfigFetcher_Match(t *testing.T) {
 		{
 			args: args{appID: apps[0].ID, adType: ad.BannerType, segmentID: 0},
 			want: &auction.Config{
-				ID:     app1BannerConfig.ID,
-				UID:    strconv.FormatInt(app1BannerConfig.PublicUID.Int64, 10),
-				Rounds: app1BannerConfig.Rounds,
+				ID:        app1BannerConfig.ID,
+				UID:       strconv.FormatInt(app1BannerConfig.PublicUID.Int64, 10),
+				Rounds:    app1BannerConfig.Rounds,
+				Demands:   db.StringArrayToAdapterKeys(&app1BannerConfig.Demands),
+				Biddings:  db.StringArrayToAdapterKeys(&app1BannerConfig.Biddings),
+				AdUnitIDs: app1BannerConfig.AdUnitIds,
 			},
 		},
 		{
 			args: args{appID: apps[1].ID, adType: ad.BannerType, segmentID: 0},
 			want: &auction.Config{
-				ID:     app2BannerConfig.ID,
-				UID:    strconv.FormatInt(app2BannerConfig.PublicUID.Int64, 10),
-				Rounds: app2BannerConfig.Rounds,
+				ID:        app2BannerConfig.ID,
+				UID:       strconv.FormatInt(app2BannerConfig.PublicUID.Int64, 10),
+				Rounds:    app2BannerConfig.Rounds,
+				Demands:   db.StringArrayToAdapterKeys(&app2BannerConfig.Demands),
+				Biddings:  db.StringArrayToAdapterKeys(&app2BannerConfig.Biddings),
+				AdUnitIDs: app2BannerConfig.AdUnitIds,
 			},
 		},
 		{
 			args: args{appID: apps[2].ID, adType: ad.InterstitialType, segmentID: 0},
 			want: &auction.Config{
-				ID:     latestConfig.ID,
-				UID:    strconv.FormatInt(latestConfig.PublicUID.Int64, 10),
-				Rounds: latestConfig.Rounds,
+				ID:        app2InterstitialConfig.ID,
+				UID:       strconv.FormatInt(app2InterstitialConfig.PublicUID.Int64, 10),
+				Rounds:    app2InterstitialConfig.Rounds,
+				Demands:   db.StringArrayToAdapterKeys(&app2InterstitialConfig.Demands),
+				Biddings:  db.StringArrayToAdapterKeys(&app2InterstitialConfig.Biddings),
+				AdUnitIDs: app2InterstitialConfig.AdUnitIds,
+			},
+		},
+		{
+			args: args{appID: apps[3].ID, adType: ad.InterstitialType, segmentID: 0},
+			want: &auction.Config{
+				ID:        app3InterstitialConfig.ID,
+				UID:       strconv.FormatInt(app3InterstitialConfig.PublicUID.Int64, 10),
+				Rounds:    app3InterstitialConfig.Rounds,
+				Demands:   db.StringArrayToAdapterKeys(&app3InterstitialConfig.Demands),
+				Biddings:  db.StringArrayToAdapterKeys(&app3InterstitialConfig.Biddings),
+				AdUnitIDs: app3InterstitialConfig.AdUnitIds,
+				Timeout:   int(app3InterstitialConfig.Timeout),
 			},
 		},
 	}
@@ -103,7 +135,7 @@ func TestConfigFetcher_FetchByUID(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	apps := make([]db.App, 3)
+	apps := make([]db.App, 4)
 	for i := range apps {
 		apps[i] = dbtest.CreateApp(t, tx)
 	}
@@ -125,13 +157,24 @@ func TestConfigFetcher_FetchByUID(t *testing.T) {
 			AdType:    db.InterstitialAdType,
 			CreatedAt: time.Now(),
 		},
+		{
+			AppID:     apps[3].ID,
+			PublicUID: sql.NullInt64{Int64: 4444444444444444444, Valid: true},
+			AdType:    db.InterstitialAdType,
+			CreatedAt: time.Now(),
+			Demands:   pq.StringArray{"gam", "dtexchange"},
+			Biddings:  pq.StringArray{"bidmachine", "mintegral"},
+			AdUnitIds: pq.Int64Array{1, 2, 3},
+			Timeout:   1500,
+		},
 	}
 	if err := tx.Create(&configs).Error; err != nil {
 		t.Fatalf("Error creating configs: %v", err)
 	}
 	app1BannerConfig := &configs[0]
 	app2BannerConfig := &configs[1]
-	latestConfig := &configs[2]
+	app2InterstitialConfig := &configs[2]
+	app3InterstitialConfig := &configs[3]
 
 	type args struct {
 		appID int64
@@ -145,25 +188,46 @@ func TestConfigFetcher_FetchByUID(t *testing.T) {
 		{
 			args: args{appID: apps[0].ID, uid: "", id: fmt.Sprint(app1BannerConfig.ID)},
 			want: &auction.Config{
-				ID:     app1BannerConfig.ID,
-				UID:    strconv.FormatInt(app1BannerConfig.PublicUID.Int64, 10),
-				Rounds: app1BannerConfig.Rounds,
+				ID:        app1BannerConfig.ID,
+				UID:       strconv.FormatInt(app1BannerConfig.PublicUID.Int64, 10),
+				Rounds:    app1BannerConfig.Rounds,
+				Demands:   db.StringArrayToAdapterKeys(&app1BannerConfig.Demands),
+				Biddings:  db.StringArrayToAdapterKeys(&app1BannerConfig.Biddings),
+				AdUnitIDs: app1BannerConfig.AdUnitIds,
 			},
 		},
 		{
 			args: args{appID: apps[1].ID, uid: fmt.Sprint(app2BannerConfig.PublicUID.Int64), id: ""},
 			want: &auction.Config{
-				ID:     app2BannerConfig.ID,
-				UID:    strconv.FormatInt(app2BannerConfig.PublicUID.Int64, 10),
-				Rounds: app2BannerConfig.Rounds,
+				ID:        app2BannerConfig.ID,
+				UID:       strconv.FormatInt(app2BannerConfig.PublicUID.Int64, 10),
+				Rounds:    app2BannerConfig.Rounds,
+				Demands:   db.StringArrayToAdapterKeys(&app2BannerConfig.Demands),
+				Biddings:  db.StringArrayToAdapterKeys(&app2BannerConfig.Biddings),
+				AdUnitIDs: app2BannerConfig.AdUnitIds,
 			},
 		},
 		{
-			args: args{appID: apps[2].ID, uid: "", id: fmt.Sprint(latestConfig.ID)},
+			args: args{appID: apps[2].ID, uid: "", id: fmt.Sprint(app2InterstitialConfig.ID)},
 			want: &auction.Config{
-				ID:     latestConfig.ID,
-				UID:    strconv.FormatInt(latestConfig.PublicUID.Int64, 10),
-				Rounds: latestConfig.Rounds,
+				ID:        app2InterstitialConfig.ID,
+				UID:       strconv.FormatInt(app2InterstitialConfig.PublicUID.Int64, 10),
+				Rounds:    app2InterstitialConfig.Rounds,
+				Demands:   db.StringArrayToAdapterKeys(&app2InterstitialConfig.Demands),
+				Biddings:  db.StringArrayToAdapterKeys(&app2InterstitialConfig.Biddings),
+				AdUnitIDs: app2InterstitialConfig.AdUnitIds,
+			},
+		},
+		{
+			args: args{appID: apps[3].ID, uid: "", id: fmt.Sprint(app3InterstitialConfig.ID)},
+			want: &auction.Config{
+				ID:        app3InterstitialConfig.ID,
+				UID:       strconv.FormatInt(app3InterstitialConfig.PublicUID.Int64, 10),
+				Demands:   db.StringArrayToAdapterKeys(&app3InterstitialConfig.Demands),
+				Biddings:  db.StringArrayToAdapterKeys(&app3InterstitialConfig.Biddings),
+				AdUnitIDs: app3InterstitialConfig.AdUnitIds,
+				Timeout:   int(app3InterstitialConfig.Timeout),
+				Rounds:    app3InterstitialConfig.Rounds,
 			},
 		},
 		{
@@ -228,25 +292,34 @@ func TestConfigFetcher_FetchByUIDCached(t *testing.T) {
 		{
 			args: args{appID: apps[0].ID, uid: "", id: fmt.Sprint(app1BannerConfig.ID)},
 			want: &auction.Config{
-				ID:     app1BannerConfig.ID,
-				UID:    strconv.FormatInt(app1BannerConfig.PublicUID.Int64, 10),
-				Rounds: app1BannerConfig.Rounds,
+				ID:        app1BannerConfig.ID,
+				UID:       strconv.FormatInt(app1BannerConfig.PublicUID.Int64, 10),
+				Rounds:    app1BannerConfig.Rounds,
+				Demands:   db.StringArrayToAdapterKeys(&app1BannerConfig.Demands),
+				Biddings:  db.StringArrayToAdapterKeys(&app1BannerConfig.Biddings),
+				AdUnitIDs: app1BannerConfig.AdUnitIds,
 			},
 		},
 		{
 			args: args{appID: apps[1].ID, uid: fmt.Sprint(app2BannerConfig.PublicUID.Int64), id: ""},
 			want: &auction.Config{
-				ID:     app2BannerConfig.ID,
-				UID:    strconv.FormatInt(app2BannerConfig.PublicUID.Int64, 10),
-				Rounds: app2BannerConfig.Rounds,
+				ID:        app2BannerConfig.ID,
+				UID:       strconv.FormatInt(app2BannerConfig.PublicUID.Int64, 10),
+				Rounds:    app2BannerConfig.Rounds,
+				Demands:   db.StringArrayToAdapterKeys(&app2BannerConfig.Demands),
+				Biddings:  db.StringArrayToAdapterKeys(&app2BannerConfig.Biddings),
+				AdUnitIDs: app2BannerConfig.AdUnitIds,
 			},
 		},
 		{
 			args: args{appID: apps[2].ID, uid: "", id: fmt.Sprint(latestConfig.ID)},
 			want: &auction.Config{
-				ID:     latestConfig.ID,
-				UID:    strconv.FormatInt(latestConfig.PublicUID.Int64, 10),
-				Rounds: latestConfig.Rounds,
+				ID:        latestConfig.ID,
+				UID:       strconv.FormatInt(latestConfig.PublicUID.Int64, 10),
+				Rounds:    latestConfig.Rounds,
+				Demands:   db.StringArrayToAdapterKeys(&latestConfig.Demands),
+				Biddings:  db.StringArrayToAdapterKeys(&latestConfig.Biddings),
+				AdUnitIDs: latestConfig.AdUnitIds,
 			},
 		},
 		{
