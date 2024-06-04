@@ -73,13 +73,14 @@ func (h *AuctionHandler) Handle(c echo.Context) error {
 	params := &auctionv2.BuildParams{
 		AppID:                req.app.ID,
 		AdType:               req.raw.AdType,
-		AdFormat:             req.raw.AdObjectV2.Format(),
+		AdFormat:             req.raw.AdObject.Format(),
 		DeviceType:           req.raw.Device.Type,
 		Adapters:             req.raw.Adapters.Keys(),
 		Segment:              sgmnt,
-		PriceFloor:           req.raw.AdObjectV2.PriceFloor,
+		PriceFloor:           req.raw.AdObject.PriceFloor,
 		MergedAuctionRequest: &req.raw,
 		GeoData:              req.geoData,
+		AuctionKey:           req.raw.AdObject.AuctionKey,
 	}
 
 	auctionResult, err := h.AuctionBuilder.Build(c.Request().Context(), params)
@@ -113,7 +114,7 @@ func (h *AuctionHandler) buildResponse(
 	auctionResult *auctionv2.AuctionResult,
 	adUnitsMap *map[adapter.Key][]auction.AdUnit,
 ) (*AuctionResponse, error) {
-	adObject := req.raw.AdObjectV2
+	adObject := req.raw.AdObject
 	response := AuctionResponse{
 		ConfigID:   auctionResult.AuctionConfiguration.ID,
 		ConfigUID:  auctionResult.AuctionConfiguration.UID,

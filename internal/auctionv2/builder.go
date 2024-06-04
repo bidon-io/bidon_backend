@@ -3,6 +3,9 @@ package auctionv2
 import (
 	"context"
 	"errors"
+	"math/big"
+	"time"
+
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/auction"
@@ -11,7 +14,6 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/geocoder"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	"github.com/bidon-io/bidon-backend/internal/segment"
-	"time"
 )
 
 type Builder struct {
@@ -50,6 +52,7 @@ type BuildParams struct {
 	PriceFloor           float64
 	MergedAuctionRequest *schema.AuctionV2Request
 	GeoData              geocoder.GeoData
+	AuctionKey           string
 }
 
 type AuctionResult struct {
@@ -68,8 +71,24 @@ type Stat struct {
 func (b *Builder) Build(ctx context.Context, params *BuildParams) (*AuctionResult, error) {
 	start := time.Now()
 
+	var auctionConfig *auction.Config
+	var err error
+
 	// Fetch Auction
-	auctionConfig, err := b.ConfigFetcher.Match(ctx, params.AppID, params.AdType, params.Segment.ID)
+	if params.AuctionKey != "" {
+		publicUid, success := new(big.Int).SetString(params.AuctionKey, 32)
+		if !success {
+			return nil, auction.InvalidAuctionKey
+		}
+
+		auctionConfig = b.ConfigFetcher.FetchByUIDCached(ctx, params.AppID, "0", publicUid.String())
+		if auctionConfig == nil {
+			return nil, auction.InvalidAuctionKey
+		}
+	} else {
+		auctionConfig, err = b.ConfigFetcher.Match(ctx, params.AppID, params.AdType, params.Segment.ID)
+	}
+
 	if err != nil {
 		return nil, err
 	}
@@ -99,9 +118,9 @@ func (b *Builder) Build(ctx context.Context, params *BuildParams) (*AuctionResul
 	}
 
 	// Bidding
-	params.MergedAuctionRequest.AdObjectV2.AuctionConfigurationID = auctionConfig.ID
-	params.MergedAuctionRequest.AdObjectV2.AuctionConfigurationUID = auctionConfig.UID
-	imp := params.MergedAuctionRequest.AdObjectV2.ToImp(firstRound.ID)
+	params.MergedAuctionRequest.AdObject.AuctionConfigurationID = auctionConfig.ID
+	params.MergedAuctionRequest.AdObject.AuctionConfigurationUID = auctionConfig.UID
+	imp := params.MergedAuctionRequest.AdObject.ToImp(firstRound.ID)
 
 	adapterConfigs, err := b.BiddingAdaptersConfigBuilder.Build(ctx, params.AppID, params.Adapters, imp, &adUnitsMap)
 	if err != nil {
