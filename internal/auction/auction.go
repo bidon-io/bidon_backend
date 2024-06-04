@@ -18,7 +18,11 @@ type Config struct {
 	ID                       int64
 	UID                      string
 	ExternalWinNotifications bool
-	Rounds                   []RoundConfig
+	Biddings                 []adapter.Key `json:"biddings"`
+	Demands                  []adapter.Key `json:"demands"`
+	AdUnitIDs                []int64       `json:"ad_unit_ids"`
+	Timeout                  int           `json:"timeout"`
+	Rounds                   []RoundConfig // Deprecated: use root level fields instead
 }
 
 type RoundConfig struct {
