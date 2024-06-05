@@ -31,8 +31,8 @@ type AuctionConfiguration struct {
 	ExternalWinNotifications *bool                 `gorm:"column:external_win_notifications;type:boolean;not null;default:false" json:"external_win_notifications"`
 	PublicUID                sql.NullInt64         `gorm:"column:public_uid;type:bigint;uniqueIndex:index_auction_configurations_on_public_uid,priority:1" json:"public_uid"`
 	Timeout                  int32                 `gorm:"column:timeout;type:integer;not null" json:"timeout"`
-	Demands                  pq.StringArray        `gorm:"column:demands;type:text[];default:ARRAY[]" json:"demands"`
-	Biddings                 pq.StringArray        `gorm:"column:biddings;type:text[];default:ARRAY[]" json:"biddings"`
+	Demands                  pq.StringArray        `gorm:"column:demands;type:character varying[];default:ARRAY[]" json:"demands"`
+	Bidding                  pq.StringArray        `gorm:"column:bidding;type:character varying[];default:ARRAY[]" json:"bidding"`
 	AdUnitIds                pq.Int64Array         `gorm:"column:ad_unit_ids;type:bigint[];default:ARRAY[]" json:"ad_unit_ids"`
 	App                      App                   `json:"app"`
 	Segment                  *Segment              `json:"segment"`

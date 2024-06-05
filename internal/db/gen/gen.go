@@ -80,7 +80,7 @@ func GenerateModels(db *sql.DB) {
 			return tag.Set("default", "false")
 		}),
 		gen.FieldType("demands", "pq.StringArray"),
-		gen.FieldType("biddings", "pq.StringArray"),
+		gen.FieldType("bidding", "pq.StringArray"),
 		gen.FieldType("ad_unit_ids", "pq.Int64Array"),
 	)
 
