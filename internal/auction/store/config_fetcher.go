@@ -22,7 +22,7 @@ func (m *ConfigFetcher) Match(ctx context.Context, appID int64, adType ad.Type, 
 
 	query := m.DB.
 		WithContext(ctx).
-		Select("id", "public_uid", "external_win_notifications", "rounds", "demands", "biddings", "ad_unit_ids", "timeout").
+		Select("id", "public_uid", "external_win_notifications", "rounds", "demands", "bidding", "ad_unit_ids", "timeout").
 		Where(map[string]any{
 			"app_id":  appID,
 			"ad_type": db.AdTypeFromDomain(adType),
@@ -49,7 +49,7 @@ func (m *ConfigFetcher) Match(ctx context.Context, appID int64, adType ad.Type, 
 		ExternalWinNotifications: *dbConfig.ExternalWinNotifications,
 		Rounds:                   dbConfig.Rounds,
 		Demands:                  db.StringArrayToAdapterKeys(&dbConfig.Demands),
-		Biddings:                 db.StringArrayToAdapterKeys(&dbConfig.Biddings),
+		Bidding:                  db.StringArrayToAdapterKeys(&dbConfig.Bidding),
 		AdUnitIDs:                dbConfig.AdUnitIds,
 		Timeout:                  int(dbConfig.Timeout),
 	}
@@ -102,7 +102,7 @@ func (m *ConfigFetcher) FetchByUID(ctx context.Context, appID int64, id, uid str
 
 	err := m.DB.
 		WithContext(ctx).
-		Select("id", "public_uid", "external_win_notifications", "rounds", "demands", "biddings", "ad_unit_ids", "timeout").
+		Select("id", "public_uid", "external_win_notifications", "rounds", "demands", "bidding", "ad_unit_ids", "timeout").
 		Where(filter).
 		Order("created_at DESC").
 		Take(dbConfig).
@@ -117,7 +117,7 @@ func (m *ConfigFetcher) FetchByUID(ctx context.Context, appID int64, id, uid str
 		ExternalWinNotifications: *dbConfig.ExternalWinNotifications,
 		Rounds:                   dbConfig.Rounds,
 		Demands:                  db.StringArrayToAdapterKeys(&dbConfig.Demands),
-		Biddings:                 db.StringArrayToAdapterKeys(&dbConfig.Biddings),
+		Bidding:                  db.StringArrayToAdapterKeys(&dbConfig.Bidding),
 		AdUnitIDs:                dbConfig.AdUnitIds,
 		Timeout:                  int(dbConfig.Timeout),
 	}
