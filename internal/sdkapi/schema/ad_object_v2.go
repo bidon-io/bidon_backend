@@ -10,7 +10,7 @@ type AdObjectV2 struct {
 	AuctionKey              string                         `json:"auction_key"`
 	AuctionConfigurationID  int64                          `json:"auction_configuration_id"`
 	AuctionConfigurationUID string                         `json:"auction_configuration_uid"`
-	PriceFloor              float64                        `json:"auction_pricefloor" validate:"required,gte=0"`
+	PriceFloor              float64                        `json:"auction_pricefloor" validate:"gte=0"`
 	Orientation             string                         `json:"orientation" validate:"oneof=PORTRAIT LANDSCAPE"`
 	Demands                 map[adapter.Key]map[string]any `json:"demands"`
 	Banner                  *BannerAdObject                `json:"banner"`
