@@ -39,8 +39,8 @@ type Segment struct {
 }
 
 type ConfigResponseInit struct {
-	TMax     int                        `json:"tmax"`
-	Adapters []sdkapi.AdapterInitConfig `json:"adapters"`
+	TMax     int                                      `json:"tmax"`
+	Adapters map[adapter.Key]sdkapi.AdapterInitConfig `json:"adapters"`
 }
 
 type ConfigBidding struct {
@@ -84,10 +84,15 @@ func (h *ConfigHandler) Handle(c echo.Context) error {
 		return sdkapi.ErrNoAdaptersFound
 	}
 
+	adapters := make(map[adapter.Key]sdkapi.AdapterInitConfig, len(adapterInitConfigs))
+	for _, cfg := range adapterInitConfigs {
+		adapters[cfg.Key()] = cfg
+	}
+
 	resp := &ConfigResponse{
 		Init: ConfigResponseInit{
 			TMax:     10000,
-			Adapters: adapterInitConfigs,
+			Adapters: adapters,
 		},
 		Placements: []any{},
 		Token:      "{}",
