@@ -50,9 +50,14 @@ type AuctionResponse struct {
 	AdUnits                  []auction.AdUnit `json:"ad_units"`
 	Segment                  auction.Segment  `json:"segment"`
 	Token                    string           `json:"token"`
-	PriceFloor               float64          `json:"pricefloor"`
+	AuctionPriceFloor        float64          `json:"auction_pricefloor"`
+	AuctionTimeout           int              `json:"auction_timeout"`
 	AuctionID                string           `json:"auction_id"`
 }
+
+const (
+	DefaultAuctionTimeout = 30000
+)
 
 func (h *AuctionHandler) Handle(c echo.Context) error {
 	req, err := h.resolveRequest(c)
@@ -119,12 +124,13 @@ func (h *AuctionHandler) buildResponse(
 ) (*AuctionResponse, error) {
 	adObject := req.raw.AdObject
 	response := AuctionResponse{
-		ConfigID:   auctionResult.AuctionConfiguration.ID,
-		ConfigUID:  auctionResult.AuctionConfiguration.UID,
-		Segment:    auction.Segment{ID: req.raw.Segment.ID, UID: req.raw.Segment.UID},
-		Token:      "{}",
-		AuctionID:  adObject.AuctionID,
-		PriceFloor: adObject.PriceFloor,
+		ConfigID:          auctionResult.AuctionConfiguration.ID,
+		ConfigUID:         auctionResult.AuctionConfiguration.UID,
+		Segment:           auction.Segment{ID: req.raw.Segment.ID, UID: req.raw.Segment.UID},
+		Token:             "{}",
+		AuctionID:         adObject.AuctionID,
+		AuctionPriceFloor: adObject.PriceFloor,
+		AuctionTimeout:    auctionTimeout(auctionResult.AuctionConfiguration),
 	}
 
 	// Store CPM AdUnits from AuctionConfiguration
@@ -349,4 +355,12 @@ func buildDemandExt(demandResponse adapters.DemandResponse) map[string]any {
 			"payload": demandResponse.Bid.Payload,
 		}
 	}
+}
+
+func auctionTimeout(conf *auction.Config) int {
+	if conf.Timeout > 0 {
+		return conf.Timeout
+	}
+
+	return DefaultAuctionTimeout
 }

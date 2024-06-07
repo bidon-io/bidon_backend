@@ -30,7 +30,6 @@ type ConfigResponse struct {
 	Placements []any              `json:"placements"`
 	Token      string             `json:"token"`
 	Segment    Segment            `json:"segment"`
-	Bidding    ConfigBidding      `json:"bidding"`
 }
 
 type Segment struct {
@@ -39,12 +38,8 @@ type Segment struct {
 }
 
 type ConfigResponseInit struct {
-	TMax     int                        `json:"tmax"`
-	Adapters []sdkapi.AdapterInitConfig `json:"adapters"`
-}
-
-type ConfigBidding struct {
-	TokenTimeoutMS int `json:"token_timeout_ms"`
+	TMax     int                                      `json:"tmax"`
+	Adapters map[adapter.Key]sdkapi.AdapterInitConfig `json:"adapters"`
 }
 
 func (h *ConfigHandler) Handle(c echo.Context) error {
@@ -84,15 +79,19 @@ func (h *ConfigHandler) Handle(c echo.Context) error {
 		return sdkapi.ErrNoAdaptersFound
 	}
 
+	adapters := make(map[adapter.Key]sdkapi.AdapterInitConfig, len(adapterInitConfigs))
+	for _, cfg := range adapterInitConfigs {
+		adapters[cfg.Key()] = cfg
+	}
+
 	resp := &ConfigResponse{
 		Init: ConfigResponseInit{
 			TMax:     10000,
-			Adapters: adapterInitConfigs,
+			Adapters: adapters,
 		},
 		Placements: []any{},
 		Token:      "{}",
 		Segment:    Segment{ID: sgmnt.StringID(), UID: sgmnt.UID},
-		Bidding:    ConfigBidding{TokenTimeoutMS: 10000},
 	}
 
 	return c.JSON(http.StatusOK, resp)
