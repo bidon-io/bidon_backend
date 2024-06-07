@@ -1,0 +1,21 @@
+{
+  "test": false,
+  "app": {
+    "skadn": [
+      "xxx.skadnetwork"
+    ],
+    "bundle": "com.app.name",
+    "key": "123",
+    "framework": "native",
+    "version": "1.0"
+  },
+  "adapters": {
+    "amazon": {
+      "version": "1",
+      "sdk_version": "11.8.2"
+    }
+  },
+  "session": {
+    "id": "9FEFC060-69A7-482D-A427-F47B8CBDF873"
+  }
+}
