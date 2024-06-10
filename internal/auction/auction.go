@@ -59,6 +59,10 @@ func (a *AdUnit) GetPriceFloor() float64 {
 	return *a.PriceFloor
 }
 
+func (a *AdUnit) IsCPM() bool {
+	return a.BidType == schema.CPMBidType
+}
+
 type Segment struct {
 	ID  string `json:"id"`
 	UID string `json:"uid"`
