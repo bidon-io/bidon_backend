@@ -116,6 +116,12 @@ func (b *Builder) Build(ctx context.Context, params *BuildParams) (*AuctionResul
 		key := adapter.Key(adUnit.DemandID)
 		adUnitsMap[key] = append(adUnitsMap[key], adUnit)
 	}
+	var auctionAdUnits []auction.AdUnit
+	for _, adUnit := range adUnits {
+		if adUnit.GetPriceFloor() >= params.PriceFloor {
+			auctionAdUnits = append(auctionAdUnits, adUnit)
+		}
+	}
 
 	// Bidding
 	params.MergedAuctionRequest.AdObject.AuctionConfigurationID = auctionConfig.ID
@@ -139,7 +145,7 @@ func (b *Builder) Build(ctx context.Context, params *BuildParams) (*AuctionResul
 	if err != nil && !errors.Is(err, bidding.ErrNoAdaptersMatched) {
 		return nil, err
 	}
-	if len(adUnits) == 0 && len(biddingAuctionResult.Bids) == 0 {
+	if len(auctionAdUnits) == 0 && len(biddingAuctionResult.Bids) == 0 {
 		return nil, auction.ErrNoAdsFound
 	}
 	end := time.Now()
@@ -147,7 +153,7 @@ func (b *Builder) Build(ctx context.Context, params *BuildParams) (*AuctionResul
 	// Build Result
 	auctionResult := AuctionResult{
 		AuctionConfiguration: auctionConfig,
-		AdUnits:              &adUnits,
+		AdUnits:              &auctionAdUnits,
 		BiddingAuctionResult: &biddingAuctionResult,
 		Stat: &Stat{
 			StartTS:    start.UnixMilli(),
