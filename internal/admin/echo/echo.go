@@ -131,6 +131,7 @@ func RegisterAdminService(g *echo.Group, service *admin.Service) {
 			service.AppService,
 			service.AppDemandProfileService,
 			service.AuctionConfigurationService,
+			service.AuctionConfigurationV2Service,
 			service.CountryService,
 			service.DemandSourceService,
 			service.DemandSourceAccountService,
@@ -165,6 +166,10 @@ func RegisterAdminService(g *echo.Group, service *admin.Service) {
 		{
 			group:   g.Group("/auction_configurations"),
 			handler: &auctionConfigurationServiceHandler{service.AuctionConfigurationService},
+		},
+		{
+			group:   g.Group("/v2/auction_configurations"),
+			handler: &auctionConfigurationV2ServiceHandler{service.AuctionConfigurationV2Service},
 		},
 		{
 			group:   g.Group("/countries"),
@@ -222,6 +227,7 @@ type resourceHandler interface {
 type appServiceHandler = resourceServiceHandler[admin.AppResource, admin.App, admin.AppAttrs]
 type appDemandProfileServiceHandler = resourceServiceHandler[admin.AppDemandProfileResource, admin.AppDemandProfile, admin.AppDemandProfileAttrs]
 type auctionConfigurationServiceHandler = resourceServiceHandler[admin.AuctionConfigurationResource, admin.AuctionConfiguration, admin.AuctionConfigurationAttrs]
+type auctionConfigurationV2ServiceHandler = resourceServiceHandler[admin.AuctionConfigurationV2Resource, admin.AuctionConfigurationV2, admin.AuctionConfigurationV2Attrs]
 type countryServiceHandler = resourceServiceHandler[admin.CountryResource, admin.Country, admin.CountryAttrs]
 type demandSourceServiceHandler = resourceServiceHandler[admin.DemandSourceResource, admin.DemandSource, admin.DemandSourceAttrs]
 type demandSourceAccountServiceHandler = resourceServiceHandler[admin.DemandSourceAccountResource, admin.DemandSourceAccount, admin.DemandSourceAccountAttrs]

@@ -5,29 +5,31 @@ package admin
 
 // Service is a top-level service for managing resources.
 type Service struct {
-	AppService                  *AppService
-	AppDemandProfileService     *AppDemandProfileService
-	AuctionConfigurationService *AuctionConfigurationService
-	CountryService              *CountryService
-	DemandSourceService         *DemandSourceService
-	DemandSourceAccountService  *DemandSourceAccountService
-	LineItemService             *LineItemService
-	SegmentService              *SegmentService
-	UserService                 *UserService
+	AppService                    *AppService
+	AppDemandProfileService       *AppDemandProfileService
+	AuctionConfigurationService   *AuctionConfigurationService
+	AuctionConfigurationV2Service *AuctionConfigurationV2Service
+	CountryService                *CountryService
+	DemandSourceService           *DemandSourceService
+	DemandSourceAccountService    *DemandSourceAccountService
+	LineItemService               *LineItemService
+	SegmentService                *SegmentService
+	UserService                   *UserService
 }
 
 // NewService creates a new Service.
 func NewService(store Store) *Service {
 	return &Service{
-		AppService:                  NewAppService(store),
-		AppDemandProfileService:     NewAppDemandProfileService(store),
-		AuctionConfigurationService: NewAuctionConfigurationService(store),
-		CountryService:              NewCountryService(store),
-		DemandSourceService:         NewDemandSourceService(store),
-		DemandSourceAccountService:  NewDemandSourceAccountService(store),
-		LineItemService:             NewLineItemService(store),
-		SegmentService:              NewSegmentService(store),
-		UserService:                 NewUserService(store),
+		AppService:                    NewAppService(store),
+		AppDemandProfileService:       NewAppDemandProfileService(store),
+		AuctionConfigurationService:   NewAuctionConfigurationService(store),
+		AuctionConfigurationV2Service: NewAuctionConfigurationV2Service(store),
+		CountryService:                NewCountryService(store),
+		DemandSourceService:           NewDemandSourceService(store),
+		DemandSourceAccountService:    NewDemandSourceAccountService(store),
+		LineItemService:               NewLineItemService(store),
+		SegmentService:                NewSegmentService(store),
+		UserService:                   NewUserService(store),
 	}
 }
 
@@ -36,6 +38,7 @@ type Store interface {
 	Apps() AppRepo
 	AppDemandProfiles() AppDemandProfileRepo
 	AuctionConfigurations() AuctionConfigurationRepo
+	AuctionConfigurationsV2() AuctionConfigurationV2Repo
 	Countries() CountryRepo
 	DemandSources() DemandSourceRepo
 	DemandSourceAccounts() DemandSourceAccountRepo
