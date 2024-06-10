@@ -57,6 +57,7 @@ type BuildParams struct {
 
 type AuctionResult struct {
 	AuctionConfiguration *auction.Config
+	CPMAdUnits           *[]auction.AdUnit
 	AdUnits              *[]auction.AdUnit
 	BiddingAuctionResult *bidding.AuctionResult
 	Stat                 *Stat
@@ -116,10 +117,10 @@ func (b *Builder) Build(ctx context.Context, params *BuildParams) (*AuctionResul
 		key := adapter.Key(adUnit.DemandID)
 		adUnitsMap[key] = append(adUnitsMap[key], adUnit)
 	}
-	var auctionAdUnits []auction.AdUnit
+	var cpmAdUnits []auction.AdUnit
 	for _, adUnit := range adUnits {
-		if adUnit.GetPriceFloor() >= params.PriceFloor {
-			auctionAdUnits = append(auctionAdUnits, adUnit)
+		if adUnit.GetPriceFloor() >= params.PriceFloor && adUnit.IsCPM() {
+			cpmAdUnits = append(cpmAdUnits, adUnit)
 		}
 	}
 
@@ -145,7 +146,14 @@ func (b *Builder) Build(ctx context.Context, params *BuildParams) (*AuctionResul
 	if err != nil && !errors.Is(err, bidding.ErrNoAdaptersMatched) {
 		return nil, err
 	}
-	if len(auctionAdUnits) == 0 && len(biddingAuctionResult.Bids) == 0 {
+
+	bidsCount := 0
+	for _, bid := range biddingAuctionResult.Bids {
+		if bid.IsBid() {
+			bidsCount++
+		}
+	}
+	if len(cpmAdUnits) == 0 && bidsCount == 0 {
 		return nil, auction.ErrNoAdsFound
 	}
 	end := time.Now()
@@ -153,7 +161,8 @@ func (b *Builder) Build(ctx context.Context, params *BuildParams) (*AuctionResul
 	// Build Result
 	auctionResult := AuctionResult{
 		AuctionConfiguration: auctionConfig,
-		AdUnits:              &auctionAdUnits,
+		AdUnits:              &adUnits,
+		CPMAdUnits:           &cpmAdUnits,
 		BiddingAuctionResult: &biddingAuctionResult,
 		Stat: &Stat{
 			StartTS:    start.UnixMilli(),
