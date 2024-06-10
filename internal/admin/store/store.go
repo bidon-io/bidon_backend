@@ -6,28 +6,30 @@ import (
 )
 
 type Store struct {
-	AppRepo                  *AppRepo
-	AppDemandProfileRepo     *AppDemandProfileRepo
-	AuctionConfigurationRepo *AuctionConfigurationRepo
-	CountryRepo              *CountryRepo
-	DemandSourceRepo         *DemandSourceRepo
-	DemandSourceAccountRepo  *DemandSourceAccountRepo
-	LineItemRepo             *LineItemRepo
-	SegmentRepo              *SegmentRepo
-	UserRepo                 *UserRepo
+	AppRepo                    *AppRepo
+	AppDemandProfileRepo       *AppDemandProfileRepo
+	AuctionConfigurationRepo   *AuctionConfigurationRepo
+	AuctionConfigurationV2Repo *AuctionConfigurationV2Repo
+	CountryRepo                *CountryRepo
+	DemandSourceRepo           *DemandSourceRepo
+	DemandSourceAccountRepo    *DemandSourceAccountRepo
+	LineItemRepo               *LineItemRepo
+	SegmentRepo                *SegmentRepo
+	UserRepo                   *UserRepo
 }
 
 func New(db *db.DB) *Store {
 	return &Store{
-		AppRepo:                  NewAppRepo(db),
-		AppDemandProfileRepo:     NewAppDemandProfileRepo(db),
-		AuctionConfigurationRepo: NewAuctionConfigurationRepo(db),
-		CountryRepo:              NewCountryRepo(db),
-		DemandSourceRepo:         NewDemandSourceRepo(db),
-		DemandSourceAccountRepo:  NewDemandSourceAccountRepo(db),
-		LineItemRepo:             NewLineItemRepo(db),
-		SegmentRepo:              NewSegmentRepo(db),
-		UserRepo:                 NewUserRepo(db),
+		AppRepo:                    NewAppRepo(db),
+		AppDemandProfileRepo:       NewAppDemandProfileRepo(db),
+		AuctionConfigurationRepo:   NewAuctionConfigurationRepo(db),
+		AuctionConfigurationV2Repo: NewAuctionConfigurationV2Repo(db),
+		CountryRepo:                NewCountryRepo(db),
+		DemandSourceRepo:           NewDemandSourceRepo(db),
+		DemandSourceAccountRepo:    NewDemandSourceAccountRepo(db),
+		LineItemRepo:               NewLineItemRepo(db),
+		SegmentRepo:                NewSegmentRepo(db),
+		UserRepo:                   NewUserRepo(db),
 	}
 }
 
@@ -41,6 +43,10 @@ func (s *Store) AppDemandProfiles() admin.AppDemandProfileRepo {
 
 func (s *Store) AuctionConfigurations() admin.AuctionConfigurationRepo {
 	return s.AuctionConfigurationRepo
+}
+
+func (s *Store) AuctionConfigurationsV2() admin.AuctionConfigurationV2Repo {
+	return s.AuctionConfigurationV2Repo
 }
 
 func (s *Store) Countries() admin.CountryRepo {

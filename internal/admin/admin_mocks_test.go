@@ -26,6 +26,9 @@ var _ Store = &StoreMock{}
 //			AuctionConfigurationsFunc: func() AuctionConfigurationRepo {
 //				panic("mock out the AuctionConfigurations method")
 //			},
+//			AuctionConfigurationsV2Func: func() AuctionConfigurationV2Repo {
+//				panic("mock out the AuctionConfigurationsV2 method")
+//			},
 //			CountriesFunc: func() CountryRepo {
 //				panic("mock out the Countries method")
 //			},
@@ -60,6 +63,9 @@ type StoreMock struct {
 	// AuctionConfigurationsFunc mocks the AuctionConfigurations method.
 	AuctionConfigurationsFunc func() AuctionConfigurationRepo
 
+	// AuctionConfigurationsV2Func mocks the AuctionConfigurationsV2 method.
+	AuctionConfigurationsV2Func func() AuctionConfigurationV2Repo
+
 	// CountriesFunc mocks the Countries method.
 	CountriesFunc func() CountryRepo
 
@@ -89,6 +95,9 @@ type StoreMock struct {
 		// AuctionConfigurations holds details about calls to the AuctionConfigurations method.
 		AuctionConfigurations []struct {
 		}
+		// AuctionConfigurationsV2 holds details about calls to the AuctionConfigurationsV2 method.
+		AuctionConfigurationsV2 []struct {
+		}
 		// Countries holds details about calls to the Countries method.
 		Countries []struct {
 		}
@@ -108,15 +117,16 @@ type StoreMock struct {
 		Users []struct {
 		}
 	}
-	lockAppDemandProfiles     sync.RWMutex
-	lockApps                  sync.RWMutex
-	lockAuctionConfigurations sync.RWMutex
-	lockCountries             sync.RWMutex
-	lockDemandSourceAccounts  sync.RWMutex
-	lockDemandSources         sync.RWMutex
-	lockLineItems             sync.RWMutex
-	lockSegments              sync.RWMutex
-	lockUsers                 sync.RWMutex
+	lockAppDemandProfiles       sync.RWMutex
+	lockApps                    sync.RWMutex
+	lockAuctionConfigurations   sync.RWMutex
+	lockAuctionConfigurationsV2 sync.RWMutex
+	lockCountries               sync.RWMutex
+	lockDemandSourceAccounts    sync.RWMutex
+	lockDemandSources           sync.RWMutex
+	lockLineItems               sync.RWMutex
+	lockSegments                sync.RWMutex
+	lockUsers                   sync.RWMutex
 }
 
 // AppDemandProfiles calls AppDemandProfilesFunc.
@@ -197,6 +207,33 @@ func (mock *StoreMock) AuctionConfigurationsCalls() []struct {
 	mock.lockAuctionConfigurations.RLock()
 	calls = mock.calls.AuctionConfigurations
 	mock.lockAuctionConfigurations.RUnlock()
+	return calls
+}
+
+// AuctionConfigurationsV2 calls AuctionConfigurationsV2Func.
+func (mock *StoreMock) AuctionConfigurationsV2() AuctionConfigurationV2Repo {
+	if mock.AuctionConfigurationsV2Func == nil {
+		panic("StoreMock.AuctionConfigurationsV2Func: method is nil but Store.AuctionConfigurationsV2 was just called")
+	}
+	callInfo := struct {
+	}{}
+	mock.lockAuctionConfigurationsV2.Lock()
+	mock.calls.AuctionConfigurationsV2 = append(mock.calls.AuctionConfigurationsV2, callInfo)
+	mock.lockAuctionConfigurationsV2.Unlock()
+	return mock.AuctionConfigurationsV2Func()
+}
+
+// AuctionConfigurationsV2Calls gets all the calls that were made to AuctionConfigurationsV2.
+// Check the length with:
+//
+//	len(mockedStore.AuctionConfigurationsV2Calls())
+func (mock *StoreMock) AuctionConfigurationsV2Calls() []struct {
+} {
+	var calls []struct {
+	}
+	mock.lockAuctionConfigurationsV2.RLock()
+	calls = mock.calls.AuctionConfigurationsV2
+	mock.lockAuctionConfigurationsV2.RUnlock()
 	return calls
 }
 
