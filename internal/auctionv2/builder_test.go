@@ -55,13 +55,22 @@ func testHelperDefaultAuctionBuilderMocks() *BuilderMocks {
 			},
 		},
 	}
-	pf := 0.1
 	adUnits := []auction.AdUnit{
 		{
 			DemandID:   "gam",
 			Label:      "gam",
-			PriceFloor: &pf,
+			PriceFloor: ptr(0.1),
 			UID:        "123_gam",
+			BidType:    schema.CPMBidType,
+			Extra: map[string]any{
+				"placement_id": "123",
+			},
+		},
+		{
+			DemandID:   "dtexchange",
+			Label:      "dtexchange",
+			PriceFloor: ptr(0.01),
+			UID:        "123_dtexchange",
 			BidType:    schema.CPMBidType,
 			Extra: map[string]any{
 				"placement_id": "123",
@@ -148,7 +157,7 @@ func TestBuilder_Build2(t *testing.T) {
 					}, nil
 				},
 			})),
-			params: &auctionv2.BuildParams{Adapters: []adapter.Key{adapter.GAMKey, adapter.BidmachineKey}, MergedAuctionRequest: request},
+			params: &auctionv2.BuildParams{Adapters: []adapter.Key{adapter.GAMKey, adapter.BidmachineKey}, MergedAuctionRequest: request, PriceFloor: 0.1},
 			want: &auctionv2.AuctionResult{
 				AuctionConfiguration: &auction.Config{
 					ID: 1,
@@ -185,7 +194,7 @@ func TestBuilder_Build2(t *testing.T) {
 					return bidding.AuctionResult{}, bidding.ErrNoAdaptersMatched
 				},
 			})),
-			params: &auctionv2.BuildParams{Adapters: []adapter.Key{adapter.GAMKey, adapter.BidmachineKey}, MergedAuctionRequest: request},
+			params: &auctionv2.BuildParams{Adapters: []adapter.Key{adapter.GAMKey, adapter.BidmachineKey}, MergedAuctionRequest: request, PriceFloor: 0.1},
 			want: &auctionv2.AuctionResult{
 				AuctionConfiguration: &auction.Config{
 					ID: 1,
@@ -225,7 +234,7 @@ func TestBuilder_Build2(t *testing.T) {
 					},
 				}),
 			),
-			params:  &auctionv2.BuildParams{Adapters: []adapter.Key{adapter.GAMKey, adapter.BidmachineKey}, MergedAuctionRequest: request},
+			params:  &auctionv2.BuildParams{Adapters: []adapter.Key{adapter.GAMKey, adapter.BidmachineKey}, MergedAuctionRequest: request, PriceFloor: 0.1},
 			wantErr: true,
 			err:     auction.ErrNoAdsFound,
 		},
@@ -245,6 +254,7 @@ func TestBuilder_Build2(t *testing.T) {
 				AuctionKey:           "1ERNSV33K4000",
 				Adapters:             []adapter.Key{adapter.GAMKey, adapter.BidmachineKey},
 				MergedAuctionRequest: request,
+				PriceFloor:           0.1,
 			},
 			want: &auctionv2.AuctionResult{
 				AuctionConfiguration: &auction.Config{
@@ -292,6 +302,7 @@ func TestBuilder_Build2(t *testing.T) {
 				AuctionKey:           "1F60CVMI00400",
 				Adapters:             []adapter.Key{adapter.GAMKey, adapter.BidmachineKey},
 				MergedAuctionRequest: request,
+				PriceFloor:           0.1,
 			},
 			wantErr: true,
 			err:     auction.InvalidAuctionKey,
