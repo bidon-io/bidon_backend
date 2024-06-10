@@ -134,11 +134,7 @@ func (h *AuctionHandler) buildResponse(
 	}
 
 	// Store CPM AdUnits from AuctionConfiguration
-	for _, adUnit := range *auctionResult.AdUnits {
-		if adUnit.BidType == schema.CPMBidType {
-			response.AdUnits = append(response.AdUnits, adUnit)
-		}
-	}
+	response.AdUnits = append(response.AdUnits, *auctionResult.CPMAdUnits...)
 
 	// Store Bids AS RTB AdUnits from BiddingAuctionResult
 	for _, bidResponse := range auctionResult.BiddingAuctionResult.Bids {
@@ -219,7 +215,7 @@ func convertBidToAdUnit(demandResponse adapters.DemandResponse, adUnitsMap *map[
 		DemandID:   string(demandResponse.DemandID),
 		UID:        storeAdUnit.UID,
 		Label:      storeAdUnit.Label,
-		BidType:    storeAdUnit.BidType,
+		BidType:    schema.RTBBidType,
 		PriceFloor: &priceFloor,
 		Extra:      ext,
 	}

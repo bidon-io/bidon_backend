@@ -179,6 +179,27 @@ func TestBuilder_Build2(t *testing.T) {
 						BidType:    "CPM",
 						Extra:      map[string]any{"placement_id": string("123")},
 					},
+					{
+						DemandID:   "dtexchange",
+						Label:      "dtexchange",
+						PriceFloor: ptr(0.01),
+						UID:        "123_dtexchange",
+						BidType:    schema.CPMBidType,
+						Extra: map[string]any{
+							"placement_id": "123",
+						},
+					},
+				},
+
+				CPMAdUnits: &[]auction.AdUnit{
+					{
+						DemandID:   "gam",
+						UID:        "123_gam",
+						Label:      "gam",
+						PriceFloor: ptr(0.1),
+						BidType:    "CPM",
+						Extra:      map[string]any{"placement_id": string("123")},
+					},
 				},
 				BiddingAuctionResult: &bidding.AuctionResult{
 					Bids: []adapters.DemandResponse{
@@ -208,6 +229,26 @@ func TestBuilder_Build2(t *testing.T) {
 					},
 				},
 				AdUnits: &[]auction.AdUnit{
+					{
+						DemandID:   "gam",
+						UID:        "123_gam",
+						Label:      "gam",
+						PriceFloor: ptr(0.1),
+						BidType:    "CPM",
+						Extra:      map[string]any{"placement_id": string("123")},
+					},
+					{
+						DemandID:   "dtexchange",
+						Label:      "dtexchange",
+						PriceFloor: ptr(0.01),
+						UID:        "123_dtexchange",
+						BidType:    schema.CPMBidType,
+						Extra: map[string]any{
+							"placement_id": "123",
+						},
+					},
+				},
+				CPMAdUnits: &[]auction.AdUnit{
 					{
 						DemandID:   "gam",
 						UID:        "123_gam",
@@ -269,6 +310,26 @@ func TestBuilder_Build2(t *testing.T) {
 					},
 				},
 				AdUnits: &[]auction.AdUnit{
+					{
+						DemandID:   "gam",
+						UID:        "123_gam",
+						Label:      "gam",
+						PriceFloor: ptr(0.1),
+						BidType:    "CPM",
+						Extra:      map[string]any{"placement_id": string("123")},
+					},
+					{
+						DemandID:   "dtexchange",
+						Label:      "dtexchange",
+						PriceFloor: ptr(0.01),
+						UID:        "123_dtexchange",
+						BidType:    schema.CPMBidType,
+						Extra: map[string]any{
+							"placement_id": "123",
+						},
+					},
+				},
+				CPMAdUnits: &[]auction.AdUnit{
 					{
 						DemandID:   "gam",
 						UID:        "123_gam",
