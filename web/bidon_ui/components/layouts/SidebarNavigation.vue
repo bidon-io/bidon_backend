@@ -11,7 +11,7 @@
           : '',
       ]"
     >
-      <span>{{ pluralize(titleize(resource.key)) }}</span>
+      <span>{{ title(resource.key) }}</span>
     </NuxtLink>
   </nav>
 </template>
@@ -22,7 +22,19 @@ import { pluralize, titleize } from "inflection";
 const resources = useResources();
 const route = useRoute();
 
+function title(key: string) {
+  if (key === "auction_configuration_v2") {
+    return "Auction Configurations V2";
+  }
+
+  return pluralize(titleize(key));
+}
+
 function resourcePath(key: string) {
+  if (key === "auction_configuration_v2") {
+    return "/v2/auction_configurations";
+  }
+
   return `/${pluralize(key)}`;
 }
 </script>
