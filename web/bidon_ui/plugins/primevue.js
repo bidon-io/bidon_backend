@@ -17,6 +17,11 @@ import Message from "primevue/message";
 import RadioButton from "primevue/radiobutton";
 import FileUpload from "primevue/fileupload";
 import ScrollPanel from "primevue/scrollpanel";
+import Accordion from "primevue/accordion";
+import AccordionTab from "primevue/accordiontab";
+import Badge from "primevue/badge";
+import Fieldset from "primevue/fieldset";
+import ToggleButton from "primevue/togglebutton";
 
 export default defineNuxtPlugin((nuxtApp) => {
   nuxtApp.vueApp.use(PrimeVue, { ripple: true });
@@ -37,4 +42,9 @@ export default defineNuxtPlugin((nuxtApp) => {
   nuxtApp.vueApp.component("RadioButton", RadioButton);
   nuxtApp.vueApp.component("FileUpload", FileUpload);
   nuxtApp.vueApp.component("ScrollPanel", ScrollPanel);
+  nuxtApp.vueApp.component("Accordion", Accordion);
+  nuxtApp.vueApp.component("AccordionTab", AccordionTab);
+  nuxtApp.vueApp.component("Badge", Badge);
+  nuxtApp.vueApp.component("Fieldset", Fieldset);
+  nuxtApp.vueApp.component("ToggleButton", ToggleButton);
 });
