@@ -27,6 +27,11 @@ export default function ({
       });
     } catch (error) {
       console.error(error);
+      toast.add({
+        severity: "error",
+        summary: `${error.response.status} ${error.response.statusText}`,
+        detail: error.response?.data?.error?.message,
+      });
       await onError(error);
     }
   };

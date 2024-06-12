@@ -14,9 +14,12 @@ const props = defineProps<{
   label: string;
 }>();
 
-const key = computed(() =>
-  camelize(singularize(props.resourcesPath.replace("/", "")), true),
-);
+const key = computed(() => {
+  if (props.resourcesPath === "/v2/auction_configurations") {
+    return "auctionConfigurationV2";
+  }
+  return camelize(singularize(props.resourcesPath.replace("/", "")), true);
+});
 
 const resources = useResources();
 const resource = computed(() => resources.state[key.value] ?? {});
