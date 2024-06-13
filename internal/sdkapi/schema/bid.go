@@ -10,7 +10,7 @@ type Bid struct {
 	AuctionID               string                `json:"auction_id" validate:"required"`
 	AuctionConfigurationID  int64                 `json:"auction_configuration_id" validate:"required_without=AuctionConfigurationUID"`
 	AuctionConfigurationUID string                `json:"auction_configuration_uid" validate:"required_without=AuctionConfigurationID"`
-	ImpID                   string                `json:"imp_id" validate:"required"`
+	ImpID                   string                `json:"imp_id"`
 	DemandID                string                `json:"demand_id" validate:"required"`
 	RoundID                 string                `json:"round_id"`
 	RoundIndex              int                   `json:"round_idx"`
