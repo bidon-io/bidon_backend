@@ -37,6 +37,12 @@ func TestBuilder_Build(t *testing.T) {
 		},
 	}
 
+	auctionConfigV2 := auction.Config{
+		Demands: []adapter.Key{adapter.UnityAdsKey},
+		Bidding: []adapter.Key{adapter.BidmachineKey},
+		Timeout: 15000,
+	}
+
 	adaptersBuilder := &mocks.AdaptersBuilderMock{
 		BuildFunc: func(adapterKey adapter.Key, cfg adapter.ProcessedConfigsMap) (*adapters.Bidder, error) {
 			adpt := &bidmachine.BidmachineAdapter{
@@ -91,6 +97,35 @@ func TestBuilder_Build(t *testing.T) {
 					},
 				},
 				AuctionConfig: auctionConfig,
+			},
+			expectedResult: adapters.DemandResponse{
+				Status:   204,
+				DemandID: adapter.BidmachineKey,
+			},
+			expectedError: nil,
+		},
+		{
+			name:                "round-less successful build v2",
+			adaptersBuilder:     adaptersBuilder,
+			notificationHandler: notificationHandler,
+			buildParams: &bidding.BuildParams{
+				AppID: 1,
+				BiddingRequest: schema.BiddingRequest{
+					Imp: schema.Imp{
+						Demands: map[adapter.Key]map[string]any{
+							adapter.BidmachineKey: {
+								"bid_token": "token",
+							},
+						},
+					},
+					Adapters: schema.Adapters{
+						adapter.BidmachineKey: {
+							Version:    "1.0.0",
+							SDKVersion: "1.0.0",
+						},
+					},
+				},
+				AuctionConfig: auctionConfigV2,
 			},
 			expectedResult: adapters.DemandResponse{
 				Status:   204,

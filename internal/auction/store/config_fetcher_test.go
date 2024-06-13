@@ -120,7 +120,7 @@ func TestConfigFetcher_Match(t *testing.T) {
 
 	matcher := &store.ConfigFetcher{DB: tx}
 	for _, tC := range testCases {
-		got, err := matcher.Match(context.Background(), tC.args.appID, tC.args.adType, tC.args.segmentID)
+		got, err := matcher.Match(context.Background(), tC.args.appID, tC.args.adType, tC.args.segmentID, "v1")
 		if err != nil {
 			t.Errorf("Error matching config: %v", err)
 		}

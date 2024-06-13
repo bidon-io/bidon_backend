@@ -95,21 +95,29 @@ func (b *Builder) HoldAuction(ctx context.Context, params *BuildParams) (Auction
 		},
 	}
 
-	// Get adapters from request, demands from bidding request and demands from round config and merge them
-	var roundConfig *auction.RoundConfig
+	var adapterKeys []adapter.Key
 	roundNumber := 0
-	for idx, round := range config.Rounds {
-		if round.ID == br.Imp.RoundID {
-			roundConfig = &round
-			roundNumber = idx
-			break
+	isV2Auction := len(config.Rounds) == 0 && (len(config.Bidding) > 0 || len(config.Demands) > 0)
+	if isV2Auction {
+		adapterKeys = adapter.GetCommonAdapters(config.Bidding, br.Adapters.Keys())
+		adapterKeys = adapter.GetCommonAdapters(adapterKeys, maps.Keys(br.Imp.Demands))
+	} else {
+		// DEPRECATED: Remove after migration to V2
+		// Get adapters from request, demands from bidding request and demands from round config and merge them
+		var roundConfig *auction.RoundConfig
+		for idx, round := range config.Rounds {
+			if round.ID == br.Imp.RoundID {
+				roundConfig = &round
+				roundNumber = idx
+				break
+			}
 		}
+		if roundConfig == nil {
+			return emptyResponse, errors.New("round not found")
+		}
+		adapterKeys = adapter.GetCommonAdapters(roundConfig.Bidding, br.Adapters.Keys())
+		adapterKeys = adapter.GetCommonAdapters(adapterKeys, maps.Keys(br.Imp.Demands))
 	}
-	if roundConfig == nil {
-		return emptyResponse, errors.New("round not found")
-	}
-	adapterKeys := adapter.GetCommonAdapters(roundConfig.Bidding, br.Adapters.Keys())
-	adapterKeys = adapter.GetCommonAdapters(adapterKeys, maps.Keys(br.Imp.Demands))
 
 	if len(adapterKeys) == 0 {
 		return emptyResponse, ErrNoAdaptersMatched

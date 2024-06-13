@@ -18,12 +18,11 @@ type AdObjectV2 struct {
 	Rewarded                *RewardedAdObject              `json:"rewarded"`
 }
 
-func (o *AdObjectV2) ToImp(roundID string) Imp {
+func (o *AdObjectV2) ToImp() Imp {
 	return Imp{
 		AuctionID:               o.AuctionID,
 		AuctionConfigurationID:  o.AuctionConfigurationID,
 		AuctionConfigurationUID: o.AuctionConfigurationUID,
-		RoundID:                 roundID,
 		BidFloor:                &o.PriceFloor,
 		Orientation:             o.Orientation,
 		Demands:                 o.Demands,
