@@ -49,6 +49,10 @@ func (m *AdUnitsMatcher) Match(ctx context.Context, params *auction.BuildParams)
 		query = query.Where("(bid_floor >= ? OR line_items.bidding)", params.PriceFloor)
 	}
 
+	if params.AdUnitIDs != nil && len(params.AdUnitIDs) > 0 {
+		query = query.Where("line_items.id IN ?", params.AdUnitIDs)
+	}
+
 	if params.AdType != ad.BannerType {
 		return m.find(query)
 	}
