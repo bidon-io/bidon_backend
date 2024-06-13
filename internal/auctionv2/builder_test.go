@@ -45,10 +45,11 @@ func WithBiddingBuilder(bb *mocks.BiddingBuilderMock) BuilderOption {
 
 func testHelperDefaultAuctionBuilderMocks() *BuilderMocks {
 	auctionConfig := &auction.Config{
-		ID:      1,
-		Demands: []adapter.Key{adapter.GAMKey, adapter.DTExchangeKey},
-		Bidding: []adapter.Key{adapter.BidmachineKey, adapter.AmazonKey, adapter.MetaKey},
-		Timeout: 15000,
+		ID:        1,
+		Demands:   []adapter.Key{adapter.GAMKey, adapter.DTExchangeKey},
+		Bidding:   []adapter.Key{adapter.BidmachineKey, adapter.AmazonKey, adapter.MetaKey},
+		AdUnitIDs: []int64{1, 2},
+		Timeout:   15000,
 	}
 	adUnits := []auction.AdUnit{
 		{
@@ -155,10 +156,11 @@ func TestBuilder_Build2(t *testing.T) {
 			params: &auctionv2.BuildParams{Adapters: []adapter.Key{adapter.GAMKey, adapter.BidmachineKey}, MergedAuctionRequest: request, PriceFloor: 0.1},
 			want: &auctionv2.AuctionResult{
 				AuctionConfiguration: &auction.Config{
-					ID:      1,
-					Demands: []adapter.Key{adapter.GAMKey, adapter.DTExchangeKey},
-					Bidding: []adapter.Key{adapter.BidmachineKey, adapter.AmazonKey, adapter.MetaKey},
-					Timeout: 15000,
+					ID:        1,
+					Demands:   []adapter.Key{adapter.GAMKey, adapter.DTExchangeKey},
+					Bidding:   []adapter.Key{adapter.BidmachineKey, adapter.AmazonKey, adapter.MetaKey},
+					AdUnitIDs: []int64{1, 2},
+					Timeout:   15000,
 				},
 				AdUnits: &[]auction.AdUnit{
 					{
@@ -208,10 +210,11 @@ func TestBuilder_Build2(t *testing.T) {
 			params: &auctionv2.BuildParams{Adapters: []adapter.Key{adapter.GAMKey, adapter.BidmachineKey}, MergedAuctionRequest: request, PriceFloor: 0.1},
 			want: &auctionv2.AuctionResult{
 				AuctionConfiguration: &auction.Config{
-					ID:      1,
-					Demands: []adapter.Key{adapter.GAMKey, adapter.DTExchangeKey},
-					Bidding: []adapter.Key{adapter.BidmachineKey, adapter.AmazonKey, adapter.MetaKey},
-					Timeout: 15000,
+					ID:        1,
+					Demands:   []adapter.Key{adapter.GAMKey, adapter.DTExchangeKey},
+					Bidding:   []adapter.Key{adapter.BidmachineKey, adapter.AmazonKey, adapter.MetaKey},
+					AdUnitIDs: []int64{1, 2},
+					Timeout:   15000,
 				},
 				AdUnits: &[]auction.AdUnit{
 					{
@@ -265,6 +268,35 @@ func TestBuilder_Build2(t *testing.T) {
 			err:     auction.ErrNoAdsFound,
 		},
 		{
+			name: "No Ads Found due to empty AdUnitIDs",
+			builder: testHelperAuctionBuilder(
+				WithBiddingBuilder(&mocks.BiddingBuilderMock{
+					HoldAuctionFunc: func(ctx context.Context, params *bidding.BuildParams) (bidding.AuctionResult, error) {
+						return bidding.AuctionResult{
+							RoundNumber: 0,
+							Bids: []adapters.DemandResponse{
+								{DemandID: "bidmachine", Bid: &adapters.BidDemandResponse{}},
+							},
+						}, nil
+					},
+				}),
+				WithConfigFetcher(&mocks.ConfigFetcherMock{
+					MatchFunc: func(ctx context.Context, appID int64, adType ad.Type, segmentID int64, version string) (*auction.Config, error) {
+						return &auction.Config{
+							ID:        1,
+							Demands:   []adapter.Key{adapter.GAMKey, adapter.DTExchangeKey},
+							Bidding:   []adapter.Key{adapter.BidmachineKey, adapter.AmazonKey, adapter.MetaKey},
+							AdUnitIDs: []int64{},
+							Timeout:   15000,
+						}, nil
+					},
+				}),
+			),
+			params:  &auctionv2.BuildParams{Adapters: []adapter.Key{adapter.GAMKey, adapter.BidmachineKey}, MergedAuctionRequest: request, PriceFloor: 0.1},
+			wantErr: true,
+			err:     auction.ErrNoAdsFound,
+		},
+		{
 			name: "Has auction for AuctionKey",
 			builder: testHelperAuctionBuilder(WithBiddingBuilder(&mocks.BiddingBuilderMock{
 				HoldAuctionFunc: func(ctx context.Context, params *bidding.BuildParams) (bidding.AuctionResult, error) {
@@ -284,10 +316,11 @@ func TestBuilder_Build2(t *testing.T) {
 			},
 			want: &auctionv2.AuctionResult{
 				AuctionConfiguration: &auction.Config{
-					ID:      1,
-					Demands: []adapter.Key{adapter.GAMKey, adapter.DTExchangeKey},
-					Bidding: []adapter.Key{adapter.BidmachineKey, adapter.AmazonKey, adapter.MetaKey},
-					Timeout: 15000,
+					ID:        1,
+					Demands:   []adapter.Key{adapter.GAMKey, adapter.DTExchangeKey},
+					Bidding:   []adapter.Key{adapter.BidmachineKey, adapter.AmazonKey, adapter.MetaKey},
+					AdUnitIDs: []int64{1, 2},
+					Timeout:   15000,
 				},
 				AdUnits: &[]auction.AdUnit{
 					{

@@ -40,6 +40,7 @@ type BuildParams struct {
 	Segment    segment.Segment
 	PriceFloor *float64
 	AuctionKey string
+	AdUnitIDs  []int64
 }
 
 func (b *BuilderV2) Build(ctx context.Context, params *BuildParams) (*Auction, error) {

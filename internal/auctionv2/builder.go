@@ -53,6 +53,7 @@ type BuildParams struct {
 	MergedAuctionRequest *schema.AuctionV2Request
 	GeoData              geocoder.GeoData
 	AuctionKey           string
+	AdUnitIds            []int64
 }
 
 type AuctionResult struct {
@@ -99,6 +100,9 @@ func (b *Builder) Build(ctx context.Context, params *BuildParams) (*AuctionResul
 	if len(demandAdapters) == 0 && len(biddingAdapters) == 0 {
 		return nil, auction.ErrNoAdsFound
 	}
+	if len(auctionConfig.AdUnitIDs) == 0 {
+		return nil, auction.ErrNoAdsFound
+	}
 
 	adUnits, err := b.AdUnitsMatcher.MatchCached(ctx, &auction.BuildParams{
 		Adapters:   params.Adapters,
@@ -106,6 +110,7 @@ func (b *Builder) Build(ctx context.Context, params *BuildParams) (*AuctionResul
 		AdType:     params.AdType,
 		AdFormat:   params.AdFormat,
 		DeviceType: params.DeviceType,
+		AdUnitIDs:  auctionConfig.AdUnitIDs,
 	})
 	if err != nil {
 		return nil, err
