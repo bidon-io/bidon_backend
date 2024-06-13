@@ -43,6 +43,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 		account.DemandSource = bidmachineDemandSource
 	})
 
+	applovinInterstitialAdUnitID := int64(1234567890)
 	lineItems := []db.LineItem{
 		{
 			AppID:  apps[0].ID,
@@ -99,6 +100,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 			},
 		},
 		{
+			ID:        applovinInterstitialAdUnitID,
 			AppID:     apps[0].ID,
 			AdType:    db.InterstitialAdType,
 			BidFloor:  decimal.NewNullDecimal(decimal.RequireFromString("0.3")),
@@ -400,6 +402,60 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 					Extra: map[string]any{
 						"placement_id": "applovin-banner-adaptive",
 					},
+				},
+			},
+		},
+		{
+			params: &auction.BuildParams{
+				AppID:      apps[0].ID,
+				AdType:     ad.InterstitialType,
+				AdFormat:   ad.EmptyFormat,
+				DeviceType: device.PhoneType,
+				Adapters:   []adapter.Key{adapter.ApplovinKey, adapter.BidmachineKey},
+				PriceFloor: ptr(0.2),
+				AdUnitIDs:  []int64{applovinInterstitialAdUnitID},
+			},
+			want: []auction.AdUnit{
+				{
+					DemandID:   "applovin",
+					UID:        "1701972528521547779",
+					PriceFloor: ptr(0.3),
+					Label:      "applovin-interstitial",
+					BidType:    schema.CPMBidType,
+					Extra: map[string]any{
+						"placement_id": "applovin-interstitial",
+					},
+				},
+			},
+		},
+		{
+			params: &auction.BuildParams{
+				AppID:      apps[0].ID,
+				AdType:     ad.InterstitialType,
+				AdFormat:   ad.EmptyFormat,
+				DeviceType: device.PhoneType,
+				Adapters:   []adapter.Key{adapter.ApplovinKey, adapter.BidmachineKey},
+				PriceFloor: ptr(0.2),
+				AdUnitIDs:  []int64{},
+			},
+			want: []auction.AdUnit{
+				{
+					DemandID:   "applovin",
+					UID:        "1701972528521547779",
+					PriceFloor: ptr(0.3),
+					Label:      "applovin-interstitial",
+					BidType:    schema.CPMBidType,
+					Extra: map[string]any{
+						"placement_id": "applovin-interstitial",
+					},
+				},
+				{
+					DemandID:   "bidmachine",
+					UID:        "1701972528521547780",
+					PriceFloor: nil,
+					Label:      "bidmachine-interstitial",
+					BidType:    schema.RTBBidType,
+					Extra:      map[string]any{},
 				},
 			},
 		},
