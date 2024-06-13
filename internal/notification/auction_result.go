@@ -2,33 +2,13 @@ package notification
 
 import (
 	"encoding/json"
-
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 )
 
 type AuctionResult struct {
 	AuctionID string  `json:"auction_id"`
-	Rounds    []Round `json:"rounds"`
-}
-
-func (a *AuctionResult) MarshalBinary() ([]byte, error) {
-	return json.Marshal(a)
-}
-
-func (a *AuctionResult) UnmarshalBinary(data []byte) error {
-	return json.Unmarshal(data, a)
-}
-
-func (a *AuctionResult) WinningBid() float64 {
-	maxPrice := 0.0
-	for _, round := range a.Rounds {
-		for _, bid := range round.Bids {
-			if bid.Price > maxPrice {
-				maxPrice = bid.Price
-			}
-		}
-	}
-	return maxPrice
+	Bids      []Bid   `json:"bids"`
+	Rounds    []Round `json:"rounds"` // Deprecated after auction v2 migration
 }
 
 type Round struct {
@@ -48,4 +28,12 @@ type Bid struct {
 	NURL      string      `json:"nurl"`
 	BURL      string      `json:"burl"`
 	RequestID string      `json:"request_id"`
+}
+
+func (a *AuctionResult) MarshalBinary() ([]byte, error) {
+	return json.Marshal(a)
+}
+
+func (a *AuctionResult) UnmarshalBinary(data []byte) error {
+	return json.Unmarshal(data, a)
 }
