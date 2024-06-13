@@ -17,7 +17,7 @@ type ConfigFetcher struct {
 	Cache cache[*auction.Config]
 }
 
-func (m *ConfigFetcher) Match(ctx context.Context, appID int64, adType ad.Type, segmentID int64) (*auction.Config, error) {
+func (m *ConfigFetcher) Match(ctx context.Context, appID int64, adType ad.Type, segmentID int64, version string) (*auction.Config, error) {
 	dbConfig := &db.AuctionConfiguration{}
 
 	query := m.DB.
@@ -33,6 +33,12 @@ func (m *ConfigFetcher) Match(ctx context.Context, appID int64, adType ad.Type, 
 		query = query.Where("segment_id = ? OR segment_id IS NULL", segmentID)
 	} else {
 		query = query.Where("segment_id IS NULL")
+	}
+
+	if version == "v2" {
+		query = query.Where("settings->>'v2' = ?", "true")
+	} else {
+		query = query.Where("settings->>'v2' IS NULL")
 	}
 
 	err := query.Take(dbConfig).Error

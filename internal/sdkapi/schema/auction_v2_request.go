@@ -38,12 +38,12 @@ func (r *AuctionV2Request) ToAuctionRequest() AuctionRequest {
 	}
 }
 
-func (r *AuctionV2Request) ToBiddingRequest(roundID string) BiddingRequest {
+func (r *AuctionV2Request) ToBiddingRequest() BiddingRequest {
 	return BiddingRequest{
 		BaseRequest: r.BaseRequest,
 		AdType:      r.AdType,
 		Adapters:    r.Adapters,
-		Imp:         r.AdObject.ToImp(roundID),
+		Imp:         r.AdObject.ToImp(),
 		Test:        r.Test,
 		TMax:        r.TMax,
 	}

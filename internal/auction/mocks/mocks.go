@@ -23,7 +23,7 @@ var _ auction.ConfigFetcher = &ConfigFetcherMock{}
 //			FetchByUIDCachedFunc: func(ctx context.Context, appId int64, id string, uid string) *auction.Config {
 //				panic("mock out the FetchByUIDCached method")
 //			},
-//			MatchFunc: func(ctx context.Context, appID int64, adType ad.Type, segmentID int64) (*auction.Config, error) {
+//			MatchFunc: func(ctx context.Context, appID int64, adType ad.Type, segmentID int64, version string) (*auction.Config, error) {
 //				panic("mock out the Match method")
 //			},
 //		}
@@ -37,7 +37,7 @@ type ConfigFetcherMock struct {
 	FetchByUIDCachedFunc func(ctx context.Context, appId int64, id string, uid string) *auction.Config
 
 	// MatchFunc mocks the Match method.
-	MatchFunc func(ctx context.Context, appID int64, adType ad.Type, segmentID int64) (*auction.Config, error)
+	MatchFunc func(ctx context.Context, appID int64, adType ad.Type, segmentID int64, version string) (*auction.Config, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -62,6 +62,8 @@ type ConfigFetcherMock struct {
 			AdType ad.Type
 			// SegmentID is the segmentID argument value.
 			SegmentID int64
+			// Version is the version argument value.
+			Version string
 		}
 	}
 	lockFetchByUIDCached sync.RWMutex
@@ -113,7 +115,7 @@ func (mock *ConfigFetcherMock) FetchByUIDCachedCalls() []struct {
 }
 
 // Match calls MatchFunc.
-func (mock *ConfigFetcherMock) Match(ctx context.Context, appID int64, adType ad.Type, segmentID int64) (*auction.Config, error) {
+func (mock *ConfigFetcherMock) Match(ctx context.Context, appID int64, adType ad.Type, segmentID int64, version string) (*auction.Config, error) {
 	if mock.MatchFunc == nil {
 		panic("ConfigFetcherMock.MatchFunc: method is nil but ConfigFetcher.Match was just called")
 	}
@@ -122,16 +124,18 @@ func (mock *ConfigFetcherMock) Match(ctx context.Context, appID int64, adType ad
 		AppID     int64
 		AdType    ad.Type
 		SegmentID int64
+		Version   string
 	}{
 		Ctx:       ctx,
 		AppID:     appID,
 		AdType:    adType,
 		SegmentID: segmentID,
+		Version:   version,
 	}
 	mock.lockMatch.Lock()
 	mock.calls.Match = append(mock.calls.Match, callInfo)
 	mock.lockMatch.Unlock()
-	return mock.MatchFunc(ctx, appID, adType, segmentID)
+	return mock.MatchFunc(ctx, appID, adType, segmentID, version)
 }
 
 // MatchCalls gets all the calls that were made to Match.
@@ -143,12 +147,14 @@ func (mock *ConfigFetcherMock) MatchCalls() []struct {
 	AppID     int64
 	AdType    ad.Type
 	SegmentID int64
+	Version   string
 } {
 	var calls []struct {
 		Ctx       context.Context
 		AppID     int64
 		AdType    ad.Type
 		SegmentID int64
+		Version   string
 	}
 	mock.lockMatch.RLock()
 	calls = mock.calls.Match
