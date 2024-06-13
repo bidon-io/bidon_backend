@@ -26,7 +26,7 @@ type AppFetcher interface {
 
 type ConfigFetcher interface {
 	FetchByUIDCached(ctx context.Context, appId int64, id, uid string) *auction.Config
-	Match(ctx context.Context, appID int64, adType ad.Type, segmentID int64) (*auction.Config, error)
+	Match(ctx context.Context, appID int64, adType ad.Type, segmentID int64, version string) (*auction.Config, error)
 }
 
 type Geocoder interface {

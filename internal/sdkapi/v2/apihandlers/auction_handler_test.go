@@ -37,15 +37,10 @@ func testHelperAuctionV2Handler(t *testing.T) *apihandlers.AuctionHandler {
 		},
 	}
 	auctionConfig := &auction.Config{
-		ID:  1,
-		UID: "1701972528521547776",
-		Rounds: []auction.RoundConfig{
-			{
-				ID:      "ROUND_1",
-				Demands: []adapter.Key{adapter.ApplovinKey, adapter.BidmachineKey},
-				Timeout: 15000,
-			},
-		},
+		ID:      1,
+		UID:     "1701972528521547776",
+		Demands: []adapter.Key{adapter.ApplovinKey, adapter.BidmachineKey},
+		Timeout: 30000,
 	}
 	pf := 0.1
 	gamPf := 0.8
@@ -108,7 +103,7 @@ func testHelperAuctionV2Handler(t *testing.T) *apihandlers.AuctionHandler {
 		},
 	}
 	configFetcher := &handlersmocks.ConfigFetcherMock{
-		MatchFunc: func(ctx context.Context, appID int64, adType ad.Type, segmentID int64) (*auction.Config, error) {
+		MatchFunc: func(ctx context.Context, appID int64, adType ad.Type, segmentID int64, version string) (*auction.Config, error) {
 			return auctionConfig, nil
 		},
 		FetchByUIDCachedFunc: func(ctx context.Context, appId int64, key string, aucUID string) *auction.Config {

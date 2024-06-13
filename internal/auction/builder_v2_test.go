@@ -50,7 +50,7 @@ func TestBuilderV2_Build(t *testing.T) {
 	}
 
 	configFetcher := &auctionmocks.ConfigFetcherMock{
-		MatchFunc: func(ctx context.Context, appID int64, adType ad.Type, segmentID int64) (*auction.Config, error) {
+		MatchFunc: func(ctx context.Context, appID int64, adType ad.Type, segmentID int64, version string) (*auction.Config, error) {
 			return config, nil
 		},
 		FetchByUIDCachedFunc: func(ctx context.Context, appId int64, key string, aucUID string) *auction.Config {

@@ -23,7 +23,7 @@ var ErrNoAdsFound = errors.New("no ads found")
 var InvalidAuctionKey = errors.New("invalid auction_key")
 
 type ConfigFetcher interface {
-	Match(ctx context.Context, appID int64, adType ad.Type, segmentID int64) (*Config, error)
+	Match(ctx context.Context, appID int64, adType ad.Type, segmentID int64, version string) (*Config, error)
 	FetchByUIDCached(ctx context.Context, appId int64, id, uid string) *Config
 }
 
@@ -56,7 +56,7 @@ func (b *BuilderV2) Build(ctx context.Context, params *BuildParams) (*Auction, e
 			return nil, InvalidAuctionKey
 		}
 	} else {
-		config, err = b.ConfigFetcher.Match(ctx, params.AppID, params.AdType, params.Segment.ID)
+		config, err = b.ConfigFetcher.Match(ctx, params.AppID, params.AdType, params.Segment.ID, "v1")
 	}
 
 	if err != nil {

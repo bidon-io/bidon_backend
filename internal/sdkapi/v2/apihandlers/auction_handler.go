@@ -175,12 +175,8 @@ func (h *AuctionHandler) logEvents(
 		auctionConfigurationUID = 0
 	}
 
-	var firstRoundID string
-	if len(auctionResult.AuctionConfiguration.Rounds) > 0 {
-		firstRoundID = auctionResult.AuctionConfiguration.Rounds[0].ID
-	}
 	biddingRequest := &request[schema.BiddingRequest, *schema.BiddingRequest]{
-		raw:           req.raw.ToBiddingRequest(firstRoundID),
+		raw:           req.raw.ToBiddingRequest(),
 		app:           req.app,
 		auctionConfig: req.auctionConfig,
 		geoData:       req.geoData,
@@ -230,8 +226,6 @@ func prepareAuctionRequestEvent(req *request[schema.AuctionRequest, *schema.Auct
 		AuctionConfigurationID:  auc.ConfigID,
 		AuctionConfigurationUID: int64(auctionConfigurationUID),
 		Status:                  "",
-		RoundID:                 "",
-		RoundNumber:             0,
 		ImpID:                   "",
 		DemandID:                "",
 		AdUnitUID:               0,
@@ -272,8 +266,6 @@ func prepareBiddingEvents(
 			AuctionConfigurationID:  imp.AuctionConfigurationID,
 			AuctionConfigurationUID: int64(auctionConfigurationUID),
 			Status:                  fmt.Sprint(result.Status),
-			RoundID:                 imp.RoundID,
-			RoundNumber:             auctionResult.RoundNumber,
 			ImpID:                   "",
 			DemandID:                string(result.DemandID),
 			AdUnitUID:               adUnitUID,
@@ -298,8 +290,6 @@ func prepareBiddingEvents(
 				AuctionConfigurationID:  imp.AuctionConfigurationID,
 				AuctionConfigurationUID: int64(auctionConfigurationUID),
 				Status:                  "SUCCESS",
-				RoundID:                 imp.RoundID,
-				RoundNumber:             auctionResult.RoundNumber,
 				ImpID:                   "",
 				DemandID:                string(result.DemandID),
 				AdUnitUID:               adUnitUID,
