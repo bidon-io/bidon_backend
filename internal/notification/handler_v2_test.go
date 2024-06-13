@@ -60,14 +60,12 @@ func TestHandlerV2_HandleStats_WinBid(t *testing.T) {
 		},
 	}
 	result := notification.AuctionResult{
-		Rounds: []notification.Round{{
-			Bids: []notification.Bid{
-				{ID: "bid-1", ImpID: "imp-1", Price: 1.23},
-				{ID: "bid-2", ImpID: "imp-1", Price: 4.56},
-				{ID: "bid-3", ImpID: "imp-2", Price: 7.89},
-				{ID: "bid-4", ImpID: "imp-1", Price: 0.12},
-			},
-		}},
+		Bids: []notification.Bid{
+			{ID: "bid-1", ImpID: "imp-1", Price: 1.23},
+			{ID: "bid-2", ImpID: "imp-1", Price: 4.56},
+			{ID: "bid-3", ImpID: "imp-2", Price: 7.89},
+			{ID: "bid-4", ImpID: "imp-1", Price: 0.12},
+		},
 	}
 	config := auction.Config{ExternalWinNotifications: false}
 	mockRepo := &mocks.AuctionResultRepoMock{}
@@ -138,14 +136,10 @@ func TestHandlerV2_HandleStats_Loss(t *testing.T) {
 	repoMock := &mocks.AuctionResultRepoMock{
 		FindFunc: func(ctx context.Context, auctionID string) (*notification.AuctionResult, error) {
 			return &notification.AuctionResult{
-				Rounds: []notification.Round{{
-					RoundID:  "round-1",
-					BidFloor: 7.0,
-					Bids: []notification.Bid{{
-						ID:    "bid-2",
-						ImpID: "imp-1",
-						Price: 7.6,
-					}},
+				Bids: []notification.Bid{{
+					ID:    "bid-2",
+					ImpID: "imp-1",
+					Price: 7.6,
 				}},
 			}, nil
 		},
