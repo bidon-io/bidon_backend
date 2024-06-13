@@ -21,8 +21,7 @@ type Router struct {
 	AppFetcher                *sdkapistore.AppFetcher
 	SegmentMatcher            *segment.Matcher
 	AdUnitsMatcher            *auctionstore.AdUnitsMatcher
-	NotificationHandler       notification.Handler
-	NotificationHandlerV2     notification.HandlerV2
+	NotificationHandler       notification.HandlerV2
 	GeoCoder                  *geocoder.Geocoder
 	EventLogger               *event.Logger
 	LineItemsMatcher          *auctionstore.LineItemsMatcher
@@ -55,7 +54,7 @@ func (r *Router) RegisterRoutes(g *echo.Group) {
 			Geocoder:      r.GeoCoder,
 		},
 		EventLogger:         r.EventLogger,
-		NotificationHandler: r.NotificationHandlerV2,
+		NotificationHandler: r.NotificationHandler,
 	}
 	configHandler := apihandlers.ConfigHandler{
 		BaseHandler: &apihandlers.BaseHandler[schema.ConfigRequest, *schema.ConfigRequest]{
