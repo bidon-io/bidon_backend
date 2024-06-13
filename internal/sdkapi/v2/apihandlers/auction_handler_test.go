@@ -37,10 +37,11 @@ func testHelperAuctionV2Handler(t *testing.T) *apihandlers.AuctionHandler {
 		},
 	}
 	auctionConfig := &auction.Config{
-		ID:      1,
-		UID:     "1701972528521547776",
-		Demands: []adapter.Key{adapter.ApplovinKey, adapter.BidmachineKey},
-		Timeout: 30000,
+		ID:        1,
+		UID:       "1701972528521547776",
+		Demands:   []adapter.Key{adapter.ApplovinKey, adapter.BidmachineKey},
+		AdUnitIDs: []int64{1, 2, 3},
+		Timeout:   30000,
 	}
 	pf := 0.1
 	gamPf := 0.8
