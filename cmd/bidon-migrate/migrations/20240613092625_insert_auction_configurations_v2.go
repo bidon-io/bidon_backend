@@ -10,7 +10,6 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"log"
-	"os"
 	"strconv"
 	"time"
 )
@@ -120,11 +119,7 @@ func downInsertAuctionConfigurationsV2(ctx context.Context, tx *sql.Tx) error {
 }
 
 func generateSnowflakeID() (int64, error) {
-	snowflakeNodeIDStr := os.Getenv("SNOWFLAKE_NODE_ID")
-	snowflakeNodeID, err := strconv.ParseInt(snowflakeNodeIDStr, 10, 64)
-	if err != nil {
-		return 0, fmt.Errorf("failed to parse SNOWFLAKE_NODE_ID: %v", err)
-	}
+	snowflakeNodeID, _ := strconv.ParseInt("1", 10, 64)
 	node, err := snowflake.NewNode(snowflakeNodeID)
 	if err != nil {
 		return 0, fmt.Errorf("snowflake.NewNode(%v): %v", snowflakeNodeID, err)
