@@ -16,7 +16,7 @@ type LineItemsMatcher interface {
 }
 
 func (b *Builder) Build(ctx context.Context, params *BuildParams) (*Auction, error) {
-	config, err := b.ConfigFetcher.Match(ctx, params.AppID, params.AdType, params.Segment.ID)
+	config, err := b.ConfigFetcher.Match(ctx, params.AppID, params.AdType, params.Segment.ID, "v1")
 	if err != nil {
 		return nil, err
 	}
