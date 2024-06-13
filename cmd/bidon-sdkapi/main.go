@@ -143,7 +143,7 @@ func main() {
 		},
 	}
 	notificationHandlerV2 := notification.HandlerV2{
-		AuctionResultRepo: notificationstore.AuctionResultRepo{Redis: rdb},
+		AuctionResultRepo: notificationstore.AuctionResultV2Repo{Redis: rdb},
 		Sender: notification.EventSender{
 			HttpClient:  biddingHttpClient,
 			EventLogger: eventLogger,
@@ -205,8 +205,7 @@ func main() {
 		BiddingBuilder:            biddingBuilder,
 		BiddingAdaptersCfgBuilder: biddingAdaptersCfgBuilder,
 		AdUnitsMatcher:            adUnitsMatcher,
-		NotificationHandler:       notificationHandler,
-		NotificationHandlerV2:     notificationHandlerV2,
+		NotificationHandler:       notificationHandlerV2,
 		GeoCoder:                  geoCoder,
 		EventLogger:               eventLogger,
 		LineItemsMatcher:          lineItemsMatcher,
