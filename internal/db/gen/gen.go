@@ -82,6 +82,10 @@ func GenerateModels(db *sql.DB) {
 		gen.FieldType("demands", "pq.StringArray"),
 		gen.FieldType("bidding", "pq.StringArray"),
 		gen.FieldType("ad_unit_ids", "pq.Int64Array"),
+		gen.FieldType("settings", "map[string]any"),
+		gen.FieldGORMTag("settings", func(tag field.GormTag) field.GormTag {
+			return tag.Set("serializer", "json")
+		}),
 	)
 
 	g.GenerateModel("countries")

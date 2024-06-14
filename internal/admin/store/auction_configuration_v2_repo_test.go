@@ -154,7 +154,7 @@ func TestAuctionConfigurationV2Repo_Update(t *testing.T) {
 		t.Fatalf("repo.Update(ctx, %+v) = %v, %q; want %T, %v", updateParams, nil, err, got, nil)
 	}
 
-	if diff := cmp.Diff(want, got); diff != "" {
+	if diff := cmp.Diff(got, want); diff != "" {
 		t.Fatalf("repo.Find(ctx) mismatch (-want, +got):\n%s", diff)
 	}
 }

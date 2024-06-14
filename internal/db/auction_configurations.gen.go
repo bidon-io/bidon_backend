@@ -10,7 +10,6 @@ import (
 
 	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/lib/pq"
-	"gorm.io/datatypes"
 )
 
 const TableNameAuctionConfiguration = "auction_configurations"
@@ -23,7 +22,7 @@ type AuctionConfiguration struct {
 	AdType                   AdType                `gorm:"column:ad_type;type:integer;not null" json:"ad_type"`
 	Rounds                   []auction.RoundConfig `gorm:"column:rounds;type:jsonb;default:'[]';serializer:json" json:"rounds"`
 	Status                   sql.NullInt32         `gorm:"column:status;type:integer" json:"status"`
-	Settings                 datatypes.JSON        `gorm:"column:settings;type:jsonb;default:'{}'" json:"settings"`
+	Settings                 map[string]any        `gorm:"column:settings;type:jsonb;default:'{}';serializer:json" json:"settings"`
 	Pricefloor               float64               `gorm:"column:pricefloor;type:double precision;not null" json:"pricefloor"`
 	CreatedAt                time.Time             `gorm:"column:created_at;type:timestamp(6) without time zone;not null" json:"created_at"`
 	UpdatedAt                time.Time             `gorm:"column:updated_at;type:timestamp(6) without time zone;not null" json:"updated_at"`
