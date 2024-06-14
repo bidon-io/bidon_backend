@@ -24,16 +24,17 @@ type AuctionConfigurationV2 struct {
 
 // AuctionConfigurationV2Attrs is attributes of Configuration. Used to create and update configurations
 type AuctionConfigurationV2Attrs struct {
-	Name                     string        `json:"name"`
-	AppID                    int64         `json:"app_id"`
-	AdType                   ad.Type       `json:"ad_type"`
-	Pricefloor               float64       `json:"pricefloor"`
-	SegmentID                *int64        `json:"segment_id"`
-	ExternalWinNotifications *bool         `json:"external_win_notifications"`
-	Demands                  []adapter.Key `json:"demands"`
-	Bidding                  []adapter.Key `json:"bidding"`
-	AdUnitIDs                []int64       `json:"ad_unit_ids"`
-	Timeout                  int32         `json:"timeout"`
+	Name                     string         `json:"name"`
+	AppID                    int64          `json:"app_id"`
+	AdType                   ad.Type        `json:"ad_type"`
+	Pricefloor               float64        `json:"pricefloor"`
+	SegmentID                *int64         `json:"segment_id"`
+	ExternalWinNotifications *bool          `json:"external_win_notifications"`
+	Demands                  []adapter.Key  `json:"demands"`
+	Bidding                  []adapter.Key  `json:"bidding"`
+	AdUnitIDs                []int64        `json:"ad_unit_ids"`
+	Timeout                  int32          `json:"timeout"`
+	Settings                 map[string]any `json:"settings"`
 }
 
 type AuctionConfigurationV2Service struct {
