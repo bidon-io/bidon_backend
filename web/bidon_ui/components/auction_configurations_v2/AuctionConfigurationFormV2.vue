@@ -22,6 +22,13 @@
       >
         <Checkbox v-model="externalWinNotifications" :binary="true" />
       </FormField>
+      <FormField label="Timeout" :error="errors.timeout" required>
+        <InputNumber
+          v-model="timeout"
+          input-id="timeout"
+          placeholder="Timeout"
+        />
+      </FormField>
       <FormField v-if="showNetworks" label="CPM Networks">
         <NetworkAccordion
           v-model:network-keys="demands"
@@ -65,6 +72,7 @@ const { errors, useFieldModel, handleSubmit } = useForm({
     pricefloor: yup.number().positive().required().label("Pricefloor"),
     segmentId: yup.number().nullable(true).label("Segment Id"),
     externalWinNotifications: yup.boolean(),
+    timeout: yup.number().positive().required().label("Timeout"),
     settings: yup.object(),
   }),
   initialValues: {
@@ -74,6 +82,7 @@ const { errors, useFieldModel, handleSubmit } = useForm({
     pricefloor: resource.value.pricefloor || null,
     segmentId: resource.value.segmentId || null,
     externalWinNotifications: resource.value.externalWinNotifications || false,
+    timeout: resource.value.timeout || null,
     settings: resource.value.settings || {},
   },
 });
@@ -84,6 +93,7 @@ const adType = useFieldModel("adType");
 const pricefloor = useFieldModel("pricefloor");
 const segmentId = useFieldModel("segmentId");
 const externalWinNotifications = useFieldModel("externalWinNotifications");
+const timeout = useFieldModel("timeout");
 
 const demands = ref(resource.value.demands || []);
 const bidding = ref(resource.value.bidding || []);

@@ -42,6 +42,8 @@ const fields = [
   { label: "Demands", key: "demands" },
   { label: "Bidding", key: "bidding" },
   { label: "Ad Unit IDs", key: "adUnitIds" },
+  { label: "Timeout", key: "timeout" },
+  { label: "External Win Notification", key: "externalWinNotifications" },
   ResourceCardFields.Segment,
 ];
 </script>
