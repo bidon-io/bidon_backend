@@ -133,6 +133,33 @@ func TestBuilder_Build(t *testing.T) {
 			},
 			expectedError: nil,
 		},
+		{
+			name:                "round-less build v2 with empty demands hash",
+			adaptersBuilder:     adaptersBuilder,
+			notificationHandler: notificationHandler,
+			buildParams: &bidding.BuildParams{
+				AppID: 1,
+				BiddingRequest: schema.BiddingRequest{
+					Imp: schema.Imp{
+						Demands: map[adapter.Key]map[string]any{
+							adapter.BidmachineKey: {},
+						},
+					},
+					Adapters: schema.Adapters{
+						adapter.BidmachineKey: {
+							Version:    "1.0.0",
+							SDKVersion: "1.0.0",
+						},
+					},
+				},
+				AuctionConfig: auctionConfigV2,
+			},
+			expectedResult: adapters.DemandResponse{
+				Status:   204,
+				DemandID: adapter.BidmachineKey,
+			},
+			expectedError: bidding.ErrNoAdaptersMatched,
+		},
 	}
 
 	for _, tt := range tests {
