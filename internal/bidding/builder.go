@@ -101,7 +101,7 @@ func (b *Builder) HoldAuction(ctx context.Context, params *BuildParams) (Auction
 	if isV2Auction {
 		filteredDemands := make(map[adapter.Key]map[string]any)
 		for key, value := range br.Imp.Demands {
-			if len(value) > 0 {
+			if token, ok := value["token"]; ok && token != "" {
 				filteredDemands[key] = value
 			}
 		}
