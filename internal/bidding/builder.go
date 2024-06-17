@@ -99,8 +99,15 @@ func (b *Builder) HoldAuction(ctx context.Context, params *BuildParams) (Auction
 	roundNumber := 0
 	isV2Auction := len(config.Rounds) == 0 && (len(config.Bidding) > 0 || len(config.Demands) > 0)
 	if isV2Auction {
+		filteredDemands := make(map[adapter.Key]map[string]any)
+		for key, value := range br.Imp.Demands {
+			if len(value) > 0 {
+				filteredDemands[key] = value
+			}
+		}
+
 		adapterKeys = adapter.GetCommonAdapters(config.Bidding, br.Adapters.Keys())
-		adapterKeys = adapter.GetCommonAdapters(adapterKeys, maps.Keys(br.Imp.Demands))
+		adapterKeys = adapter.GetCommonAdapters(adapterKeys, maps.Keys(filteredDemands))
 	} else {
 		// DEPRECATED: Remove after migration to V2
 		// Get adapters from request, demands from bidding request and demands from round config and merge them
