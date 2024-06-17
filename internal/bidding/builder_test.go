@@ -114,7 +114,7 @@ func TestBuilder_Build(t *testing.T) {
 					Imp: schema.Imp{
 						Demands: map[adapter.Key]map[string]any{
 							adapter.BidmachineKey: {
-								"bid_token": "token",
+								"token": "bid_token",
 							},
 						},
 					},
@@ -134,7 +134,7 @@ func TestBuilder_Build(t *testing.T) {
 			expectedError: nil,
 		},
 		{
-			name:                "round-less build v2 with empty demands hash",
+			name:                "round-less build v2 with no token",
 			adaptersBuilder:     adaptersBuilder,
 			notificationHandler: notificationHandler,
 			buildParams: &bidding.BuildParams{
@@ -142,7 +142,7 @@ func TestBuilder_Build(t *testing.T) {
 				BiddingRequest: schema.BiddingRequest{
 					Imp: schema.Imp{
 						Demands: map[adapter.Key]map[string]any{
-							adapter.BidmachineKey: {},
+							adapter.BidmachineKey: {"status": "SUCCESS"},
 						},
 					},
 					Adapters: schema.Adapters{
