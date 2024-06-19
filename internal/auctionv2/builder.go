@@ -123,7 +123,7 @@ func (b *Builder) Build(ctx context.Context, params *BuildParams) (*AuctionResul
 	}
 	var cpmAdUnits []auction.AdUnit
 	for _, adUnit := range adUnits {
-		if adUnit.GetPriceFloor() >= params.PriceFloor && adUnit.IsCPM() {
+		if adUnit.GetPriceFloor() > params.PriceFloor && adUnit.IsCPM() {
 			cpmAdUnits = append(cpmAdUnits, adUnit)
 		}
 	}
@@ -153,7 +153,7 @@ func (b *Builder) Build(ctx context.Context, params *BuildParams) (*AuctionResul
 
 	bidsCount := 0
 	for _, bid := range biddingAuctionResult.Bids {
-		if bid.IsBid() {
+		if bid.IsBid() && bid.Price() > params.PriceFloor {
 			bidsCount++
 		}
 	}
