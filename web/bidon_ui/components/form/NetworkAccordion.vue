@@ -110,6 +110,14 @@ const networks = ref<Network[]>([
     selectedAdUnitIds: [],
   },
   {
+    label: "BidMachine",
+    key: "bidmachine",
+    isBidding: false,
+    enabled: false,
+    adUnits: [],
+    selectedAdUnitIds: [],
+  },
+  {
     label: "DtExchange",
     key: "dtexchange",
     isBidding: false,
