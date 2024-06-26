@@ -143,6 +143,14 @@ const networks = ref<Network[]>([
   },
   // Bidding networks
   {
+    label: "Amazon",
+    key: "amazon",
+    isBidding: true,
+    enabled: false,
+    adUnits: [],
+    selectedAdUnitIds: [],
+  },
+  {
     label: "BidMachine",
     key: "bidmachine",
     isBidding: true,
