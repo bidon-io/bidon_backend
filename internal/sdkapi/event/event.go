@@ -91,6 +91,7 @@ func newBaseRequest(request *schema.BaseRequest, geoData geocoder.GeoData) *AdEv
 		SegmentID:                   request.Segment.ID,
 		SegmentUID:                  int64(segmentUID),
 		Ext:                         request.Ext,
+		MediationMode:               request.GetMediationMode(),
 		Session: Session{
 			ID:                        request.Session.ID,
 			LaunchTS:                  request.Session.LaunchTS,
@@ -188,6 +189,7 @@ type AdEvent struct {
 	SegmentUID                  int64     `json:"segment_uid"`
 	Ext                         string    `json:"ext"`
 	Session                     Session   `json:"session"`
+	MediationMode               string    `json:"mediation_mode"`
 }
 
 type Session struct {
