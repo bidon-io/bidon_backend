@@ -77,6 +77,15 @@ func testHelperAuctionV2Handler(t *testing.T) *apihandlers.AuctionHandler {
 			},
 		},
 		{
+			DemandID: "vungle",
+			Label:    "vungle",
+			UID:      "123_vungle",
+			BidType:  schema.RTBBidType,
+			Extra: map[string]any{
+				"placement_id": "123",
+			},
+		},
+		{
 			DemandID:   "gam",
 			Label:      "gam",
 			PriceFloor: &gamPf,
@@ -177,6 +186,9 @@ func testHelperAuctionV2Handler(t *testing.T) *apihandlers.AuctionHandler {
 							DemandID:   adapter.MobileFuseKey,
 							Signaldata: "signal_data",
 						},
+					},
+					{
+						DemandID: "vungle",
 					},
 				},
 			}, nil

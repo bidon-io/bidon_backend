@@ -46,6 +46,18 @@
       }
     }
   ],
+  "no_bids": [
+    {
+      "bid_type": "RTB",
+      "demand_id": "vungle",
+      "label": "vungle",
+      "pricefloor": 0,
+      "uid": "123_vungle",
+      "ext": {
+        "placement_id": "123"
+      }
+    }
+  ],
   "segment": {
     "id": "1",
     "uid": "1701972528521547776"
