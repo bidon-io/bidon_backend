@@ -151,13 +151,7 @@ func (b *Builder) Build(ctx context.Context, params *BuildParams) (*AuctionResul
 		return nil, err
 	}
 
-	bidsCount := 0
-	for _, bid := range biddingAuctionResult.Bids {
-		if bid.IsBid() && bid.Price() > params.PriceFloor {
-			bidsCount++
-		}
-	}
-	if len(cpmAdUnits) == 0 && bidsCount == 0 {
+	if len(cpmAdUnits) == 0 && len(biddingAuctionResult.Bids) == 0 {
 		return nil, auction.ErrNoAdsFound
 	}
 	end := time.Now()
