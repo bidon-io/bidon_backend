@@ -102,7 +102,7 @@ func CheckResponses(t *testing.T, expectedResponseJson, actualResponseJson []byt
 		t.Fatalf("Failed to parse JSON2: %s", err)
 	}
 
-	if diff := cmp.Diff(actualResponse, expectedResponse); diff != "" {
+	if diff := cmp.Diff(expectedResponse, actualResponse); diff != "" {
 		t.Errorf("Response mismatch (-want, +got):\n%s", diff)
 	}
 }

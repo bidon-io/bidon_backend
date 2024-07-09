@@ -48,6 +48,7 @@ type AuctionResponse struct {
 	ConfigUID                string           `json:"auction_configuration_uid"`
 	ExternalWinNotifications bool             `json:"external_win_notifications"`
 	AdUnits                  []auction.AdUnit `json:"ad_units"`
+	NoBids                   []auction.AdUnit `json:"no_bids"`
 	Segment                  auction.Segment  `json:"segment"`
 	Token                    string           `json:"token"`
 	AuctionPriceFloor        float64          `json:"auction_pricefloor"`
@@ -138,11 +139,15 @@ func (h *AuctionHandler) buildResponse(
 
 	// Store Bids AS RTB AdUnits from BiddingAuctionResult
 	for _, bidResponse := range auctionResult.BiddingAuctionResult.Bids {
+		adUnit := convertBidToAdUnit(bidResponse, adUnitsMap)
+		if adUnit == nil {
+			continue
+		}
+
 		if bidResponse.IsBid() && bidResponse.Price() >= adObject.PriceFloor {
-			adUnit := convertBidToAdUnit(bidResponse, adUnitsMap)
-			if adUnit != nil {
-				response.AdUnits = append(response.AdUnits, *adUnit)
-			}
+			response.AdUnits = append(response.AdUnits, *adUnit)
+		} else {
+			response.NoBids = append(response.NoBids, *adUnit)
 		}
 	}
 
@@ -202,7 +207,11 @@ func convertBidToAdUnit(demandResponse adapters.DemandResponse, adUnitsMap *map[
 	}
 
 	priceFloor := demandResponse.Price()
-	ext := buildDemandExt(demandResponse)
+	ext := map[string]any{}
+	if demandResponse.IsBid() {
+		ext = buildDemandExt(demandResponse)
+	}
+
 	for key, value := range storeAdUnit.Extra {
 		ext[key] = value
 	}
