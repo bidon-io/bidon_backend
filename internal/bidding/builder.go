@@ -222,6 +222,8 @@ func (b *Builder) processAdapter(
 	demandResponse, err = bidder.Adapter.ParseBids(demandResponse)
 	demandResponse.Error = err
 
+	b.setTokenResponse(demandResponse, &br)
+
 	bids <- *demandResponse
 }
 
@@ -259,6 +261,27 @@ func (b *Builder) BuildDevice(device schema.Device, user schema.User, geo geocod
 			ZIP:       geo.ZipCode,
 			Region:    geo.RegionCode,
 		},
+	}
+}
+
+func (b *Builder) setTokenResponse(demandResponse *adapters.DemandResponse, br *schema.BiddingRequest) {
+	adapterKey := demandResponse.DemandID
+	demandData, ok := br.Imp.Demands[adapterKey]
+	if !ok || demandData == nil {
+		return
+	}
+
+	if token, ok := demandData["token"]; ok {
+		demandResponse.Token.Value = token.(string)
+	}
+	if status, ok := demandData["status"]; ok {
+		demandResponse.Token.Status = status.(string)
+	}
+	if tokenStartTS, ok := demandData["token_start_ts"]; ok {
+		demandResponse.Token.StartTS = int64(tokenStartTS.(int))
+	}
+	if tokenFinishTS, ok := demandData["token_finish_ts"]; ok {
+		demandResponse.Token.EndTS = int64(tokenFinishTS.(int))
 	}
 }
 
