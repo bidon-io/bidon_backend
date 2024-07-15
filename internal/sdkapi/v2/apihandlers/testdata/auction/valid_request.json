@@ -78,19 +78,13 @@
     "auction_pricefloor": 0.001,
     "demands": {
       "meta": {
-        "token": "token",
-        "status": "FAILURE",
-        "token_finish_ts": 1718366945771,
-        "token_start_ts": 1718366945741
+        "token": "token"
       },
       "amazon": {
         "token": "[{\"slot_uuid\":\"uuid1\",\"price_point\":\"price_point_1\"},{\"slot_uuid\":\"uuid2\",\"price_point\":\"price_point_2\"}]"
       },
       "mobilefuse": {
-        "token": "token",
-        "status": "SUCCESS",
-        "token_finish_ts": 1718366945771,
-        "token_start_ts": 1718366945741
+        "token": "token"
       }
     },
     "id": "f2d0dc19-b43f-43c1-8ca0-ae895ec76970",

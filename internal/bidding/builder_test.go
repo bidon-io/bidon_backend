@@ -114,10 +114,7 @@ func TestBuilder_Build(t *testing.T) {
 					Imp: schema.Imp{
 						Demands: map[adapter.Key]map[string]any{
 							adapter.BidmachineKey: {
-								"token":           "bid_token",
-								"status":          "SUCCESS",
-								"token_start_ts":  169157953564,
-								"token_finish_ts": 169157953564,
+								"token": "bid_token",
 							},
 						},
 					},
