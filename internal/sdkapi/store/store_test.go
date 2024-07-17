@@ -177,6 +177,11 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Valid(t *testing.T) {
 				&sdkapi.DTExchangeInitConfig{
 					AppID: fmt.Sprintf("dtexchange_app_%d", apps[0].ID),
 				},
+				&sdkapi.GAMInitConfig{
+					NetworkCode: "111",
+					AppID:       fmt.Sprintf("gam_app_%d", apps[0].ID),
+					Order:       0,
+				},
 			},
 		},
 		{
@@ -186,10 +191,6 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Valid(t *testing.T) {
 			setAmazonSlots: true,
 			setOrder:       false,
 			want: []sdkapi.AdapterInitConfig{
-				&sdkapi.GAMInitConfig{
-					NetworkCode: "111",
-					AppID:       fmt.Sprintf("gam_app_%d", apps[1].ID),
-				},
 				&sdkapi.InmobiInitConfig{
 					AccountID: "inmobi",
 					AppKey:    fmt.Sprintf("inmobi_app_%d", apps[1].ID),
@@ -206,6 +207,10 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Valid(t *testing.T) {
 				&sdkapi.UnityAdsInitConfig{
 					GameID: fmt.Sprintf("unityads_game_%d", apps[1].ID),
 				},
+				&sdkapi.VKAdsInitConfig{
+					AppID: fmt.Sprintf("vkads_app_%d", apps[1].ID),
+					Order: 0,
+				},
 				&sdkapi.VungleInitConfig{
 					AppID: fmt.Sprintf("vungle_app_%d", apps[1].ID),
 				},
@@ -218,11 +223,6 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Valid(t *testing.T) {
 			setAmazonSlots: true,
 			setOrder:       true,
 			want: []sdkapi.AdapterInitConfig{
-				&sdkapi.GAMInitConfig{
-					NetworkCode: "111",
-					AppID:       fmt.Sprintf("gam_app_%d", apps[1].ID),
-					Order:       1,
-				},
 				&sdkapi.InmobiInitConfig{
 					AccountID: "inmobi",
 					AppKey:    fmt.Sprintf("inmobi_app_%d", apps[1].ID),
@@ -244,6 +244,10 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Valid(t *testing.T) {
 				&sdkapi.UnityAdsInitConfig{
 					GameID: fmt.Sprintf("unityads_game_%d", apps[1].ID),
 					Order:  2,
+				},
+				&sdkapi.VKAdsInitConfig{
+					AppID: fmt.Sprintf("vkads_app_%d", apps[1].ID),
+					Order: 2,
 				},
 				&sdkapi.VungleInitConfig{
 					AppID: fmt.Sprintf("vungle_app_%d", apps[1].ID),

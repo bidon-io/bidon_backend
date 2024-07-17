@@ -26,6 +26,7 @@ const (
 	MintegralKey  Key = "mintegral"
 	MobileFuseKey Key = "mobilefuse"
 	UnityAdsKey   Key = "unityads"
+	VKAdsKey      Key = "vkads"
 	VungleKey     Key = "vungle"
 )
 
@@ -42,6 +43,7 @@ var Keys = []Key{
 	MintegralKey,
 	MobileFuseKey,
 	UnityAdsKey,
+	VKAdsKey,
 	VungleKey,
 }
 

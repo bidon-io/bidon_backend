@@ -112,6 +112,11 @@ func (m *LineItemsMatcher) find(query *gorm.DB) ([]auction.LineItem, error) {
 			setAdUnitIDIfEmpty(&lineItems[i], slotID)
 		}
 
+		mediation, ok := dbLineItem.Extra["mediation"].(string)
+		if ok {
+			lineItems[i].Mediation = mediation
+		}
+
 	}
 
 	return lineItems, nil
