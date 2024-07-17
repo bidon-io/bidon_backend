@@ -159,6 +159,24 @@ func Test_lineItemAttrsValidator_ValidateWithContext(t *testing.T) {
 			false,
 		},
 		{
+			"valid VK Ads",
+			&LineItemAttrs{
+				AccountID: 1,
+				Extra: map[string]any{
+					"slot_id":   "8066185",
+					"mediation": "bar",
+				},
+			},
+			&DemandSourceAccount{
+				DemandSource: DemandSource{
+					DemandSourceAttrs: DemandSourceAttrs{
+						ApiKey: string(adapter.VKAdsKey),
+					},
+				},
+			},
+			false,
+		},
+		{
 			"valid Vungle",
 			&LineItemAttrs{
 				AccountID: 1,

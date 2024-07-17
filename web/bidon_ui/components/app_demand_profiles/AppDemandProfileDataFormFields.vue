@@ -50,6 +50,9 @@ const dataSchemas = {
   "DemandSourceAccount::Vungle": yup.object({
     appId: yup.string().required().label("App Id"),
   }),
+  "DemandSourceAccount::VKAds": yup.object({
+    appId: yup.string().required().label("App Id"),
+  }),
   "DemandSourceAccount::Meta": yup.object({
     appId: yup.number().required().label("App Id"),
     appSecret: yup.string().required().label("App Secret"),
@@ -75,6 +78,7 @@ const appIdVisible = computed(() =>
     "DemandSourceAccount::DtExchange",
     "DemandSourceAccount::GAM",
     "DemandSourceAccount::Vungle",
+    "DemandSourceAccount::VKAds",
     "DemandSourceAccount::Meta",
     "DemandSourceAccount::Mintegral",
   ].includes(props.accountType),

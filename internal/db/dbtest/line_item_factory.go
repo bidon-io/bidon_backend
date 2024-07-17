@@ -126,6 +126,11 @@ func ValidLineItemExtra(t *testing.T, key adapter.Key) map[string]any {
 		return map[string]any{
 			"placement_id": "vungle_line_item_placement_id",
 		}
+	case adapter.VKAdsKey:
+		return map[string]any{
+			"slot_id":   "vk_ads_line_item_slot_id",
+			"mediation": "vk_ads_line_item_mediation",
+		}
 	case adapter.MobileFuseKey:
 		return map[string]any{
 			"placement_id": "mobile_fuse_line_item_placement_id",

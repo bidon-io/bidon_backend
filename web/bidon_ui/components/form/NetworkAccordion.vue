@@ -198,6 +198,14 @@ const networks = ref<Network[]>([
     adUnits: [],
     selectedAdUnitIds: [],
   },
+  {
+    label: "VK Ads",
+    key: "vkads",
+    isBidding: true,
+    enabled: false,
+    adUnits: [],
+    selectedAdUnitIds: [],
+  },
 ]);
 const isLoaded = ref(false);
 
