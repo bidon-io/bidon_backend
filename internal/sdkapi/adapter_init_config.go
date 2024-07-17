@@ -31,6 +31,8 @@ func NewAdapterInitConfig(key adapter.Key, setOrder bool) (AdapterInitConfig, er
 		config = new(MintegralInitConfig)
 	case adapter.UnityAdsKey:
 		config = new(UnityAdsInitConfig)
+	case adapter.VKAdsKey:
+		config = new(VKAdsInitConfig)
 	case adapter.VungleKey:
 		config = new(VungleInitConfig)
 	case adapter.MobileFuseKey:
@@ -171,6 +173,19 @@ func (a *UnityAdsInitConfig) Key() adapter.Key {
 }
 
 func (a *UnityAdsInitConfig) SetDefaultOrder() {
+	a.Order = 2
+}
+
+type VKAdsInitConfig struct {
+	AppID string `json:"app_id,omitempty"`
+	Order int    `json:"order"`
+}
+
+func (a *VKAdsInitConfig) Key() adapter.Key {
+	return adapter.VKAdsKey
+}
+
+func (a *VKAdsInitConfig) SetDefaultOrder() {
 	a.Order = 2
 }
 

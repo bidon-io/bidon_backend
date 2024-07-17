@@ -395,9 +395,15 @@ func TestLineItemsMatcher_ExtraFields(t *testing.T) {
 			},
 		},
 		{
+			params: params([]adapter.Key{adapter.VKAdsKey}),
+			want: []auction.LineItem{
+				{ID: "vkads", UID: "12", PriceFloor: 0.15, SlotID: "vk_ads_line_item_slot_id", Mediation: "vk_ads_line_item_mediation", AdUnitID: "vk_ads_line_item_slot_id"},
+			},
+		},
+		{
 			params: params([]adapter.Key{adapter.VungleKey}),
 			want: []auction.LineItem{
-				{ID: "vungle", UID: "12", PriceFloor: 0.15, PlacementID: "vungle_line_item_placement_id", AdUnitID: "vungle_line_item_placement_id"},
+				{ID: "vungle", UID: "13", PriceFloor: 0.15, PlacementID: "vungle_line_item_placement_id", AdUnitID: "vungle_line_item_placement_id"},
 			},
 		},
 		{

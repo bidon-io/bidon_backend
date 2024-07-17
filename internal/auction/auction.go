@@ -41,6 +41,7 @@ type LineItem struct {
 	ZonedID     string  `json:"zoned_id"`
 	SlotUUID    string  `json:"slot_uuid"`
 	SlotID      string  `json:"slot_id"`
+	Mediation   string  `json:"mediation"`
 }
 
 type AdUnit struct {

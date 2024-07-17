@@ -111,6 +111,21 @@ func Test_appDemandProfileAttrsValidator_ValidateWithContext(t *testing.T) {
 			false,
 		},
 		{
+			"valid VK Ads",
+			&AppDemandProfileAttrs{
+				DemandSourceID: 1,
+				Data: map[string]any{
+					"app_id": "767803077426274",
+				},
+			},
+			&DemandSource{
+				DemandSourceAttrs: DemandSourceAttrs{
+					ApiKey: string(adapter.VKAdsKey),
+				},
+			},
+			false,
+		},
+		{
 			"valid Meta",
 			&AppDemandProfileAttrs{
 				DemandSourceID: 1,
