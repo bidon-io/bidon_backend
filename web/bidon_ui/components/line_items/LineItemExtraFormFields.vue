@@ -63,6 +63,10 @@
       required
     />
   </template>
+  <template v-if="apiKey === 'vkads'">
+    <VeeFormFieldWrapper field="extra.slotId" label="Slot Id" required />
+    <VeeFormFieldWrapper field="extra.mediation" label="Mediation" required />
+  </template>
 </template>
 
 <script setup>
@@ -127,6 +131,10 @@ const dataSchemas = {
   }),
   vungle: yup.object({
     placementId: yup.string().required().label("Placement Id"),
+  }),
+  vkads: yup.object({
+    slotId: yup.string().required().label("Slot Id"),
+    mediation: yup.string().required().label("Mediation"),
   }),
 };
 

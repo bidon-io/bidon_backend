@@ -61,5 +61,6 @@ const options = ref([
   { label: "MobileFuse", value: "DemandSourceAccount::MobileFuse" },
   { label: "UnityAds", value: "DemandSourceAccount::UnityAds" },
   { label: "Vungle", value: "DemandSourceAccount::Vungle" },
+  { label: "VKAds", value: "DemandSourceAccount::VKAds" },
 ]);
 </script>

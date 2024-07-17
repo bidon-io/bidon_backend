@@ -96,6 +96,8 @@ func ValidDemandSourceAccountExtra(t *testing.T, key adapter.Key) []byte {
 		return []byte(`{"foo": "bar"}`)
 	case adapter.VungleKey:
 		return []byte(`{"account_id": "vungle", "foo": "bar"}`)
+	case adapter.VKAdsKey:
+		return []byte(`{"foo": "bar"}`)
 	case adapter.MobileFuseKey:
 		return []byte(`{"foo": "bar"}`)
 	case adapter.InmobiKey:

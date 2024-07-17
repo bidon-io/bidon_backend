@@ -46,6 +46,7 @@
       "ad_unit_id": "test_id",
       "placement_id": "",
       "zoned_id": "",
+      "mediation": "",
       "slot_uuid": "",
       "slot_id": ""
     }
