@@ -3,6 +3,7 @@ package adapters_builder
 import (
 	"context"
 	"fmt"
+	"github.com/bidon-io/bidon-backend/internal/bidding/adapters/vkads"
 	"net/http"
 
 	"github.com/bidon-io/bidon-backend/internal/auction"
@@ -24,6 +25,7 @@ var biddingAdapters = map[adapter.Key]adapters.Builder{
 	adapter.MetaKey:       meta.Builder,
 	adapter.MintegralKey:  mintegral.Builder,
 	adapter.MobileFuseKey: mobilefuse.Builder,
+	adapter.VKAdsKey:      vkads.Builder,
 	adapter.VungleKey:     vungle.Builder,
 	// adapter.AdmobKey: admob.Builder,
 	// adapter.ApplovinKey: applovin.Builder,
@@ -107,6 +109,12 @@ func (b *AdaptersConfigBuilder) Build(ctx context.Context, appID int64, adapterK
 			if adUnits, ok := (*adUnitsMap)[key]; ok {
 				adapters[key]["tag_id"] = adUnits[0].Extra["unit_id"]
 				adapters[key]["placement_id"] = adUnits[0].Extra["placement_id"]
+			}
+		case adapter.VKAdsKey:
+			adapters[key]["app_id"] = appData["app_id"]
+
+			if adUnits, ok := (*adUnitsMap)[key]; ok {
+				adapters[key]["tag_id"] = adUnits[0].Extra["slot_id"]
 			}
 		case adapter.VungleKey:
 			adapters[key]["app_id"] = appData["app_id"]
