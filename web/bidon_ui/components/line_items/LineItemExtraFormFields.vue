@@ -65,7 +65,7 @@
   </template>
   <template v-if="apiKey === 'vkads'">
     <VeeFormFieldWrapper field="extra.slotId" label="Slot Id" required />
-    <VeeFormFieldWrapper field="extra.mediation" label="Mediation" required />
+    <VeeFormFieldWrapper field="extra.mediation" label="Mediation" />
   </template>
 </template>
 
@@ -134,7 +134,7 @@ const dataSchemas = {
   }),
   vkads: yup.object({
     slotId: yup.string().required().label("Slot Id"),
-    mediation: yup.string().required().label("Mediation"),
+    mediation: yup.string().label("Mediation"),
   }),
 };
 
