@@ -484,7 +484,7 @@ func (v *lineItemAttrsValidator) extraRule(account *DemandSourceAccount) v8n.Rul
 	case adapter.VKAdsKey:
 		rule = v8n.Map(
 			v8n.Key("slot_id", v8n.Required, isString),
-			v8n.Key("mediation", v8n.Required, isString),
+			v8n.Key("mediation", isString),
 		)
 	}
 
