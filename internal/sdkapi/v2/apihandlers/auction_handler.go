@@ -286,7 +286,8 @@ func prepareBiddingEvents(
 			RawResponse:             result.RawResponse,
 			Error:                   result.ErrorMessage(),
 			TimingMap: event.TimingMap{
-				"bid": {result.StartTS, result.EndTS},
+				"bid":   {result.StartTS, result.EndTS},
+				"token": {result.Token.StartTS, result.Token.EndTS},
 			},
 		}
 		events = append(events, event.NewAdEvent(&req.raw.BaseRequest, adRequestParams, req.geoData))

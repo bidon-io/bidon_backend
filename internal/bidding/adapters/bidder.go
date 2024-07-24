@@ -41,6 +41,7 @@ type DemandResponse struct {
 	TimeoutURL  string
 	StartTS     int64
 	EndTS       int64
+	Token       Token
 }
 
 func (dr *DemandResponse) IsBid() bool {
@@ -51,6 +52,13 @@ func (dr *DemandResponse) ErrorMessage() string {
 	errMsg := ""
 	if dr.Error != nil {
 		errMsg = dr.Error.Error()
+	}
+
+	if dr.Token.Status != TokenStatusSuccess {
+		if errMsg != "" {
+			errMsg += "; "
+		}
+		errMsg += "Token Status: " + dr.Token.Status
 	}
 
 	return errMsg
@@ -77,3 +85,14 @@ type BidDemandResponse struct {
 	NURL       string
 	BURL       string
 }
+
+type Token struct {
+	Value   string
+	Status  string
+	StartTS int64
+	EndTS   int64
+}
+
+const (
+	TokenStatusSuccess = "SUCCESS"
+)
