@@ -67,3 +67,18 @@ type Segment struct {
 	Value string          `json:"value,omitempty"`
 	Ext   json.RawMessage `json:"ext,omitempty"`
 }
+
+type Bid struct {
+	openrtb2.Bid
+	Bundle json.RawMessage `json:"bundle"`
+}
+
+type SeatBid struct {
+	Bid  []Bid  `json:"bid"`
+	Seat string `json:"seat"`
+}
+
+type BidResponse struct {
+	openrtb2.BidResponse
+	SeatBid []SeatBid `json:"seatbid"`
+}
