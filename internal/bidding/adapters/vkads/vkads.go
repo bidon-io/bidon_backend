@@ -172,9 +172,8 @@ func (a *VKAdsAdapter) ParseBids(dr *adapters.DemandResponse) (*adapters.DemandR
 		return dr, fmt.Errorf("unexpected status code: " + strconv.Itoa(dr.Status))
 	}
 
-	var bidResponse openrtb2.BidResponse
-	fixedResponse := fixRawResponse(&dr.RawResponse)
-	err := json.Unmarshal([]byte(fixedResponse), &bidResponse)
+	var bidResponse openrtb.BidResponse
+	err := json.Unmarshal([]byte(dr.RawResponse), &bidResponse)
 	if err != nil {
 		return dr, err
 	}
@@ -196,35 +195,6 @@ func (a *VKAdsAdapter) ParseBids(dr *adapters.DemandResponse) (*adapters.DemandR
 	}
 
 	return dr, nil
-}
-
-// TODO: Find a better way to fix the raw response.
-// VK Ads return bid response with boolean value for "bundle" field instead of string. This function fixes it.
-func fixRawResponse(rawResponse *string) string {
-	data := map[string]any{}
-	err := json.Unmarshal([]byte(*rawResponse), &data)
-	if err != nil {
-		return *rawResponse
-	}
-
-	if seatbids, ok := data["seatbid"].([]any); ok && len(seatbids) > 0 {
-		if sb, ok := seatbids[0].(map[string]any); ok {
-			if bids, ok := sb["bid"].([]any); ok && len(bids) > 0 {
-				if b, ok := bids[0].(map[string]any); ok {
-					if bundle, ok := b["bundle"].(bool); ok {
-						b["bundle"] = strconv.FormatBool(bundle)
-					}
-				}
-			}
-		}
-	}
-
-	updatedData, err := json.Marshal(data)
-	if err != nil {
-		return *rawResponse
-	}
-
-	return string(updatedData)
 }
 
 // Builder builds a new instance of the VKAds adapter for the given bidder with the given config.
