@@ -63,7 +63,7 @@ type resourcePolicy[Resource, ResourceAttrs any] interface {
 
 // resourceScope handles visibility of resource.
 type resourceScope[Resource any] interface {
-	list(context.Context) ([]Resource, error)
+	list(context.Context, map[string][]string) ([]Resource, error)
 	find(context.Context, int64) (*Resource, error)
 }
 
@@ -74,8 +74,8 @@ func (s *ResourceService[Resource, ResourceData, ResourceAttrs]) Meta(_ context.
 	}
 }
 
-func (s *ResourceService[Resource, ResourceData, ResourceAttrs]) List(ctx context.Context, authCtx AuthContext) ([]Resource, error) {
-	data, err := s.policy.getReadScope(authCtx).list(ctx)
+func (s *ResourceService[Resource, ResourceData, ResourceAttrs]) List(ctx context.Context, authCtx AuthContext, qParams map[string][]string) ([]Resource, error) {
+	data, err := s.policy.getReadScope(authCtx).list(ctx, qParams)
 	if err != nil {
 		return nil, err
 	}

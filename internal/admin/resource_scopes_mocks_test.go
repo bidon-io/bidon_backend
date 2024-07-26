@@ -21,7 +21,7 @@ var _ AllResourceQuerier[any] = &AllResourceQuerierMock[any]{}
 //			FindFunc: func(ctx context.Context, id int64) (*Resource, error) {
 //				panic("mock out the Find method")
 //			},
-//			ListFunc: func(contextMoqParam context.Context) ([]Resource, error) {
+//			ListFunc: func(contextMoqParam context.Context, stringToStrings map[string][]string) ([]Resource, error) {
 //				panic("mock out the List method")
 //			},
 //		}
@@ -35,7 +35,7 @@ type AllResourceQuerierMock[Resource any] struct {
 	FindFunc func(ctx context.Context, id int64) (*Resource, error)
 
 	// ListFunc mocks the List method.
-	ListFunc func(contextMoqParam context.Context) ([]Resource, error)
+	ListFunc func(contextMoqParam context.Context, stringToStrings map[string][]string) ([]Resource, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -50,6 +50,8 @@ type AllResourceQuerierMock[Resource any] struct {
 		List []struct {
 			// ContextMoqParam is the contextMoqParam argument value.
 			ContextMoqParam context.Context
+			// StringToStrings is the stringToStrings argument value.
+			StringToStrings map[string][]string
 		}
 	}
 	lockFind sync.RWMutex
@@ -93,19 +95,21 @@ func (mock *AllResourceQuerierMock[Resource]) FindCalls() []struct {
 }
 
 // List calls ListFunc.
-func (mock *AllResourceQuerierMock[Resource]) List(contextMoqParam context.Context) ([]Resource, error) {
+func (mock *AllResourceQuerierMock[Resource]) List(contextMoqParam context.Context, stringToStrings map[string][]string) ([]Resource, error) {
 	if mock.ListFunc == nil {
 		panic("AllResourceQuerierMock.ListFunc: method is nil but AllResourceQuerier.List was just called")
 	}
 	callInfo := struct {
 		ContextMoqParam context.Context
+		StringToStrings map[string][]string
 	}{
 		ContextMoqParam: contextMoqParam,
+		StringToStrings: stringToStrings,
 	}
 	mock.lockList.Lock()
 	mock.calls.List = append(mock.calls.List, callInfo)
 	mock.lockList.Unlock()
-	return mock.ListFunc(contextMoqParam)
+	return mock.ListFunc(contextMoqParam, stringToStrings)
 }
 
 // ListCalls gets all the calls that were made to List.
@@ -114,9 +118,11 @@ func (mock *AllResourceQuerierMock[Resource]) List(contextMoqParam context.Conte
 //	len(mockedAllResourceQuerier.ListCalls())
 func (mock *AllResourceQuerierMock[Resource]) ListCalls() []struct {
 	ContextMoqParam context.Context
+	StringToStrings map[string][]string
 } {
 	var calls []struct {
 		ContextMoqParam context.Context
+		StringToStrings map[string][]string
 	}
 	mock.lockList.RLock()
 	calls = mock.calls.List
@@ -137,7 +143,7 @@ var _ OwnedResourceQuerier[any] = &OwnedResourceQuerierMock[any]{}
 //			FindOwnedByUserFunc: func(ctx context.Context, userID int64, id int64) (*Resource, error) {
 //				panic("mock out the FindOwnedByUser method")
 //			},
-//			ListOwnedByUserFunc: func(ctx context.Context, userID int64) ([]Resource, error) {
+//			ListOwnedByUserFunc: func(ctx context.Context, userID int64, qParams map[string][]string) ([]Resource, error) {
 //				panic("mock out the ListOwnedByUser method")
 //			},
 //		}
@@ -151,7 +157,7 @@ type OwnedResourceQuerierMock[Resource any] struct {
 	FindOwnedByUserFunc func(ctx context.Context, userID int64, id int64) (*Resource, error)
 
 	// ListOwnedByUserFunc mocks the ListOwnedByUser method.
-	ListOwnedByUserFunc func(ctx context.Context, userID int64) ([]Resource, error)
+	ListOwnedByUserFunc func(ctx context.Context, userID int64, qParams map[string][]string) ([]Resource, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -170,6 +176,8 @@ type OwnedResourceQuerierMock[Resource any] struct {
 			Ctx context.Context
 			// UserID is the userID argument value.
 			UserID int64
+			// QParams is the qParams argument value.
+			QParams map[string][]string
 		}
 	}
 	lockFindOwnedByUser sync.RWMutex
@@ -217,21 +225,23 @@ func (mock *OwnedResourceQuerierMock[Resource]) FindOwnedByUserCalls() []struct 
 }
 
 // ListOwnedByUser calls ListOwnedByUserFunc.
-func (mock *OwnedResourceQuerierMock[Resource]) ListOwnedByUser(ctx context.Context, userID int64) ([]Resource, error) {
+func (mock *OwnedResourceQuerierMock[Resource]) ListOwnedByUser(ctx context.Context, userID int64, qParams map[string][]string) ([]Resource, error) {
 	if mock.ListOwnedByUserFunc == nil {
 		panic("OwnedResourceQuerierMock.ListOwnedByUserFunc: method is nil but OwnedResourceQuerier.ListOwnedByUser was just called")
 	}
 	callInfo := struct {
-		Ctx    context.Context
-		UserID int64
+		Ctx     context.Context
+		UserID  int64
+		QParams map[string][]string
 	}{
-		Ctx:    ctx,
-		UserID: userID,
+		Ctx:     ctx,
+		UserID:  userID,
+		QParams: qParams,
 	}
 	mock.lockListOwnedByUser.Lock()
 	mock.calls.ListOwnedByUser = append(mock.calls.ListOwnedByUser, callInfo)
 	mock.lockListOwnedByUser.Unlock()
-	return mock.ListOwnedByUserFunc(ctx, userID)
+	return mock.ListOwnedByUserFunc(ctx, userID, qParams)
 }
 
 // ListOwnedByUserCalls gets all the calls that were made to ListOwnedByUser.
@@ -239,12 +249,14 @@ func (mock *OwnedResourceQuerierMock[Resource]) ListOwnedByUser(ctx context.Cont
 //
 //	len(mockedOwnedResourceQuerier.ListOwnedByUserCalls())
 func (mock *OwnedResourceQuerierMock[Resource]) ListOwnedByUserCalls() []struct {
-	Ctx    context.Context
-	UserID int64
+	Ctx     context.Context
+	UserID  int64
+	QParams map[string][]string
 } {
 	var calls []struct {
-		Ctx    context.Context
-		UserID int64
+		Ctx     context.Context
+		UserID  int64
+		QParams map[string][]string
 	}
 	mock.lockListOwnedByUser.RLock()
 	calls = mock.calls.ListOwnedByUser

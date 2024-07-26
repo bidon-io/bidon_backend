@@ -64,7 +64,7 @@ func TestDemandSourceAccountRepo_List(t *testing.T) {
 		want[i].DemandSource = *adminstore.DemandSourceResource(&demandSources[i])
 	}
 
-	got, err := repo.List(context.Background())
+	got, err := repo.List(context.Background(), nil)
 	if err != nil {
 		t.Fatalf("repo.List(ctx) = %v, %q; want %+v, %v", got, err, want, nil)
 	}

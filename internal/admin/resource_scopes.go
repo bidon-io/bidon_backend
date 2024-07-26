@@ -10,14 +10,14 @@ import (
 // AllResourceQuerier defines the interface for querying all resources from persistence layer.
 // Resource repositories implement this interface.
 type AllResourceQuerier[Resource any] interface {
-	List(context.Context) ([]Resource, error)
+	List(context.Context, map[string][]string) ([]Resource, error)
 	Find(ctx context.Context, id int64) (*Resource, error)
 }
 
 // OwnedResourceQuerier defines the interface for querying resources owned by a user from persistence layer.
 // Resource repositories implement this interface.
 type OwnedResourceQuerier[Resource any] interface {
-	ListOwnedByUser(ctx context.Context, userID int64) ([]Resource, error)
+	ListOwnedByUser(ctx context.Context, userID int64, qParams map[string][]string) ([]Resource, error)
 	FindOwnedByUser(ctx context.Context, userID, id int64) (*Resource, error)
 }
 
@@ -33,8 +33,8 @@ type publicResourceScope[Resource any] struct {
 	repo AllResourceQuerier[Resource]
 }
 
-func (s *publicResourceScope[Resource]) list(ctx context.Context) ([]Resource, error) {
-	return s.repo.List(ctx)
+func (s *publicResourceScope[Resource]) list(ctx context.Context, _ map[string][]string) ([]Resource, error) {
+	return s.repo.List(ctx, nil)
 }
 
 func (s *publicResourceScope[Resource]) find(ctx context.Context, id int64) (*Resource, error) {
@@ -48,9 +48,9 @@ type privateResourceScope[Resource any] struct {
 	authCtx AuthContext
 }
 
-func (s *privateResourceScope[Resource]) list(ctx context.Context) ([]Resource, error) {
+func (s *privateResourceScope[Resource]) list(ctx context.Context, qParams map[string][]string) ([]Resource, error) {
 	if s.authCtx.IsAdmin() {
-		return s.repo.List(ctx)
+		return s.repo.List(ctx, qParams)
 	}
 
 	return nil, errors.New("unauthorized")
@@ -78,12 +78,12 @@ type ownedResourceScope[Resource any] struct {
 	authCtx AuthContext
 }
 
-func (s *ownedResourceScope[Resource]) list(ctx context.Context) ([]Resource, error) {
+func (s *ownedResourceScope[Resource]) list(ctx context.Context, qParams map[string][]string) ([]Resource, error) {
 	if s.authCtx.IsAdmin() {
-		return s.repo.List(ctx)
+		return s.repo.List(ctx, qParams)
 	}
 
-	return s.repo.ListOwnedByUser(ctx, s.authCtx.UserID())
+	return s.repo.ListOwnedByUser(ctx, s.authCtx.UserID(), qParams)
 }
 
 func (s *ownedResourceScope[Resource]) find(ctx context.Context, id int64) (*Resource, error) {
@@ -104,9 +104,9 @@ type ownedOrSharedResourceScope[Resource any] struct {
 	authCtx AuthContext
 }
 
-func (s *ownedOrSharedResourceScope[Resource]) list(ctx context.Context) ([]Resource, error) {
+func (s *ownedOrSharedResourceScope[Resource]) list(ctx context.Context, qParams map[string][]string) ([]Resource, error) {
 	if s.authCtx.IsAdmin() {
-		return s.repo.List(ctx)
+		return s.repo.List(ctx, qParams)
 	}
 
 	return s.repo.ListOwnedByUserOrShared(ctx, s.authCtx.UserID())

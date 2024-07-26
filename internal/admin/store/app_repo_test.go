@@ -48,7 +48,7 @@ func TestAppRepo_List(t *testing.T) {
 		want[i].User = *adminstore.UserResource(&users[i])
 	}
 
-	got, err := repo.List(context.Background())
+	got, err := repo.List(context.Background(), nil)
 	if err != nil {
 		t.Fatalf("repo.List(ctx) = %v, %q; want %+v, %v", got, err, want, nil)
 	}
@@ -112,7 +112,7 @@ func TestAppRepo_ListOwnedByUser(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := repo.ListOwnedByUser(context.Background(), tt.userID)
+			got, err := repo.ListOwnedByUser(context.Background(), tt.userID, nil)
 			if err != nil {
 				t.Fatalf("ListOwnedByUser() got %v; want %+v", err, tt.want)
 			}

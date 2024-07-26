@@ -26,7 +26,7 @@ func NewAppRepo(d *db.DB) *AppRepo {
 	}
 }
 
-func (r *AppRepo) ListOwnedByUser(ctx context.Context, userID int64) ([]admin.App, error) {
+func (r *AppRepo) ListOwnedByUser(ctx context.Context, userID int64, _ map[string][]string) ([]admin.App, error) {
 	return r.list(ctx, func(db *gorm.DB) *gorm.DB {
 		return db.Where("user_id = ?", userID)
 	})

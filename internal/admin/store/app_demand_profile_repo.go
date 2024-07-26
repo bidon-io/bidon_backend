@@ -24,7 +24,7 @@ func NewAppDemandProfileRepo(d *db.DB) *AppDemandProfileRepo {
 	}
 }
 
-func (r *AppDemandProfileRepo) ListOwnedByUser(ctx context.Context, userID int64) ([]admin.AppDemandProfile, error) {
+func (r *AppDemandProfileRepo) ListOwnedByUser(ctx context.Context, userID int64, _ map[string][]string) ([]admin.AppDemandProfile, error) {
 	return r.list(ctx, func(db *gorm.DB) *gorm.DB {
 		s := db.Session(&gorm.Session{NewDB: true})
 		return db.InnerJoins("App", s.Select("user_id").Where(map[string]any{"user_id": userID}))
