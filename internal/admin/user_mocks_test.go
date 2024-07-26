@@ -27,7 +27,7 @@ var _ UserRepo = &UserRepoMock{}
 //			FindFunc: func(ctx context.Context, id int64) (*User, error) {
 //				panic("mock out the Find method")
 //			},
-//			ListFunc: func(contextMoqParam context.Context) ([]User, error) {
+//			ListFunc: func(contextMoqParam context.Context, stringToStrings map[string][]string) ([]User, error) {
 //				panic("mock out the List method")
 //			},
 //			UpdateFunc: func(ctx context.Context, id int64, attrs *UserAttrs) (*User, error) {
@@ -50,7 +50,7 @@ type UserRepoMock struct {
 	FindFunc func(ctx context.Context, id int64) (*User, error)
 
 	// ListFunc mocks the List method.
-	ListFunc func(contextMoqParam context.Context) ([]User, error)
+	ListFunc func(contextMoqParam context.Context, stringToStrings map[string][]string) ([]User, error)
 
 	// UpdateFunc mocks the Update method.
 	UpdateFunc func(ctx context.Context, id int64, attrs *UserAttrs) (*User, error)
@@ -82,6 +82,8 @@ type UserRepoMock struct {
 		List []struct {
 			// ContextMoqParam is the contextMoqParam argument value.
 			ContextMoqParam context.Context
+			// StringToStrings is the stringToStrings argument value.
+			StringToStrings map[string][]string
 		}
 		// Update holds details about calls to the Update method.
 		Update []struct {
@@ -209,19 +211,21 @@ func (mock *UserRepoMock) FindCalls() []struct {
 }
 
 // List calls ListFunc.
-func (mock *UserRepoMock) List(contextMoqParam context.Context) ([]User, error) {
+func (mock *UserRepoMock) List(contextMoqParam context.Context, stringToStrings map[string][]string) ([]User, error) {
 	if mock.ListFunc == nil {
 		panic("UserRepoMock.ListFunc: method is nil but UserRepo.List was just called")
 	}
 	callInfo := struct {
 		ContextMoqParam context.Context
+		StringToStrings map[string][]string
 	}{
 		ContextMoqParam: contextMoqParam,
+		StringToStrings: stringToStrings,
 	}
 	mock.lockList.Lock()
 	mock.calls.List = append(mock.calls.List, callInfo)
 	mock.lockList.Unlock()
-	return mock.ListFunc(contextMoqParam)
+	return mock.ListFunc(contextMoqParam, stringToStrings)
 }
 
 // ListCalls gets all the calls that were made to List.
@@ -230,9 +234,11 @@ func (mock *UserRepoMock) List(contextMoqParam context.Context) ([]User, error) 
 //	len(mockedUserRepo.ListCalls())
 func (mock *UserRepoMock) ListCalls() []struct {
 	ContextMoqParam context.Context
+	StringToStrings map[string][]string
 } {
 	var calls []struct {
 		ContextMoqParam context.Context
+		StringToStrings map[string][]string
 	}
 	mock.lockList.RLock()
 	calls = mock.calls.List

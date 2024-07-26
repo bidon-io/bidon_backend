@@ -65,7 +65,7 @@ func TestAppDemandProfileRepo_List(t *testing.T) {
 		want[i].Account = adminstore.DemandSourceAccountAttrsWithId(&accounts[i])
 	}
 
-	got, err := repo.List(context.Background())
+	got, err := repo.List(context.Background(), nil)
 	if err != nil {
 		t.Fatalf("repo.List(ctx) = %v, %q; want %+v, %v", got, err, want, nil)
 	}
@@ -142,7 +142,7 @@ func TestAppDemandProfileRepo_ListOwnedByUser(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := repo.ListOwnedByUser(context.Background(), tt.userID)
+			got, err := repo.ListOwnedByUser(context.Background(), tt.userID, nil)
 			if err != nil {
 				t.Fatalf("repo.ListOwnedByUser(ctx, %v) = %v, %q; want %+v, %v", tt.userID, got, err, tt.want, nil)
 			}

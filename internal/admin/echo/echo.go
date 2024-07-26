@@ -240,7 +240,7 @@ type resourceServiceHandler[Resource, ResourceData, ResourceAttrs any] struct {
 }
 
 type resourceService[Resource, ResourceData, ResourceAttrs any] interface {
-	List(ctx context.Context, authCtx admin.AuthContext) ([]Resource, error)
+	List(ctx context.Context, authCtx admin.AuthContext, qParams map[string][]string) ([]Resource, error)
 	Find(ctx context.Context, authCtx admin.AuthContext, id int64) (*Resource, error)
 	Create(ctx context.Context, authCtx admin.AuthContext, attrs *ResourceAttrs) (*ResourceData, error)
 	Update(ctx context.Context, authCtx admin.AuthContext, id int64, attrs *ResourceAttrs) (*ResourceData, error)
@@ -264,7 +264,7 @@ func (s *resourceServiceHandler[Resource, ResourceData, ResourceAttrs]) list(c e
 		return err
 	}
 
-	resources, err := s.service.List(c.Request().Context(), authCtx)
+	resources, err := s.service.List(c.Request().Context(), authCtx, c.QueryParams())
 	if err != nil {
 		return err
 	}

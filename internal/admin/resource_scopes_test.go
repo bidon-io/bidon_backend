@@ -21,7 +21,7 @@ func TestPublicResourceScope(t *testing.T) {
 	s := &publicResourceScope[TestResourceData]{
 		repo: &repo{
 			&AllResourceQuerierMock[TestResourceData]{
-				ListFunc: func(_ context.Context) ([]TestResourceData, error) {
+				ListFunc: func(_ context.Context, qParams map[string][]string) ([]TestResourceData, error) {
 					return want, nil
 				},
 				FindFunc: func(_ context.Context, id int64) (*TestResourceData, error) {
@@ -35,7 +35,7 @@ func TestPublicResourceScope(t *testing.T) {
 		},
 	}
 
-	gotList, _ := s.list(context.Background())
+	gotList, _ := s.list(context.Background(), nil)
 	if diff := cmp.Diff(gotList, want); diff != "" {
 		t.Errorf("list() mismatch (-want +got):\n%s", diff)
 	}
@@ -59,7 +59,7 @@ func TestPrivateResourceScope(t *testing.T) {
 	s := &privateResourceScope[TestResourceData]{
 		repo: &repo{
 			&AllResourceQuerierMock[TestResourceData]{
-				ListFunc: func(_ context.Context) ([]TestResourceData, error) {
+				ListFunc: func(_ context.Context, qParams map[string][]string) ([]TestResourceData, error) {
 					return want, nil
 				},
 				FindFunc: func(_ context.Context, id int64) (*TestResourceData, error) {
@@ -102,7 +102,7 @@ func TestPrivateResourceScope(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			s.authCtx = tt.authCtx
 
-			gotList, err := s.list(context.Background())
+			gotList, err := s.list(context.Background(), nil)
 			if tt.wantErr {
 				if err == nil {
 					t.Errorf("list() error = %v, wantErr %v", err, tt.wantErr)
@@ -137,12 +137,12 @@ func TestOwnedResourceScope_list(t *testing.T) {
 	s := &ownedResourceScope[TestResourceData]{
 		repo: &repo{
 			&AllResourceQuerierMock[TestResourceData]{
-				ListFunc: func(_ context.Context) ([]TestResourceData, error) {
+				ListFunc: func(_ context.Context, qParams map[string][]string) ([]TestResourceData, error) {
 					return testResources, nil
 				},
 			},
 			&OwnedResourceQuerierMock[TestResourceData]{
-				ListOwnedByUserFunc: func(_ context.Context, userID int64) ([]TestResourceData, error) {
+				ListOwnedByUserFunc: func(_ context.Context, userID int64, qParams map[string][]string) ([]TestResourceData, error) {
 					if userID != 1 {
 						t.Errorf("ListOwnedByUser() got = %v, want %v", userID, 1)
 					}
@@ -190,7 +190,7 @@ func TestOwnedResourceScope_list(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			s.authCtx = tt.authCtx
 
-			got, _ := s.list(context.Background())
+			got, _ := s.list(context.Background(), nil)
 			if diff := cmp.Diff(got, tt.want); diff != "" {
 				t.Errorf("list() mismatch (-want +got):\n%s", diff)
 			}
@@ -316,7 +316,7 @@ func TestOwnedOrSharedResourceScope_list(t *testing.T) {
 	s := &ownedOrSharedResourceScope[TestResourceData]{
 		repo: &repo{
 			&AllResourceQuerierMock[TestResourceData]{
-				ListFunc: func(_ context.Context) ([]TestResourceData, error) {
+				ListFunc: func(_ context.Context, qParams map[string][]string) ([]TestResourceData, error) {
 					return testResources, nil
 				},
 			},
@@ -369,7 +369,7 @@ func TestOwnedOrSharedResourceScope_list(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			s.authCtx = tt.authCtx
 
-			got, _ := s.list(context.Background())
+			got, _ := s.list(context.Background(), nil)
 			if diff := cmp.Diff(got, tt.want); diff != "" {
 				t.Errorf("list() mismatch (-want +got):\n%s", diff)
 			}

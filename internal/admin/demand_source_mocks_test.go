@@ -27,7 +27,7 @@ var _ DemandSourceRepo = &DemandSourceRepoMock{}
 //			FindFunc: func(ctx context.Context, id int64) (*DemandSource, error) {
 //				panic("mock out the Find method")
 //			},
-//			ListFunc: func(contextMoqParam context.Context) ([]DemandSource, error) {
+//			ListFunc: func(contextMoqParam context.Context, stringToStrings map[string][]string) ([]DemandSource, error) {
 //				panic("mock out the List method")
 //			},
 //			UpdateFunc: func(ctx context.Context, id int64, attrs *DemandSourceAttrs) (*DemandSource, error) {
@@ -50,7 +50,7 @@ type DemandSourceRepoMock struct {
 	FindFunc func(ctx context.Context, id int64) (*DemandSource, error)
 
 	// ListFunc mocks the List method.
-	ListFunc func(contextMoqParam context.Context) ([]DemandSource, error)
+	ListFunc func(contextMoqParam context.Context, stringToStrings map[string][]string) ([]DemandSource, error)
 
 	// UpdateFunc mocks the Update method.
 	UpdateFunc func(ctx context.Context, id int64, attrs *DemandSourceAttrs) (*DemandSource, error)
@@ -82,6 +82,8 @@ type DemandSourceRepoMock struct {
 		List []struct {
 			// ContextMoqParam is the contextMoqParam argument value.
 			ContextMoqParam context.Context
+			// StringToStrings is the stringToStrings argument value.
+			StringToStrings map[string][]string
 		}
 		// Update holds details about calls to the Update method.
 		Update []struct {
@@ -209,19 +211,21 @@ func (mock *DemandSourceRepoMock) FindCalls() []struct {
 }
 
 // List calls ListFunc.
-func (mock *DemandSourceRepoMock) List(contextMoqParam context.Context) ([]DemandSource, error) {
+func (mock *DemandSourceRepoMock) List(contextMoqParam context.Context, stringToStrings map[string][]string) ([]DemandSource, error) {
 	if mock.ListFunc == nil {
 		panic("DemandSourceRepoMock.ListFunc: method is nil but DemandSourceRepo.List was just called")
 	}
 	callInfo := struct {
 		ContextMoqParam context.Context
+		StringToStrings map[string][]string
 	}{
 		ContextMoqParam: contextMoqParam,
+		StringToStrings: stringToStrings,
 	}
 	mock.lockList.Lock()
 	mock.calls.List = append(mock.calls.List, callInfo)
 	mock.lockList.Unlock()
-	return mock.ListFunc(contextMoqParam)
+	return mock.ListFunc(contextMoqParam, stringToStrings)
 }
 
 // ListCalls gets all the calls that were made to List.
@@ -230,9 +234,11 @@ func (mock *DemandSourceRepoMock) List(contextMoqParam context.Context) ([]Deman
 //	len(mockedDemandSourceRepo.ListCalls())
 func (mock *DemandSourceRepoMock) ListCalls() []struct {
 	ContextMoqParam context.Context
+	StringToStrings map[string][]string
 } {
 	var calls []struct {
 		ContextMoqParam context.Context
+		StringToStrings map[string][]string
 	}
 	mock.lockList.RLock()
 	calls = mock.calls.List
