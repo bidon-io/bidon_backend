@@ -95,6 +95,7 @@ type AuctionAdUnitResult struct {
 	AdUnitUID     string  `json:"ad_unit_uid"`
 	AdUnitLabel   string  `json:"ad_unit_label"`
 	Status        string  `json:"status" validate:"required"`
+	ErrorMessage  string  `json:"error_message"`
 }
 
 func (r AuctionAdUnitResult) GetDemandID() string {
