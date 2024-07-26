@@ -92,6 +92,7 @@ func prepareStatsEvents(req *request[schema.StatsV2Request, *schema.StatsV2Reque
 				PriceFloor:              stats.AuctionPricefloor,
 				Bidding:                 false,
 				TimingMap:               event.TimingMap{"fill": {adUnit.FillStartTS, adUnit.FillFinishTS}},
+				Error:                   adUnit.ErrorMessage,
 			}
 			events = append(events, event.NewAdEvent(&req.raw.BaseRequest, adRequestParams, req.geoData))
 		} else {
