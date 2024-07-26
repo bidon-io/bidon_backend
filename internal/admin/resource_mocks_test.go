@@ -673,7 +673,7 @@ var _ resourceScope[any] = &resourceScopeMock[any]{}
 //			findFunc: func(contextMoqParam context.Context, n int64) (*Resource, error) {
 //				panic("mock out the find method")
 //			},
-//			listFunc: func(contextMoqParam context.Context) ([]Resource, error) {
+//			listFunc: func(contextMoqParam context.Context, stringToStrings map[string][]string) ([]Resource, error) {
 //				panic("mock out the list method")
 //			},
 //		}
@@ -687,7 +687,7 @@ type resourceScopeMock[Resource any] struct {
 	findFunc func(contextMoqParam context.Context, n int64) (*Resource, error)
 
 	// listFunc mocks the list method.
-	listFunc func(contextMoqParam context.Context) ([]Resource, error)
+	listFunc func(contextMoqParam context.Context, stringToStrings map[string][]string) ([]Resource, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -702,6 +702,8 @@ type resourceScopeMock[Resource any] struct {
 		list []struct {
 			// ContextMoqParam is the contextMoqParam argument value.
 			ContextMoqParam context.Context
+			// StringToStrings is the stringToStrings argument value.
+			StringToStrings map[string][]string
 		}
 	}
 	lockfind sync.RWMutex
@@ -745,19 +747,21 @@ func (mock *resourceScopeMock[Resource]) findCalls() []struct {
 }
 
 // list calls listFunc.
-func (mock *resourceScopeMock[Resource]) list(contextMoqParam context.Context) ([]Resource, error) {
+func (mock *resourceScopeMock[Resource]) list(contextMoqParam context.Context, stringToStrings map[string][]string) ([]Resource, error) {
 	if mock.listFunc == nil {
 		panic("resourceScopeMock.listFunc: method is nil but resourceScope.list was just called")
 	}
 	callInfo := struct {
 		ContextMoqParam context.Context
+		StringToStrings map[string][]string
 	}{
 		ContextMoqParam: contextMoqParam,
+		StringToStrings: stringToStrings,
 	}
 	mock.locklist.Lock()
 	mock.calls.list = append(mock.calls.list, callInfo)
 	mock.locklist.Unlock()
-	return mock.listFunc(contextMoqParam)
+	return mock.listFunc(contextMoqParam, stringToStrings)
 }
 
 // listCalls gets all the calls that were made to list.
@@ -766,9 +770,11 @@ func (mock *resourceScopeMock[Resource]) list(contextMoqParam context.Context) (
 //	len(mockedresourceScope.listCalls())
 func (mock *resourceScopeMock[Resource]) listCalls() []struct {
 	ContextMoqParam context.Context
+	StringToStrings map[string][]string
 } {
 	var calls []struct {
 		ContextMoqParam context.Context
+		StringToStrings map[string][]string
 	}
 	mock.locklist.RLock()
 	calls = mock.calls.list

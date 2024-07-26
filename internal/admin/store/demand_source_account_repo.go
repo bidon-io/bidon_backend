@@ -25,7 +25,7 @@ func NewDemandSourceAccountRepo(d *db.DB) *DemandSourceAccountRepo {
 	}
 }
 
-func (r DemandSourceAccountRepo) ListOwnedByUser(ctx context.Context, userID int64) ([]admin.DemandSourceAccount, error) {
+func (r DemandSourceAccountRepo) ListOwnedByUser(ctx context.Context, userID int64, _ map[string][]string) ([]admin.DemandSourceAccount, error) {
 	return r.list(ctx, func(db *gorm.DB) *gorm.DB {
 		return db.Where("user_id = ?", userID)
 	})
