@@ -26,13 +26,13 @@ func NewAuctionConfigurationV2Repo(d *db.DB) *AuctionConfigurationV2Repo {
 	}
 }
 
-func (r *AuctionConfigurationV2Repo) List(ctx context.Context) ([]admin.AuctionConfigurationV2, error) {
+func (r *AuctionConfigurationV2Repo) List(ctx context.Context, _ map[string][]string) ([]admin.AuctionConfigurationV2, error) {
 	return r.list(ctx, func(db *gorm.DB) *gorm.DB {
 		return db.Where("settings->>'v2' = ?", "true")
 	})
 }
 
-func (r *AuctionConfigurationV2Repo) ListOwnedByUser(ctx context.Context, userID int64) ([]admin.AuctionConfigurationV2, error) {
+func (r *AuctionConfigurationV2Repo) ListOwnedByUser(ctx context.Context, userID int64, _ map[string][]string) ([]admin.AuctionConfigurationV2, error) {
 	return r.list(ctx, func(db *gorm.DB) *gorm.DB {
 		s := db.Session(&gorm.Session{NewDB: true})
 		return db.InnerJoins("App", s.Select("user_id").Where(map[string]any{"user_id": userID}).Where("settings->>'v2' = ?", "true"))

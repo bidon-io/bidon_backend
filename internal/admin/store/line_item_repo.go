@@ -26,11 +26,17 @@ func NewLineItemRepo(d *db.DB) *LineItemRepo {
 	}
 }
 
-func (r *LineItemRepo) ListOwnedByUser(ctx context.Context, userID int64) ([]admin.LineItem, error) {
-	return r.list(ctx, func(db *gorm.DB) *gorm.DB {
-		s := db.Session(&gorm.Session{NewDB: true})
-		return db.InnerJoins("App", s.Select("user_id").Where(map[string]any{"user_id": userID}))
-	})
+func (r *LineItemRepo) List(ctx context.Context, qParams map[string][]string) ([]admin.LineItem, error) {
+	filters := queryToLineItemFilters(qParams)
+
+	return r.list(ctx, filters.apply)
+}
+
+func (r *LineItemRepo) ListOwnedByUser(ctx context.Context, userID int64, qParams map[string][]string) ([]admin.LineItem, error) {
+	filters := queryToLineItemFilters(qParams)
+	filters.UserID = userID
+
+	return r.list(ctx, filters.apply)
 }
 
 func (r *LineItemRepo) FindOwnedByUser(ctx context.Context, userID int64, id int64) (*admin.LineItem, error) {
@@ -116,4 +122,65 @@ func (m lineItemMapper) resourceAttrs(i *db.LineItem) admin.LineItemAttrs {
 		IsBidding:   &i.IsBidding.Bool,
 		Extra:       i.Extra,
 	}
+}
+
+type lineItemFilters struct {
+	UserID      int64
+	AppID       int64
+	AdType      db.AdType
+	AccountID   int64
+	AccountType string
+	IsBidding   *bool
+}
+
+func (f *lineItemFilters) apply(db *gorm.DB) *gorm.DB {
+	if f.UserID != 0 {
+		db = db.Joins("INNER JOIN apps ON apps.id = line_items.app_id").Where("apps.user_id = ?", f.UserID)
+	}
+	if f.AppID != 0 {
+		db = db.Where("app_id = ?", f.AppID)
+	}
+	if f.AdType != 0 {
+		db = db.Where("ad_type = ?", f.AdType)
+	}
+	if f.AccountID != 0 {
+		db = db.Where("account_id = ?", f.AccountID)
+	}
+	if f.AccountType != "" {
+		db = db.Where("account_type = ?", f.AccountType)
+	}
+	if f.IsBidding != nil {
+		if *f.IsBidding {
+			db = db.Where("bidding = ?", true)
+		} else {
+			db = db.Where("bidding = ? OR bidding IS NULL", false)
+		}
+	}
+	return db
+}
+
+func queryToLineItemFilters(qParams map[string][]string) lineItemFilters {
+	filters := lineItemFilters{}
+	if v, ok := qParams["user_id"]; ok {
+		filters.UserID, _ = strconv.ParseInt(v[0], 10, 64)
+	}
+	if v, ok := qParams["app_id"]; ok {
+		filters.AppID, _ = strconv.ParseInt(v[0], 10, 64)
+	}
+	if v, ok := qParams["ad_type"]; ok {
+
+		dbAdType := db.AdTypeFromDomain(ad.Type(v[0]))
+		filters.AdType = dbAdType
+	}
+	if v, ok := qParams["account_id"]; ok {
+		filters.AccountID, _ = strconv.ParseInt(v[0], 10, 64)
+	}
+	if v, ok := qParams["account_type"]; ok {
+		filters.AccountType = v[0]
+	}
+	if v, ok := qParams["is_bidding"]; ok {
+		b := v[0] == "true"
+		filters.IsBidding = &b
+	}
+	return filters
 }

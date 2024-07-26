@@ -33,7 +33,7 @@ func TestResourceService_List(t *testing.T) {
 		policy: &resourcePolicyMock[TestResourceData, TestResourceAttrs]{
 			getReadScopeFunc: func(authCtx AuthContext) resourceScope[TestResourceData] {
 				return &resourceScopeMock[TestResourceData]{
-					listFunc: func(ctx context.Context) ([]TestResourceData, error) {
+					listFunc: func(ctx context.Context, qParams map[string][]string) ([]TestResourceData, error) {
 						return data, nil
 					},
 				}
@@ -55,7 +55,7 @@ func TestResourceService_List(t *testing.T) {
 		want[i] = s.prepareResource(nil, &data[i])
 	}
 
-	resources, _ := s.List(context.Background(), nil)
+	resources, _ := s.List(context.Background(), nil, nil)
 	if diff := cmp.Diff(want, resources); diff != "" {
 		t.Errorf("List() mismatch (-want +got):\n%s", diff)
 	}

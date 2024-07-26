@@ -22,7 +22,7 @@ type resourceMapper[Resource, ResourceAttrs, DBModel any] interface {
 	resource(*DBModel) Resource
 }
 
-func (r *resourceRepo[Resource, ResourceAttrs, DBModel]) List(ctx context.Context) ([]Resource, error) {
+func (r *resourceRepo[Resource, ResourceAttrs, DBModel]) List(ctx context.Context, _ map[string][]string) ([]Resource, error) {
 	return r.list(ctx, nil)
 }
 
