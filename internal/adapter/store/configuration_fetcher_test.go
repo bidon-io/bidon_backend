@@ -33,6 +33,7 @@ func TestAppDemandProfileFetcher_FetchCached(t *testing.T) {
 		adapter.DTExchangeKey,
 		adapter.AmazonKey,
 		adapter.GAMKey,
+		adapter.YandexKey,
 	}
 
 	demandSources := make([]db.DemandSource, len(keys))
@@ -60,6 +61,8 @@ func TestAppDemandProfileFetcher_FetchCached(t *testing.T) {
 				account.Extra = []byte(`{"amazon": "amazon", "price_points": [{ "name": "name", "price_point": "price_point", "price": 1.0 }]}`)
 			case adapter.GAMKey:
 				account.Extra = []byte(`{"network_code": "111"}`)
+			case adapter.YandexKey:
+				account.Extra = []byte(`{"oauth_token": "yandex"}`)
 			default:
 				account.Extra = []byte{}
 			}
@@ -98,6 +101,10 @@ func TestAppDemandProfileFetcher_FetchCached(t *testing.T) {
 						map[string]any{"name": "name", "price_point": "price_point", "price": 1.0},
 					}},
 					AppData: map[string]any{},
+				},
+				adapter.YandexKey: {
+					AccountExtra: map[string]any{"oauth_token": "yandex"},
+					AppData:      map[string]any{},
 				},
 			},
 		},

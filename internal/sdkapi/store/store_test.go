@@ -214,6 +214,9 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Valid(t *testing.T) {
 				&sdkapi.VungleInitConfig{
 					AppID: fmt.Sprintf("vungle_app_%d", apps[1].ID),
 				},
+				&sdkapi.YandexInitConfig{
+					MetricaID: fmt.Sprintf("yandex_metrica_%d", apps[1].ID),
+				},
 			},
 		},
 		{
@@ -252,6 +255,10 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Valid(t *testing.T) {
 				&sdkapi.VungleInitConfig{
 					AppID: fmt.Sprintf("vungle_app_%d", apps[1].ID),
 					Order: 2,
+				},
+				&sdkapi.YandexInitConfig{
+					MetricaID: fmt.Sprintf("yandex_metrica_%d", apps[1].ID),
+					Order:     2,
 				},
 			},
 		},
