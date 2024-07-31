@@ -41,6 +41,8 @@ func NewAdapterInitConfig(key adapter.Key, setOrder bool) (AdapterInitConfig, er
 		config = new(InmobiInitConfig)
 	case adapter.AmazonKey:
 		config = new(AmazonInitConfig)
+	case adapter.YandexKey:
+		config = new(YandexInitConfig)
 	default:
 		return nil, fmt.Errorf("AdapterInitConfig for key %q not defined", key)
 	}
@@ -248,4 +250,17 @@ func (a *AmazonInitConfig) Key() adapter.Key {
 
 func (a *AmazonInitConfig) SetDefaultOrder() {
 	a.Order = 0
+}
+
+type YandexInitConfig struct {
+	MetricaID string `json:"metrica_id,omitempty"`
+	Order     int    `json:"order"`
+}
+
+func (a *YandexInitConfig) Key() adapter.Key {
+	return adapter.YandexKey
+}
+
+func (a *YandexInitConfig) SetDefaultOrder() {
+	a.Order = 2
 }

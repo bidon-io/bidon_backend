@@ -158,6 +158,21 @@ func Test_appDemandProfileAttrsValidator_ValidateWithContext(t *testing.T) {
 			false,
 		},
 		{
+			"valid Yandex",
+			&AppDemandProfileAttrs{
+				DemandSourceID: 1,
+				Data: map[string]any{
+					"metrica_id": "123456",
+				},
+			},
+			&DemandSource{
+				DemandSourceAttrs: DemandSourceAttrs{
+					ApiKey: string(adapter.YandexKey),
+				},
+			},
+			false,
+		},
+		{
 			"valid nil Data",
 			&AppDemandProfileAttrs{
 				DemandSourceID: 1,

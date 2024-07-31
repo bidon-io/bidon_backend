@@ -67,6 +67,9 @@
     <VeeFormFieldWrapper field="extra.slotId" label="Slot Id" required />
     <VeeFormFieldWrapper field="extra.mediation" label="Mediation" />
   </template>
+  <template v-if="apiKey === 'yandex'">
+    <VeeFormFieldWrapper field="extra.adUnitId" label="Ad Unit Id" />
+  </template>
 </template>
 
 <script setup>
@@ -135,6 +138,9 @@ const dataSchemas = {
   vkads: yup.object({
     slotId: yup.string().required().label("Slot Id"),
     mediation: yup.string().label("Mediation"),
+  }),
+  yandex: yup.object({
+    adUnitId: yup.string().label("Ad Unit Id"),
   }),
 };
 

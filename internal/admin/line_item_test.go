@@ -232,6 +232,23 @@ func Test_lineItemAttrsValidator_ValidateWithContext(t *testing.T) {
 			false,
 		},
 		{
+			"valid Yandex",
+			&LineItemAttrs{
+				AccountID: 1,
+				Extra: map[string]any{
+					"ad_unit_id": "938186",
+				},
+			},
+			&DemandSourceAccount{
+				DemandSource: DemandSource{
+					DemandSourceAttrs: DemandSourceAttrs{
+						ApiKey: string(adapter.YandexKey),
+					},
+				},
+			},
+			false,
+		},
+		{
 			"valid nil Extra",
 			&LineItemAttrs{
 				AccountID: 1,
