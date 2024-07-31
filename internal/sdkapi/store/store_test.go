@@ -124,11 +124,13 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Valid(t *testing.T) {
 	}
 
 	selectApp := func(i int) db.App {
-		if i < (len(accounts) / 2) {
-			return apps[0]
-		} else {
-			return apps[1]
+		firstAppAccounts := []adapter.Key{adapter.AdmobKey, adapter.AmazonKey, adapter.ApplovinKey, adapter.BidmachineKey, adapter.BigoAdsKey, adapter.DTExchangeKey, adapter.GAMKey}
+		for _, key := range firstAppAccounts {
+			if key == adapter.Key(accounts[i].DemandSource.APIKey) {
+				return apps[0]
+			}
 		}
+		return apps[1]
 	}
 	for i, account := range accounts {
 		dbtest.CreateAppDemandProfile(t, tx, func(profile *db.AppDemandProfile) {
@@ -195,6 +197,9 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Valid(t *testing.T) {
 					AccountID: "inmobi",
 					AppKey:    fmt.Sprintf("inmobi_app_%d", apps[1].ID),
 				},
+				&sdkapi.IronSourceInitConfig{
+					AppKey: fmt.Sprintf("ironsource_app_%d", apps[1].ID),
+				},
 				&sdkapi.MetaInitConfig{
 					AppID:     fmt.Sprintf("meta_app_%d", apps[1].ID),
 					AppSecret: fmt.Sprintf("meta_app_%d_secret", apps[1].ID),
@@ -230,6 +235,10 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Valid(t *testing.T) {
 					AccountID: "inmobi",
 					AppKey:    fmt.Sprintf("inmobi_app_%d", apps[1].ID),
 					Order:     3,
+				},
+				&sdkapi.IronSourceInitConfig{
+					AppKey: fmt.Sprintf("ironsource_app_%d", apps[1].ID),
+					Order:  2,
 				},
 				&sdkapi.MetaInitConfig{
 					AppID:     fmt.Sprintf("meta_app_%d", apps[1].ID),
