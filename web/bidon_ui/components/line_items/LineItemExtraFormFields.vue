@@ -27,6 +27,9 @@
       required
     />
   </template>
+  <template v-if="apiKey === 'ironsource'">
+    <VeeFormFieldWrapper field="extra.instaceId" label="Instance Id" required />
+  </template>
   <template v-if="apiKey === 'meta'">
     <VeeFormFieldWrapper
       field="extra.placementId"
@@ -118,6 +121,9 @@ const dataSchemas = {
   }),
   inmobi: yup.object({
     placementId: yup.string().required().label("Placement Id"),
+  }),
+  ironsource: yup.object({
+    instaceId: yup.string().required().label("Instance Id"),
   }),
   meta: yup.object({
     placementId: yup.string().required().label("Placement Id"),

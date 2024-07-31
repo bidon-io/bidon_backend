@@ -173,6 +173,21 @@ func Test_appDemandProfileAttrsValidator_ValidateWithContext(t *testing.T) {
 			false,
 		},
 		{
+			"valid IronSource",
+			&AppDemandProfileAttrs{
+				DemandSourceID: 1,
+				Data: map[string]any{
+					"app_key": "123456",
+				},
+			},
+			&DemandSource{
+				DemandSourceAttrs: DemandSourceAttrs{
+					ApiKey: string(adapter.IronSourceKey),
+				},
+			},
+			false,
+		},
+		{
 			"valid nil Data",
 			&AppDemandProfileAttrs{
 				DemandSourceID: 1,

@@ -56,6 +56,7 @@ const options = ref([
   { label: "DTExchange", value: "DemandSourceAccount::DtExchange" },
   { label: "Google Ad Manager", value: "DemandSourceAccount::GAM" },
   { label: "Inmobi", value: "DemandSourceAccount::Inmobi" },
+  { label: "IronSource", value: "DemandSourceAccount::IronSource" },
   { label: "Meta", value: "DemandSourceAccount::Meta" },
   { label: "Mintegral", value: "DemandSourceAccount::Mintegral" },
   { label: "MobileFuse", value: "DemandSourceAccount::MobileFuse" },
