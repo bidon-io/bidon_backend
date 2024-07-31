@@ -1,33 +1,45 @@
 <template>
-  <FormField v-if="appIdVisible" label="App Id" :error="appIdError" required>
-    <InputText v-model="appId" type="text" placeholder="App ID" />
-  </FormField>
-  <FormField
-    v-if="appSecretVisible"
-    label="App Secret"
-    :error="appSecretError"
-    required
-  >
-    <InputText v-model="appSecret" type="text" placeholder="App Secret" />
-  </FormField>
-  <FormField v-if="gameIdVisible" label="Game Id" :error="gameIdError" required>
-    <InputText v-model="gameId" type="text" placeholder="Game ID" />
-  </FormField>
-  <FormField v-if="appKeyVisible" label="App key" :error="appKeyError" required>
-    <InputText v-model="appKey" type="text" placeholder="App Key" />
-  </FormField>
-  <FormField
-    v-if="metricaIdVisible"
-    label="Metrica ID"
-    :error="metricaIdError"
-    required
-  >
-    <InputText v-model="metricaId" type="text" placeholder="Metrica ID" />
-  </FormField>
+  <template v-if="accountType == 'DemandSourceAccount::Admob'">
+    <VeeFormFieldWrapper field="data.appId" label="App Id" required />
+  </template>
+  <template v-if="accountType == 'DemandSourceAccount::BigoAds'">
+    <VeeFormFieldWrapper field="data.appId" label="App Id" required />
+    <VeeFormFieldWrapper field="data.appChannel" label="App Channel" />
+  </template>
+  <template v-if="accountType == 'DemandSourceAccount::GAM'">
+    <VeeFormFieldWrapper field="data.appId" label="App Id" required />
+  </template>
+  <template v-if="accountType == 'DemandSourceAccount::DtExchange'">
+    <VeeFormFieldWrapper field="data.appId" label="App Id" required />
+  </template>
+  <template v-if="accountType == 'DemandSourceAccount::Vungle'">
+    <VeeFormFieldWrapper field="data.appId" label="App Id" required />
+  </template>
+  <template v-if="accountType == 'DemandSourceAccount::VKAds'">
+    <VeeFormFieldWrapper field="data.appId" label="App Id" required />
+  </template>
+  <template v-if="accountType == 'DemandSourceAccount::Meta'">
+    <VeeFormFieldWrapper field="data.appId" label="App Id" required />
+    <VeeFormFieldWrapper field="data.appSecret" label="App Secret" required />
+  </template>
+  <template v-if="accountType == 'DemandSourceAccount::Mintegral'">
+    <VeeFormFieldWrapper field="data.appId" label="App Id" required />
+  </template>
+  <template v-if="accountType == 'DemandSourceAccount::UnityAds'">
+    <VeeFormFieldWrapper field="data.gameId" label="Game Id" required />
+  </template>
+  <template v-if="accountType == 'DemandSourceAccount::Inmobi'">
+    <VeeFormFieldWrapper field="data.appKey" label="App Key" required />
+  </template>
+  <template v-if="accountType == 'DemandSourceAccount::MobileFuse'">
+    <VeeFormFieldWrapper field="data.appKey" label="App Key" required />
+  </template>
+  <template v-if="accountType == 'DemandSourceAccount::Yandex'">
+    <VeeFormFieldWrapper field="data.metricaId" label="Oauth Token" required />
+  </template>
 </template>
 
 <script setup>
-import { useField } from "vee-validate";
 import * as yup from "yup";
 
 const props = defineProps({
@@ -48,6 +60,7 @@ const dataSchemas = {
   }),
   "DemandSourceAccount::BigoAds": yup.object({
     appId: yup.number().required().label("App Id"),
+    apphannel: yup.string().label("App Channel"),
   }),
   "DemandSourceAccount::GAM": yup.object({
     appId: yup.string().required().label("App Id"),
@@ -81,44 +94,6 @@ const dataSchemas = {
     metricaId: yup.string().required().label("Oauth Token"),
   }),
 };
-
-const appIdVisible = computed(() =>
-  [
-    "DemandSourceAccount::Admob",
-    "DemandSourceAccount::BigoAds",
-    "DemandSourceAccount::DtExchange",
-    "DemandSourceAccount::GAM",
-    "DemandSourceAccount::Vungle",
-    "DemandSourceAccount::VKAds",
-    "DemandSourceAccount::Meta",
-    "DemandSourceAccount::Mintegral",
-    "DemandSourceAccount::Yandex",
-  ].includes(props.accountType),
-);
-const appSecretVisible = computed(
-  () => props.accountType === "DemandSourceAccount::Meta",
-);
-const gameIdVisible = computed(
-  () => props.accountType === "DemandSourceAccount::UnityAds",
-);
-const appKeyVisible = computed(() =>
-  [
-    "DemandSourceAccount::Inmobi",
-    "DemandSourceAccount::MobileFuse",
-    "DemandSourceAccount::Amazon",
-  ].includes(props.accountType),
-);
-const metricaIdVisible = computed(
-  () => props.accountType === "DemandSourceAccount::Yandex",
-);
-
-const { value: appId, errorMessage: appIdError } = useField("data.appId");
-const { value: appSecret, errorMessage: appSecretError } =
-  useField("data.appSecret");
-const { value: gameId, errorMessage: gameIdError } = useField("data.gameId");
-const { value: appKey, errorMessage: appKeyError } = useField("data.appKey");
-const { value: metricaId, errorMessage: metricaIdError } =
-  useField("data.metricaId");
 
 const schema = computed(() => dataSchemas[props.accountType] || yup.object());
 
