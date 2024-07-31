@@ -62,5 +62,6 @@ const options = ref([
   { label: "UnityAds", value: "DemandSourceAccount::UnityAds" },
   { label: "Vungle", value: "DemandSourceAccount::Vungle" },
   { label: "VKAds", value: "DemandSourceAccount::VKAds" },
+  { label: "Yandex", value: "DemandSourceAccount::Yandex" },
 ]);
 </script>

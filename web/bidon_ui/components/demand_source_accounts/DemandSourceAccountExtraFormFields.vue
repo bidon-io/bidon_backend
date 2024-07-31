@@ -51,6 +51,13 @@
   <template v-if="apiKey === 'vungle'">
     <VeeFormFieldWrapper field="extra.accountId" label="Account ID" required />
   </template>
+  <template v-if="apiKey === 'yandex'">
+    <VeeFormFieldWrapper
+      field="extra.oauth_token"
+      label="Oauth Token"
+      required
+    />
+  </template>
 </template>
 
 <script setup>
@@ -119,6 +126,9 @@ const dataSchemas = {
   }),
   vungle: yup.object({
     accountId: yup.string().required().label("Account Id"),
+  }),
+  yandex: yup.object({
+    oauth_token: yup.string().required().label("Oauth Token"),
   }),
 };
 

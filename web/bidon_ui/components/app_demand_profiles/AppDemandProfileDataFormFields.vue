@@ -16,6 +16,14 @@
   <FormField v-if="appKeyVisible" label="App key" :error="appKeyError" required>
     <InputText v-model="appKey" type="text" placeholder="App Key" />
   </FormField>
+  <FormField
+    v-if="metricaIdVisible"
+    label="Metrica ID"
+    :error="metricaIdError"
+    required
+  >
+    <InputText v-model="metricaId" type="text" placeholder="Metrica ID" />
+  </FormField>
 </template>
 
 <script setup>
@@ -69,6 +77,9 @@ const dataSchemas = {
   "DemandSourceAccount::MobileFuse": yup.object({
     appKey: yup.string().required().label("App Key"),
   }),
+  "DemandSourceAccount::Yandex": yup.object({
+    metricaId: yup.string().required().label("Oauth Token"),
+  }),
 };
 
 const appIdVisible = computed(() =>
@@ -81,6 +92,7 @@ const appIdVisible = computed(() =>
     "DemandSourceAccount::VKAds",
     "DemandSourceAccount::Meta",
     "DemandSourceAccount::Mintegral",
+    "DemandSourceAccount::Yandex",
   ].includes(props.accountType),
 );
 const appSecretVisible = computed(
@@ -96,12 +108,17 @@ const appKeyVisible = computed(() =>
     "DemandSourceAccount::Amazon",
   ].includes(props.accountType),
 );
+const metricaIdVisible = computed(
+  () => props.accountType === "DemandSourceAccount::Yandex",
+);
 
 const { value: appId, errorMessage: appIdError } = useField("data.appId");
 const { value: appSecret, errorMessage: appSecretError } =
   useField("data.appSecret");
 const { value: gameId, errorMessage: gameIdError } = useField("data.gameId");
 const { value: appKey, errorMessage: appKeyError } = useField("data.appKey");
+const { value: metricaId, errorMessage: metricaIdError } =
+  useField("data.metricaId");
 
 const schema = computed(() => dataSchemas[props.accountType] || yup.object());
 

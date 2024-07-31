@@ -226,6 +226,35 @@ func (csv unityAdsLineItemCSV) buildLineItemAttrs(account *DemandSourceAccount, 
 	return lineItemAttrs, nil
 }
 
+type yandexLineItemCSV struct {
+	AdFormat string          `csv:"ad_format"`
+	BidFloor decimal.Decimal `csv:"bid_floor"`
+	AdUnitID string          `csv:"ad_unit_id"`
+}
+
+func (csv yandexLineItemCSV) buildLineItemAttrs(account *DemandSourceAccount, attrs LineItemImportCSVAttrs) (LineItemAttrs, error) {
+	adType, format := parseCSVAdFormat(csv.AdFormat)
+	if adType == ad.UnknownType {
+		return LineItemAttrs{}, fmt.Errorf("unknown ad format %q", csv.AdFormat)
+	}
+
+	lineItemAttrs := LineItemAttrs{
+		HumanName:   strings.ToLower(fmt.Sprintf("%v_%v_%v", account.DemandSource.ApiKey, csv.AdFormat, csv.BidFloor)),
+		AppID:       attrs.AppID,
+		BidFloor:    &csv.BidFloor,
+		AdType:      adType,
+		Format:      format,
+		AccountID:   account.ID,
+		AccountType: account.Type,
+		IsBidding:   &attrs.IsBidding,
+		Extra: map[string]any{
+			"ad_unit_id": csv.AdUnitID,
+		},
+	}
+
+	return lineItemAttrs, nil
+}
+
 func parseCSVAdFormat(adFormat string) (ad.Type, *ad.Format) {
 	switch strings.ToLower(adFormat) {
 	case "banner":
@@ -314,6 +343,17 @@ func (s *LineItemService) ImportCSV(ctx context.Context, _ AuthContext, reader i
 		csvLineItems = make([]LineItemCSV, len(unityLineItems))
 		for i, unityAdsLineItem := range unityLineItems {
 			csvLineItems[i] = unityAdsLineItem
+		}
+	case adapter.YandexKey:
+		var yandexLineItems []yandexLineItemCSV
+		err = csvutil.Unmarshal(csvInput, &yandexLineItems)
+		if err != nil {
+			return fmt.Errorf("unmarshal csv: %v", err)
+		}
+
+		csvLineItems = make([]LineItemCSV, len(yandexLineItems))
+		for i, yandexLineItem := range yandexLineItems {
+			csvLineItems[i] = yandexLineItem
 		}
 	default:
 		return fmt.Errorf("unsupported demand source: %s", account.DemandSource.ApiKey)
@@ -485,6 +525,10 @@ func (v *lineItemAttrsValidator) extraRule(account *DemandSourceAccount) v8n.Rul
 		rule = v8n.Map(
 			v8n.Key("slot_id", v8n.Required, isString),
 			v8n.Key("mediation", isString),
+		)
+	case adapter.YandexKey:
+		rule = v8n.Map(
+			v8n.Key("ad_unit_id", v8n.Required, isString),
 		)
 	}
 

@@ -206,6 +206,14 @@ const networks = ref<Network[]>([
     adUnits: [],
     selectedAdUnitIds: [],
   },
+  {
+    label: "Yandex",
+    key: "yandex",
+    isBidding: true,
+    enabled: false,
+    adUnits: [],
+    selectedAdUnitIds: [],
+  },
 ]);
 const isLoaded = ref(false);
 
