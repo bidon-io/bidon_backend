@@ -189,9 +189,14 @@ func (v *appDemandProfileAttrsValidator) dataRule(demandSource *DemandSource) v8
 	var rule v8n.MapRule
 
 	switch adapter.Key(demandSource.ApiKey) {
-	case adapter.AdmobKey, adapter.BigoAdsKey, adapter.DTExchangeKey, adapter.MintegralKey, adapter.VungleKey, adapter.VKAdsKey:
+	case adapter.AdmobKey, adapter.DTExchangeKey, adapter.MintegralKey, adapter.VungleKey, adapter.VKAdsKey:
 		rule = v8n.Map(
 			v8n.Key("app_id", v8n.Required, isString),
+		)
+	case adapter.BigoAdsKey:
+		rule = v8n.Map(
+			v8n.Key("app_id", v8n.Required, isString),
+			v8n.Key("app_channel", v8n.NilOrNotEmpty, isString).Optional(),
 		)
 	case adapter.MetaKey:
 		rule = v8n.Map(

@@ -139,6 +139,10 @@ func ValidLineItemExtra(t *testing.T, key adapter.Key) map[string]any {
 		return map[string]any{
 			"placement_id": "inmobi_line_item_placement_id",
 		}
+	case adapter.IronSourceKey:
+		return map[string]any{
+			"instance_id": "iron_source_line_item_instance_id",
+		}
 	case adapter.AmazonKey:
 		return map[string]any{
 			"placement_id": "amazon_line_item_placement_id",

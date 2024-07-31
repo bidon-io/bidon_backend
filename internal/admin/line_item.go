@@ -255,6 +255,35 @@ func (csv yandexLineItemCSV) buildLineItemAttrs(account *DemandSourceAccount, at
 	return lineItemAttrs, nil
 }
 
+type IronSourceLineItemCSV struct {
+	AdFormat   string          `csv:"ad_format"`
+	BidFloor   decimal.Decimal `csv:"bid_floor"`
+	InstanceID string          `csv:"instance_id"`
+}
+
+func (csv IronSourceLineItemCSV) buildLineItemAttrs(account *DemandSourceAccount, attrs LineItemImportCSVAttrs) (LineItemAttrs, error) {
+	adType, format := parseCSVAdFormat(csv.AdFormat)
+	if adType == ad.UnknownType {
+		return LineItemAttrs{}, fmt.Errorf("unknown ad format %q", csv.AdFormat)
+	}
+
+	lineItemAttrs := LineItemAttrs{
+		HumanName:   strings.ToLower(fmt.Sprintf("%v_%v_%v", account.DemandSource.ApiKey, csv.AdFormat, csv.BidFloor)),
+		AppID:       attrs.AppID,
+		BidFloor:    &csv.BidFloor,
+		AdType:      adType,
+		Format:      format,
+		AccountID:   account.ID,
+		AccountType: account.Type,
+		IsBidding:   &attrs.IsBidding,
+		Extra: map[string]any{
+			"instance_id": csv.InstanceID,
+		},
+	}
+
+	return lineItemAttrs, nil
+}
+
 func parseCSVAdFormat(adFormat string) (ad.Type, *ad.Format) {
 	switch strings.ToLower(adFormat) {
 	case "banner":
@@ -354,6 +383,17 @@ func (s *LineItemService) ImportCSV(ctx context.Context, _ AuthContext, reader i
 		csvLineItems = make([]LineItemCSV, len(yandexLineItems))
 		for i, yandexLineItem := range yandexLineItems {
 			csvLineItems[i] = yandexLineItem
+		}
+	case adapter.IronSourceKey:
+		var ironSourceLineItems []IronSourceLineItemCSV
+		err = csvutil.Unmarshal(csvInput, &ironSourceLineItems)
+		if err != nil {
+			return fmt.Errorf("unmarshal csv: %v", err)
+		}
+
+		csvLineItems = make([]LineItemCSV, len(ironSourceLineItems))
+		for i, ironSourceLineItem := range ironSourceLineItems {
+			csvLineItems[i] = ironSourceLineItem
 		}
 	default:
 		return fmt.Errorf("unsupported demand source: %s", account.DemandSource.ApiKey)
@@ -515,6 +555,10 @@ func (v *lineItemAttrsValidator) extraRule(account *DemandSourceAccount) v8n.Rul
 	case adapter.DTExchangeKey:
 		rule = v8n.Map(
 			v8n.Key("spot_id", v8n.Required, isString),
+		)
+	case adapter.IronSourceKey:
+		rule = v8n.Map(
+			v8n.Key("instance_id", v8n.Required, isString),
 		)
 	case adapter.MintegralKey:
 		rule = v8n.Map(

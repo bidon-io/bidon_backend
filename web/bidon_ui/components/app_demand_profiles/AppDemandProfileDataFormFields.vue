@@ -31,6 +31,9 @@
   <template v-if="accountType == 'DemandSourceAccount::Inmobi'">
     <VeeFormFieldWrapper field="data.appKey" label="App Key" required />
   </template>
+  <template v-if="accountType == 'DemandSourceAccount::IronSource'">
+    <VeeFormFieldWrapper field="data.appKey" label="App Key" required />
+  </template>
   <template v-if="accountType == 'DemandSourceAccount::MobileFuse'">
     <VeeFormFieldWrapper field="data.appKey" label="App Key" required />
   </template>
@@ -85,6 +88,9 @@ const dataSchemas = {
     gameId: yup.number().required().label("Game Id"),
   }),
   "DemandSourceAccount::Inmobi": yup.object({
+    appKey: yup.string().required().label("App Key"),
+  }),
+  "DemandSourceAccount::IronSource": yup.object({
     appKey: yup.string().required().label("App Key"),
   }),
   "DemandSourceAccount::MobileFuse": yup.object({
