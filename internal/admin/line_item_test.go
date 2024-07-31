@@ -123,6 +123,23 @@ func Test_lineItemAttrsValidator_ValidateWithContext(t *testing.T) {
 			false,
 		},
 		{
+			"valid IronSource",
+			&LineItemAttrs{
+				AccountID: 1,
+				Extra: map[string]any{
+					"instance_id": "123",
+				},
+			},
+			&DemandSourceAccount{
+				DemandSource: DemandSource{
+					DemandSourceAttrs: DemandSourceAttrs{
+						ApiKey: string(adapter.IronSourceKey),
+					},
+				},
+			},
+			false,
+		},
+		{
 			"valid Meta",
 			&LineItemAttrs{
 				AccountID: 1,

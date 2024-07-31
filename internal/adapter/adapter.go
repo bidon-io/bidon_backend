@@ -22,6 +22,7 @@ const (
 	DTExchangeKey Key = "dtexchange"
 	GAMKey        Key = "gam"
 	InmobiKey     Key = "inmobi"
+	IronSourceKey Key = "ironsource"
 	MetaKey       Key = "meta"
 	MintegralKey  Key = "mintegral"
 	MobileFuseKey Key = "mobilefuse"
@@ -40,6 +41,7 @@ var Keys = []Key{
 	DTExchangeKey,
 	GAMKey,
 	InmobiKey,
+	IronSourceKey,
 	MetaKey,
 	MintegralKey,
 	MobileFuseKey,

@@ -39,6 +39,8 @@ func NewAdapterInitConfig(key adapter.Key, setOrder bool) (AdapterInitConfig, er
 		config = new(MobileFuseInitConfig)
 	case adapter.InmobiKey:
 		config = new(InmobiInitConfig)
+	case adapter.IronSourceKey:
+		config = new(IronSourceInitConfig)
 	case adapter.AmazonKey:
 		config = new(AmazonInitConfig)
 	case adapter.YandexKey:
@@ -262,5 +264,18 @@ func (a *YandexInitConfig) Key() adapter.Key {
 }
 
 func (a *YandexInitConfig) SetDefaultOrder() {
+	a.Order = 2
+}
+
+type IronSourceInitConfig struct {
+	AppKey string `json:"app_key,omitempty"`
+	Order  int    `json:"order"`
+}
+
+func (a *IronSourceInitConfig) Key() adapter.Key {
+	return adapter.IronSourceKey
+}
+
+func (a *IronSourceInitConfig) SetDefaultOrder() {
 	a.Order = 2
 }

@@ -120,7 +120,7 @@ const networks = ref<Network[]>([
   {
     label: "Bigoads",
     key: "bigoads",
-    isBidding: true,
+    isBidding: false,
     enabled: false,
     adUnits: [],
     selectedAdUnitIds: [],
@@ -144,6 +144,22 @@ const networks = ref<Network[]>([
   {
     label: "UnityAds",
     key: "unityads",
+    isBidding: false,
+    enabled: false,
+    adUnits: [],
+    selectedAdUnitIds: [],
+  },
+  {
+    label: "IronSource",
+    key: "ironsource",
+    isBidding: false,
+    enabled: false,
+    adUnits: [],
+    selectedAdUnitIds: [],
+  },
+  {
+    label: "Yandex",
+    key: "yandex",
     isBidding: false,
     enabled: false,
     adUnits: [],
@@ -209,14 +225,6 @@ const networks = ref<Network[]>([
   {
     label: "VK Ads",
     key: "vkads",
-    isBidding: true,
-    enabled: false,
-    adUnits: [],
-    selectedAdUnitIds: [],
-  },
-  {
-    label: "Yandex",
-    key: "yandex",
     isBidding: true,
     enabled: false,
     adUnits: [],
