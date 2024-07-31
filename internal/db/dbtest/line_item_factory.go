@@ -143,6 +143,10 @@ func ValidLineItemExtra(t *testing.T, key adapter.Key) map[string]any {
 		return map[string]any{
 			"placement_id": "amazon_line_item_placement_id",
 		}
+	case adapter.YandexKey:
+		return map[string]any{
+			"ad_unit_id": "yandex_line_item_ad_unit_id",
+		}
 	default:
 		t.Fatalf("Invalid adapter key or missing valid ACCOUNT config for adapter %q", key)
 		return nil
