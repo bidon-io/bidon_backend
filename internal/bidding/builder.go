@@ -234,7 +234,7 @@ func (b *Builder) BuildDevice(device schema.Device, user schema.User, geo geocod
 	}
 
 	return &openrtb2.Device{
-		IP:             "185.6.244.185",
+		IP:             "37.214.68.184",
 		W:              int64(device.Width),
 		H:              int64(device.Height),
 		JS:             js,
