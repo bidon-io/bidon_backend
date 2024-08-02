@@ -185,7 +185,7 @@ func (a *VKAdsAdapter) ParseBids(dr *adapters.DemandResponse) (*adapters.DemandR
 		ID:       bid.ID,
 		ImpID:    bid.ImpID,
 		Price:    bid.Price,
-		Payload:  bid.AdM,
+		Payload:  bid.ID,
 		DemandID: adapter.VKAdsKey,
 		AdID:     bid.AdID,
 		SeatID:   seat.Seat,
