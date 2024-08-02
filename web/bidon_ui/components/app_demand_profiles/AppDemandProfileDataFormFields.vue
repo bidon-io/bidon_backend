@@ -65,7 +65,7 @@ const dataSchemas = {
     appId: yup.string().required().label("App Id"),
   }),
   "DemandSourceAccount::Amazon": yup.object({
-    appKey: yup.object().required().label("App Key"),
+    appKey: yup.string().required().label("App Key"),
   }),
   "DemandSourceAccount::BigoAds": yup.object({
     appId: yup.number().required().label("App Id"),
