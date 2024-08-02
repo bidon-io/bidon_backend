@@ -346,6 +346,10 @@ func buildDemandExt(demandResponse adapters.DemandResponse) map[string]any {
 		return map[string]any{
 			"signaldata": demandResponse.Bid.Signaldata,
 		}
+	case adapter.VKAdsKey:
+		return map[string]any{
+			"bid_id": demandResponse.Bid.ID,
+		}
 	default:
 		return map[string]any{
 			"payload": demandResponse.Bid.Payload,

@@ -85,6 +85,10 @@ func (a *VKAdsAdapter) CreateRequest(request openrtb.BidRequest, br *schema.Bidd
 	if a.TagID == "" {
 		return request, errors.New("TagID is empty")
 	}
+	token, ok := br.Imp.Demands[adapter.VKAdsKey]["token"].(string)
+	if !ok || token == "" {
+		return request, errors.New("token is empty")
+	}
 
 	var imp *openrtb2.Imp
 	switch br.Imp.Type() {
@@ -106,8 +110,10 @@ func (a *VKAdsAdapter) CreateRequest(request openrtb.BidRequest, br *schema.Bidd
 	request.Cur = []string{"USD"}
 
 	request.User = &openrtb.User{
-		ID: br.User.IDG,
+		ID:  br.User.IDG,
+		Ext: json.RawMessage(fmt.Sprintf(`{"buyeruid": "%s"}`, token)),
 	}
+
 	request.App.ID = a.AppID
 	request.Ext = json.RawMessage(`{"pid":111}`)
 
@@ -127,7 +133,7 @@ func (a *VKAdsAdapter) ExecuteRequest(ctx context.Context, client *http.Client, 
 	}
 	dr.RawRequest = string(requestBody)
 
-	url := "https://ad.mail.ru/api/" + a.TagID
+	url := "https://ad.mail.ru/api/bid"
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(requestBody))
 	if err != nil {
 		dr.Error = err
@@ -185,7 +191,6 @@ func (a *VKAdsAdapter) ParseBids(dr *adapters.DemandResponse) (*adapters.DemandR
 		ID:       bid.ID,
 		ImpID:    bid.ImpID,
 		Price:    bid.Price,
-		Payload:  bid.ID,
 		DemandID: adapter.VKAdsKey,
 		AdID:     bid.AdID,
 		SeatID:   seat.Seat,
