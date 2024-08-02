@@ -113,7 +113,7 @@ func buildTestParams(imp schema.Imp) createRequestTestParams {
 func buildWantRequest(imp openrtb2.Imp) openrtb.BidRequest {
 	request := openrtb.BidRequest{
 		App:  &openrtb2.App{ID: "10182906", Publisher: &openrtb2.Publisher{}},
-		User: &openrtb.User{ID: ""},
+		User: &openrtb.User{Ext: json.RawMessage(`{"buyeruid": "token"}`)},
 		Cur:  []string{"USD"},
 		Imp:  []openrtb2.Imp{imp},
 		Ext:  json.RawMessage(`{"pid":111}`),
@@ -264,7 +264,7 @@ func TestAdapter_ExecuteRequest(t *testing.T) {
 		{
 			name:                "Valid Request",
 			responseBody:        []byte(`{"key": "value"}`),
-			expectedURL:         "https://ad.mail.ru/api/" + a.TagID,
+			expectedURL:         "https://ad.mail.ru/api/bid",
 			expectedDemandID:    adapter.VKAdsKey,
 			expectedRequestID:   "test-request-id",
 			expectedTagID:       a.TagID,
@@ -368,7 +368,6 @@ func TestVKAds_ParseBids(t *testing.T) {
 						ID:       "2:1::669e29a737559894",
 						ImpID:    "7703af66-0ec1-475f-b5a8-eda9d65c44e6",
 						Price:    1.5,
-						Payload:  "2:1::669e29a737559894",
 						DemandID: "vkads",
 						AdID:     "162456424",
 						LURL:     "https://rs.mail.ru",
