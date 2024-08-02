@@ -158,6 +158,14 @@ const networks = ref<Network[]>([
     selectedAdUnitIds: [],
   },
   {
+    label: "Vungle",
+    key: "vungle",
+    isBidding: false,
+    enabled: false,
+    adUnits: [],
+    selectedAdUnitIds: [],
+  },
+  {
     label: "Yandex",
     key: "yandex",
     isBidding: false,
