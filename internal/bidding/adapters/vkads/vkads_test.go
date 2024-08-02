@@ -328,7 +328,7 @@ func TestVKAds_ParseBids(t *testing.T) {
 			{
 			  "price": 1.5,
 			  "id": "2:1::669e29a737559894",
-			  "adm": "PAYLOAD",
+			  "adm": "adm",
 			  "impid": "7703af66-0ec1-475f-b5a8-eda9d65c44e6",
 			  "nurl": "https://rs.mail.ru/pixel/Q.gif?price=37.27&currency=RUB",
 			  "cid": "96295833",
@@ -368,7 +368,7 @@ func TestVKAds_ParseBids(t *testing.T) {
 						ID:       "2:1::669e29a737559894",
 						ImpID:    "7703af66-0ec1-475f-b5a8-eda9d65c44e6",
 						Price:    1.5,
-						Payload:  "PAYLOAD",
+						Payload:  "2:1::669e29a737559894",
 						DemandID: "vkads",
 						AdID:     "162456424",
 						LURL:     "https://rs.mail.ru",
