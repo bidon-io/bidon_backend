@@ -2,6 +2,9 @@
   <template v-if="accountType == 'DemandSourceAccount::Admob'">
     <VeeFormFieldWrapper field="data.appId" label="App Id" required />
   </template>
+  <template v-if="accountType == 'DemandSourceAccount::Amazon'">
+    <VeeFormFieldWrapper field="data.appKey" label="App Key" required />
+  </template>
   <template v-if="accountType == 'DemandSourceAccount::BigoAds'">
     <VeeFormFieldWrapper field="data.appId" label="App Id" required />
     <VeeFormFieldWrapper field="data.appChannel" label="App Channel" />
@@ -60,6 +63,9 @@ const emit = defineEmits(["update:schema"]);
 const dataSchemas = {
   "DemandSourceAccount::Admob": yup.object({
     appId: yup.string().required().label("App Id"),
+  }),
+  "DemandSourceAccount::Amazon": yup.object({
+    appKey: yup.object().required().label("App Key"),
   }),
   "DemandSourceAccount::BigoAds": yup.object({
     appId: yup.number().required().label("App Id"),
