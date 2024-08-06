@@ -158,6 +158,14 @@ const networks = ref<Network[]>([
     selectedAdUnitIds: [],
   },
   {
+    label: "VK Ads",
+    key: "vkads",
+    isBidding: false,
+    enabled: false,
+    adUnits: [],
+    selectedAdUnitIds: [],
+  },
+  {
     label: "Vungle",
     key: "vungle",
     isBidding: false,
@@ -243,18 +251,9 @@ const isLoaded = ref(false);
 
 const fetchAdUnits = async () => {
   if (!props.appId || !props.adType) return [];
-  const url = `/line_items?appId=${props.appId}&adType=${props.adType}&isBidding=${props.isBidding}`;
+  const url = `/line_items?app_id=${props.appId}&ad_type=${props.adType}&is_bidding=${props.isBidding}`;
   const { data, error } = await useAsyncData(url, async () => {
-    const response = await axios.get(url);
-    // TODO: Filters on API doesn't work, so filtering here
-    const result = response.data.filter(
-      (
-        adUnit: any, // eslint-disable-line @typescript-eslint/no-explicit-any
-      ) =>
-        adUnit.adType === props.adType &&
-        adUnit.appId === props.appId &&
-        adUnit.isBidding === props.isBidding,
-    );
+    const result = (await axios.get(url)).data;
     return result.map(
       (
         adUnit: any, // eslint-disable-line @typescript-eslint/no-explicit-any
