@@ -28,7 +28,11 @@
     />
   </template>
   <template v-if="apiKey === 'ironsource'">
-    <VeeFormFieldWrapper field="extra.instaceId" label="Instance Id" required />
+    <VeeFormFieldWrapper
+      field="extra.instanceId"
+      label="Instance Id"
+      required
+    />
   </template>
   <template v-if="apiKey === 'meta'">
     <VeeFormFieldWrapper
@@ -123,7 +127,7 @@ const dataSchemas = {
     placementId: yup.string().required().label("Placement Id"),
   }),
   ironsource: yup.object({
-    instaceId: yup.string().required().label("Instance Id"),
+    instanceId: yup.string().required().label("Instance Id"),
   }),
   meta: yup.object({
     placementId: yup.string().required().label("Placement Id"),
