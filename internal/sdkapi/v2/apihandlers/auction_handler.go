@@ -144,7 +144,7 @@ func (h *AuctionHandler) buildResponse(
 			continue
 		}
 
-		if bidResponse.IsBid() && bidResponse.Price() >= adObject.PriceFloor {
+		if bidResponse.IsBid() && bidResponse.Price() > adObject.PriceFloor {
 			response.AdUnits = append(response.AdUnits, *adUnit)
 		} else {
 			response.NoBids = append(response.NoBids, *adUnit)
