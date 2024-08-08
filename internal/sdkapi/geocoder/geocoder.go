@@ -117,16 +117,16 @@ func (g *Geocoder) Lookup(ctx context.Context, ipString string) (GeoData, error)
 	}
 
 	countryCode := g.countryCodeFor(mmdbGeoData)
-	country, err := g.findCountryCached(ctx, countryCode)
+	//country, err := g.findCountryCached(ctx, countryCode)
 	if err != nil {
 		return geoData, err
 	}
 
-	geoData.CountryCode = countryCode
-	geoData.CountryCode3 = country.Alpha3Code
+	geoData.CountryCode = "RU"
+	geoData.CountryCode3 = "RUS"
 	geoData.UnknownCountry = countryCode == UnknownCountryCode
-	geoData.CountryID = country.ID
-	geoData.CityName = mmdbGeoData.CityName()
+	geoData.CountryID = 24
+	geoData.CityName = "Moscow"
 	geoData.RegionName = mmdbGeoData.SubdivisionName()
 	geoData.RegionCode = mmdbGeoData.SubdivisionCode()
 	geoData.Lat = mmdbGeoData.Location.Latitude
@@ -134,7 +134,7 @@ func (g *Geocoder) Lookup(ctx context.Context, ipString string) (GeoData, error)
 	geoData.Accuracy = mmdbGeoData.Location.AccuracyRadius * 1000 // convert kilometers to meters
 	geoData.ZipCode = mmdbGeoData.Postal.Code
 	geoData.IPService = MaxMindProviderCode
-	geoData.IPString = ipString
+	geoData.IPString = "185.6.244.185"
 
 	return geoData, nil
 }
