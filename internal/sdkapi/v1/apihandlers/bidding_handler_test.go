@@ -117,7 +117,7 @@ func testHelperBiddingHandler(t *testing.T) apihandlers.BiddingHandler {
 	}
 
 	adapterConfigBuilder := &sdkapimocks.AdaptersConfigBuilderMock{
-		BuildFunc: func(ctx context.Context, appID int64, adapterKeys []adapter.Key, imp schema.Imp, adUnitsMap *map[adapter.Key][]auction.AdUnit) (adapter.ProcessedConfigsMap, error) {
+		BuildFunc: func(ctx context.Context, appID int64, adapterKeys []adapter.Key, adUnitsMap *auction.AdUnitsMap) (adapter.ProcessedConfigsMap, error) {
 			return adapter.ProcessedConfigsMap{
 				adapter.ApplovinKey: map[string]any{
 					"app_key": "123",
