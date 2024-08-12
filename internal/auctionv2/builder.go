@@ -39,7 +39,7 @@ type BiddingBuilder interface {
 }
 
 type BiddingAdaptersConfigBuilder interface {
-	Build(ctx context.Context, appID int64, adapterKeys []adapter.Key, imp schema.Imp, adUnitsMap *map[adapter.Key][]auction.AdUnit) (adapter.ProcessedConfigsMap, error)
+	Build(ctx context.Context, appID int64, adapterKeys []adapter.Key, adUnitsMap *auction.AdUnitsMap) (adapter.ProcessedConfigsMap, error)
 }
 
 type BuildParams struct {
@@ -116,11 +116,7 @@ func (b *Builder) Build(ctx context.Context, params *BuildParams) (*AuctionResul
 		return nil, err
 	}
 
-	adUnitsMap := make(map[adapter.Key][]auction.AdUnit)
-	for _, adUnit := range adUnits {
-		key := adapter.Key(adUnit.DemandID)
-		adUnitsMap[key] = append(adUnitsMap[key], adUnit)
-	}
+	adUnitsMap := auction.BuildAdUnitsMap(&adUnits)
 	var cpmAdUnits []auction.AdUnit
 	for _, adUnit := range adUnits {
 		if adUnit.GetPriceFloor() > params.PriceFloor && adUnit.IsCPM() {
@@ -131,9 +127,8 @@ func (b *Builder) Build(ctx context.Context, params *BuildParams) (*AuctionResul
 	// Bidding
 	params.MergedAuctionRequest.AdObject.AuctionConfigurationID = auctionConfig.ID
 	params.MergedAuctionRequest.AdObject.AuctionConfigurationUID = auctionConfig.UID
-	imp := params.MergedAuctionRequest.AdObject.ToImp()
 
-	adapterConfigs, err := b.BiddingAdaptersConfigBuilder.Build(ctx, params.AppID, params.Adapters, imp, &adUnitsMap)
+	adapterConfigs, err := b.BiddingAdaptersConfigBuilder.Build(ctx, params.AppID, params.Adapters, adUnitsMap)
 	if err != nil {
 		return nil, err
 	}

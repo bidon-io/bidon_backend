@@ -73,7 +73,7 @@ func NewAdapters(keys []adapter.Key) adapter.ProcessedConfigsMap {
 	return adapters
 }
 
-func (b *AdaptersConfigBuilder) Build(ctx context.Context, appID int64, adapterKeys []adapter.Key, imp schema.Imp, adUnitsMap *map[adapter.Key][]auction.AdUnit) (adapter.ProcessedConfigsMap, error) {
+func (b *AdaptersConfigBuilder) Build(ctx context.Context, appID int64, adapterKeys []adapter.Key, adUnitsMap *auction.AdUnitsMap) (adapter.ProcessedConfigsMap, error) {
 	profiles, err := b.ConfigurationFetcher.FetchCached(ctx, appID, adapterKeys)
 	if err != nil {
 		return nil, err
@@ -98,41 +98,47 @@ func (b *AdaptersConfigBuilder) Build(ctx context.Context, appID int64, adapterK
 			adapters[key]["app_id"] = appData["app_id"]
 			adapters[key]["seller_id"] = extra["publisher_id"]
 
-			if adUnits, ok := (*adUnitsMap)[key]; ok {
-				adapters[key]["tag_id"] = adUnits[0].Extra["slot_id"]
-				adapters[key]["placement_id"] = adUnits[0].Extra["placement_id"]
+			adUnit, _ := adUnitsMap.First(key, schema.RTBBidType)
+			if adUnit != nil {
+				adapters[key]["tag_id"] = adUnit.Extra["slot_id"]
+				adapters[key]["placement_id"] = adUnit.Extra["placement_id"]
 			}
 		case adapter.MintegralKey:
 			adapters[key]["app_id"] = appData["app_id"]
 			adapters[key]["seller_id"] = extra["publisher_id"]
 
-			if adUnits, ok := (*adUnitsMap)[key]; ok {
-				adapters[key]["tag_id"] = adUnits[0].Extra["unit_id"]
-				adapters[key]["placement_id"] = adUnits[0].Extra["placement_id"]
+			adUnit, _ := adUnitsMap.First(key, schema.RTBBidType)
+			if adUnit != nil {
+				adapters[key]["tag_id"] = adUnit.Extra["unit_id"]
+				adapters[key]["placement_id"] = adUnit.Extra["placement_id"]
 			}
 		case adapter.VKAdsKey:
 			adapters[key]["app_id"] = appData["app_id"]
 
-			if adUnits, ok := (*adUnitsMap)[key]; ok {
-				adapters[key]["tag_id"] = adUnits[0].Extra["slot_id"]
+			adUnit, _ := adUnitsMap.First(key, schema.RTBBidType)
+			if adUnit != nil {
+				adapters[key]["tag_id"] = adUnit.Extra["slot_id"]
 			}
 		case adapter.VungleKey:
 			adapters[key]["app_id"] = appData["app_id"]
 			adapters[key]["seller_id"] = extra["account_id"]
 
-			if adUnits, ok := (*adUnitsMap)[key]; ok {
-				adapters[key]["tag_id"] = adUnits[0].Extra["placement_id"]
+			adUnit, _ := adUnitsMap.First(key, schema.RTBBidType)
+			if adUnit != nil {
+				adapters[key]["tag_id"] = adUnit.Extra["placement_id"]
 			}
 		case adapter.MetaKey:
 			adapters[key]["app_id"] = appData["app_id"]
 			adapters[key]["app_secret"] = appData["app_secret"]
 
-			if adUnits, ok := (*adUnitsMap)[key]; ok {
-				adapters[key]["tag_id"] = adUnits[0].Extra["placement_id"]
+			adUnit, _ := adUnitsMap.First(key, schema.RTBBidType)
+			if adUnit != nil {
+				adapters[key]["tag_id"] = adUnit.Extra["placement_id"]
 			}
 		case adapter.MobileFuseKey:
-			if adUnits, ok := (*adUnitsMap)[key]; ok {
-				adapters[key]["tag_id"] = adUnits[0].Extra["placement_id"]
+			adUnit, _ := adUnitsMap.First(key, schema.RTBBidType)
+			if adUnit != nil {
+				adapters[key]["tag_id"] = adUnit.Extra["placement_id"]
 			}
 		default:
 			adapters[key] = extra
