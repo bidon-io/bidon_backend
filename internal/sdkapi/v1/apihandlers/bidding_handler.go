@@ -35,7 +35,7 @@ type BiddingBuilder interface {
 }
 
 type AdaptersConfigBuilder interface {
-	Build(ctx context.Context, appID int64, adapterKeys []adapter.Key, imp schema.Imp, adUnitsMap *map[adapter.Key][]auction.AdUnit) (adapter.ProcessedConfigsMap, error)
+	Build(ctx context.Context, appID int64, adapterKeys []adapter.Key, adUnitsMap *auction.AdUnitsMap) (adapter.ProcessedConfigsMap, error)
 }
 
 type AdUnitsMatcher interface {
@@ -126,13 +126,8 @@ func (h *BiddingHandler) Handle(c echo.Context) error {
 		return err
 	}
 
-	adUnitsMap := make(map[adapter.Key][]auction.AdUnit)
-	for _, adUnit := range adUnits {
-		key := adapter.Key(adUnit.DemandID)
-		adUnitsMap[key] = append(adUnitsMap[key], adUnit)
-	}
-
-	adapterConfigs, err := h.AdaptersConfigBuilder.Build(ctx, req.app.ID, req.raw.Adapters.Keys(), imp, &adUnitsMap)
+	adUnitsMap := auction.BuildAdUnitsMap(&adUnits)
+	adapterConfigs, err := h.AdaptersConfigBuilder.Build(ctx, req.app.ID, req.raw.Adapters.Keys(), adUnitsMap)
 	if err != nil {
 		return err
 	}
@@ -156,7 +151,7 @@ func (h *BiddingHandler) Handle(c echo.Context) error {
 		return err
 	}
 
-	events := prepareBiddingEvents(req, &auctionResult, &adUnitsMap)
+	events := prepareBiddingEvents(req, &auctionResult, adUnitsMap)
 	for _, ev := range events {
 		h.EventLogger.Log(ev, func(err error) {
 			sdkapi.LogError(c, fmt.Errorf("log %v event: %v", ev.EventType, err))
@@ -171,7 +166,7 @@ func (h *BiddingHandler) Handle(c echo.Context) error {
 	return c.JSON(http.StatusOK, response)
 }
 
-func (h *BiddingHandler) buildResponse(auctionResult bidding.AuctionResult, imp schema.Imp, adUnitsMap map[adapter.Key][]auction.AdUnit, sdkVersion *semver.Version) (BiddingResponse, error) {
+func (h *BiddingHandler) buildResponse(auctionResult bidding.AuctionResult, imp schema.Imp, adUnitsMap *auction.AdUnitsMap, sdkVersion *semver.Version) (BiddingResponse, error) {
 	response := BiddingResponse{
 		Status: "NO_BID",
 	}
@@ -181,7 +176,7 @@ func (h *BiddingHandler) buildResponse(auctionResult bidding.AuctionResult, imp 
 			var bid *Bid
 
 			if sdkapi.Version05GTEConstraint.Check(sdkVersion) {
-				bid = buildBid(result, &adUnitsMap)
+				bid = buildBid(result, adUnitsMap)
 			} else {
 				bid = h.buildBidDeprecated(result)
 			}
@@ -202,7 +197,7 @@ func (h *BiddingHandler) buildResponse(auctionResult bidding.AuctionResult, imp 
 	return response, nil
 }
 
-func buildBid(demandResponse adapters.DemandResponse, adUnitsMap *map[adapter.Key][]auction.AdUnit) *Bid {
+func buildBid(demandResponse adapters.DemandResponse, adUnitsMap *auction.AdUnitsMap) *Bid {
 	storeAdUnit, err := selectAdUnit(demandResponse, adUnitsMap)
 	if err != nil {
 		return nil
@@ -244,7 +239,7 @@ func (h *BiddingHandler) buildBidDeprecated(demandResponse adapters.DemandRespon
 func prepareBiddingEvents(
 	req *request[schema.BiddingRequest, *schema.BiddingRequest],
 	auctionResult *bidding.AuctionResult,
-	adUnitsMap *map[adapter.Key][]auction.AdUnit,
+	adUnitsMap *auction.AdUnitsMap,
 ) []*event.AdEvent {
 	imp := req.raw.Imp
 	auctionConfigurationUID, err := strconv.Atoi(imp.AuctionConfigurationUID)
@@ -317,10 +312,10 @@ func prepareBiddingEvents(
 	return events
 }
 
-func selectAdUnit(demandResponse adapters.DemandResponse, adUnitsMap *map[adapter.Key][]auction.AdUnit) (*auction.AdUnit, error) {
-	adUnits, ok := (*adUnitsMap)[demandResponse.DemandID]
-	if !ok {
-		return nil, fmt.Errorf("ad units not found for demand %s", demandResponse.DemandID)
+func selectAdUnit(demandResponse adapters.DemandResponse, adUnitsMap *auction.AdUnitsMap) (*auction.AdUnit, error) {
+	adUnits, err := adUnitsMap.All(demandResponse.DemandID, schema.RTBBidType)
+	if err != nil {
+		return nil, err
 	}
 
 	if demandResponse.DemandID == adapter.AmazonKey {

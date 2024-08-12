@@ -36,7 +36,7 @@ type BiddingBuilder interface {
 }
 
 type AdaptersConfigBuilder interface {
-	Build(ctx context.Context, appID int64, adapterKeys []adapter.Key, imp schema.Imp, adUnitsMap *map[adapter.Key][]auction.AdUnit) (adapter.ProcessedConfigsMap, error)
+	Build(ctx context.Context, appID int64, adapterKeys []adapter.Key, adUnitsMap *auction.AdUnitsMap) (adapter.ProcessedConfigsMap, error)
 }
 
 type AdUnitsMatcher interface {
@@ -102,15 +102,11 @@ func (h *AuctionHandler) Handle(c echo.Context) error {
 	}
 	c.Logger().Printf("[AUCTION V2] auction: (%+v), err: (%s), took (%ms)", auctionResult, err, auctionResult.Stat.DurationTS)
 
-	adUnitsMap := make(map[adapter.Key][]auction.AdUnit)
-	for _, adUnit := range *auctionResult.AdUnits {
-		key := adapter.Key(adUnit.DemandID)
-		adUnitsMap[key] = append(adUnitsMap[key], adUnit)
-	}
+	adUnitsMap := auction.BuildAdUnitsMap(auctionResult.AdUnits)
 
-	h.logEvents(c, req, auctionResult, &adUnitsMap)
+	h.logEvents(c, req, auctionResult, adUnitsMap)
 
-	response, err := h.buildResponse(req, auctionResult, &adUnitsMap)
+	response, err := h.buildResponse(req, auctionResult, adUnitsMap)
 	if err != nil {
 		return err
 	}
@@ -121,7 +117,7 @@ func (h *AuctionHandler) Handle(c echo.Context) error {
 func (h *AuctionHandler) buildResponse(
 	req *request[schema.AuctionV2Request, *schema.AuctionV2Request],
 	auctionResult *auctionv2.AuctionResult,
-	adUnitsMap *map[adapter.Key][]auction.AdUnit,
+	adUnitsMap *auction.AdUnitsMap,
 ) (*AuctionResponse, error) {
 	adObject := req.raw.AdObject
 	response := AuctionResponse{
@@ -163,7 +159,7 @@ func (h *AuctionHandler) logEvents(
 	c echo.Context,
 	req *request[schema.AuctionV2Request, *schema.AuctionV2Request],
 	auctionResult *auctionv2.AuctionResult,
-	adUnitsMap *map[adapter.Key][]auction.AdUnit,
+	adUnitsMap *auction.AdUnitsMap,
 ) {
 	auctionRequest := &request[schema.AuctionRequest, *schema.AuctionRequest]{
 		raw:           req.raw.ToAuctionRequest(),
@@ -197,7 +193,7 @@ func (h *AuctionHandler) logEvents(
 	}
 }
 
-func convertBidToAdUnit(demandResponse adapters.DemandResponse, adUnitsMap *map[adapter.Key][]auction.AdUnit) *auction.AdUnit {
+func convertBidToAdUnit(demandResponse adapters.DemandResponse, adUnitsMap *auction.AdUnitsMap) *auction.AdUnit {
 	storeAdUnit, err := selectAdUnit(demandResponse, adUnitsMap)
 	if err != nil {
 		return nil
@@ -248,7 +244,7 @@ func prepareAuctionRequestEvent(req *request[schema.AuctionRequest, *schema.Auct
 func prepareBiddingEvents(
 	req *request[schema.BiddingRequest, *schema.BiddingRequest],
 	auctionResult *bidding.AuctionResult,
-	adUnitsMap *map[adapter.Key][]auction.AdUnit,
+	adUnitsMap *auction.AdUnitsMap,
 ) []*event.AdEvent {
 	imp := req.raw.Imp
 	auctionConfigurationUID, err := strconv.Atoi(imp.AuctionConfigurationUID)
@@ -318,10 +314,10 @@ func prepareBiddingEvents(
 	return events
 }
 
-func selectAdUnit(demandResponse adapters.DemandResponse, adUnitsMap *map[adapter.Key][]auction.AdUnit) (*auction.AdUnit, error) {
-	adUnits, ok := (*adUnitsMap)[demandResponse.DemandID]
-	if !ok {
-		return nil, fmt.Errorf("ad units not found for demand %s", demandResponse.DemandID)
+func selectAdUnit(demandResponse adapters.DemandResponse, adUnitsMap *auction.AdUnitsMap) (*auction.AdUnit, error) {
+	adUnits, err := adUnitsMap.All(demandResponse.DemandID, schema.RTBBidType)
+	if err != nil {
+		return nil, err
 	}
 
 	if demandResponse.DemandID == adapter.AmazonKey {
