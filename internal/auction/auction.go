@@ -1,6 +1,7 @@
 package auction
 
 import (
+	"errors"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 )
@@ -62,6 +63,48 @@ func (a *AdUnit) GetPriceFloor() float64 {
 
 func (a *AdUnit) IsCPM() bool {
 	return a.BidType == schema.CPMBidType
+}
+
+func (a *AdUnit) IsRTB() bool {
+	return a.BidType == schema.RTBBidType
+}
+
+var ErrNoAdUnitsFound = errors.New("no ad units found")
+
+type AdUnitsMap map[adapter.Key][]AdUnit
+
+func (m *AdUnitsMap) First(key adapter.Key, bidType schema.BidType) (*AdUnit, error) {
+	if adUnits, ok := (*m)[key]; ok {
+		for _, adUnit := range adUnits {
+			if adUnit.BidType == bidType {
+				return &adUnit, nil
+			}
+		}
+	}
+	return nil, ErrNoAdUnitsFound
+}
+
+func (m *AdUnitsMap) All(key adapter.Key, bidType schema.BidType) ([]AdUnit, error) {
+	if adUnits, ok := (*m)[key]; ok {
+		var result []AdUnit
+		for _, adUnit := range adUnits {
+			if adUnit.BidType == bidType {
+				result = append(result, adUnit)
+			}
+		}
+		return result, nil
+	}
+	return nil, ErrNoAdUnitsFound
+}
+
+func BuildAdUnitsMap(adUnits *[]AdUnit) *AdUnitsMap {
+	m := make(AdUnitsMap)
+	for _, adUnit := range *adUnits {
+		key := adapter.Key(adUnit.DemandID)
+		m[key] = append(m[key], adUnit)
+	}
+
+	return &m
 }
 
 type Segment struct {
