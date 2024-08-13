@@ -8,6 +8,7 @@
       class="w-full md:w-14rem"
       :disabled="disabled"
       placeholder="Select Demand source account"
+      filter
     />
   </FormField>
 </template>

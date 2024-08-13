@@ -12,6 +12,7 @@
       option-value="id"
       class="w-full md:w-14rem"
       placeholder="Select Demand source"
+      filter
     />
   </FormField>
 </template>
