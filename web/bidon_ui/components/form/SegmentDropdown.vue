@@ -7,6 +7,7 @@
       option-value="id"
       class="w-full md:w-14rem"
       placeholder="None"
+      filter
     />
   </FormField>
 </template>
