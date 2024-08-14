@@ -110,6 +110,36 @@ func (csv admobLineItemCSV) buildLineItemAttrs(account *DemandSourceAccount, att
 	return lineItemAttrs, nil
 }
 
+type applovinLineItemCSV struct {
+	AdFormat string          `csv:"ad_format"`
+	BidFloor decimal.Decimal `csv:"bid_floor"`
+	ZoneID   string          `csv:"zone_id"`
+}
+
+func (csv applovinLineItemCSV) buildLineItemAttrs(account *DemandSourceAccount, attrs LineItemImportCSVAttrs) (LineItemAttrs, error) {
+	adType, format := parseCSVAdFormat(csv.AdFormat)
+	if adType == ad.UnknownType {
+		return LineItemAttrs{}, fmt.Errorf("unknown ad format %q", csv.AdFormat)
+	}
+
+	lineItemAttrs := LineItemAttrs{
+		HumanName:   strings.ToLower(fmt.Sprintf("%v_%v_%v", account.DemandSource.ApiKey, csv.AdFormat, csv.BidFloor)),
+		AppID:       attrs.AppID,
+		BidFloor:    &csv.BidFloor,
+		AdType:      adType,
+		Format:      format,
+		AccountID:   account.ID,
+		AccountType: account.Type,
+		IsBidding:   &attrs.IsBidding,
+		Extra: map[string]any{
+			"zone_id": csv.ZoneID,
+		},
+	}
+
+	return lineItemAttrs, nil
+
+}
+
 type dtExchangeLineItemCSV struct {
 	AdFormat string          `csv:"ad_format"`
 	BidFloor decimal.Decimal `csv:"bid_floor"`
@@ -328,6 +358,17 @@ func (s *LineItemService) ImportCSV(ctx context.Context, _ AuthContext, reader i
 		csvLineItems = make([]LineItemCSV, len(admobLineItems))
 		for i, admobLineItem := range admobLineItems {
 			csvLineItems[i] = admobLineItem
+		}
+	case adapter.ApplovinKey:
+		var applovinLineItems []applovinLineItemCSV
+		err = csvutil.Unmarshal(csvInput, &applovinLineItems)
+		if err != nil {
+			return fmt.Errorf("unmarshal csv: %v", err)
+		}
+
+		csvLineItems = make([]LineItemCSV, len(applovinLineItems))
+		for i, applovinLineItem := range applovinLineItems {
+			csvLineItems[i] = applovinLineItem
 		}
 	case adapter.DTExchangeKey:
 		var dtExchangeLineItems []dtExchangeLineItemCSV
