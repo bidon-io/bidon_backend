@@ -87,6 +87,24 @@ func Test_lineItemAttrsValidator_ValidateWithContext(t *testing.T) {
 			false,
 		},
 		{
+			"valid Chartboost",
+			&LineItemAttrs{
+				AccountID: 1,
+				Extra: map[string]any{
+					"ad_location": "123",
+					"mediation":   "appodeal",
+				},
+			},
+			&DemandSourceAccount{
+				DemandSource: DemandSource{
+					DemandSourceAttrs: DemandSourceAttrs{
+						ApiKey: string(adapter.ChartboostKey),
+					},
+				},
+			},
+			false,
+		},
+		{
 			"valid DT Exchange",
 			&LineItemAttrs{
 				AccountID: 1,

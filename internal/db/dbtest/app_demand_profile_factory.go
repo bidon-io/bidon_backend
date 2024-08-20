@@ -75,6 +75,8 @@ func ValidAppDemandProfileData(t *testing.T, key adapter.Key, appID int64) []byt
 		return []byte(`{"foo": "bar"}`)
 	case adapter.BigoAdsKey:
 		return []byte(fmt.Sprintf(`{"app_id": "bigoads_app_%d", "foo": "bar"}`, appID))
+	case adapter.ChartboostKey:
+		return []byte(fmt.Sprintf(`{"app_id": "chartboost_app_%d", "app_signature": "123"}`, appID))
 	case adapter.DTExchangeKey:
 		return []byte(fmt.Sprintf(`{"app_id": "dtexchange_app_%d", "foo": "bar"}`, appID))
 	case adapter.GAMKey:

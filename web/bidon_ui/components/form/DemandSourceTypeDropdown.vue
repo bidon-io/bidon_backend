@@ -54,6 +54,7 @@ const options = ref([
   { label: "Applovin", value: "DemandSourceAccount::Applovin" },
   { label: "Bidmachine", value: "DemandSourceAccount::BidMachine" },
   { label: "BigoAds", value: "DemandSourceAccount::BigoAds" },
+  { label: "Chartboost", value: "DemandSourceAccount::Chartboost" },
   { label: "DTExchange", value: "DemandSourceAccount::DtExchange" },
   { label: "Google Ad Manager", value: "DemandSourceAccount::GAM" },
   { label: "Inmobi", value: "DemandSourceAccount::Inmobi" },

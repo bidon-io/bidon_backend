@@ -101,6 +101,11 @@ func ValidLineItemExtra(t *testing.T, key adapter.Key) map[string]any {
 		return map[string]any{
 			"slot_id": "bigo_ads_line_item_slot_id",
 		}
+	case adapter.ChartboostKey:
+		return map[string]any{
+			"ad_location": "chartboost_line_item_ad_location",
+			"mediation":   "appodeal",
+		}
 	case adapter.DTExchangeKey:
 		return map[string]any{
 			"spot_id": "dt_exchange_line_item_spot_id",

@@ -14,6 +14,14 @@
   <template v-if="apiKey === 'bigoads'">
     <VeeFormFieldWrapper field="extra.slotId" label="Slot Id" required />
   </template>
+  <template v-if="apiKey === 'chartboost'">
+    <VeeFormFieldWrapper
+      field="extra.adLocation"
+      label="Ad Location"
+      required
+    />
+    <VeeFormFieldWrapper field="extra.mediation" label="Mediation" />
+  </template>
   <template v-if="apiKey === 'dtexchange'">
     <VeeFormFieldWrapper field="extra.spotId" label="Spot Id" required />
   </template>
@@ -116,6 +124,10 @@ const dataSchemas = {
   bidmachine: yup.object({}),
   bigoads: yup.object({
     slotId: yup.string().required().label("Slot Id"),
+  }),
+  chartboost: yup.object({
+    adLocation: yup.string().required().label("AdLocation"),
+    mediation: yup.string().label("Mediation"),
   }),
   dtexchange: yup.object({
     spotId: yup.string().required().label("Spot Id"),
