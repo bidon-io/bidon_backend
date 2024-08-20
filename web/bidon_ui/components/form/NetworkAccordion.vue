@@ -150,6 +150,14 @@ const networks = ref<Network[]>([
     selectedAdUnitIds: [],
   },
   {
+    label: "Mintegral",
+    key: "mintegral",
+    isBidding: false,
+    enabled: false,
+    adUnits: [],
+    selectedAdUnitIds: [],
+  },
+  {
     label: "UnityAds",
     key: "unityads",
     isBidding: false,
