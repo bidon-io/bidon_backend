@@ -140,6 +140,37 @@ func (csv applovinLineItemCSV) buildLineItemAttrs(account *DemandSourceAccount, 
 
 }
 
+type chartboostLineItemCSV struct {
+	AdFormat   string          `csv:"ad_format"`
+	BidFloor   decimal.Decimal `csv:"bid_floor"`
+	AdLocation string          `csv:"ad_location"`
+	Mediation  string          `csv:"mediation"`
+}
+
+func (csv chartboostLineItemCSV) buildLineItemAttrs(account *DemandSourceAccount, attrs LineItemImportCSVAttrs) (LineItemAttrs, error) {
+	adType, format := parseCSVAdFormat(csv.AdFormat)
+	if adType == ad.UnknownType {
+		return LineItemAttrs{}, fmt.Errorf("unknown ad format %q", csv.AdFormat)
+	}
+
+	lineItemAttrs := LineItemAttrs{
+		HumanName:   strings.ToLower(fmt.Sprintf("%v_%v_%v", account.DemandSource.ApiKey, csv.AdFormat, csv.BidFloor)),
+		AppID:       attrs.AppID,
+		BidFloor:    &csv.BidFloor,
+		AdType:      adType,
+		Format:      format,
+		AccountID:   account.ID,
+		AccountType: account.Type,
+		IsBidding:   &attrs.IsBidding,
+		Extra: map[string]any{
+			"ad_location": csv.AdLocation,
+			"mediation":   csv.Mediation,
+		},
+	}
+
+	return lineItemAttrs, nil
+}
+
 type dtExchangeLineItemCSV struct {
 	AdFormat string          `csv:"ad_format"`
 	BidFloor decimal.Decimal `csv:"bid_floor"`
@@ -370,6 +401,17 @@ func (s *LineItemService) ImportCSV(ctx context.Context, _ AuthContext, reader i
 		for i, applovinLineItem := range applovinLineItems {
 			csvLineItems[i] = applovinLineItem
 		}
+	case adapter.ChartboostKey:
+		var chartboostLineItems []chartboostLineItemCSV
+		err = csvutil.Unmarshal(csvInput, &chartboostLineItems)
+		if err != nil {
+			return fmt.Errorf("unmarshal csv: %v", err)
+		}
+
+		csvLineItems = make([]LineItemCSV, len(chartboostLineItems))
+		for i, chartboostLineItem := range chartboostLineItems {
+			csvLineItems[i] = chartboostLineItem
+		}
 	case adapter.DTExchangeKey:
 		var dtExchangeLineItems []dtExchangeLineItemCSV
 		err = csvutil.Unmarshal(csvInput, &dtExchangeLineItems)
@@ -588,6 +630,11 @@ func (v *lineItemAttrsValidator) extraRule(account *DemandSourceAccount) v8n.Rul
 	case adapter.BigoAdsKey:
 		rule = v8n.Map(
 			v8n.Key("slot_id", v8n.Required, isString),
+		)
+	case adapter.ChartboostKey:
+		rule = v8n.Map(
+			v8n.Key("ad_location", v8n.Required, isString),
+			v8n.Key("mediation", v8n.NilOrNotEmpty, isString).Optional(),
 		)
 	case adapter.MetaKey, adapter.UnityAdsKey, adapter.VungleKey, adapter.MobileFuseKey:
 		rule = v8n.Map(
