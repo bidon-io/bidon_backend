@@ -9,6 +9,14 @@
     <VeeFormFieldWrapper field="data.appId" label="App Id" required />
     <VeeFormFieldWrapper field="data.appChannel" label="App Channel" />
   </template>
+  <template v-if="accountType == 'DemandSourceAccount::Chartboost'">
+    <VeeFormFieldWrapper field="data.appId" label="App Id" required />
+    <VeeFormFieldWrapper
+      field="data.appSignature"
+      label="App Signature"
+      required
+    />
+  </template>
   <template v-if="accountType == 'DemandSourceAccount::GAM'">
     <VeeFormFieldWrapper field="data.appId" label="App Id" required />
   </template>
@@ -70,6 +78,10 @@ const dataSchemas = {
   "DemandSourceAccount::BigoAds": yup.object({
     appId: yup.number().required().label("App Id"),
     apphannel: yup.string().label("App Channel"),
+  }),
+  "DemandSourceAccount::Chartboost": yup.object({
+    appId: yup.string().required().label("App Id"),
+    appSignature: yup.string().required().label("App Signature"),
   }),
   "DemandSourceAccount::GAM": yup.object({
     appId: yup.string().required().label("App Id"),

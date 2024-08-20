@@ -21,6 +21,8 @@ func NewAdapterInitConfig(key adapter.Key, setOrder bool) (AdapterInitConfig, er
 		config = new(BidmachineInitConfig)
 	case adapter.BigoAdsKey:
 		config = new(BigoAdsInitConfig)
+	case adapter.ChartboostKey:
+		config = new(ChartboostInitConfig)
 	case adapter.DTExchangeKey:
 		config = new(DTExchangeInitConfig)
 	case adapter.GAMKey:
@@ -110,6 +112,20 @@ func (a *BigoAdsInitConfig) Key() adapter.Key {
 
 func (a *BigoAdsInitConfig) SetDefaultOrder() {
 	a.Order = 0
+}
+
+type ChartboostInitConfig struct {
+	AppID        string `json:"app_id,omitempty"`
+	AppSignature string `json:"app_signature,omitempty"`
+	Order        int    `json:"order"`
+}
+
+func (a *ChartboostInitConfig) Key() adapter.Key {
+	return adapter.ChartboostKey
+}
+
+func (a *ChartboostInitConfig) SetDefaultOrder() {
+	a.Order = 2
 }
 
 type DTExchangeInitConfig struct {

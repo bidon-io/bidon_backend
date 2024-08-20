@@ -19,6 +19,7 @@ const (
 	ApplovinKey   Key = "applovin"
 	BidmachineKey Key = "bidmachine"
 	BigoAdsKey    Key = "bigoads"
+	ChartboostKey Key = "chartboost"
 	DTExchangeKey Key = "dtexchange"
 	GAMKey        Key = "gam"
 	InmobiKey     Key = "inmobi"
@@ -38,6 +39,7 @@ var Keys = []Key{
 	ApplovinKey,
 	BidmachineKey,
 	BigoAdsKey,
+	ChartboostKey,
 	DTExchangeKey,
 	GAMKey,
 	InmobiKey,
