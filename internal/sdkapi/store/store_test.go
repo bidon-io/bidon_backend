@@ -193,6 +193,10 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Valid(t *testing.T) {
 			setAmazonSlots: true,
 			setOrder:       false,
 			want: []sdkapi.AdapterInitConfig{
+				&sdkapi.ChartboostInitConfig{
+					AppID:        fmt.Sprintf("chartboost_app_%d", apps[1].ID),
+					AppSignature: "123",
+				},
 				&sdkapi.InmobiInitConfig{
 					AccountID: "inmobi",
 					AppKey:    fmt.Sprintf("inmobi_app_%d", apps[1].ID),
@@ -231,6 +235,11 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Valid(t *testing.T) {
 			setAmazonSlots: true,
 			setOrder:       true,
 			want: []sdkapi.AdapterInitConfig{
+				&sdkapi.ChartboostInitConfig{
+					AppID:        fmt.Sprintf("chartboost_app_%d", apps[1].ID),
+					AppSignature: "123",
+					Order:        2,
+				},
 				&sdkapi.InmobiInitConfig{
 					AccountID: "inmobi",
 					AppKey:    fmt.Sprintf("inmobi_app_%d", apps[1].ID),

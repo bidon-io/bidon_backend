@@ -47,6 +47,22 @@ func Test_appDemandProfileAttrsValidator_ValidateWithContext(t *testing.T) {
 			false,
 		},
 		{
+			"valid Chartboost",
+			&AppDemandProfileAttrs{
+				DemandSourceID: 1,
+				Data: map[string]any{
+					"app_id":        "123",
+					"app_signature": "5f4b3f3f5e0d0f0001f3f5e1",
+				},
+			},
+			&DemandSource{
+				DemandSourceAttrs: DemandSourceAttrs{
+					ApiKey: string(adapter.ChartboostKey),
+				},
+			},
+			false,
+		},
+		{
 			"valid DT Exchange",
 			&AppDemandProfileAttrs{
 				DemandSourceID: 1,

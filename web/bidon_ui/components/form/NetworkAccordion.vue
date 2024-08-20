@@ -126,6 +126,14 @@ const networks = ref<Network[]>([
     selectedAdUnitIds: [],
   },
   {
+    label: "Chartboost",
+    key: "chartboost",
+    isBidding: false,
+    enabled: false,
+    adUnits: [],
+    selectedAdUnitIds: [],
+  },
+  {
     label: "DtExchange",
     key: "dtexchange",
     isBidding: false,
