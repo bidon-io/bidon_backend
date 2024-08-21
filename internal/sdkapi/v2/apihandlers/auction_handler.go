@@ -326,7 +326,7 @@ func selectAdUnit(demandResponse adapters.DemandResponse, adUnitsMap *auction.Ad
 				return &adUnit, nil
 			}
 		}
-	} else {
+	} else if len(adUnits) > 0 {
 		adUnit := adUnits[0]
 		return &adUnit, nil
 	}
