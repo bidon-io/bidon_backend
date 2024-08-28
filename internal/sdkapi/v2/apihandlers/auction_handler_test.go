@@ -52,6 +52,7 @@ func testHelperAuctionV2Handler(t *testing.T) *apihandlers.AuctionHandler {
 			PriceFloor: &pf,
 			UID:        "123_amazon",
 			BidType:    schema.RTBBidType,
+			Timeout:    5000,
 			Extra: map[string]any{
 				"slot_uuid": "uuid1",
 			},
@@ -62,6 +63,7 @@ func testHelperAuctionV2Handler(t *testing.T) *apihandlers.AuctionHandler {
 			PriceFloor: &pf,
 			UID:        "123_meta",
 			BidType:    schema.RTBBidType,
+			Timeout:    5000,
 			Extra: map[string]any{
 				"placement_id": "123",
 			},
@@ -72,6 +74,7 @@ func testHelperAuctionV2Handler(t *testing.T) *apihandlers.AuctionHandler {
 			PriceFloor: &pf,
 			UID:        "123_mobilefuse",
 			BidType:    schema.RTBBidType,
+			Timeout:    5000,
 			Extra: map[string]any{
 				"placement_id": "123",
 			},
@@ -81,6 +84,7 @@ func testHelperAuctionV2Handler(t *testing.T) *apihandlers.AuctionHandler {
 			Label:    "vungle",
 			UID:      "123_vungle",
 			BidType:  schema.RTBBidType,
+			Timeout:  5000,
 			Extra: map[string]any{
 				"placement_id": "123",
 			},
@@ -91,6 +95,7 @@ func testHelperAuctionV2Handler(t *testing.T) *apihandlers.AuctionHandler {
 			PriceFloor: &gamPf,
 			UID:        "123_gam",
 			BidType:    schema.CPMBidType,
+			Timeout:    5000,
 			Extra: map[string]any{
 				"placement_id": "123",
 			},
