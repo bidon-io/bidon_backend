@@ -202,6 +202,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 					PriceFloor: ptr(0.1),
 					Label:      "applovin-banner-banner",
 					BidType:    schema.CPMBidType,
+					Timeout:    5000,
 					Extra: map[string]any{
 						"placement_id": "applovin-banner-banner",
 					},
@@ -212,6 +213,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 					PriceFloor: ptr(0.2),
 					Label:      "applovin-banner-adaptive",
 					BidType:    schema.CPMBidType,
+					Timeout:    5000,
 					Extra: map[string]any{
 						"placement_id": "applovin-banner-adaptive",
 					},
@@ -233,6 +235,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 					PriceFloor: ptr(0.2),
 					Label:      "applovin-banner-adaptive",
 					BidType:    schema.CPMBidType,
+					Timeout:    5000,
 					Extra: map[string]any{
 						"placement_id": "applovin-banner-adaptive",
 					},
@@ -243,6 +246,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 					PriceFloor: ptr(0.3),
 					Label:      "applovin-banner-leaderboard",
 					BidType:    schema.CPMBidType,
+					Timeout:    5000,
 					Extra: map[string]any{
 						"placement_id": "applovin-banner-leaderboard",
 					},
@@ -264,6 +268,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 					PriceFloor: ptr(0.2),
 					Label:      "applovin-banner-adaptive",
 					BidType:    schema.CPMBidType,
+					Timeout:    5000,
 					Extra: map[string]any{
 						"placement_id": "applovin-banner-adaptive",
 					},
@@ -285,6 +290,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 					PriceFloor: ptr(0.1),
 					Label:      "applovin-banner-banner",
 					BidType:    schema.CPMBidType,
+					Timeout:    5000,
 					Extra: map[string]any{
 						"placement_id": "applovin-banner-banner",
 					},
@@ -295,6 +301,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 					PriceFloor: ptr(0.2),
 					Label:      "applovin-banner-adaptive",
 					BidType:    schema.CPMBidType,
+					Timeout:    5000,
 					Extra: map[string]any{
 						"placement_id": "applovin-banner-adaptive",
 					},
@@ -316,6 +323,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 					PriceFloor: ptr(0.3),
 					Label:      "applovin-banner-leaderboard",
 					BidType:    schema.CPMBidType,
+					Timeout:    5000,
 					Extra: map[string]any{
 						"placement_id": "applovin-banner-leaderboard",
 					},
@@ -326,6 +334,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 					PriceFloor: ptr(0.2),
 					Label:      "applovin-banner-adaptive",
 					BidType:    schema.CPMBidType,
+					Timeout:    5000,
 					Extra: map[string]any{
 						"placement_id": "applovin-banner-adaptive",
 					},
@@ -348,6 +357,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 					PriceFloor: ptr(0.3),
 					Label:      "applovin-interstitial",
 					BidType:    schema.CPMBidType,
+					Timeout:    5000,
 					Extra: map[string]any{
 						"placement_id": "applovin-interstitial",
 					},
@@ -358,6 +368,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 					PriceFloor: nil,
 					Label:      "bidmachine-interstitial",
 					BidType:    schema.RTBBidType,
+					Timeout:    5000,
 					Extra:      map[string]any{},
 				},
 			},
@@ -377,6 +388,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 					PriceFloor: ptr(0.4),
 					Label:      "app2-applovin-banner-mrec",
 					BidType:    schema.CPMBidType,
+					Timeout:    5000,
 					Extra: map[string]any{
 						"placement_id": "app2-applovin-banner-mrec",
 					},
@@ -399,6 +411,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 					PriceFloor: ptr(0.2),
 					Label:      "applovin-banner-adaptive",
 					BidType:    schema.CPMBidType,
+					Timeout:    5000,
 					Extra: map[string]any{
 						"placement_id": "applovin-banner-adaptive",
 					},
@@ -422,6 +435,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 					PriceFloor: ptr(0.3),
 					Label:      "applovin-interstitial",
 					BidType:    schema.CPMBidType,
+					Timeout:    5000,
 					Extra: map[string]any{
 						"placement_id": "applovin-interstitial",
 					},
@@ -445,6 +459,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 					PriceFloor: ptr(0.3),
 					Label:      "applovin-interstitial",
 					BidType:    schema.CPMBidType,
+					Timeout:    5000,
 					Extra: map[string]any{
 						"placement_id": "applovin-interstitial",
 					},
@@ -455,6 +470,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 					PriceFloor: nil,
 					Label:      "bidmachine-interstitial",
 					BidType:    schema.RTBBidType,
+					Timeout:    5000,
 					Extra:      map[string]any{},
 				},
 			},
