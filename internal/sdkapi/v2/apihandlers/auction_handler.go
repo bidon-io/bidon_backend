@@ -218,6 +218,7 @@ func convertBidToAdUnit(demandResponse adapters.DemandResponse, adUnitsMap *auct
 		Label:      storeAdUnit.Label,
 		BidType:    schema.RTBBidType,
 		PriceFloor: &priceFloor,
+		Timeout:    storeAdUnit.Timeout,
 		Extra:      ext,
 	}
 }
