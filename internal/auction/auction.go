@@ -51,6 +51,7 @@ type AdUnit struct {
 	Label      string         `json:"label"`
 	PriceFloor *float64       `json:"pricefloor,omitempty"`
 	BidType    schema.BidType `json:"bid_type"`
+	Timeout    int32          `json:"timeout"`
 	Extra      map[string]any `json:"ext"`
 }
 

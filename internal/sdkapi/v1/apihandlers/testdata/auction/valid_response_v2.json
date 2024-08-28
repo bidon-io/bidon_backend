@@ -45,6 +45,7 @@
       "pricefloor": 0.1,
       "label": "test",
       "bid_type": "RTB",
+      "timeout": 0,
       "ext": {
         "placement_id": "test_id"
       }
