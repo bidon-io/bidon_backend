@@ -1,0 +1,40 @@
+{
+  "$id": "geo.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Geo",
+  "type": "object",
+  "properties": {
+    "lat": {
+      "type": "number",
+      "description": "Latitude of the location"
+    },
+    "lon": {
+      "type": "number",
+      "description": "Longitude of the location"
+    },
+    "accuracy": {
+      "type": "number",
+      "description": "Accuracy of the location data"
+    },
+    "lastfix": {
+      "type": "integer",
+      "description": "Timestamp of the last location fix in seconds since epoch"
+    },
+    "country": {
+      "type": "string",
+      "description": "Country code or name"
+    },
+    "city": {
+      "type": "string",
+      "description": "City name"
+    },
+    "zip": {
+      "type": "string",
+      "description": "ZIP or postal code"
+    },
+    "utcoffset": {
+      "type": "integer",
+      "description": "UTC offset in minutes"
+    }
+  }
+}

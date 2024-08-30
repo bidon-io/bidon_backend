@@ -212,7 +212,7 @@ func main() {
 		AdapterInitConfigsFetcher: adapterInitConfigsFetcher,
 		ConfigurationFetcher:      configurationFetcher,
 	}
-	routerV2.RegisterRoutes(v2Group)
+	routerV2.RegisterRoutes(e, v2Group)
 
 	e.Use(echoprometheus.NewMiddleware("sdkapi"))  // adds middleware to gather metrics
 	e.GET("/metrics", echoprometheus.NewHandler()) // adds route to serve gathered metrics
