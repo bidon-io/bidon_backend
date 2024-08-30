@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ad-unit.schema.json",
+  "title": "AdUnit",
+  "type": "object",
+  "properties": {
+    "demand_id": {
+      "type": "string",
+      "description": "Identifier for the demand source"
+    },
+    "uid": {
+      "type": "string",
+      "description": "Unique identifier for the ad unit"
+    },
+    "label": {
+      "type": "string",
+      "description": "Label for the ad unit"
+    },
+    "pricefloor": {
+      "type": "number",
+      "description": "Optional price floor for the ad unit",
+      "minimum": 0
+    },
+    "bid_type": {
+      "type": "string",
+      "description": "Type of bid associated with the ad unit"
+    },
+    "ext": {
+      "type": "object",
+      "description": "Additional properties for the ad unit",
+      "additionalProperties": true
+    }
+  },
+  "required": [
+    "demand_id",
+    "uid",
+    "label",
+    "bid_type"
+  ],
+  "additionalProperties": false
+}

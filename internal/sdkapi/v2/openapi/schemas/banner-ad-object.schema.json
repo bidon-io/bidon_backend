@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "banner-ad-object.schema.json",
+  "title": "BannerAdObject",
+  "type": "object",
+  "properties": {
+    "format": {
+      "$ref": "ad-format.schema.json"
+    }
+  },
+  "required": ["format"],
+  "additionalProperties": false
+}

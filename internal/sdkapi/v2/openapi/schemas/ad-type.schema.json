@@ -1,0 +1,11 @@
+{
+  "$id": "adType.json.schema",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Ad Type",
+  "type": "string",
+  "enum": [
+      "banner",
+      "interstitial",
+      "rewarded"
+  ]
+}
