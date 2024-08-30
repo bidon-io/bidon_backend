@@ -3,6 +3,37 @@ info:
   title: SDK API
   version: 1.0.0
 paths:
+  /v2/auction/{ad_type}:
+    post:
+      summary: Auction
+      operationId: getAuction
+      parameters:
+        - name: ad_type
+          in: path
+          description: Ad type
+          required: true
+          schema:
+            $ref: './schemas/ad-type.schema.json'
+      requestBody:
+        description: Auction request
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/auction-request.schema.json'
+      responses:
+        '200':
+          description: Auction response
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/auction-response.schema.json'
+      default:
+        description: Error
+        content:
+          application/problem+json:
+            schema:
+              $ref: './schemas/error.schema.json'
   /v2/config:
     post:
       summary: Get config
