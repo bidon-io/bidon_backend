@@ -1,0 +1,18 @@
+{
+  "$id": "init-config.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Init Config",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "adapters": {
+      "type": "object",
+      "additionalProperties": {}
+    },
+    "tmax": {
+      "type": "integer",
+      "format": "int64"
+    }
+  },
+  "required": ["tmax", "adapters"]
+}

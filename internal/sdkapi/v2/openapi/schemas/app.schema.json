@@ -1,0 +1,48 @@
+{
+  "$id": "app.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "bundle": {
+      "type": "string",
+      "description": "The bundle identifier of the application, typically in reverse domain name notation (e.g., com.example.myapp)."
+    },
+    "key": {
+      "type": "string",
+      "description": "A unique key or identifier for the application."
+    },
+    "framework": {
+      "type": "string",
+      "description": "The name of the framework used by the application (e.g., React Native, Flutter, etc.)."
+    },
+    "version": {
+      "type": "string",
+      "description": "The version of the application, typically following semantic versioning (e.g., 1.0.0)."
+    },
+    "framework_version": {
+      "type": "string",
+      "description": "The version of the framework used by the application, specifying compatibility."
+    },
+    "plugin_version": {
+      "type": "string",
+      "description": "The version of the plugin integrated into the application"
+    },
+    "skadn": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "An array of SKAdNetwork IDs for ad attribution, used primarily for iOS applications."
+    },
+    "sdk_version": {
+      "type": "string",
+      "description": "The version of the SDK used in the application."
+    }
+  },
+  "required": [
+    "bundle",
+    "key",
+    "framework",
+    "version"
+  ]
+}

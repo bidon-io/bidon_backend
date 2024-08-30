@@ -1,0 +1,78 @@
+{
+  "$id": "device.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Device",
+  "type": "object",
+  "properties": {
+    "geo": {
+      "$ref": "./geo.schema.json"
+    },
+    "ua": {
+      "type": "string",
+      "description": "UserAgent"
+    },
+    "make": {
+      "type": "string",
+      "description": "Manufacturer"
+    },
+    "model": {
+      "type": "string",
+      "description": "Model"
+    },
+    "os": {
+      "type": "string",
+      "description": "Operating System"
+    },
+    "osv": {
+      "type": "string",
+      "description": "Operating System Version"
+    },
+    "hwv": {
+      "type": "string",
+      "description": "Hardware Version"
+    },
+    "h": {
+      "type": "integer",
+      "description": "Height"
+    },
+    "w": {
+      "type": "integer",
+      "description": "Width"
+    },
+    "ppi": {
+      "type": "integer",
+      "description": "Pixels per Inch (PPI)"
+    },
+    "pxratio": {
+      "type": "number",
+      "description": "Pixel Ratio"
+    },
+    "js": {
+      "type": "integer",
+      "description": "JavaScript support"
+    },
+    "language": {
+      "type": "string",
+      "description": "Language"
+    },
+    "carrier": {
+      "type": "string",
+      "description": "Carrier"
+    },
+    "mccmnc": {
+      "type": "string",
+      "description": "Mobile Country Code and Mobile Network Code"
+    },
+    "connection_type": {
+      "type": "string",
+      "description": "Connection Type",
+      "enum": ["ETHERNET", "WIFI", "CELLULAR", "CELLULAR_UNKNOWN", "CELLULAR_2_G", "CELLULAR_3_G", "CELLULAR_4_G", "CELLULAR_5_G"]
+    },
+    "type": {
+      "type": "string",
+      "description": "Device Type",
+      "enum": ["PHONE", "TABLET"]
+    }
+  },
+  "required": ["ua", "make", "model", "os", "osv", "hwv", "h", "w", "ppi", "pxratio", "js", "language", "connection_type"]
+}
