@@ -1,0 +1,64 @@
+{
+  "$id": "auction-request.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AuctionV2Request",
+  "type": "object",
+  "properties": {
+    "app": {
+      "$ref": "app.schema.json"
+    },
+    "device": {
+      "$ref": "device.schema.json"
+    },
+    "ext": {
+      "type": "string"
+    },
+    "geo": {
+      "$ref": "geo.schema.json"
+    },
+    "regs": {
+      "$ref": "regulations.schema.json"
+    },
+    "session": {
+      "$ref": "session.schema.json"
+    },
+    "segment": {
+      "$ref": "segment.schema.json"
+    },
+    "token": {
+      "type": "string"
+    },
+    "user": {
+      "$ref": "user.schema.json"
+    },
+    "adapters": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "adapter.schema.json"
+      }
+    },
+    "ad_object": {
+      "$ref": "ad-object.schema.json",
+      "description": "Ad object information"
+    },
+    "test": {
+      "type": "boolean",
+      "description": "Flag indicating that the request is a test"
+    },
+    "tmax": {
+      "type": "integer",
+      "format": "int64",
+      "description": "Maximum response time for the server before timeout"
+    }
+  },
+  "required": [
+    "device",
+    "session",
+    "app",
+    "user",
+    "adapters",
+    "ad_object",
+    "segment"
+  ],
+  "additionalProperties": false
+}
