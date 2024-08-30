@@ -1,0 +1,37 @@
+{
+  "$id": "user.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "User",
+  "type": "object",
+  "properties": {
+    "idfa": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Identifier for Advertisers (IDFA)"
+    },
+    "tracking_authorization_status": {
+      "type": "string",
+      "description": "Status of tracking authorization"
+    },
+    "idfv": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Identifier for Vendors (IDFV)"
+    },
+    "idg": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Generic identifier (IDG)"
+    },
+    "consent": {
+      "type": "object",
+      "description": "Consent settings or preferences",
+      "additionalProperties": true
+    },
+    "coppa": {
+      "type": "boolean",
+      "description": "Indicates if COPPA (Children's Online Privacy Protection Act) applies"
+    }
+  },
+  "required": ["tracking_authorization_status"]
+}

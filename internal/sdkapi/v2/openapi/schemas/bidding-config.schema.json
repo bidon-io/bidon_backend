@@ -1,0 +1,13 @@
+{
+  "$id": "bidding-config.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Bidding Config",
+  "type": "object",
+  "properties": {
+    "token_timeout_ms": {
+      "type": "integer",
+      "format": "int64",
+      "description": "The timeout duration for the token in milliseconds."
+    }
+  }
+}

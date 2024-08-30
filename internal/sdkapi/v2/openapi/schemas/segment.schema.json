@@ -1,0 +1,18 @@
+{
+  "$id": "segment.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Segment",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "uid": {
+      "type": "string"
+    },
+    "ext": {
+      "type": "string",
+      "description": "An extension field for additional information about the segment."
+    }
+  }
+}
