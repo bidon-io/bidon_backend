@@ -1,0 +1,29 @@
+{
+  "$id": "regulations.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Regulations",
+  "type": "object",
+  "properties": {
+    "coppa": {
+      "type": "boolean",
+      "description": "Indicates if COPPA regulations apply"
+    },
+    "gdpr": {
+      "type": "boolean",
+      "description": "Indicates if GDPR regulations apply"
+    },
+    "us_privacy": {
+      "type": "string",
+      "description": "US privacy string indicating compliance"
+    },
+    "eu_privacy": {
+      "type": "string",
+      "description": "EU privacy string indicating compliance"
+    },
+    "iab": {
+      "type": "object",
+      "description": "IAB-specific settings or values",
+      "additionalProperties": true
+    }
+  }
+}

@@ -1,0 +1,90 @@
+{
+  "$id": "session.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Session",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique identifier for the session"
+    },
+    "launch_ts": {
+      "type": "integer",
+      "description": "Timestamp of the session launch"
+    },
+    "launch_monotonic_ts": {
+      "type": "integer",
+      "description": "Monotonic timestamp of the session launch"
+    },
+    "start_ts": {
+      "type": "integer",
+      "description": "Timestamp of the session start"
+    },
+    "start_monotonic_ts": {
+      "type": "integer",
+      "description": "Monotonic timestamp of the session start"
+    },
+    "ts": {
+      "type": "integer",
+      "description": "Current timestamp of the session"
+    },
+    "monotonic_ts": {
+      "type": "integer",
+      "description": "Current monotonic timestamp of the session"
+    },
+    "memory_warnings_ts": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      },
+      "description": "Timestamps when memory warnings occurred"
+    },
+    "memory_warnings_monotonic_ts": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      },
+      "description": "Monotonic timestamps when memory warnings occurred"
+    },
+    "ram_used": {
+      "type": "integer",
+      "description": "Amount of RAM used"
+    },
+    "ram_size": {
+      "type": "integer",
+      "description": "Total size of RAM"
+    },
+    "storage_free": {
+      "type": "integer",
+      "description": "Free storage space available"
+    },
+    "storage_used": {
+      "type": "integer",
+      "description": "Used storage space"
+    },
+    "battery": {
+      "type": "number",
+      "description": "Battery level percentage"
+    },
+    "cpu_usage": {
+      "type": "number",
+      "description": "CPU usage percentage"
+    }
+  },
+  "required": [
+    "id",
+    "launch_ts",
+    "launch_monotonic_ts",
+    "start_ts",
+    "start_monotonic_ts",
+    "ts",
+    "monotonic_ts",
+    "memory_warnings_ts",
+    "memory_warnings_monotonic_ts",
+    "ram_used",
+    "ram_size",
+    "battery",
+    "cpu_usage"
+  ]
+}

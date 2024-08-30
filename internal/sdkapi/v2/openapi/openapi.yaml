@@ -1,0 +1,47 @@
+openapi: 3.0.3
+info:
+  title: SDK API
+  version: 1.0.0
+paths:
+  /v2/config:
+    post:
+      summary: Get config
+      operationId: getConfig
+      requestBody:
+        description: Config request
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/config-request.schema.json'
+      responses:
+        '200':
+          description: Config response
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/config-response.schema.json'
+      default:
+        description: Error
+        content:
+          application/problem+json:
+            schema:
+              $ref: './schemas/error.schema.json'
+  /openapi.json:
+    get:
+      summary: Get OpenAPI specification
+      operationId: getOpenAPISpec
+      description: Returns the OpenAPI JSON specification for the API.
+      responses:
+        '200':
+          description: OpenAPI JSON specification
+          content:
+            application/json:
+              schema:
+                type: object
+        default:
+          description: Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: './schemas/error.schema.json'
