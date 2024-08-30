@@ -5,13 +5,23 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/bidon-io/bidon-backend/internal/sdkapi/v2/apihandlers"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
 
+type Handler interface {
+	Handle(c echo.Context) error
+}
+
+//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/mocks.go -pkg mocks . Handler
+
 type Server struct {
-	ConfigHandler *apihandlers.ConfigHandler
+	AuctionHandler Handler
+	ConfigHandler  Handler
+}
+
+func (s *Server) GetAuction(c echo.Context, _ GetAuctionParamsAdType) error {
+	return s.AuctionHandler.Handle(c)
 }
 
 func (s *Server) GetConfig(c echo.Context) error {

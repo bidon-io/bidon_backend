@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "interstitial-ad-object.schema.json",
+  "title": "InterstitialAdObject",
+  "type": "object",
+  "properties": {},
+  "additionalProperties": false,
+  "description": "Empty schema for interstitial ad configuration"
+}

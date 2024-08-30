@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "auction-response.schema.json",
+  "title": "AuctionResponse",
+  "type": "object",
+  "properties": {
+    "auction_configuration_id": {
+      "type": "integer",
+      "format": "int64",
+      "description": "ID of the auction configuration"
+    },
+    "auction_configuration_uid": {
+      "type": "string",
+      "description": "UID of the auction configuration"
+    },
+    "external_win_notifications": {
+      "type": "boolean",
+      "description": "Indicates if external win notifications are enabled"
+    },
+    "ad_units": {
+      "type": "array",
+      "description": "List of ad units returned in the auction",
+      "items": {
+        "$ref": "ad-unit.schema.json"
+      }
+    },
+    "no_bids": {
+      "type": "array",
+      "description": "List of ad units that received no bids",
+      "items": {
+        "$ref": "ad-unit.schema.json"
+      }
+    },
+    "segment": {
+      "$ref": "segment.schema.json",
+      "description": "Segment information related to the auction"
+    },
+    "token": {
+      "type": "string",
+      "description": "Token"
+    },
+    "auction_pricefloor": {
+      "type": "number",
+      "description": "PriceFloor for the auction",
+      "minimum": 0
+    },
+    "auction_timeout": {
+      "type": "integer",
+      "description": "Timeout for the auction in milliseconds"
+    },
+    "auction_id": {
+      "type": "string",
+      "description": "Unique identifier for the auction"
+    }
+  },
+  "required": [
+    "auction_configuration_id",
+    "auction_configuration_uid",
+    "external_win_notifications",
+    "ad_units",
+    "segment",
+    "token",
+    "auction_pricefloor",
+    "auction_timeout",
+    "auction_id"
+  ],
+  "additionalProperties": false
+}

@@ -27,6 +27,9 @@
     "session": {
       "$ref": "./session.schema.json"
     },
+    "segment": {
+        "$ref": "./segment.schema.json"
+    },
     "token": {
       "type": "string"
     },

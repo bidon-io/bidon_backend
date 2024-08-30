@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ad-object-v2.schema.json",
+  "title": "AdObjectV2",
+  "type": "object",
+  "properties": {
+    "auction_id": {
+      "type": "string",
+      "description": "Unique identifier for the auction"
+    },
+    "auction_key": {
+      "type": "string",
+      "description": "Generated key for the auction request"
+    },
+    "auction_configuration_id": {
+      "type": "integer",
+      "format": "int64",
+        "description": "ID of the auction configuration"
+    },
+    "auction_configuration_uid": {
+      "type": "string",
+      "description": "UID of the auction configuration"
+    },
+    "auction_pricefloor": {
+      "type": "number",
+      "minimum": 0,
+      "description": "PriceFloor for the auction"
+    },
+    "orientation": {
+      "type": "string",
+      "enum": ["PORTRAIT", "LANDSCAPE"],
+      "description": "Orientation of the ad"
+    },
+    "demands": {
+      "type": "object",
+      "description": "Map of demands",
+      "additionalProperties": {
+        "type": "object",
+        "description": "Demand object"
+      },
+      "examples": [
+        {
+          "meta": {
+            "token": "token",
+            "status": "SUCCESS",
+            "token_finish_ts": 1700000000000,
+            "token_start_ts": 1700000000001
+          },
+          "vungle": {
+            "token": "token",
+            "status": "FAIL",
+            "token_finish_ts": 1700000000000,
+            "token_start_ts": 1700000000001
+          }
+        }
+      ]
+    },
+    "banner": {
+      "$ref": "banner-ad-object.schema.json",
+      "description": "Details of the banner ad, if applicable"
+    },
+    "interstitial": {
+      "$ref": "interstitial-ad-object.schema.json",
+      "description": "Details of the interstitial ad, if applicable"
+    },
+    "rewarded": {
+      "$ref": "rewarded-ad-object.schema.json",
+      "description": "Details of the rewarded ad, if applicable"
+    }
+  },
+  "required": ["auction_pricefloor", "demands"],
+  "additionalProperties": false
+}
