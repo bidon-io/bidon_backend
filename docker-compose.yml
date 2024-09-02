@@ -1,6 +1,6 @@
 services:
   migrate:
-    image: golang:alpine
+    image: golang:1.23-alpine
     volumes:
       - .:/app
       - gomodcache:/go/pkg/mod
@@ -14,7 +14,7 @@ services:
       DATABASE_URL: postgres://bidon:pass@postgres:5432/bidon
 
   migrate-test:
-    image: golang:alpine
+    image: golang:1.23-alpine
     volumes:
       - .:/app
       - gomodcache:/go/pkg/mod
@@ -29,7 +29,7 @@ services:
 
   go-test:
     profiles: ['test']
-    image: golang:alpine
+    image: golang:1.23-alpine
     volumes:
       - .:/app
       - gomodcache:/go/pkg/mod

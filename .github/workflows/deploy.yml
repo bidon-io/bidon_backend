@@ -36,7 +36,7 @@ jobs:
         run: echo "TAG=${{ fromJson(steps.latest-release.outputs.data).tag_name }}" >> $GITHUB_ENV
 
       - name: Checks-out repository devops
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: ${{ secrets.ANSIBLE_SECRET }}/devops
           token: ${{ secrets.PAT_RUNNER }}

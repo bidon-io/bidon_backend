@@ -71,6 +71,9 @@ func GenerateModels(db *sql.DB) {
 			RelatePointer: true,
 		}),
 		gen.FieldType("segment_id", "*sql.NullInt64"),
+		gen.FieldGORMTag("is_default", func(tag field.GormTag) field.GormTag {
+			return tag.Set("default", "false")
+		}),
 		gen.FieldType("ad_type", "AdType"),
 		gen.FieldType("rounds", "[]auction.RoundConfig"),
 		gen.FieldGORMTag("rounds", func(tag field.GormTag) field.GormTag {
