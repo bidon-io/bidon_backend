@@ -111,7 +111,6 @@ func (r *Router) RegisterRoutes(e *echo.Echo, g *echo.Group) {
 		NotificationHandler: r.NotificationHandler,
 	}
 
-	g.POST("/stats/:ad_type", statsHandler.Handle)
 	g.POST("/show/:ad_type", showHandler.Handle)
 	g.POST("/click/:ad_type", clickHandler.Handle)
 	g.POST("/reward/:ad_type", rewardHandler.Handle)
@@ -121,5 +120,6 @@ func (r *Router) RegisterRoutes(e *echo.Echo, g *echo.Group) {
 	api.RegisterHandlers(e, &api.Server{
 		AuctionHandler: &auctionHandler,
 		ConfigHandler:  &configHandler,
+		StatsHandler:   &statsHandler,
 	})
 }

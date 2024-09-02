@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "auction-result.schema.json",
+  "title": "AuctionResult",
+  "type": "object",
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": ["SUCCESS", "FAIL", "AUCTION_CANCELLED"],
+      "description": "Status of the auction"
+    },
+    "winner_demand_id": {
+      "type": "string",
+      "description": "ID of the winning demand source, if applicable"
+    },
+    "winner_ad_unit_uid": {
+      "type": "string",
+      "description": "UID of the winning ad unit, if applicable"
+    },
+    "winner_ad_unit_label": {
+      "type": "string",
+      "description": "Label of the winning ad unit, if applicable"
+    },
+    "price": {
+      "type": "number",
+      "description": "Price of the winning bid",
+      "minimum": 0
+    },
+    "bid_type": {
+      "type": "string",
+      "enum": ["RTB", "CPM"],
+      "description": "Type of bid (RTB or CPM)"
+    },
+    "auction_start_ts": {
+      "type": "integer",
+      "format": "int64",
+      "description": "Timestamp when the auction started"
+    },
+    "auction_finish_ts": {
+      "type": "integer",
+      "format": "int64",
+      "description": "Timestamp when the auction finished"
+    },
+    "banner": {
+      "$ref": "banner-ad-object.schema.json",
+      "description": "Details of the banner ad, if applicable",
+      "nullable": true
+    },
+    "interstitial": {
+      "$ref": "interstitial-ad-object.schema.json",
+      "description": "Details of the interstitial ad, if applicable",
+      "nullable": true
+    },
+    "rewarded": {
+      "$ref": "rewarded-ad-object.schema.json",
+      "description": "Details of the rewarded ad, if applicable",
+      "nullable": true
+    }
+  },
+  "required": ["status"],
+  "additionalProperties": false
+}

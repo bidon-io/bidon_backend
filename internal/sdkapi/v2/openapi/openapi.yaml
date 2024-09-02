@@ -58,6 +58,37 @@ paths:
           application/problem+json:
             schema:
               $ref: './schemas/error.schema.json'
+  v2/stats/{ad_type}:
+    post:
+      summary: Stats
+      operationId: postStats
+      parameters:
+        - name: ad_type
+          in: path
+          description: Ad type
+          required: true
+          schema:
+              $ref: './schemas/ad-type.schema.json'
+      requestBody:
+        description: Stats request
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/stats-request.schema.json'
+      responses:
+        '200':
+          description: Stats response
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/success-response.schema.json'
+      default:
+        description: Error
+        content:
+        application/problem+json:
+          schema:
+            $ref: './schemas/error.schema.json'
   /openapi.json:
     get:
       summary: Get OpenAPI specification
