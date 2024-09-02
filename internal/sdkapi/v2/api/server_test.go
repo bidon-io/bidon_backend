@@ -100,3 +100,50 @@ func TestServer_GetConfig(t *testing.T) {
 		})
 	}
 }
+
+func TestServer_PostStats(t *testing.T) {
+	e := echo.New()
+
+	statsHandlerMock := &mocks.HandlerMock{
+		HandleFunc: func(c echo.Context) error {
+			return nil
+		},
+	}
+
+	srv := &api.Server{
+		StatsHandler: statsHandlerMock,
+	}
+
+	tests := []struct {
+		name        string
+		handler     func(c echo.Context, _ api.PostStatsParamsAdType) error
+		method      string
+		url         string
+		adType      api.PostStatsParamsAdType
+		mockHandler *mocks.HandlerMock
+	}{
+		{
+			name:        "PostStats",
+			handler:     srv.PostStats,
+			method:      http.MethodPost,
+			url:         "/v2/stats/banner",
+			adType:      "banner",
+			mockHandler: statsHandlerMock,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req := httptest.NewRequest(tt.method, tt.url, nil)
+			rec := httptest.NewRecorder()
+			c := e.NewContext(req, rec)
+			if err := tt.handler(c, tt.adType); err != nil {
+				t.Errorf("unexpected error: %v", err)
+			}
+
+			if calls := len(tt.mockHandler.HandleCalls()); calls != 1 {
+				t.Errorf("expected Handle to be called once, got %d calls", calls)
+			}
+		})
+	}
+}

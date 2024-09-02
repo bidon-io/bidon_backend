@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "auction-ad-unit-result.schema.json",
+  "title": "AuctionAdUnitResult",
+  "type": "object",
+  "properties": {
+    "price": {
+      "type": "number",
+      "description": "Price associated with the ad unit",
+      "minimum": 0
+    },
+    "token_start_ts": {
+      "type": "integer",
+      "format": "int64",
+      "description": "Timestamp when the token process started"
+    },
+    "token_finish_ts": {
+      "type": "integer",
+      "format": "int64",
+      "description": "Timestamp when the token process finished"
+    },
+    "fill_start_ts": {
+      "type": "integer",
+      "format": "int64",
+      "description": "Timestamp when the ad fill started"
+    },
+    "fill_finish_ts": {
+      "type": "integer",
+      "format": "int64",
+      "description": "Timestamp when the ad fill finished"
+    },
+    "demand_id": {
+      "type": "string",
+      "description": "ID of the demand source for the ad unit"
+    },
+    "bid_type": {
+      "ref": "bid-type.schema.json"
+    },
+    "ad_unit_uid": {
+      "type": "string",
+      "description": "UID of the ad unit"
+    },
+    "ad_unit_label": {
+      "type": "string",
+      "description": "Label of the ad unit"
+    },
+    "status": {
+      "type": "string",
+      "description": "Status of the ad unit",
+      "enum": ["", "SUCCESS", "FAIL", "PENDING"]
+    },
+    "error_message": {
+      "type": "string",
+      "description": "Error message associated with the ad unit, if applicable"
+    }
+  },
+  "required": ["demand_id", "status"],
+  "additionalProperties": false
+}

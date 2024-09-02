@@ -18,6 +18,7 @@ type Handler interface {
 type Server struct {
 	AuctionHandler Handler
 	ConfigHandler  Handler
+	StatsHandler   Handler
 }
 
 func (s *Server) GetAuction(c echo.Context, _ GetAuctionParamsAdType) error {
@@ -26,6 +27,10 @@ func (s *Server) GetAuction(c echo.Context, _ GetAuctionParamsAdType) error {
 
 func (s *Server) GetConfig(c echo.Context) error {
 	return s.ConfigHandler.Handle(c)
+}
+
+func (s *Server) PostStats(c echo.Context, _ PostStatsParamsAdType) error {
+	return s.StatsHandler.Handle(c)
 }
 
 func (s *Server) GetOpenAPISpec(c echo.Context) error {
