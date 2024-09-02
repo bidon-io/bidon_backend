@@ -10,19 +10,20 @@ jobs:
   test:
     runs-on: [self-hosted]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
 
       - run: docker compose run -v $(pwd)/testcov:/app/testcov --rm go-test -coverprofile=testcov/coverage.out -covermode=atomic ./...
 
       - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_BIDON_BACKEND_TOKEN }}
           url: ${{ secrets.CODECOV_URL }}
           directory: ./testcov/
           fail_ci_if_error: true
+          codecov_yml_path: ./codecov.yml
 
       - run: docker compose down --rmi local -v
         if: always()

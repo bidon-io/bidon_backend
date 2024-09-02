@@ -16,6 +16,7 @@ const columns = [
   { field: "auctionKey", header: "Auction Key", copyable: true },
   ResourceTableFields.AdType,
   { field: "pricefloor", header: "Price Floor" },
+  ResourceTableFields.IsDefault,
   ResourceTableFields.Segment,
 ];
 const resourcesPath = "/v2/auction_configurations";

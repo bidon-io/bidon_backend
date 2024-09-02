@@ -22,36 +22,67 @@ func TestConfigFetcher_Match(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	apps := make([]db.App, 4)
+	apps := make([]db.App, 5)
 	for i := range apps {
 		apps[i] = dbtest.CreateApp(t, tx)
 	}
 
+	app4segment := dbtest.CreateSegment(t, tx, func(segment *db.Segment) {
+		segment.App = apps[4]
+	})
+
+	isDefault := true
 	configs := []db.AuctionConfiguration{
 		{
 			AppID:     apps[0].ID,
-			PublicUID: sql.NullInt64{Int64: 1111111111111111111, Valid: true},
+			PublicUID: sql.NullInt64{Int64: 1, Valid: true},
 			AdType:    db.BannerAdType,
 		},
 		{
 			AppID:     apps[1].ID,
-			PublicUID: sql.NullInt64{Int64: 2222222222222222222, Valid: true},
+			PublicUID: sql.NullInt64{Int64: 2, Valid: true},
 			AdType:    db.BannerAdType,
 		},
 		{
 			AppID:     apps[2].ID,
-			PublicUID: sql.NullInt64{Int64: 3333333333333333333, Valid: true},
+			PublicUID: sql.NullInt64{Int64: 3, Valid: true},
 			AdType:    db.InterstitialAdType,
 			CreatedAt: time.Now(),
 		},
 		{
 			AppID:     apps[3].ID,
-			PublicUID: sql.NullInt64{Int64: 4444444444444444444, Valid: true},
+			PublicUID: sql.NullInt64{Int64: 4, Valid: true},
 			AdType:    db.InterstitialAdType,
 			CreatedAt: time.Now(),
 			Demands:   pq.StringArray{"gam", "dtexchange"},
 			Bidding:   pq.StringArray{"bidmachine", "mintegral"},
 			AdUnitIds: pq.Int64Array{1, 2, 3},
+		},
+		{
+			AppID:     apps[4].ID,
+			PublicUID: sql.NullInt64{Int64: 5, Valid: true},
+			AdType:    db.InterstitialAdType,
+			CreatedAt: time.Now(),
+			IsDefault: &isDefault,
+		},
+		{
+			AppID:     apps[4].ID,
+			PublicUID: sql.NullInt64{Int64: 6, Valid: true},
+			AdType:    db.InterstitialAdType,
+			CreatedAt: time.Now(),
+		},
+		{
+			AppID:     apps[4].ID,
+			PublicUID: sql.NullInt64{Int64: 7, Valid: true},
+			AdType:    db.InterstitialAdType,
+			CreatedAt: time.Now(),
+		},
+		{
+			AppID:     apps[4].ID,
+			PublicUID: sql.NullInt64{Int64: 8, Valid: true},
+			AdType:    db.InterstitialAdType,
+			CreatedAt: time.Now(),
+			SegmentID: &sql.NullInt64{Int64: app4segment.ID, Valid: true},
 		},
 	}
 	if err := tx.Create(&configs).Error; err != nil {
@@ -61,6 +92,8 @@ func TestConfigFetcher_Match(t *testing.T) {
 	app2BannerConfig := &configs[1]
 	app2InterstitialConfig := &configs[2]
 	app3InterstitialConfig := &configs[3]
+	app4DefaultInterstitialConfig := &configs[4]
+	app4SegmentInterstitialConfig := &configs[7]
 
 	type args struct {
 		appID     int64
@@ -114,6 +147,30 @@ func TestConfigFetcher_Match(t *testing.T) {
 				Bidding:   db.StringArrayToAdapterKeys(&app3InterstitialConfig.Bidding),
 				AdUnitIDs: app3InterstitialConfig.AdUnitIds,
 				Timeout:   int(app3InterstitialConfig.Timeout),
+			},
+		},
+		{
+			args: args{appID: apps[4].ID, adType: ad.InterstitialType, segmentID: 0},
+			want: &auction.Config{
+				ID:        app4DefaultInterstitialConfig.ID,
+				UID:       strconv.FormatInt(app4DefaultInterstitialConfig.PublicUID.Int64, 10),
+				Rounds:    app4DefaultInterstitialConfig.Rounds,
+				Demands:   db.StringArrayToAdapterKeys(&app4DefaultInterstitialConfig.Demands),
+				Bidding:   db.StringArrayToAdapterKeys(&app4DefaultInterstitialConfig.Bidding),
+				AdUnitIDs: app4DefaultInterstitialConfig.AdUnitIds,
+				Timeout:   int(app4DefaultInterstitialConfig.Timeout),
+			},
+		},
+		{
+			args: args{appID: apps[4].ID, adType: ad.InterstitialType, segmentID: app4segment.ID},
+			want: &auction.Config{
+				ID:        app4SegmentInterstitialConfig.ID,
+				UID:       strconv.FormatInt(app4SegmentInterstitialConfig.PublicUID.Int64, 10),
+				Rounds:    app4SegmentInterstitialConfig.Rounds,
+				Demands:   db.StringArrayToAdapterKeys(&app4SegmentInterstitialConfig.Demands),
+				Bidding:   db.StringArrayToAdapterKeys(&app4SegmentInterstitialConfig.Bidding),
+				AdUnitIDs: app4SegmentInterstitialConfig.AdUnitIds,
+				Timeout:   int(app4SegmentInterstitialConfig.Timeout),
 			},
 		},
 	}

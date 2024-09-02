@@ -14,3 +14,7 @@ max_line_length = 120
 [{*.go,go.mod,Makefile}]
 indent_style = tab
 tab_width = 4
+
+[{*.js,*.ts,*.vue}]
+indent_style = space
+indent_size = 2

@@ -29,6 +29,7 @@ type AuctionConfigurationV2Attrs struct {
 	AdType                   ad.Type        `json:"ad_type"`
 	Pricefloor               float64        `json:"pricefloor"`
 	SegmentID                *int64         `json:"segment_id"`
+	IsDefault                *bool          `json:"is_default"`
 	ExternalWinNotifications *bool          `json:"external_win_notifications"`
 	Demands                  []adapter.Key  `json:"demands"`
 	Bidding                  []adapter.Key  `json:"bidding"`
