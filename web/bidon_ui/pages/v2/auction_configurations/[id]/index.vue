@@ -43,6 +43,7 @@ const fields = [
   { label: "Bidding", key: "bidding" },
   { label: "Ad Unit IDs", key: "adUnitIds" },
   { label: "Timeout", key: "timeout" },
+  { label: "Default", key: "isDefault" },
   { label: "External Win Notification", key: "externalWinNotifications" },
   ResourceCardFields.Segment,
 ];
