@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "bid.schema.json",
+  "title": "Bid",
+  "type": "object",
+  "properties": {
+    "auction_id": {
+      "type": "string",
+      "description": "Unique identifier for the auction"
+    },
+    "auction_configuration_id": {
+      "type": "integer",
+      "format": "int64",
+      "description": "ID of the auction configuration",
+      "nullable": true
+    },
+    "auction_configuration_uid": {
+      "type": "string",
+      "description": "UID of the auction configuration",
+      "nullable": true
+    },
+    "imp_id": {
+      "type": "string",
+      "description": "Impression ID"
+    },
+    "demand_id": {
+      "type": "string",
+      "description": "ID of the demand source"
+    },
+    "round_id": {
+      "type": "string",
+      "description": "Round ID for the bidding process"
+    },
+    "round_idx": {
+      "type": "integer",
+      "description": "Index of the round in the bidding process"
+    },
+    "ad_unit_id": {
+      "type": "string",
+      "description": "Deprecated: use ad_unit_uid instead"
+    },
+    "line_item_uid": {
+      "type": "string",
+      "description": "Deprecated: use ad_unit_uid instead"
+    },
+    "ad_unit_uid": {
+      "type": "string",
+      "description": "UID of the ad unit"
+    },
+    "ad_unit_label": {
+      "type": "string",
+      "description": "Label of the ad unit"
+    },
+    "ecpm": {
+      "type": "number",
+      "description": "Estimated cost per mille, deprecated: use price instead",
+      "nullable": true
+    },
+    "price": {
+      "type": "number",
+      "description": "Price of the bid",
+      "nullable": true
+    },
+    "bid_type": {
+      "$ref": "bid-type.schema.json"
+    },
+    "round_price_floor": {
+      "type": "number",
+      "description": "PriceFloor for the bidding round",
+      "minimum": 0
+    },
+    "auction_price_floor": {
+      "type": "number",
+      "description": "Auction PriceFloor",
+      "minimum": 0
+    },
+    "banner": {
+      "$ref": "banner-ad-object.schema.json",
+      "nullable": true
+    },
+    "interstitial": {
+      "$ref": "interstitial-ad-object.schema.json",
+      "nullable": true
+    },
+    "rewarded": {
+      "$ref": "rewarded-ad-object.schema.json",
+      "nullable": true
+    }
+  },
+  "required": ["auction_id", "demand_id"],
+  "oneOf": [
+    { "required": ["auction_configuration_id"] },
+    { "required": ["auction_configuration_uid"] }
+  ],
+  "additionalProperties": false
+}
