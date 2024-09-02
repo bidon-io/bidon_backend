@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "stats.schema.json",
+  "title": "Stats",
+  "type": "object",
+  "properties": {
+    "auction_id": {
+      "type": "string",
+      "description": "Generated unique identifier for the auction"
+    },
+    "auction_pricefloor": {
+      "type": "number",
+      "description": "PriceFloor for the auction",
+      "minimum": 0
+    },
+    "auction_configuration_id": {
+      "type": "integer",
+      "format": "int64",
+      "description": "ID of the auction configuration",
+      "nullable": true
+    },
+    "auction_configuration_uid": {
+      "type": "string",
+      "description": "UID of the auction configuration",
+      "nullable": true
+    },
+    "result": {
+      "$ref": "auction-result.schema.json",
+      "description": "The result of the auction"
+    },
+    "ad_units": {
+      "type": "array",
+      "description": "List of results for each ad unit in the auction",
+      "items": {
+        "$ref": "auction-ad-unit-result.schema.json"
+      }
+    }
+  },
+  "required": ["auction_id", "result", "ad_units"],
+  "oneOf": [
+    {
+      "required": ["auction_configuration_id"]
+    },
+    {
+      "required": ["auction_configuration_uid"]
+    }
+  ],
+  "additionalProperties": false
+}

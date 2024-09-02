@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "bid-type.schema.json",
+  "title": "Stats",
+  "type": "string",
+  "enum": ["RTB", "CPM"],
+  "description": "Type of bid (RTB or CPM)"
+}

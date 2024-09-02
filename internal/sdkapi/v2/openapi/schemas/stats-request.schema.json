@@ -1,0 +1,21 @@
+{
+  "$id": "stats-request.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "StatsRequest",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "base-request.schema.json"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "stats": {
+          "$ref": "stats.schema.json"
+        }
+      },
+      "required": ["stats"]
+    }
+  ],
+  "additionalProperties": false
+}

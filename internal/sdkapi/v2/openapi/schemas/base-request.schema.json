@@ -1,7 +1,7 @@
 {
-  "$id": "auction-request.schema.json",
+  "$id": "base-request.schema.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "AuctionV2Request",
+  "title": "BaseRequest",
   "type": "object",
   "properties": {
     "app": {
@@ -30,34 +30,13 @@
     },
     "user": {
       "$ref": "user.schema.json"
-    },
-    "adapters": {
-      "type": "object",
-      "additionalProperties": {
-        "$ref": "adapter.schema.json"
-      }
-    },
-    "ad_object": {
-      "$ref": "ad-object.schema.json",
-      "description": "Ad object information"
-    },
-    "test": {
-      "type": "boolean",
-      "description": "Flag indicating that the request is a test"
-    },
-    "tmax": {
-      "type": "integer",
-      "format": "int64",
-      "description": "Maximum response time for the server before timeout"
     }
   },
   "required": [
     "device",
     "session",
     "app",
-    "user",
-    "adapters",
-    "ad_object"
+    "user"
   ],
   "additionalProperties": false
 }
