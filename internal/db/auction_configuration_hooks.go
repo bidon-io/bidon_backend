@@ -28,7 +28,8 @@ func (ac *AuctionConfiguration) BeforeSave(tx *gorm.DB) (err error) {
 		query = query.Where("settings->>'v2' IS NULL")
 	}
 
-	if ac.SegmentID != nil && ac.SegmentID.Valid {
+	withSegment := ac.SegmentID != nil && ac.SegmentID.Valid
+	if withSegment {
 		query = query.Where("segment_id = ?", ac.SegmentID.Int64)
 	} else {
 		query = query.Where("segment_id IS NULL")

@@ -34,6 +34,26 @@ export const ResourceTableFields = {
     },
   },
   AccountType: { field: "accountType", header: "Account Type" },
+  IsDefault: {
+    field: "isDefault",
+    header: "Default",
+    filter: {
+      field: "isDefault",
+      type: "select",
+      matchMode: FilterMatchMode.EQUALS,
+      placeholder: "Default",
+      extractOptions: () => [
+        {
+          label: "True",
+          value: "true",
+        },
+        {
+          label: "False",
+          value: "false",
+        },
+      ],
+    },
+  },
   AdType: {
     field: "adType",
     header: "Ad Type",

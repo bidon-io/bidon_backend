@@ -16,6 +16,9 @@
         />
       </FormField>
       <SegmentDropdown v-model="segmentId" :error="errors.segmentId" />
+      <FormField label="Is Default" :error="errors.isDefault">
+        <Checkbox v-model="isDefault" :binary="true" />
+      </FormField>
       <FormField
         label="External Win Notification"
         :error="errors.externalWinNotifications"
@@ -71,6 +74,7 @@ const { errors, useFieldModel, handleSubmit } = useForm({
     adType: yup.string().required().label("AdType"),
     pricefloor: yup.number().positive().required().label("Pricefloor"),
     segmentId: yup.number().nullable(true).label("Segment Id"),
+    isDefault: yup.boolean(),
     externalWinNotifications: yup.boolean(),
     timeout: yup.number().positive().required().label("Timeout"),
     settings: yup.object(),
@@ -81,6 +85,7 @@ const { errors, useFieldModel, handleSubmit } = useForm({
     adType: resource.value.adType || "",
     pricefloor: resource.value.pricefloor || null,
     segmentId: resource.value.segmentId || null,
+    isDefault: resource.value.isDefault || false,
     externalWinNotifications: resource.value.externalWinNotifications || false,
     timeout: resource.value.timeout || null,
     settings: resource.value.settings || {},
@@ -92,6 +97,7 @@ const appId = useFieldModel("appId");
 const adType = useFieldModel("adType");
 const pricefloor = useFieldModel("pricefloor");
 const segmentId = useFieldModel("segmentId");
+const isDefault = useFieldModel("isDefault");
 const externalWinNotifications = useFieldModel("externalWinNotifications");
 const timeout = useFieldModel("timeout");
 

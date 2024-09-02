@@ -380,21 +380,13 @@ func skipIfWebAppOrAuth(prefixes ...string) middleware.Skipper {
 
 func skipIfWebApp() middleware.Skipper {
 	return func(c echo.Context) bool {
-		if c.Request().Header.Get("X-Bidon-App") == "web" {
-			return true
-		}
-
-		return false
+		return c.Request().Header.Get("X-Bidon-App") == "web"
 	}
 }
 
 func skipIfNotWebApp() middleware.Skipper {
 	return func(c echo.Context) bool {
-		if c.Request().Header.Get("X-Bidon-App") != "web" {
-			return true
-		}
-
-		return false
+		return c.Request().Header.Get("X-Bidon-App") != "web"
 	}
 }
 

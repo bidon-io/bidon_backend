@@ -27,7 +27,7 @@ func (m *ConfigFetcher) Match(ctx context.Context, appID int64, adType ad.Type, 
 			"app_id":  appID,
 			"ad_type": db.AdTypeFromDomain(adType),
 		}).
-		Order("created_at DESC")
+		Order("segment_id, is_default DESC, created_at DESC")
 
 	if segmentID != 0 {
 		query = query.Where("segment_id = ? OR segment_id IS NULL", segmentID)
