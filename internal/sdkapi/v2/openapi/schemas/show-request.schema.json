@@ -1,0 +1,29 @@
+{
+  "$id": "show-request.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ShowRequest",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "base-request.schema.json"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "bid": {
+          "$ref": "bid.schema.json",
+          "description": "Bid object, required if Show is not present"
+        },
+        "show": {
+          "$ref": "bid.schema.json",
+          "description": "Show object, required if Bid is not present"
+        }
+      },
+      "oneOf": [
+        { "required": ["bid"] },
+        { "required": ["show"] }
+      ]
+    }
+  ],
+  "additionalProperties": false
+}
