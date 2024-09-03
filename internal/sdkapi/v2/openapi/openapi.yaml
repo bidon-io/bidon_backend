@@ -151,6 +151,38 @@ paths:
           application/problem+json:
             schema:
               $ref: './schemas/error.schema.json'
+  /v2/reward/{ad_type}:
+    post:
+      summary: Reward
+      operationId: postReward
+      parameters:
+        - name: ad_type
+          in: path
+          description: Ad type for the reward request
+          required: true
+          schema:
+            type: string
+            enum: ["rewarded"]
+      requestBody:
+        description: Reward request
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/reward-request.schema.json'
+      responses:
+        '200':
+          description: Reward response
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/success-response.schema.json'
+      default:
+        description: Error
+        content:
+          application/problem+json:
+            schema:
+              $ref: './schemas/error.schema.json'
   /openapi.json:
     get:
       summary: Get OpenAPI specification

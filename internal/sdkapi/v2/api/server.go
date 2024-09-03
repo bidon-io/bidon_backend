@@ -21,6 +21,7 @@ type Server struct {
 	ConfigHandler  Handler
 	StatsHandler   Handler
 	ShowHandler    Handler
+	RewardHandler  Handler
 }
 
 func (s *Server) GetAuction(c echo.Context, _ GetAuctionParamsAdType) error {
@@ -41,6 +42,10 @@ func (s *Server) PostStats(c echo.Context, _ PostStatsParamsAdType) error {
 
 func (s *Server) PostShow(c echo.Context, _ PostShowParamsAdType) error {
 	return s.ShowHandler.Handle(c)
+}
+
+func (s *Server) PostReward(c echo.Context, _ PostRewardParamsAdType) error {
+	return s.RewardHandler.Handle(c)
 }
 
 func (s *Server) GetOpenAPISpec(c echo.Context) error {
