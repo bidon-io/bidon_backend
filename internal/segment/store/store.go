@@ -2,9 +2,10 @@ package store
 
 import (
 	"context"
+	"strconv"
+
 	"github.com/bidon-io/bidon-backend/internal/db"
 	"github.com/bidon-io/bidon-backend/internal/segment"
-	"strconv"
 )
 
 type SegmentFetcher struct {

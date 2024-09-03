@@ -2,11 +2,12 @@ package notification
 
 import (
 	"context"
+	"log"
+
 	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	"github.com/prebid/openrtb/v19/openrtb3"
 	"golang.org/x/exp/slices"
-	"log"
 )
 
 type HandlerV2 struct {

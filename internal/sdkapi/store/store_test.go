@@ -76,7 +76,7 @@ func TestAppFetcher_Fetch(t *testing.T) {
 	}
 
 	for _, tC := range testCases {
-		app, err := fetcher.Fetch(context.Background(), tC.appKey, tC.appBundle)
+		app, _ := fetcher.Fetch(context.Background(), tC.appKey, tC.appBundle)
 		appCached, err := fetcher.FetchCached(context.Background(), tC.appKey, tC.appBundle)
 
 		if diff := cmp.Diff(app, appCached); diff != "" {

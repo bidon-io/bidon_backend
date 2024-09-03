@@ -3,10 +3,11 @@ package apihandlers_test
 import (
 	"context"
 	"fmt"
-	"github.com/bidon-io/bidon-backend/internal/sdkapi/v1/apihandlers"
 	"net/http"
 	"os"
 	"testing"
+
+	"github.com/bidon-io/bidon-backend/internal/sdkapi/v1/apihandlers"
 
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
