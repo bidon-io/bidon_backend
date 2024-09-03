@@ -89,7 +89,38 @@ paths:
           application/problem+json:
             schema:
               $ref: './schemas/error.schema.json'
-  v2/stats/{ad_type}:
+  /v2/loss/{ad_type}:
+    post:
+      summary: Loss
+      operationId: postLoss
+      parameters:
+        - name: ad_type
+          in: path
+          description: Ad type
+          required: true
+          schema:
+            $ref: './schemas/ad-type.schema.json'
+      requestBody:
+        description: Loss request
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/loss-request.schema.json'
+      responses:
+        '200':
+          description: Loss response
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/success-response.schema.json'
+      default:
+        description: Error
+        content:
+          application/problem+json:
+            schema:
+              $ref: './schemas/error.schema.json'
+  /v2/stats/{ad_type}:
     post:
       summary: Stats
       operationId: postStats

@@ -32,7 +32,7 @@ type Router struct {
 	BiddingAdaptersCfgBuilder *adapters_builder.AdaptersConfigBuilder
 }
 
-func (r *Router) RegisterRoutes(e *echo.Echo, g *echo.Group) {
+func (r *Router) RegisterRoutes(g *echo.Group) {
 	auctionHandler := apihandlers.AuctionHandler{
 		BaseHandler: &apihandlers.BaseHandler[schema.AuctionV2Request, *schema.AuctionV2Request]{
 			AppFetcher:    r.AppFetcher,
@@ -111,12 +111,11 @@ func (r *Router) RegisterRoutes(e *echo.Echo, g *echo.Group) {
 		NotificationHandler: r.NotificationHandler,
 	}
 
-	g.POST("/loss/:ad_type", lossHandler.Handle)
-
-	api.RegisterHandlers(e, &api.Server{
+	api.RegisterHandlers(g, &api.Server{
 		AuctionHandler: &auctionHandler,
 		ClickHandler:   &clickHandler,
 		ConfigHandler:  &configHandler,
+		LossHandler:    &lossHandler,
 		StatsHandler:   &statsHandler,
 		ShowHandler:    &showHandler,
 		RewardHandler:  &rewardHandler,

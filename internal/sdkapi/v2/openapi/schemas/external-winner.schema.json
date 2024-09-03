@@ -1,0 +1,19 @@
+{
+  "$id": "external-winner.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ExternalWinner",
+  "type": "object",
+  "properties": {
+    "demand_id": {
+      "type": "string",
+      "description": "Identifier for the demand source of the external winner"
+    },
+    "ecpm": {
+      "type": "number",
+      "description": "Effective cost per mille for the external winner",
+      "minimum": 0
+    }
+  },
+  "required": ["ecpm"],
+  "additionalProperties": false
+}

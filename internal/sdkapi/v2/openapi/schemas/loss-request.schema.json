@@ -1,0 +1,21 @@
+{
+  "$id": "loss-request.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LossRequest",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "show-request.schema.json"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "external_winner": {
+          "$ref": "external-winner.schema.json"
+        }
+      },
+      "required": ["external_winner"]
+    }
+  ],
+  "additionalProperties": false
+}

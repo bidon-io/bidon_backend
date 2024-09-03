@@ -19,6 +19,7 @@ type Server struct {
 	AuctionHandler Handler
 	ClickHandler   Handler
 	ConfigHandler  Handler
+	LossHandler    Handler
 	StatsHandler   Handler
 	ShowHandler    Handler
 	RewardHandler  Handler
@@ -35,6 +36,10 @@ func (s *Server) GetConfig(c echo.Context) error {
 
 func (s *Server) PostClick(c echo.Context, _ PostClickParamsAdType) error {
 	return s.ClickHandler.Handle(c)
+}
+
+func (s *Server) PostLoss(c echo.Context, _ PostLossParamsAdType) error {
+	return s.LossHandler.Handle(c)
 }
 
 func (s *Server) PostStats(c echo.Context, _ PostStatsParamsAdType) error {
