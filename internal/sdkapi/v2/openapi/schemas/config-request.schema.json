@@ -2,39 +2,20 @@
   "$id": "config-request.schema.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
-  "properties": {
-    "adapters": {
+  "allOf": [
+    {
+      "$ref": "base-request.schema.json"
+    },
+    {
       "type": "object",
-        "additionalProperties": {
+      "properties": {
+        "adapters": {
+          "type": "object",
+          "additionalProperties": {
             "$ref": "./adapter.schema.json"
+          }
         }
-    },
-    "app": {
-      "$ref": "./app.schema.json"
-    },
-    "device": {
-      "$ref": "./device.schema.json"
-    },
-    "ext": {
-      "type": "string"
-    },
-    "geo": {
-      "$ref": "./geo.schema.json"
-    },
-    "regs": {
-      "$ref": "./regulations.schema.json"
-    },
-    "session": {
-      "$ref": "./session.schema.json"
-    },
-    "segment": {
-        "$ref": "./segment.schema.json"
-    },
-    "token": {
-      "type": "string"
-    },
-    "user": {
-      "$ref": "./user.schema.json"
+      }
     }
-  }
+  ]
 }

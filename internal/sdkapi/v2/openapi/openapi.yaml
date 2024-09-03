@@ -183,6 +183,37 @@ paths:
           application/problem+json:
             schema:
               $ref: './schemas/error.schema.json'
+  /v2/win/{ad_type}:
+    post:
+      summary: Win
+      operationId: postWin
+      parameters:
+        - name: ad_type
+          in: path
+          description: Ad type
+          required: true
+          schema:
+            $ref: './schemas/ad-type.schema.json'
+      requestBody:
+        description: Win request
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/win-request.schema.json'
+      responses:
+        '200':
+          description: Win response
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/success-response.schema.json'
+      default:
+        description: Error
+        content:
+          application/problem+json:
+            schema:
+              $ref: './schemas/error.schema.json'
   /openapi.json:
     get:
       summary: Get OpenAPI specification
