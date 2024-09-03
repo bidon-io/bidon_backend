@@ -1,6 +1,17 @@
 REGISTRY ?= "ghcr.io/bidon-io"
 
 .PHONY: test
+
+init:
+	@cp -n .env.sample .env || true
+	@cp -n .env.test.sample .env.test || true
+
+install-deps:
+	@brew ls --versions pre-commit || brew install pre-commit
+	@pre-commit install
+
+local-init: init install-deps
+
 test:
 	docker compose run --rm go-test
 

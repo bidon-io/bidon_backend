@@ -43,6 +43,17 @@ services:
     environment:
       DATABASE_URL: postgres://bidon:pass@postgres-test:5432/bidon_test
 
+  go-pre-commit:
+    build:
+      context: .
+      target: pre-commit-deps
+    volumes:
+      - .:/app
+      - gomodcache:/go/pkg/mod
+      - gocache:/root/.cache/go-build
+    working_dir: /app
+    entrypoint: ["pre-commit", "run", "--all-files"]
+
   postgres:
     image: postgres:14-alpine
     ports:
