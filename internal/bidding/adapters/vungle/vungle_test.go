@@ -5,10 +5,11 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"testing"
+
+	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
 
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
@@ -292,7 +293,7 @@ func TestVungleAdapter_ExecuteRequest(t *testing.T) {
 		return &http.Response{
 			Status:        http.StatusText(http.StatusOK),
 			StatusCode:    http.StatusOK,
-			Body:          ioutil.NopCloser(bytes.NewBuffer(responseBody)),
+			Body:          io.NopCloser(bytes.NewBuffer(responseBody)),
 			ContentLength: int64(len(responseBody)),
 		}
 	})

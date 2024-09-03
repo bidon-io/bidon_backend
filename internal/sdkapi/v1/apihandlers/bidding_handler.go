@@ -4,11 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/bidon-io/bidon-backend/internal/sdkapi"
 	"net/http"
 	"sort"
 	"strconv"
 	"time"
+
+	"github.com/bidon-io/bidon-backend/internal/sdkapi"
 
 	"github.com/Masterminds/semver/v3"
 	"github.com/bidon-io/bidon-backend/internal/adapter"

@@ -2,11 +2,12 @@ package adminstore_test
 
 import (
 	"context"
-	"github.com/bidon-io/bidon-backend/internal/db"
 	"testing"
 
+	"github.com/bidon-io/bidon-backend/internal/db"
+
 	"github.com/bidon-io/bidon-backend/internal/admin"
-	"github.com/bidon-io/bidon-backend/internal/admin/store"
+	adminstore "github.com/bidon-io/bidon-backend/internal/admin/store"
 	"github.com/google/go-cmp/cmp"
 )
 

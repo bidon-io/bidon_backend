@@ -2,9 +2,10 @@ package store_test
 
 import (
 	"context"
-	"github.com/bidon-io/bidon-backend/config"
 	"testing"
 	"time"
+
+	"github.com/bidon-io/bidon-backend/config"
 
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/adapter/store"

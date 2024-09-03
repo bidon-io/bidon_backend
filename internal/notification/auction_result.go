@@ -2,6 +2,7 @@ package notification
 
 import (
 	"encoding/json"
+
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 )
 

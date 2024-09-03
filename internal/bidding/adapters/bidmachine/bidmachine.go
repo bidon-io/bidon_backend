@@ -182,11 +182,11 @@ func (a *BidmachineAdapter) ParseBids(dr *adapters.DemandResponse) (*adapters.De
 	case http.StatusUnauthorized:
 		fallthrough
 	case http.StatusForbidden:
-		return dr, fmt.Errorf("unauthorized request: " + strconv.Itoa(dr.Status))
+		return dr, fmt.Errorf("unauthorized request: %s", strconv.Itoa(dr.Status))
 	case http.StatusOK:
 		break
 	default:
-		return dr, fmt.Errorf("unexpected status code: " + strconv.Itoa(dr.Status))
+		return dr, fmt.Errorf("unexpected status code: %s", strconv.Itoa(dr.Status))
 	}
 
 	var bidResponse openrtb2.BidResponse

@@ -2,12 +2,13 @@ package apihandlers_test
 
 import (
 	"context"
-	"github.com/bidon-io/bidon-backend/internal/sdkapi/v2/apihandlers"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/bidon-io/bidon-backend/internal/sdkapi/v2/apihandlers"
 
 	"github.com/bidon-io/bidon-backend/config"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"

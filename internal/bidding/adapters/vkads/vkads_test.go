@@ -5,6 +5,10 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"io"
+	"net/http"
+	"testing"
+
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
@@ -14,9 +18,6 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/prebid/openrtb/v19/adcom1"
 	"github.com/prebid/openrtb/v19/openrtb2"
-	"io/ioutil"
-	"net/http"
-	"testing"
 )
 
 type createRequestTestParams struct {
@@ -288,7 +289,7 @@ func TestAdapter_ExecuteRequest(t *testing.T) {
 				return &http.Response{
 					Status:        http.StatusText(http.StatusOK),
 					StatusCode:    http.StatusOK,
-					Body:          ioutil.NopCloser(bytes.NewBuffer(tc.responseBody)),
+					Body:          io.NopCloser(bytes.NewBuffer(tc.responseBody)),
 					ContentLength: int64(len(tc.responseBody)),
 				}
 			})

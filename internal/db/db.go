@@ -4,11 +4,12 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"fmt"
-	"github.com/bidon-io/bidon-backend/internal/adapter"
-	"github.com/lib/pq"
 	"log"
 	"os"
 	"time"
+
+	"github.com/bidon-io/bidon-backend/internal/adapter"
+	"github.com/lib/pq"
 
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bwmarrin/snowflake"
