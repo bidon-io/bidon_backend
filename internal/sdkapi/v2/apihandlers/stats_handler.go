@@ -70,6 +70,7 @@ func prepareStatsEvents(req *request[schema.StatsV2Request, *schema.StatsV2Reque
 		AdUnitLabel:             stats.Result.WinnerAdUnitLabel,
 		ECPM:                    stats.Result.GetWinnerPrice(),
 		PriceFloor:              stats.AuctionPricefloor,
+		Bidding:                 stats.Result.IsBidding(),
 		TimingMap:               event.TimingMap{"auction": {stats.Result.AuctionStartTS, stats.Result.AuctionFinishTS}},
 	}
 	events = append(events, event.NewAdEvent(&req.raw.BaseRequest, adRequestParams, req.geoData))
