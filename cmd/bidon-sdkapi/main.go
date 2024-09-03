@@ -195,7 +195,7 @@ func main() {
 	}
 	routerV1.RegisterRoutes(v1Group)
 
-	v2Group := e.Group("/v2")
+	v2Group := e.Group("")
 	config.UseCommonMiddleware(v2Group, "bidon-sdkapi", logger)
 	v2Group.Use(sdkapi.CheckBidonHeader)
 	routerV2 := v2.Router{
@@ -212,7 +212,7 @@ func main() {
 		AdapterInitConfigsFetcher: adapterInitConfigsFetcher,
 		ConfigurationFetcher:      configurationFetcher,
 	}
-	routerV2.RegisterRoutes(e, v2Group)
+	routerV2.RegisterRoutes(v2Group)
 
 	e.Use(echoprometheus.NewMiddleware("sdkapi"))  // adds middleware to gather metrics
 	e.GET("/metrics", echoprometheus.NewHandler()) // adds route to serve gathered metrics
