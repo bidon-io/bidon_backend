@@ -19,6 +19,10 @@ RUN go mod download
 
 COPY . .
 
+FROM base AS pre-commit-deps
+
+RUN apk add --no-cache python3 git pre-commit
+
 FROM base AS bidon-admin-builder
 
 COPY --from=frontend-deps /app/.output/public ./cmd/bidon-admin/web/ui

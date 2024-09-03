@@ -1,0 +1,9 @@
+repos:
+  - repo: local
+    hooks:
+      - id: openapi-codegen
+        name: Run go generate for API code when OpenAPI spec changes
+        entry: go generate ./internal/sdkapi/v2/api/server.go
+        language: system
+        files: internal/sdkapi/v2/openapi/openapi.yaml
+        pass_filenames: false
