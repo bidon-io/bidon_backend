@@ -1,10 +1,11 @@
 package apihandlers_test
 
 import (
-	"github.com/bidon-io/bidon-backend/internal/sdkapi/v2/apihandlers"
 	"net/http"
 	"os"
 	"testing"
+
+	"github.com/bidon-io/bidon-backend/internal/sdkapi/v2/apihandlers"
 
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event/engine"

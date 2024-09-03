@@ -3,13 +3,14 @@ package notification
 import (
 	"context"
 	"fmt"
-	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
-	"github.com/cenkalti/backoff/v4"
-	"github.com/prebid/openrtb/v19/openrtb3"
 	"log"
 	"net/http"
 	"net/url"
 	"strconv"
+
+	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
+	"github.com/cenkalti/backoff/v4"
+	"github.com/prebid/openrtb/v19/openrtb3"
 )
 
 type Params struct {

@@ -3,8 +3,9 @@ package apihandlers
 import (
 	"context"
 	"fmt"
-	"github.com/bidon-io/bidon-backend/internal/sdkapi"
 	"net/http"
+
+	"github.com/bidon-io/bidon-backend/internal/sdkapi"
 
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"

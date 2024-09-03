@@ -2,9 +2,10 @@ package apihandlers
 
 import (
 	"fmt"
-	"github.com/bidon-io/bidon-backend/internal/sdkapi"
 	"net/http"
 	"strconv"
+
+	"github.com/bidon-io/bidon-backend/internal/sdkapi"
 
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"

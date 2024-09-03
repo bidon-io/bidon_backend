@@ -2,6 +2,7 @@ package openrtb
 
 import (
 	"encoding/json"
+
 	"github.com/prebid/openrtb/v19/adcom1"
 	"github.com/prebid/openrtb/v19/openrtb2"
 )

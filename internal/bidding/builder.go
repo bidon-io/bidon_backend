@@ -4,10 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/bidon-io/bidon-backend/internal/bidding/adapters/amazon"
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/bidon-io/bidon-backend/internal/bidding/adapters/amazon"
 
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/auction"

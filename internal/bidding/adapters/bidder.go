@@ -2,8 +2,9 @@ package adapters
 
 import (
 	"context"
-	"github.com/bidon-io/bidon-backend/internal/bidding/openrtb"
 	"net/http"
+
+	"github.com/bidon-io/bidon-backend/internal/bidding/openrtb"
 
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
