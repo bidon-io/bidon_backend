@@ -59,6 +59,59 @@ const (
 	GetAuctionJSONBodyDeviceTypeTABLET GetAuctionJSONBodyDeviceType = "TABLET"
 )
 
+// Defines values for PostClickParamsAdType.
+const (
+	PostClickParamsAdTypeBanner       PostClickParamsAdType = "banner"
+	PostClickParamsAdTypeInterstitial PostClickParamsAdType = "interstitial"
+	PostClickParamsAdTypeRewarded     PostClickParamsAdType = "rewarded"
+)
+
+// Defines values for PostClickJSONBodyBidBannerFormat.
+const (
+	PostClickJSONBodyBidBannerFormatADAPTIVE    PostClickJSONBodyBidBannerFormat = "ADAPTIVE"
+	PostClickJSONBodyBidBannerFormatBANNER      PostClickJSONBodyBidBannerFormat = "BANNER"
+	PostClickJSONBodyBidBannerFormatLEADERBOARD PostClickJSONBodyBidBannerFormat = "LEADERBOARD"
+	PostClickJSONBodyBidBannerFormatMREC        PostClickJSONBodyBidBannerFormat = "MREC"
+)
+
+// Defines values for PostClickJSONBodyBidBidType.
+const (
+	PostClickJSONBodyBidBidTypeCPM PostClickJSONBodyBidBidType = "CPM"
+	PostClickJSONBodyBidBidTypeRTB PostClickJSONBodyBidBidType = "RTB"
+)
+
+// Defines values for PostClickJSONBodyDeviceConnectionType.
+const (
+	PostClickJSONBodyDeviceConnectionTypeCELLULAR        PostClickJSONBodyDeviceConnectionType = "CELLULAR"
+	PostClickJSONBodyDeviceConnectionTypeCELLULAR2G      PostClickJSONBodyDeviceConnectionType = "CELLULAR_2_G"
+	PostClickJSONBodyDeviceConnectionTypeCELLULAR3G      PostClickJSONBodyDeviceConnectionType = "CELLULAR_3_G"
+	PostClickJSONBodyDeviceConnectionTypeCELLULAR4G      PostClickJSONBodyDeviceConnectionType = "CELLULAR_4_G"
+	PostClickJSONBodyDeviceConnectionTypeCELLULAR5G      PostClickJSONBodyDeviceConnectionType = "CELLULAR_5_G"
+	PostClickJSONBodyDeviceConnectionTypeCELLULARUNKNOWN PostClickJSONBodyDeviceConnectionType = "CELLULAR_UNKNOWN"
+	PostClickJSONBodyDeviceConnectionTypeETHERNET        PostClickJSONBodyDeviceConnectionType = "ETHERNET"
+	PostClickJSONBodyDeviceConnectionTypeWIFI            PostClickJSONBodyDeviceConnectionType = "WIFI"
+)
+
+// Defines values for PostClickJSONBodyDeviceType.
+const (
+	PostClickJSONBodyDeviceTypePHONE  PostClickJSONBodyDeviceType = "PHONE"
+	PostClickJSONBodyDeviceTypeTABLET PostClickJSONBodyDeviceType = "TABLET"
+)
+
+// Defines values for PostClickJSONBodyShowBannerFormat.
+const (
+	PostClickJSONBodyShowBannerFormatADAPTIVE    PostClickJSONBodyShowBannerFormat = "ADAPTIVE"
+	PostClickJSONBodyShowBannerFormatBANNER      PostClickJSONBodyShowBannerFormat = "BANNER"
+	PostClickJSONBodyShowBannerFormatLEADERBOARD PostClickJSONBodyShowBannerFormat = "LEADERBOARD"
+	PostClickJSONBodyShowBannerFormatMREC        PostClickJSONBodyShowBannerFormat = "MREC"
+)
+
+// Defines values for PostClickJSONBodyShowBidType.
+const (
+	PostClickJSONBodyShowBidTypeCPM PostClickJSONBodyShowBidType = "CPM"
+	PostClickJSONBodyShowBidTypeRTB PostClickJSONBodyShowBidType = "RTB"
+)
+
 // Defines values for GetConfigJSONBodyDeviceConnectionType.
 const (
 	GetConfigJSONBodyDeviceConnectionTypeCELLULAR        GetConfigJSONBodyDeviceConnectionType = "CELLULAR"
@@ -132,27 +185,27 @@ const (
 
 // Defines values for PostStatsParamsAdType.
 const (
-	Banner       PostStatsParamsAdType = "banner"
-	Interstitial PostStatsParamsAdType = "interstitial"
-	Rewarded     PostStatsParamsAdType = "rewarded"
+	PostStatsParamsAdTypeBanner       PostStatsParamsAdType = "banner"
+	PostStatsParamsAdTypeInterstitial PostStatsParamsAdType = "interstitial"
+	PostStatsParamsAdTypeRewarded     PostStatsParamsAdType = "rewarded"
 )
 
 // Defines values for PostStatsJSONBodyDeviceConnectionType.
 const (
-	PostStatsJSONBodyDeviceConnectionTypeCELLULAR        PostStatsJSONBodyDeviceConnectionType = "CELLULAR"
-	PostStatsJSONBodyDeviceConnectionTypeCELLULAR2G      PostStatsJSONBodyDeviceConnectionType = "CELLULAR_2_G"
-	PostStatsJSONBodyDeviceConnectionTypeCELLULAR3G      PostStatsJSONBodyDeviceConnectionType = "CELLULAR_3_G"
-	PostStatsJSONBodyDeviceConnectionTypeCELLULAR4G      PostStatsJSONBodyDeviceConnectionType = "CELLULAR_4_G"
-	PostStatsJSONBodyDeviceConnectionTypeCELLULAR5G      PostStatsJSONBodyDeviceConnectionType = "CELLULAR_5_G"
-	PostStatsJSONBodyDeviceConnectionTypeCELLULARUNKNOWN PostStatsJSONBodyDeviceConnectionType = "CELLULAR_UNKNOWN"
-	PostStatsJSONBodyDeviceConnectionTypeETHERNET        PostStatsJSONBodyDeviceConnectionType = "ETHERNET"
-	PostStatsJSONBodyDeviceConnectionTypeWIFI            PostStatsJSONBodyDeviceConnectionType = "WIFI"
+	CELLULAR        PostStatsJSONBodyDeviceConnectionType = "CELLULAR"
+	CELLULAR2G      PostStatsJSONBodyDeviceConnectionType = "CELLULAR_2_G"
+	CELLULAR3G      PostStatsJSONBodyDeviceConnectionType = "CELLULAR_3_G"
+	CELLULAR4G      PostStatsJSONBodyDeviceConnectionType = "CELLULAR_4_G"
+	CELLULAR5G      PostStatsJSONBodyDeviceConnectionType = "CELLULAR_5_G"
+	CELLULARUNKNOWN PostStatsJSONBodyDeviceConnectionType = "CELLULAR_UNKNOWN"
+	ETHERNET        PostStatsJSONBodyDeviceConnectionType = "ETHERNET"
+	WIFI            PostStatsJSONBodyDeviceConnectionType = "WIFI"
 )
 
 // Defines values for PostStatsJSONBodyDeviceType.
 const (
-	PostStatsJSONBodyDeviceTypePHONE  PostStatsJSONBodyDeviceType = "PHONE"
-	PostStatsJSONBodyDeviceTypeTABLET PostStatsJSONBodyDeviceType = "TABLET"
+	PHONE  PostStatsJSONBodyDeviceType = "PHONE"
+	TABLET PostStatsJSONBodyDeviceType = "TABLET"
 )
 
 // Defines values for PostStatsJSONBodyStatsAdUnitsStatus.
@@ -457,6 +510,389 @@ type GetAuctionJSONBodyDeviceConnectionType string
 
 // GetAuctionJSONBodyDeviceType defines parameters for GetAuction.
 type GetAuctionJSONBodyDeviceType string
+
+// PostClickJSONBody defines parameters for PostClick.
+type PostClickJSONBody struct {
+	App struct {
+		// Bundle The bundle identifier of the application, typically in reverse domain name notation (e.g., com.example.myapp).
+		Bundle string `json:"bundle"`
+
+		// Framework The name of the framework used by the application (e.g., React Native, Flutter, etc.).
+		Framework string `json:"framework"`
+
+		// FrameworkVersion The version of the framework used by the application, specifying compatibility.
+		FrameworkVersion *string `json:"framework_version,omitempty"`
+
+		// Key A unique key or identifier for the application.
+		Key string `json:"key"`
+
+		// PluginVersion The version of the plugin integrated into the application
+		PluginVersion *string `json:"plugin_version,omitempty"`
+
+		// SdkVersion The version of the SDK used in the application.
+		SdkVersion *string `json:"sdk_version,omitempty"`
+
+		// Skadn An array of SKAdNetwork IDs for ad attribution, used primarily for iOS applications.
+		Skadn *[]string `json:"skadn,omitempty"`
+
+		// Version The version of the application, typically following semantic versioning (e.g., 1.0.0).
+		Version string `json:"version"`
+	} `json:"app"`
+	Bid    *PostClickJSONBody_Bid `json:"bid,omitempty"`
+	Device struct {
+		// Carrier Carrier
+		Carrier *string `json:"carrier,omitempty"`
+
+		// ConnectionType Connection Type
+		ConnectionType PostClickJSONBodyDeviceConnectionType `json:"connection_type"`
+		Geo            *struct {
+			// Accuracy Accuracy of the location data
+			Accuracy *float32 `json:"accuracy,omitempty"`
+
+			// City City name
+			City *string `json:"city,omitempty"`
+
+			// Country Country code or name
+			Country *string `json:"country,omitempty"`
+
+			// Lastfix Timestamp of the last location fix in seconds since epoch
+			Lastfix *int `json:"lastfix,omitempty"`
+
+			// Lat Latitude of the location
+			Lat *float32 `json:"lat,omitempty"`
+
+			// Lon Longitude of the location
+			Lon *float32 `json:"lon,omitempty"`
+
+			// Utcoffset UTC offset in minutes
+			Utcoffset *int `json:"utcoffset,omitempty"`
+
+			// Zip ZIP or postal code
+			Zip *string `json:"zip,omitempty"`
+		} `json:"geo,omitempty"`
+
+		// H Height
+		H int `json:"h"`
+
+		// Hwv Hardware Version
+		Hwv string `json:"hwv"`
+
+		// Js JavaScript support
+		Js int `json:"js"`
+
+		// Language Language
+		Language string `json:"language"`
+
+		// Make Manufacturer
+		Make string `json:"make"`
+
+		// Mccmnc Mobile Country Code and Mobile Network Code
+		Mccmnc *string `json:"mccmnc,omitempty"`
+
+		// Model Model
+		Model string `json:"model"`
+
+		// Os Operating System
+		Os string `json:"os"`
+
+		// Osv Operating System Version
+		Osv string `json:"osv"`
+
+		// Ppi Pixels per Inch (PPI)
+		Ppi int `json:"ppi"`
+
+		// Pxratio Pixel Ratio
+		Pxratio float32 `json:"pxratio"`
+
+		// Type Device Type
+		Type *PostClickJSONBodyDeviceType `json:"type,omitempty"`
+
+		// Ua UserAgent
+		Ua string `json:"ua"`
+
+		// W Width
+		W int `json:"w"`
+	} `json:"device"`
+	Ext *string `json:"ext,omitempty"`
+	Geo *struct {
+		// Accuracy Accuracy of the location data
+		Accuracy *float32 `json:"accuracy,omitempty"`
+
+		// City City name
+		City *string `json:"city,omitempty"`
+
+		// Country Country code or name
+		Country *string `json:"country,omitempty"`
+
+		// Lastfix Timestamp of the last location fix in seconds since epoch
+		Lastfix *int `json:"lastfix,omitempty"`
+
+		// Lat Latitude of the location
+		Lat *float32 `json:"lat,omitempty"`
+
+		// Lon Longitude of the location
+		Lon *float32 `json:"lon,omitempty"`
+
+		// Utcoffset UTC offset in minutes
+		Utcoffset *int `json:"utcoffset,omitempty"`
+
+		// Zip ZIP or postal code
+		Zip *string `json:"zip,omitempty"`
+	} `json:"geo,omitempty"`
+	Regs *struct {
+		// Coppa Indicates if COPPA regulations apply
+		Coppa *bool `json:"coppa,omitempty"`
+
+		// EuPrivacy EU privacy string indicating compliance
+		EuPrivacy *string `json:"eu_privacy,omitempty"`
+
+		// Gdpr Indicates if GDPR regulations apply
+		Gdpr *bool `json:"gdpr,omitempty"`
+
+		// Iab IAB-specific settings or values
+		Iab *map[string]interface{} `json:"iab,omitempty"`
+
+		// UsPrivacy US privacy string indicating compliance
+		UsPrivacy *string `json:"us_privacy,omitempty"`
+	} `json:"regs,omitempty"`
+	Segment *struct {
+		// Ext An extension field for additional information about the segment.
+		Ext *string `json:"ext,omitempty"`
+		Id  *string `json:"id,omitempty"`
+		Uid *string `json:"uid,omitempty"`
+	} `json:"segment,omitempty"`
+	Session struct {
+		// Battery Battery level percentage
+		Battery float32 `json:"battery"`
+
+		// CpuUsage CPU usage percentage
+		CpuUsage float32 `json:"cpu_usage"`
+
+		// Id Unique identifier for the session
+		Id openapi_types.UUID `json:"id"`
+
+		// LaunchMonotonicTs Monotonic timestamp of the session launch
+		LaunchMonotonicTs int `json:"launch_monotonic_ts"`
+
+		// LaunchTs Timestamp of the session launch
+		LaunchTs int `json:"launch_ts"`
+
+		// MemoryWarningsMonotonicTs Monotonic timestamps when memory warnings occurred
+		MemoryWarningsMonotonicTs []int `json:"memory_warnings_monotonic_ts"`
+
+		// MemoryWarningsTs Timestamps when memory warnings occurred
+		MemoryWarningsTs []int `json:"memory_warnings_ts"`
+
+		// MonotonicTs Current monotonic timestamp of the session
+		MonotonicTs int `json:"monotonic_ts"`
+
+		// RamSize Total size of RAM
+		RamSize int `json:"ram_size"`
+
+		// RamUsed Amount of RAM used
+		RamUsed int `json:"ram_used"`
+
+		// StartMonotonicTs Monotonic timestamp of the session start
+		StartMonotonicTs int `json:"start_monotonic_ts"`
+
+		// StartTs Timestamp of the session start
+		StartTs int `json:"start_ts"`
+
+		// StorageFree Free storage space available
+		StorageFree *int `json:"storage_free,omitempty"`
+
+		// StorageUsed Used storage space
+		StorageUsed *int `json:"storage_used,omitempty"`
+
+		// Ts Current timestamp of the session
+		Ts int `json:"ts"`
+	} `json:"session"`
+	Show  *PostClickJSONBody_Show `json:"show,omitempty"`
+	Token *string                 `json:"token,omitempty"`
+	User  struct {
+		// Consent Consent settings or preferences
+		Consent *map[string]interface{} `json:"consent,omitempty"`
+
+		// Coppa Indicates if COPPA (Children's Online Privacy Protection Act) applies
+		Coppa *bool `json:"coppa,omitempty"`
+
+		// Idfa Identifier for Advertisers (IDFA)
+		Idfa *openapi_types.UUID `json:"idfa,omitempty"`
+
+		// Idfv Identifier for Vendors (IDFV)
+		Idfv *openapi_types.UUID `json:"idfv,omitempty"`
+
+		// Idg Generic identifier (IDG)
+		Idg *openapi_types.UUID `json:"idg,omitempty"`
+
+		// TrackingAuthorizationStatus Status of tracking authorization
+		TrackingAuthorizationStatus string `json:"tracking_authorization_status"`
+	} `json:"user"`
+	union json.RawMessage
+}
+
+// PostClickParamsAdType defines parameters for PostClick.
+type PostClickParamsAdType string
+
+// PostClickJSONBodyBidBannerFormat defines parameters for PostClick.
+type PostClickJSONBodyBidBannerFormat string
+
+// PostClickJSONBodyBidBidType defines parameters for PostClick.
+type PostClickJSONBodyBidBidType string
+
+// PostClickJSONBodyBid0 defines parameters for PostClick.
+type PostClickJSONBodyBid0 = interface{}
+
+// PostClickJSONBodyBid1 defines parameters for PostClick.
+type PostClickJSONBodyBid1 = interface{}
+
+// PostClickJSONBody_Bid defines parameters for PostClick.
+type PostClickJSONBody_Bid struct {
+	// AdUnitId Deprecated: use ad_unit_uid instead
+	AdUnitId *string `json:"ad_unit_id,omitempty"`
+
+	// AdUnitLabel Label of the ad unit
+	AdUnitLabel *string `json:"ad_unit_label,omitempty"`
+
+	// AdUnitUid UID of the ad unit
+	AdUnitUid *string `json:"ad_unit_uid,omitempty"`
+
+	// AuctionConfigurationId ID of the auction configuration
+	AuctionConfigurationId *int64 `json:"auction_configuration_id"`
+
+	// AuctionConfigurationUid UID of the auction configuration
+	AuctionConfigurationUid *string `json:"auction_configuration_uid"`
+
+	// AuctionId Unique identifier for the auction
+	AuctionId string `json:"auction_id"`
+
+	// AuctionPriceFloor Auction PriceFloor
+	AuctionPriceFloor *float32 `json:"auction_price_floor,omitempty"`
+	Banner            *struct {
+		// Format Format of the banner ad
+		Format PostClickJSONBodyBidBannerFormat `json:"format"`
+	} `json:"banner,omitempty"`
+
+	// BidType Type of bid (RTB or CPM)
+	BidType *PostClickJSONBodyBidBidType `json:"bid_type,omitempty"`
+
+	// DemandId ID of the demand source
+	DemandId string `json:"demand_id"`
+
+	// Ecpm Estimated cost per mille, deprecated: use price instead
+	Ecpm *float32 `json:"ecpm"`
+
+	// ImpId Impression ID
+	ImpId *string `json:"imp_id,omitempty"`
+
+	// Interstitial Empty schema for interstitial ad configuration
+	Interstitial *map[string]interface{} `json:"interstitial,omitempty"`
+
+	// LineItemUid Deprecated: use ad_unit_uid instead
+	LineItemUid *string `json:"line_item_uid,omitempty"`
+
+	// Price Price of the bid
+	Price *float32 `json:"price"`
+
+	// Rewarded Empty schema for rewarded ad configuration
+	Rewarded *map[string]interface{} `json:"rewarded,omitempty"`
+
+	// RoundId Round ID for the bidding process
+	RoundId *string `json:"round_id,omitempty"`
+
+	// RoundIdx Index of the round in the bidding process
+	RoundIdx *int `json:"round_idx,omitempty"`
+
+	// RoundPriceFloor PriceFloor for the bidding round
+	RoundPriceFloor *float32 `json:"round_price_floor,omitempty"`
+	union           json.RawMessage
+}
+
+// PostClickJSONBodyDeviceConnectionType defines parameters for PostClick.
+type PostClickJSONBodyDeviceConnectionType string
+
+// PostClickJSONBodyDeviceType defines parameters for PostClick.
+type PostClickJSONBodyDeviceType string
+
+// PostClickJSONBodyShowBannerFormat defines parameters for PostClick.
+type PostClickJSONBodyShowBannerFormat string
+
+// PostClickJSONBodyShowBidType defines parameters for PostClick.
+type PostClickJSONBodyShowBidType string
+
+// PostClickJSONBodyShow0 defines parameters for PostClick.
+type PostClickJSONBodyShow0 = interface{}
+
+// PostClickJSONBodyShow1 defines parameters for PostClick.
+type PostClickJSONBodyShow1 = interface{}
+
+// PostClickJSONBody_Show defines parameters for PostClick.
+type PostClickJSONBody_Show struct {
+	// AdUnitId Deprecated: use ad_unit_uid instead
+	AdUnitId *string `json:"ad_unit_id,omitempty"`
+
+	// AdUnitLabel Label of the ad unit
+	AdUnitLabel *string `json:"ad_unit_label,omitempty"`
+
+	// AdUnitUid UID of the ad unit
+	AdUnitUid *string `json:"ad_unit_uid,omitempty"`
+
+	// AuctionConfigurationId ID of the auction configuration
+	AuctionConfigurationId *int64 `json:"auction_configuration_id"`
+
+	// AuctionConfigurationUid UID of the auction configuration
+	AuctionConfigurationUid *string `json:"auction_configuration_uid"`
+
+	// AuctionId Unique identifier for the auction
+	AuctionId string `json:"auction_id"`
+
+	// AuctionPriceFloor Auction PriceFloor
+	AuctionPriceFloor *float32 `json:"auction_price_floor,omitempty"`
+	Banner            *struct {
+		// Format Format of the banner ad
+		Format PostClickJSONBodyShowBannerFormat `json:"format"`
+	} `json:"banner,omitempty"`
+
+	// BidType Type of bid (RTB or CPM)
+	BidType *PostClickJSONBodyShowBidType `json:"bid_type,omitempty"`
+
+	// DemandId ID of the demand source
+	DemandId string `json:"demand_id"`
+
+	// Ecpm Estimated cost per mille, deprecated: use price instead
+	Ecpm *float32 `json:"ecpm"`
+
+	// ImpId Impression ID
+	ImpId *string `json:"imp_id,omitempty"`
+
+	// Interstitial Empty schema for interstitial ad configuration
+	Interstitial *map[string]interface{} `json:"interstitial,omitempty"`
+
+	// LineItemUid Deprecated: use ad_unit_uid instead
+	LineItemUid *string `json:"line_item_uid,omitempty"`
+
+	// Price Price of the bid
+	Price *float32 `json:"price"`
+
+	// Rewarded Empty schema for rewarded ad configuration
+	Rewarded *map[string]interface{} `json:"rewarded,omitempty"`
+
+	// RoundId Round ID for the bidding process
+	RoundId *string `json:"round_id,omitempty"`
+
+	// RoundIdx Index of the round in the bidding process
+	RoundIdx *int `json:"round_idx,omitempty"`
+
+	// RoundPriceFloor PriceFloor for the bidding round
+	RoundPriceFloor *float32 `json:"round_price_floor,omitempty"`
+	union           json.RawMessage
+}
+
+// PostClickJSONBody0 defines parameters for PostClick.
+type PostClickJSONBody0 = interface{}
+
+// PostClickJSONBody1 defines parameters for PostClick.
+type PostClickJSONBody1 = interface{}
 
 // GetConfigJSONBody defines parameters for GetConfig.
 type GetConfigJSONBody struct {
@@ -1401,6 +1837,9 @@ type PostStatsJSONBody_Stats struct {
 // GetAuctionJSONRequestBody defines body for GetAuction for application/json ContentType.
 type GetAuctionJSONRequestBody GetAuctionJSONBody
 
+// PostClickJSONRequestBody defines body for PostClick for application/json ContentType.
+type PostClickJSONRequestBody PostClickJSONBody
+
 // GetConfigJSONRequestBody defines body for GetConfig for application/json ContentType.
 type GetConfigJSONRequestBody GetConfigJSONBody
 
@@ -1418,6 +1857,9 @@ type ServerInterface interface {
 	// Auction
 	// (POST /v2/auction/{ad_type})
 	GetAuction(ctx echo.Context, adType GetAuctionParamsAdType) error
+	// Click
+	// (POST /v2/click{ad_type})
+	PostClick(ctx echo.Context, adType PostClickParamsAdType) error
 	// Get config
 	// (POST /v2/config)
 	GetConfig(ctx echo.Context) error
@@ -1456,6 +1898,22 @@ func (w *ServerInterfaceWrapper) GetAuction(ctx echo.Context) error {
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.GetAuction(ctx, adType)
+	return err
+}
+
+// PostClick converts echo context to params.
+func (w *ServerInterfaceWrapper) PostClick(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "ad_type" -------------
+	var adType PostClickParamsAdType
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ad_type", ctx.Param("ad_type"), &adType, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter ad_type: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PostClick(ctx, adType)
 	return err
 }
 
@@ -1530,6 +1988,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 
 	router.GET(baseURL+"/openapi.json", wrapper.GetOpenAPISpec)
 	router.POST(baseURL+"/v2/auction/:ad_type", wrapper.GetAuction)
+	router.POST(baseURL+"/v2/click:ad_type", wrapper.PostClick)
 	router.POST(baseURL+"/v2/config", wrapper.GetConfig)
 	router.POST(baseURL+"/v2/show/:ad_type", wrapper.PostShow)
 	router.POST(baseURL+"v2/stats/:ad_type", wrapper.PostStats)
@@ -1539,75 +1998,76 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/+xcfW/bOJP/KoTuAa7FKS+bfe4OyH+O7Xb9bJoYTtIFbrEwaGlscyuRWpJK4g3y3Q98",
-	"k2iJku22afostv804suQHM78ODMc+ilKWF4wClSK6PwpEskacqz/xOnRkvEcS/XxD5JG53XRsWl3/Ltg",
-	"NIqjf5jP6DxaS1mI85MTVXFkGzG+Okk5XsqTs9Oz06Mfzk5s8zhKQSScFJIwGp1H7zRtxJZIrgEtMKXA",
-	"EU6jOAJa5tH5r9HF4OpqPIvi6HI8GI1nF9eD2SiKow+z8TCKo8FoML2dfBxHv8WRJDKD6Dy60FQG6fXi",
-	"d0hkFEdyU6hyITmhq+g5VotiptJfpyk6uj/7WkvFaUrUOnE25awALgmI6HyJMwFxVHhFTxEuE9VynjC6",
-	"JKuSY/2lZvbU4Nhk5Lhl+6CtPlEcuS2MCJX/8896/YRKWAHXDAgOV4bGu9s9YJu/lnyQHiV/lIBIClSS",
-	"JQGOloz75PsIfoJNm+J7oMCxhBR9gk2TGuLwRwlC9lEtOElgmTHG28Snqu6dqgvMMyeU5EpMTyvqtMwX",
-	"hsdGmLWEcVhG59F/nNSKZ4VEnJhWR7VEPisVyTFNrUaGRKg5yZHugFhD4H2KfvMPuFBb6oaJI3jEeZEp",
-	"yr8+RTlIrHFBYlmK6Dy6uRsOxzc3ii77BIqA+d9+z5eEErGeKzT54X9P63+uXkjMZav6h+c4ui/pSqms",
-	"N9i7weTyq4/0/FuAJ0oduJBEEpzt2iW/7fZeMU6ASqMJrX25risrHfKxbXo9u50NJrcK3QZXo5vhYGqQ",
-	"rCmpHB4wTyHdNU/Xzp+j7v5HSbjq/mtI6GuJ81DU4efHs5BA4fTIlNX4ebspQEPmcQWAn42cjkFWhxqb",
-	"5fFja8JITaED70tKttFeFbwC0C9IOnec2xYWNXklJQuSIiwES4jGtAci11ZykF5EYH1m+8LHRRtnTWsk",
-	"WMmTILvgUXZjj+QlNAFlULVE9WprvGxOvBajDC8ga0/6UhV3969n2ofc10U1JZIAWm5jeEWzF8PLA0+w",
-	"rpk2dLDeLzOEY0Rci8eWYN91sA+nuJD2jNFyXQGBrflaAr4twyL9NL8HLizmtXalu67BB9cw3iIZAmtc",
-	"FJ72FsXLLGxR0jQLqaayTXWdv+sO0YsiI4kG+RjJTUESnGUbRJTpoZYEKGU5JhRRnAOizJ4Hb+B4dRyj",
-	"hOXH9vg9zje4KN4ehwR9yXEOD4x/Ck9Ok7bzqZqiUkCKFpvmLN3QM8CJRFdYknuI0buslBJ4jEAmxzsm",
-	"4e9+ezK2cu/5xEgUkJDlhtCV4keBJVmQjMhNcBZBG3CgFE9ppTIBGQ8qZz1ikG6RlStCD1qa6YK0YW0s",
-	"UEIla44WGqyhQjtHuhn9bNhH6F6LEZ9wGqA8oAhzjjeK7M3Pg/QKpN6ZycjANU4RlpKTRWk2Rg9ZcJJj",
-	"TjJjW5PrG390oYYnEnIRhAJboAdtQMPONXco1pJlGXtQsiIUjEqSuI6qzMr2D8enx6chKW4gkNV4I1W+",
-	"mtVTDcKRMaKOrB1xxEGUmW9fBOtfw69M52oC896DtjJNO89ZR2anh9hNwjd8jAW7IMaI3GLLDmumGmnL",
-	"iNnHVADOGZ/nIAReBSB+rKqRre6zv2JElk40F1nQflqSLPN9lZaskxyExHmBHtZAHXHVC5lekO7nxuuB",
-	"aqfngHF0p32H0QZUh2u8w1Ttta6c09ckfKPL2zLlvIIo9nxS6zBOx1ejydX7oPfUch73YJTuo6zZBIQ4",
-	"cFuazujBwx2wOz2WpWWvb0kaWDIG5cxgVg+6udBJC9ZsxevgmRe56/GEt5x0aw33RlT6iRk7+7nHMu3r",
-	"XhQG1+6tHvU1tq1qN6wlzitgu4ioJloyVmJ3yGBVZuYo1zoJqxzoTva6ZrqHcEd6fw/TTPHQClUjFJzh",
-	"FSI01Uc+XSG5xlLrhpU2RATCSG7F8haMZYAN0Rw/tol+wI8KfxAHUTAqAEmS18eFAH4PHC1gybipYqU8",
-	"QMeD21OK3VE/3aatu3rna44a4bIUPSmOPTVoa/fHs1kz5BlSbcOPkG6bmtczVgKIeUmEviSwZ4FAHGTJ",
-	"qWcPVzHZyhbdgQ76TAlYqH9H4veKxL9MzNxRd6oYPDpZKVtRfkJRTrKMCEiYiWm3WQ2PEjjF2fyB0Dll",
-	"as3WhwnsrcEhEMracx3Rg/Li/Y4Ic0BAlSGYBlGJsvmCpPtItIY7DgmQe0gRZUj3+3J5PhzQK2hrsN6F",
-	"4nsdqk716RP13r2Ja1yoVxNXNwPBeHZTjrYUoQ2ZM4eG/YgZdPFez7WzKzrQ0bAKc5hF68Y6zNewQx3k",
-	"a3z+rdl+kfU3s9sLxDgaTj+89VyK2e1FFEfD6YegA/F1rop63SgL7A+E6jDGQmtFL1Z+yZ3Q3r5XBduO",
-	"US3Ha3A3vJ1cX82Hg6vh+PJyPApyUK0L+PyQcIRjxf5+d2OQXYfoZw+wV4DCUd8KVOwco4GmnS5ct/PW",
-	"Uo0KsZo1r4BZXnZJ/2lmGzb5YYv3SPbwGSKg7cr6pa8B3n97jQd7jd/a49qSMgE9XtXCQIGVLJJ+E4Fi",
-	"FK6XOmNjL/vrt+d4n5albvpbVxw5hHkjKDgoYzk9R6UA5OEvIlRIwGlfTPn1Q9Mv6vLRMss01tub85d2",
-	"ATvG+1Yu4bzDJ7TnFqp9w5fLn/Itwd6+9gLi8y4dgpcMSZEH7haEJLmOkCdMSFQA184qxChtqI5JVaiV",
-	"pmMzayaRvAjPOS+4wTQ0GUUvZtJmhMJceahhcf1MZNjHUDYG8k7+fJmRzFnZIRMzVYMmo0o/FiRNlbln",
-	"Q/ihZTlqj8FwAzy6pel2LrDVSdcDEEO4V/0CIRlHWffuV8YOH19vQa04/nlJ0o5zspE2FrwD/GrZxQc7",
-	"fnb6ygkSHZeYimdHBnS3luGVv0xyirlVshGNeS7Cd+i2HqX2RKi229wwNeJkx3teMXn7qmVmaNYf2GLD",
-	"gba9vV3+Mhz6+5rnr2iwd4tY8wqjUfE62Z1KP/YwPHwY0ccxkbuPYSK9LkWGE8jdKw4XJv66EeBmdGJb",
-	"vDXTzffLKHSCOScQOM6GtiIA0QmjFGz0NxgNHFYNXL6wOwvGtz+NZ1fj2yiOfpm8m6hzYXx5eXc5mHl/",
-	"zu+ufr66/uXKLzqbv/c/f9z+/Of253/Pw1kK++v7ur2on4Cs1jJoHawf7gPtMU8fMAf0sUrBbE3o98AR",
-	"8y98j2/0NxJlUTAeHjPDdFUG82wuXU1gwBx/gtAVLi2XOJElD294niQ5TQL92IJkgIaspJJv0JClgJT1",
-	"bstd6psqD5Jlacgt/aCLA+2ZCKUgAzeX2TcbISEP97vf3bFvm4qCBOw98giZ0K7GhCZr9GY6nbwNJ/c8",
-	"akOhgwSa6cqAZR1WrpFGg6ZiTX+6vhpHcXQ7uLgc3walv8QBb1QAH6zsdU8rFttu/wtJ5Xp3jkypgEbL",
-	"mttlvXtmK4y+KB1TQxju1kzSSuGJdxtuPCty5KJLrRNM56LVEKo/XwZBq5EawKqEvsZ3Txy8BLl2aLqx",
-	"EM8w1OlzoaU6VNMLXQF7IcsvSUqOk1BisK1xzlXGbBJ0iiUOyXVCZIDMkMiNzrIOHzkaYkJHjcEexW7l",
-	"e3QRyLCQS/LYd6vmpo+FrNewJI/KorfGPBKEJoCgYMm6A5VlCJAlkWUKTQaFeJOFMncvGV3tTaGUCVsu",
-	"BQQmcnc7RKbOeCm0lBD2d/8kRbv7/02misUFExJnmuPB2xUnsO+BRcFHYbWNVYmtV/gqWTE7vZqQlezy",
-	"oQ7NINT9vGQjD9AmlMge168jTOSxMVT/TTjaiMflhdwg09PktHszQzhtp9VUDKjb9V05+c5WtXyv8IWs",
-	"ZVYUeEcqy/B6Oh0gbyr6NnITzF2Bcl5wch+E1fEdsnXIKJefuacs14xgGo6RrtKC75jl+9F0tuckCV4c",
-	"9lZtMrg4Mu9NSIIESDVjoZDjHmelDzj1dpaimxF3N5/JCA+LZp64BKWpFZv0hKpZ9z3ok5tVny7NbJs+",
-	"PfI9V71cW/BCttKjDL6YgUcJVJjzFrLUPpSpXjwSaiBWNcALVkqbWmpmGoy9p+GoSLDck5ObOvmpzak6",
-	"OmM5pQte6J0clhJCBs+FqUAZ3EOmvI8EqNzy9jxDqyjnZfgxxnB6h3TVDhKHXWHVl7zVmViWJA0bZCVN",
-	"1vOcUSYZJUkw5emDq9VB1y0zzQ6FDJ0OY0wP0Z9LtT+5HHLGN/MHzKkCtMOnLkzilqGDHB3ElP3MdfZW",
-	"85WXnw3dCDk1Z9O7yq87cu+6h4oilSjfuXXhixaczwX5M5RixpTVqeoUndngQ2f/UkBAage5chVsX/3s",
-	"LkjA5N99sVhqMj0DHCSUfcQYxyuYLzkEWPaOAyDbBIkCJ4DwPSbZdmJUgFyYg3cC0m1y4bz9Hqk4QBYa",
-	"RrN9w+00OgwgHneDO6kn15DgoCrt0HZPzjyRjSvU9qHXv/RqLtY7XdbsoX2l45d+E6sDZ5nNeOnPCPDy",
-	"vZ7jp45EmUUoJ0YtKZT+4hJ8+mP6jlV7NW37bP5erNlDT76R0PeT9Uaoz79szlFP8rzJvTZPlwEna5fk",
-	"87mvQsKver/1I5F/q4yh+seXyu/vOYmXs7/Htrvt7st24C7vthLO7rSBhr4GANQv/p4RtPHzHxX69N0m",
-	"6kahfGYReFHfZGIf9pVJAkIErn+bNa8Qq7NT2BHeUBLMzA0Po+gBC2T7LcssEORo8tCO4fPMFPU9Y6mu",
-	"3DWr1NdLBaGosC77/jGZoem0FY4pOCyBA03CMZn9g11vhmuSpRzofwp0TTNCAU1txGbKmbRXwYNEvjWZ",
-	"+f54fqApXeKdP680SO/VOgVwgd5MRu8Gb/fxNkm6vN9J+iPQlFmyH/cku+rAa5L4MP1mMnq/F0HJcfKJ",
-	"0NUcl3LNOPkTu0dBu56S2I5oq+PO1w/943nyfycgcPn0rGPSS33/VGnK6Gc0mE68n/c4j/Rvheir2AIo",
-	"Lkh0Hv14fHr8o5JtLNd6ZSe2zmjL+VO0Cl1hzPSrVKEV/LoAOphO0L9urq+QCzhup2QNppPjSA9roGCS",
-	"6g2StutNAYk5crRW63mcnZ5aLZNOy+pfSTlxk3Oq/BRiSeumuWOaJpdpie0J2jFkwdkig/y/2kP3nQ7m",
-	"WjIwnbGtUDif55hvDEcqbjZm+BxHJ/dn7gQ/ecIm8fdZ33gy98r8i9dwvD3x7R8s6VxEYGcHld1SYI5z",
-	"MPc6v7aiASmS5gadqE8lhcpOw7k2Qm1ys68rBlT347376T79q4j2lL9g6eYgudrPnrIWRJtDg9aPc26v",
-	"5fkLxX5Pc8+clr3zq9r4Eum20clffWH4PQpddWP3EpvdyPcMTMwM/ypb3cwU7JtdcKMV9LiMO7vXysH/",
-	"zoFmyoS8WbOHvzbMbAWlAsxRHHgVqWt5KN2TCwqd3jpVpKRNeUM7xe0rylhc84CWWXaIxFnv968sclt+",
-	"fGhbVYPvV+js7MJSZx325+f/DwAA//8DPeX3IV4AAA==",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

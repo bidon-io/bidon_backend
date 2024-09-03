@@ -194,3 +194,50 @@ func TestServer_PostShow(t *testing.T) {
 		})
 	}
 }
+
+func TestServer_PostClick(t *testing.T) {
+	e := echo.New()
+
+	clickHandlerMock := &mocks.HandlerMock{
+		HandleFunc: func(c echo.Context) error {
+			return nil
+		},
+	}
+
+	srv := &api.Server{
+		ClickHandler: clickHandlerMock,
+	}
+
+	tests := []struct {
+		name        string
+		handler     func(c echo.Context, _ api.PostClickParamsAdType) error
+		method      string
+		url         string
+		adType      api.PostClickParamsAdType
+		mockHandler *mocks.HandlerMock
+	}{
+		{
+			name:        "PostClick",
+			handler:     srv.PostClick,
+			method:      http.MethodPost,
+			url:         "/v2/click/banner",
+			adType:      "banner",
+			mockHandler: clickHandlerMock,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req := httptest.NewRequest(tt.method, tt.url, nil)
+			rec := httptest.NewRecorder()
+			c := e.NewContext(req, rec)
+			if err := tt.handler(c, tt.adType); err != nil {
+				t.Errorf("unexpected error: %v", err)
+			}
+
+			if calls := len(tt.mockHandler.HandleCalls()); calls != 1 {
+				t.Errorf("expected Handle to be called once, got %d calls", calls)
+			}
+		})
+	}
+}
