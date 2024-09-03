@@ -34,6 +34,37 @@ paths:
           application/problem+json:
             schema:
               $ref: './schemas/error.schema.json'
+  /v2/click{ad_type}:
+    post:
+      summary: Click
+      operationId: postClick
+      parameters:
+        - name: ad_type
+          in: path
+          description: Ad type
+          required: true
+          schema:
+            $ref: './schemas/ad-type.schema.json'
+      requestBody:
+        description: Click request
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/click-request.schema.json'
+      responses:
+        '200':
+          description: Click response
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/success-response.schema.json'
+      default:
+        description: Error
+        content:
+          application/problem+json:
+            schema:
+              $ref: './schemas/error.schema.json'
   /v2/config:
     post:
       summary: Get config
