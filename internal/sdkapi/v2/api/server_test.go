@@ -241,3 +241,50 @@ func TestServer_PostClick(t *testing.T) {
 		})
 	}
 }
+
+func TestServer_PostReward(t *testing.T) {
+	e := echo.New()
+
+	rewardHandlerMock := &mocks.HandlerMock{
+		HandleFunc: func(c echo.Context) error {
+			return nil
+		},
+	}
+
+	srv := &api.Server{
+		RewardHandler: rewardHandlerMock,
+	}
+
+	tests := []struct {
+		name        string
+		handler     func(c echo.Context, _ api.PostRewardParamsAdType) error
+		method      string
+		url         string
+		adType      api.PostRewardParamsAdType
+		mockHandler *mocks.HandlerMock
+	}{
+		{
+			name:        "PostReward",
+			handler:     srv.PostReward,
+			method:      http.MethodPost,
+			url:         "/v2/reward/banner",
+			adType:      "banner",
+			mockHandler: rewardHandlerMock,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req := httptest.NewRequest(tt.method, tt.url, nil)
+			rec := httptest.NewRecorder()
+			c := e.NewContext(req, rec)
+			if err := tt.handler(c, tt.adType); err != nil {
+				t.Errorf("unexpected error: %v", err)
+			}
+
+			if calls := len(tt.mockHandler.HandleCalls()); calls != 1 {
+				t.Errorf("expected Handle to be called once, got %d calls", calls)
+			}
+		})
+	}
+}
