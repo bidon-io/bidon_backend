@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/bidon-io/bidon-backend/internal/admin"
-	"github.com/bidon-io/bidon-backend/internal/admin/store"
+	adminstore "github.com/bidon-io/bidon-backend/internal/admin/store"
 	"github.com/bidon-io/bidon-backend/internal/db"
 	"github.com/bidon-io/bidon-backend/internal/db/dbtest"
 	"github.com/bidon-io/bidon-backend/internal/segment"

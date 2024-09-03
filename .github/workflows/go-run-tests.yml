@@ -23,7 +23,6 @@ jobs:
           url: ${{ secrets.CODECOV_URL }}
           directory: ./testcov/
           fail_ci_if_error: true
-          codecov_yml_path: ./codecov.yml
 
       - run: docker compose down --rmi local -v
         if: always()

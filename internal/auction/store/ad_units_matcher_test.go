@@ -3,9 +3,10 @@ package store_test
 import (
 	"context"
 	"database/sql"
-	"github.com/bidon-io/bidon-backend/config"
 	"testing"
 	"time"
+
+	"github.com/bidon-io/bidon-backend/config"
 
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"

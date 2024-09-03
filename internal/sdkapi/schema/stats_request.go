@@ -203,16 +203,3 @@ func (b StatsBid) GetAdUnitUID() int {
 func (b StatsBid) IsFill() bool {
 	return b.Status == "WIN" || b.Status == "LOSE"
 }
-
-type mapper interface {
-	Map() map[string]any
-}
-
-func sliceMap[E mapper](s []E) []map[string]any {
-	m := make([]map[string]any, len(s))
-	for i, e := range s {
-		m[i] = e.Map()
-	}
-
-	return m
-}

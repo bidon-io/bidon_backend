@@ -1,9 +1,10 @@
 package event
 
 import (
+	"testing"
+
 	"github.com/bidon-io/bidon-backend/config"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
-	"testing"
 
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/geocoder"
 )

@@ -3,11 +3,12 @@ package notification_test
 import (
 	"context"
 	"fmt"
-	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
-	"github.com/bidon-io/bidon-backend/internal/sdkapi/event/engine"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
+	"github.com/bidon-io/bidon-backend/internal/sdkapi/event/engine"
 
 	"github.com/bidon-io/bidon-backend/internal/notification"
 	"github.com/google/go-cmp/cmp"

@@ -4,14 +4,15 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log"
+	"strconv"
+	"time"
+
 	"github.com/bwmarrin/snowflake"
 	"github.com/lib/pq"
 	"github.com/pressly/goose/v3"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"log"
-	"strconv"
-	"time"
 )
 
 func init() {
