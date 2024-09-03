@@ -9,3 +9,7 @@ jobs:
   run-tests:
     uses: ./.github/workflows/go-run-tests.yml
     secrets: inherit
+
+  run-pre-commit:
+    uses: ./.github/workflows/pre-commit-checks.yml
+    secrets: inherit

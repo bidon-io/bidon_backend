@@ -1,0 +1,19 @@
+name: Pre-commit Checks
+
+on:
+  workflow_call:
+  push:
+    branches:
+      - "main"
+
+jobs:
+    pre-commit:
+      runs-on: [self-hosted]
+
+      steps:
+        - uses: actions/checkout@v4
+          with:
+            ref: ${{ github.head_ref }}
+
+        - name: Run pre-commit checks
+          run: docker compose run --rm go-pre-commit
