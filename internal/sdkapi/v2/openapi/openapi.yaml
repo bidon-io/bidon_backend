@@ -34,7 +34,7 @@ paths:
           application/problem+json:
             schema:
               $ref: './schemas/error.schema.json'
-  /v2/click{ad_type}:
+  /v2/click/{ad_type}:
     post:
       summary: Click
       operationId: postClick
