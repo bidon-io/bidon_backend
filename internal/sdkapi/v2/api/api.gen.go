@@ -3173,7 +3173,7 @@ type ServerInterface interface {
 	// (POST /v2/auction/{ad_type})
 	GetAuction(ctx echo.Context, adType GetAuctionParamsAdType) error
 	// Click
-	// (POST /v2/click{ad_type})
+	// (POST /v2/click/{ad_type})
 	PostClick(ctx echo.Context, adType PostClickParamsAdType) error
 	// Get config
 	// (POST /v2/config)
@@ -3360,7 +3360,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 
 	router.GET(baseURL+"/openapi.json", wrapper.GetOpenAPISpec)
 	router.POST(baseURL+"/v2/auction/:ad_type", wrapper.GetAuction)
-	router.POST(baseURL+"/v2/click:ad_type", wrapper.PostClick)
+	router.POST(baseURL+"/v2/click/:ad_type", wrapper.PostClick)
 	router.POST(baseURL+"/v2/config", wrapper.GetConfig)
 	router.POST(baseURL+"/v2/loss/:ad_type", wrapper.PostLoss)
 	router.POST(baseURL+"/v2/reward/:ad_type", wrapper.PostReward)
@@ -3441,12 +3441,12 @@ var swaggerSpec = []string{
 	"mnfy0kDYVUpYfzJG/7q+ukR59LiaJNqfjI8DM6wFu3FkVFC5rtcpCe2hanDL8HH6/r3DEZXjSPk7Qyc5",
 	"c/lKPUAiaeTQtLBp8/QX2NkILUOmgs9jkvxXc+jOmxWTCAGwM3IV+iRLEiy2ViKFNGscPvaCk/VpbqOc",
 	"PGD7FOHR5HLw/DcqvnoOx1XGqz/50zoJYGX7hWWWYoETYu9Cf2/EOyKkbG4Q1Z9aC7UlihNjZrvnFj4a",
-	"2GNjP9nnP35pflfU7alzHm0P0qv9LEa3X5sS6jd+3rY6l8evVPs9DVprD3TyV7TxNTJfxlz/TL7121a+",
-	"CZfKZFn/2LpXTYgHxGNk8Cp61zDNO7gDtc4uX6FzRWLHWwS6IrPiRRa5+hoAkqNp8SrLXM+77+IOXGZ9",
-	"3OX5626tYy7lydvHlwtunkz9wPBSSYYBhKMl8GbBxTEHKp1Zulzd7AX1d6Bw9pZ8T5UrzG47PW+ZnqiJ",
-	"ed525ee8ay7bC+lhLb8DkNq0Psm3pYsFe6A2unXN9VF7f9+BNl6v+ObHhr+qG94UjpbAm1U5xxyocGbp",
-	"CnVTWO0+bp9RyXqlEFgWx4eonIup/8g6V7kdgNZVN3i7Wue4g9WuuAbQereh7DtAuS/0Bw9f+GFRQDRf",
-	"KHuzymZ5A1VNL9vj4+Pj/wcAAP//hV+bE0BrAAA=",
+	"2GNjP9nnP35pflfU7alzHm0P0qv9LEa3X5sS6jd+3rY6l8evVPs9DVprD3TyV7TxNTJfxlz/TL71G9e+",
+	"CZfKpFn/2MpXzYgHxGNk8CqK17DNO7gD1c4uX6F0RWbHW0S6IrXiRRa5+hwAkqNp8SrLXE+87+IOXGZ9",
+	"3uUJ7G6tYy7ld4AvF9y8mfqB4aWSDQMIR0vgzYKLYw5UOrN0ubrZG+rvQOHsNfmeKlfY3XZ63jI9URPz",
+	"xO3K73nXfLYX0sNaggcgtWl9km9LFwv2QG1065rro3b/vgNtvF7xzY8Nf1U/vCkcLYE3q3KOOVDhzNIV",
+	"6qaw2n3cPqOS9UohsCyOD1E5F1T/kXWucj0Aratu8Ha1znEHq11xD6D1bkPZd4ByX+gPHr/w46KAaL5Q",
+	"9maVzfIGqppetsfHx8f/DwAA//9/Mql0QWsAAA==",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
