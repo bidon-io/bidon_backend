@@ -184,6 +184,9 @@ func (a *MetaAdapter) ExecuteRequest(ctx context.Context, client *http.Client, r
 
 	dr.RawResponse = string(respBody)
 	dr.Status = httpResp.StatusCode
+	if dr.Status == http.StatusBadRequest {
+		dr.Error = errors.New(httpResp.Header.Get("X-Fb-An-Errors"))
+	}
 
 	return dr
 }
