@@ -8,12 +8,8 @@ paths:
       summary: Auction
       operationId: getAuction
       parameters:
-        - name: ad_type
-          in: path
-          description: Ad type
-          required: true
-          schema:
-            $ref: './schemas/ad-type.schema.json'
+        - $ref: '#/components/parameters/X-Bidon-Version'
+        - $ref: '#/components/parameters/AdType'
       requestBody:
         description: Auction request
         required: true
@@ -39,12 +35,8 @@ paths:
       summary: Click
       operationId: postClick
       parameters:
-        - name: ad_type
-          in: path
-          description: Ad type
-          required: true
-          schema:
-            $ref: './schemas/ad-type.schema.json'
+        - $ref: '#/components/parameters/X-Bidon-Version'
+        - $ref: '#/components/parameters/AdType'
       requestBody:
         description: Click request
         required: true
@@ -69,6 +61,8 @@ paths:
     post:
       summary: Get config
       operationId: getConfig
+      parameters:
+        - $ref: '#/components/parameters/X-Bidon-Version'
       requestBody:
         description: Config request
         required: true
@@ -94,12 +88,8 @@ paths:
       summary: Loss
       operationId: postLoss
       parameters:
-        - name: ad_type
-          in: path
-          description: Ad type
-          required: true
-          schema:
-            $ref: './schemas/ad-type.schema.json'
+        - $ref: '#/components/parameters/X-Bidon-Version'
+        - $ref: '#/components/parameters/AdType'
       requestBody:
         description: Loss request
         required: true
@@ -125,12 +115,8 @@ paths:
       summary: Stats
       operationId: postStats
       parameters:
-        - name: ad_type
-          in: path
-          description: Ad type
-          required: true
-          schema:
-              $ref: './schemas/ad-type.schema.json'
+        - $ref: '#/components/parameters/X-Bidon-Version'
+        - $ref: '#/components/parameters/AdType'
       requestBody:
         description: Stats request
         required: true
@@ -156,12 +142,8 @@ paths:
       summary: Show
       operationId: postShow
       parameters:
-        - name: ad_type
-          in: path
-          description: Ad type
-          required: true
-          schema:
-            $ref: './schemas/ad-type.schema.json'
+        - $ref: '#/components/parameters/X-Bidon-Version'
+        - $ref: '#/components/parameters/AdType'
       requestBody:
         description: Show request
         required: true
@@ -187,6 +169,7 @@ paths:
       summary: Reward
       operationId: postReward
       parameters:
+        - $ref: '#/components/parameters/X-Bidon-Version'
         - name: ad_type
           in: path
           description: Ad type for the reward request
@@ -219,12 +202,8 @@ paths:
       summary: Win
       operationId: postWin
       parameters:
-        - name: ad_type
-          in: path
-          description: Ad type
-          required: true
-          schema:
-            $ref: './schemas/ad-type.schema.json'
+        - $ref: '#/components/parameters/X-Bidon-Version'
+        - $ref: '#/components/parameters/AdType'
       requestBody:
         description: Win request
         required: true
@@ -263,3 +242,23 @@ paths:
             application/problem+json:
               schema:
                 $ref: './schemas/error.schema.json'
+components:
+  parameters:
+    AdType:
+      name: ad_type
+      in: path
+      required: true
+      schema:
+        type: string
+        enum:
+          - banner
+          - interstitial
+          - rewarded
+      description: Ad type
+    X-Bidon-Version:
+      in: header
+      name: X-Bidon-Version
+      required: true
+      schema:
+        type: string
+      description: Version of the Bidon SDK

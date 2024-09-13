@@ -1,6 +1,6 @@
-package web
+package openapi
 
 import "embed"
 
-//go:embed all:ui
+//go:embed all:*
 var FS embed.FS

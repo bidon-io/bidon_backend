@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/bidon-io/bidon-backend/internal/sdkapi/v2/openapi"
+	"github.com/labstack/echo/v4"
 	"log"
 	"net/http"
 	"os"
@@ -214,6 +216,9 @@ func main() {
 		ConfigurationFetcher:      configurationFetcher,
 	}
 	routerV2.RegisterRoutes(v2Group)
+
+	docsWebServer := http.FileServer(http.FS(openapi.FS))
+	e.GET("/docs/*", echo.WrapHandler(http.StripPrefix("/docs/", docsWebServer)))
 
 	e.Use(echoprometheus.NewMiddleware("sdkapi"))  // adds middleware to gather metrics
 	e.GET("/metrics", echoprometheus.NewHandler()) // adds route to serve gathered metrics

@@ -25,7 +25,7 @@ func TestServer_GetAuction(t *testing.T) {
 
 	tests := []struct {
 		name        string
-		handler     func(c echo.Context, _ api.GetAuctionParamsAdType) error
+		handler     func(c echo.Context, _ api.GetAuctionParamsAdType, _ api.GetAuctionParams) error
 		method      string
 		url         string
 		adType      api.GetAuctionParamsAdType
@@ -46,7 +46,7 @@ func TestServer_GetAuction(t *testing.T) {
 			req := httptest.NewRequest(tt.method, tt.url, nil)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
-			if err := tt.handler(c, tt.adType); err != nil {
+			if err := tt.handler(c, tt.adType, api.GetAuctionParams{}); err != nil {
 				t.Errorf("unexpected error: %v", err)
 			}
 
@@ -72,7 +72,7 @@ func TestServer_GetConfig(t *testing.T) {
 
 	tests := []struct {
 		name        string
-		handler     func(c echo.Context) error
+		handler     func(c echo.Context, _ api.GetConfigParams) error
 		method      string
 		url         string
 		mockHandler *mocks.HandlerMock
@@ -91,7 +91,7 @@ func TestServer_GetConfig(t *testing.T) {
 			req := httptest.NewRequest(tt.method, tt.url, nil)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
-			if err := tt.handler(c); err != nil {
+			if err := tt.handler(c, api.GetConfigParams{}); err != nil {
 				t.Errorf("unexpected error: %v", err)
 			}
 
@@ -117,7 +117,7 @@ func TestServer_PostLoss(t *testing.T) {
 
 	tests := []struct {
 		name        string
-		handler     func(c echo.Context, _ api.PostLossParamsAdType) error
+		handler     func(c echo.Context, _ api.PostLossParamsAdType, _ api.PostLossParams) error
 		method      string
 		url         string
 		adType      api.PostLossParamsAdType
@@ -138,7 +138,7 @@ func TestServer_PostLoss(t *testing.T) {
 			req := httptest.NewRequest(tt.method, tt.url, nil)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
-			if err := tt.handler(c, tt.adType); err != nil {
+			if err := tt.handler(c, tt.adType, api.PostLossParams{}); err != nil {
 				t.Errorf("unexpected error: %v", err)
 			}
 
@@ -164,7 +164,7 @@ func TestServer_PostStats(t *testing.T) {
 
 	tests := []struct {
 		name        string
-		handler     func(c echo.Context, _ api.PostStatsParamsAdType) error
+		handler     func(c echo.Context, _ api.PostStatsParamsAdType, _ api.PostStatsParams) error
 		method      string
 		url         string
 		adType      api.PostStatsParamsAdType
@@ -185,7 +185,7 @@ func TestServer_PostStats(t *testing.T) {
 			req := httptest.NewRequest(tt.method, tt.url, nil)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
-			if err := tt.handler(c, tt.adType); err != nil {
+			if err := tt.handler(c, tt.adType, api.PostStatsParams{}); err != nil {
 				t.Errorf("unexpected error: %v", err)
 			}
 
@@ -211,7 +211,7 @@ func TestServer_PostShow(t *testing.T) {
 
 	tests := []struct {
 		name        string
-		handler     func(c echo.Context, _ api.PostShowParamsAdType) error
+		handler     func(c echo.Context, _ api.PostShowParamsAdType, _ api.PostShowParams) error
 		method      string
 		url         string
 		adType      api.PostShowParamsAdType
@@ -232,7 +232,7 @@ func TestServer_PostShow(t *testing.T) {
 			req := httptest.NewRequest(tt.method, tt.url, nil)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
-			if err := tt.handler(c, tt.adType); err != nil {
+			if err := tt.handler(c, tt.adType, api.PostShowParams{}); err != nil {
 				t.Errorf("unexpected error: %v", err)
 			}
 
@@ -258,7 +258,7 @@ func TestServer_PostClick(t *testing.T) {
 
 	tests := []struct {
 		name        string
-		handler     func(c echo.Context, _ api.PostClickParamsAdType) error
+		handler     func(c echo.Context, _ api.PostClickParamsAdType, _ api.PostClickParams) error
 		method      string
 		url         string
 		adType      api.PostClickParamsAdType
@@ -279,7 +279,7 @@ func TestServer_PostClick(t *testing.T) {
 			req := httptest.NewRequest(tt.method, tt.url, nil)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
-			if err := tt.handler(c, tt.adType); err != nil {
+			if err := tt.handler(c, tt.adType, api.PostClickParams{}); err != nil {
 				t.Errorf("unexpected error: %v", err)
 			}
 
@@ -305,7 +305,7 @@ func TestServer_PostReward(t *testing.T) {
 
 	tests := []struct {
 		name        string
-		handler     func(c echo.Context, _ api.PostRewardParamsAdType) error
+		handler     func(c echo.Context, _ api.PostRewardParamsAdType, _ api.PostRewardParams) error
 		method      string
 		url         string
 		adType      api.PostRewardParamsAdType
@@ -326,7 +326,7 @@ func TestServer_PostReward(t *testing.T) {
 			req := httptest.NewRequest(tt.method, tt.url, nil)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
-			if err := tt.handler(c, tt.adType); err != nil {
+			if err := tt.handler(c, tt.adType, api.PostRewardParams{}); err != nil {
 				t.Errorf("unexpected error: %v", err)
 			}
 
@@ -352,7 +352,7 @@ func TestServer_PostWin(t *testing.T) {
 
 	tests := []struct {
 		name        string
-		handler     func(c echo.Context, _ api.PostWinParamsAdType) error
+		handler     func(c echo.Context, _ api.PostWinParamsAdType, _ api.PostWinParams) error
 		method      string
 		url         string
 		adType      api.PostWinParamsAdType
@@ -373,7 +373,7 @@ func TestServer_PostWin(t *testing.T) {
 			req := httptest.NewRequest(tt.method, tt.url, nil)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
-			if err := tt.handler(c, tt.adType); err != nil {
+			if err := tt.handler(c, tt.adType, api.PostWinParams{}); err != nil {
 				t.Errorf("unexpected error: %v", err)
 			}
 
