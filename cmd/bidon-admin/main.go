@@ -95,12 +95,8 @@ func main() {
 	e.Use(echoprometheus.NewMiddleware("admin"))   // adds middleware to gather metrics
 	e.GET("/metrics", echoprometheus.NewHandler()) // adds route to serve gathered metrics
 
-	redocFileSystem, _ := fs.Sub(web.FS, "redoc")
-	redocWebServer := http.FileServer(http.FS(redocFileSystem))
-	e.GET("/redoc/*", echo.WrapHandler(http.StripPrefix("/redoc/", redocWebServer)))
-
 	oapiWebServer := http.FileServer(http.FS(openapi.FS))
-	e.GET("/openapi/*", echo.WrapHandler(http.StripPrefix("/openapi/", oapiWebServer)))
+	e.GET("/docs/*", echo.WrapHandler(http.StripPrefix("/docs/", oapiWebServer)))
 
 	uiFileSystem, _ := fs.Sub(web.FS, "ui")
 	uiWebServer := echo.WrapHandler(http.FileServer(http.FS(uiFileSystem)))
