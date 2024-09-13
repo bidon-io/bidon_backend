@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "app-demand-profile-detailed.schema.json",
+  "title": "AppDemandProfileDetailed",
+  "allOf": [
+    {
+      "$ref": "app-demand-profile.schema.json"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "user": {
+          "$ref": "app.schema.json",
+          "description": "Details of the user associated with the app demand profile"
+        },
+        "demand_source": {
+          "$ref": "demand-source.schema.json",
+          "description": "Details of the demand source associated with the app demand profile"
+        },
+        "account": {
+          "$ref": "demand-source-account.schema.json",
+          "description": "Details of the account associated with the demand source"
+        }
+      }
+    }
+  ]
+}

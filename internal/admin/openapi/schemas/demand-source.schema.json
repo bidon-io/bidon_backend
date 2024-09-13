@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "demand-source.schema.json",
+  "title": "DemandSource",
+  "allOf": [
+    {
+      "$ref": "./demand-source-props.schema.json"
+    },
+    {
+      "type": "object",
+      "required": ["human_name", "api_key"]
+    }
+  ]
+}

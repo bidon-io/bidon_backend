@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "demand-source-props.schema.json",
+  "title": "DemandSourceProps",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "primary-id.schema.json"
+    },
+    "public_uid": {
+      "$ref": "public-uid.schema.json"
+    },
+    "human_name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The human-readable name of the demand source"
+    },
+    "api_key": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The API key associated with the demand source"
+    }
+  },
+  "required": [
+    "human_name",
+    "api_key"
+  ]
+}
