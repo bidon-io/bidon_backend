@@ -27,35 +27,35 @@ type Server struct {
 	WinHandler     Handler
 }
 
-func (s *Server) GetAuction(c echo.Context, _ GetAuctionParamsAdType) error {
+func (s *Server) GetAuction(c echo.Context, _ GetAuctionParamsAdType, _ GetAuctionParams) error {
 	return s.AuctionHandler.Handle(c)
 }
 
-func (s *Server) GetConfig(c echo.Context) error {
+func (s *Server) GetConfig(c echo.Context, _ GetConfigParams) error {
 	return s.ConfigHandler.Handle(c)
 }
 
-func (s *Server) PostClick(c echo.Context, _ PostClickParamsAdType) error {
+func (s *Server) PostClick(c echo.Context, _ PostClickParamsAdType, _ PostClickParams) error {
 	return s.ClickHandler.Handle(c)
 }
 
-func (s *Server) PostLoss(c echo.Context, _ PostLossParamsAdType) error {
+func (s *Server) PostLoss(c echo.Context, _ PostLossParamsAdType, _ PostLossParams) error {
 	return s.LossHandler.Handle(c)
 }
 
-func (s *Server) PostStats(c echo.Context, _ PostStatsParamsAdType) error {
+func (s *Server) PostStats(c echo.Context, _ PostStatsParamsAdType, _ PostStatsParams) error {
 	return s.StatsHandler.Handle(c)
 }
 
-func (s *Server) PostShow(c echo.Context, _ PostShowParamsAdType) error {
+func (s *Server) PostShow(c echo.Context, _ PostShowParamsAdType, _ PostShowParams) error {
 	return s.ShowHandler.Handle(c)
 }
 
-func (s *Server) PostReward(c echo.Context, _ PostRewardParamsAdType) error {
+func (s *Server) PostReward(c echo.Context, _ PostRewardParamsAdType, _ PostRewardParams) error {
 	return s.RewardHandler.Handle(c)
 }
 
-func (s *Server) PostWin(c echo.Context, _ PostWinParamsAdType) error {
+func (s *Server) PostWin(c echo.Context, _ PostWinParamsAdType, _ PostWinParams) error {
 	return s.WinHandler.Handle(c)
 }
 

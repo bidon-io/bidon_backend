@@ -20,6 +20,13 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
+// Defines values for AdType.
+const (
+	AdTypeBanner       AdType = "banner"
+	AdTypeInterstitial AdType = "interstitial"
+	AdTypeRewarded     AdType = "rewarded"
+)
+
 // Defines values for GetAuctionParamsAdType.
 const (
 	GetAuctionParamsAdTypeBanner       GetAuctionParamsAdType = "banner"
@@ -343,9 +350,9 @@ const (
 
 // Defines values for PostWinParamsAdType.
 const (
-	Banner       PostWinParamsAdType = "banner"
-	Interstitial PostWinParamsAdType = "interstitial"
-	Rewarded     PostWinParamsAdType = "rewarded"
+	PostWinParamsAdTypeBanner       PostWinParamsAdType = "banner"
+	PostWinParamsAdTypeInterstitial PostWinParamsAdType = "interstitial"
+	PostWinParamsAdTypeRewarded     PostWinParamsAdType = "rewarded"
 )
 
 // Defines values for PostWinJSONBodyBidBannerFormat.
@@ -393,6 +400,12 @@ const (
 	CPM PostWinJSONBodyShowBidType = "CPM"
 	RTB PostWinJSONBodyShowBidType = "RTB"
 )
+
+// AdType defines model for AdType.
+type AdType string
+
+// XBidonVersion defines model for X-Bidon-Version.
+type XBidonVersion = string
 
 // GetAuctionJSONBody defines parameters for GetAuction.
 type GetAuctionJSONBody struct {
@@ -653,6 +666,12 @@ type GetAuctionJSONBody struct {
 	} `json:"user"`
 }
 
+// GetAuctionParams defines parameters for GetAuction.
+type GetAuctionParams struct {
+	// XBidonVersion Version of the Bidon SDK
+	XBidonVersion XBidonVersion `json:"X-Bidon-Version"`
+}
+
 // GetAuctionParamsAdType defines parameters for GetAuction.
 type GetAuctionParamsAdType string
 
@@ -886,6 +905,12 @@ type PostClickJSONBody struct {
 		TrackingAuthorizationStatus string `json:"tracking_authorization_status"`
 	} `json:"user"`
 	union json.RawMessage
+}
+
+// PostClickParams defines parameters for PostClick.
+type PostClickParams struct {
+	// XBidonVersion Version of the Bidon SDK
+	XBidonVersion XBidonVersion `json:"X-Bidon-Version"`
 }
 
 // PostClickParamsAdType defines parameters for PostClick.
@@ -1272,6 +1297,12 @@ type GetConfigJSONBody struct {
 	} `json:"user"`
 }
 
+// GetConfigParams defines parameters for GetConfig.
+type GetConfigParams struct {
+	// XBidonVersion Version of the Bidon SDK
+	XBidonVersion XBidonVersion `json:"X-Bidon-Version"`
+}
+
 // GetConfigJSONBodyDeviceConnectionType defines parameters for GetConfig.
 type GetConfigJSONBodyDeviceConnectionType string
 
@@ -1502,6 +1533,12 @@ type PostLossJSONBody struct {
 		// TrackingAuthorizationStatus Status of tracking authorization
 		TrackingAuthorizationStatus string `json:"tracking_authorization_status"`
 	} `json:"user"`
+}
+
+// PostLossParams defines parameters for PostLoss.
+type PostLossParams struct {
+	// XBidonVersion Version of the Bidon SDK
+	XBidonVersion XBidonVersion `json:"X-Bidon-Version"`
 }
 
 // PostLossParamsAdType defines parameters for PostLoss.
@@ -1879,6 +1916,12 @@ type PostRewardJSONBody struct {
 		TrackingAuthorizationStatus string `json:"tracking_authorization_status"`
 	} `json:"user"`
 	union json.RawMessage
+}
+
+// PostRewardParams defines parameters for PostReward.
+type PostRewardParams struct {
+	// XBidonVersion Version of the Bidon SDK
+	XBidonVersion XBidonVersion `json:"X-Bidon-Version"`
 }
 
 // PostRewardParamsAdType defines parameters for PostReward.
@@ -2264,6 +2307,12 @@ type PostShowJSONBody struct {
 	union json.RawMessage
 }
 
+// PostShowParams defines parameters for PostShow.
+type PostShowParams struct {
+	// XBidonVersion Version of the Bidon SDK
+	XBidonVersion XBidonVersion `json:"X-Bidon-Version"`
+}
+
 // PostShowParamsAdType defines parameters for PostShow.
 type PostShowParamsAdType string
 
@@ -2645,6 +2694,12 @@ type PostStatsJSONBody struct {
 	} `json:"user"`
 }
 
+// PostStatsParams defines parameters for PostStats.
+type PostStatsParams struct {
+	// XBidonVersion Version of the Bidon SDK
+	XBidonVersion XBidonVersion `json:"X-Bidon-Version"`
+}
+
 // PostStatsParamsAdType defines parameters for PostStats.
 type PostStatsParamsAdType string
 
@@ -2977,6 +3032,12 @@ type PostWinJSONBody struct {
 	union json.RawMessage
 }
 
+// PostWinParams defines parameters for PostWin.
+type PostWinParams struct {
+	// XBidonVersion Version of the Bidon SDK
+	XBidonVersion XBidonVersion `json:"X-Bidon-Version"`
+}
+
 // PostWinParamsAdType defines parameters for PostWin.
 type PostWinParamsAdType string
 
@@ -3171,28 +3232,28 @@ type ServerInterface interface {
 	GetOpenAPISpec(ctx echo.Context) error
 	// Auction
 	// (POST /v2/auction/{ad_type})
-	GetAuction(ctx echo.Context, adType GetAuctionParamsAdType) error
+	GetAuction(ctx echo.Context, adType GetAuctionParamsAdType, params GetAuctionParams) error
 	// Click
 	// (POST /v2/click/{ad_type})
-	PostClick(ctx echo.Context, adType PostClickParamsAdType) error
+	PostClick(ctx echo.Context, adType PostClickParamsAdType, params PostClickParams) error
 	// Get config
 	// (POST /v2/config)
-	GetConfig(ctx echo.Context) error
+	GetConfig(ctx echo.Context, params GetConfigParams) error
 	// Loss
 	// (POST /v2/loss/{ad_type})
-	PostLoss(ctx echo.Context, adType PostLossParamsAdType) error
+	PostLoss(ctx echo.Context, adType PostLossParamsAdType, params PostLossParams) error
 	// Reward
 	// (POST /v2/reward/{ad_type})
-	PostReward(ctx echo.Context, adType PostRewardParamsAdType) error
+	PostReward(ctx echo.Context, adType PostRewardParamsAdType, params PostRewardParams) error
 	// Show
 	// (POST /v2/show/{ad_type})
-	PostShow(ctx echo.Context, adType PostShowParamsAdType) error
+	PostShow(ctx echo.Context, adType PostShowParamsAdType, params PostShowParams) error
 	// Stats
 	// (POST /v2/stats/{ad_type})
-	PostStats(ctx echo.Context, adType PostStatsParamsAdType) error
+	PostStats(ctx echo.Context, adType PostStatsParamsAdType, params PostStatsParams) error
 	// Win
 	// (POST /v2/win/{ad_type})
-	PostWin(ctx echo.Context, adType PostWinParamsAdType) error
+	PostWin(ctx echo.Context, adType PostWinParamsAdType, params PostWinParams) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
@@ -3220,8 +3281,30 @@ func (w *ServerInterfaceWrapper) GetAuction(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter ad_type: %s", err))
 	}
 
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetAuctionParams
+
+	headers := ctx.Request().Header
+	// ------------- Required header parameter "X-Bidon-Version" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("X-Bidon-Version")]; found {
+		var XBidonVersion XBidonVersion
+		n := len(valueList)
+		if n != 1 {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Expected one value for X-Bidon-Version, got %d", n))
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "X-Bidon-Version", valueList[0], &XBidonVersion, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: true})
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter X-Bidon-Version: %s", err))
+		}
+
+		params.XBidonVersion = XBidonVersion
+	} else {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Header parameter X-Bidon-Version is required, but not found"))
+	}
+
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetAuction(ctx, adType)
+	err = w.Handler.GetAuction(ctx, adType, params)
 	return err
 }
 
@@ -3236,8 +3319,30 @@ func (w *ServerInterfaceWrapper) PostClick(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter ad_type: %s", err))
 	}
 
+	// Parameter object where we will unmarshal all parameters from the context
+	var params PostClickParams
+
+	headers := ctx.Request().Header
+	// ------------- Required header parameter "X-Bidon-Version" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("X-Bidon-Version")]; found {
+		var XBidonVersion XBidonVersion
+		n := len(valueList)
+		if n != 1 {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Expected one value for X-Bidon-Version, got %d", n))
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "X-Bidon-Version", valueList[0], &XBidonVersion, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: true})
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter X-Bidon-Version: %s", err))
+		}
+
+		params.XBidonVersion = XBidonVersion
+	} else {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Header parameter X-Bidon-Version is required, but not found"))
+	}
+
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.PostClick(ctx, adType)
+	err = w.Handler.PostClick(ctx, adType, params)
 	return err
 }
 
@@ -3245,8 +3350,30 @@ func (w *ServerInterfaceWrapper) PostClick(ctx echo.Context) error {
 func (w *ServerInterfaceWrapper) GetConfig(ctx echo.Context) error {
 	var err error
 
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetConfigParams
+
+	headers := ctx.Request().Header
+	// ------------- Required header parameter "X-Bidon-Version" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("X-Bidon-Version")]; found {
+		var XBidonVersion XBidonVersion
+		n := len(valueList)
+		if n != 1 {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Expected one value for X-Bidon-Version, got %d", n))
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "X-Bidon-Version", valueList[0], &XBidonVersion, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: true})
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter X-Bidon-Version: %s", err))
+		}
+
+		params.XBidonVersion = XBidonVersion
+	} else {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Header parameter X-Bidon-Version is required, but not found"))
+	}
+
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetConfig(ctx)
+	err = w.Handler.GetConfig(ctx, params)
 	return err
 }
 
@@ -3261,8 +3388,30 @@ func (w *ServerInterfaceWrapper) PostLoss(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter ad_type: %s", err))
 	}
 
+	// Parameter object where we will unmarshal all parameters from the context
+	var params PostLossParams
+
+	headers := ctx.Request().Header
+	// ------------- Required header parameter "X-Bidon-Version" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("X-Bidon-Version")]; found {
+		var XBidonVersion XBidonVersion
+		n := len(valueList)
+		if n != 1 {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Expected one value for X-Bidon-Version, got %d", n))
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "X-Bidon-Version", valueList[0], &XBidonVersion, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: true})
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter X-Bidon-Version: %s", err))
+		}
+
+		params.XBidonVersion = XBidonVersion
+	} else {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Header parameter X-Bidon-Version is required, but not found"))
+	}
+
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.PostLoss(ctx, adType)
+	err = w.Handler.PostLoss(ctx, adType, params)
 	return err
 }
 
@@ -3277,8 +3426,30 @@ func (w *ServerInterfaceWrapper) PostReward(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter ad_type: %s", err))
 	}
 
+	// Parameter object where we will unmarshal all parameters from the context
+	var params PostRewardParams
+
+	headers := ctx.Request().Header
+	// ------------- Required header parameter "X-Bidon-Version" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("X-Bidon-Version")]; found {
+		var XBidonVersion XBidonVersion
+		n := len(valueList)
+		if n != 1 {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Expected one value for X-Bidon-Version, got %d", n))
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "X-Bidon-Version", valueList[0], &XBidonVersion, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: true})
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter X-Bidon-Version: %s", err))
+		}
+
+		params.XBidonVersion = XBidonVersion
+	} else {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Header parameter X-Bidon-Version is required, but not found"))
+	}
+
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.PostReward(ctx, adType)
+	err = w.Handler.PostReward(ctx, adType, params)
 	return err
 }
 
@@ -3293,8 +3464,30 @@ func (w *ServerInterfaceWrapper) PostShow(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter ad_type: %s", err))
 	}
 
+	// Parameter object where we will unmarshal all parameters from the context
+	var params PostShowParams
+
+	headers := ctx.Request().Header
+	// ------------- Required header parameter "X-Bidon-Version" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("X-Bidon-Version")]; found {
+		var XBidonVersion XBidonVersion
+		n := len(valueList)
+		if n != 1 {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Expected one value for X-Bidon-Version, got %d", n))
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "X-Bidon-Version", valueList[0], &XBidonVersion, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: true})
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter X-Bidon-Version: %s", err))
+		}
+
+		params.XBidonVersion = XBidonVersion
+	} else {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Header parameter X-Bidon-Version is required, but not found"))
+	}
+
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.PostShow(ctx, adType)
+	err = w.Handler.PostShow(ctx, adType, params)
 	return err
 }
 
@@ -3309,8 +3502,30 @@ func (w *ServerInterfaceWrapper) PostStats(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter ad_type: %s", err))
 	}
 
+	// Parameter object where we will unmarshal all parameters from the context
+	var params PostStatsParams
+
+	headers := ctx.Request().Header
+	// ------------- Required header parameter "X-Bidon-Version" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("X-Bidon-Version")]; found {
+		var XBidonVersion XBidonVersion
+		n := len(valueList)
+		if n != 1 {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Expected one value for X-Bidon-Version, got %d", n))
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "X-Bidon-Version", valueList[0], &XBidonVersion, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: true})
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter X-Bidon-Version: %s", err))
+		}
+
+		params.XBidonVersion = XBidonVersion
+	} else {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Header parameter X-Bidon-Version is required, but not found"))
+	}
+
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.PostStats(ctx, adType)
+	err = w.Handler.PostStats(ctx, adType, params)
 	return err
 }
 
@@ -3325,8 +3540,30 @@ func (w *ServerInterfaceWrapper) PostWin(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter ad_type: %s", err))
 	}
 
+	// Parameter object where we will unmarshal all parameters from the context
+	var params PostWinParams
+
+	headers := ctx.Request().Header
+	// ------------- Required header parameter "X-Bidon-Version" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("X-Bidon-Version")]; found {
+		var XBidonVersion XBidonVersion
+		n := len(valueList)
+		if n != 1 {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Expected one value for X-Bidon-Version, got %d", n))
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "X-Bidon-Version", valueList[0], &XBidonVersion, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: true})
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter X-Bidon-Version: %s", err))
+		}
+
+		params.XBidonVersion = XBidonVersion
+	} else {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Header parameter X-Bidon-Version is required, but not found"))
+	}
+
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.PostWin(ctx, adType)
+	err = w.Handler.PostWin(ctx, adType, params)
 	return err
 }
 
@@ -3373,80 +3610,81 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
-	"9maVzfIGqppetsfHx8f/DwAA//9/Mql0QWsAAA==",
+	"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",
+	"ttvt9v8CAAD//wthqmWbawAA",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

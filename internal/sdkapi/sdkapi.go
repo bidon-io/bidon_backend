@@ -1,7 +1,9 @@
 package sdkapi
 
 import (
+	"github.com/labstack/echo/v4/middleware"
 	"net/http"
+	"strings"
 
 	"github.com/getsentry/sentry-go"
 	sentryecho "github.com/getsentry/sentry-go/echo"
@@ -15,6 +17,11 @@ type App struct {
 
 func CheckBidonHeader(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
+		skipper := skipIfUtilRoutes()
+		if skipper(c) {
+			return next(c)
+		}
+
 		if c.Request().Header.Get("X-Bidon-Version") == "" {
 			return echo.NewHTTPError(http.StatusUnprocessableEntity, "Request should contain X-Bidon-Version header")
 		}
@@ -34,5 +41,11 @@ func LogError(c echo.Context, err error) {
 			&sentry.EventHint{Context: c.Request().Context()},
 			scope,
 		)
+	}
+}
+
+func skipIfUtilRoutes() middleware.Skipper {
+	return func(c echo.Context) bool {
+		return strings.EqualFold(c.Path(), "/openapi.json")
 	}
 }
