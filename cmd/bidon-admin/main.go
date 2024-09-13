@@ -104,6 +104,7 @@ func main() {
 
 	uiFileSystem, _ := fs.Sub(web.FS, "ui")
 	uiWebServer := echo.WrapHandler(http.FileServer(http.FS(uiFileSystem)))
+	e.GET("/", uiWebServer)
 	e.GET("/*", uiWebServer, func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			file, err := uiFileSystem.Open(strings.TrimPrefix(c.Request().URL.Path, "/"))
