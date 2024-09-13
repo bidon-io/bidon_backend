@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "demand-source-account-props.schema.json",
+  "title": "DemandSourceAccountProps",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "primary-id.schema.json"
+    },
+    "public_uid": {
+      "$ref": "public-uid.schema.json"
+    },
+    "user_id": {
+      "$ref": "id.schema.json",
+      "description": "The ID of the user associated with the demand source account"
+    },
+    "type": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The type of the demand source account"
+    },
+    "demand_source_id": {
+      "$ref": "id.schema.json",
+      "description": "The ID of the demand source"
+    },
+    "is_bidding": {
+      "type": "boolean",
+      "description": "Indicates whether bidding is enabled for this demand source account"
+    },
+    "extra": {
+      "type": "object",
+      "description": "Additional information for the demand source account"
+    }
+  }
+}

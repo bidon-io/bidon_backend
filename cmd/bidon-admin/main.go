@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/bidon-io/bidon-backend/internal/admin/api"
+	"github.com/bidon-io/bidon-backend/internal/admin/openapi"
 	"io/fs"
 	"log"
 	"net/http"
@@ -84,14 +86,11 @@ func main() {
 	authService := auth.NewAuthService(store.UserRepo, authConfig)
 	adminService := admin.NewService(store)
 
-	authGroup := e.Group("/auth")
-	config.UseCommonMiddleware(authGroup, "bidon-admin", logger)
-	adminecho.RegisterAuthService(authGroup, authService)
-
-	apiGroup := e.Group("/api")
-	config.UseCommonMiddleware(apiGroup, "bidon-admin", logger)
-	adminecho.UseAuthorization(apiGroup, authService)
-	adminecho.RegisterAdminService(apiGroup, adminService)
+	g := e.Group("")
+	config.UseCommonMiddleware(g, "bidon-admin", logger)
+	adminecho.UseAuthorization(g, authService)
+	serv := adminecho.NewServer(adminService, authService)
+	api.RegisterHandlers(g, serv)
 
 	e.Use(echoprometheus.NewMiddleware("admin"))   // adds middleware to gather metrics
 	e.GET("/metrics", echoprometheus.NewHandler()) // adds route to serve gathered metrics
@@ -99,6 +98,9 @@ func main() {
 	redocFileSystem, _ := fs.Sub(web.FS, "redoc")
 	redocWebServer := http.FileServer(http.FS(redocFileSystem))
 	e.GET("/redoc/*", echo.WrapHandler(http.StripPrefix("/redoc/", redocWebServer)))
+
+	oapiWebServer := http.FileServer(http.FS(openapi.FS))
+	e.GET("/openapi/*", echo.WrapHandler(http.StripPrefix("/openapi/", oapiWebServer)))
 
 	uiFileSystem, _ := fs.Sub(web.FS, "ui")
 	uiWebServer := echo.WrapHandler(http.FileServer(http.FS(uiFileSystem)))

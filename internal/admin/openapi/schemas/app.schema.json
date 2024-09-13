@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "app.schema.json",
+  "title": "App",
+  "allOf": [
+    {
+      "$ref": "./app-props.schema.json"
+    },
+    {
+      "required": [
+        "platform_id",
+        "human_name",
+        "package_name",
+        "user_id",
+        "app_key"
+      ]
+    }
+  ]
+}

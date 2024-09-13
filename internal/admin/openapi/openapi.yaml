@@ -1,0 +1,1072 @@
+openapi: 3.0.3
+info:
+  title: Admin API
+  version: 0.1.0
+paths:
+  /api/auction_configurations:
+    get:
+      operationId: getAuctionConfigurations
+      summary: List auction configurations
+      tags:
+        - Auction configurations
+      responses:
+        '200':
+          description: A list of auction configurations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: './schemas/auction-configuration-detailed.schema.json'
+    post:
+      operationId: createAuctionConfiguration
+      summary: Create auction configuration
+      tags:
+        - Auction configurations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/auction-configuration.schema.json'
+      responses:
+        '201':
+          description: An auction configuration
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/auction-configuration.schema.json'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/auction_configurations/{id}:
+    parameters:
+      - $ref: '#/components/parameters/idParam'
+    get:
+      operationId: getAuctionConfiguration
+      tags:
+        - Auction configurations
+      summary: Get auction configuration
+      responses:
+        '200':
+          description: An auction configuration
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/auction-configuration-detailed.schema.json'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    patch:
+      operationId: updateAuctionConfiguration
+      tags:
+        - Auction configurations
+      summary: Update auction configuration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/auction-configuration-props.schema.json'
+      responses:
+        '200':
+          description: An auction configuration
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/auction-configuration.schema.json'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    delete:
+      operationId: deleteAuctionConfiguration
+      tags:
+        - Auction configurations
+      summary: Delete auction configuration
+      responses:
+        '204':
+          description: Auction configuration deleted successfully
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/v2/auction_configurations:
+    get:
+      operationId: getAuctionConfigurationsV2
+      summary: List auction configurations V2
+      tags:
+        - Auction configurations
+      responses:
+        '200':
+          description: A list of auction configurations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: './schemas/auction-configuration-v2-detailed.schema.json'
+    post:
+      operationId: createAuctionConfigurationV2
+      summary: Create auction configuration V2
+      tags:
+        - Auction configurations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/auction-configuration-v2.schema.json'
+      responses:
+        '201':
+          description: An auction configuration
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/auction-configuration-v2.schema.json'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/v2/auction_configurations/{id}:
+    parameters:
+      - $ref: '#/components/parameters/idParam'
+    get:
+      operationId: getAuctionConfigurationV2
+      tags:
+        - Auction configurations
+      summary: Get auction configuration V2
+      responses:
+        '200':
+          description: An auction configuration
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/auction-configuration-v2-detailed.schema.json'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    patch:
+      operationId: updateAuctionConfigurationV2
+      tags:
+        - Auction configurations
+      summary: Update auction configuration V2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/auction-configuration-v2-props.schema.json'
+      responses:
+        '200':
+          description: An auction configuration
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/auction-configuration-v2.schema.json'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    delete:
+      operationId: deleteAuctionConfigurationV2
+      tags:
+        - Auction configurations
+      summary: Delete auction configuration
+      responses:
+        '204':
+          description: Auction configuration deleted successfully
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/apps:
+    get:
+      summary: List apps
+      operationId: getApps
+      tags:
+        - Apps
+      responses:
+        '200':
+          description: A list of apps
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: './schemas/app-detailed.schema.json'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    post:
+      summary: Create app
+      operationId: createApp
+      tags:
+        - Apps
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/app.schema.json'
+      responses:
+        '201':
+          description: An app
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/app.schema.json'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/apps/{id}:
+    parameters:
+      - $ref: '#/components/parameters/idParam'
+    get:
+      operationId: getApp
+      tags:
+        - Apps
+      summary: Get app
+      responses:
+        '200':
+          description: An app
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/app-detailed.schema.json'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    patch:
+      operationId: updateApp
+      tags:
+        - Apps
+      summary: Update app
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/app-props.schema.json'
+      responses:
+        '200':
+          description: An app
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/app.schema.json'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    delete:
+      operationId: deleteApp
+      tags:
+        - Apps
+      summary: Delete app
+      responses:
+        '204':
+          description: App deleted successfully
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/app_demand_profiles:
+    get:
+      operationId: getAppDemandProfiles
+      summary: List app demand profiles
+      tags:
+        - App demand profiles
+      responses:
+        '200':
+          description: A list of app demand profiles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: './schemas/app-demand-profile-detailed.schema.json'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    post:
+      operationId: createAppDemandProfile
+      summary: Create app demand profile
+      tags:
+        - App demand profiles
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/app-demand-profile.schema.json'
+      responses:
+        '201':
+          AppDemandProfileResponse:
+            description: An app demand profile
+            content:
+              application/json:
+                schema:
+                  $ref: './schemas/app-demand-profile.schema.json'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/app_demand_profiles/{id}:
+    parameters:
+      - $ref: '#/components/parameters/idParam'
+    get:
+      operationId: getAppDemandProfile
+      tags:
+        - App demand profiles
+      summary: Get app demand profile
+      responses:
+        '200':
+          description: An app demand profile
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/app-demand-profile-detailed.schema.json'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    patch:
+      operationId: updateAppDemandProfile
+      tags:
+        - App demand profiles
+      summary: Update app demand profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/app-demand-profile-props.schema.json'
+      responses:
+        '200':
+          AppDemandProfileResponse:
+            description: An app demand profile
+            content:
+              application/json:
+                schema:
+                  $ref: './schemas/app-demand-profile.schema.json'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    delete:
+      operationId: deleteAppDemandProfile
+      tags:
+        - App demand profiles
+      summary: Delete app demand profile
+      responses:
+        '204':
+          description: App demand profile deleted successfully
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/countries:
+    get:
+      operationId: getCountries
+      summary: List countries
+      tags:
+        - Countries
+      responses:
+        '200':
+          description: A list of countries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: './schemas/country.schema.json'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    post:
+      operationId: createCountry
+      summary: Create country
+      tags:
+        - Countries
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/country.schema.json'
+      responses:
+        '201':
+          description: A country
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/country.schema.json'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/countries/{id}:
+    parameters:
+      - $ref: '#/components/parameters/idParam'
+    get:
+      operationId: getCountry
+      tags:
+        - Countries
+      summary: Get country
+      responses:
+        '200':
+          description: A country
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/country.schema.json'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    patch:
+      operationId: updateCountry
+      tags:
+        - Countries
+      summary: Update country
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/country-props.schema.json'
+      responses:
+        '200':
+          description: A country
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/country.schema.json'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    delete:
+      operationId: deleteCountry
+      tags:
+        - Countries
+      summary: Delete country
+      responses:
+        '204':
+          description: Country deleted successfully
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/demand_sources:
+    get:
+      operationId: getDemandSources
+      summary: List demand sources
+      tags:
+        - Demand sources
+      responses:
+        '200':
+          description: A list of demand sources
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: './schemas/demand-source.schema.json'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    post:
+      operationId: createDemandSource
+      summary: Create demand source
+      tags:
+        - Demand sources
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/demand-source-props.schema.json'
+      responses:
+        '201':
+          description: A demand source
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/demand-source.schema.json'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/demand_sources/{id}:
+    parameters:
+      - $ref: '#/components/parameters/idParam'
+    get:
+      operationId: getDemandSource
+      tags:
+        - Demand sources
+      summary: Get demand source
+      responses:
+        '200':
+          description: A demand source
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/demand-source.schema.json'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    patch:
+      operationId: updateDemandSource
+      tags:
+        - Demand sources
+      summary: Update demand source
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/demand-source-props.schema.json'
+      responses:
+        '200':
+          description: A demand source
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/demand-source.schema.json'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    delete:
+      operationId: deleteDemandSource
+      tags:
+        - Demand sources
+      summary: Delete demand source
+      responses:
+        '204':
+          description: Demand source deleted successfully
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/demand_source_accounts:
+    get:
+      operationId: getDemandSourceAccounts
+      summary: List demand source accounts
+      tags:
+        - Demand source accounts
+      responses:
+        '200':
+          description: A list of demand source accounts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: './schemas/demand-source-account-detailed.schema.json'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    post:
+      operationId: createDemandSourceAccount
+      summary: Create demand source account
+      tags:
+        - Demand source accounts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/demand-source-account.schema.json'
+      responses:
+        '201':
+          description: A demand source account
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/demand-source-account.schema.json'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/demand_source_accounts/{id}:
+    parameters:
+      - $ref: '#/components/parameters/idParam'
+    get:
+      operationId: getDemandSourceAccount
+      tags:
+        - Demand source accounts
+      summary: Get demand source account
+      responses:
+        '200':
+          description: A demand source account
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/demand-source-account-detailed.schema.json'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    patch:
+      operationId: updateDemandSourceAccount
+      tags:
+        - Demand source accounts
+      summary: Update demand source account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/demand-source-account-props.schema.json'
+      responses:
+        '200':
+          description: A demand source account
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/demand-source-account-detailed.schema.json'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    delete:
+      operationId: deleteDemandSourceAccount
+      tags:
+        - Demand source accounts
+      summary: Delete demand source account
+      responses:
+        '204':
+          description: Demand source account deleted successfully
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/line_items:
+    get:
+      operationId: getLineItems
+      summary: List line items
+      tags:
+        - Line items
+      parameters:
+        - name: user_id
+          in: query
+          description: "Filter by user ID"
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: app_id
+          in: query
+          description: "Filter by app ID"
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: ad_type
+          in: query
+          description: "Filter by ad type"
+          required: false
+          schema:
+            ref$: './schemas/ad-type.schema.json'
+        - name: account_id
+          in: query
+          description: "Filter by account ID"
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: account_type
+          in: query
+          description: "Filter by account type"
+          required: false
+          schema:
+            type: string
+        - name: is_bidding
+          in: query
+          description: "Filter by bidding status"
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: A list of line items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: './schemas/line-item-detailed.schema.json'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    post:
+      operationId: createLineItem
+      summary: Create line item
+      tags:
+        - Line items
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/line-item.schema.json'
+      responses:
+        '201':
+          description: A line item
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/line-item.schema.json'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/line_items/{id}:
+    parameters:
+      - $ref: '#/components/parameters/idParam'
+    get:
+      operationId: getLineItem
+      tags:
+        - Line items
+      summary: Get line item
+      responses:
+        '200':
+          description: A line item
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/line-item-detailed.schema.json'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    patch:
+      operationId: updateLineItem
+      tags:
+        - Line items
+      summary: Update line item
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/line-item-props.schema.json'
+      responses:
+        '200':
+          description: A line item
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/line-item.schema.json'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    delete:
+      operationId: deleteLineItem
+      tags:
+        - Line items
+      summary: Delete line item
+      responses:
+        '204':
+          description: Line item deleted successfully
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/segments:
+    get:
+      operationId: getSegments
+      summary: List segments
+      tags:
+        - Segments
+      responses:
+        '200':
+          description: A list of segments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: './schemas/segment-detailed.schema.json'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    post:
+      operationId: createSegment
+      summary: Create segment
+      tags:
+        - Segments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/segment.schema.json'
+      responses:
+        '201':
+          description: A segment
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/segment.schema.json'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/segments/{id}:
+    parameters:
+      - $ref: '#/components/parameters/idParam'
+    get:
+      operationId: getSegment
+      tags:
+        - Segments
+      summary: Get segment
+      responses:
+        '200':
+          description: A segment
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/segment-detailed.schema.json'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    patch:
+      operationId: updateSegment
+      tags:
+        - Segments
+      summary: Update segment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/segment-props.schema.json'
+      responses:
+        '200':
+          description: A segment
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/segment.schema.json'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    delete:
+      operationId: deleteSegment
+      tags:
+        - Segments
+      summary: Delete segment
+      responses:
+        '204':
+          description: Segment deleted successfully
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/users:
+    get:
+      operationId: getUsers
+      summary: List users
+      tags:
+        - Users
+      responses:
+        '200':
+          description: A list of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: './schemas/user.schema.json'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    post:
+      operationId: createUser
+      summary: Create user
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/user.schema.json'
+      responses:
+        '201':
+          description: A user
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/user.schema.json'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/users/{id}:
+    parameters:
+      - $ref: '#/components/parameters/idParam'
+    get:
+      operationId: getUser
+      tags:
+        - Users
+      summary: Get user
+      responses:
+        '200':
+          description: A user
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/user.schema.json'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    patch:
+      operationId: updateUser
+      tags:
+        - Users
+      summary: Update user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/user-props.schema.json'
+      responses:
+        '200':
+          description: A user
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/user.schema.json'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    delete:
+      operationId: deleteUser
+      tags:
+        - Users
+      summary: Delete user
+      responses:
+        '204':
+          description: User deleted successfully
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/users/me:
+    get:
+      operationId: getCurrentUser
+      tags:
+        - Users
+      summary: Get current user
+      responses:
+        '200':
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/user.schema.json'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/rest/resources:
+    get:
+      operationId: getResources
+      summary: List resources permissions
+      tags:
+          - Resources
+      responses:
+        '200':
+          description: A list of resources permissions
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/resources.schema.json'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/line_items/import:
+    post:
+      summary: Import Line Items from CSV
+      operationId: importLineItems
+      tags:
+        - Line Items
+      description: |
+        Use this endpoint to upload a CSV file for importing line items.
+
+        Example `curl` usage:
+
+        ```bash
+        curl -u admins@appodeal.com:password --basic \
+        -F app_id=123 -F account_id=123 -F is_bidding=true \
+        -F csv=@line_items.csv https://bidon-go.appodeal.com/api/line_items/import
+        ```
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                app_id:
+                  type: integer
+                  format: int64
+                  description: "The ID of the app to which the line items belong."
+                account_id:
+                  type: integer
+                  format: int64
+                  description: "The ID of the account associated with the line items."
+                is_bidding:
+                  type: boolean
+                  description: "Indicates whether the line items are for bidding."
+                csv:
+                  type: string
+                  format: binary
+                  description: "The CSV file containing the line items to import."
+              required:
+                - app_id
+                - account_id
+                - csv
+      security:
+        - basicAuth: [ ]
+      responses:
+        '204':
+          description: "No Content, the CSV was imported successfully."
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/openapi.json:
+    get:
+      summary: Get OpenAPI specification
+      operationId: getOpenAPISpec
+      description: Returns the OpenAPI JSON specification for the API.
+      tags:
+        - Utility
+      responses:
+        '200':
+          description: OpenAPI JSON
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: object
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  # Auth-specific routes
+  /auth/login:
+    post:
+      summary: User login
+      operationId: logIn
+      tags:
+        - Authentication
+      servers:
+        - url: /auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/login-request.schema.json'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/success-response.schema.json'
+        '401':
+          description: Unauthorized, invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/error.schema.json'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /auth/logout:
+    post:
+      summary: User logout
+      operationId: logOut
+      tags:
+        - Authentication
+      servers:
+        - url: /auth
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/success-response.schema.json'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /auth/authorize:
+    post:
+      summary: Issue access token
+      operationId: authorizeUser
+      tags:
+        - Authentication
+      servers:
+        - url: /auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/login-request.schema.json'
+      responses:
+        '200':
+          description: Authorization successful, returns user data and access token
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/login-response.schema.json'
+        '401':
+          description: Unauthorized, invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/error.schema.json'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+components:
+  responses:
+    ErrorResponse:
+      description: An error occurred.
+      content:
+        application/json:
+          schema:
+            $ref: './schemas/error.schema.json'
+  parameters:
+    idParam:
+      name: id
+      in: path
+      required: true
+      description: 'An id of a resource'
+      schema:
+        $ref: './schemas/id.schema.json'

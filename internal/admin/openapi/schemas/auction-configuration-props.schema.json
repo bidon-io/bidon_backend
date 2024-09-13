@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "auction-configuration-props.schema.json",
+  "title": "AuctionConfigurationProps (Deprecated)",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "./primary-id.schema.json",
+    },
+    "public_uid": {
+      "$ref": "public-uid.schema.json"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Name of the auction configuration"
+    },
+    "app_id": {
+      "$ref": "./id.schema.json",
+      "description": "ID of the app associated with the auction"
+    },
+    "ad_type": {
+      "$ref": "./ad-type.schema.json",
+      "description": "Type of advertisement in the auction"
+    },
+    "rounds": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Auction rounds",
+      "items": {
+        "type": "object",
+        "required": ["id", "demands", "timeout"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Round ID"
+          },
+          "demands": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Demand sources for the round"
+            },
+            "description": "List of demands for the round"
+          },
+          "timeout": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Timeout for the round in milliseconds"
+          }
+        }
+      }
+    },
+    "pricefloor": {
+      "type": "number",
+      "minimum": 0,
+      "exclusiveMinimum": true,
+      "description": "Price floor for the auction configuration"
+    }
+  },
+  "required": ["id", "name", "app_id", "ad_type", "rounds", "pricefloor"]
+}

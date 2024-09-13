@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "primary-id.schema.json",
+  "title": "PrimaryID",
+  "type": "integer",
+  "minimum": 1,
+  "readOnly": true,
+  "description": "A positive integer primary ID, read-only"
+}

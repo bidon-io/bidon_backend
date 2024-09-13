@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "login-response.schema.json",
+  "title": "LogInResponse",
+  "type": "object",
+  "properties": {
+    "user": {
+      "$ref": "./user.schema.json"
+    },
+    "access_token": {
+      "type": "string",
+      "description": "JWT or session token used for further authentication",
+      "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+    }
+  },
+  "required": ["user", "access_token"]
+}
