@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "segment-props.schema.json",
+  "title": "SegmentProps",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "primary-id.schema.json"
+    },
+    "public_uid": {
+      "$ref": "public-uid.schema.json"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The name of the segment"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The description of the segment"
+    },
+    "enabled": {
+      "type": "boolean",
+      "description": "Indicates if the segment is enabled"
+    },
+    "app_id": {
+      "$ref": "id.schema.json",
+      "description": "The ID of the app associated with this segment"
+    },
+    "filters": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Filters applied to the segment",
+      "items": {
+        "type": "object",
+        "required": ["type", "name", "operator", "values"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The type of filter"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The name of the filter"
+          },
+          "operator": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The operator used in the filter"
+          },
+          "values": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The values used in the filter"
+            }
+          }
+        }
+      }
+    }
+  },
+  "required": ["name", "description", "enabled", "app_id", "filters"]
+}

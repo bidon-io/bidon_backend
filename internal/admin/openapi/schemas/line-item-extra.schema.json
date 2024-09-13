@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "extra.schema.json",
+  "title": "Extra",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "ad_unit_id": {
+          "type": "string",
+          "description": "Ad unit ID (for Admob, Yandex)"
+        }
+      },
+      "required": ["ad_unit_id"]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "slot_uuid": {
+          "type": "string",
+          "description": "Slot UUID (for Amazon)"
+        },
+        "format": {
+          "type": "string",
+          "enum": ["BANNER", "MREC", "INTERSTITIAL", "VIDEO", "REWARDED"],
+          "description": "Ad format"
+        }
+      },
+      "required": ["slot_uuid", "format"]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "zone_id": {
+          "type": "string",
+          "description": "Zone ID (for Applovin)"
+        }
+      },
+      "required": ["zone_id"]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "slot_id": {
+          "type": "string",
+          "description": "Slot ID (for BigoAds, VKAds)"
+        }
+      },
+      "required": ["slot_id"]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "ad_location": {
+          "type": "string",
+          "description": "Ad location (for Chartboost)"
+        },
+        "mediation": {
+          "type": "string",
+          "description": "Optional mediation parameter"
+        }
+      },
+      "required": ["ad_location"],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "placement_id": {
+          "type": "string",
+          "description": "Placement ID (for Meta, UnityAds, Vungle, MobileFuse)"
+        }
+      },
+      "required": ["placement_id"]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "spot_id": {
+          "type": "string",
+          "description": "Spot ID (for DTExchange)"
+        }
+      },
+      "required": ["spot_id"]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "instance_id": {
+          "type": "string",
+          "description": "Instance ID (for IronSource)"
+        }
+      },
+      "required": ["instance_id"]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "placement_id": {
+          "type": "string",
+          "description": "Placement ID (for Mintegral)"
+        },
+        "unit_id": {
+          "type": "string",
+          "description": "Unit ID (for Mintegral)"
+        }
+      },
+      "required": ["placement_id", "unit_id"]
+    }
+  ],
+  "additionalProperties": false
+}

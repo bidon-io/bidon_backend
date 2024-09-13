@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "user.schema.json",
+  "title": "User",
+  "allOf": [
+    {
+      "$ref": "./user-props.schema.json"
+    },
+    {
+      "type": "object",
+      "required": ["email"]
+    }
+  ]
+}

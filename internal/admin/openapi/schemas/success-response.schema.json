@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "success-response.schema.json",
+  "title": "SuccessResponse",
+  "type": "object",
+  "properties": {
+    "success": {
+      "type": "boolean",
+      "description": "Indicates if the operation was successful"
+    }
+  },
+  "required": ["success"],
+  "additionalProperties": false
+}

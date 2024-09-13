@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AuctionConfigurationProps",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "primary-id.schema.json"
+    },
+    "public_uid": {
+      "$ref": "public-uid.schema.json"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "app_id": {
+      "$ref": "id.schema.json"
+    },
+    "ad_type": {
+      "$ref": "ad-type.schema.json"
+    },
+    "pricefloor": {
+      "type": "number",
+      "minimum": 0,
+      "exclusiveMinimum": true
+    },
+    "segment_id": {
+      "$ref": "id.schema.json",
+      "description": "Optional segment ID associated with the auction"
+    },
+    "is_default": {
+      "type": ["boolean"],
+      "description": "Indicates if this is the default configuration"
+    },
+    "external_win_notifications": {
+      "type": ["boolean"],
+      "description": "Whether external win notifications are enabled"
+    },
+    "demands": {
+      "type": "array",
+      "items": {
+        "$ref": "adapter-key.schema.json"
+      },
+      "description": "List of demand sources"
+    },
+    "bidding": {
+      "type": "array",
+      "items": {
+        "$ref": "adapter-key.schema.json"
+      },
+      "description": "List of bidding sources"
+    },
+    "ad_unit_ids": {
+      "type": "array",
+      "items": {
+        "$ref": "id.schema.json"
+      },
+      "description": "List of ad unit IDs"
+    },
+    "timeout": {
+      "type": "integer",
+      "format": "int32",
+      "description": "Timeout value in milliseconds"
+    },
+    "settings": {
+      "type": "object",
+      "description": "A map of configuration settings",
+      "additionalProperties": {}
+    }
+  }
+}

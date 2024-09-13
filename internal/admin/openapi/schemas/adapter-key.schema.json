@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "adapter-key.schema.json",
+  "title": "AdapterKey",
+  "type": "string",
+  "enum": [
+    "admob",
+    "amazon",
+    "applovin",
+    "bidmachine",
+    "bigoads",
+    "chartboost",
+    "dtexchange",
+    "gam",
+    "inmobi",
+    "ironsource",
+    "meta",
+    "mintegral",
+    "mobilefuse",
+    "unityads",
+    "vkads",
+    "vungle",
+    "yandex"
+  ],
+  "description": "An enum representing adapter keys for various ad networks"
+}

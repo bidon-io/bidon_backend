@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "line-item.schema.json",
+  "title": "LineItem",
+  "allOf": [
+    {
+      "$ref": "./line-item-props.schema.json"
+    },
+    {
+      "type": "object",
+      "required": [
+        "human_name",
+        "app_id",
+        "bid_floor",
+        "ad_type",
+        "format",
+        "account_id",
+        "account_type",
+        "code",
+        "extra"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "demand-source-account.schema.json",
+  "title": "DemandSourceAccount",
+  "allOf": [
+    {
+      "$ref": "./demand-source-account-props.schema.json"
+    },
+    {
+      "type": "object",
+      "required": ["user_id", "type", "demand_source_id", "is_bidding", "extra"]
+    }
+  ]
+}

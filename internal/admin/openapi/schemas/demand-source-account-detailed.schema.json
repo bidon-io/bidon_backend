@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "demand-source-account-detailed.schema.json",
+  "title": "DemandSourceAccountDetailed",
+  "allOf": [
+    {
+      "$ref": "demand-source-account.schema.json"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "user": {
+          "$ref": "user.schema.json",
+          "description": "Details of the user associated with the demand source account"
+        },
+        "demand_source": {
+          "$ref": "demand-source.schema.json",
+          "description": "Details of the demand source associated with the account"
+        }
+      }
+    }
+  ]
+}

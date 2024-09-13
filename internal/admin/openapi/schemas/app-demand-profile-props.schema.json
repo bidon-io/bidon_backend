@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "app-demand-profile-props.schema.json",
+  "title": "AppDemandProfileProps",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "primary-id.schema.json"
+    },
+    "public_uid": {
+      "$ref": "public-uid.schema.json"
+    },
+    "app_id": {
+      "$ref": "id.schema.json"
+    },
+    "demand_source_id": {
+      "$ref": "id.schema.json"
+    },
+    "account_id": {
+      "$ref": "id.schema.json"
+    },
+    "account_type": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The type of account associated with this demand profile"
+    },
+    "data": {
+      "type": "object",
+      "description": "Additional data associated with the demand profile"
+    }
+  }
+}
