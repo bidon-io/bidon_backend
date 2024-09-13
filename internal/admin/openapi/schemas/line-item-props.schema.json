@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "line-item-props.schema.json",
+  "title": "LineItemProps",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "primary-id.schema.json"
+    },
+    "public_uid": {
+      "$ref": "public-uid.schema.json"
+    },
+    "human_name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The human-readable name of the line item"
+    },
+    "app_id": {
+      "$ref": "id.schema.json",
+      "description": "The ID of the app associated with this line item"
+    },
+    "bid_floor": {
+      "type": "string",
+      "format": "decimal",
+      "example": "0.01",
+      "description": "The minimum bid floor price"
+    },
+    "ad_type": {
+      "$ref": "ad-type.schema.json"
+    },
+    "format": {
+        "$ref": "ad-format.schema.json"
+    },
+    "account_id": {
+      "$ref": "id.schema.json",
+      "description": "The account ID associated with this line item"
+    },
+    "account_type": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The type of account"
+    },
+    "code": {
+      "type": "string",
+      "description": "The unique code for the line item"
+    },
+    "extra": {
+      "$ref": "line-item-extra.schema.json",
+      "description": "Additional configuration specific to the demand source"
+    }
+  },
+  "required": ["human_name", "app_id", "bid_floor", "ad_type", "format", "account_id", "account_type", "code"]
+}

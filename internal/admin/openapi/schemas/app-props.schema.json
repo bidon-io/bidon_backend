@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "app-props.schema.json",
+  "title": "AppProps",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "id.schema.json"
+    },
+    "public_uid": {
+      "$ref": "public-uid.schema.json"
+    },
+    "platform_id": {
+      "$ref": "platform-id.schema.json",
+      "description": "The platform ID (ios, android)"
+    },
+    "human_name": {
+      "type": "string",
+      "description": "The human-readable name of the app"
+    },
+    "package_name": {
+      "type": "string",
+      "description": "The package name of the app"
+    },
+    "user_id": {
+        "$ref": "id.schema.json"
+    },
+    "app_key": {
+      "type": "string",
+      "description": "A unique key for the app"
+    }
+  }
+}

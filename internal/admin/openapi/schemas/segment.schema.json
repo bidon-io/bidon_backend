@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "segment.schema.json",
+  "title": "Segment",
+  "allOf": [
+    {
+      "$ref": "./segment-props.schema.json"
+    },
+    {
+      "type": "object",
+      "required": ["name", "description", "filters", "enabled", "app_id"]
+    }
+  ]
+}

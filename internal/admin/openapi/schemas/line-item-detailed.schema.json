@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "line-item-detailed.schema.json",
+  "title": "LineItemDetailed",
+  "allOf": [
+    {
+      "$ref": "line-item.schema.json"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "app": {
+          "$ref": "app.schema.json",
+          "description": "Details of the app associated with the line item"
+        },
+        "account": {
+          "$ref": "demand-source-account.schema.json",
+          "description": "Details of the demand source account"
+        }
+      }
+    }
+  ]
+}

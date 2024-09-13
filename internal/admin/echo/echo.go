@@ -22,7 +22,7 @@ import (
 func UseAuthorization(g *echo.Group, authService *auth.Service) {
 	sm := authService.GetSessionManager()
 	g.Use(middleware.BasicAuthWithConfig(middleware.BasicAuthConfig{
-		Skipper: skipIfWebAppOrAuth("Bearer"),
+		Skipper: skipIfAny(skipIfWebAppOrAuth("Bearer"), skipIfAuthRoutes()),
 		Validator: func(username, password string, c echo.Context) (bool, error) {
 			if authService.IsSuperUser(username, password) {
 				c.Set("authCtx", stubAuthContext{})
@@ -34,7 +34,7 @@ func UseAuthorization(g *echo.Group, authService *auth.Service) {
 		},
 	}))
 	g.Use(echojwt.WithConfig(echojwt.Config{
-		Skipper: skipIfWebAppOrAuth("Basic"),
+		Skipper: skipIfAny(skipIfWebAppOrAuth("Basic"), skipIfAuthRoutes()),
 		SuccessHandler: func(c echo.Context) {
 			token := c.Get("user").(*jwt.Token)
 			claims := token.Claims.(*auth.JWTClaims)
@@ -49,12 +49,13 @@ func UseAuthorization(g *echo.Group, authService *auth.Service) {
 		},
 	}))
 	g.Use(session.LoadAndSaveWithConfig(session.SessionConfig{
-		Skipper:        skipIfNotWebApp(),
+		Skipper:        skipIfAny(skipIfNotWebApp(), skipIfAuthRoutes()),
 		SessionManager: sm,
 	}))
 	g.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			if skipIfNotWebApp()(c) {
+			skipper := skipIfAny(skipIfNotWebApp(), skipIfAuthRoutes())
+			if skipper(c) {
 				return next(c)
 			}
 
@@ -66,162 +67,6 @@ func UseAuthorization(g *echo.Group, authService *auth.Service) {
 			return next(c)
 		}
 	})
-}
-
-func RegisterAuthService(g *echo.Group, service *auth.Service) {
-	g.POST("/login", func(c echo.Context) error {
-		var r auth.LogInRequest
-		if err := c.Bind(&r); err != nil {
-			return err
-		}
-
-		err := service.LogInWithSession(c.Request().Context(), r)
-		if err != nil {
-			if errors.Is(err, auth.ErrInvalidCredentials) {
-				return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
-			}
-
-			return err
-		}
-
-		return c.JSON(http.StatusOK, map[string]any{"success": true})
-	}, session.LoadAndSaveWithConfig(session.SessionConfig{
-		SessionManager: service.GetSessionManager(),
-	}))
-	g.POST("/logout", func(c echo.Context) error {
-		err := service.DestroySession(c.Request().Context())
-		if err != nil {
-			return err
-		}
-
-		return c.JSON(http.StatusOK, map[string]any{"success": true})
-	}, session.LoadAndSaveWithConfig(session.SessionConfig{
-		SessionManager: service.GetSessionManager(),
-	}))
-
-	g.POST("/authorize", func(c echo.Context) error {
-		var r auth.LogInRequest
-		if err := c.Bind(&r); err != nil {
-			return err
-		}
-
-		response, err := service.LogInWithAccessToken(c.Request().Context(), r)
-		if err != nil {
-			if errors.Is(err, auth.ErrInvalidCredentials) {
-				return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
-			}
-
-			return err
-		}
-
-		return c.JSON(http.StatusOK, response)
-	})
-}
-
-func RegisterAdminService(g *echo.Group, service *admin.Service) {
-	g.GET("/rest/resources", func(c echo.Context) error {
-		authCtx, err := getAuthContext(c)
-		if err != nil {
-			return err
-		}
-
-		services := []interface {
-			Meta(context.Context, admin.AuthContext) admin.ResourceMeta
-		}{
-			service.AppService,
-			service.AppDemandProfileService,
-			service.AuctionConfigurationService,
-			service.AuctionConfigurationV2Service,
-			service.CountryService,
-			service.DemandSourceService,
-			service.DemandSourceAccountService,
-			service.LineItemService,
-			service.SegmentService,
-			service.UserService,
-		}
-
-		response := make(map[string]admin.ResourceMeta, len(services))
-
-		for _, s := range services {
-			meta := s.Meta(c.Request().Context(), authCtx)
-			if !meta.Permissions.Read {
-				continue
-			}
-
-			response[meta.Key] = meta
-		}
-
-		return c.JSON(http.StatusOK, response)
-	})
-
-	resourceRoutes := []resourceRoute{
-		{
-			group:   g.Group("/apps"),
-			handler: &appServiceHandler{service.AppService},
-		},
-		{
-			group:   g.Group("/app_demand_profiles"),
-			handler: &appDemandProfileServiceHandler{service.AppDemandProfileService},
-		},
-		{
-			group:   g.Group("/auction_configurations"),
-			handler: &auctionConfigurationServiceHandler{service.AuctionConfigurationService},
-		},
-		{
-			group:   g.Group("/v2/auction_configurations"),
-			handler: &auctionConfigurationV2ServiceHandler{service.AuctionConfigurationV2Service},
-		},
-		{
-			group:   g.Group("/countries"),
-			handler: &countryServiceHandler{service.CountryService},
-		},
-		{
-			group:   g.Group("/demand_sources"),
-			handler: &demandSourceServiceHandler{service.DemandSourceService},
-		},
-		{
-			group:   g.Group("/demand_source_accounts"),
-			handler: &demandSourceAccountServiceHandler{service.DemandSourceAccountService},
-		},
-		{
-			group:   g.Group("/line_items"),
-			handler: &lineItemServiceHandler{service.LineItemService},
-		},
-		{
-			group:   g.Group("/segments"),
-			handler: &segmentServiceHandler{service.SegmentService},
-		},
-		{
-			group: g.Group("/users"),
-			handler: &userHandler{
-				userServiceHandler: &userServiceHandler{service.UserService},
-			},
-		},
-	}
-	for _, r := range resourceRoutes {
-		r.group.GET("", r.handler.list)
-		r.group.POST("", r.handler.create)
-		r.group.GET("/:id", r.handler.get)
-		r.group.PUT("/:id", r.handler.update)
-		r.group.PATCH("/:id", r.handler.update)
-		r.group.DELETE("/:id", r.handler.delete)
-	}
-
-	lineItemImportHandler := &lineItemImportHandler{service.LineItemService}
-	g.POST("/line_items/import", lineItemImportHandler.handleImport)
-}
-
-type resourceRoute struct {
-	group   *echo.Group
-	handler resourceHandler
-}
-
-type resourceHandler interface {
-	list(c echo.Context) error
-	create(c echo.Context) error
-	get(c echo.Context) error
-	update(c echo.Context) error
-	delete(c echo.Context) error
 }
 
 type appServiceHandler = resourceServiceHandler[admin.AppResource, admin.App, admin.AppAttrs]
@@ -408,71 +253,21 @@ func skipIfAuthIs(prefixes ...string) middleware.Skipper {
 	}
 }
 
-type userHandler struct {
-	*userServiceHandler
+func skipIfAuthRoutes() middleware.Skipper {
+	return func(c echo.Context) bool {
+		return strings.HasPrefix(c.Path(), "/auth")
+	}
 }
 
-func (h *userHandler) get(c echo.Context) error {
-	authCtx, err := getAuthContext(c)
-	if err != nil {
-		return err
-	}
-
-	var id int64
-	idParam := c.Param("id")
-	if idParam == "me" {
-		id = authCtx.UserID()
-	} else {
-		convID, err := strconv.Atoi(idParam)
-		if err != nil {
-			return fmt.Errorf("invalid id: %v", err)
+// Combine skippers with OR logic
+func skipIfAny(skippers ...middleware.Skipper) middleware.Skipper {
+	return func(c echo.Context) bool {
+		// Any skipper returning true will make the combined skipper skip
+		for _, skipper := range skippers {
+			if skipper(c) {
+				return true
+			}
 		}
-		id = int64(convID)
+		return false
 	}
-
-	resource, err := h.service.Find(c.Request().Context(), authCtx, id)
-	if err != nil {
-		return err
-	}
-
-	return c.JSON(http.StatusOK, resource)
-}
-
-type lineItemImportHandler struct {
-	service *admin.LineItemService
-}
-
-func (h *lineItemImportHandler) handleImport(c echo.Context) error {
-	authCtx, err := getAuthContext(c)
-	if err != nil {
-		return err
-	}
-
-	attrs := admin.LineItemImportCSVAttrs{}
-	if err := c.Bind(&attrs); err != nil {
-		return err
-	}
-
-	fileHeader, err := c.FormFile("csv")
-	if err != nil {
-		return err
-	}
-
-	file, err := fileHeader.Open()
-	if err != nil {
-		return fmt.Errorf("open csv file: %v", err)
-	}
-	defer func() {
-		err := file.Close()
-		if err != nil {
-			c.Logger().Errorf("close csv file: %v", err)
-		}
-	}()
-
-	err = h.service.ImportCSV(c.Request().Context(), authCtx, file, attrs)
-	if err != nil {
-		return fmt.Errorf("import csv: %v", err)
-	}
-
-	return c.NoContent(http.StatusNoContent)
 }

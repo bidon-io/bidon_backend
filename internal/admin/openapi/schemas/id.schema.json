@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "id.schema.json",
+  "title": "ID",
+  "type": "integer",
+  "minimum": 1,
+  "description": "A positive integer ID"
+}

@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "country.schema.json",
+  "title": "Country",
+  "allOf": [
+    {
+      "$ref": "country-props.schema.json"
+    },
+    {
+      "type": "object",
+      "required": ["human_name", "alpha_2_code", "alpha_3_code"]
+    }
+  ]
+}

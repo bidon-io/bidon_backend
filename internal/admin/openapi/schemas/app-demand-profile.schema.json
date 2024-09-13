@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "app-demand-profile.schema.json",
+  "title": "AppDemandProfile",
+  "allOf": [
+    {
+      "$ref": "./app-demand-profile-props.schema.json"
+    },
+    {
+      "type": "object",
+      "required": ["app_id", "demand_source_id", "account_id", "account_type", "data"]
+    }
+  ]
+}
