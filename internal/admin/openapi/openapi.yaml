@@ -985,8 +985,6 @@ paths:
       operationId: logIn
       tags:
         - Authentication
-      servers:
-        - url: /auth
       requestBody:
         required: true
         content:
@@ -1014,8 +1012,6 @@ paths:
       operationId: logOut
       tags:
         - Authentication
-      servers:
-        - url: /auth
       responses:
         '200':
           description: Success response
@@ -1031,8 +1027,6 @@ paths:
       operationId: authorizeUser
       tags:
         - Authentication
-      servers:
-        - url: /auth
       requestBody:
         required: true
         content:
