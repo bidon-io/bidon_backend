@@ -71,6 +71,13 @@ func (f *AdapterInitConfigsFetcher) FetchAdapterInitConfigs(ctx context.Context,
 	configs := make([]sdkapi.AdapterInitConfig, 0, len(dbProfiles))
 	for _, profile := range dbProfiles {
 		adapterKey := adapter.Key(profile.Account.DemandSource.APIKey)
+
+		// TODO remove this check after test is completed
+		isMergeBlockIOS := appID == 735361
+		if adapterKey == adapter.AmazonKey && isMergeBlockIOS {
+			continue
+		}
+
 		config, err := sdkapi.NewAdapterInitConfig(adapterKey, setOrder)
 		if err != nil {
 			return nil, fmt.Errorf("new AdapterInitConfig: %w", err)
