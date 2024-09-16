@@ -615,7 +615,7 @@ paths:
           description: "Filter by ad type"
           required: false
           schema:
-            ref$: './schemas/ad-type.schema.json'
+            type: string
         - name: account_id
           in: query
           description: "Filter by account ID"
