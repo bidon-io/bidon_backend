@@ -64,12 +64,7 @@
     "bid_type": {
       "$ref": "bid-type.schema.json"
     },
-    "round_price_floor": {
-      "type": "number",
-      "description": "PriceFloor for the bidding round",
-      "minimum": 0
-    },
-    "auction_price_floor": {
+    "auction_pricefloor": {
       "type": "number",
       "description": "Auction PriceFloor",
       "minimum": 0

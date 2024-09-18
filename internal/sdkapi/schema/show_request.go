@@ -14,21 +14,6 @@ type ShowRequest struct {
 	Show   *Bid    `json:"show" validate:"required_without=Bid"`
 }
 
-func (r *ShowRequest) Map() map[string]any {
-	m := r.BaseRequest.Map()
-
-	m["ad_type"] = r.AdType
-
-	if r.Bid != nil {
-		m["bid"] = r.Bid.Map()
-	}
-	if r.Show != nil {
-		m["show"] = r.Show.Map()
-	}
-
-	return m
-}
-
 func (r *ShowRequest) NormalizeValues() {
 	r.BaseRequest.NormalizeValues()
 
