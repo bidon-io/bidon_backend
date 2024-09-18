@@ -45,9 +45,6 @@
   <template v-if="accountType == 'DemandSourceAccount::IronSource'">
     <VeeFormFieldWrapper field="data.appKey" label="App Key" required />
   </template>
-  <template v-if="accountType == 'DemandSourceAccount::MobileFuse'">
-    <VeeFormFieldWrapper field="data.appKey" label="App Key" required />
-  </template>
   <template v-if="accountType == 'DemandSourceAccount::Yandex'">
     <VeeFormFieldWrapper field="data.metricaId" label="Oauth Token" required />
   </template>
@@ -109,9 +106,6 @@ const dataSchemas = {
     appKey: yup.string().required().label("App Key"),
   }),
   "DemandSourceAccount::IronSource": yup.object({
-    appKey: yup.string().required().label("App Key"),
-  }),
-  "DemandSourceAccount::MobileFuse": yup.object({
     appKey: yup.string().required().label("App Key"),
   }),
   "DemandSourceAccount::Yandex": yup.object({
