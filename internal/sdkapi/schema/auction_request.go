@@ -11,19 +11,6 @@ type AuctionRequest struct {
 	AdObject AdObject `json:"ad_object" validate:"required"`
 }
 
-func (r *AuctionRequest) Map() map[string]any {
-	m := r.BaseRequest.Map()
-
-	m["ad_type"] = r.AdType
-	m["ad_object"] = r.AdObject.Map()
-
-	if r.Adapters != nil {
-		m["adapters"] = r.Adapters.Map()
-	}
-
-	return m
-}
-
 func (r *AuctionRequest) GetAuctionConfigurationParams() (string, string) {
 	return "", r.AdObject.AuctionConfigurationUID
 }
