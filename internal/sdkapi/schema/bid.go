@@ -21,8 +21,7 @@ type Bid struct {
 	ECPM                    float64               `json:"ecpm" validate:"required_without=Price"` // Deprecated: use Price instead
 	Price                   float64               `json:"price" validate:"required_without=ECPM"`
 	BidType                 BidType               `json:"bid_type" validate:"omitempty,oneof=RTB CPM"`
-	RoundPriceFloor         float64               `json:"round_price_floor"`
-	AuctionPriceFloor       float64               `json:"auction_price_floor"`
+	AuctionPriceFloor       float64               `json:"auction_pricefloor"`
 	Banner                  *BannerAdObject       `json:"banner"`
 	Interstitial            *InterstitialAdObject `json:"interstitial"`
 	Rewarded                *RewardedAdObject     `json:"rewarded"`
@@ -60,41 +59,4 @@ func (b *Bid) Format() ad.Format {
 	}
 
 	return ad.EmptyFormat
-}
-
-func (b *Bid) Map() map[string]any {
-	auctionConfigurationUID, err := strconv.Atoi(b.AuctionConfigurationUID)
-	if err != nil {
-		auctionConfigurationUID = 0
-	}
-
-	m := map[string]any{
-		"auction_id":                b.AuctionID,
-		"auction_configuration_id":  b.AuctionConfigurationID,
-		"auction_configuration_uid": auctionConfigurationUID,
-		"imp_id":                    b.ImpID,
-		"demand_id":                 b.DemandID,
-		"round_id":                  b.RoundID,
-		"round_number":              b.RoundIndex,
-		"ad_unit_id":                b.AdUnitID, // Deprecated: use AdUnitUID instead
-		"line_item_uid":             b.GetAdUnitUID(),
-		"line_item_label":           b.AdUnitLabel,
-		"ecpm":                      b.GetPrice(),
-		"round_price_floor":         b.RoundPriceFloor,
-		"auction_price_floor":       b.AuctionPriceFloor,
-		"bid_type":                  b.BidType,
-		"bidding":                   b.IsBidding(),
-	}
-
-	if b.Banner != nil {
-		m["banner"] = b.Banner.Map()
-	}
-	if b.Interstitial != nil {
-		m["interstitial"] = b.Interstitial.Map()
-	}
-	if b.Rewarded != nil {
-		m["rewarded"] = b.Rewarded.Map()
-	}
-
-	return m
 }

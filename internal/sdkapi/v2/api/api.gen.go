@@ -948,8 +948,8 @@ type PostClickJSONBody_Bid struct {
 	// AuctionId Unique identifier for the auction
 	AuctionId string `json:"auction_id"`
 
-	// AuctionPriceFloor Auction PriceFloor
-	AuctionPriceFloor *float32 `json:"auction_price_floor,omitempty"`
+	// AuctionPricefloor Auction PriceFloor
+	AuctionPricefloor *float32 `json:"auction_pricefloor,omitempty"`
 	Banner            *struct {
 		// Format Format of the banner ad
 		Format PostClickJSONBodyBidBannerFormat `json:"format"`
@@ -984,10 +984,7 @@ type PostClickJSONBody_Bid struct {
 
 	// RoundIdx Index of the round in the bidding process
 	RoundIdx *int `json:"round_idx,omitempty"`
-
-	// RoundPriceFloor PriceFloor for the bidding round
-	RoundPriceFloor *float32 `json:"round_price_floor,omitempty"`
-	union           json.RawMessage
+	union    json.RawMessage
 }
 
 // PostClickJSONBodyDeviceConnectionType defines parameters for PostClick.
@@ -1028,8 +1025,8 @@ type PostClickJSONBody_Show struct {
 	// AuctionId Unique identifier for the auction
 	AuctionId string `json:"auction_id"`
 
-	// AuctionPriceFloor Auction PriceFloor
-	AuctionPriceFloor *float32 `json:"auction_price_floor,omitempty"`
+	// AuctionPricefloor Auction PriceFloor
+	AuctionPricefloor *float32 `json:"auction_pricefloor,omitempty"`
 	Banner            *struct {
 		// Format Format of the banner ad
 		Format PostClickJSONBodyShowBannerFormat `json:"format"`
@@ -1064,10 +1061,7 @@ type PostClickJSONBody_Show struct {
 
 	// RoundIdx Index of the round in the bidding process
 	RoundIdx *int `json:"round_idx,omitempty"`
-
-	// RoundPriceFloor PriceFloor for the bidding round
-	RoundPriceFloor *float32 `json:"round_price_floor,omitempty"`
-	union           json.RawMessage
+	union    json.RawMessage
 }
 
 // PostClickJSONBody0 defines parameters for PostClick.
@@ -1576,8 +1570,8 @@ type PostLossJSONBody_Bid struct {
 	// AuctionId Unique identifier for the auction
 	AuctionId string `json:"auction_id"`
 
-	// AuctionPriceFloor Auction PriceFloor
-	AuctionPriceFloor *float32 `json:"auction_price_floor,omitempty"`
+	// AuctionPricefloor Auction PriceFloor
+	AuctionPricefloor *float32 `json:"auction_pricefloor,omitempty"`
 	Banner            *struct {
 		// Format Format of the banner ad
 		Format PostLossJSONBodyBidBannerFormat `json:"format"`
@@ -1612,10 +1606,7 @@ type PostLossJSONBody_Bid struct {
 
 	// RoundIdx Index of the round in the bidding process
 	RoundIdx *int `json:"round_idx,omitempty"`
-
-	// RoundPriceFloor PriceFloor for the bidding round
-	RoundPriceFloor *float32 `json:"round_price_floor,omitempty"`
-	union           json.RawMessage
+	union    json.RawMessage
 }
 
 // PostLossJSONBodyDeviceConnectionType defines parameters for PostLoss.
@@ -1656,8 +1647,8 @@ type PostLossJSONBody_Show struct {
 	// AuctionId Unique identifier for the auction
 	AuctionId string `json:"auction_id"`
 
-	// AuctionPriceFloor Auction PriceFloor
-	AuctionPriceFloor *float32 `json:"auction_price_floor,omitempty"`
+	// AuctionPricefloor Auction PriceFloor
+	AuctionPricefloor *float32 `json:"auction_pricefloor,omitempty"`
 	Banner            *struct {
 		// Format Format of the banner ad
 		Format PostLossJSONBodyShowBannerFormat `json:"format"`
@@ -1692,10 +1683,7 @@ type PostLossJSONBody_Show struct {
 
 	// RoundIdx Index of the round in the bidding process
 	RoundIdx *int `json:"round_idx,omitempty"`
-
-	// RoundPriceFloor PriceFloor for the bidding round
-	RoundPriceFloor *float32 `json:"round_price_floor,omitempty"`
-	union           json.RawMessage
+	union    json.RawMessage
 }
 
 // PostRewardJSONBody defines parameters for PostReward.
@@ -1959,8 +1947,8 @@ type PostRewardJSONBody_Bid struct {
 	// AuctionId Unique identifier for the auction
 	AuctionId string `json:"auction_id"`
 
-	// AuctionPriceFloor Auction PriceFloor
-	AuctionPriceFloor *float32 `json:"auction_price_floor,omitempty"`
+	// AuctionPricefloor Auction PriceFloor
+	AuctionPricefloor *float32 `json:"auction_pricefloor,omitempty"`
 	Banner            *struct {
 		// Format Format of the banner ad
 		Format PostRewardJSONBodyBidBannerFormat `json:"format"`
@@ -1995,10 +1983,7 @@ type PostRewardJSONBody_Bid struct {
 
 	// RoundIdx Index of the round in the bidding process
 	RoundIdx *int `json:"round_idx,omitempty"`
-
-	// RoundPriceFloor PriceFloor for the bidding round
-	RoundPriceFloor *float32 `json:"round_price_floor,omitempty"`
-	union           json.RawMessage
+	union    json.RawMessage
 }
 
 // PostRewardJSONBodyDeviceConnectionType defines parameters for PostReward.
@@ -2039,8 +2024,8 @@ type PostRewardJSONBody_Show struct {
 	// AuctionId Unique identifier for the auction
 	AuctionId string `json:"auction_id"`
 
-	// AuctionPriceFloor Auction PriceFloor
-	AuctionPriceFloor *float32 `json:"auction_price_floor,omitempty"`
+	// AuctionPricefloor Auction PriceFloor
+	AuctionPricefloor *float32 `json:"auction_pricefloor,omitempty"`
 	Banner            *struct {
 		// Format Format of the banner ad
 		Format PostRewardJSONBodyShowBannerFormat `json:"format"`
@@ -2075,10 +2060,7 @@ type PostRewardJSONBody_Show struct {
 
 	// RoundIdx Index of the round in the bidding process
 	RoundIdx *int `json:"round_idx,omitempty"`
-
-	// RoundPriceFloor PriceFloor for the bidding round
-	RoundPriceFloor *float32 `json:"round_price_floor,omitempty"`
-	union           json.RawMessage
+	union    json.RawMessage
 }
 
 // PostRewardJSONBody0 defines parameters for PostReward.
@@ -2348,8 +2330,8 @@ type PostShowJSONBody_Bid struct {
 	// AuctionId Unique identifier for the auction
 	AuctionId string `json:"auction_id"`
 
-	// AuctionPriceFloor Auction PriceFloor
-	AuctionPriceFloor *float32 `json:"auction_price_floor,omitempty"`
+	// AuctionPricefloor Auction PriceFloor
+	AuctionPricefloor *float32 `json:"auction_pricefloor,omitempty"`
 	Banner            *struct {
 		// Format Format of the banner ad
 		Format PostShowJSONBodyBidBannerFormat `json:"format"`
@@ -2384,10 +2366,7 @@ type PostShowJSONBody_Bid struct {
 
 	// RoundIdx Index of the round in the bidding process
 	RoundIdx *int `json:"round_idx,omitempty"`
-
-	// RoundPriceFloor PriceFloor for the bidding round
-	RoundPriceFloor *float32 `json:"round_price_floor,omitempty"`
-	union           json.RawMessage
+	union    json.RawMessage
 }
 
 // PostShowJSONBodyDeviceConnectionType defines parameters for PostShow.
@@ -2428,8 +2407,8 @@ type PostShowJSONBody_Show struct {
 	// AuctionId Unique identifier for the auction
 	AuctionId string `json:"auction_id"`
 
-	// AuctionPriceFloor Auction PriceFloor
-	AuctionPriceFloor *float32 `json:"auction_price_floor,omitempty"`
+	// AuctionPricefloor Auction PriceFloor
+	AuctionPricefloor *float32 `json:"auction_pricefloor,omitempty"`
 	Banner            *struct {
 		// Format Format of the banner ad
 		Format PostShowJSONBodyShowBannerFormat `json:"format"`
@@ -2464,10 +2443,7 @@ type PostShowJSONBody_Show struct {
 
 	// RoundIdx Index of the round in the bidding process
 	RoundIdx *int `json:"round_idx,omitempty"`
-
-	// RoundPriceFloor PriceFloor for the bidding round
-	RoundPriceFloor *float32 `json:"round_price_floor,omitempty"`
-	union           json.RawMessage
+	union    json.RawMessage
 }
 
 // PostShowJSONBody0 defines parameters for PostShow.
@@ -3073,8 +3049,8 @@ type PostWinJSONBody_Bid struct {
 	// AuctionId Unique identifier for the auction
 	AuctionId string `json:"auction_id"`
 
-	// AuctionPriceFloor Auction PriceFloor
-	AuctionPriceFloor *float32 `json:"auction_price_floor,omitempty"`
+	// AuctionPricefloor Auction PriceFloor
+	AuctionPricefloor *float32 `json:"auction_pricefloor,omitempty"`
 	Banner            *struct {
 		// Format Format of the banner ad
 		Format PostWinJSONBodyBidBannerFormat `json:"format"`
@@ -3109,10 +3085,7 @@ type PostWinJSONBody_Bid struct {
 
 	// RoundIdx Index of the round in the bidding process
 	RoundIdx *int `json:"round_idx,omitempty"`
-
-	// RoundPriceFloor PriceFloor for the bidding round
-	RoundPriceFloor *float32 `json:"round_price_floor,omitempty"`
-	union           json.RawMessage
+	union    json.RawMessage
 }
 
 // PostWinJSONBodyDeviceConnectionType defines parameters for PostWin.
@@ -3153,8 +3126,8 @@ type PostWinJSONBody_Show struct {
 	// AuctionId Unique identifier for the auction
 	AuctionId string `json:"auction_id"`
 
-	// AuctionPriceFloor Auction PriceFloor
-	AuctionPriceFloor *float32 `json:"auction_price_floor,omitempty"`
+	// AuctionPricefloor Auction PriceFloor
+	AuctionPricefloor *float32 `json:"auction_pricefloor,omitempty"`
 	Banner            *struct {
 		// Format Format of the banner ad
 		Format PostWinJSONBodyShowBannerFormat `json:"format"`
@@ -3189,10 +3162,7 @@ type PostWinJSONBody_Show struct {
 
 	// RoundIdx Index of the round in the bidding process
 	RoundIdx *int `json:"round_idx,omitempty"`
-
-	// RoundPriceFloor PriceFloor for the bidding round
-	RoundPriceFloor *float32 `json:"round_price_floor,omitempty"`
-	union           json.RawMessage
+	union    json.RawMessage
 }
 
 // PostWinJSONBody0 defines parameters for PostWin.
@@ -3610,81 +3580,80 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
-	"ttvt9v8CAAD//wthqmWbawAA",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
