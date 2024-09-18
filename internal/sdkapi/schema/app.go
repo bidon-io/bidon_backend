@@ -10,21 +10,3 @@ type App struct {
 	SKAdN            []string `json:"skadn"`
 	SDKVersion       string   `json:"sdk_version"`
 }
-
-func (a App) Map() map[string]any {
-	m := map[string]any{
-		"bundle":            a.Bundle,
-		"key":               a.Key,
-		"framework":         a.Framework,
-		"version":           a.Version,
-		"framework_version": a.FrameworkVersion,
-		"plugin_version":    a.PluginVersion,
-		"sdk_version":       a.SDKVersion,
-	}
-
-	if a.SKAdN != nil {
-		m["skadn"] = a.SKAdN
-	}
-
-	return m
-}

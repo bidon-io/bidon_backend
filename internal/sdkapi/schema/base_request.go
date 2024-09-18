@@ -24,27 +24,6 @@ type BaseRequest struct {
 	parseExtOnce sync.Once
 }
 
-func (r *BaseRequest) Map() map[string]any {
-	m := map[string]any{
-		"device":  r.Device.Map(),
-		"session": r.Session.Map(),
-		"app":     r.App.Map(),
-		"user":    r.User.Map(),
-		"ext":     r.Ext,
-		"token":   r.Token,
-		"segment": r.Segment.Map(),
-	}
-
-	if r.Geo != nil {
-		m["geo"] = r.Geo.Map()
-	}
-	if r.Regulations != nil {
-		m["regs"] = r.Regulations.Map()
-	}
-
-	return m
-}
-
 func (r *BaseRequest) GetApp() App {
 	return r.App
 }
