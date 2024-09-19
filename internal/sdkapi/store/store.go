@@ -74,7 +74,7 @@ func (f *AdapterInitConfigsFetcher) FetchAdapterInitConfigs(ctx context.Context,
 
 		// TODO remove this check after test is completed
 		isMergeBlockIOS := appID == 735361
-		if adapterKey == adapter.AmazonKey && isMergeBlockIOS {
+		if adapterKey == adapter.AmazonKey && isMergeBlockIOS && !setAmazonSlots {
 			continue
 		}
 
