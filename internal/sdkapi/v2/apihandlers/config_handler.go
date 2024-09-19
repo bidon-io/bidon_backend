@@ -3,6 +3,7 @@ package apihandlers
 import (
 	"context"
 	"fmt"
+	"github.com/Masterminds/semver/v3"
 	"net/http"
 
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
@@ -77,6 +78,14 @@ func (h *ConfigHandler) Handle(c echo.Context) error {
 
 	setOrder := req.raw.Device.OS == "android"                      // Set order for Android devices only
 	setAmazonSlots := !sdkapi.Version05Constraint.Check(sdkVersion) // Do not set Amazon slots for SDK version 0.5.x
+
+	// TODO remove this hack after test is completed
+	isMergeBlockIOS := req.app.ID == 735361
+	if isMergeBlockIOS {
+		constraint, _ := semver.NewConstraint("= 0.7.0-0-next.3")
+		setAmazonSlots = !constraint.Check(sdkVersion) // For all versions except 0.7.0-0-next.3 sets to false it used in ConfigsFetcher
+	}
+
 	adapterInitConfigs, err := h.AdapterInitConfigsFetcher.FetchAdapterInitConfigs(ctx, req.app.ID, req.raw.Adapters.Keys(), setAmazonSlots, setOrder)
 	if err != nil {
 		return err
