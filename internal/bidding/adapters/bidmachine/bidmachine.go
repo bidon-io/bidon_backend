@@ -72,6 +72,12 @@ func (a *BidmachineAdapter) interstitial(br *schema.BiddingRequest) *openrtb2.Im
 			BAttr: []adcom1.CreativeAttribute{},
 			Pos:   adcom1.PositionFullScreen.Ptr(),
 		},
+		Video: &openrtb2.Video{
+			W:     w,
+			H:     h,
+			Pos:   adcom1.PositionFullScreen.Ptr(),
+			MIMEs: []string{"video/mp4", "video/3gpp", "video/3gpp2", "video/x-m4v", "video/quicktime"},
+		},
 	}
 }
 
