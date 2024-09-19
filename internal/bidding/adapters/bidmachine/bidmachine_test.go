@@ -281,6 +281,12 @@ func TestBidmachine_CreateRequest(t *testing.T) {
 						BAttr: []adcom1.CreativeAttribute{},
 						Pos:   adcom1.PositionFullScreen.Ptr(),
 					},
+					Video: &openrtb2.Video{
+						W:     int64(320),
+						H:     int64(480),
+						Pos:   adcom1.PositionFullScreen.Ptr(),
+						MIMEs: []string{"video/mp4", "video/3gpp", "video/3gpp2", "video/x-m4v", "video/quicktime"},
+					},
 				}),
 				Err: nil,
 			},
