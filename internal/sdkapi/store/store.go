@@ -98,7 +98,7 @@ func (f *AdapterInitConfigsFetcher) FetchAdapterInitConfigs(ctx context.Context,
 			applovinConfig.AppKey = applovinConfig.SDKKey
 		}
 
-		if setAmazonSlots {
+		if setAmazonSlots || (isMergeBlockIOS && !setAmazonSlots) {
 			amazonConfig, ok := config.(*sdkapi.AmazonInitConfig)
 			if ok {
 				amazonConfig.Slots, err = f.fetchAmazonSlots(ctx, appID)
