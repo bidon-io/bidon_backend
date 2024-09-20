@@ -8,12 +8,12 @@
       "type": "string",
       "description": "Identifier for the demand source of the external winner"
     },
-    "ecpm": {
+    "price": {
       "type": "number",
       "description": "Effective cost per mille for the external winner",
       "minimum": 0
     }
   },
-  "required": ["ecpm"],
+  "required": ["price"],
   "additionalProperties": false
 }
