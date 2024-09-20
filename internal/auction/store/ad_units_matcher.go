@@ -15,7 +15,7 @@ import (
 	"gorm.io/gorm"
 )
 
-const adUnitTimeout = 5000
+const AdUnitTimeout = 10_000
 
 type AdUnitsMatcher struct {
 	DB    *db.DB
@@ -89,7 +89,7 @@ func (m *AdUnitsMatcher) find(query *gorm.DB) ([]auction.AdUnit, error) {
 			adUnits[i].PriceFloor = &pf
 		}
 		adUnits[i].Extra = dbLineItem.Extra
-		adUnits[i].Timeout = adUnitTimeout
+		adUnits[i].Timeout = AdUnitTimeout
 	}
 
 	return adUnits, nil
