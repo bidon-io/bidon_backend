@@ -64,7 +64,7 @@ func prepareLossEvent(req *request[schema.LossRequest, *schema.LossRequest]) *ev
 		PriceFloor:              bid.AuctionPriceFloor,
 		Bidding:                 bid.IsBidding(),
 		ExternalWinnerDemandID:  req.raw.ExternalWinner.DemandID,
-		ExternalWinnerEcpm:      req.raw.ExternalWinner.ECPM,
+		ExternalWinnerEcpm:      req.raw.ExternalWinner.GetPrice(),
 	}
 
 	return event.NewAdEvent(&req.raw.BaseRequest, adRequestParams, req.geoData)
