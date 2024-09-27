@@ -82,7 +82,7 @@ func (h *ConfigHandler) Handle(c echo.Context) error {
 	// TODO remove this hack after test is completed
 	isMergeBlockIOS := req.app.ID == 735361
 	if isMergeBlockIOS {
-		constraint, _ := semver.NewConstraint("= 0.7.0-next.3 || = 0.7.0-next.4")
+		constraint, _ := semver.NewConstraint("= 0.7.0-next.3 || = 0.7.0-next.4 || = 0.7.0-next.5")
 		setAmazonSlots = !constraint.Check(sdkVersion) // For all versions except 0.7.0-0-next.3 sets to false it used in ConfigsFetcher
 	}
 
