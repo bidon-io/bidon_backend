@@ -72,12 +72,6 @@ func (f *AdapterInitConfigsFetcher) FetchAdapterInitConfigs(ctx context.Context,
 	for _, profile := range dbProfiles {
 		adapterKey := adapter.Key(profile.Account.DemandSource.APIKey)
 
-		// TODO remove this check after test is completed
-		isMergeBlockIOS := appID == 735361
-		if adapterKey == adapter.AmazonKey && isMergeBlockIOS && setAmazonSlots {
-			continue
-		}
-
 		config, err := sdkapi.NewAdapterInitConfig(adapterKey, setOrder)
 		if err != nil {
 			return nil, fmt.Errorf("new AdapterInitConfig: %w", err)
@@ -98,7 +92,7 @@ func (f *AdapterInitConfigsFetcher) FetchAdapterInitConfigs(ctx context.Context,
 			applovinConfig.AppKey = applovinConfig.SDKKey
 		}
 
-		if setAmazonSlots || (isMergeBlockIOS && !setAmazonSlots) {
+		if setAmazonSlots {
 			amazonConfig, ok := config.(*sdkapi.AmazonInitConfig)
 			if ok {
 				amazonConfig.Slots, err = f.fetchAmazonSlots(ctx, appID)
