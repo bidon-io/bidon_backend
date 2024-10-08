@@ -9,6 +9,11 @@ import (
 )
 
 func (ac *AuctionConfiguration) BeforeSave(tx *gorm.DB) (err error) {
+	// Exit check if configuration w/o segment and not default
+	if ac.SegmentID == nil && (ac.IsDefault == nil || !*ac.IsDefault) {
+		return nil
+	}
+
 	// Check if the combination of app_id, ad_type, and segment_id is already taken
 	var count int64
 
@@ -32,7 +37,7 @@ func (ac *AuctionConfiguration) BeforeSave(tx *gorm.DB) (err error) {
 	if withSegment {
 		query = query.Where("segment_id = ?", ac.SegmentID.Int64)
 	} else {
-		query = query.Where("segment_id IS NULL")
+		query = query.Where("segment_id IS NULL AND is_default")
 	}
 
 	query = query.Not(ac.ID).Count(&count)
