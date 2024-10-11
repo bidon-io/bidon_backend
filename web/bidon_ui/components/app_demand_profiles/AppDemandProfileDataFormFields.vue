@@ -46,7 +46,7 @@
     <VeeFormFieldWrapper field="data.appKey" label="App Key" required />
   </template>
   <template v-if="accountType == 'DemandSourceAccount::Yandex'">
-    <VeeFormFieldWrapper field="data.metricaId" label="Oauth Token" required />
+    <VeeFormFieldWrapper field="data.metricaId" label="Metrica ID" required />
   </template>
 </template>
 
@@ -109,7 +109,7 @@ const dataSchemas = {
     appKey: yup.string().required().label("App Key"),
   }),
   "DemandSourceAccount::Yandex": yup.object({
-    metricaId: yup.string().required().label("Oauth Token"),
+    metricaId: yup.string().required().label("Metrica ID"),
   }),
 };
 
