@@ -119,6 +119,13 @@ func (b *Builder) Build(ctx context.Context, params *BuildParams) (*AuctionResul
 	adUnitsMap := auction.BuildAdUnitsMap(&adUnits)
 	var cpmAdUnits []auction.AdUnit
 	for _, adUnit := range adUnits {
+		// Use auction pricefloor as BM CPM price
+		if adUnit.DemandID == string(adapter.BidmachineKey) && adUnit.IsCPM() {
+			adUnit.PriceFloor = &params.PriceFloor
+			cpmAdUnits = append(cpmAdUnits, adUnit)
+			continue
+		}
+
 		if adUnit.GetPriceFloor() > params.PriceFloor && adUnit.IsCPM() {
 			cpmAdUnits = append(cpmAdUnits, adUnit)
 		}
