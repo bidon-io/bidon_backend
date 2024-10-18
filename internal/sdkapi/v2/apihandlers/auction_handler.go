@@ -122,13 +122,15 @@ func (h *AuctionHandler) buildResponse(
 ) (*AuctionResponse, error) {
 	adObject := req.raw.AdObject
 	response := AuctionResponse{
-		ConfigID:          auctionResult.AuctionConfiguration.ID,
-		ConfigUID:         auctionResult.AuctionConfiguration.UID,
-		Segment:           auction.Segment{ID: req.raw.Segment.ID, UID: req.raw.Segment.UID},
-		Token:             "{}",
-		AuctionID:         adObject.AuctionID,
-		AuctionPriceFloor: adObject.PriceFloor,
-		AuctionTimeout:    auctionTimeout(auctionResult.AuctionConfiguration),
+		ConfigID:                 auctionResult.AuctionConfiguration.ID,
+		ConfigUID:                auctionResult.AuctionConfiguration.UID,
+		Segment:                  auction.Segment{ID: req.raw.Segment.ID, UID: req.raw.Segment.UID},
+		Token:                    "{}",
+		AuctionID:                adObject.AuctionID,
+		AuctionPriceFloor:        adObject.PriceFloor,
+		AuctionTimeout:           auctionTimeout(auctionResult.AuctionConfiguration),
+		ExternalWinNotifications: auctionResult.AuctionConfiguration.ExternalWinNotifications,
+		NoBids:                   make([]auction.AdUnit, 0),
 	}
 
 	// Store CPM AdUnits from AuctionConfiguration
