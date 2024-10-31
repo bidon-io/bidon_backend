@@ -3,7 +3,7 @@
   "private": true,
   "engines": {
     "npm": ">=9.0.0",
-    "node": ">=20.0.0"
+    "node": ">=22.0"
   },
   "scripts": {
     "build": "nuxt build",
@@ -24,7 +24,7 @@
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-nuxt": "^4.0.0",
     "eslint-plugin-prettier": "^5.0.1",
-    "nuxt": "^3.7.4",
+    "nuxt": "^3.13.2",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
   },
