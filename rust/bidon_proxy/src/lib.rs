@@ -1,4 +1,13 @@
-#![allow(missing_docs, trivial_casts, unused_variables, unused_mut, unused_imports, unused_extern_crates, unused_attributes, non_camel_case_types)]
+#![allow(
+    missing_docs,
+    trivial_casts,
+    unused_variables,
+    unused_mut,
+    unused_imports,
+    unused_extern_crates,
+    unused_attributes,
+    non_camel_case_types
+)]
 #![allow(clippy::derive_partial_eq_without_eq, clippy::disallowed_names)]
 
 use async_trait::async_trait;
@@ -14,19 +23,7 @@ pub const API_VERSION: &str = "1.0.0";
 
 mod auth;
 pub use auth::{AuthenticationApi, Claims};
-pub use api::{
-    Api,
-    GetAuctionResponse,
-    GetConfigResponse,
-    GetOpenApiSpecResponse,
-    PostClickResponse,
-    PostLossResponse,
-    PostRewardResponse,
-    PostShowResponse,
-    PostStatsResponse,
-    PostWinResponse,
-};
-
+pub use api::{Api, GetAuctionResponse};
 
 
 #[cfg(feature = "client")]

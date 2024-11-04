@@ -4,17 +4,7 @@
 #[allow(unused_imports)]
 use futures::{future, Stream, stream};
 #[allow(unused_imports)]
-use bidon::{Api, Claims, Client, models,
-            GetConfigResponse,
-            GetOpenApiSpecResponse,
-            GetAuctionResponse,
-            PostClickResponse,
-            PostLossResponse,
-            PostRewardResponse,
-            PostShowResponse,
-            PostStatsResponse,
-            PostWinResponse,
-};
+use bidon::{Api, Claims, Client, models, GetAuctionResponse};
 use clap::{App, Arg};
 
 // NOTE: Set environment variable RUST_LOG to the name of the executable (or "cargo run") to activate console logging for all loglevels.
@@ -120,23 +110,22 @@ fn main() {
             info!("{:?} (X-Span-ID: {:?})", result, (client.context() as &dyn Has<XSpanIdString>).get().clone());
         },
         */
-        Some("GetOpenApiSpec") => {
-            let context: ClientContext =
-                swagger::make_context!(MyContext, MyEmpContext, auth_data, XSpanIdString::default(), XBidonVersionString::default());
-
-            let result = rt.block_on(client.get_open_api_spec(&context.clone()));
-            info!("{:?} (X-Span-ID: {:?})", result, swagger::Has::<XSpanIdString>::get(&context).clone());
-        }
-        /* Disabled because there's no example.
-        Some("GetAuction") => {
-            let result = rt.block_on(client.get_auction(
-                  "x_bidon_version_example".to_string(),
-                  ???,
-                  ???
-            ));
-            info!("{:?} (X-Span-ID: {:?})", result, (client.context() as &dyn Has<XSpanIdString>).get().clone());
-        },
-        */
+        // Some("GetOpenApiSpec") => {
+        //     let context: ClientContext =
+        //         swagger::make_context!(MyContext, MyEmpContext, auth_data, XSpanIdString::default(), XBidonVersionString::default());
+        //
+        //     let result = rt.block_on(client.get_open_api_spec(&context.clone()));
+        //     info!("{:?} (X-Span-ID: {:?})", result, swagger::Has::<XSpanIdString>::get(&context).clone());
+        // }
+        // Disabled because there's no example.
+        // Some("GetAuction") => {
+        //     let result = rt.block_on(client.get_auction(
+        //           "x_bidon_version_example".to_string(),
+        //           ???,
+        //           ???
+        //     ));
+        //     info!("{:?} (X-Span-ID: {:?})", result, (client.context() as &dyn Has<XSpanIdString>).get().clone());
+        // },
         /* Disabled because there's no example.
         Some("PostClick") => {
             let result = rt.block_on(client.post_click(
