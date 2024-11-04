@@ -110,10 +110,7 @@ use serde::{Deserialize, Serialize};
 use swagger::auth::Authorization;
 
 use bidon::server::MakeService;
-use bidon::{
-    Api, GetAuctionResponse, GetConfigResponse, GetOpenApiSpecResponse, PostClickResponse,
-    PostLossResponse, PostRewardResponse, PostShowResponse, PostStatsResponse, PostWinResponse,
-};
+use bidon::{Api, GetAuctionResponse};
 use std::error::Error;
 use swagger::ApiError;
 
@@ -122,30 +119,6 @@ impl<C> Api<C> for Server<C>
 where
     C: Has<XSpanIdString> + Has<XBidonVersionString> + Send + Sync,
 {
-    /// Get config
-    async fn get_config(
-        &self,
-        config_request: models::ConfigRequest,
-        context: &C,
-    ) -> Result<GetConfigResponse, ApiError> {
-        info!(
-            "get_config(\"{}\", {:?}) - X-Span-ID: {:?}",
-            <C as Has<XBidonVersionString>>::get(context).0.clone(),
-            config_request,
-            <C as Has<XSpanIdString>>::get(context).0.clone()
-        );
-        Err(ApiError("Api-Error: Operation is NOT implemented".into()))
-    }
-
-    /// Get OpenAPI specification
-    async fn get_open_api_spec(&self, context: &C) -> Result<GetOpenApiSpecResponse, ApiError> {
-        info!(
-            "get_open_api_spec() - X-Span-ID: {:?}",
-            <C as Has<XSpanIdString>>::get(context).0.clone()
-        );
-        Err(ApiError("Api-Error: Operation is NOT implemented".into()))
-    }
-
     /// Auction
     async fn get_auction(
         &self,
@@ -158,109 +131,6 @@ where
             <C as Has<XBidonVersionString>>::get(context).0.clone(),
             ad_type,
             auction_request,
-            <C as Has<XSpanIdString>>::get(context).0.clone()
-        );
-        Err(ApiError("Api-Error: Operation is NOT implemented".into()))
-    }
-
-    /// Click
-    async fn post_click(
-        &self,
-        ad_type: models::GetAuctionAdTypeParameter,
-        click_request: models::ClickRequest,
-        context: &C,
-    ) -> Result<PostClickResponse, ApiError> {
-        info!(
-            "post_click(\"{}\", {:?}, {:?}) - X-Span-ID: {:?}",
-            <C as Has<XBidonVersionString>>::get(context).0.clone(),
-            ad_type,
-            click_request,
-            <C as Has<XSpanIdString>>::get(context).0.clone()
-
-        );
-        Err(ApiError("Api-Error: Operation is NOT implemented".into()))
-    }
-
-    /// Loss
-    async fn post_loss(
-        &self,
-        ad_type: models::GetAuctionAdTypeParameter,
-        loss_request: models::LossRequest,
-        context: &C,
-    ) -> Result<PostLossResponse, ApiError> {
-        info!(
-            "post_loss(\"{}\", {:?}, {:?}) - X-Span-ID: {:?}",
-            <C as Has<XBidonVersionString>>::get(context).0.clone(),
-            ad_type,
-            loss_request,
-            <C as Has<XSpanIdString>>::get(context).0.clone()
-        );
-        Err(ApiError("Api-Error: Operation is NOT implemented".into()))
-    }
-
-    /// Reward
-    async fn post_reward(
-        &self,
-        ad_type: models::PostRewardAdTypeParameter,
-        reward_request: models::RewardRequest,
-        context: &C,
-    ) -> Result<PostRewardResponse, ApiError> {
-        info!(
-            "post_reward(\"{}\", {:?}, {:?}) - X-Span-ID: {:?}",
-            <C as Has<XBidonVersionString>>::get(context).0.clone(),
-            ad_type,
-            reward_request,
-            <C as Has<XSpanIdString>>::get(context).0.clone()
-        );
-        Err(ApiError("Api-Error: Operation is NOT implemented".into()))
-    }
-
-    /// Show
-    async fn post_show(
-        &self,
-        ad_type: models::GetAuctionAdTypeParameter,
-        show_request: models::ShowRequest,
-        context: &C,
-    ) -> Result<PostShowResponse, ApiError> {
-        info!(
-            "post_show(\"{}\", {:?}, {:?}) - X-Span-ID: {:?}",
-            <C as Has<XBidonVersionString>>::get(context).0.clone(),
-            ad_type,
-            show_request,
-            <C as Has<XSpanIdString>>::get(context).0.clone()
-        );
-        Err(ApiError("Api-Error: Operation is NOT implemented".into()))
-    }
-
-    /// Stats
-    async fn post_stats(
-        &self,
-        ad_type: models::GetAuctionAdTypeParameter,
-        stats_request: models::StatsRequest,
-        context: &C,
-    ) -> Result<PostStatsResponse, ApiError> {
-        info!(
-            "post_stats(\"{}\", {:?}, {:?}) - X-Span-ID: {:?}",
-            <C as Has<XBidonVersionString>>::get(context).0.clone(),
-            ad_type,
-            stats_request,
-            <C as Has<XSpanIdString>>::get(context).0.clone()
-        );
-        Err(ApiError("Api-Error: Operation is NOT implemented".into()))
-    }
-
-    /// Win
-    async fn post_win(
-        &self,
-        ad_type: models::GetAuctionAdTypeParameter,
-        win_request: models::WinRequest,
-        context: &C,
-    ) -> Result<PostWinResponse, ApiError> {
-        info!(
-            "post_win(\"{}\", {:?}, {:?}) - X-Span-ID: {:?}",
-            <C as Has<XBidonVersionString>>::get(context).0.clone(),
-            ad_type,
-            win_request,
             <C as Has<XSpanIdString>>::get(context).0.clone()
         );
         Err(ApiError("Api-Error: Operation is NOT implemented".into()))
