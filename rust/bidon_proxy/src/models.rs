@@ -3,7 +3,7 @@
 use validator::Validate;
 
 use crate::models;
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 use crate::header;
 
 /// Format of the banner ad
@@ -52,7 +52,7 @@ impl std::str::FromStr for AdFormat {
 
 // Methods for converting between header::IntoHeaderValue<AdFormat> and hyper::header::HeaderValue
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<header::IntoHeaderValue<AdFormat>> for hyper::header::HeaderValue {
     type Error = String;
 
@@ -67,7 +67,7 @@ impl std::convert::TryFrom<header::IntoHeaderValue<AdFormat>> for hyper::header:
     }
 }
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderValue<AdFormat> {
     type Error = String;
 
@@ -333,7 +333,7 @@ impl std::str::FromStr for AdObject {
 
 // Methods for converting between header::IntoHeaderValue<AdObject> and hyper::header::HeaderValue
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<header::IntoHeaderValue<AdObject>> for hyper::header::HeaderValue {
     type Error = String;
 
@@ -348,7 +348,7 @@ impl std::convert::TryFrom<header::IntoHeaderValue<AdObject>> for hyper::header:
     }
 }
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderValue<AdObject> {
     type Error = String;
 
@@ -453,7 +453,7 @@ impl std::str::FromStr for AdObjectOrientation {
 
 // Methods for converting between header::IntoHeaderValue<AdObjectOrientation> and hyper::header::HeaderValue
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<header::IntoHeaderValue<AdObjectOrientation>> for hyper::header::HeaderValue {
     type Error = String;
 
@@ -468,7 +468,7 @@ impl std::convert::TryFrom<header::IntoHeaderValue<AdObjectOrientation>> for hyp
     }
 }
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderValue<AdObjectOrientation> {
     type Error = String;
 
@@ -678,7 +678,7 @@ impl std::str::FromStr for AdUnit {
 
 // Methods for converting between header::IntoHeaderValue<AdUnit> and hyper::header::HeaderValue
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<header::IntoHeaderValue<AdUnit>> for hyper::header::HeaderValue {
     type Error = String;
 
@@ -693,7 +693,7 @@ impl std::convert::TryFrom<header::IntoHeaderValue<AdUnit>> for hyper::header::H
     }
 }
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderValue<AdUnit> {
     type Error = String;
 
@@ -850,7 +850,7 @@ impl std::str::FromStr for Adapter {
 
 // Methods for converting between header::IntoHeaderValue<Adapter> and hyper::header::HeaderValue
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<header::IntoHeaderValue<Adapter>> for hyper::header::HeaderValue {
     type Error = String;
 
@@ -865,7 +865,7 @@ impl std::convert::TryFrom<header::IntoHeaderValue<Adapter>> for hyper::header::
     }
 }
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderValue<Adapter> {
     type Error = String;
 
@@ -1109,7 +1109,7 @@ impl std::str::FromStr for App {
 
 // Methods for converting between header::IntoHeaderValue<App> and hyper::header::HeaderValue
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<header::IntoHeaderValue<App>> for hyper::header::HeaderValue {
     type Error = String;
 
@@ -1124,7 +1124,7 @@ impl std::convert::TryFrom<header::IntoHeaderValue<App>> for hyper::header::Head
     }
 }
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderValue<App> {
     type Error = String;
 
@@ -1422,7 +1422,7 @@ impl std::str::FromStr for AuctionAdUnitResult {
 
 // Methods for converting between header::IntoHeaderValue<AuctionAdUnitResult> and hyper::header::HeaderValue
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<header::IntoHeaderValue<AuctionAdUnitResult>> for hyper::header::HeaderValue {
     type Error = String;
 
@@ -1437,7 +1437,7 @@ impl std::convert::TryFrom<header::IntoHeaderValue<AuctionAdUnitResult>> for hyp
     }
 }
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderValue<AuctionAdUnitResult> {
     type Error = String;
 
@@ -1550,7 +1550,7 @@ impl std::str::FromStr for AuctionAdUnitResultStatus {
 
 // Methods for converting between header::IntoHeaderValue<AuctionAdUnitResultStatus> and hyper::header::HeaderValue
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<header::IntoHeaderValue<AuctionAdUnitResultStatus>> for hyper::header::HeaderValue {
     type Error = String;
 
@@ -1565,7 +1565,7 @@ impl std::convert::TryFrom<header::IntoHeaderValue<AuctionAdUnitResultStatus>> f
     }
 }
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderValue<AuctionAdUnitResultStatus> {
     type Error = String;
 
@@ -1847,7 +1847,7 @@ impl std::str::FromStr for AuctionRequest {
 
 // Methods for converting between header::IntoHeaderValue<AuctionRequest> and hyper::header::HeaderValue
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<header::IntoHeaderValue<AuctionRequest>> for hyper::header::HeaderValue {
     type Error = String;
 
@@ -1862,7 +1862,7 @@ impl std::convert::TryFrom<header::IntoHeaderValue<AuctionRequest>> for hyper::h
     }
 }
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderValue<AuctionRequest> {
     type Error = String;
 
@@ -2107,7 +2107,7 @@ impl std::str::FromStr for AuctionResponse {
 
 // Methods for converting between header::IntoHeaderValue<AuctionResponse> and hyper::header::HeaderValue
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<header::IntoHeaderValue<AuctionResponse>> for hyper::header::HeaderValue {
     type Error = String;
 
@@ -2122,7 +2122,7 @@ impl std::convert::TryFrom<header::IntoHeaderValue<AuctionResponse>> for hyper::
     }
 }
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderValue<AuctionResponse> {
     type Error = String;
 
@@ -2409,7 +2409,7 @@ impl std::str::FromStr for AuctionResult {
 
 // Methods for converting between header::IntoHeaderValue<AuctionResult> and hyper::header::HeaderValue
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<header::IntoHeaderValue<AuctionResult>> for hyper::header::HeaderValue {
     type Error = String;
 
@@ -2424,7 +2424,7 @@ impl std::convert::TryFrom<header::IntoHeaderValue<AuctionResult>> for hyper::he
     }
 }
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderValue<AuctionResult> {
     type Error = String;
 
@@ -2529,7 +2529,7 @@ impl std::str::FromStr for AuctionResultBidType {
 
 // Methods for converting between header::IntoHeaderValue<AuctionResultBidType> and hyper::header::HeaderValue
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<header::IntoHeaderValue<AuctionResultBidType>> for hyper::header::HeaderValue {
     type Error = String;
 
@@ -2544,7 +2544,7 @@ impl std::convert::TryFrom<header::IntoHeaderValue<AuctionResultBidType>> for hy
     }
 }
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderValue<AuctionResultBidType> {
     type Error = String;
 
@@ -2653,7 +2653,7 @@ impl std::str::FromStr for AuctionResultStatus {
 
 // Methods for converting between header::IntoHeaderValue<AuctionResultStatus> and hyper::header::HeaderValue
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<header::IntoHeaderValue<AuctionResultStatus>> for hyper::header::HeaderValue {
     type Error = String;
 
@@ -2668,7 +2668,7 @@ impl std::convert::TryFrom<header::IntoHeaderValue<AuctionResultStatus>> for hyp
     }
 }
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderValue<AuctionResultStatus> {
     type Error = String;
 
@@ -2814,7 +2814,7 @@ impl std::str::FromStr for BannerAdObject {
 
 // Methods for converting between header::IntoHeaderValue<BannerAdObject> and hyper::header::HeaderValue
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<header::IntoHeaderValue<BannerAdObject>> for hyper::header::HeaderValue {
     type Error = String;
 
@@ -2829,7 +2829,7 @@ impl std::convert::TryFrom<header::IntoHeaderValue<BannerAdObject>> for hyper::h
     }
 }
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderValue<BannerAdObject> {
     type Error = String;
 
@@ -3062,7 +3062,7 @@ impl std::str::FromStr for BaseRequest {
 
 // Methods for converting between header::IntoHeaderValue<BaseRequest> and hyper::header::HeaderValue
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<header::IntoHeaderValue<BaseRequest>> for hyper::header::HeaderValue {
     type Error = String;
 
@@ -3077,7 +3077,7 @@ impl std::convert::TryFrom<header::IntoHeaderValue<BaseRequest>> for hyper::head
     }
 }
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderValue<BaseRequest> {
     type Error = String;
 
@@ -3171,7 +3171,7 @@ impl ::std::str::FromStr for Bid {
 
 // Methods for converting between header::IntoHeaderValue<Bid> and hyper::header::HeaderValue
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<header::IntoHeaderValue<Bid>> for hyper::header::HeaderValue {
     type Error = String;
 
@@ -3186,7 +3186,7 @@ impl std::convert::TryFrom<header::IntoHeaderValue<Bid>> for hyper::header::Head
     }
 }
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderValue<Bid> {
     type Error = String;
 
@@ -3291,7 +3291,7 @@ impl std::str::FromStr for BidType {
 
 // Methods for converting between header::IntoHeaderValue<BidType> and hyper::header::HeaderValue
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<header::IntoHeaderValue<BidType>> for hyper::header::HeaderValue {
     type Error = String;
 
@@ -3306,7 +3306,7 @@ impl std::convert::TryFrom<header::IntoHeaderValue<BidType>> for hyper::header::
     }
 }
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderValue<BidType> {
     type Error = String;
 
@@ -3459,7 +3459,7 @@ impl std::str::FromStr for BiddingConfig {
 
 // Methods for converting between header::IntoHeaderValue<BiddingConfig> and hyper::header::HeaderValue
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<header::IntoHeaderValue<BiddingConfig>> for hyper::header::HeaderValue {
     type Error = String;
 
@@ -3474,7 +3474,7 @@ impl std::convert::TryFrom<header::IntoHeaderValue<BiddingConfig>> for hyper::he
     }
 }
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderValue<BiddingConfig> {
     type Error = String;
 
@@ -3729,7 +3729,7 @@ impl std::str::FromStr for ClickRequest {
 
 // Methods for converting between header::IntoHeaderValue<ClickRequest> and hyper::header::HeaderValue
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<header::IntoHeaderValue<ClickRequest>> for hyper::header::HeaderValue {
     type Error = String;
 
@@ -3744,7 +3744,7 @@ impl std::convert::TryFrom<header::IntoHeaderValue<ClickRequest>> for hyper::hea
     }
 }
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderValue<ClickRequest> {
     type Error = String;
 
@@ -3986,7 +3986,7 @@ impl std::str::FromStr for ConfigRequest {
 
 // Methods for converting between header::IntoHeaderValue<ConfigRequest> and hyper::header::HeaderValue
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<header::IntoHeaderValue<ConfigRequest>> for hyper::header::HeaderValue {
     type Error = String;
 
@@ -4001,7 +4001,7 @@ impl std::convert::TryFrom<header::IntoHeaderValue<ConfigRequest>> for hyper::he
     }
 }
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderValue<ConfigRequest> {
     type Error = String;
 
@@ -4192,7 +4192,7 @@ impl std::str::FromStr for ConfigResponse {
 
 // Methods for converting between header::IntoHeaderValue<ConfigResponse> and hyper::header::HeaderValue
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<header::IntoHeaderValue<ConfigResponse>> for hyper::header::HeaderValue {
     type Error = String;
 
@@ -4207,7 +4207,7 @@ impl std::convert::TryFrom<header::IntoHeaderValue<ConfigResponse>> for hyper::h
     }
 }
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderValue<ConfigResponse> {
     type Error = String;
 
@@ -4537,7 +4537,7 @@ impl std::str::FromStr for Device {
 
 // Methods for converting between header::IntoHeaderValue<Device> and hyper::header::HeaderValue
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<header::IntoHeaderValue<Device>> for hyper::header::HeaderValue {
     type Error = String;
 
@@ -4552,7 +4552,7 @@ impl std::convert::TryFrom<header::IntoHeaderValue<Device>> for hyper::header::H
     }
 }
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderValue<Device> {
     type Error = String;
 
@@ -4681,7 +4681,7 @@ impl std::str::FromStr for DeviceConnectionType {
 
 // Methods for converting between header::IntoHeaderValue<DeviceConnectionType> and hyper::header::HeaderValue
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<header::IntoHeaderValue<DeviceConnectionType>> for hyper::header::HeaderValue {
     type Error = String;
 
@@ -4696,7 +4696,7 @@ impl std::convert::TryFrom<header::IntoHeaderValue<DeviceConnectionType>> for hy
     }
 }
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderValue<DeviceConnectionType> {
     type Error = String;
 
@@ -4801,7 +4801,7 @@ impl std::str::FromStr for DeviceType {
 
 // Methods for converting between header::IntoHeaderValue<DeviceType> and hyper::header::HeaderValue
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<header::IntoHeaderValue<DeviceType>> for hyper::header::HeaderValue {
     type Error = String;
 
@@ -4816,7 +4816,7 @@ impl std::convert::TryFrom<header::IntoHeaderValue<DeviceType>> for hyper::heade
     }
 }
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderValue<DeviceType> {
     type Error = String;
 
@@ -4963,7 +4963,7 @@ impl std::str::FromStr for Error {
 
 // Methods for converting between header::IntoHeaderValue<Error> and hyper::header::HeaderValue
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<header::IntoHeaderValue<Error>> for hyper::header::HeaderValue {
     type Error = String;
 
@@ -4978,7 +4978,7 @@ impl std::convert::TryFrom<header::IntoHeaderValue<Error>> for hyper::header::He
     }
 }
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderValue<Error> {
     type Error = String;
 
@@ -5145,7 +5145,7 @@ impl std::str::FromStr for ErrorError {
 
 // Methods for converting between header::IntoHeaderValue<ErrorError> and hyper::header::HeaderValue
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<header::IntoHeaderValue<ErrorError>> for hyper::header::HeaderValue {
     type Error = String;
 
@@ -5160,7 +5160,7 @@ impl std::convert::TryFrom<header::IntoHeaderValue<ErrorError>> for hyper::heade
     }
 }
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderValue<ErrorError> {
     type Error = String;
 
@@ -5327,7 +5327,7 @@ impl std::str::FromStr for ExternalWinner {
 
 // Methods for converting between header::IntoHeaderValue<ExternalWinner> and hyper::header::HeaderValue
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<header::IntoHeaderValue<ExternalWinner>> for hyper::header::HeaderValue {
     type Error = String;
 
@@ -5342,7 +5342,7 @@ impl std::convert::TryFrom<header::IntoHeaderValue<ExternalWinner>> for hyper::h
     }
 }
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderValue<ExternalWinner> {
     type Error = String;
 
@@ -5607,7 +5607,7 @@ impl std::str::FromStr for Geo {
 
 // Methods for converting between header::IntoHeaderValue<Geo> and hyper::header::HeaderValue
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<header::IntoHeaderValue<Geo>> for hyper::header::HeaderValue {
     type Error = String;
 
@@ -5622,7 +5622,7 @@ impl std::convert::TryFrom<header::IntoHeaderValue<Geo>> for hyper::header::Head
     }
 }
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderValue<Geo> {
     type Error = String;
 
@@ -5730,7 +5730,7 @@ impl std::str::FromStr for GetAuctionAdTypeParameter {
 
 // Methods for converting between header::IntoHeaderValue<GetAuctionAdTypeParameter> and hyper::header::HeaderValue
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<header::IntoHeaderValue<GetAuctionAdTypeParameter>> for hyper::header::HeaderValue {
     type Error = String;
 
@@ -5745,7 +5745,7 @@ impl std::convert::TryFrom<header::IntoHeaderValue<GetAuctionAdTypeParameter>> f
     }
 }
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderValue<GetAuctionAdTypeParameter> {
     type Error = String;
 
@@ -5900,7 +5900,7 @@ impl std::str::FromStr for InitConfig {
 
 // Methods for converting between header::IntoHeaderValue<InitConfig> and hyper::header::HeaderValue
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<header::IntoHeaderValue<InitConfig>> for hyper::header::HeaderValue {
     type Error = String;
 
@@ -5915,7 +5915,7 @@ impl std::convert::TryFrom<header::IntoHeaderValue<InitConfig>> for hyper::heade
     }
 }
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderValue<InitConfig> {
     type Error = String;
 
@@ -6179,7 +6179,7 @@ impl std::str::FromStr for LossRequest {
 
 // Methods for converting between header::IntoHeaderValue<LossRequest> and hyper::header::HeaderValue
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<header::IntoHeaderValue<LossRequest>> for hyper::header::HeaderValue {
     type Error = String;
 
@@ -6194,7 +6194,7 @@ impl std::convert::TryFrom<header::IntoHeaderValue<LossRequest>> for hyper::head
     }
 }
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderValue<LossRequest> {
     type Error = String;
 
@@ -6294,7 +6294,7 @@ impl std::str::FromStr for PostRewardAdTypeParameter {
 
 // Methods for converting between header::IntoHeaderValue<PostRewardAdTypeParameter> and hyper::header::HeaderValue
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<header::IntoHeaderValue<PostRewardAdTypeParameter>> for hyper::header::HeaderValue {
     type Error = String;
 
@@ -6309,7 +6309,7 @@ impl std::convert::TryFrom<header::IntoHeaderValue<PostRewardAdTypeParameter>> f
     }
 }
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderValue<PostRewardAdTypeParameter> {
     type Error = String;
 
@@ -6520,7 +6520,7 @@ impl std::str::FromStr for Regulations {
 
 // Methods for converting between header::IntoHeaderValue<Regulations> and hyper::header::HeaderValue
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<header::IntoHeaderValue<Regulations>> for hyper::header::HeaderValue {
     type Error = String;
 
@@ -6535,7 +6535,7 @@ impl std::convert::TryFrom<header::IntoHeaderValue<Regulations>> for hyper::head
     }
 }
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderValue<Regulations> {
     type Error = String;
 
@@ -6790,7 +6790,7 @@ impl std::str::FromStr for RewardRequest {
 
 // Methods for converting between header::IntoHeaderValue<RewardRequest> and hyper::header::HeaderValue
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<header::IntoHeaderValue<RewardRequest>> for hyper::header::HeaderValue {
     type Error = String;
 
@@ -6805,7 +6805,7 @@ impl std::convert::TryFrom<header::IntoHeaderValue<RewardRequest>> for hyper::he
     }
 }
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderValue<RewardRequest> {
     type Error = String;
 
@@ -6988,7 +6988,7 @@ impl std::str::FromStr for Segment {
 
 // Methods for converting between header::IntoHeaderValue<Segment> and hyper::header::HeaderValue
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<header::IntoHeaderValue<Segment>> for hyper::header::HeaderValue {
     type Error = String;
 
@@ -7003,7 +7003,7 @@ impl std::convert::TryFrom<header::IntoHeaderValue<Segment>> for hyper::header::
     }
 }
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderValue<Segment> {
     type Error = String;
 
@@ -7312,7 +7312,7 @@ impl std::str::FromStr for Session {
 
 // Methods for converting between header::IntoHeaderValue<Session> and hyper::header::HeaderValue
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<header::IntoHeaderValue<Session>> for hyper::header::HeaderValue {
     type Error = String;
 
@@ -7327,7 +7327,7 @@ impl std::convert::TryFrom<header::IntoHeaderValue<Session>> for hyper::header::
     }
 }
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderValue<Session> {
     type Error = String;
 
@@ -7582,7 +7582,7 @@ impl std::str::FromStr for ShowRequest {
 
 // Methods for converting between header::IntoHeaderValue<ShowRequest> and hyper::header::HeaderValue
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<header::IntoHeaderValue<ShowRequest>> for hyper::header::HeaderValue {
     type Error = String;
 
@@ -7597,7 +7597,7 @@ impl std::convert::TryFrom<header::IntoHeaderValue<ShowRequest>> for hyper::head
     }
 }
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderValue<ShowRequest> {
     type Error = String;
 
@@ -7691,7 +7691,7 @@ impl ::std::str::FromStr for Stats {
 
 // Methods for converting between header::IntoHeaderValue<Stats> and hyper::header::HeaderValue
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<header::IntoHeaderValue<Stats>> for hyper::header::HeaderValue {
     type Error = String;
 
@@ -7706,7 +7706,7 @@ impl std::convert::TryFrom<header::IntoHeaderValue<Stats>> for hyper::header::He
     }
 }
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderValue<Stats> {
     type Error = String;
 
@@ -7947,7 +7947,7 @@ impl std::str::FromStr for StatsRequest {
 
 // Methods for converting between header::IntoHeaderValue<StatsRequest> and hyper::header::HeaderValue
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<header::IntoHeaderValue<StatsRequest>> for hyper::header::HeaderValue {
     type Error = String;
 
@@ -7962,7 +7962,7 @@ impl std::convert::TryFrom<header::IntoHeaderValue<StatsRequest>> for hyper::hea
     }
 }
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderValue<StatsRequest> {
     type Error = String;
 
@@ -8110,7 +8110,7 @@ impl std::str::FromStr for SuccessResponse {
 
 // Methods for converting between header::IntoHeaderValue<SuccessResponse> and hyper::header::HeaderValue
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<header::IntoHeaderValue<SuccessResponse>> for hyper::header::HeaderValue {
     type Error = String;
 
@@ -8125,7 +8125,7 @@ impl std::convert::TryFrom<header::IntoHeaderValue<SuccessResponse>> for hyper::
     }
 }
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderValue<SuccessResponse> {
     type Error = String;
 
@@ -8332,7 +8332,7 @@ impl std::str::FromStr for User {
 
 // Methods for converting between header::IntoHeaderValue<User> and hyper::header::HeaderValue
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<header::IntoHeaderValue<User>> for hyper::header::HeaderValue {
     type Error = String;
 
@@ -8347,7 +8347,7 @@ impl std::convert::TryFrom<header::IntoHeaderValue<User>> for hyper::header::Hea
     }
 }
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderValue<User> {
     type Error = String;
 
@@ -8602,7 +8602,7 @@ impl std::str::FromStr for WinRequest {
 
 // Methods for converting between header::IntoHeaderValue<WinRequest> and hyper::header::HeaderValue
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<header::IntoHeaderValue<WinRequest>> for hyper::header::HeaderValue {
     type Error = String;
 
@@ -8617,7 +8617,7 @@ impl std::convert::TryFrom<header::IntoHeaderValue<WinRequest>> for hyper::heade
     }
 }
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderValue<WinRequest> {
     type Error = String;
 
