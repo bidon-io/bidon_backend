@@ -1,12 +1,13 @@
 use crate::com::iabtechlab::adcom::v1 as adcom;
+use crate::com::iabtechlab::adcom::v1::context::DistributionChannel;
 use crate::com::iabtechlab::openrtb::v3 as openrtb;
-use crate::models::{AuctionRequest, DeviceConnectionType, DeviceType, Regulations};
+use crate::controllers::adapter::adcom::enums::OperatingSystem;
+use crate::galaxy::v1::bidon::BIDON_APP;
+use crate::models::{AuctionRequest, DeviceConnectionType, DeviceType};
+use crate::{galaxy, models};
+use prost::{EncodeError, Extendable, Message};
 use std::convert::TryFrom;
 use std::error::Error;
-use prost::{EncodeError, Extendable, Message};
-use crate::{galaxy, models};
-use crate::com::iabtechlab::adcom::v1::context::DistributionChannel;
-use crate::controllers::adapter::adcom::enums::OperatingSystem;
 
 pub(crate) fn try_from(auction_request: AuctionRequest) -> Result<openrtb::Openrtb, dyn Error> {
 
@@ -45,7 +46,7 @@ fn serialize_context(auction_request: &AuctionRequest) -> Result<Vec<u8>, Encode
             r#pub: None, // TODO
             content: None, // TODO
             channel_oneof:
-            Some(adcom::context::distribution_channel::ChannelOneof::App(convert_app(&auction_request.app))),
+            Some(adcom::context::distribution_channel::ChannelOneof::App(convert_app(&auction_request.app)?)),
         }.into(),
         device: convert_device(&auction_request.device).into(),
         user: None, // convert_user(&auction_request.user).into(),
@@ -59,7 +60,7 @@ fn serialize_context(auction_request: &AuctionRequest) -> Result<Vec<u8>, Encode
     Ok(context_bytes)
 }
 
-fn convert_app(api_app: &models::App) -> adcom::context::distribution_channel::App {
+fn convert_app(api_app: &models::App) -> Result<adcom::context::distribution_channel::App, dyn Error> {
     let mut app = adcom::context::distribution_channel::App {
 
         // Map standard fields
@@ -69,27 +70,27 @@ fn convert_app(api_app: &models::App) -> adcom::context::distribution_channel::A
         pagecat: vec![],
         cattax: None,
         privpolicy: None,
-        // app.set_bundle(api_app.bundle);
         storeid: None,
         storeurl: None,
-        ver: None,
-        // app.set_ver(api_app.version);
-        //
-        // // Map additional fields
-        // app.set_key(api_app.key);
-        // app.set_framework(api_app.framework);
-        // app.set_framework_version(api_app.framework_version);
-        // app.set_plugin_version(api_app.plugin_version);
-        // app.set_sdk_version(api_app.sdk_version);
-        // app.set_skadn(RepeatedField::from_vec(api_app.skadn,
-        // ));
+        ver: api_app.version.clone().into(),
+
         keywords: None,
         paid: None,
-        bundle: None,
+        bundle: api_app.bundle.clone().into(),
         extension_set: Default::default(),
     };
-    // app.set_extension_data(api_app.extension_data.clone());
-    app
+
+    let bidon_app = galaxy::v1::bidon::BidonApp{
+        key: api_app.key.clone().into(),
+        framework: api_app.framework_version.clone(),
+        framework_version: api_app.framework_version.clone(),
+        plugin_version: api_app.plugin_version.clone(),
+        sdk_version: api_app.sdk_version.clone(),
+        skadn: api_app.skadn.clone().unwrap_or(vec![]),
+    };
+
+    app.set_extension_data(BIDON_APP, bidon_app)?;
+    Ok(app)
 }
 
 fn convert_device(api_device: &models::Device) -> adcom::context::Device {
