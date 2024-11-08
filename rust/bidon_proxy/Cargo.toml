@@ -8,13 +8,13 @@ edition = "2021"
 
 [features]
 server = [
-  "axum", "serde_ignored", "hyper", "regex", "percent-encoding", "url", "lazy_static", "tokio", "env_logger", "native-tls"
+    "axum", "serde_ignored", "hyper", "regex", "percent-encoding", "url", "lazy_static", "tokio", "env_logger", "native-tls"
 ]
 conversion = ["frunk", "frunk_derives", "frunk_core", "frunk-enum-core", "frunk-enum-derive"]
 
 [target.'cfg(any(target_os = "macos", target_os = "windows", target_os = "ios"))'.dependencies]
 native-tls = { version = "0.2", optional = true }
-#hyper-tls = { version = "0.5", optional = true }
+# hyper-tls = { version = "0.5", optional = true }
 
 [dependencies]
 # Common
@@ -30,24 +30,25 @@ serde_json = "1.0"
 validator = { version = "0.16", features = ["derive"] }
 
 # Crates included if required by the API definition
-uuid = {version = "1.3.1", features = ["serde", "v4"]}
+uuid = { version = "1.3.1", features = ["serde", "v4"] }
 
-tonic = "0.12.3"
+tonic = "0.11.0"
 prost = { git = 'https://github.com/fabura/prosit' }
-hyper = {version = "0.14", features = ["full"], optional = true}
-serde_ignored = {version = "0.1.1", optional = true}
-url = {version = "2.1", optional = true}
+prost-types = { git = 'https://github.com/fabura/prosit' }
+hyper = { version = "0.14", features = ["full"], optional = true }
+serde_ignored = { version = "0.1.1", optional = true }
+url = { version = "2.1", optional = true }
 
 # Client-specific
 
 # Server, and client callback-specific
 lazy_static = { version = "1.4", optional = true }
-percent-encoding = {version = "2.1.0", optional = true}
-regex = {version = "1.3", optional = true}
+percent-encoding = { version = "2.1.0", optional = true }
+regex = { version = "1.3", optional = true }
 
 env_logger = { version = "0.7", optional = true }
-axum = {version = "0.5", optional = true }
-tokio = { version = "1.14", features = ["full"] , optional = true}
+axum = { version = "0.5", optional = true }
+tokio = { version = "1.14", features = ["full"], optional = true }
 # native-tls = { version = "0.2" , optional = true}
 
 # Conversion
@@ -57,7 +58,6 @@ frunk_core = { version = "0.4.0", optional = true }
 frunk-enum-derive = { version = "0.3.0", optional = true }
 frunk-enum-core = { version = "0.3.0", optional = true }
 
-
 [patch.crates-io]
 prost = { git = 'https://github.com/fabura/prosit' }
 prost-derive = { git = 'https://github.com/fabura/prosit' }
@@ -65,18 +65,18 @@ prost-types = { git = 'https://github.com/fabura/prosit' }
 prost-build = { git = 'https://github.com/fabura/prosit' }
 
 [build-dependencies]
-tonic-build = "0.12.1"
+tonic-build = "0.11.0"
 prost-build = { git = 'https://github.com/fabura/prosit' }
 
 [build]
 rustflags = [
-    "-W", "missing_docs",  # detects missing documentation for public members
-    "-W", "trivial_casts",  # detects trivial casts which could be removed
-    "-W", "trivial_numeric_casts",  # detects trivial casts of numeric types which could be removed
-    "-W", "unsafe_code",  # usage of `unsafe` code
-    "-W", "unused_qualifications",  # detects unnecessarily qualified names
-    "-W", "unused_extern_crates",  # extern crates that are never used
-    "-W", "unused_import_braces",  # unnecessary braces around an imported item
+    "-W", "missing_docs", # detects missing documentation for public members
+    "-W", "trivial_casts", # detects trivial casts which could be removed
+    "-W", "trivial_numeric_casts", # detects trivial casts of numeric types which could be removed
+    "-W", "unsafe_code", # usage of `unsafe` code
+    "-W", "unused_qualifications", # detects unnecessarily qualified names
+    "-W", "unused_extern_crates", # extern crates that are never used
+    "-W", "unused_import_braces", # unnecessary braces around an imported item
     "-D", "warnings", # all warnings should be denied
 ]
 

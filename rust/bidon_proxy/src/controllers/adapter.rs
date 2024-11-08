@@ -1,14 +1,14 @@
 use crate::com::iabtechlab::adcom::v1 as adcom;
-use crate::com::iabtechlab::openrtb::v3::Openrtb;
 use crate::com::iabtechlab::openrtb::v3 as openrtb;
 use crate::models::{AuctionRequest, DeviceConnectionType, DeviceType, Regulations};
 use std::convert::TryFrom;
 use std::error::Error;
 use prost::{EncodeError, Extendable, Message};
 use crate::{galaxy, models};
-use crate::com::iabtechlab::adcom::v1::DistributionChannel;
+use crate::com::iabtechlab::adcom::v1::context::DistributionChannel;
+use crate::controllers::adapter::adcom::enums::OperatingSystem;
 
-pub(crate) fn try_from(auction_request: AuctionRequest) -> Result<Openrtb, dyn Error> {
+pub(crate) fn try_from(auction_request: AuctionRequest) -> Result<openrtb::Openrtb, dyn Error> {
 
     // Convert AuctionRequest to Openrtb::Request
     let mut request = openrtb::Request {
@@ -24,10 +24,11 @@ pub(crate) fn try_from(auction_request: AuctionRequest) -> Result<Openrtb, dyn E
         item: vec![], //TODO
         cdata: None, //TODO
         package: None, //TODO
+        extension_set: Default::default(),
     };
 
     // Create Openrtb instance with the converted request
-    Ok(Openrtb {
+    Ok(openrtb::Openrtb {
         ver: Some("3.0".to_string()), // Set the version as needed
         domainspec: Some("domain_spec".to_string()), // Set the domain spec as needed
         domainver: Some("domain_version".to_string()), // Set the domain version as needed
@@ -37,18 +38,18 @@ pub(crate) fn try_from(auction_request: AuctionRequest) -> Result<Openrtb, dyn E
 
 fn serialize_context(auction_request: &AuctionRequest) -> Result<Vec<u8>, EncodeError> {
     // Create the AdCOM Context message
-    let mut context = galaxy::v1::Context {
+    let mut context = galaxy::v1::context::Context {
         distribution_channel: DistributionChannel {
             id: None, // TODO
             name: None, // TODO
             r#pub: None, // TODO
             content: None, // TODO
             channel_oneof:
-            Some(adcom::distribution_channel::ChannelOneof::App(convert_app(&auction_request.app))),
+            Some(adcom::context::distribution_channel::ChannelOneof::App(convert_app(&auction_request.app))),
         }.into(),
         device: convert_device(&auction_request.device).into(),
-        user: convert_user(&auction_request.user).into(),
-        regs: convert_regs(&auction_request.regs).into(),
+        user: None, // convert_user(&auction_request.user).into(),
+        regs: None, // convert_regs(&auction_request.regs).into(),
         restrictions: None, // TODO
     };
 
@@ -58,8 +59,8 @@ fn serialize_context(auction_request: &AuctionRequest) -> Result<Vec<u8>, Encode
     Ok(context_bytes)
 }
 
-fn convert_app(api_app: &models::App) -> adcom::distribution_channel::App {
-    let mut app = adcom::distribution_channel::App {
+fn convert_app(api_app: &models::App) -> adcom::context::distribution_channel::App {
+    let mut app = adcom::context::distribution_channel::App {
 
         // Map standard fields
         domain: None,
@@ -87,12 +88,12 @@ fn convert_app(api_app: &models::App) -> adcom::distribution_channel::App {
         bundle: None,
         extension_set: Default::default(),
     };
-    app.set_extension_data(api_app.extension_data.clone());
+    // app.set_extension_data(api_app.extension_data.clone());
     app
 }
 
-fn convert_device(api_device: &models::Device) -> adcom::Device {
-    let mut device = adcom::Device {
+fn convert_device(api_device: &models::Device) -> adcom::context::Device {
+    let mut device = adcom::context::Device {
         // Map standard fields
         r#type: convert_device_type(api_device.r#type.clone()).into(),
         ua: api_device.ua.clone().into(),
@@ -101,13 +102,13 @@ fn convert_device(api_device: &models::Device) -> adcom::Device {
         lmt: None, // TODO
         make: api_device.make.clone().into(),
         model: api_device.model.clone().into(),
-        os: api_device.os.clone().into(),
+        os: Option::from(convert_os(api_device.os.clone()).into()),
         osv: api_device.osv.clone().into(),
         hwv: api_device.hwv.clone().into(),
         h: api_device.h.into(),
         w: api_device.w.into(),
         ppi: api_device.ppi.into(),
-        pxratio: api_device.pxratio.into(),
+        pxratio: (api_device.pxratio as f32).into(), // TODO validate conversion
         js: Some(api_device.js != 0),
         ip: None, // TODO
         ipv6: None, // TODO
@@ -128,25 +129,35 @@ fn convert_device(api_device: &models::Device) -> adcom::Device {
     device
 }
 
-fn convert_device_type(device_type: Option<DeviceType>) -> Option<adcom::DeviceType> {
+fn convert_device_type(device_type: Option<DeviceType>) -> Option<adcom::enums::DeviceType> {
     device_type.map(|dt| match dt {
-        DeviceType::Phone => adcom::DeviceType::Phone,
-        DeviceType::Tablet => adcom::DeviceType::Tablet,
-        _ => adcom::DeviceType::Unknown,
+        DeviceType::Phone => adcom::enums::DeviceType::Phone,
+        DeviceType::Tablet => adcom::enums::DeviceType::Tablet,
     }).map(Into::into)
 }
 
-fn convert_connection_type(connection_type: DeviceConnectionType) -> adcom::ConnectionType {
+fn convert_os(os: String) -> OperatingSystem {
+    match os.to_lowercase().as_str() {
+        "ios" => OperatingSystem::Ios,
+        "android" => OperatingSystem::Android,
+        "windows" => OperatingSystem::Windows,
+        "macos" => OperatingSystem::Macos,
+        "linux" => OperatingSystem::Linux,
+        _ => OperatingSystem::OtherNotListed,
+    }
+}
+
+fn convert_connection_type(connection_type: DeviceConnectionType) -> adcom::enums::ConnectionType {
     match connection_type {
-        DeviceConnectionType::Ethernet => adcom::ConnectionType::Wired,
-        DeviceConnectionType::Wifi => adcom::ConnectionType::Wifi,
-        DeviceConnectionType::CellularUnknown=> adcom::ConnectionType::CellUnknown,
-        DeviceConnectionType::Cellular=> adcom::ConnectionType::CellUnknown,
-        DeviceConnectionType::Cellular2G => adcom::ConnectionType::Cell2g,
-        DeviceConnectionType::Cellular3G => adcom::ConnectionType::Cell3g,
-        DeviceConnectionType::Cellular4G => adcom::ConnectionType::Cell4g,
-        DeviceConnectionType::Cellular5G => adcom::ConnectionType::Cell5g,
-        _ => adcom::ConnectionType::Unknown,
+        DeviceConnectionType::Ethernet => adcom::enums::ConnectionType::Wired,
+        DeviceConnectionType::Wifi => adcom::enums::ConnectionType::Wifi,
+        DeviceConnectionType::CellularUnknown=> adcom::enums::ConnectionType::CellUnknown,
+        DeviceConnectionType::Cellular=> adcom::enums::ConnectionType::CellUnknown,
+        DeviceConnectionType::Cellular2G => adcom::enums::ConnectionType::Cell2g,
+        DeviceConnectionType::Cellular3G => adcom::enums::ConnectionType::Cell3g,
+        DeviceConnectionType::Cellular4G => adcom::enums::ConnectionType::Cell4g,
+        DeviceConnectionType::Cellular5G => adcom::enums::ConnectionType::Cell5g,
+        _ => adcom::enums::ConnectionType::Unknown,
     }
 }
 

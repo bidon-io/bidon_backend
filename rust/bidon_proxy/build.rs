@@ -10,22 +10,22 @@ fn main() {
 
     // Compile the proto files, including all found directories for imports
     tonic_build::configure()
-        .compile_protos(
-            &["galaxy/v1/services.proto",
-            ],  // List of .proto files to compile
-            &proto_dirs,                  // Directories where imports may be found
-        )
+        .compile(&["galaxy/v1/services.proto"], &proto_dirs)
         .unwrap_or_else(|e| panic!("Failed to compile protos: {:?}", e));
 
     Config::new()
         .compile_protos(
-            &[ "galaxy/v1/bidon/bidon.proto",
-                "galaxy/v1/context.proto",
+            &[
+                "galaxy/v1/bidon/bidon.proto",
+                "galaxy/v1/context/context.proto",
                 "com/iabtechlab/openrtb/v3/openrtb.proto",
-                "com/iabtechlab/adcom/v1/adcom.proto"
-            ],  // List of .proto files to compile
-            &proto_dirs,                  // Directories where imports may be found
+                "com/iabtechlab/adcom/v1/adcom.proto",
+                "com/iabtechlab/adcom/v1/context/context.proto",
+                "com/iabtechlab/adcom/v1/enums/enums.proto",
+                "com/iabtechlab/adcom/v1/media/media.proto",
+                "com/iabtechlab/adcom/v1/placement/placement.proto",
+            ],
+            &proto_dirs,
         )
         .unwrap_or_else(|e| panic!("Failed to compile protos: {:?}", e));
-
 }

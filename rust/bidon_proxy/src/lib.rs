@@ -21,15 +21,6 @@ type ServiceError = Box<dyn Error + Send + Sync + 'static>;
 pub const BASE_PATH: &str = "";
 pub const API_VERSION: &str = "1.0.0";
 
-pub mod galaxy {
-    pub mod v1 {
-        tonic::include_proto!("galaxy.v1");
-        pub mod bidon {
-            tonic::include_proto!("galaxy.v1.bidon");
-        }
-    }
-}
-
 pub mod com {
     pub mod iabtechlab {
         pub mod openrtb {
@@ -39,18 +30,34 @@ pub mod com {
         }
         pub mod adcom {
             pub mod v1 {
-                tonic::include_proto!("com.iabtechlab.adcom.v1.context");
-                tonic::include_proto!("com.iabtechlab.adcom.v1.enums");
-                tonic::include_proto!("com.iabtechlab.adcom.v1.media");
-                tonic::include_proto!("com.iabtechlab.adcom.v1.placement");
+                pub mod context {
+                    tonic::include_proto!("com.iabtechlab.adcom.v1.context");
+                }
+                pub mod enums {
+                    tonic::include_proto!("com.iabtechlab.adcom.v1.enums");
+                }
+                pub mod media {
+                    tonic::include_proto!("com.iabtechlab.adcom.v1.media");
+                }
+                pub mod placement {
+                    tonic::include_proto!("com.iabtechlab.adcom.v1.placement");
+                }
             }
         }
     }
 }
 
-
-#[cfg(feature = "server")]
-pub mod server;
+pub mod galaxy {
+    pub mod v1 {
+        tonic::include_proto!("galaxy.v1");
+        pub mod bidon {
+            tonic::include_proto!("galaxy.v1.bidon");
+        }
+        pub mod context {
+            tonic::include_proto!("galaxy.v1.context");
+        }
+    }
+}
 
 #[cfg(feature = "server")]
 pub mod context;
