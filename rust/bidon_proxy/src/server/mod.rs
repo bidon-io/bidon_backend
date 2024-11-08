@@ -1,4 +1,4 @@
-use futures::{future, future::BoxFuture, future::FutureExt, stream, stream::TryStreamExt, Stream};
+/*use futures::{future, future::BoxFuture, future::FutureExt, stream, stream::TryStreamExt, Stream};
 use hyper::{Body, HeaderMap, Request, Response, StatusCode};
 use hyper::header::{HeaderName, HeaderValue, CONTENT_TYPE};
 use log::warn;
@@ -14,16 +14,13 @@ use swagger::auth::Scopes;
 use url::form_urlencoded;
 
 #[allow(unused_imports)]
-use crate::{header, models, AuthenticationApi};
+use crate::{header, models};
 
 pub use crate::context;
 
 type ServiceFuture = BoxFuture<'static, Result<Response<Body>, crate::ServiceError>>;
 
-use crate::{Api, GetAuctionResponse};
 use crate::bidon_version::XBidonVersionString;
-
-mod server_auth;
 
 mod paths {
     use lazy_static::lazy_static;
@@ -387,3 +384,4 @@ impl<T> RequestParser<T> for ApiRequestParser {
         }
     }
 }
+*/

@@ -1,4 +1,5 @@
 use std::fmt;
+use hyper;
 
 // TODO use the following constants in your code
 
