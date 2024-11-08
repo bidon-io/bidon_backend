@@ -24,6 +24,9 @@ pub const API_VERSION: &str = "1.0.0";
 pub mod galaxy {
     pub mod v1 {
         tonic::include_proto!("galaxy.v1");
+        pub mod bidon {
+            tonic::include_proto!("galaxy.v1.bidon");
+        }
     }
 }
 

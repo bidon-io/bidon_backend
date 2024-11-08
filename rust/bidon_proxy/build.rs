@@ -1,5 +1,7 @@
 //! This file is used to compile the proto files in the proto directory
 
+use prost_build::Config;
+
 fn main() {
     let proto_dirs = ["proto/adcom/proto", "proto/openrtb/proto", "proto/proto"];
 
@@ -10,10 +12,20 @@ fn main() {
     tonic_build::configure()
         .compile_protos(
             &["galaxy/v1/services.proto",
+            ],  // List of .proto files to compile
+            &proto_dirs,                  // Directories where imports may be found
+        )
+        .unwrap_or_else(|e| panic!("Failed to compile protos: {:?}", e));
+
+    Config::new()
+        .compile_protos(
+            &[ "galaxy/v1/bidon/bidon.proto",
+                "galaxy/v1/context.proto",
                 "com/iabtechlab/openrtb/v3/openrtb.proto",
                 "com/iabtechlab/adcom/v1/adcom.proto"
             ],  // List of .proto files to compile
             &proto_dirs,                  // Directories where imports may be found
         )
         .unwrap_or_else(|e| panic!("Failed to compile protos: {:?}", e));
+
 }
