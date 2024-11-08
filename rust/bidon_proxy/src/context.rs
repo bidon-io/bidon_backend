@@ -8,7 +8,6 @@ use std::marker::PhantomData;
 use std::task::{Poll, Context};
 use swagger::auth::{AuthData, Authorization, Bearer, Scopes};
 use swagger::{EmptyContext, Has, Pop, Push, XSpanIdString};
-use crate::{Api, AuthenticationApi};
 use log::error;
 use crate::bidon_version::XBidonVersionString;
 
@@ -103,7 +102,7 @@ impl<T, A, B, C, D, E, ReqBody> Service<Request<ReqBody>> for AddContext<T, A, B
         C: Push<Option<AuthData>, Result=D>,
         D: Push<Option<Authorization>, Result=E>,
         E: Send + 'static,
-        T: Service<(Request<ReqBody>, E)> + AuthenticationApi
+        T: Service<(Request<ReqBody>, E)>
 {
     type Response = T::Response;
     type Error = T::Error;

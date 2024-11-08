@@ -21,32 +21,50 @@ type ServiceError = Box<dyn Error + Send + Sync + 'static>;
 pub const BASE_PATH: &str = "";
 pub const API_VERSION: &str = "1.0.0";
 
-mod auth;
-pub use auth::{AuthenticationApi, Claims};
-pub use api::{Api, GetAuctionResponse};
+pub mod galaxy {
+    pub mod v1 {
+        tonic::include_proto!("galaxy.v1");
+    }
+}
 
+pub mod com {
+    pub mod iabtechlab {
+        pub mod openrtb {
+            pub mod v3 {
+                tonic::include_proto!("com.iabtechlab.openrtb.v3");
+            }
+        }
+        pub mod adcom {
+            pub mod v1 {
+                tonic::include_proto!("com.iabtechlab.adcom.v1.context");
+                tonic::include_proto!("com.iabtechlab.adcom.v1.enums");
+                tonic::include_proto!("com.iabtechlab.adcom.v1.media");
+                tonic::include_proto!("com.iabtechlab.adcom.v1.placement");
+            }
+        }
+    }
+}
 
-#[cfg(feature = "client")]
-pub mod client;
-
-// Re-export Client as a top-level name
-#[cfg(feature = "client")]
-pub use client::Client;
 
 #[cfg(feature = "server")]
 pub mod server;
-
-// Re-export router() as a top-level name
-#[cfg(feature = "server")]
-pub use self::server::Service;
 
 #[cfg(feature = "server")]
 pub mod context;
 
 pub mod models;
 
-#[cfg(any(feature = "client", feature = "server"))]
+#[cfg(feature = "server")]
 pub(crate) mod header;
-mod impls;
-pub mod bidon_version;
-mod api;
+
+#[cfg(feature = "server")]
+mod auction;
+
+#[cfg(feature = "server")]
+mod controllers {
+    pub mod auction;
+    pub mod adapter;
+}
+
+#[cfg(feature = "server")]
+mod bidon_version;
