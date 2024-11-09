@@ -59,22 +59,17 @@ pub mod galaxy {
     }
 }
 
-#[cfg(feature = "server")]
 pub mod context;
 
 pub mod models;
 
-#[cfg(feature = "server")]
 pub(crate) mod header;
 
-#[cfg(feature = "server")]
-mod auction;
+pub mod auction;
 
-#[cfg(feature = "server")]
-mod controllers {
+pub mod controllers {
     pub mod auction;
     pub mod adapter;
 }
 
-#[cfg(feature = "server")]
-mod bidon_version;
+pub mod bidon_version;
