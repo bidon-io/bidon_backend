@@ -31,7 +31,7 @@ func TestAuctionResultV2Repo_CreateOrUpdate(t *testing.T) {
 	}
 	rdb, mock := redismock.NewClientMock()
 	mock.ExpectGet("auction-1").RedisNil()
-	mock.ExpectSet("auction-1", expectedAuctionResultV2, 24*time.Hour).SetVal("OK")
+	mock.ExpectSet("auction-1", expectedAuctionResultV2, 4*time.Hour).SetVal("OK")
 
 	repo := store.AuctionResultV2Repo{Redis: rdb}
 	err := repo.CreateOrUpdate(ctx, imp, bids)
