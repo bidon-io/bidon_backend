@@ -78,7 +78,7 @@ func (r AuctionResultRepo) Find(ctx context.Context, auctionID string) (*notific
 	}
 }
 
-var TTL time.Duration = 24 * time.Hour
+var TTL time.Duration = 4 * time.Hour
 
 func (r AuctionResultRepo) Save(ctx context.Context, a *notification.AuctionResult) error {
 	err := r.Redis.Set(ctx, a.AuctionID, a, TTL).Err()
