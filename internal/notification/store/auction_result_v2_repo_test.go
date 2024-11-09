@@ -94,7 +94,7 @@ func TestAuctionResultV2_Save(t *testing.T) {
 		Bids:      []notification.Bid{},
 	}
 	rdb, mock := redismock.NewClientMock()
-	mock.ExpectSet("auction-1", AuctionResultV2, 24*time.Hour).SetVal("OK")
+	mock.ExpectSet("auction-1", AuctionResultV2, 4*time.Hour).SetVal("OK")
 	repo := store.AuctionResultV2Repo{Redis: rdb}
 
 	err := repo.Save(ctx, AuctionResultV2)
