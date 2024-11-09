@@ -15,7 +15,7 @@ use crate::bidon_version::XBidonVersionString;
 swagger::new_context_type!(MyContext, MyEmpContext, Option<AuthData>, Option<Authorization>, XSpanIdString, XBidonVersionString);
 
 // Define the BidonContext type
-pub(crate) type BidonContext = swagger::make_context_ty!(MyContext, MyEmpContext,  XSpanIdString, XBidonVersionString, Option<AuthData>, Option<Authorization>);
+pub type BidonContext = swagger::make_context_ty!(MyContext, MyEmpContext,  XSpanIdString, XBidonVersionString, Option<AuthData>, Option<Authorization>);
 
 pub struct MakeAddContext<T, A> {
     inner: T,
