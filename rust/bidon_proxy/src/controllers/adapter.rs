@@ -9,13 +9,13 @@ use prost::{EncodeError, Extendable, Message};
 use std::convert::TryFrom;
 use std::error::Error;
 
-pub(crate) fn try_from(auction_request: AuctionRequest) -> Result<openrtb::Openrtb, dyn Error> {
+pub(crate) fn try_from(auction_request: AuctionRequest) -> Result<openrtb::Openrtb, Box<dyn Error>> {
 
     // Convert AuctionRequest to Openrtb::Request
     let mut request = openrtb::Request {
         id: auction_request.ad_object.auction_id.to_owned(),
         test: auction_request.test,
-        tmax: auction_request.tmax.into(),
+        tmax: auction_request.tmax.map(|t| t as u32),
         at: None, //TODO
         cur: vec![], //TODO
         seat: vec![], //TODO
@@ -37,7 +37,7 @@ pub(crate) fn try_from(auction_request: AuctionRequest) -> Result<openrtb::Openr
     })
 }
 
-fn serialize_context(auction_request: &AuctionRequest) -> Result<Vec<u8>, EncodeError> {
+fn serialize_context(auction_request: &AuctionRequest) -> Result<Vec<u8>, Box<dyn Error>> {
     // Create the AdCOM Context message
     let mut context = galaxy::v1::context::Context {
         distribution_channel: DistributionChannel {
@@ -60,7 +60,7 @@ fn serialize_context(auction_request: &AuctionRequest) -> Result<Vec<u8>, Encode
     Ok(context_bytes)
 }
 
-fn convert_app(api_app: &models::App) -> Result<adcom::context::distribution_channel::App, dyn Error> {
+fn convert_app(api_app: &models::App) -> Result<adcom::context::distribution_channel::App, Box<dyn Error>> {
     let mut app = adcom::context::distribution_channel::App {
 
         // Map standard fields
@@ -80,7 +80,7 @@ fn convert_app(api_app: &models::App) -> Result<adcom::context::distribution_cha
         extension_set: Default::default(),
     };
 
-    let bidon_app = galaxy::v1::bidon::BidonApp{
+    let bidon_app = galaxy::v1::bidon::BidonApp {
         key: api_app.key.clone().into(),
         framework: api_app.framework_version.clone(),
         framework_version: api_app.framework_version.clone(),
@@ -96,14 +96,14 @@ fn convert_app(api_app: &models::App) -> Result<adcom::context::distribution_cha
 fn convert_device(api_device: &models::Device) -> adcom::context::Device {
     let mut device = adcom::context::Device {
         // Map standard fields
-        r#type: convert_device_type(api_device.r#type.clone()).into(),
+        r#type: convert_device_type(api_device.r#type.clone()).map(|dt| dt as i32),
         ua: api_device.ua.clone().into(),
         ifa: None, // TODO
         dnt: None, // TODO
         lmt: None, // TODO
         make: api_device.make.clone().into(),
         model: api_device.model.clone().into(),
-        os: Option::from(convert_os(api_device.os.clone()).into()),
+        os: Option::from(<OperatingSystem as Into<i32>>::into(convert_os(api_device.os.clone()))),
         osv: api_device.osv.clone().into(),
         hwv: api_device.hwv.clone().into(),
         h: api_device.h.into(),
@@ -119,7 +119,7 @@ fn convert_device(api_device: &models::Device) -> adcom::context::Device {
         mccmnc: api_device.clone().mccmnc,
         mccmncsim: None, // TODO
         geofetch: None, // TODO
-        contype: Option::from(convert_connection_type(api_device.connection_type).into()),
+        contype: Option::from(<adcom::enums::ConnectionType as Into<i32>>::into(convert_connection_type(api_device.connection_type))),
 
         // Map additional fields
         // `type`:
@@ -152,8 +152,8 @@ fn convert_connection_type(connection_type: DeviceConnectionType) -> adcom::enum
     match connection_type {
         DeviceConnectionType::Ethernet => adcom::enums::ConnectionType::Wired,
         DeviceConnectionType::Wifi => adcom::enums::ConnectionType::Wifi,
-        DeviceConnectionType::CellularUnknown=> adcom::enums::ConnectionType::CellUnknown,
-        DeviceConnectionType::Cellular=> adcom::enums::ConnectionType::CellUnknown,
+        DeviceConnectionType::CellularUnknown => adcom::enums::ConnectionType::CellUnknown,
+        DeviceConnectionType::Cellular => adcom::enums::ConnectionType::CellUnknown,
         DeviceConnectionType::Cellular2G => adcom::enums::ConnectionType::Cell2g,
         DeviceConnectionType::Cellular3G => adcom::enums::ConnectionType::Cell3g,
         DeviceConnectionType::Cellular4G => adcom::enums::ConnectionType::Cell4g,
@@ -163,32 +163,32 @@ fn convert_connection_type(connection_type: DeviceConnectionType) -> adcom::enum
 }
 
 // fn convert_user(api_user: &models::User) -> adcom::User {
-    // let mut user = adcom::User::new();
-    //
-    // // Map standard fields
-    // user.set_id(api_user.idg);
-    //
-    // // Map additional fields
-    // user.set_idfa(api_user.idfa);
-    // user.set_tracking_authorization_status(api_user.tracking_authorization_status);
-    // user.set_idfv(api_user.idfv);
-    //
-    // // Map consent (if structure is known)
-    // // If 'consent' is a JSON object, you may need to convert it accordingly
-    // if let Some(consent) = api_user.consent {
-    //     let consent_struct = convert_consent(consent);
-    //     user.set_consent(consent_struct);
-    // }
+// let mut user = adcom::User::new();
+//
+// // Map standard fields
+// user.set_id(api_user.idg);
+//
+// // Map additional fields
+// user.set_idfa(api_user.idfa);
+// user.set_tracking_authorization_status(api_user.tracking_authorization_status);
+// user.set_idfv(api_user.idfv);
+//
+// // Map consent (if structure is known)
+// // If 'consent' is a JSON object, you may need to convert it accordingly
+// if let Some(consent) = api_user.consent {
+//     let consent_struct = convert_consent(consent);
+//     user.set_consent(consent_struct);
+// }
 
-    // // Map 'segments'
-    // if let Some(segments_api) = api_user.segments {
-    //     let segments = segments_api
-    //         .into_iter()
-    //         .map(convert_segment)
-    //         .collect::<Vec<adcom::Segment>>();
-    //     user.set_segments(RepeatedField::from_vec(segments));
-    // }
-    //
+// // Map 'segments'
+// if let Some(segments_api) = api_user.segments {
+//     let segments = segments_api
+//         .into_iter()
+//         .map(convert_segment)
+//         .collect::<Vec<adcom::Segment>>();
+//     user.set_segments(RepeatedField::from_vec(segments));
+// }
+//
 //     user
 // }
 

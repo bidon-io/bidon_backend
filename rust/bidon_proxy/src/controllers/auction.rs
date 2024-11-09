@@ -1,25 +1,25 @@
+use crate::auction::Api as AuctionApi;
+use crate::com::iabtechlab::openrtb::v3::Openrtb;
+use crate::controllers::adapter;
+use crate::models::{AuctionRequest, GetAuctionAdTypeParameter};
 use axum::{
     extract::{Extension, Json, Path},
     http::StatusCode,
     response::IntoResponse,
+    response::Response,
 };
-use std::sync::Arc;
-use tokio::sync::Mutex;
-use crate::bidon_version::XBidonVersionString;
-use swagger::{ContextBuilder, XSpanIdString, AuthData};
-use crate::models::{AuctionRequest, GetAuctionAdTypeParameter};
-use crate::context::BidonContext;
-use crate::auction::Api as AuctionApi;
-use crate::Context;
-use crate::controllers::adapter;
 use std::convert::TryFrom;
-use crate::com::iabtechlab::openrtb::v3::Openrtb;
+use std::sync::Arc;
+use hyper::Body;
+use prost::bytes::BytesMut;
+use prost::{Message};
+use tokio::sync::Mutex;
+use tonic::IntoRequest;
 
 pub async fn get_auction_handler<A>(
     Path(ad_type): Path<String>,
     Json(auction_request): Json<AuctionRequest>,
     Extension(auction): Extension<Arc<Mutex<A>>>,
-    Extension(context): Extension<Context<'_>>,
 ) -> impl IntoResponse
 where
     A: AuctionApi,
@@ -36,7 +36,13 @@ where
     };
 
     match auction.bid(openrtb_request).await {
-        Ok(response) => (StatusCode::OK, Json(response)).into_response(),
+        Ok(response) => {
+            let mut buf = BytesMut::with_capacity(128);
+            match response.encode(&mut buf) {
+                Ok(()) => buf.into_response(),
+                Err(err) => (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()).into_response(),
+            }
+        },
         Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, "Internal Server Error").into_response(),
     }
 }

@@ -4,34 +4,31 @@ use axum::{
 };
 use std::sync::Arc;
 use tokio::sync::Mutex;
-use crate::bidon_version::XBidonVersionString;
+use galaxy::bidon_version::XBidonVersionString;
+// use crate::auction;
+use galaxy::controllers;
 use swagger::{ContextBuilder, XSpanIdString, AuthData};
-use crate::context::BidonContext;
-use crate::auction;
-use crate::controllers;
-
-// mod models;
-// mod auction;
-// mod controllers;
+use galaxy::context::{MyContext, MyEmpContext};
+use swagger::Push;
+use galaxy::auction::SimpleAuction;
 
 #[tokio::main]
 async fn main() {
 
     // Create a ProxyServer instance
-    let auction = Arc::new(Mutex::new(auction::SimpleAuction::new()));
+    let auction = Arc::new(Mutex::new(galaxy::auction::SimpleAuction::new("http://localhost:50051".to_string()).await.unwrap()));
 
     // Define the context
-    let context = BidonContext::new()
-        .push(XSpanIdString::default())
-        .push(XBidonVersionString::default())
-        .push(None::<AuthData>)
-        .build();
+    // let context = swagger::make_context!(MyContext, MyEmpContext,
+    //     XSpanIdString::default(),
+    //     XBidonVersionString::default(),
+    //     None::<AuthData>);
 
     // Define the routes
     let app = Router::new()
-        .route("/v2/auction/:ad_type", post(controllers::auction::get_auction_handler))
-        .layer(axum::extract::Extension(auction))
-        .layer(axum::extract::Extension(context));
+        .route("/v2/auction/:ad_type", post(controllers::auction::get_auction_handler::<SimpleAuction>))
+        .layer(axum::extract::Extension(auction));
+        // .layer(axum::extract::Extension(context) );
 
     // Start the server
     axum::Server::bind(&"127.0.0.1:3030".parse().unwrap())
