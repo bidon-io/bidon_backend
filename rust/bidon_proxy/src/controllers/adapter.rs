@@ -2,13 +2,14 @@ use crate::com::iabtechlab::adcom::v1 as adcom;
 use crate::com::iabtechlab::adcom::v1::context::DistributionChannel;
 use crate::com::iabtechlab::openrtb::v3 as openrtb;
 use crate::controllers::adapter::adcom::enums::OperatingSystem;
-use crate::galaxy::v1::bidon::BIDON_APP;
-use crate::models::{AuctionRequest, DeviceConnectionType, DeviceType};
+use crate::galaxy::v1::bidon::{BIDON, BIDON_APP};
+use crate::models::{AuctionRequest, DeviceConnectionType, DeviceType, Geo, Segment};
 use crate::{galaxy, models};
 use prost::{EncodeError, Extendable, Message};
 use std::convert::TryFrom;
 use std::error::Error;
 
+//TODO As it takes auction_request's ownership, it should be possible to remove most of the .clone() calls.
 pub(crate) fn try_from(auction_request: AuctionRequest) -> Result<openrtb::Openrtb, Box<dyn Error>> {
 
     // Convert AuctionRequest to Openrtb::Request
@@ -48,8 +49,8 @@ fn serialize_context(auction_request: &AuctionRequest) -> Result<Vec<u8>, Box<dy
             channel_oneof:
             Some(adcom::context::distribution_channel::ChannelOneof::App(convert_app(&auction_request.app)?)),
         }.into(),
-        device: convert_device(&auction_request.device).into(),
-        user: None, // convert_user(&auction_request.user).into(),
+        device: convert_device(&auction_request.device, &auction_request.geo).into(),
+        user: convert_user(&auction_request.user, &auction_request.segment)?.into(),
         regs: None, // convert_regs(&auction_request.regs).into(),
         restrictions: None, // TODO
     };
@@ -93,7 +94,7 @@ fn convert_app(api_app: &models::App) -> Result<adcom::context::distribution_cha
     Ok(app)
 }
 
-fn convert_device(api_device: &models::Device) -> adcom::context::Device {
+fn convert_device(api_device: &models::Device, geo: &Option<Geo>) -> adcom::context::Device {
     let mut device = adcom::context::Device {
         // Map standard fields
         r#type: convert_device_type(api_device.r#type.clone()).map(|dt| dt as i32),
@@ -124,7 +125,7 @@ fn convert_device(api_device: &models::Device) -> adcom::context::Device {
         // Map additional fields
         // `type`:
         iptr: None,
-        geo: None,
+        geo: geo.clone().map(|g| convert_geo(&g)),
         extension_set: Default::default(),
     };
     device
@@ -162,52 +163,52 @@ fn convert_connection_type(connection_type: DeviceConnectionType) -> adcom::enum
     }
 }
 
-// fn convert_user(api_user: &models::User) -> adcom::User {
-// let mut user = adcom::User::new();
-//
-// // Map standard fields
-// user.set_id(api_user.idg);
-//
-// // Map additional fields
-// user.set_idfa(api_user.idfa);
-// user.set_tracking_authorization_status(api_user.tracking_authorization_status);
-// user.set_idfv(api_user.idfv);
-//
-// // Map consent (if structure is known)
-// // If 'consent' is a JSON object, you may need to convert it accordingly
-// if let Some(consent) = api_user.consent {
-//     let consent_struct = convert_consent(consent);
-//     user.set_consent(consent_struct);
-// }
+fn convert_geo(geo: &models::Geo) -> adcom::context::Geo {
+    let geo = adcom::context::Geo {
+        r#type: Option::from(adcom::enums::LocationType::Unknown as i32), // TODO
+        lat: geo.lat.map(|t|t as f32),
+        lon: geo.lon.map(|t|t as f32),
+        accur: geo.accuracy.map(|t| (t as i32)), // TODO check accuracy conversion.
+        country: geo.country.clone().into(),
+        city: geo.city.clone().into(),
+        zip: geo.zip.clone().into(),
+        utcoffset: geo.utcoffset,
+        lastfix: geo.lastfix,
+        ..Default::default()
+    };
+    geo
+}
 
-// // Map 'segments'
-// if let Some(segments_api) = api_user.segments {
-//     let segments = segments_api
-//         .into_iter()
-//         .map(convert_segment)
-//         .collect::<Vec<adcom::Segment>>();
-//     user.set_segments(RepeatedField::from_vec(segments));
-// }
-//
-//     user
-// }
+fn convert_user(api_user: &models::User, segment: &Option<Segment>) -> Result<adcom::context::User, Box<dyn Error>>  {
+    let mut user = adcom::context::User {
+        id: api_user.idg.map(|uuid| uuid.to_string()),
+        ..Default::default()
+    };
 
-// fn convert_segment(api_segment: galaxy::bidon::Segment) -> adcom::Segment {
-//     let mut segment = galaxy::v1::bidon::Segment{
-//         id: None,
-//         uid: None,
-//         name: None,
-//         value: None,
-//         ext: None,
-//     }
-//
-//     segment.set_id(api_segment.id);
-//     segment.set_uid(api_segment.uid);
-//     segment.set_ext(api_segment.ext);
-//
-//     segment
-// }
-//
+    let bidon_user = galaxy::v1::bidon::BidonUser {
+        idfa: api_user.idfa.map(|uuid| uuid.to_string()),
+        tracking_authorization_status: Option::from(api_user.tracking_authorization_status.clone()),
+        idfv: api_user.idfv.map(|uuid| uuid.to_string()),
+        idg: api_user.idg.map(|uuid| uuid.to_string()),
+        consent: Option::from(serde_json::to_string(&api_user.consent)?), // TODO there is a consent field in adcom::User. Should we have it here?
+        segments: segment.into_iter().map(convert_segment).collect(),
+    };
+
+    user.set_extension_data(BIDON, bidon_user)?;
+
+    Ok(user)
+}
+
+fn convert_segment(api_segment: &Segment) -> galaxy::v1::bidon::Segment {
+    let mut segment = galaxy::v1::bidon::Segment {
+        id: api_segment.id.clone(),
+        uid: api_segment.uid.clone(),
+        ext: api_segment.ext.clone(),
+    };
+
+    segment
+}
+
 // // Placeholder for consent conversion
 // fn convert_consent(consent_json: serde_json::Value) -> adcom::Consent {
 //     let mut consent = adcom::Consent::new();
