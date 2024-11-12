@@ -6,32 +6,35 @@ use crate::galaxy::v1::bidon::{BIDON, BIDON_APP};
 use crate::models::{AuctionRequest, DeviceConnectionType, DeviceType, Geo, Segment};
 use crate::{galaxy, models};
 use prost::{EncodeError, Extendable, Message};
+use serde_json::Value;
+use std::collections::HashMap;
 use std::convert::TryFrom;
 use std::error::Error;
 
 //TODO As it takes auction_request's ownership, it should be possible to remove most of the .clone() calls.
-pub(crate) fn try_from(auction_request: AuctionRequest) -> Result<openrtb::Openrtb, Box<dyn Error>> {
-
+pub(crate) fn try_from(
+    auction_request: AuctionRequest,
+) -> Result<openrtb::Openrtb, Box<dyn Error>> {
     // Convert AuctionRequest to Openrtb::Request
     let mut request = openrtb::Request {
         id: auction_request.ad_object.auction_id.to_owned(),
         test: auction_request.test,
         tmax: auction_request.tmax.map(|t| t as u32),
-        at: None, //TODO
-        cur: vec![], //TODO
+        at: None,     //TODO
+        cur: vec![],  //TODO
         seat: vec![], //TODO
-        wseat: None, //TODO
+        wseat: None,  //TODO
         context: Option::from(serialize_context(&auction_request)?),
-        source: None, //TODO: Map 'source' if necessary
-        item: vec![], //TODO
-        cdata: None, //TODO
+        source: None,  //TODO: Map 'source' if necessary
+        item: vec![],  //TODO
+        cdata: None,   //TODO
         package: None, //TODO
         extension_set: Default::default(),
     };
 
     // Create Openrtb instance with the converted request
     Ok(openrtb::Openrtb {
-        ver: Some("3.0".to_string()), // Set the version as needed
+        ver: Some("3.0".to_string()),                // Set the version as needed
         domainspec: Some("domain_spec".to_string()), // Set the domain spec as needed
         domainver: Some("domain_version".to_string()), // Set the domain version as needed
         payload_oneof: Some(openrtb::openrtb::PayloadOneof::Request(request)),
@@ -42,16 +45,21 @@ fn serialize_context(auction_request: &AuctionRequest) -> Result<Vec<u8>, Box<dy
     // Create the AdCOM Context message
     let mut context = galaxy::v1::context::Context {
         distribution_channel: DistributionChannel {
-            id: None, // TODO
-            name: None, // TODO
-            r#pub: None, // TODO
+            id: None,      // TODO
+            name: None,    // TODO
+            r#pub: None,   // TODO
             content: None, // TODO
-            channel_oneof:
-            Some(adcom::context::distribution_channel::ChannelOneof::App(convert_app(&auction_request.app)?)),
-        }.into(),
+            channel_oneof: Some(adcom::context::distribution_channel::ChannelOneof::App(
+                convert_app(&auction_request.app)?,
+            )),
+        }
+        .into(),
         device: convert_device(&auction_request.device, &auction_request.geo).into(),
         user: convert_user(&auction_request.user, &auction_request.segment)?.into(),
-        regs: None, // convert_regs(&auction_request.regs).into(),
+        regs: match auction_request.regs.as_ref() {
+            Some(t) => convert_regs(&t)?.into(),
+            None => None,
+        },
         restrictions: None, // TODO
     };
 
@@ -61,9 +69,10 @@ fn serialize_context(auction_request: &AuctionRequest) -> Result<Vec<u8>, Box<dy
     Ok(context_bytes)
 }
 
-fn convert_app(api_app: &models::App) -> Result<adcom::context::distribution_channel::App, Box<dyn Error>> {
+fn convert_app(
+    api_app: &models::App,
+) -> Result<adcom::context::distribution_channel::App, Box<dyn Error>> {
     let mut app = adcom::context::distribution_channel::App {
-
         // Map standard fields
         domain: None,
         cat: vec![],
@@ -99,12 +108,11 @@ fn convert_device(api_device: &models::Device, geo: &Option<Geo>) -> adcom::cont
         // Map standard fields
         r#type: convert_device_type(api_device.r#type.clone()).map(|dt| dt as i32),
         ua: api_device.ua.clone().into(),
-        ifa: None, // TODO
-        dnt: None, // TODO
-        lmt: None, // TODO
         make: api_device.make.clone().into(),
         model: api_device.model.clone().into(),
-        os: Option::from(<OperatingSystem as Into<i32>>::into(convert_os(api_device.os.clone()))),
+        os: Option::from(<OperatingSystem as Into<i32>>::into(convert_os(
+            api_device.os.clone(),
+        ))),
         osv: api_device.osv.clone().into(),
         hwv: api_device.hwv.clone().into(),
         h: api_device.h.into(),
@@ -112,30 +120,25 @@ fn convert_device(api_device: &models::Device, geo: &Option<Geo>) -> adcom::cont
         ppi: api_device.ppi.into(),
         pxratio: (api_device.pxratio as f32).into(), // TODO validate conversion
         js: Some(api_device.js != 0),
-        ip: None, // TODO
-        ipv6: None, // TODO
-        xff: None, // TODO
         lang: api_device.language.clone().into(),
         carrier: api_device.clone().carrier,
         mccmnc: api_device.clone().mccmnc,
-        mccmncsim: None, // TODO
-        geofetch: None, // TODO
-        contype: Option::from(<adcom::enums::ConnectionType as Into<i32>>::into(convert_connection_type(api_device.connection_type))),
-
-        // Map additional fields
-        // `type`:
-        iptr: None,
+        contype: Option::from(<adcom::enums::ConnectionType as Into<i32>>::into(
+            convert_connection_type(api_device.connection_type),
+        )),
         geo: geo.clone().map(|g| convert_geo(&g)),
-        extension_set: Default::default(),
+        ..Default::default()
     };
     device
 }
 
 fn convert_device_type(device_type: Option<DeviceType>) -> Option<adcom::enums::DeviceType> {
-    device_type.map(|dt| match dt {
-        DeviceType::Phone => adcom::enums::DeviceType::Phone,
-        DeviceType::Tablet => adcom::enums::DeviceType::Tablet,
-    }).map(Into::into)
+    device_type
+        .map(|dt| match dt {
+            DeviceType::Phone => adcom::enums::DeviceType::Phone,
+            DeviceType::Tablet => adcom::enums::DeviceType::Tablet,
+        })
+        .map(Into::into)
 }
 
 fn convert_os(os: String) -> OperatingSystem {
@@ -166,8 +169,8 @@ fn convert_connection_type(connection_type: DeviceConnectionType) -> adcom::enum
 fn convert_geo(geo: &models::Geo) -> adcom::context::Geo {
     let geo = adcom::context::Geo {
         r#type: Option::from(adcom::enums::LocationType::Unknown as i32), // TODO
-        lat: geo.lat.map(|t|t as f32),
-        lon: geo.lon.map(|t|t as f32),
+        lat: geo.lat.map(|t| t as f32),
+        lon: geo.lon.map(|t| t as f32),
         accur: geo.accuracy.map(|t| (t as i32)), // TODO check accuracy conversion.
         country: geo.country.clone().into(),
         city: geo.city.clone().into(),
@@ -179,7 +182,10 @@ fn convert_geo(geo: &models::Geo) -> adcom::context::Geo {
     geo
 }
 
-fn convert_user(api_user: &models::User, segment: &Option<Segment>) -> Result<adcom::context::User, Box<dyn Error>>  {
+fn convert_user(
+    api_user: &models::User,
+    segment: &Option<Segment>,
+) -> Result<adcom::context::User, Box<dyn Error>> {
     let mut user = adcom::context::User {
         id: api_user.idg.map(|uuid| uuid.to_string()),
         ..Default::default()
@@ -216,33 +222,30 @@ fn convert_segment(api_segment: &Segment) -> galaxy::v1::bidon::Segment {
 //     // This requires defining the Consent message structure
 //     consent
 // }
-// fn convert_regs(api_regs: &Option<Regulations>) -> adcom::Regs {
-//     let mut regs = adcom::Regs::new();
-//
-//     regs.set_coppa(api_regs.coppa);
-//
-//     // Map additional fields
-//     regs.set_gdpr(api_regs.gdpr);
-//     regs.set_us_privacy(api_regs.us_privacy);
-//     regs.set_eu_privacy(api_regs.eu_privacy);
-//
-//     // Map 'iab' if structure is known
-//     if let Some(iab) = api_regs.iab {
-//         let iab_struct = convert_iab(iab);
-//         regs.set_iab(iab_struct);
-//     }
-//
-//     regs
-// }
-//
-// // Placeholder for IAB conversion
-// fn convert_iab(iab_json: serde_json::Value) -> adcom::Iab {
-//     let mut iab = adcom::Iab::new();
-//     // Map fields from iab_json to IAB message
-//     // This requires defining the Iab message structure
-//     iab
-// }
-//
+fn convert_regs(api_regs: &models::Regulations) -> Result<adcom::context::Regs, Box<dyn Error>> {
+    let mut regs = adcom::context::Regs {
+        coppa: api_regs.coppa,
+        gdpr: api_regs.gdpr.clone(),
+        ..Default::default()
+    };
+
+    let bidon_regs = galaxy::v1::bidon::BidonRegs {
+        us_privacy: api_regs.us_privacy.clone(),
+        eu_privacy: api_regs.eu_privacy.clone(),
+        iab: match api_regs.iab.as_ref() {
+            Some(t) => Option::from(convert_iab(t)?),
+            None => None,
+        },
+    };
+
+    Ok(regs)
+}
+
+// Placeholder for IAB conversion
+fn convert_iab(iab_json: &HashMap<String, Value>) -> Result<String, Box<dyn Error>> {
+    serde_json::to_string(&iab_json).map_err(Into::into)
+}
+
 // fn convert_ad_object_to_impressions(api_ad_object: OpenApiAdObject) -> RepeatedField<openrtb::Impression> {
 //     let mut impressions = Vec::new();
 //
