@@ -8,11 +8,11 @@ use axum::{
     response::IntoResponse,
     response::Response,
 };
-use std::convert::TryFrom;
-use std::sync::Arc;
 use hyper::Body;
 use prost::bytes::BytesMut;
-use prost::{Message};
+use prost::Message;
+use std::convert::TryFrom;
+use std::sync::Arc;
 use tokio::sync::Mutex;
 use tonic::IntoRequest;
 
@@ -42,7 +42,7 @@ where
                 Ok(()) => buf.into_response(),
                 Err(err) => (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()).into_response(),
             }
-        },
+        }
         Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, "Internal Server Error").into_response(),
     }
 }

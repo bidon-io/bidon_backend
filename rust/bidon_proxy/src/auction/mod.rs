@@ -1,14 +1,14 @@
 mod simple;
 
-use std::{error, fmt};
 pub use simple::SimpleAuction;
+use std::{error, fmt};
 
 use crate::com::iabtechlab::openrtb::v3::Openrtb;
 
 #[async_trait::async_trait]
 pub trait Api {
     /// Auction
-    async fn bid(&mut self, auction_request: Openrtb ) -> Result<Openrtb, AuctionError>;
+    async fn bid(&mut self, auction_request: Openrtb) -> Result<Openrtb, AuctionError>;
 }
 
 #[derive(Clone, Debug)]
