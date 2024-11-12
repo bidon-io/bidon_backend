@@ -1,5 +1,5 @@
-use std::fmt;
 use hyper;
+use std::fmt;
 
 // TODO use the following constants in your code
 

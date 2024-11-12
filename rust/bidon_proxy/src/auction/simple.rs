@@ -1,11 +1,11 @@
 use crate::auction::Api;
 use crate::auction::AuctionError;
 use crate::com::iabtechlab::openrtb::v3::Openrtb;
+use crate::galaxy::v1::bidding_service_client::BiddingServiceClient;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use tonic::transport::Channel;
 use tonic::Request;
-use crate::galaxy::v1::bidding_service_client::BiddingServiceClient;
 
 pub struct SimpleAuction {
     grpc_client: BiddingServiceClient<Channel>,
@@ -22,7 +22,11 @@ impl SimpleAuction {
 impl Api for SimpleAuction {
     async fn bid(&mut self, auction_request: Openrtb) -> Result<Openrtb, AuctionError> {
         let request = Request::new(auction_request);
-        let response = self.grpc_client.bid(request).await.map_err(|e| AuctionError::new(e.to_string()))?;
+        let response = self
+            .grpc_client
+            .bid(request)
+            .await
+            .map_err(|e| AuctionError::new(e.to_string()))?;
         Ok(response.into_inner())
     }
 }
