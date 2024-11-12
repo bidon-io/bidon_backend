@@ -12,10 +12,10 @@
 
 use async_trait::async_trait;
 use futures::Stream;
+use serde::{Deserialize, Serialize};
 use std::error::Error;
 use std::task::{Context, Poll};
 use swagger::{ApiError, ContextWrapper};
-use serde::{Deserialize, Serialize};
 type ServiceError = Box<dyn Error + Send + Sync + 'static>;
 
 pub const BASE_PATH: &str = "";
@@ -68,8 +68,8 @@ pub(crate) mod header;
 pub mod auction;
 
 pub mod controllers {
-    pub mod auction;
     pub mod adapter;
+    pub mod auction;
 }
 
 pub mod bidon_version;
