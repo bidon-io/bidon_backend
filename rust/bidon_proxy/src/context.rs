@@ -1,34 +1,46 @@
+use crate::bidon_version::XBidonVersionString;
 use futures::future::BoxFuture;
 use hyper::header::HeaderName;
-use hyper::{Error, Request, Response, StatusCode, service::Service};
-use url::form_urlencoded;
+use hyper::{service::Service, Error, Request, Response, StatusCode};
+use log::error;
 use std::default::Default;
 use std::io;
 use std::marker::PhantomData;
-use std::task::{Poll, Context};
+use std::task::{Context, Poll};
 use swagger::auth::{AuthData, Authorization, Bearer, Scopes};
 use swagger::{EmptyContext, Has, Pop, Push, XSpanIdString};
-use log::error;
-use crate::bidon_version::XBidonVersionString;
+use url::form_urlencoded;
 
-
-swagger::new_context_type!(MyContext, MyEmpContext, Option<AuthData>, Option<Authorization>, XSpanIdString, XBidonVersionString);
+swagger::new_context_type!(
+    MyContext,
+    MyEmpContext,
+    Option<AuthData>,
+    Option<Authorization>,
+    XSpanIdString,
+    XBidonVersionString
+);
 
 // Define the BidonContext type
-pub type BidonContext = swagger::make_context_ty!(MyContext, MyEmpContext,  XSpanIdString, XBidonVersionString, Option<AuthData>, Option<Authorization>);
+pub type BidonContext = swagger::make_context_ty!(
+    MyContext,
+    MyEmpContext,
+    XSpanIdString,
+    XBidonVersionString,
+    Option<AuthData>,
+    Option<Authorization>
+);
 
 pub struct MakeAddContext<T, A> {
     inner: T,
     marker: PhantomData<A>,
 }
 
-impl<T, A, B, C, D,E> MakeAddContext<T, A>
+impl<T, A, B, C, D, E> MakeAddContext<T, A>
 where
     A: Default + Push<XSpanIdString, Result = B>,
     B: Push<XBidonVersionString, Result = C>,
     C: Push<Option<AuthData>, Result = D>,
     D: Push<Option<Authorization>, Result = E>,
-
 {
     pub fn new(inner: T) -> MakeAddContext<T, A> {
         MakeAddContext {
@@ -39,8 +51,7 @@ where
 }
 
 // Make a service that adds context.
-impl<Target, T, A, B, C, D,E> Service<Target> for
-    MakeAddContext<T, A>
+impl<Target, T, A, B, C, D, E> Service<Target> for MakeAddContext<T, A>
 where
     Target: Send,
     A: Default + Push<XSpanIdString, Result = B> + Send,
@@ -49,10 +60,10 @@ where
     D: Push<Option<Authorization>, Result = E>,
     E: Send + 'static,
     T: Service<Target> + Send,
-    T::Future: Send + 'static
+    T::Future: Send + 'static,
 {
     type Error = T::Error;
-    type Response = AddContext<T::Response, A, B, C, D,E>;
+    type Response = AddContext<T::Response, A, B, C, D, E>;
     type Future = BoxFuture<'static, Result<Self::Response, Self::Error>>;
 
     fn poll_ready(&mut self, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
@@ -62,9 +73,7 @@ where
     fn call(&mut self, target: Target) -> Self::Future {
         let service = self.inner.call(target);
 
-        Box::pin(async move {
-            Ok(AddContext::new(service.await?))
-        })
+        Box::pin(async move { Ok(AddContext::new(service.await?)) })
     }
 }
 
@@ -74,13 +83,13 @@ where
     A: Default + Push<XSpanIdString, Result = B>,
     B: Push<XBidonVersionString, Result = C>,
     C: Push<Option<AuthData>, Result = D>,
-    D: Push<Option<Authorization>, Result = E>
+    D: Push<Option<Authorization>, Result = E>,
 {
     inner: T,
     marker: PhantomData<A>,
 }
 
-impl<T, A, B, C, D,E> AddContext<T, A, B, C, D, E>
+impl<T, A, B, C, D, E> AddContext<T, A, B, C, D, E>
 where
     A: Default + Push<XSpanIdString, Result = B>,
     B: Push<XBidonVersionString, Result = C>,
@@ -96,13 +105,13 @@ where
 }
 
 impl<T, A, B, C, D, E, ReqBody> Service<Request<ReqBody>> for AddContext<T, A, B, C, D, E>
-    where
-        A: Default + Push<XSpanIdString, Result=B>,
-        B: Push<XBidonVersionString, Result=C>,
-        C: Push<Option<AuthData>, Result=D>,
-        D: Push<Option<Authorization>, Result=E>,
-        E: Send + 'static,
-        T: Service<(Request<ReqBody>, E)>
+where
+    A: Default + Push<XSpanIdString, Result = B>,
+    B: Push<XBidonVersionString, Result = C>,
+    C: Push<Option<AuthData>, Result = D>,
+    D: Push<Option<Authorization>, Result = E>,
+    E: Send + 'static,
+    T: Service<(Request<ReqBody>, E)>,
 {
     type Response = T::Response;
     type Error = T::Error;
@@ -112,12 +121,10 @@ impl<T, A, B, C, D, E, ReqBody> Service<Request<ReqBody>> for AddContext<T, A, B
         self.inner.poll_ready(cx)
     }
 
-
     fn call(&mut self, request: Request<ReqBody>) -> Self::Future {
         let context = A::default().push(XSpanIdString::get_or_generate(&request));
         let context = context.push(XBidonVersionString::get_or_generate(&request));
         let headers = request.headers();
-
 
         let context = context.push(None::<AuthData>);
         let context = context.push(None::<Authorization>);
