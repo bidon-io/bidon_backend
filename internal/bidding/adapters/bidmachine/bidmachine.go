@@ -150,7 +150,11 @@ func (a *BidmachineAdapter) ExecuteRequest(ctx context.Context, client *http.Cli
 	}
 	dr.RawRequest = string(requestBody)
 
-	url := "https://api-eu.bidmachine.io/auction/prebid/bidon"
+	alpha3 := ""
+	if request.Device != nil && request.Device.Geo != nil {
+		alpha3 = request.Device.Geo.Country
+	}
+	url := getEndpoint(alpha3)
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(requestBody))
 	if err != nil {
 		dr.Error = err
@@ -243,4 +247,88 @@ func Builder(cfg adapter.ProcessedConfigsMap, client *http.Client) (*adapters.Bi
 	}
 
 	return bidder, nil
+}
+
+var alpha3ToDcMapping = map[string]string{
+	"AUS": "apac",
+	"BGD": "apac",
+	"CHN": "apac",
+	"ETH": "apac",
+	"HKG": "apac",
+	"IDN": "apac",
+	"IND": "apac",
+	"PRK": "apac",
+	"KOR": "apac",
+	"LKA": "apac",
+	"MYS": "apac",
+	"NZL": "apac",
+	"PHL": "apac",
+	"SGP": "apac",
+	"THA": "apac",
+	"TWN": "apac",
+	"VNM": "apac",
+	"JPN": "apac",
+	"ABW": "us",
+	"AIA": "us",
+	"ARG": "us",
+	"ATG": "us",
+	"BHS": "us",
+	"BLM": "us",
+	"BLZ": "us",
+	"BMU": "us",
+	"BOL": "us",
+	"BRA": "us",
+	"BRB": "us",
+	"CAN": "us",
+	"CHL": "us",
+	"COL": "us",
+	"CRI": "us",
+	"CUB": "us",
+	"CYM": "us",
+	"DMA": "us",
+	"DOM": "us",
+	"ECU": "us",
+	"FLK": "us",
+	"GLP": "us",
+	"GRD": "us",
+	"GRL": "us",
+	"GTM": "us",
+	"GUF": "us",
+	"GUY": "us",
+	"HND": "us",
+	"HTI": "us",
+	"JAM": "us",
+	"KNA": "us",
+	"LCA": "us",
+	"MAF": "us",
+	"MEX": "us",
+	"MSR": "us",
+	"MTQ": "us",
+	"NIC": "us",
+	"PAN": "us",
+	"PER": "us",
+	"PRI": "us",
+	"PRY": "us",
+	"SLV": "us",
+	"SPM": "us",
+	"SUR": "us",
+	"TCA": "us",
+	"TTO": "us",
+	"URY": "us",
+	"USA": "us",
+	"VCT": "us",
+	"VEN": "us",
+	"VGB": "us",
+	"VIR": "us",
+}
+
+const defaultDc = "eu"
+
+func getEndpoint(alpha3 string) string {
+	dc := defaultDc
+	if rewrittenDc, ok := alpha3ToDcMapping[alpha3]; ok {
+		dc = rewrittenDc
+	}
+
+	return "https://api-" + dc + ".bidmachine.io/auction/prebid/bidon"
 }
