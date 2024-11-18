@@ -1,13 +1,10 @@
-use axum::{routing::post, Router};
+use axum::routing::post;
+use axum::{middleware, Router};
+use galaxy::auction::SimpleAuction;
 use galaxy::bidon_version::XBidonVersionString;
+use galaxy::controllers;
 use std::sync::Arc;
 use tokio::sync::Mutex;
-// use crate::auction;
-use galaxy::auction::SimpleAuction;
-use galaxy::context::{MyContext, MyEmpContext};
-use galaxy::controllers;
-use swagger::Push;
-use swagger::{AuthData, ContextBuilder, XSpanIdString};
 
 #[tokio::main]
 async fn main() {
@@ -18,18 +15,15 @@ async fn main() {
             .unwrap(),
     ));
 
-    // Define the context
-    // let context = swagger::make_context!(MyContext, MyEmpContext,
-    //     XSpanIdString::default(),
-    //     XBidonVersionString::default(),
-    //     None::<AuthData>);
-
     // Define the routes
     let app = Router::new()
         .route(
             "/v2/auction/:ad_type",
             post(controllers::auction::get_auction_handler::<SimpleAuction>),
         )
+        .route_layer(middleware::from_fn(
+            XBidonVersionString::extract_header_middleware,
+        ))
         .layer(axum::extract::Extension(auction));
     // .layer(axum::extract::Extension(context) );
 
