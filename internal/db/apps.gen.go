@@ -7,6 +7,8 @@ package db
 import (
 	"database/sql"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 const TableNameApp = "apps"
@@ -23,6 +25,7 @@ type App struct {
 	CreatedAt   time.Time      `gorm:"column:created_at;type:timestamp(6) without time zone;not null" json:"created_at"`
 	UpdatedAt   time.Time      `gorm:"column:updated_at;type:timestamp(6) without time zone;not null" json:"updated_at"`
 	PublicUID   sql.NullInt64  `gorm:"column:public_uid;type:bigint;uniqueIndex:index_apps_on_public_uid,priority:1" json:"public_uid"`
+	DeletedAt   gorm.DeletedAt `gorm:"column:deleted_at;type:timestamp(6) without time zone" json:"deleted_at"`
 	User        User           `json:"user"`
 }
 

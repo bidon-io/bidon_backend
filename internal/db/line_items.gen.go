@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/shopspring/decimal"
+	"gorm.io/gorm"
 )
 
 const TableNameLineItem = "line_items"
@@ -30,6 +31,7 @@ type LineItem struct {
 	Format      sql.NullString      `gorm:"column:format;type:character varying" json:"format"`
 	PublicUID   sql.NullInt64       `gorm:"column:public_uid;type:bigint;uniqueIndex:index_line_items_on_public_uid,priority:1" json:"public_uid"`
 	IsBidding   sql.NullBool        `gorm:"column:bidding;type:boolean" json:"bidding"`
+	DeletedAt   gorm.DeletedAt      `gorm:"column:deleted_at;type:timestamp(6) without time zone" json:"deleted_at"`
 	App         App                 `json:"app"`
 	Account     DemandSourceAccount `json:"account"`
 }
