@@ -1,15 +1,20 @@
 use crate::com::iabtechlab::adcom::v1 as adcom;
 use crate::com::iabtechlab::adcom::v1::context::DistributionChannel;
 use crate::com::iabtechlab::openrtb::v3 as openrtb;
+use crate::com::iabtechlab::openrtb::v3::AuctionType;
 use crate::controllers::adapter::adcom::enums::OperatingSystem;
-use crate::galaxy::v1::bidon::{BIDON, BIDON_APP};
-use crate::models::{AuctionRequest, DeviceConnectionType, DeviceType, Geo, Segment};
+use crate::galaxy::v1::bidon::{BidonSession, BIDON_AD_OBJECT, BIDON_SESSION};
+use crate::galaxy::v1::bidon::{BIDON, BIDON_APP, BIDON_REGS};
+use crate::models::{AdFormat, AuctionRequest, DeviceConnectionType, DeviceType, Geo, Segment};
 use crate::{galaxy, models};
-use prost::{EncodeError, Extendable, Message};
+use galaxy::v1::bidon::{Demand, Orientation};
+use models::AdObjectOrientation;
+use prost::{Extendable, Message};
 use serde_json::Value;
 use std::collections::HashMap;
 use std::convert::TryFrom;
 use std::error::Error;
+use std::fmt::format;
 
 //TODO As it takes auction_request's ownership, it should be possible to remove most of the .clone() calls.
 pub(crate) fn try_from(
@@ -20,17 +25,20 @@ pub(crate) fn try_from(
         id: auction_request.ad_object.auction_id.to_owned(),
         test: auction_request.test,
         tmax: auction_request.tmax.map(|t| t as u32),
-        at: None,     //TODO
+        at: Some(AuctionType::FirstPrice as i32),
         cur: vec![],  //TODO
         seat: vec![], //TODO
         wseat: None,  //TODO
-        context: Option::from(serialize_context(&auction_request)?),
-        source: None,  //TODO: Map 'source' if necessary
-        item: vec![],  //TODO
+        context: Some(serialize_context(&auction_request)?),
+        source: None, //TODO: Map 'source' if necessary
+        item: vec![convert_ad_object_to_item(&auction_request.ad_object)?],
         cdata: None,   //TODO
         package: None, //TODO
         extension_set: Default::default(),
     };
+
+    let bidon_session = convert_session(&auction_request.session);
+    request.set_extension_data(BIDON_SESSION, bidon_session)?;
 
     // Create Openrtb instance with the converted request
     Ok(openrtb::Openrtb {
@@ -53,7 +61,7 @@ fn serialize_context(auction_request: &AuctionRequest) -> Result<Vec<u8>, Box<dy
                 convert_app(&auction_request.app)?,
             )),
         }
-        .into(),
+            .into(),
         device: convert_device(&auction_request.device, &auction_request.geo).into(),
         user: convert_user(&auction_request.user, &auction_request.segment)?.into(),
         regs: match auction_request.regs.as_ref() {
@@ -73,21 +81,11 @@ fn convert_app(
     api_app: &models::App,
 ) -> Result<adcom::context::distribution_channel::App, Box<dyn Error>> {
     let mut app = adcom::context::distribution_channel::App {
-        // Map standard fields
-        domain: None,
-        cat: vec![],
-        sectcat: vec![],
-        pagecat: vec![],
-        cattax: None,
-        privpolicy: None,
-        storeid: None,
-        storeurl: None,
         ver: api_app.version.clone().into(),
-
         keywords: None,
         paid: None,
         bundle: api_app.bundle.clone().into(),
-        extension_set: Default::default(),
+        ..Default::default()
     };
 
     let bidon_app = galaxy::v1::bidon::BidonApp {
@@ -110,9 +108,7 @@ fn convert_device(api_device: &models::Device, geo: &Option<Geo>) -> adcom::cont
         ua: api_device.ua.clone().into(),
         make: api_device.make.clone().into(),
         model: api_device.model.clone().into(),
-        os: Option::from(<OperatingSystem as Into<i32>>::into(convert_os(
-            api_device.os.clone(),
-        ))),
+        os: Some(convert_os(api_device.os.clone()) as i32),
         osv: api_device.osv.clone().into(),
         hwv: api_device.hwv.clone().into(),
         h: api_device.h.into(),
@@ -123,7 +119,7 @@ fn convert_device(api_device: &models::Device, geo: &Option<Geo>) -> adcom::cont
         lang: api_device.language.clone().into(),
         carrier: api_device.clone().carrier,
         mccmnc: api_device.clone().mccmnc,
-        contype: Option::from(<adcom::enums::ConnectionType as Into<i32>>::into(
+        contype: Some(<adcom::enums::ConnectionType as Into<i32>>::into(
             convert_connection_type(api_device.connection_type),
         )),
         geo: geo.clone().map(|g| convert_geo(&g)),
@@ -168,7 +164,7 @@ fn convert_connection_type(connection_type: DeviceConnectionType) -> adcom::enum
 
 fn convert_geo(geo: &models::Geo) -> adcom::context::Geo {
     let geo = adcom::context::Geo {
-        r#type: Option::from(adcom::enums::LocationType::Unknown as i32), // TODO
+        r#type: Some(adcom::enums::LocationType::Unknown as i32), // TODO
         lat: geo.lat.map(|t| t as f32),
         lon: geo.lon.map(|t| t as f32),
         accur: geo.accuracy.map(|t| (t as i32)), // TODO check accuracy conversion.
@@ -193,10 +189,10 @@ fn convert_user(
 
     let bidon_user = galaxy::v1::bidon::BidonUser {
         idfa: api_user.idfa.map(|uuid| uuid.to_string()),
-        tracking_authorization_status: Option::from(api_user.tracking_authorization_status.clone()),
+        tracking_authorization_status: Some(api_user.tracking_authorization_status.clone()),
         idfv: api_user.idfv.map(|uuid| uuid.to_string()),
         idg: api_user.idg.map(|uuid| uuid.to_string()),
-        consent: Option::from(serde_json::to_string(&api_user.consent)?), // TODO there is a consent field in adcom::User. Should we have it here?
+        consent: Some(serde_json::to_string(&api_user.consent)?), // TODO there is a consent field in adcom::User. Should we have it here?
         segments: segment.into_iter().map(convert_segment).collect(),
     };
 
@@ -215,13 +211,26 @@ fn convert_segment(api_segment: &Segment) -> galaxy::v1::bidon::Segment {
     segment
 }
 
-// // Placeholder for consent conversion
-// fn convert_consent(consent_json: serde_json::Value) -> adcom::Consent {
-//     let mut consent = adcom::Consent::new();
-//     // Map fields from consent_json to consent message
-//     // This requires defining the Consent message structure
-//     consent
-// }
+fn convert_session(api_session: &models::Session) -> BidonSession {
+    BidonSession {
+        id: Some(api_session.id.to_string().clone()),
+        launch_ts: Some(api_session.launch_ts),
+        launch_monotonic_ts: api_session.launch_monotonic_ts.into(),
+        start_ts: Some(api_session.start_ts),
+        start_monotonic_ts: Some(api_session.start_monotonic_ts),
+        ts: Some(api_session.ts),
+        monotonic_ts: Some(api_session.monotonic_ts),
+        memory_warnings_ts: api_session.memory_warnings_ts.clone(),
+        memory_warnings_monotonic_ts: api_session.memory_warnings_monotonic_ts.clone(),
+        ram_used: Some(api_session.ram_used),
+        ram_size: Some(api_session.ram_size),
+        storage_free: api_session.storage_free,
+        storage_used: api_session.storage_used,
+        battery: Some(api_session.battery),
+        cpu_usage: Some(api_session.cpu_usage),
+    }
+}
+
 fn convert_regs(api_regs: &models::Regulations) -> Result<adcom::context::Regs, Box<dyn Error>> {
     let mut regs = adcom::context::Regs {
         coppa: api_regs.coppa,
@@ -233,10 +242,12 @@ fn convert_regs(api_regs: &models::Regulations) -> Result<adcom::context::Regs, 
         us_privacy: api_regs.us_privacy.clone(),
         eu_privacy: api_regs.eu_privacy.clone(),
         iab: match api_regs.iab.as_ref() {
-            Some(t) => Option::from(convert_iab(t)?),
+            Some(t) => Some(convert_iab(t)?),
             None => None,
         },
     };
+
+    regs.set_extension_data(BIDON_REGS, bidon_regs)?;
 
     Ok(regs)
 }
@@ -246,80 +257,121 @@ fn convert_iab(iab_json: &HashMap<String, Value>) -> Result<String, Box<dyn Erro
     serde_json::to_string(&iab_json).map_err(Into::into)
 }
 
-// fn convert_ad_object_to_impressions(api_ad_object: OpenApiAdObject) -> RepeatedField<openrtb::Impression> {
-//     let mut impressions = Vec::new();
-//
-//     let mut imp = openrtb::Impression::new();
-//
-//     imp.set_id("1".to_string()); // Assign a unique ID
-//
-//     // Map 'banner' ad
-//     if let Some(banner_api) = api_ad_object.banner {
-//         let banner = convert_banner_ad(banner_api);
-//         imp.set_banner(banner);
-//     }
-//
-//     // Map 'interstitial' ad
-//     if let Some(interstitial_api) = api_ad_object.interstitial {
-//         // Map as a banner or video depending on your implementation
-//         // For example, if it's a banner:
-//         let banner = convert_interstitial_ad(interstitial_api);
-//         imp.set_banner(banner);
-//     }
-//
-//     // Map 'rewarded' ad
-//     if let Some(rewarded_api) = api_ad_object.rewarded {
-//         // Map as a video ad
-//         let video = convert_rewarded_ad(rewarded_api);
-//         imp.set_video(video);
-//     }
-//
-//     // Map other fields like 'auction_pricefloor'
-//     if let Some(pricefloor) = api_ad_object.auction_pricefloor {
-//         imp.set_bidfloor(pricefloor);
-//     }
-//
-//     // Add imp to the list
-//     impressions.push(imp);
-//
-//     RepeatedField::from_vec(impressions)
-// }
-//
-// fn convert_banner_ad(api_banner: OpenApiBannerAdObject) -> adcom::Banner {
-//     let mut banner = adcom::Banner::new();
-//
-//     // Map 'format'
-//     banner.set_format(convert_ad_format(api_banner.format));
-//
-//     // Map other fields as needed
-//
-//     banner
-// }
-//
-// fn convert_ad_format(format_str: String) -> adcom::AdFormat {
-//     match format_str.as_str() {
-//         "BANNER" => adcom::Ad::BANNER,
-//         "LEADERBOARD" => adcom::AdFormat::LEADERBOARD,
-//         "MREC" => adcom::AdFormat::MREC,
-//         "ADAPTIVE" => adcom::AdFormat::ADAPTIVE,
-//         _ => adcom::AdFormat::UNKNOWN_FORMAT,
-//     }
-// }
-//
-// fn convert_interstitial_ad(api_interstitial: OpenApiInterstitialAdObject) -> adcom::Banner {
-//     let mut banner = adcom::Banner::new();
-//
-//     // Map fields specific to interstitial ads
-//     // ...
-//
-//     banner
-// }
-//
-// fn convert_rewarded_ad(api_rewarded: OpenApiRewardedAdObject) -> adcom::Video {
-//     let mut video = adcom::Video::new();
-//
-//     // Map fields specific to rewarded ads
-//     // ...
-//
-//     video
-// }
+fn convert_ad_object_to_item(
+    ad_object: &models::AdObject,
+) -> Result<openrtb::Item, Box<dyn Error>> {
+    let mut item = openrtb::Item {
+        id: ad_object.auction_id.clone(),
+        flr: Some(ad_object.auction_pricefloor as f32),
+        flrcur: Some("USD".to_string()),
+        ..Default::default()
+    };
+
+    // Create the AdObjectExtension
+    let bidon_ad_object = galaxy::v1::bidon::BidonAdObject {
+        auction_id: ad_object.auction_id.clone(),
+        auction_key: ad_object.auction_key.clone(),
+        auction_configuration_id: ad_object.auction_configuration_id.clone(),
+        auction_configuration_uid: ad_object.auction_configuration_uid.clone(),
+        orientation: ad_object
+            .orientation
+            .as_ref()
+            .map(convert_ad_orientation)
+            .map(|f| f as i32),
+        demands: convert_demand(&ad_object.demands)?,
+        banner: match &ad_object.banner {
+            Some(ref banner) => Some(convert_banner_ad(banner)),
+            None => None,
+        },
+        interstitial: ad_object.interstitial.as_ref().map(|i| i.to_string()),
+        rewarded: ad_object.rewarded.as_ref().map(|r| r.to_string()),
+    };
+
+    item.set_extension_data(BIDON_AD_OBJECT, bidon_ad_object)?;
+
+    Ok(item)
+}
+
+fn convert_ad_orientation(orientation: &AdObjectOrientation) -> Orientation {
+    match orientation {
+        AdObjectOrientation::Portrait => Orientation::Portrait,
+        AdObjectOrientation::Landscape => Orientation::Landscape,
+    }
+}
+
+fn convert_banner_ad(api_banner: &models::BannerAdObject) -> galaxy::v1::bidon::BannerAd {
+    let mut banner = galaxy::v1::bidon::BannerAd {
+        format: Some(convert_ad_format(api_banner.format) as i32),
+    };
+
+    banner
+}
+
+fn convert_ad_format(format: AdFormat) -> galaxy::v1::bidon::AdFormat {
+    match format {
+        AdFormat::Banner => galaxy::v1::bidon::AdFormat::Banner,
+        AdFormat::Leaderboard => galaxy::v1::bidon::AdFormat::Leaderboard,
+        AdFormat::Mrec => galaxy::v1::bidon::AdFormat::Mrec,
+        AdFormat::Adaptive => galaxy::v1::bidon::AdFormat::Adaptive,
+    }
+}
+
+fn convert_demand(
+    api_demand: &HashMap<String, Value>,
+) -> Result<HashMap<String, Demand>, Box<dyn Error>> {
+    let mut demands = HashMap::new();
+
+    for (key, value) in api_demand {
+        let map = value
+            .as_object()
+            .ok_or(format!("Demand value is not an object: {}", value))?;
+        let demand = Demand {
+            // Assuming Demand has fields that need to be populated from the value
+            // Add the necessary field mappings here
+            token: match map.get("token") {
+                Some(v) => Some(
+                    v.as_str()
+                        .ok_or(format!(
+                            "Token is not a string. Key: {}, value: {}",
+                            key, value
+                        ))?
+                        .to_string(),
+                ),
+                None => None,
+            },
+            status: match map.get("status") {
+                Some(v) => Some(
+                    v.as_str()
+                        .ok_or(format!(
+                            "Status is not a string. Key: {}, value: {}",
+                            key, value
+                        ))?
+                        .to_string(),
+                ),
+                None => None,
+            },
+            token_finish_ts: match map.get("token_finish_ts") {
+                Some(v) => Some(
+                    v.as_i64()
+                        .ok_or(format!(
+                            "token_finish_ts is not a number. Key: {}, value: {}",
+                            key, value
+                        ))?
+                ),
+                None => None,
+            },
+            token_start_ts: match map.get("token_start_ts") {
+                Some(v) => Some(
+                    v.as_i64()
+                        .ok_or(format!(
+                            "token_start_ts is not a number. Key: {}, value: {}",
+                            key, value
+                        ))?
+                ),
+                None => None,
+            },
+        };
+        demands.insert(key.clone(), demand);
+    }
+    Ok(demands)
+}
