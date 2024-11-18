@@ -2,6 +2,7 @@ package adminstore_test
 
 import (
 	"context"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"testing"
 
 	"github.com/bidon-io/bidon-backend/internal/admin"
@@ -147,7 +148,10 @@ func TestAppDemandProfileRepo_ListOwnedByUser(t *testing.T) {
 				t.Fatalf("repo.ListOwnedByUser(ctx, %v) = %v, %q; want %+v, %v", tt.userID, got, err, tt.want, nil)
 			}
 
-			if diff := cmp.Diff(tt.want, got); diff != "" {
+			diff := cmp.Diff(tt.want, got, cmpopts.SortSlices(func(a, b admin.AppDemandProfile) bool {
+				return a.ID < b.ID
+			}))
+			if diff != "" {
 				t.Fatalf("repo.ListOwnedByUser(ctx, %v) mismatch (-want, +got):\n%s", tt.userID, diff)
 			}
 		})
