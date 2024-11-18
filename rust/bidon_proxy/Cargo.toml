@@ -6,9 +6,6 @@ description = "Galaxy OpenRTB 3.0"
 license = "Apache-2.0" # TODO: Check the license
 edition = "2021"
 
-#[features]
-#conversion = ["frunk", "frunk_derives", "frunk_core", "frunk-enum-core", "frunk-enum-derive"]
-
 [target.'cfg(any(target_os = "macos", target_os = "windows", target_os = "ios"))'.dependencies]
 native-tls = { version = "0.2" }
 # hyper-tls = { version = "0.5" }
@@ -49,13 +46,6 @@ axum-core = "0.4.4"
 axum-extra = { version = "0.9.4", features = ["protobuf"] }
 tokio = { version = "1.14", features = ["full"] }
 # native-tls = { version = "0.2" }
-
-# Conversion
-#frunk = { version = "0.4.0" }
-#frunk_derives = { version = "0.4.0" }
-#frunk_core = { version = "0.4.0" }
-#frunk-enum-derive = { version = "0.3.0" }
-#frunk-enum-core = { version = "0.3.0" }
 
 [patch.crates-io]
 prost = { git = 'https://github.com/fabura/prosit' }
