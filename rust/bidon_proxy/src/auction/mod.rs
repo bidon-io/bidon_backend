@@ -1,3 +1,4 @@
+mod echo;
 mod simple;
 
 pub use simple::SimpleAuction;

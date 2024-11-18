@@ -16,7 +16,6 @@ use serde::{Deserialize, Serialize};
 use std::error::Error;
 use std::task::{Context, Poll};
 use swagger::{ApiError, ContextWrapper};
-type ServiceError = Box<dyn Error + Send + Sync + 'static>;
 
 pub const BASE_PATH: &str = "";
 pub const API_VERSION: &str = "1.0.0";
@@ -58,8 +57,6 @@ pub mod galaxy {
         }
     }
 }
-
-pub mod context;
 
 pub mod models;
 

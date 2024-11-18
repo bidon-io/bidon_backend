@@ -14,7 +14,6 @@ use serde_json::Value;
 use std::collections::HashMap;
 use std::convert::TryFrom;
 use std::error::Error;
-use std::fmt::format;
 
 //TODO As it takes auction_request's ownership, it should be possible to remove most of the .clone() calls.
 pub(crate) fn try_from(
@@ -52,7 +51,7 @@ fn serialize_context(auction_request: &AuctionRequest) -> Result<Vec<u8>, Box<dy
             )),
             ..Default::default()
         }
-            .into(),
+        .into(),
         device: convert_device(&auction_request.device, &auction_request.geo).into(),
         user: convert_user(&auction_request.user, &auction_request.segment)?.into(),
         regs: match auction_request.regs.as_ref() {
@@ -149,7 +148,6 @@ fn convert_connection_type(connection_type: DeviceConnectionType) -> adcom::enum
         DeviceConnectionType::Cellular3G => adcom::enums::ConnectionType::Cell3g,
         DeviceConnectionType::Cellular4G => adcom::enums::ConnectionType::Cell4g,
         DeviceConnectionType::Cellular5G => adcom::enums::ConnectionType::Cell5g,
-        _ => adcom::enums::ConnectionType::Unknown,
     }
 }
 
@@ -363,7 +361,7 @@ fn convert_demand(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::models::{AdObject, App, AuctionRequest, Device, Session, User};
+    use crate::models::{App, Device, Session, User};
     use serde_json::json;
     use std::collections::HashMap;
     use uuid::Uuid;
@@ -506,8 +504,14 @@ mod tests {
         let bidon_user = user.extension_set.extension_data(BIDON).unwrap();
         assert_eq!(bidon_user.idfa, Some(idfa.to_string()));
         assert_eq!(bidon_user.idfv, Some(idfv.to_string()));
-        assert_eq!(bidon_user.tracking_authorization_status, Some("authorized".to_string()));
-        assert_eq!(bidon_user.consent, Some("{\"meta\":{\"consent\":true}}".to_string()));
+        assert_eq!(
+            bidon_user.tracking_authorization_status,
+            Some("authorized".to_string())
+        );
+        assert_eq!(
+            bidon_user.consent,
+            Some("{\"meta\":{\"consent\":true}}".to_string())
+        );
         assert_eq!(bidon_user.segments[0].id, Some("segment_id".to_string()));
         assert_eq!(bidon_user.segments[0].uid, Some("segment_uid".to_string()));
     }
@@ -535,7 +539,10 @@ mod tests {
         assert_eq!(bidon_app.framework_version, Some("1.0".to_string()));
         assert_eq!(bidon_app.plugin_version, Some("1.0".to_string()));
         assert_eq!(bidon_app.sdk_version, Some("1.0".to_string()));
-        assert_eq!(bidon_app.skadn, vec!["skadn1".to_string(), "skadn2".to_string()]);
+        assert_eq!(
+            bidon_app.skadn,
+            vec!["skadn1".to_string(), "skadn2".to_string()]
+        );
     }
 
     #[test]
@@ -553,9 +560,9 @@ mod tests {
         assert_eq!(regs.coppa, Some(true));
         assert_eq!(regs.gdpr, Some(true));
         let bidon_regs = regs.extension_set.extension_data(BIDON_REGS).unwrap();
-        assert_eq!( bidon_regs.us_privacy, Some("1YNN".to_string()) );
-        assert_eq!( bidon_regs.eu_privacy, Some("1".to_string()) );
-        assert_eq!( bidon_regs.iab, Some("{\"key\":\"value\"}".to_string()) );
+        assert_eq!(bidon_regs.us_privacy, Some("1YNN".to_string()));
+        assert_eq!(bidon_regs.eu_privacy, Some("1".to_string()));
+        assert_eq!(bidon_regs.iab, Some("{\"key\":\"value\"}".to_string()));
     }
 
     #[test]
@@ -569,11 +576,11 @@ mod tests {
             demands: HashMap::from([(
                 "demand_key".to_string(),
                 json!({
-                "token": "token_value",
-                "status": "status_value",
-                "token_finish_ts": 1234567890,
-                "token_start_ts": 1234567990
-            })
+                    "token": "token_value",
+                    "status": "status_value",
+                    "token_finish_ts": 1234567890,
+                    "token_start_ts": 1234567990
+                }),
             )]),
             banner: Some(models::BannerAdObject {
                 format: AdFormat::Banner,
@@ -592,14 +599,46 @@ mod tests {
         assert_eq!(bidon_ad_object.auction_id, Some("auction_id".to_string()));
         assert_eq!(bidon_ad_object.auction_key, Some("auction_key".to_string()));
         assert_eq!(bidon_ad_object.auction_configuration_id, Some(123));
-        assert_eq!(bidon_ad_object.auction_configuration_uid, Some("auction_configuration_uid".to_string()));
-        assert_eq!(bidon_ad_object.orientation, Some(Orientation::Portrait as i32));
-        assert_eq!(bidon_ad_object.demands.get("demand_key").unwrap().token, Some("token_value".to_string()));
-        assert_eq!(bidon_ad_object.demands.get("demand_key").unwrap().status, Some("status_value".to_string()));
-        assert_eq!(bidon_ad_object.demands.get("demand_key").unwrap().token_finish_ts, Some(1234567890));
-        assert_eq!(bidon_ad_object.demands.get("demand_key").unwrap().token_start_ts, Some(1234567990));
-        assert_eq!(bidon_ad_object.banner.as_ref().unwrap().format, Some(galaxy::v1::bidon::AdFormat::Banner as i32));
-        assert_eq!(bidon_ad_object.interstitial, Some("{\"interstitial\":\"value\"}".to_string()));
+        assert_eq!(
+            bidon_ad_object.auction_configuration_uid,
+            Some("auction_configuration_uid".to_string())
+        );
+        assert_eq!(
+            bidon_ad_object.orientation,
+            Some(Orientation::Portrait as i32)
+        );
+        assert_eq!(
+            bidon_ad_object.demands.get("demand_key").unwrap().token,
+            Some("token_value".to_string())
+        );
+        assert_eq!(
+            bidon_ad_object.demands.get("demand_key").unwrap().status,
+            Some("status_value".to_string())
+        );
+        assert_eq!(
+            bidon_ad_object
+                .demands
+                .get("demand_key")
+                .unwrap()
+                .token_finish_ts,
+            Some(1234567890)
+        );
+        assert_eq!(
+            bidon_ad_object
+                .demands
+                .get("demand_key")
+                .unwrap()
+                .token_start_ts,
+            Some(1234567990)
+        );
+        assert_eq!(
+            bidon_ad_object.banner.as_ref().unwrap().format,
+            Some(galaxy::v1::bidon::AdFormat::Banner as i32)
+        );
+        assert_eq!(
+            bidon_ad_object.interstitial,
+            Some("{\"interstitial\":\"value\"}".to_string())
+        );
         assert_eq!(bidon_ad_object.rewarded, Some("\"rewarded\"".to_string()));
     }
 }

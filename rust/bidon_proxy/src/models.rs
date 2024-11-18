@@ -148,7 +148,6 @@ impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderVal
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
-#[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct AdObject {
     /// ID of the auction configuration
     #[serde(rename = "auction_configuration_id")]
@@ -627,7 +626,6 @@ impl std::convert::TryFrom<hyper::header::HeaderValue>
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
-#[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct AdUnit {
     /// Type of bid associated with the ad unit
     #[serde(rename = "bid_type")]
@@ -897,7 +895,6 @@ impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderVal
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
-#[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct Adapter {
     #[serde(rename = "sdk_version")]
     pub sdk_version: String,
@@ -1100,7 +1097,6 @@ impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderVal
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
-#[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct App {
     /// The bundle identifier of the application, typically in reverse domain name notation (e.g., com.example.myapp).
     #[serde(rename = "bundle")]
@@ -1406,7 +1402,6 @@ impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderVal
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
-#[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct AuctionAdUnitResult {
     /// Label of the ad unit
     #[serde(rename = "ad_unit_label")]
@@ -1901,7 +1896,6 @@ impl std::convert::TryFrom<hyper::header::HeaderValue>
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
-#[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct AuctionRequest {
     #[serde(rename = "app")]
     pub app: models::App,
@@ -2277,7 +2271,6 @@ impl std::convert::TryFrom<hyper::header::HeaderValue>
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
-#[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct AuctionResponse {
     /// List of ad units returned in the auction
     #[serde(rename = "ad_units")]
@@ -2642,7 +2635,6 @@ impl std::convert::TryFrom<hyper::header::HeaderValue>
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
-#[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct AuctionResult {
     /// Timestamp when the auction finished
     #[serde(rename = "auction_finish_ts")]
@@ -3276,7 +3268,6 @@ impl std::convert::TryFrom<hyper::header::HeaderValue>
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
-#[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct BannerAdObject {
     #[serde(rename = "format")]
     pub format: models::AdFormat,
@@ -3465,7 +3456,6 @@ impl std::convert::TryFrom<hyper::header::HeaderValue>
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
-#[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct BaseRequest {
     #[serde(rename = "app")]
     pub app: models::App,
@@ -3776,7 +3766,6 @@ impl std::convert::TryFrom<hyper::header::HeaderValue>
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
-#[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct Bid();
 
 /// Converts the Bid value to the Query Parameters representation (style=form, explode=false)
@@ -4028,7 +4017,6 @@ impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderVal
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
-#[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct BiddingConfig {
     /// The timeout duration for the token in milliseconds.
     #[serde(rename = "token_timeout_ms")]
@@ -4217,7 +4205,6 @@ impl std::convert::TryFrom<hyper::header::HeaderValue>
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
-#[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct ClickRequest {
     #[serde(rename = "app")]
     pub app: models::App,
@@ -4560,7 +4547,6 @@ impl std::convert::TryFrom<hyper::header::HeaderValue>
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
-#[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct ConfigRequest {
     #[serde(rename = "app")]
     pub app: models::App,
@@ -4885,7 +4871,6 @@ impl std::convert::TryFrom<hyper::header::HeaderValue>
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
-#[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct ConfigResponse {
     #[serde(rename = "bidding")]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -5127,7 +5112,6 @@ impl std::convert::TryFrom<hyper::header::HeaderValue>
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
-#[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct Device {
     /// Carrier
     #[serde(rename = "carrier")]
@@ -5890,7 +5874,6 @@ impl std::convert::TryFrom<hyper::header::HeaderValue>
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
-#[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct Error {
     #[serde(rename = "error")]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -6070,7 +6053,6 @@ impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderVal
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
-#[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct ErrorError {
     #[serde(rename = "code")]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -6273,7 +6255,6 @@ impl std::convert::TryFrom<hyper::header::HeaderValue>
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
-#[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct ExternalWinner {
     /// Identifier for the demand source of the external winner
     #[serde(rename = "demand_id")]
@@ -6481,7 +6462,6 @@ impl std::convert::TryFrom<hyper::header::HeaderValue>
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
-#[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct Geo {
     /// Accuracy of the location data
     #[serde(rename = "accuracy")]
@@ -6909,7 +6889,6 @@ impl std::convert::TryFrom<hyper::header::HeaderValue>
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
-#[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct InitConfig {
     #[serde(rename = "adapters")]
     pub adapters: std::collections::HashMap<String, serde_json::Value>,
@@ -7117,7 +7096,6 @@ impl std::convert::TryFrom<hyper::header::HeaderValue>
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
-#[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct LossRequest {
     #[serde(rename = "app")]
     pub app: models::App,
@@ -7616,7 +7594,6 @@ impl std::convert::TryFrom<hyper::header::HeaderValue>
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
-#[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct Regulations {
     /// Indicates if COPPA regulations apply
     #[serde(rename = "coppa")]
@@ -7866,7 +7843,6 @@ impl std::convert::TryFrom<hyper::header::HeaderValue>
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
-#[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct RewardRequest {
     #[serde(rename = "app")]
     pub app: models::App,
@@ -8209,7 +8185,6 @@ impl std::convert::TryFrom<hyper::header::HeaderValue>
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
-#[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct Segment {
     /// An extension field for additional information about the segment.
     #[serde(rename = "ext")]
@@ -8423,7 +8398,6 @@ impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderVal
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
-#[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct Session {
     /// Battery level percentage
     #[serde(rename = "battery")]
@@ -8875,7 +8849,6 @@ impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderVal
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
-#[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct ShowRequest {
     #[serde(rename = "app")]
     pub app: models::App,
@@ -9222,7 +9195,6 @@ impl std::convert::TryFrom<hyper::header::HeaderValue>
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
-#[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct Stats();
 
 /// Converts the Stats value to the Query Parameters representation (style=form, explode=false)
@@ -9342,7 +9314,6 @@ impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderVal
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
-#[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct StatsRequest {
     #[serde(rename = "app")]
     pub app: models::App,
@@ -9667,7 +9638,6 @@ impl std::convert::TryFrom<hyper::header::HeaderValue>
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
-#[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct SuccessResponse {
     /// Indicates if the operation was successful
     #[serde(rename = "success")]
@@ -9859,7 +9829,6 @@ impl std::convert::TryFrom<hyper::header::HeaderValue>
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
-#[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct User {
     /// Consent settings or preferences
     #[serde(rename = "consent")]
@@ -10118,7 +10087,6 @@ impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderVal
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
-#[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct WinRequest {
     #[serde(rename = "app")]
     pub app: models::App,
