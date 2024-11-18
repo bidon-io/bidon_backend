@@ -1,20 +1,17 @@
 use crate::auction::Api as AuctionApi;
-use crate::com::iabtechlab::openrtb::v3::Openrtb;
 use crate::controllers::adapter;
 use crate::models::{AuctionRequest, GetAuctionAdTypeParameter};
 use axum::{
     extract::{Extension, Json, Path},
     http::StatusCode,
-    response::IntoResponse,
-    response::Response,
+    response::IntoResponse
+    ,
 };
-use hyper::Body;
 use prost::bytes::BytesMut;
 use prost::Message;
 use std::convert::TryFrom;
 use std::sync::Arc;
 use tokio::sync::Mutex;
-use tonic::IntoRequest;
 
 pub async fn get_auction_handler<A>(
     Path(ad_type): Path<String>,
