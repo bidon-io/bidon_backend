@@ -14,7 +14,6 @@ use crate::models;
 #[derive(
     Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, serde::Serialize, serde::Deserialize, Hash,
 )]
-#[cfg_attr(feature = "conversion", derive(frunk_enum_derive::LabelledGenericEnum))]
 pub enum AdFormat {
     #[serde(rename = "BANNER")]
     Banner,
@@ -496,7 +495,6 @@ impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderVal
 #[derive(
     Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, serde::Serialize, serde::Deserialize, Hash,
 )]
-#[cfg_attr(feature = "conversion", derive(frunk_enum_derive::LabelledGenericEnum))]
 pub enum AdObjectOrientation {
     #[serde(rename = "PORTRAIT")]
     Portrait,
@@ -1763,7 +1761,6 @@ impl std::convert::TryFrom<hyper::header::HeaderValue>
 #[derive(
     Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, serde::Serialize, serde::Deserialize, Hash,
 )]
-#[cfg_attr(feature = "conversion", derive(frunk_enum_derive::LabelledGenericEnum))]
 pub enum AuctionAdUnitResultStatus {
     #[serde(rename = "")]
     Empty,
@@ -3003,7 +3000,6 @@ impl std::convert::TryFrom<hyper::header::HeaderValue>
 #[derive(
     Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, serde::Serialize, serde::Deserialize, Hash,
 )]
-#[cfg_attr(feature = "conversion", derive(frunk_enum_derive::LabelledGenericEnum))]
 pub enum AuctionResultBidType {
     #[serde(rename = "RTB")]
     Rtb,
@@ -3144,7 +3140,6 @@ impl std::convert::TryFrom<hyper::header::HeaderValue>
 #[derive(
     Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, serde::Serialize, serde::Deserialize, Hash,
 )]
-#[cfg_attr(feature = "conversion", derive(frunk_enum_derive::LabelledGenericEnum))]
 pub enum AuctionResultStatus {
     #[serde(rename = "SUCCESS")]
     Success,
@@ -3907,7 +3902,6 @@ impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderVal
 #[derive(
     Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, serde::Serialize, serde::Deserialize, Hash,
 )]
-#[cfg_attr(feature = "conversion", derive(frunk_enum_derive::LabelledGenericEnum))]
 pub enum BidType {
     #[serde(rename = "RTB")]
     Rtb,
@@ -5602,7 +5596,6 @@ impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderVal
 #[derive(
     Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, serde::Serialize, serde::Deserialize, Hash,
 )]
-#[cfg_attr(feature = "conversion", derive(frunk_enum_derive::LabelledGenericEnum))]
 pub enum DeviceConnectionType {
     #[serde(rename = "ETHERNET")]
     Ethernet,
@@ -5767,7 +5760,6 @@ impl std::convert::TryFrom<hyper::header::HeaderValue>
 #[derive(
     Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, serde::Serialize, serde::Deserialize, Hash,
 )]
-#[cfg_attr(feature = "conversion", derive(frunk_enum_derive::LabelledGenericEnum))]
 pub enum DeviceType {
     #[serde(rename = "PHONE")]
     Phone,
@@ -6781,7 +6773,6 @@ impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderVal
 #[derive(
     Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, serde::Serialize, serde::Deserialize, Hash,
 )]
-#[cfg_attr(feature = "conversion", derive(frunk_enum_derive::LabelledGenericEnum))]
 pub enum GetAuctionAdTypeParameter {
     #[serde(rename = "banner")]
     Banner,
@@ -7497,7 +7488,6 @@ impl std::convert::TryFrom<hyper::header::HeaderValue>
 #[derive(
     Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, serde::Serialize, serde::Deserialize, Hash,
 )]
-#[cfg_attr(feature = "conversion", derive(frunk_enum_derive::LabelledGenericEnum))]
 pub enum PostRewardAdTypeParameter {
     #[serde(rename = "rewarded")]
     Rewarded,
