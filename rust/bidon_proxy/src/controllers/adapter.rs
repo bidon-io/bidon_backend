@@ -158,7 +158,7 @@ fn convert_geo(geo: &models::Geo) -> adcom::context::Geo {
         r#type: Some(adcom::enums::LocationType::Unknown as i32), // TODO
         lat: geo.lat.map(|t| t as f32),
         lon: geo.lon.map(|t| t as f32),
-        accur: geo.accuracy.map(|t| (t as i32)), // TODO check accuracy conversion.
+        accur: geo.accuracy.map(|t| (t as i32)), // TODO check accuracy conversion. We convert it from f64 to i32 here.
         country: geo.country.clone().into(),
         city: geo.city.clone().into(),
         zip: geo.zip.clone().into(),
@@ -341,27 +341,265 @@ fn convert_demand(
                 None => None,
             },
             token_finish_ts: match map.get("token_finish_ts") {
-                Some(v) => Some(
-                    v.as_i64()
-                        .ok_or(format!(
-                            "token_finish_ts is not a number. Key: {}, value: {}",
-                            key, value
-                        ))?
-                ),
+                Some(v) => Some(v.as_i64().ok_or(format!(
+                    "token_finish_ts is not a number. Key: {}, value: {}",
+                    key, value
+                ))?),
                 None => None,
             },
             token_start_ts: match map.get("token_start_ts") {
-                Some(v) => Some(
-                    v.as_i64()
-                        .ok_or(format!(
-                            "token_start_ts is not a number. Key: {}, value: {}",
-                            key, value
-                        ))?
-                ),
+                Some(v) => Some(v.as_i64().ok_or(format!(
+                    "token_start_ts is not a number. Key: {}, value: {}",
+                    key, value
+                ))?),
                 None => None,
             },
         };
         demands.insert(key.clone(), demand);
     }
     Ok(demands)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::models::{AdObject, App, AuctionRequest, Device, Session, User};
+    use serde_json::json;
+    use std::collections::HashMap;
+    use uuid::Uuid;
+
+    #[test]
+    fn test_convert_session() {
+        let id = Uuid::new_v4();
+
+        let api_session = Session {
+            id: id,
+            launch_ts: 1234567890,
+            launch_monotonic_ts: 1234567890,
+            start_ts: 1234567890,
+            start_monotonic_ts: 1234567890,
+            ts: 1234567890,
+            monotonic_ts: 1234567890,
+            memory_warnings_ts: vec![1234567890],
+            memory_warnings_monotonic_ts: vec![1234567890],
+            ram_used: 1024,
+            ram_size: 2048,
+            storage_free: Some(512),
+            storage_used: Some(256),
+            battery: 80.5,
+            cpu_usage: 10.6,
+        };
+
+        let bidon_session = convert_session(&api_session);
+
+        assert_eq!(bidon_session.id, Some(id.to_string()));
+        assert_eq!(bidon_session.launch_ts, Some(1234567890));
+        assert_eq!(bidon_session.ram_used, Some(1024));
+        assert_eq!(bidon_session.launch_monotonic_ts, Some(1234567890));
+        assert_eq!(bidon_session.start_ts, Some(1234567890));
+        assert_eq!(bidon_session.start_monotonic_ts, Some(1234567890));
+        assert_eq!(bidon_session.ts, Some(1234567890));
+        assert_eq!(bidon_session.monotonic_ts, Some(1234567890));
+        assert_eq!(bidon_session.memory_warnings_ts, vec![1234567890]);
+        assert_eq!(bidon_session.memory_warnings_monotonic_ts, vec![1234567890]);
+        assert_eq!(bidon_session.ram_size, Some(2048));
+        assert_eq!(bidon_session.storage_free, Some(512));
+        assert_eq!(bidon_session.storage_used, Some(256));
+        assert_eq!(bidon_session.battery, Some(80.5));
+        assert_eq!(bidon_session.cpu_usage, Some(10.6));
+    }
+
+    #[test]
+    fn test_convert_device() {
+        let api_device = Device {
+            r#type: Some(DeviceType::Phone),
+            ua: "Mozilla/5.0".to_string(),
+            make: "Apple".to_string(),
+            model: "iPhone".to_string(),
+            os: "iOS".to_string(),
+            osv: "14.4".to_string(),
+            hwv: "A14".to_string(),
+            h: 1920,
+            w: 1080,
+            ppi: 326,
+            pxratio: 2.0,
+            js: 1,
+            language: "en".to_string(),
+            carrier: Some("Verizon".to_string()),
+            mccmnc: Some("310012".to_string()),
+            connection_type: DeviceConnectionType::Wifi,
+            geo: None,
+        };
+
+        let geo = Some(Geo {
+            lat: Some(37.7749),
+            lon: Some(-122.4194),
+            accuracy: Some(10.6),
+            country: Some("US".to_string()),
+            city: Some("San Francisco".to_string()),
+            zip: Some("94103".to_string()),
+            utcoffset: Some(-8),
+            lastfix: Some(1234567890),
+        });
+
+        let device = convert_device(&api_device, &geo);
+
+        assert_eq!(device.r#type, Some(adcom::enums::DeviceType::Phone as i32));
+        assert_eq!(device.ua, Some("Mozilla/5.0".to_string()));
+        assert_eq!(device.make, Some("Apple".to_string()));
+        assert_eq!(device.model, Some("iPhone".to_string()));
+        assert_eq!(device.os, Some(adcom::enums::OperatingSystem::Ios as i32));
+        assert_eq!(device.osv, Some("14.4".to_string()));
+        assert_eq!(device.hwv, Some("A14".to_string()));
+        assert_eq!(device.h, Some(1920));
+        assert_eq!(device.w, Some(1080));
+        assert_eq!(device.ppi, Some(326));
+        assert_eq!(device.pxratio, Some(2.0));
+        assert_eq!(device.js, Some(true));
+        assert_eq!(device.lang, Some("en".to_string()));
+        assert_eq!(device.carrier, Some("Verizon".to_string()));
+        assert_eq!(device.mccmnc, Some("310012".to_string()));
+        assert_eq!(
+            device.contype,
+            Some(adcom::enums::ConnectionType::Wifi as i32)
+        );
+        assert_eq!(device.geo.as_ref().unwrap().lat, Some(37.7749));
+        assert_eq!(device.geo.as_ref().unwrap().lon, Some(-122.4194));
+        assert_eq!(device.geo.as_ref().unwrap().accur, Some(10));
+        assert_eq!(device.geo.as_ref().unwrap().country, Some("US".to_string()));
+        assert_eq!(
+            device.geo.as_ref().unwrap().city,
+            Some("San Francisco".to_string())
+        );
+        assert_eq!(device.geo.as_ref().unwrap().zip, Some("94103".to_string()));
+        assert_eq!(device.geo.as_ref().unwrap().utcoffset, Some(-8));
+        assert_eq!(device.geo.as_ref().unwrap().lastfix, Some(1234567890));
+    }
+
+    #[test]
+    fn test_convert_user() {
+        let idfa = Uuid::new_v4();
+        let idfv = Uuid::new_v4();
+        let idg = Uuid::new_v4();
+
+        let api_user = User {
+            idfa: Some(idfa),
+            tracking_authorization_status: "authorized".to_string(),
+            idfv: Some(idfv),
+            idg: Some(idg),
+            consent: Some(HashMap::from([(
+                "meta".to_string(),
+                json!({"consent": true}),
+            )])),
+            coppa: None,
+        };
+
+        let segment = Some(Segment {
+            id: Some("segment_id".to_string()),
+            uid: Some("segment_uid".to_string()),
+            ext: None,
+        });
+
+        let user = convert_user(&api_user, &segment).unwrap();
+
+        assert_eq!(user.id, Some(idg.to_string()));
+        let bidon_user = user.extension_set.extension_data(BIDON).unwrap();
+        assert_eq!(bidon_user.idfa, Some(idfa.to_string()));
+        assert_eq!(bidon_user.idfv, Some(idfv.to_string()));
+        assert_eq!(bidon_user.tracking_authorization_status, Some("authorized".to_string()));
+        assert_eq!(bidon_user.consent, Some("{\"meta\":{\"consent\":true}}".to_string()));
+        assert_eq!(bidon_user.segments[0].id, Some("segment_id".to_string()));
+        assert_eq!(bidon_user.segments[0].uid, Some("segment_uid".to_string()));
+    }
+
+    #[test]
+    fn test_convert_app() {
+        let api_app = App {
+            version: "1.0".to_string(),
+            bundle: "com.example.app".to_string(),
+            key: "app_key".to_string(),
+            framework_version: Some("1.0".to_string()),
+            plugin_version: Some("1.0".to_string()),
+            sdk_version: Some("1.0".to_string()),
+            skadn: Some(vec!["skadn1".to_string(), "skadn2".to_string()]),
+            framework: "".to_string(),
+        };
+
+        let app = convert_app(&api_app).unwrap();
+
+        assert_eq!(app.ver, Some("1.0".to_string()));
+        assert_eq!(app.bundle, Some("com.example.app".to_string()));
+        let bidon_app = app.extension_set.extension_data(BIDON_APP).unwrap();
+        assert_eq!(bidon_app.key, Some("app_key".to_string()));
+        assert_eq!(bidon_app.framework, Some("1.0".to_string()));
+        assert_eq!(bidon_app.framework_version, Some("1.0".to_string()));
+        assert_eq!(bidon_app.plugin_version, Some("1.0".to_string()));
+        assert_eq!(bidon_app.sdk_version, Some("1.0".to_string()));
+        assert_eq!(bidon_app.skadn, vec!["skadn1".to_string(), "skadn2".to_string()]);
+    }
+
+    #[test]
+    fn test_convert_regs() {
+        let api_regs = models::Regulations {
+            coppa: Some(true),
+            gdpr: Some(true),
+            us_privacy: Some("1YNN".to_string()),
+            eu_privacy: Some("1".to_string()),
+            iab: Some(HashMap::from([("key".to_string(), json!("value"))])),
+        };
+
+        let regs = convert_regs(&api_regs).unwrap();
+
+        assert_eq!(regs.coppa, Some(true));
+        assert_eq!(regs.gdpr, Some(true));
+        let bidon_regs = regs.extension_set.extension_data(BIDON_REGS).unwrap();
+        assert_eq!( bidon_regs.us_privacy, Some("1YNN".to_string()) );
+        assert_eq!( bidon_regs.eu_privacy, Some("1".to_string()) );
+        assert_eq!( bidon_regs.iab, Some("{\"key\":\"value\"}".to_string()) );
+    }
+
+    #[test]
+    fn test_convert_ad_object_to_item() {
+        let ad_object = models::AdObject {
+            auction_id: Some("auction_id".to_string()),
+            auction_key: Some("auction_key".to_string()),
+            auction_configuration_id: Some(123i64),
+            auction_configuration_uid: Some("auction_configuration_uid".to_string()),
+            orientation: Some(AdObjectOrientation::Portrait),
+            demands: HashMap::from([(
+                "demand_key".to_string(),
+                json!({
+                "token": "token_value",
+                "status": "status_value",
+                "token_finish_ts": 1234567890,
+                "token_start_ts": 1234567990
+            })
+            )]),
+            banner: Some(models::BannerAdObject {
+                format: AdFormat::Banner,
+            }),
+            interstitial: Some(json!({"interstitial": "value"})),
+            rewarded: Some(json!("rewarded".to_string())),
+            auction_pricefloor: 1.0,
+        };
+
+        let item = convert_ad_object_to_item(&ad_object).unwrap();
+
+        assert_eq!(item.id, Some("auction_id".to_string()));
+        assert_eq!(item.flr, Some(1.0));
+        assert_eq!(item.flrcur, Some("USD".to_string()));
+        let bidon_ad_object = item.extension_set.extension_data(BIDON_AD_OBJECT).unwrap();
+        assert_eq!(bidon_ad_object.auction_id, Some("auction_id".to_string()));
+        assert_eq!(bidon_ad_object.auction_key, Some("auction_key".to_string()));
+        assert_eq!(bidon_ad_object.auction_configuration_id, Some(123));
+        assert_eq!(bidon_ad_object.auction_configuration_uid, Some("auction_configuration_uid".to_string()));
+        assert_eq!(bidon_ad_object.orientation, Some(Orientation::Portrait as i32));
+        assert_eq!(bidon_ad_object.demands.get("demand_key").unwrap().token, Some("token_value".to_string()));
+        assert_eq!(bidon_ad_object.demands.get("demand_key").unwrap().status, Some("status_value".to_string()));
+        assert_eq!(bidon_ad_object.demands.get("demand_key").unwrap().token_finish_ts, Some(1234567890));
+        assert_eq!(bidon_ad_object.demands.get("demand_key").unwrap().token_start_ts, Some(1234567990));
+        assert_eq!(bidon_ad_object.banner.as_ref().unwrap().format, Some(galaxy::v1::bidon::AdFormat::Banner as i32));
+        assert_eq!(bidon_ad_object.interstitial, Some("{\"interstitial\":\"value\"}".to_string()));
+        assert_eq!(bidon_ad_object.rewarded, Some("\"rewarded\"".to_string()));
+    }
 }
