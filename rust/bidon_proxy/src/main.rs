@@ -25,7 +25,6 @@ async fn main() {
             XBidonVersionString::extract_header_middleware,
         ))
         .layer(axum::extract::Extension(auction));
-    // .layer(axum::extract::Extension(context) );
 
     // Start the server
     axum::Server::bind(&"127.0.0.1:3030".parse().unwrap())
