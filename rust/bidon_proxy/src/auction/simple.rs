@@ -2,8 +2,6 @@ use crate::auction::Api;
 use crate::auction::AuctionError;
 use crate::com::iabtechlab::openrtb::v3::Openrtb;
 use crate::galaxy::v1::bidding_service_client::BiddingServiceClient;
-use std::sync::Arc;
-use tokio::sync::Mutex;
 use tonic::transport::Channel;
 use tonic::Request;
 
