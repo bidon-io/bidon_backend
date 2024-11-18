@@ -28,12 +28,14 @@ where
         Err(_) => return (StatusCode::BAD_REQUEST, "Invalid ad_type").into_response(),
     };
 
-    let mut auction = auction.lock().await;
     let openrtb_request = match adapter::try_from(auction_request) {
         Ok(req) => req,
         Err(_) => return (StatusCode::BAD_REQUEST, "Invalid auction request").into_response(),
     };
-
+    // TODO use xbidon_version_string and ad_type to determine the auction type.
+   
+    // TODO use multiple auction to avoid lock contention.
+    let mut auction = auction.lock().await;
     match auction.bid(openrtb_request).await {
         Ok(response) => {
             let mut buf = BytesMut::with_capacity(128);
