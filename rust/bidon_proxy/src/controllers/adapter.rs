@@ -26,15 +26,9 @@ pub(crate) fn try_from(
         test: auction_request.test,
         tmax: auction_request.tmax.map(|t| t as u32),
         at: Some(AuctionType::FirstPrice as i32),
-        cur: vec![],  //TODO
-        seat: vec![], //TODO
-        wseat: None,  //TODO
         context: Some(serialize_context(&auction_request)?),
-        source: None, //TODO: Map 'source' if necessary
         item: vec![convert_ad_object_to_item(&auction_request.ad_object)?],
-        cdata: None,   //TODO
-        package: None, //TODO
-        extension_set: Default::default(),
+        ..Default::default()
     };
 
     let bidon_session = convert_session(&auction_request.session);
@@ -42,9 +36,9 @@ pub(crate) fn try_from(
 
     // Create Openrtb instance with the converted request
     Ok(openrtb::Openrtb {
-        ver: Some("3.0".to_string()),                // Set the version as needed
-        domainspec: Some("domain_spec".to_string()), // Set the domain spec as needed
-        domainver: Some("domain_version".to_string()), // Set the domain version as needed
+        ver: Some("3.0".to_string()),
+        domainspec: Some("domain_spec".to_string()),
+        domainver: Some("domain_version".to_string()),
         payload_oneof: Some(openrtb::openrtb::PayloadOneof::Request(request)),
     })
 }
@@ -53,13 +47,10 @@ fn serialize_context(auction_request: &AuctionRequest) -> Result<Vec<u8>, Box<dy
     // Create the AdCOM Context message
     let mut context = galaxy::v1::context::Context {
         distribution_channel: DistributionChannel {
-            id: None,      // TODO
-            name: None,    // TODO
-            r#pub: None,   // TODO
-            content: None, // TODO
             channel_oneof: Some(adcom::context::distribution_channel::ChannelOneof::App(
                 convert_app(&auction_request.app)?,
             )),
+            ..Default::default()
         }
             .into(),
         device: convert_device(&auction_request.device, &auction_request.geo).into(),
@@ -252,7 +243,6 @@ fn convert_regs(api_regs: &models::Regulations) -> Result<adcom::context::Regs, 
     Ok(regs)
 }
 
-// Placeholder for IAB conversion
 fn convert_iab(iab_json: &HashMap<String, Value>) -> Result<String, Box<dyn Error>> {
     serde_json::to_string(&iab_json).map_err(Into::into)
 }
