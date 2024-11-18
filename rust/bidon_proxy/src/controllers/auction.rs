@@ -12,11 +12,13 @@ use prost::Message;
 use std::convert::TryFrom;
 use std::sync::Arc;
 use tokio::sync::Mutex;
+use crate::bidon_version::XBidonVersionString;
 
 pub async fn get_auction_handler<A>(
     Path(ad_type): Path<String>,
     Json(auction_request): Json<AuctionRequest>,
     Extension(auction): Extension<Arc<Mutex<A>>>,
+    Extension(xbidon_version_string): Extension<XBidonVersionString>,
 ) -> impl IntoResponse
 where
     A: AuctionApi,
