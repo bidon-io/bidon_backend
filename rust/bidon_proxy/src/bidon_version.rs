@@ -38,7 +38,6 @@ impl XBidonVersionString {
             // Store the header value in the request extensions
             req.extensions_mut().insert(bidon_version);
             // Continue processing the request
-            // Run the next middleware or handler, and ensure the response body is boxed
             next.run(req).await
         } else {
             // Return an error response if the header is missing
