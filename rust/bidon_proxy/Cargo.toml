@@ -41,11 +41,13 @@ percent-encoding = { version = "2.1.0" }
 regex = { version = "1.3" }
 
 env_logger = { version = "0.7" }
-axum = { version = "0.5" }
-axum-core = "0.4.4"
+axum = { version = "0.7.7", features = ["macros"] }
+#axum-core = "0.4.5"
 axum-extra = { version = "0.9.4", features = ["protobuf"] }
 tokio = { version = "1.14", features = ["full"] }
-# native-tls = { version = "0.2" }
+
+[dev-dependencies]
+axum-test-helper = "0.4.0"
 
 [patch.crates-io]
 prost = { git = 'https://github.com/fabura/prosit' }
