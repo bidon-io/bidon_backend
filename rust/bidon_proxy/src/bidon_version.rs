@@ -1,15 +1,17 @@
-use axum::body::BoxBody;
+use axum::http::StatusCode;
+use axum::response::IntoResponse;
 use axum::{
-    body::{boxed, Body},
-    extract::Extension,
-    http::{HeaderValue, Request},
+    body::Body,
+    extract::{Extension, Request},
+    http::HeaderValue,
     middleware::{self, Next},
     response::Response,
+    // response::IntoResponse,
     Router,
 };
-use hyper::StatusCode;
 use std::fmt;
 use std::net::SocketAddr;
+use tonic::IntoRequest;
 // TODO use the following constants in your code
 
 /// Header - `x-bidon-version` - version of the bidon server.
@@ -22,13 +24,11 @@ pub const BIDON_VERSION: &str = "0.0.1"; // TODO: Update version
 pub struct XBidonVersionString(pub String);
 
 impl XBidonVersionString {
-    pub async fn extract_header_middleware<B>(
-        mut req: Request<B>,
-        next: Next<B>,
-    ) -> Response<BoxBody>
-    where
-        B: Send + 'static,
-    {
+    // #[axum::debug_middleware]
+    pub async fn extract_header_middleware(
+        mut req: axum::extract::Request,
+        next: Next,
+    ) -> Response {
         if let Some(bidon_version) = req
             .headers()
             .get(X_BIDON_VERSION_HEADER)
@@ -39,18 +39,14 @@ impl XBidonVersionString {
             req.extensions_mut().insert(bidon_version);
             // Continue processing the request
             // Run the next middleware or handler, and ensure the response body is boxed
-            let response = next.run(req).await;
-            response.map(boxed)
+            next.run(req).await
         } else {
             // Return an error response if the header is missing
-            let body = boxed(Body::from(format!(
-                "Missing '{}' header",
-                X_BIDON_VERSION_HEADER
-            )));
-            Response::builder()
-                .status(StatusCode::BAD_REQUEST)
-                .body(body)
-                .unwrap()
+            (
+                StatusCode::BAD_REQUEST,
+                format!("Missing {} header", X_BIDON_VERSION_HEADER),
+            )
+                .into_response()
         }
     }
 }

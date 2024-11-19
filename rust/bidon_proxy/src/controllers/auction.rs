@@ -1,27 +1,29 @@
 use crate::auction::Api as AuctionApi;
+use crate::auction::EchoAuction;
+use crate::bidon_version::XBidonVersionString;
 use crate::controllers::adapter;
 use crate::models::{AuctionRequest, GetAuctionAdTypeParameter};
+use axum::extract::State;
 use axum::{
     extract::{Extension, Json, Path},
     http::StatusCode,
-    response::IntoResponse
-    ,
+    response::IntoResponse,
 };
 use prost::bytes::BytesMut;
 use prost::Message;
 use std::convert::TryFrom;
 use std::sync::Arc;
 use tokio::sync::Mutex;
-use crate::bidon_version::XBidonVersionString;
 
+// #[axum::debug_handler]
 pub async fn get_auction_handler<A>(
     Path(ad_type): Path<String>,
+    Extension(bidon_version): Extension<XBidonVersionString>,
+    State(mut auction): State<Box<A>>,
     Json(auction_request): Json<AuctionRequest>,
-    Extension(auction): Extension<Arc<Mutex<A>>>,
-    Extension(xbidon_version_string): Extension<XBidonVersionString>,
 ) -> impl IntoResponse
 where
-    A: AuctionApi,
+    A: AuctionApi + Send + Sync,
 {
     let ad_type = match ad_type.parse::<GetAuctionAdTypeParameter>() {
         Ok(ad_type) => ad_type,
@@ -33,9 +35,9 @@ where
         Err(_) => return (StatusCode::BAD_REQUEST, "Invalid auction request").into_response(),
     };
     // TODO use xbidon_version_string and ad_type to determine the auction type.
-   
+
     // TODO use multiple auction to avoid lock contention.
-    let mut auction = auction.lock().await;
+    let mut auction = auction.as_mut();
     match auction.bid(openrtb_request).await {
         Ok(response) => {
             let mut buf = BytesMut::with_capacity(128);
