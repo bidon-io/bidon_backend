@@ -1,34 +1,25 @@
 use axum::routing::post;
 use axum::{middleware, Router};
+use galaxy::auction::EchoAuction;
 use galaxy::auction::SimpleAuction;
 use galaxy::bidon_version::XBidonVersionString;
 use galaxy::controllers;
+use hyper::Server;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
 #[tokio::main]
 async fn main() {
     // Create a ProxyServer instance
-    let auction = Arc::new(Mutex::new(
-        galaxy::auction::SimpleAuction::new("http://localhost:50051".to_string())
-            .await
-            .unwrap(),
-    ));
+    // let auction = Arc::new(Mutex::new(
+    //     galaxy::auction::SimpleAuction::new("http://localhost:50051".to_string())
+    //         .await
+    //         .unwrap(),
+    // ));
+    let auction = Box::new(EchoAuction::new());
 
-    // Define the routes
-    let app = Router::new()
-        .route(
-            "/v2/auction/:ad_type",
-            post(controllers::auction::get_auction_handler::<SimpleAuction>),
-        )
-        .route_layer(middleware::from_fn(
-            XBidonVersionString::extract_header_middleware,
-        ))
-        .layer(axum::extract::Extension(auction));
-
+    let app = galaxy::create_app(auction);
     // Start the server
-    axum::Server::bind(&"127.0.0.1:3030".parse().unwrap())
-        .serve(app.into_make_service())
-        .await
-        .unwrap();
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    axum::serve(listener, app).await.unwrap();
 }

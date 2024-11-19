@@ -1,6 +1,7 @@
 mod echo;
 mod simple;
 
+pub use echo::EchoAuction;
 pub use simple::SimpleAuction;
 use std::{error, fmt};
 
