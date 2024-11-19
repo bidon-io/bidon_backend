@@ -1,5 +1,4 @@
 use crate::auction::Api as AuctionApi;
-use crate::auction::EchoAuction;
 use crate::bidon_version::XBidonVersionString;
 use crate::controllers::adapter;
 use crate::models::{AuctionRequest, GetAuctionAdTypeParameter};
@@ -12,8 +11,6 @@ use axum::{
 use prost::bytes::BytesMut;
 use prost::Message;
 use std::convert::TryFrom;
-use std::sync::Arc;
-use tokio::sync::Mutex;
 
 // #[axum::debug_handler]
 pub async fn get_auction_handler<A>(
