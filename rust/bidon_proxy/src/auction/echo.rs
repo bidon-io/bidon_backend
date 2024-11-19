@@ -4,12 +4,13 @@ use crate::com::iabtechlab::openrtb::v3::Openrtb;
 
 // This is a simple echo auction that returns the same request as the response.
 // It's useful for testing the API.
+#[derive(Debug, Clone)]
 pub struct EchoAuction;
 
 #[allow(dead_code)]
 impl EchoAuction {
-    pub async fn new() -> Result<Self, Box<dyn std::error::Error>> {
-        Ok(EchoAuction)
+    pub fn new() -> Self {
+        EchoAuction
     }
 }
 
