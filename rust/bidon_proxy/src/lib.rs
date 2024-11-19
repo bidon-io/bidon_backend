@@ -10,21 +10,13 @@
 )]
 #![allow(clippy::derive_partial_eq_without_eq, clippy::disallowed_names)]
 
-use crate::auction::SimpleAuction;
-use crate::auction::{Api as AuctionApi, EchoAuction};
+use crate::auction::Api as AuctionApi;
 use crate::bidon_version::XBidonVersionString;
-use async_trait::async_trait;
-use axum::extract::State;
 use axum::routing::post;
-use axum::Extension;
 use axum::{middleware, Router};
 use futures::Stream;
 use serde::{Deserialize, Serialize};
 use std::error::Error;
-use std::sync::Arc;
-use std::task::{Context, Poll};
-use swagger::{ApiError, ContextWrapper};
-use tokio::sync::Mutex;
 
 pub const BASE_PATH: &str = "";
 pub const API_VERSION: &str = "1.0.0";
