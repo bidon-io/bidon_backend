@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/bidon-io/bidon-backend/internal/notification"
@@ -20,7 +21,6 @@ func (r AuctionResultV2Repo) CreateOrUpdate(ctx context.Context, imp *schema.Imp
 	}
 
 	if auctionResult != nil {
-		// This is can be potentially a problem place if we have 2 concurrent requests. Lock should be added
 		auctionResult.Bids = bids
 	} else {
 		auctionResult = &notification.AuctionResult{
@@ -56,10 +56,10 @@ func (r AuctionResultV2Repo) FinalizeResult(ctx context.Context, statsRequest *s
 func (r AuctionResultV2Repo) Find(ctx context.Context, auctionID string) (*notification.AuctionResult, error) {
 	auctionResult := &notification.AuctionResult{}
 	err := r.Redis.Get(ctx, auctionID).Scan(auctionResult)
-	switch err {
-	case redis.Nil: // Key does not exist
+	switch {
+	case errors.Is(err, redis.Nil): // Key does not exist
 		return nil, nil
-	case nil:
+	case err == nil:
 		return auctionResult, nil
 	default:
 		return nil, err

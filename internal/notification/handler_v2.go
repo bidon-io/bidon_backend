@@ -2,9 +2,11 @@ package notification
 
 import (
 	"context"
+	"errors"
 	"log"
 
 	"github.com/bidon-io/bidon-backend/internal/auction"
+	"github.com/bidon-io/bidon-backend/internal/bidding"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	"github.com/prebid/openrtb/v19/openrtb3"
 	"golang.org/x/exp/slices"
@@ -13,6 +15,67 @@ import (
 type HandlerV2 struct {
 	AuctionResultRepo AuctionResultRepo
 	Sender            Sender
+}
+
+// HandleBiddingRound is used to handle bidding round, it is called after all adapters have responded with bids or errors
+// Results saved to redis
+func (h HandlerV2) HandleBiddingRound(ctx context.Context, imp *schema.Imp, auctionResult bidding.AuctionResult, bundle, adType string) error {
+	var bids []Bid
+	bidFloor := imp.GetBidFloor()
+
+	for _, resp := range auctionResult.Bids {
+		if errors.Is(resp.Error, context.DeadlineExceeded) && resp.TimeoutURL != "" {
+			// Handle Timeout, currently only Meta supports this
+			p := Params{
+				Bundle:           bundle,
+				AdType:           adType,
+				AuctionID:        imp.AuctionID,
+				NotificationType: "TimeoutURL",
+				URL:              resp.TimeoutURL,
+				Bid:              Bid{RequestID: resp.RequestID, DemandID: resp.DemandID},
+				Reason:           openrtb3.LossExpired,
+				FirstPrice:       bidFloor,
+				SecondPrice:      bidFloor,
+			}
+
+			h.Sender.SendEvent(ctx, p)
+		} else if resp.IsBid() {
+			bid := Bid{
+				ID:        resp.Bid.ID,
+				ImpID:     resp.Bid.ImpID,
+				Price:     resp.Bid.Price,
+				DemandID:  resp.Bid.DemandID,
+				AdID:      resp.Bid.AdID,
+				SeatID:    resp.Bid.SeatID,
+				LURL:      resp.Bid.LURL,
+				NURL:      resp.Bid.NURL,
+				BURL:      resp.Bid.BURL,
+				RequestID: resp.RequestID,
+			}
+
+			if bid.Price >= bidFloor { // Valid Bid, use for further processing
+				bids = append(bids, bid)
+			} else { // Send Loss notification straight away
+				go h.Sender.SendEvent(ctx, Params{
+					Bundle:           bundle,
+					AdType:           adType,
+					AuctionID:        imp.AuctionID,
+					NotificationType: "LURL",
+					URL:              bid.LURL,
+					Bid:              bid,
+					Reason:           openrtb3.LossBelowAuctionFloor,
+					FirstPrice:       bidFloor,
+					SecondPrice:      bidFloor,
+				})
+			}
+		}
+	}
+
+	if len(bids) > 0 {
+		return h.AuctionResultRepo.CreateOrUpdate(ctx, imp, bids)
+	}
+
+	return nil
 }
 
 // HandleStats is used to handle v2/stats request

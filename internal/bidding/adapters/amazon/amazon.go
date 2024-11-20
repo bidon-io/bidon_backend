@@ -46,9 +46,10 @@ func (a *Adapter) FetchBids(br *schema.BiddingRequest) ([]*adapters.DemandRespon
 				DemandID: adapter.AmazonKey,
 				SlotUUID: slot.SlotUUID,
 				Bid: &adapters.BidDemandResponse{
-					ID:    ID.String(),
-					ImpID: impID.String(),
-					Price: pricePoint.Price,
+					DemandID: adapter.AmazonKey,
+					ID:       ID.String(),
+					ImpID:    impID.String(),
+					Price:    pricePoint.Price,
 				},
 			}
 			demandResponses = append(demandResponses, &demandResponse)
