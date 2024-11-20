@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"fmt"
+	"gorm.io/plugin/dbresolver"
 	"log"
 	"os"
 	"time"
@@ -41,7 +42,7 @@ func WithIgnoreRecordNotFoundError() Option {
 	}
 }
 
-func Open(databaseURL string, opts ...Option) (*DB, error) {
+func Open(databaseURL string, replicaURL string, opts ...Option) (*DB, error) {
 	var db DB
 
 	if len(opts) > 0 {
@@ -54,7 +55,34 @@ func Open(databaseURL string, opts ...Option) (*DB, error) {
 		Logger: newLogger(db.ignoreRecordNotFoundError),
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to open database: %v", err)
+		return nil, fmt.Errorf("failed to open primary database: %v", err)
+	}
+
+	// Configure DBResolver if a replica URL is provided
+	if replicaURL != "" {
+		err = gormDB.Use(dbresolver.Register(dbresolver.Config{
+			Sources:  []gorm.Dialector{postgres.Open(databaseURL)},
+			Replicas: []gorm.Dialector{postgres.Open(replicaURL)},
+			Policy:   dbresolver.RandomPolicy{},
+		}))
+		if err != nil {
+			return nil, fmt.Errorf("failed to configure DBResolver plugin: %v", err)
+		}
+	}
+
+	// Configure the primary connection pool
+	sqlDB, _ := gormDB.DB()
+	sqlDB.SetMaxOpenConns(20)
+	sqlDB.SetMaxIdleConns(5)
+	sqlDB.SetConnMaxLifetime(15 * time.Minute)
+
+	// Configure the replica connection pool (if replica URL is provided)
+	if replicaURL != "" {
+		replicaDB := gormDB.Clauses(dbresolver.Read)
+		replicaSQLDB, _ := replicaDB.DB()
+		replicaSQLDB.SetMaxOpenConns(350)
+		replicaSQLDB.SetMaxIdleConns(75)
+		replicaSQLDB.SetConnMaxLifetime(10 * time.Minute)
 	}
 
 	err = gormDB.Use(otelgorm.NewPlugin())
