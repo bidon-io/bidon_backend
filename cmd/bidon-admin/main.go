@@ -23,7 +23,7 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/admin/auth"
 	adminecho "github.com/bidon-io/bidon-backend/internal/admin/echo"
 	adminstore "github.com/bidon-io/bidon-backend/internal/admin/store"
-	"github.com/bidon-io/bidon-backend/internal/db"
+	dbpkg "github.com/bidon-io/bidon-backend/internal/db"
 	"github.com/bwmarrin/snowflake"
 	"github.com/getsentry/sentry-go"
 	_ "github.com/joho/godotenv/autoload"
@@ -55,13 +55,18 @@ func main() {
 	defer sentry.Flush(sentryConf.FlushTimeout)
 
 	dbURL := os.Getenv("DATABASE_URL")
+	replicaURL := os.Getenv("DATABASE_REPLICA_URL")
+
+	if dbURL == "" {
+		log.Fatalf("DATABASE_URL environment variable is required")
+	}
 	snowflakeNode, err := prepareSnowflakeNode()
 	if err != nil {
 		log.Fatalf("prepareSnowflakeNode(): %v", err)
 	}
-	db, err := db.Open(dbURL, db.WithSnowflakeNode(snowflakeNode))
+	db, err := dbpkg.Open(dbURL, replicaURL, dbpkg.WithSnowflakeNode(snowflakeNode))
 	if err != nil {
-		log.Fatalf("db.Open(%v): %v", dbURL, err)
+		log.Fatalf("dbpkg.Open(%v, %v): %v", dbURL, replicaURL, err)
 	}
 
 	e := config.Echo()
