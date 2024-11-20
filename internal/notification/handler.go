@@ -43,7 +43,7 @@ func (h Handler) HandleBiddingRound(ctx context.Context, imp *schema.Imp, auctio
 				AuctionID:        imp.AuctionID,
 				NotificationType: "TimeoutURL",
 				URL:              resp.TimeoutURL,
-				Bid:              Bid{RequestID: resp.RequestID},
+				Bid:              Bid{RequestID: resp.RequestID, DemandID: resp.DemandID},
 				Reason:           openrtb3.LossExpired,
 				FirstPrice:       bidFloor,
 				SecondPrice:      bidFloor,
@@ -82,7 +82,11 @@ func (h Handler) HandleBiddingRound(ctx context.Context, imp *schema.Imp, auctio
 		}
 	}
 
-	return h.AuctionResultRepo.CreateOrUpdate(ctx, imp, bids)
+	if len(bids) > 0 {
+		return h.AuctionResultRepo.CreateOrUpdate(ctx, imp, bids)
+	}
+
+	return nil
 }
 
 // HandleStats is used to handle /stats request

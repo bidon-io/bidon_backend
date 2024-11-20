@@ -2,10 +2,8 @@ package schema
 
 import (
 	"encoding/json"
-	"strings"
-	"sync"
-
 	"github.com/Masterminds/semver/v3"
+	"strings"
 )
 
 type BaseRequest struct {
@@ -20,8 +18,7 @@ type BaseRequest struct {
 	Segment     Segment      `json:"segment"`
 
 	// Cache for parsed Ext data
-	extData      map[string]any
-	parseExtOnce sync.Once
+	extData map[string]any
 }
 
 func (r *BaseRequest) GetApp() App {
@@ -51,6 +48,7 @@ func (r *BaseRequest) NormalizeValues() {
 	r.User.IDFV = strings.ToLower(r.User.IDFV)
 	r.User.IDG = strings.ToLower(r.User.IDG)
 	r.Session.ID = strings.ToLower(r.Session.ID)
+	r.parseExt()
 }
 
 func (r *BaseRequest) SetSDKVersion(version string) {
@@ -69,7 +67,6 @@ func (r *BaseRequest) SetAuctionConfigurationParams(id int64, uid string) {
 }
 
 func (r *BaseRequest) GetExtData() map[string]any {
-	r.parseExt()
 	if r.extData == nil {
 		return map[string]any{}
 	}
@@ -87,10 +84,8 @@ func (r *BaseRequest) GetMediationMode() string {
 }
 
 func (r *BaseRequest) parseExt() {
-	r.parseExtOnce.Do(func() {
-		if r.Ext == "" {
-			return
-		}
-		_ = json.Unmarshal([]byte(r.Ext), &r.extData)
-	})
+	if r.Ext == "" {
+		return
+	}
+	_ = json.Unmarshal([]byte(r.Ext), &r.extData)
 }

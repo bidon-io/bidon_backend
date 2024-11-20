@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -68,10 +69,10 @@ func (r AuctionResultRepo) FinalizeResult(ctx context.Context, statsRequest *sch
 func (r AuctionResultRepo) Find(ctx context.Context, auctionID string) (*notification.AuctionResult, error) {
 	auctionResult := &notification.AuctionResult{}
 	err := r.Redis.Get(ctx, auctionID).Scan(auctionResult)
-	switch err {
-	case redis.Nil: // Key does not exist
+	switch {
+	case errors.Is(err, redis.Nil): // Key does not exist
 		return nil, nil
-	case nil:
+	case err == nil:
 		return auctionResult, nil
 	default:
 		return nil, err
