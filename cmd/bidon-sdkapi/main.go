@@ -60,9 +60,15 @@ func main() {
 	defer sentry.Flush(sentryConf.FlushTimeout)
 
 	dbURL := os.Getenv("DATABASE_URL")
-	db, err := dbpkg.Open(dbURL)
+	replicaURL := os.Getenv("DATABASE_REPLICA_URL")
+
+	if dbURL == "" {
+		log.Fatalf("DATABASE_URL environment variable is required")
+	}
+
+	db, err := dbpkg.Open(dbURL, replicaURL)
 	if err != nil {
-		log.Fatalf("db.Open(%v): %v", dbURL, err)
+		log.Fatalf("dbpkg.Open(%v, %v): %v", dbURL, replicaURL, err)
 	}
 
 	redisURL := os.Getenv("REDIS_URL")
