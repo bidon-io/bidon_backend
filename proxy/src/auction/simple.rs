@@ -8,7 +8,7 @@ use tonic::Request;
 pub struct SimpleAuction {
     grpc_client: BiddingServiceClient<Channel>,
 }
-
+//todo rename to proxy/ grpc bidding service
 impl SimpleAuction {
     pub async fn new(grpc_url: String) -> Result<Self, Box<dyn std::error::Error>> {
         let grpc_client = BiddingServiceClient::connect(grpc_url).await?;

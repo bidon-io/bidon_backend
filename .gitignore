@@ -21,3 +21,8 @@
 .DS_Store
 
 public/system
+
+# Ignore files related to Rust.
+target
+Cargo.lock
+.cargo

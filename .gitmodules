@@ -1,3 +1,6 @@
 [submodule "rust/bidon_proxy/proto"]
 	path = rust/bidon_proxy/proto
 	url = git@github.com:bidmachine/galaxy-protos.git
+[submodule "proto"]
+	path = proto
+	url = git@github.com:bidmachine/galaxy-protos.git

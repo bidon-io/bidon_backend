@@ -7,12 +7,14 @@ use std::{error, fmt};
 
 use crate::com::iabtechlab::openrtb::v3::Openrtb;
 
+// todo rename to BiddingService?
 #[async_trait::async_trait]
 pub trait Api {
     /// Auction
     async fn bid(&mut self, auction_request: Openrtb) -> Result<Openrtb, AuctionError>;
 }
 
+// todo check errors in openrtb
 #[derive(Clone, Debug)]
 pub struct AuctionError(pub String);
 
