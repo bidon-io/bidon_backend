@@ -179,12 +179,12 @@ func (b *Builder) processAdapter(
 	defer wg.Done()
 
 	if adapterKey == adapter.AmazonKey {
-		adapter, err := amazon.Builder(params.AdapterConfigs)
+		bidder, err := amazon.Builder(params.AdapterConfigs)
 		if err != nil {
 			handleError(adapterKey, err)
 			return
 		}
-		demandResponses, err := adapter.FetchBids(&br)
+		demandResponses, err := bidder.FetchBids(&br)
 		if err != nil {
 			handleError(adapterKey, err)
 			return
@@ -195,6 +195,8 @@ func (b *Builder) processAdapter(
 
 			bids <- *demandResponse
 		}
+
+		return
 	}
 
 	// adapter build bid request from baseBidRequest

@@ -158,6 +158,10 @@ func main() {
 		AdaptersBuilder:     adapters_builder.BuildBiddingAdapters(biddingHttpClient),
 		NotificationHandler: notificationHandler,
 	}
+	biddingBuilderV2 := &bidding.Builder{
+		AdaptersBuilder:     adapters_builder.BuildBiddingAdapters(biddingHttpClient),
+		NotificationHandler: notificationHandlerV2,
+	}
 	biddingAdaptersCfgBuilder := &adapters_builder.AdaptersConfigBuilder{
 		ConfigurationFetcher: &adapterstore.ConfigurationFetcher{
 			DB:    db,
@@ -203,7 +207,7 @@ func main() {
 		ConfigFetcher:             configFetcher,
 		AppFetcher:                appFetcher,
 		SegmentMatcher:            segmentMatcher,
-		BiddingBuilder:            biddingBuilder,
+		BiddingBuilder:            biddingBuilderV2,
 		BiddingAdaptersCfgBuilder: biddingAdaptersCfgBuilder,
 		AdUnitsMatcher:            adUnitsMatcher,
 		NotificationHandler:       notificationHandlerV2,
