@@ -73,6 +73,10 @@ func main() {
 	}
 	rdb := redis.NewClient(opts)
 
+	cacheOpts := *opts
+	cacheOpts.DB = 1
+	rdbCache := redis.NewClient(&cacheOpts)
+
 	var maxMindDB *maxminddb.Reader
 
 	if os.Getenv("USE_GEOCODING") == "true" {
@@ -152,7 +156,7 @@ func main() {
 	}
 	adUnitsMatcher := &auctionstore.AdUnitsMatcher{
 		DB:    db,
-		Cache: config.NewMemoryCacheOf[[]auction.AdUnit](10 * time.Minute),
+		Cache: config.NewRedisCacheOf[[]auction.AdUnit](rdbCache, 10*time.Minute),
 	}
 	biddingBuilder := &bidding.Builder{
 		AdaptersBuilder:     adapters_builder.BuildBiddingAdapters(biddingHttpClient),
