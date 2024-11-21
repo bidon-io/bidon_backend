@@ -149,27 +149,27 @@ impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderVal
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
 pub struct AdObject {
-    /// ID of the auction configuration
+    /// ID of the bidding configuration
     #[serde(rename = "auction_configuration_id")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub auction_configuration_id: Option<i64>,
 
-    /// UID of the auction configuration
+    /// UID of the bidding configuration
     #[serde(rename = "auction_configuration_uid")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub auction_configuration_uid: Option<String>,
 
-    /// Unique identifier for the auction
+    /// Unique identifier for the bidding
     #[serde(rename = "auction_id")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub auction_id: Option<String>,
 
-    /// Generated key for the auction request
+    /// Generated key for the bidding request
     #[serde(rename = "auction_key")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub auction_key: Option<String>,
 
-    /// PriceFloor for the auction
+    /// PriceFloor for the bidding
     #[serde(rename = "auction_pricefloor")]
     #[validate(range(min = 0))]
     pub auction_pricefloor: f64,
@@ -2272,28 +2272,28 @@ impl std::convert::TryFrom<hyper::header::HeaderValue>
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
 pub struct AuctionResponse {
-    /// List of ad units returned in the auction
+    /// List of ad units returned in the bidding
     #[serde(rename = "ad_units")]
     pub ad_units: Vec<models::AdUnit>,
 
-    /// ID of the auction configuration
+    /// ID of the bidding configuration
     #[serde(rename = "auction_configuration_id")]
     pub auction_configuration_id: i64,
 
-    /// UID of the auction configuration
+    /// UID of the bidding configuration
     #[serde(rename = "auction_configuration_uid")]
     pub auction_configuration_uid: String,
 
-    /// Unique identifier for the auction
+    /// Unique identifier for the bidding
     #[serde(rename = "auction_id")]
     pub auction_id: String,
 
-    /// PriceFloor for the auction
+    /// PriceFloor for the bidding
     #[serde(rename = "auction_pricefloor")]
     #[validate(range(min = 0))]
     pub auction_pricefloor: f64,
 
-    /// Timeout for the auction in milliseconds
+    /// Timeout for the bidding in milliseconds
     #[serde(rename = "auction_timeout")]
     pub auction_timeout: i32,
 
@@ -2636,12 +2636,12 @@ impl std::convert::TryFrom<hyper::header::HeaderValue>
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
 pub struct AuctionResult {
-    /// Timestamp when the auction finished
+    /// Timestamp when the bidding finished
     #[serde(rename = "auction_finish_ts")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub auction_finish_ts: Option<i64>,
 
-    /// Timestamp when the auction started
+    /// Timestamp when the bidding started
     #[serde(rename = "auction_start_ts")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub auction_start_ts: Option<i64>,
@@ -3123,7 +3123,7 @@ impl std::convert::TryFrom<hyper::header::HeaderValue>
     }
 }
 
-/// Status of the auction
+/// Status of the bidding
 /// Enumeration of values.
 /// Since this enum's variants do not hold data, we can easily define them as `#[repr(C)]`
 /// which helps with FFI.

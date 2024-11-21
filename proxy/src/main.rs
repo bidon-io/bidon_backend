@@ -1,16 +1,16 @@
-use galaxy::auction::EchoAuction;
+use galaxy::bidding::EchoBiddingService;
 // use std::sync::Arc;
 // use tokio::sync::Mutex;
 
 #[tokio::main]
 async fn main() {
     // Create a ProxyServer instance
-    // let auction = Arc::new(Mutex::new(
-    //     galaxy::auction::SimpleAuction::new("http://localhost:50051".to_string())
+    // let bidding = Arc::new(Mutex::new(
+    //     galaxy::bidding::SimpleAuction::new("http://localhost:50051".to_string())
     //         .await
     //         .unwrap(),
     // ));
-    let auction = Box::new(EchoAuction::new());
+    let auction = Box::new(EchoBiddingService::new());
 
     let app = galaxy::create_app(auction);
     // Start the server
