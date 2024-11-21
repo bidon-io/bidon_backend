@@ -3,6 +3,7 @@ package store_test
 import (
 	"context"
 	"database/sql"
+	"github.com/go-redis/redismock/v9"
 	"testing"
 	"time"
 
@@ -24,6 +25,8 @@ import (
 func TestAdUnitsMatcher_Match(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
+
+	rdb, _ := redismock.NewClientMock()
 
 	apps := make([]db.App, 2)
 	for i := range apps {
@@ -170,7 +173,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 
 	matcher := store.AdUnitsMatcher{
 		DB:    tx,
-		Cache: config.NewMemoryCacheOf[[]auction.AdUnit](time.Minute),
+		Cache: config.NewRedisCacheOf[[]auction.AdUnit](rdb, time.Minute),
 	}
 	pf := 0.15
 
