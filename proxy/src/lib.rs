@@ -10,7 +10,7 @@
 )]
 #![allow(clippy::derive_partial_eq_without_eq, clippy::disallowed_names)]
 
-use crate::auction::Api as AuctionApi;
+use crate::bidding::Api as BiddingApi;
 use crate::bidon_version::XBidonVersionString;
 use axum::routing::post;
 use axum::{middleware, Router};
@@ -25,7 +25,7 @@ pub const API_VERSION: &str = "1.0.0";
 pub fn create_app<A>(auction: Box<A>) -> Router
 where
     A: Clone + 'static,
-    A: AuctionApi + Send + Sync,
+    A: BiddingApi + Send + Sync,
 {
     Router::new()
         .route(
@@ -80,7 +80,7 @@ pub mod models;
 
 pub(crate) mod header;
 
-pub mod auction;
+pub mod bidding;
 
 pub mod controllers {
     pub mod adapter;

@@ -1,8 +1,8 @@
 mod echo;
-mod simple;
+mod proxy;
 
-pub use echo::EchoAuction;
-pub use simple::SimpleAuction;
+pub use echo::EchoBiddingService;
+pub use proxy::ProxyBiddingService;
 use std::{error, fmt};
 
 use crate::com::iabtechlab::openrtb::v3::Openrtb;
@@ -11,27 +11,27 @@ use crate::com::iabtechlab::openrtb::v3::Openrtb;
 #[async_trait::async_trait]
 pub trait Api {
     /// Auction
-    async fn bid(&mut self, auction_request: Openrtb) -> Result<Openrtb, AuctionError>;
+    async fn bid(&mut self, bidding_request: Openrtb) -> Result<Openrtb, BiddingError>;
 }
 
 // todo check errors in openrtb
 #[derive(Clone, Debug)]
-pub struct AuctionError(pub String);
+pub struct BiddingError(pub String);
 
-impl AuctionError {
+impl BiddingError {
     pub fn new(msg: String) -> Self {
-        AuctionError(msg)
+        BiddingError(msg)
     }
 }
 
-impl fmt::Display for AuctionError {
+impl fmt::Display for BiddingError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let debug: &dyn fmt::Debug = self;
         debug.fmt(f)
     }
 }
 
-impl error::Error for AuctionError {
+impl error::Error for BiddingError {
     fn description(&self) -> &str {
         "Failed to produce a valid response."
     }

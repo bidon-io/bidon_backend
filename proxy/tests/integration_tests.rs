@@ -9,7 +9,7 @@ use common::auction_request::get_auction_request;
 #[tokio::test]
 async fn test_auction() {
     // Create the app
-    let app = create_app(Box::new(galaxy::auction::EchoAuction::new()));
+    let app = create_app(Box::new(galaxy::bidding::EchoBiddingService::new()));
 
     // Create a test client
     let client = TestClient::new(app);
