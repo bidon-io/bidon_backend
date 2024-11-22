@@ -4,17 +4,6 @@
   "external_win_notifications": false,
   "ad_units": [
     {
-      "demand_id": "applovin",
-      "uid": "123_applovin",
-      "pricefloor": 0.8,
-      "label": "Applovin",
-      "bid_type": "CPM",
-      "timeout": 10000,
-      "ext": {
-        "placement_id": "123"
-      }
-    },
-    {
       "bid_type": "RTB",
       "demand_id": "mobilefuse",
       "label": "mobilefuse",
