@@ -42,10 +42,6 @@ prost-derive = { git = 'https://github.com/fabura/prosit' }
 prost-types = { git = 'https://github.com/fabura/prosit' }
 prost-build = { git = 'https://github.com/fabura/prosit' }
 
-[build-dependencies]
-tonic-build = "0.11.0"
-prost-build = { git = 'https://github.com/fabura/prosit' }
-
 [build]
 rustflags = [
     "-W", "missing_docs", # detects missing documentation for public members
