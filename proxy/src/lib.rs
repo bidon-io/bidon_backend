@@ -11,12 +11,12 @@
 #![allow(clippy::derive_partial_eq_without_eq, clippy::disallowed_names)]
 
 use crate::bidding::Api as BiddingApi;
-use crate::bidon_version::XBidonVersionString;
 use axum::routing::post;
-use axum::{middleware, Router};
-use futures::Stream;
-use serde::{Deserialize, Serialize};
+use axum::{middleware, Router, async_trait};
+use axum::extract::{Json, Request, FromRequest, Extension, State};
+use axum::http::StatusCode;
 use std::error::Error;
+use axum::extract::rejection::JsonRejection;
 
 pub const BASE_PATH: &str = "";
 pub const API_VERSION: &str = "1.0.0";
@@ -33,58 +33,11 @@ where
             post(controllers::auction::get_auction_handler),
         )
         .with_state(auction)
-        .route_layer(middleware::from_fn(
-            XBidonVersionString::extract_header_middleware,
-        ))
 }
-
-pub mod com {
-    pub mod iabtechlab {
-        pub mod openrtb {
-            pub mod v3 {
-                tonic::include_proto!("com.iabtechlab.openrtb.v3");
-            }
-        }
-        pub mod adcom {
-            pub mod v1 {
-                pub mod context {
-                    tonic::include_proto!("com.iabtechlab.adcom.v1.context");
-                }
-                pub mod enums {
-                    tonic::include_proto!("com.iabtechlab.adcom.v1.enums");
-                }
-                pub mod media {
-                    tonic::include_proto!("com.iabtechlab.adcom.v1.media");
-                }
-                pub mod placement {
-                    tonic::include_proto!("com.iabtechlab.adcom.v1.placement");
-                }
-            }
-        }
-    }
-}
-
-pub mod galaxy {
-    pub mod v1 {
-        tonic::include_proto!("galaxy.v1");
-        pub mod bidon {
-            tonic::include_proto!("galaxy.v1.bidon");
-        }
-        pub mod context {
-            tonic::include_proto!("galaxy.v1.context");
-        }
-    }
-}
-
-pub mod models;
-
-pub(crate) mod header;
 
 pub mod bidding;
 
 pub mod controllers {
-    pub mod adapter;
     pub mod auction;
 }
 
-pub mod bidon_version;
