@@ -87,11 +87,18 @@ func (h *ConfigHandler) Handle(c echo.Context) error {
 	}
 
 	isIOS := req.raw.Device.OS == "iOS" // For iOS devices we should skip Amazon adapter
+	isCOPPA := false
+	if req.raw.Regulations != nil {
+		isCOPPA = req.raw.Regulations.COPPA
+	}
 	ignoreAllExceptBM := req.app.ID == 735354 && (req.raw.App.Version == "2.6.64" || req.raw.App.Version == "2.6.59")
 
 	adapters := make(map[adapter.Key]sdkapi.AdapterInitConfig, len(adapterInitConfigs))
 	for _, cfg := range adapterInitConfigs {
 		if isIOS && cfg.Key() == adapter.AmazonKey {
+			continue
+		}
+		if isCOPPA && adapter.IsDisabledForCOPPA(cfg.Key()) {
 			continue
 		}
 		// TODO: Hack for Merge Block Android, versions 2.6.64 and 2.6.59
