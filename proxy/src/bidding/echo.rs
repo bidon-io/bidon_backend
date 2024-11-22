@@ -1,6 +1,6 @@
 use crate::bidding::Api;
 use crate::bidding::BiddingError;
-use crate::com::iabtechlab::openrtb::v3::Openrtb;
+use galaxy_bidon::com::iabtechlab::openrtb::v3::Openrtb;
 
 // This is a simple echo bidding that returns the same request as the response.
 // It's useful for testing the API.

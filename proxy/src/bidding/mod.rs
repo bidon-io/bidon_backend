@@ -5,7 +5,7 @@ pub use echo::EchoBiddingService;
 pub use proxy::ProxyBiddingService;
 use std::{error, fmt};
 
-use crate::com::iabtechlab::openrtb::v3::Openrtb;
+use galaxy_bidon::com::iabtechlab::openrtb::v3::Openrtb;
 
 // todo rename to BiddingService?
 #[async_trait::async_trait]
