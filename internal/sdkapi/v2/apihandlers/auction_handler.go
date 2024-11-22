@@ -133,8 +133,18 @@ func (h *AuctionHandler) buildResponse(
 		NoBids:                   make([]auction.AdUnit, 0),
 	}
 
+	isCOPPA := false
+	if req.raw.Regulations != nil {
+		isCOPPA = req.raw.Regulations.COPPA
+	}
+
 	// Store CPM AdUnits from AuctionConfiguration
-	response.AdUnits = append(response.AdUnits, *auctionResult.CPMAdUnits...)
+	for _, adUnit := range *auctionResult.CPMAdUnits {
+		if isCOPPA && adapter.IsDisabledForCOPPA(adapter.Key(adUnit.DemandID)) {
+			continue
+		}
+		response.AdUnits = append(response.AdUnits, adUnit)
+	}
 
 	// Store Bids AS RTB AdUnits from BiddingAuctionResult
 	for _, bidResponse := range auctionResult.BiddingAuctionResult.Bids {
