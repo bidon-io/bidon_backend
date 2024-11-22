@@ -1,15 +1,14 @@
 use crate::bidding::Api as BiddingAPI;
-use galaxy_bidon::models::{AuctionRequest, GetAuctionAdTypeParameter};
 use axum::extract::State;
 use axum::{
-    extract::{Extension, Json, Path},
+    extract::Path,
     http::StatusCode,
     response::IntoResponse,
 };
+use galaxy_bidon::extractor::BidonOpenRTBExtractor;
+use galaxy_bidon::models::GetAuctionAdTypeParameter;
 use prost::bytes::BytesMut;
 use prost::Message;
-use std::convert::TryFrom;
-use galaxy_bidon::extractor::BidonOpenRTBExtractor;
 
 // #[axum::debug_handler]
 pub async fn get_auction_handler<A>(
@@ -20,12 +19,11 @@ pub async fn get_auction_handler<A>(
 where
     A: BiddingAPI + Send + Sync,
 {
-    let ad_type = match ad_type.parse::<GetAuctionAdTypeParameter>() {
+    // TODO use ad_type to determine the bidding type.
+    let _ad_type = match ad_type.parse::<GetAuctionAdTypeParameter>() {
         Ok(ad_type) => ad_type,
         Err(_) => return (StatusCode::BAD_REQUEST, "Invalid ad_type").into_response(),
     };
-
-    // TODO use xbidon_version_string and ad_type to determine the bidding type.
 
     // TODO use multiple bidding to avoid lock contention.
     match auction.bid(openrtb_request).await {
