@@ -44,7 +44,7 @@ func testHelperAuctionV2Handler(t *testing.T) *apihandlers.AuctionHandler {
 		Timeout:   30000,
 	}
 	pf := 0.1
-	gamPf := 0.8
+	applovinPf := 0.8
 	adUnits := []auction.AdUnit{
 		{
 			DemandID:   "amazon",
@@ -90,10 +90,10 @@ func testHelperAuctionV2Handler(t *testing.T) *apihandlers.AuctionHandler {
 			},
 		},
 		{
-			DemandID:   "gam",
-			Label:      "gam",
-			PriceFloor: &gamPf,
-			UID:        "123_gam",
+			DemandID:   "applovin",
+			Label:      "Applovin",
+			PriceFloor: &applovinPf,
+			UID:        "123_applovin",
 			BidType:    schema.CPMBidType,
 			Timeout:    store.AdUnitTimeout,
 			Extra: map[string]any{
@@ -235,6 +235,14 @@ func TestAuctionV2Handler_Handle(t *testing.T) {
 			sdkVersion:           "0.5",
 			requestPath:          "testdata/auction/valid_request.json",
 			expectedResponsePath: "testdata/auction/valid_response.json",
+			expectedStatusCode:   http.StatusOK,
+			wantErr:              false,
+		},
+		{
+			name:                 "OK",
+			sdkVersion:           "0.5",
+			requestPath:          "testdata/auction/valid_request_coppa.json",
+			expectedResponsePath: "testdata/auction/valid_response_coppa.json",
 			expectedStatusCode:   http.StatusOK,
 			wantErr:              false,
 		},

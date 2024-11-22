@@ -71,7 +71,7 @@
   },
   "ext": "{}",
   "regs": {
-    "coppa": false,
+    "coppa": true,
     "gdpr": false,
     "iab": {}
   },

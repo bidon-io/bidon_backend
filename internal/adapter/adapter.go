@@ -69,3 +69,7 @@ func GetCommonAdapters(adapters1 []Key, adapters2 []Key) []Key {
 
 	return result
 }
+
+func IsDisabledForCOPPA(adapter Key) bool {
+	return adapter == ApplovinKey
+}
