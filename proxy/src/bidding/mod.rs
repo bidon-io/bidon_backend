@@ -7,10 +7,9 @@ use std::{error, fmt};
 
 use galaxy_bidon::com::iabtechlab::openrtb::v3::Openrtb;
 
-// todo rename to BiddingService?
 #[async_trait::async_trait]
 pub trait Api {
-    /// Auction
+    /// Bidding service
     async fn bid(&mut self, bidding_request: Openrtb) -> Result<Openrtb, BiddingError>;
 }
 
