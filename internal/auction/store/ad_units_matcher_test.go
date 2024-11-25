@@ -173,7 +173,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 
 	matcher := store.AdUnitsMatcher{
 		DB:    tx,
-		Cache: config.NewRedisCacheOf[[]auction.AdUnit](rdb, time.Minute),
+		Cache: config.NewRedisCacheOf[[]auction.AdUnit](rdb, time.Minute, "ad units"),
 	}
 	pf := 0.15
 
