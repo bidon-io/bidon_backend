@@ -11,6 +11,9 @@ import (
 	"syscall"
 	"time"
 
+	"go.opentelemetry.io/otel/exporters/prometheus"
+	"go.opentelemetry.io/otel/sdk/metric"
+
 	"github.com/bidon-io/bidon-backend/config"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	adapterstore "github.com/bidon-io/bidon-backend/internal/adapter/store"
@@ -45,6 +48,12 @@ import (
 
 func main() {
 	config.ConfigureOTel()
+	exporter, err := prometheus.New()
+	if err != nil {
+		log.Fatalf("prometheus.New(): %v", err)
+	}
+	provider := metric.NewMeterProvider(metric.WithReader(exporter))
+	meter := provider.Meter("bidon-sdkapi")
 
 	logger, err := config.NewLogger()
 	if err != nil {
@@ -154,9 +163,11 @@ func main() {
 			EventLogger: eventLogger,
 		},
 	}
+	adUnitsCache := config.NewRedisCacheOf[[]auction.AdUnit](rdbCache, 10*time.Minute, "ad_units")
+	adUnitsCache.Monitor(meter)
 	adUnitsMatcher := &auctionstore.AdUnitsMatcher{
 		DB:    db,
-		Cache: config.NewRedisCacheOf[[]auction.AdUnit](rdbCache, 10*time.Minute),
+		Cache: adUnitsCache,
 	}
 	biddingBuilder := &bidding.Builder{
 		AdaptersBuilder:     adapters_builder.BuildBiddingAdapters(biddingHttpClient),

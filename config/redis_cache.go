@@ -2,6 +2,8 @@ package config
 
 import (
 	"context"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/metric"
 	"time"
 
 	"github.com/go-redis/cache/v9"
@@ -9,18 +11,21 @@ import (
 )
 
 type RedisCache[T any] struct {
+	Label string
 	cache *cache.Cache
 	ttl   time.Duration
 }
 
 // NewRedisCacheOf initializes the RedisCache with a TTL, and local TinyLFU cache.
-func NewRedisCacheOf[T any](client *redis.Client, ttl time.Duration) *RedisCache[T] {
+func NewRedisCacheOf[T any](client *redis.Client, ttl time.Duration, label string) *RedisCache[T] {
 	localCache := cache.New(&cache.Options{
-		Redis:      client,
-		LocalCache: cache.NewTinyLFU(1000, ttl),
+		StatsEnabled: true,
+		Redis:        client,
+		LocalCache:   cache.NewTinyLFU(1000, ttl),
 	})
 
 	return &RedisCache[T]{
+		Label: label,
 		cache: localCache,
 		ttl:   ttl,
 	}
@@ -46,4 +51,27 @@ func (c *RedisCache[T]) Get(ctx context.Context, key []byte, load func(ctx conte
 	}
 
 	return result, nil
+}
+
+// Monitor sets up OpenTelemetry monitoring for the RedisCache.
+func (c *RedisCache[T]) Monitor(meter metric.Meter) error {
+	counter, err := meter.Int64ObservableCounter("cache.stats", metric.WithDescription("Cache stats"))
+	if err != nil {
+		return err
+	}
+
+	_, err = meter.RegisterCallback(
+		func(ctx context.Context, observer metric.Observer) error {
+			stats := c.cache.Stats()
+			cacheLabelAttr := attribute.String("label", c.Label)
+
+			observer.ObserveInt64(counter, int64(stats.Hits), metric.WithAttributes(cacheLabelAttr, attribute.String("type", "hit")))
+			observer.ObserveInt64(counter, int64(stats.Misses), metric.WithAttributes(cacheLabelAttr, attribute.String("type", "hit")))
+
+			return nil
+		},
+		counter,
+	)
+
+	return err
 }
