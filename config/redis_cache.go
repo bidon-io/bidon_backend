@@ -66,7 +66,7 @@ func (c *RedisCache[T]) Monitor(meter metric.Meter) error {
 			cacheLabelAttr := attribute.String("label", c.Label)
 
 			observer.ObserveInt64(counter, int64(stats.Hits), metric.WithAttributes(cacheLabelAttr, attribute.String("type", "hit")))
-			observer.ObserveInt64(counter, int64(stats.Misses), metric.WithAttributes(cacheLabelAttr, attribute.String("type", "hit")))
+			observer.ObserveInt64(counter, int64(stats.Misses), metric.WithAttributes(cacheLabelAttr, attribute.String("type", "miss")))
 
 			return nil
 		},
