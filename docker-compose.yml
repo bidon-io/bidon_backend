@@ -12,7 +12,6 @@ services:
     environment:
       ENVIRONMENT: development
       DATABASE_URL: postgres://bidon:pass@postgres:5432/bidon
-      DATABASE_REPLICA_URL: postgres://bidon:pass@postgres:5432/bidon
 
   migrate-test:
     image: golang:1.23-alpine
@@ -27,7 +26,6 @@ services:
     environment:
       ENVIRONMENT: test
       DATABASE_URL: postgres://bidon:pass@postgres-test:5432/bidon_test
-      DATABASE_REPLICA_URL: postgres://bidon:pass@postgres-test:5432/bidon_test
 
   go-test:
     profiles: ['test']
@@ -44,7 +42,6 @@ services:
         condition: service_completed_successfully
     environment:
       DATABASE_URL: postgres://bidon:pass@postgres-test:5432/bidon_test
-      DATABASE_REPLICA_URL: postgres://bidon:pass@postgres-test:5432/bidon_test
 
   go-pre-commit:
     build:
