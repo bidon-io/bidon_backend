@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/go-redis/redismock/v9"
 	"strconv"
 	"testing"
 	"time"
@@ -308,6 +309,8 @@ func TestConfigFetcher_FetchByUIDCached(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
+	rdb, _ := redismock.NewClientMock()
+
 	apps := make([]db.App, 3)
 	for i := range apps {
 		apps[i] = dbtest.CreateApp(t, tx)
@@ -386,8 +389,7 @@ func TestConfigFetcher_FetchByUIDCached(t *testing.T) {
 		},
 	}
 
-	configCache := config.NewMemoryCacheOf[*auction.Config](1 * time.Hour)
-
+	configCache := config.NewRedisCacheOf[*auction.Config](rdb, 10*time.Minute, "auction_configs")
 	matcher := &store.ConfigFetcher{DB: tx, Cache: configCache}
 	for _, tC := range testCases {
 		got := matcher.FetchByUIDCached(context.Background(), tC.args.appID, tC.args.id, tC.args.uid)

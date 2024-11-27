@@ -127,18 +127,24 @@ func main() {
 		MaxMindDB: maxMindDB,
 		Cache:     config.NewMemoryCacheOf[*dbpkg.Country](cache.UnlimitedTTL), // We don't update countries
 	}
+	auctionCache := config.NewRedisCacheOf[*auction.Config](rdbCache, 10*time.Minute, "auction_configs")
+	auctionCache.Monitor(meter)
 	configFetcher := &auctionstore.ConfigFetcher{
 		DB:    db,
-		Cache: config.NewMemoryCacheOf[*auction.Config](10 * time.Minute),
+		Cache: auctionCache,
 	}
+	appCache := config.NewRedisCacheOf[sdkapi.App](rdbCache, 10*time.Minute, "apps")
+	appCache.Monitor(meter)
 	appFetcher := &sdkapistore.AppFetcher{
 		DB:    db,
-		Cache: config.NewMemoryCacheOf[sdkapi.App](10 * time.Minute),
+		Cache: appCache,
 	}
+	segmentCache := config.NewRedisCacheOf[[]segment.Segment](rdbCache, 10*time.Minute, "segments")
+	segmentCache.Monitor(meter)
 	segmentMatcher := &segment.Matcher{
 		Fetcher: &segmentstore.SegmentFetcher{
 			DB:    db,
-			Cache: config.NewMemoryCacheOf[[]segment.Segment](10 * time.Minute),
+			Cache: segmentCache,
 		},
 	}
 	biddingHttpClient := &http.Client{
@@ -177,20 +183,26 @@ func main() {
 		AdaptersBuilder:     adapters_builder.BuildBiddingAdapters(biddingHttpClient),
 		NotificationHandler: notificationHandlerV2,
 	}
+	biddingAdaptersCfgCache := config.NewRedisCacheOf[adapter.RawConfigsMap](rdbCache, 10*time.Minute, "bidding_adapters_cfg")
+	biddingAdaptersCfgCache.Monitor(meter)
 	biddingAdaptersCfgBuilder := &adapters_builder.AdaptersConfigBuilder{
 		ConfigurationFetcher: &adapterstore.ConfigurationFetcher{
 			DB:    db,
-			Cache: config.NewMemoryCacheOf[adapter.RawConfigsMap](10 * time.Minute),
+			Cache: biddingAdaptersCfgCache,
 		},
 	}
+	lineItemsCache := config.NewRedisCacheOf[[]auction.LineItem](rdbCache, 10*time.Minute, "line_items")
+	lineItemsCache.Monitor(meter)
 	lineItemsMatcher := &auctionstore.LineItemsMatcher{
 		DB:    db,
-		Cache: config.NewMemoryCacheOf[[]auction.LineItem](10 * time.Minute),
+		Cache: lineItemsCache,
 	}
 	adapterInitConfigsFetcher := &sdkapistore.AdapterInitConfigsFetcher{DB: db}
+	configsCache := config.NewRedisCacheOf[adapter.RawConfigsMap](rdbCache, 10*time.Minute, "configs")
+	configsCache.Monitor(meter)
 	configurationFetcher := &adapterstore.ConfigurationFetcher{
 		DB:    db,
-		Cache: config.NewMemoryCacheOf[adapter.RawConfigsMap](10 * time.Minute),
+		Cache: configsCache,
 	}
 
 	e := config.Echo()
