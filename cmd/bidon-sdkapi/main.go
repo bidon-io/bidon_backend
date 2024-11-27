@@ -68,8 +68,14 @@ func main() {
 	}
 	defer sentry.Flush(sentryConf.FlushTimeout)
 
-	dbURL := os.Getenv("DATABASE_URL")
-	db, err := dbpkg.Open(dbURL)
+	dbURL := os.Getenv("DATABASE_REPLICA_URL")
+	dbConfig := dbpkg.Config{
+		MaxOpenConns:    50,
+		MaxIdleConns:    13,
+		ConnMaxLifetime: 15 * time.Minute,
+		ReadOnly:        true,
+	}
+	db, err := dbpkg.Open(dbURL, dbpkg.WithConfig(dbConfig))
 	if err != nil {
 		log.Fatalf("db.Open(%v): %v", dbURL, err)
 	}
