@@ -23,7 +23,7 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/admin/auth"
 	adminecho "github.com/bidon-io/bidon-backend/internal/admin/echo"
 	adminstore "github.com/bidon-io/bidon-backend/internal/admin/store"
-	"github.com/bidon-io/bidon-backend/internal/db"
+	dbpkg "github.com/bidon-io/bidon-backend/internal/db"
 	"github.com/bwmarrin/snowflake"
 	"github.com/getsentry/sentry-go"
 	_ "github.com/joho/godotenv/autoload"
@@ -59,9 +59,15 @@ func main() {
 	if err != nil {
 		log.Fatalf("prepareSnowflakeNode(): %v", err)
 	}
-	db, err := db.Open(dbURL, db.WithSnowflakeNode(snowflakeNode))
+	dbConfig := dbpkg.Config{
+		MaxOpenConns:    12,
+		MaxIdleConns:    3,
+		ConnMaxLifetime: 15 * time.Minute,
+		ReadOnly:        false,
+	}
+	db, err := dbpkg.Open(dbURL, dbpkg.WithConfig(dbConfig), dbpkg.WithSnowflakeNode(snowflakeNode))
 	if err != nil {
-		log.Fatalf("db.Open(%v): %v", dbURL, err)
+		log.Fatalf("dbpkg.Open(%v): %v", dbURL, err)
 	}
 
 	e := config.Echo()
