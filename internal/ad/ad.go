@@ -25,3 +25,11 @@ func (f Format) IsBannerFormat() bool {
 		f == MRECFormat ||
 		f == AdaptiveFormat
 }
+
+type OS string
+
+const (
+	UnknownOS OS = ""
+	IOSOS     OS = "iOS"
+	AndroidOS OS = "android"
+)
