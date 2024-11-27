@@ -2,23 +2,24 @@ package store
 
 import (
 	"context"
+	"crypto/sha256"
 	"encoding/json"
 	"errors"
 	"fmt"
-
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/db"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
 	"gorm.io/gorm"
+	"sort"
 )
 
 type AppFetcher struct {
 	DB    *db.DB
-	Cache cache
+	Cache cache[sdkapi.App]
 }
 
-type cache interface {
-	Get(context.Context, []byte, func(ctx context.Context) (sdkapi.App, error)) (sdkapi.App, error)
+type cache[T any] interface {
+	Get(context.Context, []byte, func(ctx context.Context) (T, error)) (T, error)
 }
 
 func (f *AppFetcher) FetchCached(ctx context.Context, appKey, appBundle string) (app sdkapi.App, err error) {
@@ -50,22 +51,15 @@ func (f *AppFetcher) Fetch(ctx context.Context, appKey, appBundle string) (app s
 }
 
 type AdapterInitConfigsFetcher struct {
-	DB *db.DB
+	DB               *db.DB
+	ProfilesCache    cache[[]db.AppDemandProfile]
+	AmazonSlotsCache cache[[]sdkapi.AmazonSlot]
 }
 
 func (f *AdapterInitConfigsFetcher) FetchAdapterInitConfigs(ctx context.Context, appID int64, adapterKeys []adapter.Key, setAmazonSlots bool, setOrder bool) ([]sdkapi.AdapterInitConfig, error) {
-	var dbProfiles []db.AppDemandProfile
-
-	err := f.DB.
-		WithContext(ctx).
-		Select("app_demand_profiles.id, app_demand_profiles.data").
-		Where("app_id", appID).
-		InnerJoins("Account", f.DB.Select("id", "extra")).
-		InnerJoins("Account.DemandSource", f.DB.Select("api_key").Where(map[string]any{"api_key": adapterKeys})).
-		Find(&dbProfiles).
-		Error
+	dbProfiles, err := f.fetchAppDemandProfilesCached(ctx, appID, adapterKeys)
 	if err != nil {
-		return nil, fmt.Errorf("find app demand profiles: %v", err)
+		return nil, fmt.Errorf("fetch profiles from cache or DB: %w", err)
 	}
 
 	configs := make([]sdkapi.AdapterInitConfig, 0, len(dbProfiles))
@@ -95,7 +89,7 @@ func (f *AdapterInitConfigsFetcher) FetchAdapterInitConfigs(ctx context.Context,
 		if setAmazonSlots {
 			amazonConfig, ok := config.(*sdkapi.AmazonInitConfig)
 			if ok {
-				amazonConfig.Slots, err = f.fetchAmazonSlots(ctx, appID)
+				amazonConfig.Slots, err = f.fetchAmazonSlotsCached(ctx, appID)
 				if err != nil {
 					return nil, fmt.Errorf("fetch amazon slots: %v", err)
 				}
@@ -106,6 +100,41 @@ func (f *AdapterInitConfigsFetcher) FetchAdapterInitConfigs(ctx context.Context,
 	}
 
 	return configs, nil
+}
+
+func (f *AdapterInitConfigsFetcher) fetchAppDemandProfilesCached(ctx context.Context, appID int64, adapterKeys []adapter.Key) ([]db.AppDemandProfile, error) {
+	cacheKey, err := f.profilesCacheKey(appID, adapterKeys)
+	if err != nil {
+		return nil, fmt.Errorf("generate profiles cache key: %w", err)
+	}
+
+	return f.ProfilesCache.Get(ctx, cacheKey, func(ctx context.Context) ([]db.AppDemandProfile, error) {
+		return f.fetchAppDemandProfiles(ctx, appID, adapterKeys)
+	})
+}
+
+func (f *AdapterInitConfigsFetcher) fetchAppDemandProfiles(ctx context.Context, appID int64, adapterKeys []adapter.Key) ([]db.AppDemandProfile, error) {
+	var profiles []db.AppDemandProfile
+	err := f.DB.
+		WithContext(ctx).
+		Select("app_demand_profiles.id, app_demand_profiles.data").
+		Where("app_id", appID).
+		InnerJoins("Account", f.DB.Select("id", "extra")).
+		InnerJoins("Account.DemandSource", f.DB.Select("api_key").Where(map[string]any{"api_key": adapterKeys})).
+		Find(&profiles).
+		Error
+	if err != nil {
+		return nil, fmt.Errorf("find app demand profiles: %v", err)
+	}
+	return profiles, nil
+}
+
+func (f *AdapterInitConfigsFetcher) fetchAmazonSlotsCached(ctx context.Context, appID int64) ([]sdkapi.AmazonSlot, error) {
+	cacheKey := f.amazonSlotsCacheKey(appID)
+
+	return f.AmazonSlotsCache.Get(ctx, cacheKey, func(ctx context.Context) ([]sdkapi.AmazonSlot, error) {
+		return f.fetchAmazonSlots(ctx, appID)
+	})
 }
 
 func (f *AdapterInitConfigsFetcher) fetchAmazonSlots(ctx context.Context, appID int64) ([]sdkapi.AmazonSlot, error) {
@@ -145,4 +174,30 @@ func (f *AdapterInitConfigsFetcher) fetchAmazonSlots(ctx context.Context, appID 
 	}
 
 	return slots, nil
+}
+
+func (f *AdapterInitConfigsFetcher) profilesCacheKey(appID int64, adapterKeys []adapter.Key) ([]byte, error) {
+	// Sort adapter keys to get deterministic cache key
+	sort.Slice(adapterKeys, func(i, j int) bool {
+		return adapterKeys[i] < adapterKeys[j]
+	})
+	cacheKeyData := struct {
+		AppID       int64         `json:"app_id"`
+		AdapterKeys []adapter.Key `json:"adapter_keys"`
+	}{
+		AppID:       appID,
+		AdapterKeys: adapterKeys,
+	}
+	jsonData, err := json.Marshal(cacheKeyData)
+
+	if err != nil {
+		return nil, err
+	}
+
+	hash := sha256.Sum256(jsonData)
+	return hash[:], nil
+}
+
+func (f *AdapterInitConfigsFetcher) amazonSlotsCacheKey(appID int64) []byte {
+	return []byte(fmt.Sprintf("amazon_slots:%d", appID))
 }
