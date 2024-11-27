@@ -6,7 +6,7 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
-	"github.com/stretchr/testify/assert"
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestFilterCached(t *testing.T) {
@@ -77,7 +77,9 @@ func TestFilterCached(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := filter.Filter(tt.OS, tt.adType, tt.adapters, tt.adCache)
-			assert.ElementsMatch(t, tt.expected, result)
+			if diff := cmp.Diff(tt.expected, result); diff != "" {
+				t.Errorf("filter.Filter-> %v mismatch (-want +got):\n%s", tt.name, diff)
+			}
 		})
 	}
 }
