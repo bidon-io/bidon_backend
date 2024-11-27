@@ -2,6 +2,7 @@ package store_test
 
 import (
 	"context"
+	"github.com/go-redis/redismock/v9"
 	"testing"
 	"time"
 
@@ -17,6 +18,8 @@ import (
 func TestAppDemandProfileFetcher_FetchCached(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
+
+	rdbCache, _ := redismock.NewClientMock()
 
 	user := dbtest.CreateUser(t, tx)
 
@@ -147,9 +150,10 @@ func TestAppDemandProfileFetcher_FetchCached(t *testing.T) {
 		},
 	}
 
+	configsCache := config.NewRedisCacheOf[adapter.RawConfigsMap](rdbCache, 10*time.Minute, "configs")
 	fetcher := store.ConfigurationFetcher{
 		DB:    tx,
-		Cache: config.NewMemoryCacheOf[adapter.RawConfigsMap](10 * time.Minute),
+		Cache: configsCache,
 	}
 
 	for _, tC := range testCases {

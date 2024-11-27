@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/go-redis/redismock/v9"
 	"os"
 	"testing"
 	"time"
@@ -101,6 +102,8 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Valid(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
+	rdb, _ := redismock.NewClientMock()
+
 	keys := adapter.Keys
 
 	demandSources := make([]db.DemandSource, len(keys))
@@ -140,7 +143,9 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Valid(t *testing.T) {
 		})
 	}
 
-	fetcher := &AdapterInitConfigsFetcher{DB: tx}
+	profilesCache := config.NewRedisCacheOf[[]db.AppDemandProfile](rdb, 10*time.Minute, "app_demand_profiles")
+	amazonSlotsCache := config.NewRedisCacheOf[[]sdkapi.AmazonSlot](rdb, 10*time.Minute, "amazon_slots")
+	fetcher := &AdapterInitConfigsFetcher{DB: tx, ProfilesCache: profilesCache, AmazonSlotsCache: amazonSlotsCache}
 
 	tests := []struct {
 		name           string
@@ -300,6 +305,8 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Amazon(t *testing.T) 
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
+	rdb, _ := redismock.NewClientMock()
+
 	demandSource := dbtest.CreateDemandSource(t, tx, func(source *db.DemandSource) {
 		source.APIKey = string(adapter.AmazonKey)
 	})
@@ -360,7 +367,9 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Amazon(t *testing.T) 
 		item.Extra = map[string]any{"slot_uuid": "amazon_slot_rewarded", "format": "REWARDED"}
 	})
 
-	fetcher := &AdapterInitConfigsFetcher{DB: tx}
+	profilesCache := config.NewRedisCacheOf[[]db.AppDemandProfile](rdb, 10*time.Minute, "app_demand_profiles")
+	amazonSlotsCache := config.NewRedisCacheOf[[]sdkapi.AmazonSlot](rdb, 10*time.Minute, "amazon_slots")
+	fetcher := &AdapterInitConfigsFetcher{DB: tx, ProfilesCache: profilesCache, AmazonSlotsCache: amazonSlotsCache}
 
 	tests := []struct {
 		name           string
