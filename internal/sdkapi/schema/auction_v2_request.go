@@ -7,11 +7,12 @@ import (
 // AuctionV2Request Has both the auction and bidding request fields
 type AuctionV2Request struct {
 	BaseRequest
-	AdType   ad.Type    `param:"ad_type"`
-	Adapters Adapters   `json:"adapters" validate:"required"`
-	AdObject AdObjectV2 `json:"ad_object" validate:"required"`
-	Test     bool       `json:"test"` // Flag indicating that request is test
-	TMax     int64      `json:"tmax"` // Max response time for server before timeout
+	AdType   ad.Type         `param:"ad_type"`
+	Adapters Adapters        `json:"adapters" validate:"required"`
+	AdObject AdObjectV2      `json:"ad_object" validate:"required"`
+	AdCache  []AdCacheObject `json:"ad_cache,omitempty"`
+	Test     bool            `json:"test"` // Flag indicating that request is test
+	TMax     int64           `json:"tmax"` // Max response time for server before timeout
 }
 
 func (r *AuctionV2Request) GetAuctionConfigurationParams() (string, string) {
