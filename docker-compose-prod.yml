@@ -94,6 +94,7 @@ services:
     environment:
       ENVIRONMENT: production
       DATABASE_URL: postgres://bidon:${PG_PASSWORD:-password}@postgres:5432/bidon
+      DATABASE_REPLICA_URL: postgres://bidon:${PG_PASSWORD:-password}@postgres:5432/bidon
     logging: *default-logging
 
   bidon-admin:
@@ -111,6 +112,7 @@ services:
       APP_SECRET: ${APP_SECRET}
       SNOWFLAKE_NODE_ID: ${SNOWFLAKE_NODE_ID}
       DATABASE_URL: postgres://bidon:${PG_PASSWORD:-password}@postgres:5432/bidon
+      DATABASE_REPLICA_URL: postgres://bidon:${PG_PASSWORD:-password}@postgres:5432/bidon
       REDIS_URL: redis://redis:6379/0
     ports:
       - "3200:3200"
@@ -134,6 +136,7 @@ services:
       PORT: 3100
       ENVIRONMENT: production
       DATABASE_URL: postgres://bidon:${PG_PASSWORD:-password}@postgres:5432/bidon
+      DATABASE_REPLICA_URL: postgres://bidon:${PG_PASSWORD:-password}@postgres:5432/bidon
       REDIS_URL: redis://redis:6379/0
       USE_KAFKA: "true"
       KAFKA_BROKERS_LIST: kafka:9092

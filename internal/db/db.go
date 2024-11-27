@@ -22,12 +22,26 @@ import (
 type DB struct {
 	*gorm.DB
 
+	config        Config
 	snowflakeNode *snowflake.Node
 
 	ignoreRecordNotFoundError bool
 }
 
+type Config struct {
+	MaxOpenConns    int
+	MaxIdleConns    int
+	ConnMaxLifetime time.Duration
+	ReadOnly        bool
+}
+
 type Option func(*DB)
+
+func WithConfig(cfg Config) Option {
+	return func(db *DB) {
+		db.config = cfg
+	}
+}
 
 func WithSnowflakeNode(node *snowflake.Node) Option {
 	return func(db *DB) {
@@ -60,6 +74,28 @@ func Open(databaseURL string, opts ...Option) (*DB, error) {
 	err = gormDB.Use(otelgorm.NewPlugin())
 	if err != nil {
 		return nil, fmt.Errorf("failed to use otelgorm plugin: %v", err)
+	}
+
+	sqlDB, err := gormDB.DB()
+	if err != nil {
+		return nil, fmt.Errorf("failed to access sql.DB: %v", err)
+	}
+
+	if db.config.MaxOpenConns > 0 {
+		sqlDB.SetMaxOpenConns(db.config.MaxOpenConns)
+	}
+	if db.config.MaxIdleConns > 0 {
+		sqlDB.SetMaxIdleConns(db.config.MaxIdleConns)
+	}
+	if db.config.ConnMaxLifetime > 0 {
+		sqlDB.SetConnMaxLifetime(db.config.ConnMaxLifetime)
+	}
+
+	if db.config.ReadOnly {
+		gormDB = gormDB.Session(&gorm.Session{
+			NewDB:             true,
+			AllowGlobalUpdate: false,
+		})
 	}
 
 	if db.snowflakeNode != nil {
