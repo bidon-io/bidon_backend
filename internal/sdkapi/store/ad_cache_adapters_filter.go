@@ -45,7 +45,7 @@ func (f *AdCacheAdaptersFilter) Filter(OS ad.OS, adType ad.Type, adapters []adap
 		demandCount[adapter.Key(entry.DemandID)]++
 	}
 
-	var filteredAdapters []adapter.Key
+	filteredAdapters := make([]adapter.Key, 0)
 	for _, adapterKey := range adapters {
 		maxCount := f.DefaultMaxCacheCount
 		if platformSettings, platformExists := f.Settings[OS]; platformExists {
