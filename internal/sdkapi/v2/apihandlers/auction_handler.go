@@ -8,6 +8,7 @@ import (
 	"sort"
 	"strconv"
 
+	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/auctionv2"
@@ -16,6 +17,7 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
+	"github.com/bidon-io/bidon-backend/internal/sdkapi/store"
 	"github.com/bidon-io/bidon-backend/internal/segment"
 	"github.com/labstack/echo/v4"
 )
@@ -77,12 +79,20 @@ func (h *AuctionHandler) Handle(c echo.Context) error {
 	req.raw.Segment.ID = sgmnt.StringID()
 	req.raw.Segment.UID = sgmnt.UID
 
+	adCacheAdaptersFilter := store.NewAdCacheAdaptersFilter()
+	adapters := adCacheAdaptersFilter.Filter(
+		ad.OS(req.raw.Device.OS),
+		req.raw.AdType,
+		req.raw.Adapters.Keys(),
+		req.raw.AdCache,
+	)
+
 	params := &auctionv2.BuildParams{
 		AppID:                req.app.ID,
 		AdType:               req.raw.AdType,
 		AdFormat:             req.raw.AdObject.Format(),
 		DeviceType:           req.raw.Device.Type,
-		Adapters:             req.raw.Adapters.Keys(),
+		Adapters:             adapters,
 		Segment:              sgmnt,
 		PriceFloor:           req.raw.AdObject.PriceFloor,
 		MergedAuctionRequest: &req.raw,
