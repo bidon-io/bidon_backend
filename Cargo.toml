@@ -20,7 +20,7 @@ path = "proxy/tests/integration_tests.rs"
 
 [dependencies]
 # Common
-galaxy_bidon = { git = "ssh://git@github.com/bidmachine/galaxy_bidon.git" }
+bidon = { git = "ssh://git@github.com/bidmachine/galaxy_bidon.git" }
 
 async-trait = "0.1.24"
 # gRPC and Protobuf
