@@ -5,7 +5,7 @@ pub use echo::EchoBiddingService;
 pub use proxy::ProxyBiddingService;
 use std::{error, fmt};
 
-use galaxy_bidon::com::iabtechlab::openrtb::v3::Openrtb;
+use bidon::com::iabtechlab::openrtb::v3::Openrtb;
 
 #[async_trait::async_trait]
 pub trait Api {

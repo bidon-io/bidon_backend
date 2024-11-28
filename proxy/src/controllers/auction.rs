@@ -5,8 +5,8 @@ use axum::{
     http::StatusCode,
     response::IntoResponse,
 };
-use galaxy_bidon::extractor::BidonOpenRTBExtractor;
-use galaxy_bidon::models::GetAuctionAdTypeParameter;
+use bidon::extractor::BidonOpenRTBExtractor;
+use bidon::models::GetAuctionAdTypeParameter;
 use prost::bytes::BytesMut;
 use prost::Message;
 
