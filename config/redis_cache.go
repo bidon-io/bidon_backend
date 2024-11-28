@@ -10,6 +10,8 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
+const CacheNamespace = "cache"
+
 type RedisCache[T any] struct {
 	Label string
 	cache *cache.Cache
@@ -37,7 +39,7 @@ func (c *RedisCache[T]) Get(ctx context.Context, key []byte, load func(ctx conte
 
 	err := c.cache.Once(&cache.Item{
 		Ctx:   ctx,
-		Key:   string(key),
+		Key:   c.namespacedKey(key),
 		Value: &result,
 		TTL:   c.ttl,
 		Do: func(*cache.Item) (any, error) {
@@ -74,4 +76,8 @@ func (c *RedisCache[T]) Monitor(meter metric.Meter) error {
 	)
 
 	return err
+}
+
+func (c *RedisCache[T]) namespacedKey(key []byte) string {
+	return CacheNamespace + ":" + string(key)
 }
