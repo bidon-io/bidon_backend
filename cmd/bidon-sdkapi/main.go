@@ -88,10 +88,6 @@ func main() {
 	}
 	rdb := redis.NewClient(opts)
 
-	cacheOpts := *opts
-	cacheOpts.DB = 1
-	rdbCache := redis.NewClient(&cacheOpts)
-
 	var maxMindDB *maxminddb.Reader
 
 	if os.Getenv("USE_GEOCODING") == "true" {
@@ -133,19 +129,19 @@ func main() {
 		MaxMindDB: maxMindDB,
 		Cache:     config.NewMemoryCacheOf[*dbpkg.Country](cache.UnlimitedTTL), // We don't update countries
 	}
-	auctionCache := config.NewRedisCacheOf[*auction.Config](rdbCache, 10*time.Minute, "auction_configs")
+	auctionCache := config.NewRedisCacheOf[*auction.Config](rdb, 10*time.Minute, "auction_configs")
 	auctionCache.Monitor(meter)
 	configFetcher := &auctionstore.ConfigFetcher{
 		DB:    db,
 		Cache: auctionCache,
 	}
-	appCache := config.NewRedisCacheOf[sdkapi.App](rdbCache, 10*time.Minute, "apps")
+	appCache := config.NewRedisCacheOf[sdkapi.App](rdb, 10*time.Minute, "apps")
 	appCache.Monitor(meter)
 	appFetcher := &sdkapistore.AppFetcher{
 		DB:    db,
 		Cache: appCache,
 	}
-	segmentCache := config.NewRedisCacheOf[[]segment.Segment](rdbCache, 10*time.Minute, "segments")
+	segmentCache := config.NewRedisCacheOf[[]segment.Segment](rdb, 10*time.Minute, "segments")
 	segmentCache.Monitor(meter)
 	segmentMatcher := &segment.Matcher{
 		Fetcher: &segmentstore.SegmentFetcher{
@@ -175,7 +171,7 @@ func main() {
 			EventLogger: eventLogger,
 		},
 	}
-	adUnitsCache := config.NewRedisCacheOf[[]auction.AdUnit](rdbCache, 10*time.Minute, "ad_units")
+	adUnitsCache := config.NewRedisCacheOf[[]auction.AdUnit](rdb, 10*time.Minute, "ad_units")
 	adUnitsCache.Monitor(meter)
 	adUnitsMatcher := &auctionstore.AdUnitsMatcher{
 		DB:    db,
@@ -189,7 +185,7 @@ func main() {
 		AdaptersBuilder:     adapters_builder.BuildBiddingAdapters(biddingHttpClient),
 		NotificationHandler: notificationHandlerV2,
 	}
-	biddingAdaptersCfgCache := config.NewRedisCacheOf[adapter.RawConfigsMap](rdbCache, 10*time.Minute, "bidding_adapters_cfg")
+	biddingAdaptersCfgCache := config.NewRedisCacheOf[adapter.RawConfigsMap](rdb, 10*time.Minute, "bidding_adapters_cfg")
 	biddingAdaptersCfgCache.Monitor(meter)
 	biddingAdaptersCfgBuilder := &adapters_builder.AdaptersConfigBuilder{
 		ConfigurationFetcher: &adapterstore.ConfigurationFetcher{
@@ -197,18 +193,18 @@ func main() {
 			Cache: biddingAdaptersCfgCache,
 		},
 	}
-	lineItemsCache := config.NewRedisCacheOf[[]auction.LineItem](rdbCache, 10*time.Minute, "line_items")
+	lineItemsCache := config.NewRedisCacheOf[[]auction.LineItem](rdb, 10*time.Minute, "line_items")
 	lineItemsCache.Monitor(meter)
 	lineItemsMatcher := &auctionstore.LineItemsMatcher{
 		DB:    db,
 		Cache: lineItemsCache,
 	}
-	profilesCache := config.NewRedisCacheOf[[]dbpkg.AppDemandProfile](rdbCache, 10*time.Minute, "app_demand_profiles")
+	profilesCache := config.NewRedisCacheOf[[]dbpkg.AppDemandProfile](rdb, 10*time.Minute, "app_demand_profiles")
 	profilesCache.Monitor(meter)
-	amazonSlotsCache := config.NewRedisCacheOf[[]sdkapi.AmazonSlot](rdbCache, 10*time.Minute, "amazon_slots")
+	amazonSlotsCache := config.NewRedisCacheOf[[]sdkapi.AmazonSlot](rdb, 10*time.Minute, "amazon_slots")
 	amazonSlotsCache.Monitor(meter)
 	adapterInitConfigsFetcher := &sdkapistore.AdapterInitConfigsFetcher{DB: db, ProfilesCache: profilesCache, AmazonSlotsCache: amazonSlotsCache}
-	configsCache := config.NewRedisCacheOf[adapter.RawConfigsMap](rdbCache, 10*time.Minute, "configs")
+	configsCache := config.NewRedisCacheOf[adapter.RawConfigsMap](rdb, 10*time.Minute, "configs")
 	configsCache.Monitor(meter)
 	configurationFetcher := &adapterstore.ConfigurationFetcher{
 		DB:    db,
