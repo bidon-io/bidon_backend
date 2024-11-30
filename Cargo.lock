@@ -265,6 +265,30 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9d297deb1925b89f2ccc13d7635fa0714f12c87adce1c75356b39ca9b7178567"
 
 [[package]]
+name = "bidon"
+version = "0.0.1"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "axum 0.7.9",
+ "axum-test-helper",
+ "chrono",
+ "env_logger",
+ "hyper 0.14.31",
+ "prost",
+ "prost-build",
+ "prost-types",
+ "serde",
+ "serde_json",
+ "swagger",
+ "tokio",
+ "tonic",
+ "tonic-build",
+ "uuid 1.11.0",
+ "validator",
+]
+
+[[package]]
 name = "bitflags"
 version = "1.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -519,30 +543,6 @@ dependencies = [
  "pin-project-lite",
  "pin-utils",
  "slab",
-]
-
-[[package]]
-name = "galaxy"
-version = "0.0.1"
-dependencies = [
- "anyhow",
- "async-trait",
- "axum 0.7.9",
- "axum-test-helper",
- "chrono",
- "env_logger",
- "hyper 0.14.31",
- "prost",
- "prost-build",
- "prost-types",
- "serde",
- "serde_json",
- "swagger",
- "tokio",
- "tonic",
- "tonic-build",
- "uuid 1.11.0",
- "validator",
 ]
 
 [[package]]
