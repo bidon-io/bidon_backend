@@ -1,6 +1,6 @@
 use axum::http;
 use axum_test_helper::TestClient;
-use galaxy::create_app;
+use bidon::create_app;
 use http::status::StatusCode;
 mod common;
 
@@ -9,7 +9,7 @@ use common::auction_request::get_auction_request;
 #[tokio::test]
 async fn test_auction() {
     // Create the app
-    let app = create_app(Box::new(galaxy::bidding::EchoBiddingService::new()));
+    let app = create_app(Box::new(bidon::bidding::EchoBiddingService::new()));
 
     // Create a test client
     let client = TestClient::new(app);
