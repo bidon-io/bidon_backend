@@ -1,8 +1,8 @@
 [package]
-name = "galaxy"
+name = "bidon"
 version = "0.0.1"
 authors = ["bulat.fattakhov@appodeal.com", "ivan.doroshenko@appodeal.com"]
-description = "Galaxy OpenRTB 3.0"
+description = "Bidon OpenRTB 3.0"
 license = "Apache-2.0" # TODO: Check the license
 edition = "2021"
 
