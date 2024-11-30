@@ -1,12 +1,8 @@
 use crate::bidding::Api as BiddingAPI;
-use axum::extract::State;
-use axum::{
-    extract::Path,
-    http::StatusCode,
-    response::IntoResponse,
-};
 use crate::extractor::BidonOpenRTBExtractor;
 use crate::models::GetAuctionAdTypeParameter;
+use axum::extract::State;
+use axum::{extract::Path, http::StatusCode, response::IntoResponse};
 use prost::bytes::BytesMut;
 use prost::Message;
 

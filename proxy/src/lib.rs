@@ -18,15 +18,13 @@ where
 
 // mod main;
 pub mod bidding;
-pub mod models;
 pub mod extractor;
-
+pub mod models;
 
 mod adapter;
 mod controllers;
 
 pub(crate) mod header;
-
 
 pub mod com {
     pub mod iabtechlab {
