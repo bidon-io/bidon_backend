@@ -1,7 +1,7 @@
 use crate::bidding::Api;
 use crate::bidding::BiddingError;
-use crate::com::iabtechlab::openrtb::v3::Openrtb;
 use crate::bidon::v1::bidding_service_client::BiddingServiceClient;
+use crate::com::iabtechlab::openrtb::v3::Openrtb;
 use tonic::transport::Channel;
 use tonic::Request;
 

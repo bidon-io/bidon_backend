@@ -1,20 +1,20 @@
 use crate::adapter::adcom::enums::OperatingSystem;
+use crate::bidon::v1::mediation::{
+    MediationSession, MEDIATION_AD_OBJECT, MEDIATION_SESSION, MEDIATION_USER,
+};
+use crate::bidon::v1::mediation::{MEDIATION_APP, MEDIATION_REGS};
 use crate::com::iabtechlab::adcom::v1 as adcom;
 use crate::com::iabtechlab::adcom::v1::context::DistributionChannel;
 use crate::com::iabtechlab::openrtb::v3 as openrtb;
 use crate::com::iabtechlab::openrtb::v3::AuctionType;
-use crate::bidon::v1::mediation::{MediationSession, MEDIATION_AD_OBJECT, MEDIATION_SESSION, MEDIATION_USER};
-use crate::bidon::v1::mediation::{MediationUser, MEDIATION_APP, MEDIATION_REGS};
 use crate::models::{AdFormat, AuctionRequest, DeviceConnectionType, DeviceType, Geo, Segment};
 use crate::{bidon, models};
+use anyhow::{anyhow, Result};
 use bidon::v1::mediation::{Demand, Orientation};
 use models::AdObjectOrientation;
 use prost::{Extendable, Message};
 use serde_json::Value;
 use std::collections::HashMap;
-use std::convert::TryFrom;
-use std::error::Error;
-use anyhow::{anyhow, Result};
 
 //TODO As it takes auction_request's ownership, it should be possible to remove most of the .clone() calls.
 pub(crate) fn try_from(
@@ -44,12 +44,9 @@ pub(crate) fn try_from(
     })
 }
 
-fn serialize_context(
-    auction_request: &AuctionRequest,
-    bidon_version: &String,
-) -> Result<Vec<u8>> {
+fn serialize_context(auction_request: &AuctionRequest, bidon_version: &String) -> Result<Vec<u8>> {
     // Create the AdCOM Context message
-    let mut context = bidon::v1::context::Context {
+    let context = bidon::v1::context::Context {
         distribution_channel: DistributionChannel {
             channel_oneof: Some(adcom::context::distribution_channel::ChannelOneof::App(
                 convert_app(&auction_request.app, bidon_version)?,
@@ -99,7 +96,7 @@ fn convert_app(
 }
 
 fn convert_device(api_device: &models::Device, geo: Option<&Geo>) -> adcom::context::Device {
-    let mut device = adcom::context::Device {
+    let device = adcom::context::Device {
         // Map standard fields
         r#type: convert_device_type(api_device.r#type.clone()).map(|dt| dt as i32),
         ua: api_device.ua.clone().into(),
@@ -198,7 +195,7 @@ fn convert_user(
 }
 
 fn convert_segment(api_segment: &Segment) -> bidon::v1::mediation::Segment {
-    let mut segment = bidon::v1::mediation::Segment {
+    let segment = bidon::v1::mediation::Segment {
         id: api_segment.id.clone(),
         uid: api_segment.uid.clone(),
         ext: api_segment.ext.clone(),
@@ -252,9 +249,7 @@ fn convert_iab(iab_json: &HashMap<String, Value>) -> Result<String> {
     serde_json::to_string(&iab_json).map_err(Into::into)
 }
 
-fn convert_ad_object_to_item(
-    ad_object: &models::AdObject,
-) -> Result<openrtb::Item> {
+fn convert_ad_object_to_item(ad_object: &models::AdObject) -> Result<openrtb::Item> {
     let mut item = openrtb::Item {
         id: ad_object.auction_id.clone(),
         flr: Some(ad_object.auction_pricefloor as f32),
@@ -295,7 +290,7 @@ fn convert_ad_orientation(orientation: &AdObjectOrientation) -> Orientation {
 }
 
 fn convert_banner_ad(api_banner: &models::BannerAdObject) -> bidon::v1::mediation::BannerAd {
-    let mut banner = bidon::v1::mediation::BannerAd {
+    let banner = bidon::v1::mediation::BannerAd {
         format: Some(convert_ad_format(api_banner.format) as i32),
     };
 
@@ -311,9 +306,7 @@ fn convert_ad_format(format: AdFormat) -> bidon::v1::mediation::AdFormat {
     }
 }
 
-fn convert_demand(
-    api_demand: &HashMap<String, Value>,
-) -> Result<HashMap<String, Demand>> {
+fn convert_demand(api_demand: &HashMap<String, Value>) -> Result<HashMap<String, Demand>> {
     let mut demands = HashMap::new();
 
     for (key, value) in api_demand {
@@ -328,7 +321,8 @@ fn convert_demand(
                     v.as_str()
                         .ok_or(anyhow!(
                             "Token is not a string. Key: {}, value: {}",
-                            key, value
+                            key,
+                            value
                         ))?
                         .to_string(),
                 ),
@@ -339,7 +333,8 @@ fn convert_demand(
                     v.as_str()
                         .ok_or(anyhow!(
                             "Status is not a string. Key: {}, value: {}",
-                            key, value
+                            key,
+                            value
                         ))?
                         .to_string(),
                 ),
@@ -348,14 +343,16 @@ fn convert_demand(
             token_finish_ts: match map.get("token_finish_ts") {
                 Some(v) => Some(v.as_i64().ok_or(anyhow!(
                     "token_finish_ts is not a number. Key: {}, value: {}",
-                    key, value
+                    key,
+                    value
                 ))?),
                 None => None,
             },
             token_start_ts: match map.get("token_start_ts") {
                 Some(v) => Some(v.as_i64().ok_or(anyhow!(
                     "token_start_ts is not a number. Key: {}, value: {}",
-                    key, value
+                    key,
+                    value
                 ))?),
                 None => None,
             },
@@ -368,11 +365,11 @@ fn convert_demand(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::bidon::v1::mediation::MEDIATION_USER;
     use crate::models::{App, Device, Session, User};
     use serde_json::json;
     use std::collections::HashMap;
     use uuid::Uuid;
-    use crate::bidon::v1::mediation::MEDIATION_USER;
 
     #[test]
     fn test_convert_session() {
@@ -603,7 +600,10 @@ mod tests {
         assert_eq!(item.id, Some("auction_id".to_string()));
         assert_eq!(item.flr, Some(1.0));
         assert_eq!(item.flrcur, Some("USD".to_string()));
-        let bidon_ad_object = item.extension_set.extension_data(MEDIATION_AD_OBJECT).unwrap();
+        let bidon_ad_object = item
+            .extension_set
+            .extension_data(MEDIATION_AD_OBJECT)
+            .unwrap();
         assert_eq!(bidon_ad_object.auction_id, Some("auction_id".to_string()));
         assert_eq!(bidon_ad_object.auction_key, Some("auction_key".to_string()));
         assert_eq!(bidon_ad_object.auction_configuration_id, Some(123));
