@@ -1,9 +1,11 @@
 mod echo;
 mod proxy;
 
+use derive_more::Display;
+use derive_new::new;
 pub use echo::EchoBiddingService;
 pub use proxy::ProxyBiddingService;
-use std::{error, fmt};
+use thiserror::Error;
 
 use crate::com::iabtechlab::openrtb::v3::Openrtb;
 
@@ -14,24 +16,5 @@ pub trait Api {
 }
 
 // todo check errors in openrtb
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Display, Error, new)]
 pub struct BiddingError(pub String);
-
-impl BiddingError {
-    pub fn new(msg: String) -> Self {
-        BiddingError(msg)
-    }
-}
-
-impl fmt::Display for BiddingError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let debug: &dyn fmt::Debug = self;
-        debug.fmt(f)
-    }
-}
-
-impl error::Error for BiddingError {
-    fn description(&self) -> &str {
-        "Failed to produce a valid response."
-    }
-}
