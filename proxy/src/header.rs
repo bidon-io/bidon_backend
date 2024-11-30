@@ -1,7 +1,6 @@
 use chrono::{DateTime, Utc};
 use hyper::header::HeaderValue;
 use std::convert::TryFrom;
-use std::fmt;
 use std::ops::Deref;
 
 /// A struct to allow homogeneous conversion into a HeaderValue. We can't

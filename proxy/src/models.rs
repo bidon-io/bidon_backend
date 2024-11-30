@@ -1,7 +1,5 @@
 #![allow(unused_qualifications)]
 
-use validator::Validate;
-
 use crate::header;
 use crate::models;
 
@@ -3784,7 +3782,7 @@ impl ::std::string::ToString for Bid {
 impl ::std::str::FromStr for Bid {
     type Err = &'static str;
 
-    fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
+    fn from_str(_s: &str) -> std::result::Result<Self, Self::Err> {
         std::result::Result::Err("Parsing Bid is not supported")
     }
 }
@@ -9213,7 +9211,7 @@ impl ::std::string::ToString for Stats {
 impl ::std::str::FromStr for Stats {
     type Err = &'static str;
 
-    fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
+    fn from_str(_s: &str) -> std::result::Result<Self, Self::Err> {
         std::result::Result::Err("Parsing Stats is not supported")
     }
 }
