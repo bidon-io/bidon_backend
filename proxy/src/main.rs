@@ -1,4 +1,4 @@
-use galaxy::bidding::EchoBiddingService;
+pub(crate) use bidon::bidding::EchoBiddingService;
 // use std::sync::Arc;
 // use tokio::sync::Mutex;
 
@@ -12,7 +12,7 @@ async fn main() {
     // ));
     let auction = Box::new(EchoBiddingService::new());
 
-    let app = galaxy::create_app(auction);
+    let app = bidon::create_app(auction);
     // Start the server
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     axum::serve(listener, app).await.unwrap();
