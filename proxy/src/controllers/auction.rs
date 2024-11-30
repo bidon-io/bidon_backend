@@ -5,8 +5,8 @@ use axum::{
     http::StatusCode,
     response::IntoResponse,
 };
-use bidon::extractor::BidonOpenRTBExtractor;
-use bidon::models::GetAuctionAdTypeParameter;
+use crate::extractor::BidonOpenRTBExtractor;
+use crate::models::GetAuctionAdTypeParameter;
 use prost::bytes::BytesMut;
 use prost::Message;
 
