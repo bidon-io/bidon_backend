@@ -1,0 +1,34 @@
+name: Rust build and test
+
+on:
+  push:
+    paths:
+      - "proxy/**"
+      - "proto/**"
+      - "Cargo.toml"
+      - "build.rs"
+      - "Cargo.lock"
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - "proxy/**"
+      - "proto/**"
+      - "Cargo.toml"
+      - "build.rs"
+      - "Cargo.lock"
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build
+      run: cargo build --verbose
+    - name: Run tests
+      run: cargo test --verbose
+
