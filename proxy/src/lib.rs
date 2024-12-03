@@ -19,7 +19,7 @@ where
 // mod main;
 pub mod bidding;
 pub mod extract;
-pub mod protocol;
+pub mod sdk;
 
 mod adapter;
 mod handlers;
