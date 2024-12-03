@@ -18,10 +18,10 @@ const TableNameAppDemandProfile = "app_demand_profiles"
 type AppDemandProfile struct {
 	ID             int64               `gorm:"column:id;type:bigint;primaryKey;autoIncrement:true" json:"id"`
 	AppID          int64               `gorm:"column:app_id;type:bigint;not null;uniqueIndex:index_app_demand_profiles_on_app_id_and_demand_source_id,priority:1;index:index_app_demand_profiles_on_app_id,priority:1" json:"app_id"`
-	AccountType    string              `gorm:"column:account_type;type:character varying;not null;index:index_app_demand_profiles_on_account,priority:1" json:"account_type"`
-	AccountID      int64               `gorm:"column:account_id;type:bigint;not null;index:index_app_demand_profiles_on_account,priority:2" json:"account_id"`
+	AccountType    string              `gorm:"column:account_type;type:character varying;not null;index:index_app_demand_profiles_on_account,priority:2" json:"account_type"`
+	AccountID      int64               `gorm:"column:account_id;type:bigint;not null;index:index_app_demand_profiles_on_account,priority:1" json:"account_id"`
 	DemandSourceID int64               `gorm:"column:demand_source_id;type:bigint;not null;uniqueIndex:index_app_demand_profiles_on_app_id_and_demand_source_id,priority:2;index:index_app_demand_profiles_on_demand_source_id,priority:1" json:"demand_source_id"`
-	Data           datatypes.JSON      `gorm:"column:data;type:jsonb;default:'{}'" json:"data"`
+	Data           datatypes.JSON      `gorm:"column:data;type:jsonb;default:{}" json:"data"`
 	CreatedAt      time.Time           `gorm:"column:created_at;type:timestamp(6) without time zone;not null" json:"created_at"`
 	UpdatedAt      time.Time           `gorm:"column:updated_at;type:timestamp(6) without time zone;not null" json:"updated_at"`
 	PublicUID      sql.NullInt64       `gorm:"column:public_uid;type:bigint;uniqueIndex:index_app_demand_profiles_on_public_uid,priority:1" json:"public_uid"`

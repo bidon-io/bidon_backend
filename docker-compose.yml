@@ -58,7 +58,7 @@ services:
     entrypoint: ["pre-commit", "run", "--all-files"]
 
   postgres:
-    image: postgres:14-alpine
+    image: postgres:17-alpine
     ports:
       - '5434:5432'
     volumes:
@@ -72,7 +72,7 @@ services:
       interval: 5s
 
   postgres-test:
-    image: postgres:14-alpine
+    image: postgres:17-alpine
     ports:
       - '5435:5432'
     volumes:
