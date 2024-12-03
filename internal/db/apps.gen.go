@@ -17,11 +17,11 @@ const TableNameApp = "apps"
 type App struct {
 	ID          int64          `gorm:"column:id;type:bigint;primaryKey;autoIncrement:true" json:"id"`
 	UserID      int64          `gorm:"column:user_id;type:bigint;not null;index:index_apps_on_user_id,priority:1" json:"user_id"`
-	PlatformID  PlatformID     `gorm:"column:platform_id;type:integer;not null;uniqueIndex:index_apps_on_package_name_and_platform_id,priority:1" json:"platform_id"`
+	PlatformID  PlatformID     `gorm:"column:platform_id;type:integer;not null;uniqueIndex:index_apps_on_package_name_and_platform_id,priority:2" json:"platform_id"`
 	HumanName   string         `gorm:"column:human_name;type:character varying;not null" json:"human_name"`
-	PackageName sql.NullString `gorm:"column:package_name;type:character varying;uniqueIndex:index_apps_on_package_name_and_platform_id,priority:2" json:"package_name"`
+	PackageName sql.NullString `gorm:"column:package_name;type:character varying;uniqueIndex:index_apps_on_package_name_and_platform_id,priority:1" json:"package_name"`
 	AppKey      sql.NullString `gorm:"column:app_key;type:character varying;uniqueIndex:index_apps_on_app_key,priority:1" json:"app_key"`
-	Settings    map[string]any `gorm:"column:settings;type:jsonb;default:'{}';serializer:json" json:"settings"`
+	Settings    map[string]any `gorm:"column:settings;type:jsonb;default:{};serializer:json" json:"settings"`
 	CreatedAt   time.Time      `gorm:"column:created_at;type:timestamp(6) without time zone;not null" json:"created_at"`
 	UpdatedAt   time.Time      `gorm:"column:updated_at;type:timestamp(6) without time zone;not null" json:"updated_at"`
 	PublicUID   sql.NullInt64  `gorm:"column:public_uid;type:bigint;uniqueIndex:index_apps_on_public_uid,priority:1" json:"public_uid"`
