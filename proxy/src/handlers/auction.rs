@@ -1,5 +1,5 @@
 use crate::bidding::BiddingService;
-use crate::extractor::AuctionRequestPayload;
+use crate::extract::AuctionRequestPayload;
 use crate::protocol::GetAuctionAdTypeParameter;
 use axum::extract::State;
 use axum::{extract::Path, http::StatusCode, response::IntoResponse};
