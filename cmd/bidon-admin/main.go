@@ -4,24 +4,25 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/bidon-io/bidon-backend/internal/admin/api"
-	"github.com/bidon-io/bidon-backend/internal/admin/openapi"
 	"io/fs"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
+	"runtime"
 	"strconv"
 	"strings"
 	"syscall"
 	"time"
 
-	"github.com/alexedwards/scs/goredisstore"
+	"github.com/alexedwards/scs/gormstore"
 	"github.com/bidon-io/bidon-backend/cmd/bidon-admin/web"
 	"github.com/bidon-io/bidon-backend/config"
 	"github.com/bidon-io/bidon-backend/internal/admin"
+	"github.com/bidon-io/bidon-backend/internal/admin/api"
 	"github.com/bidon-io/bidon-backend/internal/admin/auth"
 	adminecho "github.com/bidon-io/bidon-backend/internal/admin/echo"
+	"github.com/bidon-io/bidon-backend/internal/admin/openapi"
 	adminstore "github.com/bidon-io/bidon-backend/internal/admin/store"
 	dbpkg "github.com/bidon-io/bidon-backend/internal/db"
 	"github.com/bwmarrin/snowflake"
@@ -30,7 +31,6 @@ import (
 	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/redis/go-redis/v9"
 )
 
 func main() {
@@ -60,8 +60,8 @@ func main() {
 		log.Fatalf("prepareSnowflakeNode(): %v", err)
 	}
 	dbConfig := dbpkg.Config{
-		MaxOpenConns:    12,
-		MaxIdleConns:    3,
+		MaxOpenConns:    5 * runtime.GOMAXPROCS(0),
+		MaxIdleConns:    1 * runtime.GOMAXPROCS(0),
 		ConnMaxLifetime: 15 * time.Minute,
 		ReadOnly:        false,
 	}
@@ -81,13 +81,9 @@ func main() {
 	}
 
 	if config.GetEnv() == config.ProdEnv {
-		redisURL := os.Getenv("REDIS_URL")
-		opts, err := redis.ParseURL(redisURL)
-		if err != nil {
-			log.Fatalf("redis.ParseURL(%v): %v", redisURL, err)
+		if authConfig.SessionStore, err = gormstore.New(db.DB); err != nil {
+			log.Fatal(err)
 		}
-		rdb := redis.NewClient(opts)
-		authConfig.SessionStore = goredisstore.New(rdb)
 	}
 	authService := auth.NewAuthService(store.UserRepo, authConfig)
 	adminService := admin.NewService(store)
