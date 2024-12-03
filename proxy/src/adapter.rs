@@ -1,23 +1,20 @@
 use crate::adapter::adcom::enums::OperatingSystem;
-use crate::bidon::v1::mediation::{
-    MediationSession, MEDIATION_AD_OBJECT, MEDIATION_SESSION, MEDIATION_USER,
-};
-use crate::bidon::v1::mediation::{MEDIATION_APP, MEDIATION_REGS};
+use crate::bidon::v1::context::Context;
+use crate::bidon::v1::mediation;
 use crate::com::iabtechlab::adcom::v1 as adcom;
 use crate::com::iabtechlab::adcom::v1::context::DistributionChannel;
+use crate::com::iabtechlab::adcom::v1::enums::ConnectionType;
 use crate::com::iabtechlab::openrtb::v3 as openrtb;
 use crate::com::iabtechlab::openrtb::v3::AuctionType;
-use crate::protocol::{AdFormat, AuctionRequest, DeviceConnectionType, DeviceType, Geo, Segment};
-use crate::{bidon, protocol};
+use crate::protocol;
+use crate::protocol::AdObjectOrientation;
 use anyhow::{anyhow, Result};
-use bidon::v1::mediation::{Demand, Orientation};
 use prost::{Extendable, Message};
-use protocol::AdObjectOrientation;
 use serde_json::Value;
 use std::collections::HashMap;
 
 pub(crate) fn try_from(
-    auction_request: AuctionRequest,
+    auction_request: protocol::AuctionRequest,
     bidon_version: &String,
 ) -> Result<openrtb::Openrtb> {
     // Convert AuctionRequest to Openrtb::Request
@@ -31,8 +28,8 @@ pub(crate) fn try_from(
         ..Default::default()
     };
 
-    let bidon_session = convert_session(&auction_request.session);
-    request.set_extension_data(MEDIATION_SESSION, bidon_session)?;
+    let session = convert_session(&auction_request.session);
+    request.set_extension_data(mediation::MEDIATION_SESSION, session)?;
 
     // Create Openrtb instance with the converted request
     Ok(openrtb::Openrtb {
@@ -43,19 +40,22 @@ pub(crate) fn try_from(
     })
 }
 
-fn serialize_context(auction_request: &AuctionRequest, bidon_version: &String) -> Result<Vec<u8>> {
+fn serialize_context(
+    request: &protocol::AuctionRequest,
+    bidon_version: &String,
+) -> Result<Vec<u8>> {
     // Create the AdCOM Context message
-    let context = bidon::v1::context::Context {
+    let context = Context {
         distribution_channel: DistributionChannel {
             channel_oneof: Some(adcom::context::distribution_channel::ChannelOneof::App(
-                convert_app(&auction_request.app, bidon_version)?,
+                convert_app(&request.app, bidon_version)?,
             )),
             ..Default::default()
         }
         .into(),
-        device: convert_device(&auction_request.device, auction_request.geo.as_ref()).into(),
-        user: convert_user(&auction_request.user, auction_request.segment.as_ref())?.into(),
-        regs: match auction_request.regs.as_ref() {
+        device: convert_device(&request.device, request.geo.as_ref()).into(),
+        user: convert_user(&request.user, request.segment.as_ref())?.into(),
+        regs: match request.regs.as_ref() {
             Some(t) => convert_regs(&t)?.into(),
             None => None,
         },
@@ -80,7 +80,7 @@ fn convert_app(
         ..Default::default()
     };
 
-    let bidon_app = bidon::v1::mediation::MediationApp {
+    let app_ext = mediation::AppExt {
         key: api_app.key.clone().into(),
         framework: api_app.framework_version.clone(),
         framework_version: api_app.framework_version.clone(),
@@ -90,42 +90,47 @@ fn convert_app(
         bidon_version: Some(bidon_version.clone()),
     };
 
-    app.set_extension_data(MEDIATION_APP, bidon_app)?;
+    app.set_extension_data(mediation::APP_MEDIATION_EXT, app_ext)?;
     Ok(app)
 }
 
-fn convert_device(api_device: &protocol::Device, geo: Option<&Geo>) -> adcom::context::Device {
-    let device = adcom::context::Device {
+fn convert_device(
+    device: &protocol::Device,
+    geo: Option<&protocol::Geo>,
+) -> adcom::context::Device {
+    let adcom_device = adcom::context::Device {
         // Map standard fields
-        r#type: convert_device_type(api_device.r#type.clone()).map(|dt| dt as i32),
-        ua: api_device.ua.clone().into(),
-        make: api_device.make.clone().into(),
-        model: api_device.model.clone().into(),
-        os: Some(convert_os(api_device.os.clone()) as i32),
-        osv: api_device.osv.clone().into(),
-        hwv: api_device.hwv.clone().into(),
-        h: api_device.h.into(),
-        w: api_device.w.into(),
-        ppi: api_device.ppi.into(),
-        pxratio: (api_device.pxratio as f32).into(), // TODO validate conversion
-        js: Some(api_device.js != 0),
-        lang: api_device.language.clone().into(),
-        carrier: api_device.clone().carrier,
-        mccmnc: api_device.clone().mccmnc,
+        r#type: convert_device_type(device.r#type.clone()).map(|dt| dt as i32),
+        ua: device.ua.clone().into(),
+        make: device.make.clone().into(),
+        model: device.model.clone().into(),
+        os: Some(convert_os(device.os.clone()) as i32),
+        osv: device.osv.clone().into(),
+        hwv: device.hwv.clone().into(),
+        h: device.h.into(),
+        w: device.w.into(),
+        ppi: device.ppi.into(),
+        pxratio: (device.pxratio as f32).into(), // TODO validate conversion
+        js: Some(device.js != 0),
+        lang: device.language.clone().into(),
+        carrier: device.clone().carrier,
+        mccmnc: device.clone().mccmnc,
         contype: Some(<adcom::enums::ConnectionType as Into<i32>>::into(
-            convert_connection_type(api_device.connection_type),
+            convert_connection_type(device.connection_type),
         )),
         geo: geo.clone().map(|g| convert_geo(&g)),
         ..Default::default()
     };
-    device
+    adcom_device
 }
 
-fn convert_device_type(device_type: Option<DeviceType>) -> Option<adcom::enums::DeviceType> {
+fn convert_device_type(
+    device_type: Option<protocol::DeviceType>,
+) -> Option<adcom::enums::DeviceType> {
     device_type
         .map(|dt| match dt {
-            DeviceType::Phone => adcom::enums::DeviceType::Phone,
-            DeviceType::Tablet => adcom::enums::DeviceType::Tablet,
+            protocol::DeviceType::Phone => adcom::enums::DeviceType::Phone,
+            protocol::DeviceType::Tablet => adcom::enums::DeviceType::Tablet,
         })
         .map(Into::into)
 }
@@ -141,16 +146,16 @@ fn convert_os(os: String) -> OperatingSystem {
     }
 }
 
-fn convert_connection_type(connection_type: DeviceConnectionType) -> adcom::enums::ConnectionType {
-    match connection_type {
-        DeviceConnectionType::Ethernet => adcom::enums::ConnectionType::Wired,
-        DeviceConnectionType::Wifi => adcom::enums::ConnectionType::Wifi,
-        DeviceConnectionType::CellularUnknown => adcom::enums::ConnectionType::CellUnknown,
-        DeviceConnectionType::Cellular => adcom::enums::ConnectionType::CellUnknown,
-        DeviceConnectionType::Cellular2G => adcom::enums::ConnectionType::Cell2g,
-        DeviceConnectionType::Cellular3G => adcom::enums::ConnectionType::Cell3g,
-        DeviceConnectionType::Cellular4G => adcom::enums::ConnectionType::Cell4g,
-        DeviceConnectionType::Cellular5G => adcom::enums::ConnectionType::Cell5g,
+fn convert_connection_type(conn_type: protocol::DeviceConnectionType) -> ConnectionType {
+    match conn_type {
+        protocol::DeviceConnectionType::Ethernet => ConnectionType::Wired,
+        protocol::DeviceConnectionType::Wifi => ConnectionType::Wifi,
+        protocol::DeviceConnectionType::CellularUnknown => ConnectionType::CellUnknown,
+        protocol::DeviceConnectionType::Cellular => ConnectionType::CellUnknown,
+        protocol::DeviceConnectionType::Cellular2G => ConnectionType::Cell2g,
+        protocol::DeviceConnectionType::Cellular3G => ConnectionType::Cell3g,
+        protocol::DeviceConnectionType::Cellular4G => ConnectionType::Cell4g,
+        protocol::DeviceConnectionType::Cellular5G => ConnectionType::Cell5g,
     }
 }
 
@@ -171,55 +176,53 @@ fn convert_geo(geo: &protocol::Geo) -> adcom::context::Geo {
 }
 
 fn convert_user(
-    api_user: &protocol::User,
-    segment: Option<&Segment>,
+    user: &protocol::User,
+    segment: Option<&protocol::Segment>,
 ) -> Result<adcom::context::User> {
-    let mut user = adcom::context::User {
-        id: api_user.idg.map(|uuid| uuid.to_string()),
+    let mut adcom_user = adcom::context::User {
+        id: user.idg.map(|uuid| uuid.to_string()),
         ..Default::default()
     };
 
-    let mediation_user = bidon::v1::mediation::MediationUser {
-        idfa: api_user.idfa.map(|uuid| uuid.to_string()),
-        tracking_authorization_status: Some(api_user.tracking_authorization_status.clone()),
-        idfv: api_user.idfv.map(|uuid| uuid.to_string()),
-        idg: api_user.idg.map(|uuid| uuid.to_string()),
-        consent: Some(serde_json::to_string(&api_user.consent)?), // TODO there is a consent field in adcom::User. Should we have it here?
+    let user_ext = mediation::UserExt {
+        idfa: user.idfa.map(|uuid| uuid.to_string()),
+        tracking_authorization_status: Some(user.tracking_authorization_status.clone()),
+        idfv: user.idfv.map(|uuid| uuid.to_string()),
+        idg: user.idg.map(|uuid| uuid.to_string()),
+        consent: Some(serde_json::to_string(&user.consent)?), // TODO there is a consent field in adcom::User. Should we have it here?
         segments: segment.into_iter().map(convert_segment).collect(),
     };
 
-    user.set_extension_data(MEDIATION_USER, mediation_user)?;
+    adcom_user.set_extension_data(mediation::USER_MEDIATION_EXT, user_ext)?;
 
-    Ok(user)
+    Ok(adcom_user)
 }
 
-fn convert_segment(api_segment: &Segment) -> bidon::v1::mediation::Segment {
-    let segment = bidon::v1::mediation::Segment {
-        id: api_segment.id.clone(),
-        uid: api_segment.uid.clone(),
-        ext: api_segment.ext.clone(),
-    };
-
-    segment
+fn convert_segment(segment: &protocol::Segment) -> mediation::Segment {
+    mediation::Segment {
+        id: segment.id.clone(),
+        uid: segment.uid.clone(),
+        ext: segment.ext.clone(),
+    }
 }
 
-fn convert_session(api_session: &protocol::Session) -> MediationSession {
-    MediationSession {
-        id: Some(api_session.id.to_string().clone()),
-        launch_ts: Some(api_session.launch_ts),
-        launch_monotonic_ts: api_session.launch_monotonic_ts.into(),
-        start_ts: Some(api_session.start_ts),
-        start_monotonic_ts: Some(api_session.start_monotonic_ts),
-        ts: Some(api_session.ts),
-        monotonic_ts: Some(api_session.monotonic_ts),
-        memory_warnings_ts: api_session.memory_warnings_ts.clone(),
-        memory_warnings_monotonic_ts: api_session.memory_warnings_monotonic_ts.clone(),
-        ram_used: Some(api_session.ram_used),
-        ram_size: Some(api_session.ram_size),
-        storage_free: api_session.storage_free,
-        storage_used: api_session.storage_used,
-        battery: Some(api_session.battery),
-        cpu_usage: Some(api_session.cpu_usage),
+fn convert_session(session: &protocol::Session) -> mediation::Session {
+    mediation::Session {
+        id: Some(session.id.to_string().clone()),
+        launch_ts: Some(session.launch_ts),
+        launch_monotonic_ts: session.launch_monotonic_ts.into(),
+        start_ts: Some(session.start_ts),
+        start_monotonic_ts: Some(session.start_monotonic_ts),
+        ts: Some(session.ts),
+        monotonic_ts: Some(session.monotonic_ts),
+        memory_warnings_ts: session.memory_warnings_ts.clone(),
+        memory_warnings_monotonic_ts: session.memory_warnings_monotonic_ts.clone(),
+        ram_used: Some(session.ram_used),
+        ram_size: Some(session.ram_size),
+        storage_free: session.storage_free,
+        storage_used: session.storage_used,
+        battery: Some(session.battery),
+        cpu_usage: Some(session.cpu_usage),
     }
 }
 
@@ -230,7 +233,7 @@ fn convert_regs(api_regs: &protocol::Regulations) -> Result<adcom::context::Regs
         ..Default::default()
     };
 
-    let mediation_regs = bidon::v1::mediation::MediationRegs {
+    let regs_ext = mediation::RegsExt {
         us_privacy: api_regs.us_privacy.clone(),
         eu_privacy: api_regs.eu_privacy.clone(),
         iab: match api_regs.iab.as_ref() {
@@ -239,7 +242,7 @@ fn convert_regs(api_regs: &protocol::Regulations) -> Result<adcom::context::Regs
         },
     };
 
-    regs.set_extension_data(MEDIATION_REGS, mediation_regs)?;
+    regs.set_extension_data(mediation::REGS_MEDIATION_EXT, regs_ext)?;
 
     Ok(regs)
 }
@@ -252,12 +255,11 @@ fn convert_ad_object_to_item(ad_object: &protocol::AdObject) -> Result<openrtb::
     let mut item = openrtb::Item {
         id: ad_object.auction_id.clone(),
         flr: Some(ad_object.auction_pricefloor as f32),
-        flrcur: Some("USD".to_string()),
+        flrcur: Some("USD".to_string()), // TODO
         ..Default::default()
     };
 
-    // Create the AdObjectExtension
-    let mediation_ad_object = bidon::v1::mediation::MediationAdObject {
+    let mediation_placement = mediation::Placement {
         auction_id: ad_object.auction_id.clone(),
         auction_key: ad_object.auction_key.clone(),
         auction_configuration_id: ad_object.auction_configuration_id.clone(),
@@ -276,43 +278,44 @@ fn convert_ad_object_to_item(ad_object: &protocol::AdObject) -> Result<openrtb::
         rewarded: ad_object.rewarded.as_ref().map(|r| r.to_string()),
     };
 
-    item.set_extension_data(MEDIATION_AD_OBJECT, mediation_ad_object)?;
+    item.set_extension_data(mediation::MEDIATION_PLACEMENT, mediation_placement)?;
 
     Ok(item)
 }
 
-fn convert_ad_orientation(orientation: &AdObjectOrientation) -> Orientation {
+fn convert_ad_orientation(orientation: &AdObjectOrientation) -> mediation::Orientation {
     match orientation {
-        AdObjectOrientation::Portrait => Orientation::Portrait,
-        AdObjectOrientation::Landscape => Orientation::Landscape,
+        AdObjectOrientation::Portrait => mediation::Orientation::Portrait,
+        AdObjectOrientation::Landscape => mediation::Orientation::Landscape,
     }
 }
 
-fn convert_banner_ad(api_banner: &protocol::BannerAdObject) -> bidon::v1::mediation::BannerAd {
-    let banner = bidon::v1::mediation::BannerAd {
+fn convert_banner_ad(api_banner: &protocol::BannerAdObject) -> mediation::BannerAd {
+    let banner = mediation::BannerAd {
         format: Some(convert_ad_format(api_banner.format) as i32),
     };
 
     banner
 }
 
-fn convert_ad_format(format: AdFormat) -> bidon::v1::mediation::AdFormat {
+fn convert_ad_format(format: protocol::AdFormat) -> mediation::AdFormat {
     match format {
-        AdFormat::Banner => bidon::v1::mediation::AdFormat::Banner,
-        AdFormat::Leaderboard => bidon::v1::mediation::AdFormat::Leaderboard,
-        AdFormat::Mrec => bidon::v1::mediation::AdFormat::Mrec,
-        AdFormat::Adaptive => bidon::v1::mediation::AdFormat::Adaptive,
+        protocol::AdFormat::Banner => mediation::AdFormat::Banner,
+        protocol::AdFormat::Leaderboard => mediation::AdFormat::Leaderboard,
+        protocol::AdFormat::Mrec => mediation::AdFormat::Mrec,
+        protocol::AdFormat::Adaptive => mediation::AdFormat::Adaptive,
     }
 }
 
-fn convert_demand(api_demand: &HashMap<String, Value>) -> Result<HashMap<String, Demand>> {
+fn convert_demand(demand: &HashMap<String, Value>) -> Result<HashMap<String, mediation::Demand>> {
     let mut demands = HashMap::new();
 
-    for (key, value) in api_demand {
+    // TODO: mb we should preserve JSON structure?
+    for (key, value) in demand {
         let map = value
             .as_object()
             .ok_or(anyhow!("Demand value is not an object: {}", value))?;
-        let demand = Demand {
+        let mediation_demand = mediation::Demand {
             // Assuming Demand has fields that need to be populated from the value
             // Add the necessary field mappings here
             token: match map.get("token") {
@@ -356,7 +359,7 @@ fn convert_demand(api_demand: &HashMap<String, Value>) -> Result<HashMap<String,
                 None => None,
             },
         };
-        demands.insert(key.clone(), demand);
+        demands.insert(key.clone(), mediation_demand);
     }
     Ok(demands)
 }
@@ -364,8 +367,9 @@ fn convert_demand(api_demand: &HashMap<String, Value>) -> Result<HashMap<String,
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::bidon::v1::mediation::MEDIATION_USER;
-    use crate::protocol::{App, Device, Session, User};
+    use crate::bidon::v1::mediation::{
+        APP_MEDIATION_EXT, MEDIATION_PLACEMENT, REGS_MEDIATION_EXT, USER_MEDIATION_EXT,
+    };
     use serde_json::json;
     use std::collections::HashMap;
     use uuid::Uuid;
@@ -374,8 +378,8 @@ mod tests {
     fn test_convert_session() {
         let id = Uuid::new_v4();
 
-        let api_session = Session {
-            id: id,
+        let api_session = protocol::Session {
+            id,
             launch_ts: 1234567890,
             launch_monotonic_ts: 1234567890,
             start_ts: 1234567890,
@@ -392,29 +396,32 @@ mod tests {
             cpu_usage: 10.6,
         };
 
-        let bidon_session = convert_session(&api_session);
+        let mediation_session = convert_session(&api_session);
 
-        assert_eq!(bidon_session.id, Some(id.to_string()));
-        assert_eq!(bidon_session.launch_ts, Some(1234567890));
-        assert_eq!(bidon_session.ram_used, Some(1024));
-        assert_eq!(bidon_session.launch_monotonic_ts, Some(1234567890));
-        assert_eq!(bidon_session.start_ts, Some(1234567890));
-        assert_eq!(bidon_session.start_monotonic_ts, Some(1234567890));
-        assert_eq!(bidon_session.ts, Some(1234567890));
-        assert_eq!(bidon_session.monotonic_ts, Some(1234567890));
-        assert_eq!(bidon_session.memory_warnings_ts, vec![1234567890]);
-        assert_eq!(bidon_session.memory_warnings_monotonic_ts, vec![1234567890]);
-        assert_eq!(bidon_session.ram_size, Some(2048));
-        assert_eq!(bidon_session.storage_free, Some(512));
-        assert_eq!(bidon_session.storage_used, Some(256));
-        assert_eq!(bidon_session.battery, Some(80.5));
-        assert_eq!(bidon_session.cpu_usage, Some(10.6));
+        assert_eq!(mediation_session.id, Some(id.to_string()));
+        assert_eq!(mediation_session.launch_ts, Some(1234567890));
+        assert_eq!(mediation_session.ram_used, Some(1024));
+        assert_eq!(mediation_session.launch_monotonic_ts, Some(1234567890));
+        assert_eq!(mediation_session.start_ts, Some(1234567890));
+        assert_eq!(mediation_session.start_monotonic_ts, Some(1234567890));
+        assert_eq!(mediation_session.ts, Some(1234567890));
+        assert_eq!(mediation_session.monotonic_ts, Some(1234567890));
+        assert_eq!(mediation_session.memory_warnings_ts, vec![1234567890]);
+        assert_eq!(
+            mediation_session.memory_warnings_monotonic_ts,
+            vec![1234567890]
+        );
+        assert_eq!(mediation_session.ram_size, Some(2048));
+        assert_eq!(mediation_session.storage_free, Some(512));
+        assert_eq!(mediation_session.storage_used, Some(256));
+        assert_eq!(mediation_session.battery, Some(80.5));
+        assert_eq!(mediation_session.cpu_usage, Some(10.6));
     }
 
     #[test]
     fn test_convert_device() {
-        let api_device = Device {
-            r#type: Some(DeviceType::Phone),
+        let api_device = protocol::Device {
+            r#type: Some(protocol::DeviceType::Phone),
             ua: "Mozilla/5.0".to_string(),
             make: "Apple".to_string(),
             model: "iPhone".to_string(),
@@ -429,11 +436,11 @@ mod tests {
             language: "en".to_string(),
             carrier: Some("Verizon".to_string()),
             mccmnc: Some("310012".to_string()),
-            connection_type: DeviceConnectionType::Wifi,
+            connection_type: protocol::DeviceConnectionType::Wifi,
             geo: None,
         };
 
-        let geo = Some(Geo {
+        let geo = Some(protocol::Geo {
             lat: Some(37.7749),
             lon: Some(-122.4194),
             accuracy: Some(10.6),
@@ -484,7 +491,7 @@ mod tests {
         let idfv = Uuid::new_v4();
         let idg = Uuid::new_v4();
 
-        let api_user = User {
+        let api_user = protocol::User {
             idfa: Some(idfa),
             tracking_authorization_status: "authorized".to_string(),
             idfv: Some(idfv),
@@ -496,7 +503,7 @@ mod tests {
             coppa: None,
         };
 
-        let segment = Some(Segment {
+        let segment = Some(protocol::Segment {
             id: Some("segment_id".to_string()),
             uid: Some("segment_uid".to_string()),
             ext: None,
@@ -505,24 +512,27 @@ mod tests {
         let user = convert_user(&api_user, segment.as_ref()).unwrap();
 
         assert_eq!(user.id, Some(idg.to_string()));
-        let bidon_user = user.extension_set.extension_data(MEDIATION_USER).unwrap();
-        assert_eq!(bidon_user.idfa, Some(idfa.to_string()));
-        assert_eq!(bidon_user.idfv, Some(idfv.to_string()));
+        let user_ext = user
+            .extension_set
+            .extension_data(USER_MEDIATION_EXT)
+            .unwrap();
+        assert_eq!(user_ext.idfa, Some(idfa.to_string()));
+        assert_eq!(user_ext.idfv, Some(idfv.to_string()));
         assert_eq!(
-            bidon_user.tracking_authorization_status,
+            user_ext.tracking_authorization_status,
             Some("authorized".to_string())
         );
         assert_eq!(
-            bidon_user.consent,
+            user_ext.consent,
             Some("{\"meta\":{\"consent\":true}}".to_string())
         );
-        assert_eq!(bidon_user.segments[0].id, Some("segment_id".to_string()));
-        assert_eq!(bidon_user.segments[0].uid, Some("segment_uid".to_string()));
+        assert_eq!(user_ext.segments[0].id, Some("segment_id".to_string()));
+        assert_eq!(user_ext.segments[0].uid, Some("segment_uid".to_string()));
     }
 
     #[test]
     fn test_convert_app() {
-        let api_app = App {
+        let api_app = protocol::App {
             version: "1.0".to_string(),
             bundle: "com.example.app".to_string(),
             key: "app_key".to_string(),
@@ -537,14 +547,14 @@ mod tests {
 
         assert_eq!(app.ver, Some("1.0".to_string()));
         assert_eq!(app.bundle, Some("com.example.app".to_string()));
-        let bidon_app = app.extension_set.extension_data(MEDIATION_APP).unwrap();
-        assert_eq!(bidon_app.key, Some("app_key".to_string()));
-        assert_eq!(bidon_app.framework, Some("1.0".to_string()));
-        assert_eq!(bidon_app.framework_version, Some("1.0".to_string()));
-        assert_eq!(bidon_app.plugin_version, Some("1.0".to_string()));
-        assert_eq!(bidon_app.sdk_version, Some("1.0".to_string()));
+        let app_ext = app.extension_set.extension_data(APP_MEDIATION_EXT).unwrap();
+        assert_eq!(app_ext.key, Some("app_key".to_string()));
+        assert_eq!(app_ext.framework, Some("1.0".to_string()));
+        assert_eq!(app_ext.framework_version, Some("1.0".to_string()));
+        assert_eq!(app_ext.plugin_version, Some("1.0".to_string()));
+        assert_eq!(app_ext.sdk_version, Some("1.0".to_string()));
         assert_eq!(
-            bidon_app.skadn,
+            app_ext.skadn,
             vec!["skadn1".to_string(), "skadn2".to_string()]
         );
     }
@@ -563,10 +573,13 @@ mod tests {
 
         assert_eq!(regs.coppa, Some(true));
         assert_eq!(regs.gdpr, Some(true));
-        let bidon_regs = regs.extension_set.extension_data(MEDIATION_REGS).unwrap();
-        assert_eq!(bidon_regs.us_privacy, Some("1YNN".to_string()));
-        assert_eq!(bidon_regs.eu_privacy, Some("1".to_string()));
-        assert_eq!(bidon_regs.iab, Some("{\"key\":\"value\"}".to_string()));
+        let regs_ext = regs
+            .extension_set
+            .extension_data(REGS_MEDIATION_EXT)
+            .unwrap();
+        assert_eq!(regs_ext.us_privacy, Some("1YNN".to_string()));
+        assert_eq!(regs_ext.eu_privacy, Some("1".to_string()));
+        assert_eq!(regs_ext.iab, Some("{\"key\":\"value\"}".to_string()));
     }
 
     #[test]
@@ -587,7 +600,7 @@ mod tests {
                 }),
             )]),
             banner: Some(protocol::BannerAdObject {
-                format: AdFormat::Banner,
+                format: protocol::AdFormat::Banner,
             }),
             interstitial: Some(json!({"interstitial": "value"})),
             rewarded: Some(json!("rewarded".to_string())),
@@ -599,31 +612,41 @@ mod tests {
         assert_eq!(item.id, Some("auction_id".to_string()));
         assert_eq!(item.flr, Some(1.0));
         assert_eq!(item.flrcur, Some("USD".to_string()));
-        let bidon_ad_object = item
+        let mediation_placement = item
             .extension_set
-            .extension_data(MEDIATION_AD_OBJECT)
+            .extension_data(MEDIATION_PLACEMENT)
             .unwrap();
-        assert_eq!(bidon_ad_object.auction_id, Some("auction_id".to_string()));
-        assert_eq!(bidon_ad_object.auction_key, Some("auction_key".to_string()));
-        assert_eq!(bidon_ad_object.auction_configuration_id, Some(123));
         assert_eq!(
-            bidon_ad_object.auction_configuration_uid,
+            mediation_placement.auction_id,
+            Some("auction_id".to_string())
+        );
+        assert_eq!(
+            mediation_placement.auction_key,
+            Some("auction_key".to_string())
+        );
+        assert_eq!(mediation_placement.auction_configuration_id, Some(123));
+        assert_eq!(
+            mediation_placement.auction_configuration_uid,
             Some("auction_configuration_uid".to_string())
         );
         assert_eq!(
-            bidon_ad_object.orientation,
-            Some(Orientation::Portrait as i32)
+            mediation_placement.orientation,
+            Some(mediation::Orientation::Portrait as i32)
         );
         assert_eq!(
-            bidon_ad_object.demands.get("demand_key").unwrap().token,
+            mediation_placement.demands.get("demand_key").unwrap().token,
             Some("token_value".to_string())
         );
         assert_eq!(
-            bidon_ad_object.demands.get("demand_key").unwrap().status,
+            mediation_placement
+                .demands
+                .get("demand_key")
+                .unwrap()
+                .status,
             Some("status_value".to_string())
         );
         assert_eq!(
-            bidon_ad_object
+            mediation_placement
                 .demands
                 .get("demand_key")
                 .unwrap()
@@ -631,7 +654,7 @@ mod tests {
             Some(1234567890)
         );
         assert_eq!(
-            bidon_ad_object
+            mediation_placement
                 .demands
                 .get("demand_key")
                 .unwrap()
@@ -639,13 +662,16 @@ mod tests {
             Some(1234567990)
         );
         assert_eq!(
-            bidon_ad_object.banner.as_ref().unwrap().format,
-            Some(bidon::v1::mediation::AdFormat::Banner as i32)
+            mediation_placement.banner.as_ref().unwrap().format,
+            Some(mediation::AdFormat::Banner as i32)
         );
         assert_eq!(
-            bidon_ad_object.interstitial,
+            mediation_placement.interstitial,
             Some("{\"interstitial\":\"value\"}".to_string())
         );
-        assert_eq!(bidon_ad_object.rewarded, Some("\"rewarded\"".to_string()));
+        assert_eq!(
+            mediation_placement.rewarded,
+            Some("\"rewarded\"".to_string())
+        );
     }
 }
