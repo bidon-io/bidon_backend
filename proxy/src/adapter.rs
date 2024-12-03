@@ -181,6 +181,7 @@ fn convert_user(
 ) -> Result<adcom::context::User> {
     let mut adcom_user = adcom::context::User {
         id: user.idg.map(|uuid| uuid.to_string()),
+        consent: serde_json::to_string(&user.consent).ok(),
         ..Default::default()
     };
 
@@ -189,7 +190,6 @@ fn convert_user(
         tracking_authorization_status: Some(user.tracking_authorization_status.clone()),
         idfv: user.idfv.map(|uuid| uuid.to_string()),
         idg: user.idg.map(|uuid| uuid.to_string()),
-        consent: Some(serde_json::to_string(&user.consent)?), // TODO there is a consent field in adcom::User. Should we have it here?
         segments: segment.into_iter().map(convert_segment).collect(),
     };
 
@@ -523,7 +523,7 @@ mod tests {
             Some("authorized".to_string())
         );
         assert_eq!(
-            user_ext.consent,
+            user.consent,
             Some("{\"meta\":{\"consent\":true}}".to_string())
         );
         assert_eq!(user_ext.segments[0].id, Some("segment_id".to_string()));
