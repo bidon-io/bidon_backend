@@ -18,7 +18,7 @@ where
 
 // mod main;
 pub mod bidding;
-pub mod extractor;
+pub mod extract;
 pub mod protocol;
 
 mod adapter;
