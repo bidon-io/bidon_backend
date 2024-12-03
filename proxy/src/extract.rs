@@ -6,7 +6,7 @@ use axum::response::{IntoResponse, Response};
 
 use crate::adapter;
 use crate::com::iabtechlab::openrtb::v3::Openrtb;
-use crate::protocol::AuctionRequest;
+use crate::sdk::AuctionRequest;
 
 pub struct AuctionRequestPayload(pub Openrtb);
 
