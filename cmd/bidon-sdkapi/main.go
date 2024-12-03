@@ -47,6 +47,8 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
+var cpus = runtime.GOMAXPROCS(0)
+
 func main() {
 	config.ConfigureOTel()
 	exporter, err := prometheus.New()
@@ -71,8 +73,8 @@ func main() {
 
 	dbURL := os.Getenv("DATABASE_REPLICA_URL")
 	dbConfig := dbpkg.Config{
-		MaxOpenConns:    10 * runtime.GOMAXPROCS(0),
-		MaxIdleConns:    5 * runtime.GOMAXPROCS(0),
+		MaxOpenConns:    10 * cpus,
+		MaxIdleConns:    5 * cpus,
 		ConnMaxLifetime: 15 * time.Minute,
 		ReadOnly:        true,
 	}
@@ -131,19 +133,28 @@ func main() {
 		Cache:     config.NewMemoryCacheOf[*dbpkg.Country](cache.UnlimitedTTL), // We don't update countries
 	}
 	auctionCache := config.NewRedisCacheOf[*auction.Config](rdb, 10*time.Minute, "auction_configs")
-	auctionCache.Monitor(meter)
+	err = auctionCache.Monitor(meter)
+	if err != nil {
+		log.Fatalf("Unable to register observer for auctionCache: %v", err)
+	}
 	configFetcher := &auctionstore.ConfigFetcher{
 		DB:    db,
 		Cache: auctionCache,
 	}
 	appCache := config.NewRedisCacheOf[sdkapi.App](rdb, 10*time.Minute, "apps")
-	appCache.Monitor(meter)
+	err = appCache.Monitor(meter)
+	if err != nil {
+		log.Fatalf("Unable to register observer for appCache: %v", err)
+	}
 	appFetcher := &sdkapistore.AppFetcher{
 		DB:    db,
 		Cache: appCache,
 	}
 	segmentCache := config.NewRedisCacheOf[[]segment.Segment](rdb, 10*time.Minute, "segments")
-	segmentCache.Monitor(meter)
+	err = segmentCache.Monitor(meter)
+	if err != nil {
+		log.Fatalf("Unable to register observer for segmentCache: %v", err)
+	}
 	segmentMatcher := &segment.Matcher{
 		Fetcher: &segmentstore.SegmentFetcher{
 			DB:    db,
@@ -151,11 +162,11 @@ func main() {
 		},
 	}
 	biddingHttpClient := &http.Client{
-		Timeout: 5 * time.Second,
+		Timeout: 4 * time.Second,
 		Transport: otelhttp.NewTransport(&http.Transport{
-			MaxConnsPerHost:     200,
-			MaxIdleConns:        200,
-			MaxIdleConnsPerHost: 200, // TODO: Move to config
+			MaxConnsPerHost:     30 * cpus,
+			MaxIdleConns:        30 * cpus,
+			MaxIdleConnsPerHost: 30 * cpus,
 		}),
 	}
 	notificationHandler := notification.Handler{
@@ -173,7 +184,10 @@ func main() {
 		},
 	}
 	adUnitsCache := config.NewRedisCacheOf[[]auction.AdUnit](rdb, 10*time.Minute, "ad_units")
-	adUnitsCache.Monitor(meter)
+	err = adUnitsCache.Monitor(meter)
+	if err != nil {
+		log.Fatalf("Unable to register observer for adUnitsCache: %v", err)
+	}
 	adUnitsMatcher := &auctionstore.AdUnitsMatcher{
 		DB:    db,
 		Cache: adUnitsCache,
@@ -187,7 +201,10 @@ func main() {
 		NotificationHandler: notificationHandlerV2,
 	}
 	biddingAdaptersCfgCache := config.NewRedisCacheOf[adapter.RawConfigsMap](rdb, 10*time.Minute, "bidding_adapters_cfg")
-	biddingAdaptersCfgCache.Monitor(meter)
+	err = biddingAdaptersCfgCache.Monitor(meter)
+	if err != nil {
+		log.Fatalf("Unable to register observer for biddingAdaptersCfgCache: %v", err)
+	}
 	biddingAdaptersCfgBuilder := &adapters_builder.AdaptersConfigBuilder{
 		ConfigurationFetcher: &adapterstore.ConfigurationFetcher{
 			DB:    db,
@@ -195,18 +212,30 @@ func main() {
 		},
 	}
 	lineItemsCache := config.NewRedisCacheOf[[]auction.LineItem](rdb, 10*time.Minute, "line_items")
-	lineItemsCache.Monitor(meter)
+	err = lineItemsCache.Monitor(meter)
+	if err != nil {
+		log.Fatalf("Unable to register observer for lineItemsCache: %v", err)
+	}
 	lineItemsMatcher := &auctionstore.LineItemsMatcher{
 		DB:    db,
 		Cache: lineItemsCache,
 	}
 	profilesCache := config.NewRedisCacheOf[[]dbpkg.AppDemandProfile](rdb, 10*time.Minute, "app_demand_profiles")
-	profilesCache.Monitor(meter)
+	err = profilesCache.Monitor(meter)
+	if err != nil {
+		log.Fatalf("Unable to register observer for profilesCache: %v", err)
+	}
 	amazonSlotsCache := config.NewRedisCacheOf[[]sdkapi.AmazonSlot](rdb, 10*time.Minute, "amazon_slots")
-	amazonSlotsCache.Monitor(meter)
+	err = amazonSlotsCache.Monitor(meter)
+	if err != nil {
+		log.Fatalf("Unable to register observer for amazonSlotsCache: %v", err)
+	}
 	adapterInitConfigsFetcher := &sdkapistore.AdapterInitConfigsFetcher{DB: db, ProfilesCache: profilesCache, AmazonSlotsCache: amazonSlotsCache}
 	configsCache := config.NewRedisCacheOf[adapter.RawConfigsMap](rdb, 10*time.Minute, "configs")
-	configsCache.Monitor(meter)
+	err = configsCache.Monitor(meter)
+	if err != nil {
+		log.Fatalf("Unable to register observer for configsCache: %v", err)
+	}
 	configurationFetcher := &adapterstore.ConfigurationFetcher{
 		DB:    db,
 		Cache: configsCache,
