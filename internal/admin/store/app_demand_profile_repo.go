@@ -27,14 +27,14 @@ func NewAppDemandProfileRepo(d *db.DB) *AppDemandProfileRepo {
 func (r *AppDemandProfileRepo) ListOwnedByUser(ctx context.Context, userID int64, _ map[string][]string) ([]admin.AppDemandProfile, error) {
 	return r.list(ctx, func(db *gorm.DB) *gorm.DB {
 		s := db.Session(&gorm.Session{NewDB: true})
-		return db.InnerJoins("App", s.Select("user_id").Where(map[string]any{"user_id": userID}))
+		return db.InnerJoins("App", s.Table("App").Where(map[string]any{"user_id": userID}))
 	})
 }
 
 func (r *AppDemandProfileRepo) FindOwnedByUser(ctx context.Context, userID int64, id int64) (*admin.AppDemandProfile, error) {
 	return r.find(ctx, id, func(db *gorm.DB) *gorm.DB {
 		s := db.Session(&gorm.Session{NewDB: true})
-		return db.InnerJoins("App", s.Select("user_id").Where(map[string]any{"user_id": userID}))
+		return db.InnerJoins("App", s.Table("App").Where(map[string]any{"user_id": userID}))
 	})
 }
 

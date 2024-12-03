@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"runtime"
 	"syscall"
 	"time"
 
@@ -70,8 +71,8 @@ func main() {
 
 	dbURL := os.Getenv("DATABASE_REPLICA_URL")
 	dbConfig := dbpkg.Config{
-		MaxOpenConns:    50,
-		MaxIdleConns:    13,
+		MaxOpenConns:    10 * runtime.GOMAXPROCS(0),
+		MaxIdleConns:    5 * runtime.GOMAXPROCS(0),
 		ConnMaxLifetime: 15 * time.Minute,
 		ReadOnly:        true,
 	}
@@ -114,7 +115,7 @@ func main() {
 
 			err := client.Flush(ctx)
 			if err != nil {
-				log.Printf("client.Flush(): %v", err)
+				log.Printf("kgo.Client.Flush(): %v", err)
 			}
 		}()
 

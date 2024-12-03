@@ -18,12 +18,12 @@ const TableNameLineItem = "line_items"
 type LineItem struct {
 	ID          int64               `gorm:"column:id;type:bigint;primaryKey;autoIncrement:true" json:"id"`
 	AppID       int64               `gorm:"column:app_id;type:bigint;not null;index:index_line_items_on_app_id,priority:1" json:"app_id"`
-	AccountType string              `gorm:"column:account_type;type:character varying;not null;index:index_line_items_on_account,priority:1" json:"account_type"`
-	AccountID   int64               `gorm:"column:account_id;type:bigint;not null;index:index_line_items_on_account,priority:2" json:"account_id"`
+	AccountType string              `gorm:"column:account_type;type:character varying;not null;index:index_line_items_on_account,priority:2" json:"account_type"`
+	AccountID   int64               `gorm:"column:account_id;type:bigint;not null;index:index_line_items_on_account,priority:1" json:"account_id"`
 	HumanName   string              `gorm:"column:human_name;type:character varying;not null" json:"human_name"`
 	BidFloor    decimal.NullDecimal `gorm:"column:bid_floor;type:numeric" json:"bid_floor"`
 	AdType      AdType              `gorm:"column:ad_type;type:integer;not null" json:"ad_type"`
-	Extra       map[string]any      `gorm:"column:extra;type:jsonb;default:'{}';serializer:json" json:"extra"`
+	Extra       map[string]any      `gorm:"column:extra;type:jsonb;default:{};serializer:json" json:"extra"`
 	CreatedAt   time.Time           `gorm:"column:created_at;type:timestamp(6) without time zone;not null" json:"created_at"`
 	UpdatedAt   time.Time           `gorm:"column:updated_at;type:timestamp(6) without time zone;not null" json:"updated_at"`
 	Width       int32               `gorm:"column:width;type:integer;not null" json:"width"`
