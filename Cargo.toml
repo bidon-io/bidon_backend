@@ -1,0 +1,66 @@
+[package]
+name = "bidon_proxy"
+version = "0.1.0"
+authors = ["bf@bidon.org", "ivd@bidon.org"]
+description = "Bidon SDK Proxy"
+license = "Apache-2.0"
+edition = "2021"
+
+[[bin]]
+name = "bidon"
+path = "proxy/src/main.rs"
+
+[lib]
+name = "bidon"
+path = "proxy/src/lib.rs"
+
+[[test]]
+name = "integration_test"
+path = "proxy/tests/integration_tests.rs"
+
+[dependencies]
+async-trait = "0.1"
+
+# gRPC and Protobuf
+tonic = "0.11.0"
+prost = { git = 'https://github.com/bidon-io/prost', branch = "extensions" }
+
+serde = "1.0"
+serde_json = "1.0"
+validator = { version = "0.16", features = ["derive"] }
+swagger = { version = "6.5.0", features = ["serdejson"] }
+uuid = { version = "1.11.0", features = ["serde", "v4"] }
+
+anyhow = "1.0.93"
+derive_more = { version = "1.0.0", features = ["full"] }
+derive-new = "0.7.0"
+
+# Web
+axum = { version = "0.7", features = ["macros"] }
+tokio = { version = "1.41", features = ["full"] }
+thiserror = "2.0.3"
+
+[dev-dependencies]
+axum-test-helper = "0.4.0"
+
+[patch.crates-io]
+prost = { git = 'https://github.com/bidon-io/prost', branch = "extensions" }
+prost-derive = { git = 'https://github.com/bidon-io/prost', branch = "extensions" }
+prost-types = { git = 'https://github.com/bidon-io/prost', branch = "extensions" }
+prost-build = { git = 'https://github.com/bidon-io/prost', branch = "extensions" }
+
+[build-dependencies]
+tonic-build = "0.11.0"
+prost-build = { git = 'https://github.com/bidon-io/prost', branch = "extensions" }
+
+[build]
+rustflags = [
+    "-W", "missing_docs", # detects missing documentation for public members
+    "-W", "trivial_casts", # detects trivial casts which could be removed
+    "-W", "trivial_numeric_casts", # detects trivial casts of numeric types which could be removed
+    "-W", "unsafe_code", # usage of `unsafe` code
+    "-W", "unused_qualifications", # detects unnecessarily qualified names
+    "-W", "unused_extern_crates", # extern crates that are never used
+    "-W", "unused_import_braces", # unnecessary braces around an imported item
+    "-D", "warnings", # all warnings should be denied
+]
