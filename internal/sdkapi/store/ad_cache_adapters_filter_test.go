@@ -43,11 +43,11 @@ func TestFilterCached(t *testing.T) {
 			name:     "Default max_cache_count is applied for missing settings",
 			OS:       ad.AndroidOS,
 			adType:   ad.RewardedType,
-			adapters: []adapter.Key{adapter.MintegralKey},
+			adapters: []adapter.Key{adapter.DTExchangeKey},
 			adCache: []schema.AdCacheObject{
-				{DemandID: string(adapter.MintegralKey), Price: 3.37},
+				{DemandID: string(adapter.DTExchangeKey), Price: 3.37},
 			},
-			expected: []adapter.Key{adapter.MintegralKey},
+			expected: []adapter.Key{adapter.DTExchangeKey},
 		},
 		{
 			name:     "Excludes adapters with exceed default max_cache_count",
