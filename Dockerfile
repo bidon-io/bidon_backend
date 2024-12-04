@@ -21,7 +21,16 @@ COPY . .
 
 FROM base AS pre-commit-deps
 
-RUN apk add --no-cache python3 git pre-commit
+RUN apk add --no-cache python3 git pre-commit curl
+
+# Install buf at version 1.47.2
+ENV BIN="/usr/local/bin" \
+    VERSION="1.47.2"
+
+RUN curl -sSL \
+    "https://github.com/bufbuild/buf/releases/download/v${VERSION}/buf-$(uname -s)-$(uname -m)" \
+    -o "${BIN}/buf" && \
+    chmod +x "${BIN}/buf"
 
 FROM base AS bidon-admin-builder
 
