@@ -44,6 +44,7 @@ RUN adduser -D -u 1000 deploy
 USER deploy
 
 EXPOSE 1323
+EXPOSE 50051
 
 FROM deploy AS bidon-admin
 
