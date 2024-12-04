@@ -92,7 +92,7 @@ func (h *ConfigHandler) Handle(c echo.Context) error {
 		isCOPPA = req.raw.Regulations.COPPA
 	}
 	mergeBlockAndroidHack := req.app.ID == 735354 && (req.raw.App.Version == "2.6.64" || req.raw.App.Version == "2.6.59")
-
+	chardonnayHack := req.app.ID == 735400 || req.app.ID == 735401 || req.app.ID == 735402
 	adapters := make(map[adapter.Key]sdkapi.AdapterInitConfig, len(adapterInitConfigs))
 	for _, cfg := range adapterInitConfigs {
 		if isIOS && cfg.Key() == adapter.AmazonKey {
@@ -101,8 +101,11 @@ func (h *ConfigHandler) Handle(c echo.Context) error {
 		if isCOPPA && adapter.IsDisabledForCOPPA(cfg.Key()) {
 			continue
 		}
-		// TODO: Remove hack after experiment
+		// TODO: Remove hacks after experiment
 		if mergeBlockAndroidHack && cfg.Key() != adapter.BidmachineKey && cfg.Key() != adapter.AdmobKey {
+			continue
+		}
+		if chardonnayHack && cfg.Key() != adapter.BidmachineKey {
 			continue
 		}
 		adapters[cfg.Key()] = cfg
