@@ -1,0 +1,5 @@
+version: v2
+modules:
+  - path: proto/adcom/proto
+  - path: proto/openrtb/proto
+  - path: proto/proto
