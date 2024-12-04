@@ -13,3 +13,8 @@ repos:
         language: system
         files: ^internal/admin/openapi/.*\.(yaml|json)$
         pass_filenames: false
+      - id: buf-generate
+        name: Run buf generate for proto files
+        entry: buf generate
+        language: system
+        pass_filenames: false
