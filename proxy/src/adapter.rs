@@ -1,11 +1,11 @@
 use crate::adapter::adcom::enums::OperatingSystem;
-use crate::bidon::v1::context::Context;
-use crate::bidon::v1::mediation;
 use crate::com::iabtechlab::adcom::v1 as adcom;
 use crate::com::iabtechlab::adcom::v1::context::DistributionChannel;
 use crate::com::iabtechlab::adcom::v1::enums::ConnectionType;
 use crate::com::iabtechlab::openrtb::v3 as openrtb;
 use crate::com::iabtechlab::openrtb::v3::AuctionType;
+use crate::org::bidon::proto::v1::context::Context;
+use crate::org::bidon::proto::v1::mediation;
 use crate::sdk;
 use crate::sdk::AdObjectOrientation;
 use anyhow::{anyhow, Result};
@@ -25,7 +25,7 @@ pub(crate) fn try_from(
         test: request.test,
         tmax: request.tmax.map(|t| t as u32),
         at: Some(AuctionType::FirstPrice as i32),
-        context: serialize_context(&context)?.into(),
+        context: context.encode_to_vec().into(),
         item: vec![convert_ad_object_to_item(&request.ad_object)?],
         ..Default::default()
     };
@@ -57,13 +57,6 @@ fn convert_context(request: &sdk::AuctionRequest, bidon_version: &String) -> Res
         },
         restrictions: None, // TODO
     })
-}
-
-fn serialize_context(context: &Context) -> Result<Vec<u8>> {
-    // Serialize the Context message into bytes
-    let mut context_bytes = Vec::new();
-    context.encode(&mut context_bytes)?;
-    Ok(context_bytes)
 }
 
 fn convert_app(
@@ -249,14 +242,12 @@ fn convert_iab(iab_json: &HashMap<String, Value>) -> Result<String> {
 }
 
 fn convert_ad_object_to_item(ad_object: &sdk::AdObject) -> Result<openrtb::Item> {
-    let mut item = openrtb::Item {
-        id: ad_object.auction_id.clone(),
-        flr: Some(ad_object.auction_pricefloor as f32),
-        flrcur: Some("USD".to_string()), // TODO
+    // TODO: model AdObject with Placement
+    let mut placement = adcom::placement::Placement {
         ..Default::default()
     };
 
-    let mediation_placement = mediation::PlacementExt {
+    let placement_ext = mediation::PlacementExt {
         auction_id: ad_object.auction_id.clone(),
         auction_key: ad_object.auction_key.clone(),
         auction_configuration_id: ad_object.auction_configuration_id.clone(),
@@ -275,7 +266,15 @@ fn convert_ad_object_to_item(ad_object: &sdk::AdObject) -> Result<openrtb::Item>
         rewarded: ad_object.rewarded.as_ref().map(|r| r.to_string()),
     };
 
-    item.set_extension_data(mediation::PLACEMENT_EXT, mediation_placement)?;
+    placement.set_extension_data(mediation::PLACEMENT_EXT, placement_ext)?;
+
+    let item = openrtb::Item {
+        id: ad_object.auction_id.clone(),
+        flr: Some(ad_object.auction_pricefloor as f32),
+        flrcur: Some("USD".to_string()), // TODO
+        spec: placement.encode_to_vec().into(),
+        ..Default::default()
+    };
 
     Ok(item)
 }
@@ -362,8 +361,10 @@ fn convert_demand(demand: &HashMap<String, Value>) -> Result<HashMap<String, med
 #[cfg(test)]
 mod tests {
     use super::*;
+    use prost::ExtensionRegistry;
     use serde_json::json;
     use std::collections::HashMap;
+    use std::io::Cursor;
     use uuid::Uuid;
 
     #[test]
@@ -614,13 +615,24 @@ mod tests {
 
         let item = convert_ad_object_to_item(&ad_object).unwrap();
 
-        assert_eq!(item.id, Some("auction_id".to_string()));
-        assert_eq!(item.flr, Some(1.0));
-        assert_eq!(item.flrcur, Some("USD".to_string()));
-        let placement_ext = item
+        let mut registry = ExtensionRegistry::new();
+        registry.register(mediation::PLACEMENT_EXT);
+
+        let placement = adcom::placement::Placement::decode_with_extensions(
+            &mut Cursor::new(item.spec.unwrap()),
+            &registry,
+        )
+        .unwrap();
+
+        let placement_ext = placement
             .extension_set
             .extension_data(mediation::PLACEMENT_EXT)
             .unwrap();
+
+        assert_eq!(item.id, Some("auction_id".to_string()));
+        assert_eq!(item.flr, Some(1.0));
+        assert_eq!(item.flrcur, Some("USD".to_string()));
+
         assert_eq!(placement_ext.auction_id, Some("auction_id".to_string()));
         assert_eq!(placement_ext.auction_key, Some("auction_key".to_string()));
         assert_eq!(placement_ext.auction_configuration_id, Some(123));
