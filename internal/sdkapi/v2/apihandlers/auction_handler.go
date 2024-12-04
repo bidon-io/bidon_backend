@@ -265,6 +265,7 @@ func prepareAuctionRequestEvent(req *request[schema.AuctionRequest, *schema.Auct
 
 	return event.NewAdEvent(&req.raw.BaseRequest, adRequestParams, req.geoData)
 }
+
 func prepareBiddingEvents(
 	req *request[schema.BiddingRequest, *schema.BiddingRequest],
 	auctionResult *bidding.AuctionResult,
