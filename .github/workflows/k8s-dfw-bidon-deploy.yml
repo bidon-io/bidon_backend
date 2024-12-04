@@ -11,6 +11,10 @@ on:
         type: string
         required: true
         default: latest
+      state:
+        type: string
+        required: true
+        default: present
   workflow_dispatch:
     inputs:
       app:
@@ -25,6 +29,14 @@ on:
         type: string
         required: true
         default: latest
+      state:
+        description: App deployment state
+        type: choice
+        required: true
+        default: present
+        options:
+          - present
+          - absent
 
 jobs:
   deploy:
@@ -56,4 +68,4 @@ jobs:
 
       - name: Deploy app
         working-directory: ./prod
-        run: ANSIBLE_VAULT_PASSWORD_FILE=$ANSIBLE_VAULT_PASSWORD_FILE_BIDON && make k8s-dfw-${{ inputs.app }} TAG=$TAG
+        run: ANSIBLE_VAULT_PASSWORD_FILE=$ANSIBLE_VAULT_PASSWORD_FILE_BIDON && make k8s-dfw-${{ inputs.app }} TAG=$TAG STATE=${{ inputs.state }}
