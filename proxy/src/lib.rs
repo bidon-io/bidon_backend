@@ -50,14 +50,18 @@ pub mod com {
     }
 }
 
-pub mod bidon {
-    pub mod v1 {
-        tonic::include_proto!("bidon.v1");
-        pub mod mediation {
-            tonic::include_proto!("bidon.v1.mediation");
-        }
-        pub mod context {
-            tonic::include_proto!("bidon.v1.context");
+pub mod org {
+    pub mod bidon {
+        pub mod proto {
+            pub mod v1 {
+                tonic::include_proto!("org.bidon.proto.v1");
+                pub mod mediation {
+                    tonic::include_proto!("org.bidon.proto.v1.mediation");
+                }
+                pub mod context {
+                    tonic::include_proto!("org.bidon.proto.v1.context");
+                }
+            }
         }
     }
 }
