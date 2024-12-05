@@ -11,6 +11,10 @@ on:
         type: string
         required: true
         default: latest
+      devops_branch:
+        type: string
+        required: true
+        default: master
       state:
         type: string
         required: true
@@ -29,6 +33,10 @@ on:
         type: string
         required: true
         default: latest
+      devops_branch:
+        type: string
+        required: true
+        default: master
       state:
         description: App deployment state
         type: choice
@@ -63,7 +71,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: bidon-io/devops
-          ref: master
+          ref: ${{ inputs.devops_branch }}
           token: ${{ secrets.PAT_RUNNER }}
 
       - name: Deploy app
