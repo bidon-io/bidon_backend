@@ -29,6 +29,7 @@ type AppDemandProfileAttrs struct {
 	AccountID      int64          `json:"account_id"`
 	Data           map[string]any `json:"data"`
 	AccountType    string         `json:"account_type"`
+	Enabled        *bool          `json:"enabled"`
 }
 
 type AppDemandProfileService struct {
