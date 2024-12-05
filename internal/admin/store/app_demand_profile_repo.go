@@ -53,6 +53,7 @@ func (m appDemandProfileMapper) dbModel(attrs *admin.AppDemandProfileAttrs, id i
 		AccountID:      attrs.AccountID,
 		DemandSourceID: attrs.DemandSourceID,
 		Data:           data,
+		Enabled:        attrs.Enabled,
 	}
 }
 
@@ -87,5 +88,6 @@ func (m appDemandProfileMapper) resourceAttrs(p *db.AppDemandProfile) admin.AppD
 		AccountID:      p.AccountID,
 		Data:           data,
 		AccountType:    p.AccountType,
+		Enabled:        p.Enabled,
 	}
 }

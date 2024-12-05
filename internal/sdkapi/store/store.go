@@ -118,7 +118,7 @@ func (f *AdapterInitConfigsFetcher) fetchAppDemandProfiles(ctx context.Context, 
 	err := f.DB.
 		WithContext(ctx).
 		Select("app_demand_profiles.id, app_demand_profiles.data").
-		Where("app_id", appID).
+		Where("app_id = ? AND app_demand_profiles.enabled = ?", appID, true).
 		InnerJoins("Account", f.DB.Select("id", "extra")).
 		InnerJoins("Account.DemandSource", f.DB.Select("api_key").Where(map[string]any{"api_key": adapterKeys})).
 		Find(&profiles).
