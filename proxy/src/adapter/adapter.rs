@@ -1,7 +1,6 @@
-use crate::adapter::adcom::enums::OperatingSystem;
 use crate::com::iabtechlab::adcom::v1 as adcom;
 use crate::com::iabtechlab::adcom::v1::context::DistributionChannel;
-use crate::com::iabtechlab::adcom::v1::enums::ConnectionType;
+use crate::com::iabtechlab::adcom::v1::enums::{ConnectionType, OperatingSystem};
 use crate::com::iabtechlab::openrtb::v3 as openrtb;
 use crate::com::iabtechlab::openrtb::v3::AuctionType;
 use crate::org::bidon::proto::v1::context::Context;
@@ -15,7 +14,7 @@ use std::collections::HashMap;
 
 pub(crate) fn try_from(
     request: sdk::AuctionRequest,
-    bidon_version: &String,
+    bidon_version: String,
 ) -> Result<openrtb::Openrtb> {
     let context = convert_context(&request, bidon_version)?;
 
@@ -39,7 +38,7 @@ pub(crate) fn try_from(
     })
 }
 
-fn convert_context(request: &sdk::AuctionRequest, bidon_version: &String) -> Result<Context> {
+fn convert_context(request: &sdk::AuctionRequest, bidon_version: String) -> Result<Context> {
     // Create the AdCOM Context message
     Ok(Context {
         distribution_channel: DistributionChannel {
@@ -61,7 +60,7 @@ fn convert_context(request: &sdk::AuctionRequest, bidon_version: &String) -> Res
 
 fn convert_app(
     app: &sdk::App,
-    bidon_version: &String,
+    bidon_version: String,
 ) -> Result<adcom::context::distribution_channel::App> {
     let mut adcom_app = adcom::context::distribution_channel::App {
         ver: app.version.clone().into(),
@@ -545,7 +544,7 @@ mod tests {
             framework: "".to_string(),
         };
 
-        let adcom_app = convert_app(&app, &"1.0".to_string()).unwrap();
+        let adcom_app = convert_app(&app, "1.0".to_string()).unwrap();
 
         assert_eq!(adcom_app.ver, Some("1.0".to_string()));
         assert_eq!(adcom_app.bundle, Some("com.example.app".to_string()));
