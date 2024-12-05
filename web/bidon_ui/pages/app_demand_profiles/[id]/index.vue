@@ -39,5 +39,6 @@ const fields = [
   ResourceCardFields.DemandSourceAccount,
   { label: "Data", key: "data", type: "textarea" },
   { label: "Account Type", key: "accountType" },
+  { label: "Enabled", key: "enabled" },
 ];
 </script>
