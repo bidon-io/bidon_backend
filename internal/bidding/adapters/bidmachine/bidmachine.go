@@ -96,6 +96,14 @@ func (a *BidmachineAdapter) rewarded(br *schema.BiddingRequest) *openrtb2.Imp {
 			BAttr: []adcom1.CreativeAttribute{16},
 			Pos:   adcom1.PositionFullScreen.Ptr(),
 		},
+		Video: &openrtb2.Video{
+			W:         w,
+			H:         h,
+			BAttr:     []adcom1.CreativeAttribute{16},
+			Pos:       adcom1.PositionFullScreen.Ptr(),
+			MIMEs:     []string{"video/mp4", "video/x-m4v", "video/quicktime", "video/mpeg", "video/avi"},
+			Protocols: []adcom1.MediaCreativeSubtype{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14},
+		},
 		Ext: json.RawMessage(`{"rewarded": 1}`),
 	}
 }
