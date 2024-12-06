@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/signal"
 	"runtime"
+	"strings"
 	"syscall"
 	"time"
 
@@ -88,13 +89,14 @@ func main() {
 		log.Fatalf("db.Open(%v): %v", dbURL, err)
 	}
 
-	redisURL := os.Getenv("REDIS_URL")
-	opts, err := redis.ParseURL(redisURL)
-	if err != nil {
-		log.Printf("REDIS_URL parsing failed, using default options: %v", err)
-		opts = &redis.Options{}
+	redisClusterAddrs := os.Getenv("REDIS_CLUSTER")
+	if redisClusterAddrs == "" {
+		log.Fatalf("REDIS_CLUSTER is not set")
 	}
-	rdb := redis.NewClient(opts)
+	rdb := redis.NewClusterClient(&redis.ClusterOptions{
+		Addrs:    strings.Split(redisClusterAddrs, ","),
+		PoolSize: 10 * cpus,
+	})
 
 	var maxMindDB *maxminddb.Reader
 

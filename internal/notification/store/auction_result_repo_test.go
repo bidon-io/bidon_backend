@@ -36,7 +36,7 @@ func TestAuctionResultRepo_CreateOrUpdate(t *testing.T) {
 			},
 		},
 	}
-	rdb, mock := redismock.NewClientMock()
+	rdb, mock := redismock.NewClusterMock()
 	mock.ExpectGet("auction-1").RedisNil()
 	mock.ExpectSet("auction-1", expectedAuctionResult, 4*time.Hour).SetVal("OK")
 
@@ -76,7 +76,7 @@ func TestAuctionResultRepo_CreateOrUpdate_DuplicateRound(t *testing.T) {
 		},
 	}
 	bytes, _ := existingAuctionResult.MarshalBinary()
-	rdb, mock := redismock.NewClientMock()
+	rdb, mock := redismock.NewClusterMock()
 	mock.ExpectGet("auction-1").SetVal(string(bytes))
 
 	repo := store.AuctionResultRepo{Redis: rdb}
@@ -103,7 +103,7 @@ func TestAuctionResultRepo_Find(t *testing.T) {
 		},
 	}
 	bytes, _ := expectedAuctionResult.MarshalBinary()
-	rdb, mock := redismock.NewClientMock()
+	rdb, mock := redismock.NewClusterMock()
 	mock.ExpectGet("auction-1").SetVal(string(bytes))
 
 	repo := store.AuctionResultRepo{Redis: rdb}
@@ -122,7 +122,7 @@ func TestAuctionResultRepo_Find(t *testing.T) {
 
 func TestAuctionResultRepo_Find_NotFound(t *testing.T) {
 	ctx := context.Background()
-	rdb, mock := redismock.NewClientMock()
+	rdb, mock := redismock.NewClusterMock()
 	mock.ExpectGet("auction-1").RedisNil()
 
 	repo := store.AuctionResultRepo{Redis: rdb}
@@ -151,7 +151,7 @@ func TestAuctionResult_Save(t *testing.T) {
 			},
 		},
 	}
-	rdb, mock := redismock.NewClientMock()
+	rdb, mock := redismock.NewClusterMock()
 	mock.ExpectSet("auction-1", auctionResult, 4*time.Hour).SetVal("OK")
 	repo := store.AuctionResultRepo{Redis: rdb}
 
