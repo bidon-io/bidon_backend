@@ -1,4 +1,4 @@
-name: Deploy
+name: Prod Deploy
 
 on:
   workflow_call:
@@ -38,17 +38,14 @@ jobs:
       - name: Checks-out repository devops
         uses: actions/checkout@v4
         with:
-          repository: ${{ secrets.ANSIBLE_SECRET }}/devops
+          repository: bidon-io/devops
+          ref: master
           token: ${{ secrets.PAT_RUNNER }}
 
-      - name: Data migration
-        working-directory: ./${{ secrets.ANSIBLE_SECRET }}/prod
-        run: make bidon-data-migration TAG=$TAG
+      - name: Deploy bidon-admin
+        working-directory: ./prod
+        run: ANSIBLE_VAULT_PASSWORD_FILE=$ANSIBLE_VAULT_PASSWORD_FILE_BIDON && make k8s-dfw-bidon-admin TAG=$TAG
 
-      - name: Deploy admin
-        working-directory: ./${{ secrets.ANSIBLE_SECRET }}/prod
-        run: make bidon-admin TAG=$TAG
-
-      - name: Deploy sdkapi
-        working-directory: ./${{ secrets.ANSIBLE_SECRET }}/prod
-        run: make bidon-sdkapi TAG=$TAG
+      - name: Deploy bidon-sdkapi
+        working-directory: ./prod
+        run: ANSIBLE_VAULT_PASSWORD_FILE=$ANSIBLE_VAULT_PASSWORD_FILE_BIDON && make k8s-dfw-bidon-sdkapi TAG=$TAG
