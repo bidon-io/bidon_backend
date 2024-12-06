@@ -102,7 +102,7 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Valid(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	rdb, _ := redismock.NewClientMock()
+	rdb, _ := redismock.NewClusterMock()
 
 	keys := adapter.Keys
 
@@ -305,7 +305,7 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Amazon(t *testing.T) 
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	rdb, _ := redismock.NewClientMock()
+	rdb, _ := redismock.NewClusterMock()
 
 	demandSource := dbtest.CreateDemandSource(t, tx, func(source *db.DemandSource) {
 		source.APIKey = string(adapter.AmazonKey)
