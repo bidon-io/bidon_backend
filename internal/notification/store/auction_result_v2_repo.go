@@ -11,7 +11,7 @@ import (
 )
 
 type AuctionResultV2Repo struct {
-	Redis *redis.Client
+	Redis *redis.ClusterClient
 }
 
 func (r AuctionResultV2Repo) CreateOrUpdate(ctx context.Context, imp *schema.Imp, bids []notification.Bid) error {

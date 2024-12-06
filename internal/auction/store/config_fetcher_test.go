@@ -309,7 +309,7 @@ func TestConfigFetcher_FetchByUIDCached(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	rdb, _ := redismock.NewClientMock()
+	rdb, _ := redismock.NewClusterMock()
 
 	apps := make([]db.App, 3)
 	for i := range apps {

@@ -19,7 +19,7 @@ type RedisCache[T any] struct {
 }
 
 // NewRedisCacheOf initializes the RedisCache with a TTL, and local TinyLFU cache.
-func NewRedisCacheOf[T any](client *redis.Client, ttl time.Duration, label string) *RedisCache[T] {
+func NewRedisCacheOf[T any](client *redis.ClusterClient, ttl time.Duration, label string) *RedisCache[T] {
 	localCache := cache.New(&cache.Options{
 		Redis:        client,
 		StatsEnabled: true,
