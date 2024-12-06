@@ -933,7 +933,7 @@ pub struct Device {
 
     #[serde(rename = "type")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub r#type: Option<sdk::DeviceType>,
+    pub device_type: Option<sdk::DeviceType>,
 
     /// UserAgent
     #[serde(rename = "ua")]
@@ -976,7 +976,7 @@ impl Device {
             osv,
             ppi,
             pxratio,
-            r#type: None,
+            device_type: None,
             ua,
             w,
         }

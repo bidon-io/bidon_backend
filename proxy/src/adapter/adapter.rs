@@ -91,11 +91,11 @@ fn convert_device(
 ) -> Result<adcom::context::Device> {
     let mut adcom_device = adcom::context::Device {
         // Map standard fields
-        r#type: convert_device_type(device.r#type.clone()).map(|dt| dt as i32),
+        r#type: convert_device_type(device.device_type.clone()).map(Into::into),
         ua: device.ua.clone().into(),
         make: device.make.clone().into(),
         model: device.model.clone().into(),
-        os: Some(convert_os(device.os.clone()) as i32),
+        os: Some(convert_os(device.os.clone())).map(Into::into),
         osv: device.osv.clone().into(),
         hwv: device.hwv.clone().into(),
         h: device.h.into(),
@@ -106,10 +106,8 @@ fn convert_device(
         lang: device.language.clone().into(),
         carrier: device.clone().carrier,
         mccmnc: device.clone().mccmnc,
-        contype: Some(<ConnectionType as Into<i32>>::into(
-            convert_connection_type(device.connection_type),
-        )),
-        geo: geo.clone().map(|g| convert_geo(&g)),
+        contype: Some(convert_connection_type(device.connection_type)).map(Into::into),
+        geo: geo.map(convert_geo),
         ..Default::default()
     };
 
@@ -152,7 +150,7 @@ fn convert_connection_type(conn_type: sdk::DeviceConnectionType) -> ConnectionTy
 }
 
 fn convert_geo(geo: &sdk::Geo) -> adcom::context::Geo {
-    let geo = adcom::context::Geo {
+    adcom::context::Geo {
         r#type: Some(adcom::enums::LocationType::Unknown as i32), // TODO
         lat: geo.lat.map(|t| t as f32),
         lon: geo.lon.map(|t| t as f32),
@@ -163,8 +161,7 @@ fn convert_geo(geo: &sdk::Geo) -> adcom::context::Geo {
         utcoffset: geo.utcoffset,
         lastfix: geo.lastfix,
         ..Default::default()
-    };
-    geo
+    }
 }
 
 fn convert_user(user: &sdk::User, segment: Option<&sdk::Segment>) -> Result<adcom::context::User> {
@@ -247,10 +244,10 @@ fn convert_ad_object_to_item(ad_object: &sdk::AdObject) -> Result<openrtb::Item>
     };
 
     let placement_ext = mediation::PlacementExt {
-        auction_id: ad_object.auction_id.clone(),
-        auction_key: ad_object.auction_key.clone(),
-        auction_configuration_id: ad_object.auction_configuration_id.clone(),
-        auction_configuration_uid: ad_object.auction_configuration_uid.clone(),
+        auction_id: ad_object.auction_id.clone(), // Unique Request ID, same as OpenRtb.Request.id
+        auction_key: ad_object.auction_key.clone(), // Generated key for the auction request
+        auction_configuration_id: ad_object.auction_configuration_id.clone(), // Deprecated: ID of the auction configuration
+        auction_configuration_uid: ad_object.auction_configuration_uid.clone(), // UID of the auction configuration
         orientation: ad_object
             .orientation
             .as_ref()
@@ -261,8 +258,8 @@ fn convert_ad_object_to_item(ad_object: &sdk::AdObject) -> Result<openrtb::Item>
             Some(ref banner) => Some(convert_banner_ad(banner)),
             None => None,
         },
-        interstitial: ad_object.interstitial.as_ref().map(|i| i.to_string()),
-        rewarded: ad_object.rewarded.as_ref().map(|r| r.to_string()),
+        interstitial: ad_object.interstitial.as_ref().map(|i| i.to_string()), // TODO: remove String
+        rewarded: ad_object.rewarded.as_ref().map(|r| r.to_string()),         // TODO: remove String
     };
 
     placement.set_extension_data(mediation::PLACEMENT_EXT, placement_ext)?;
@@ -369,7 +366,7 @@ mod tests {
     #[test]
     fn test_convert_device() {
         let device = sdk::Device {
-            r#type: Some(sdk::DeviceType::Phone),
+            device_type: Some(sdk::DeviceType::Phone),
             ua: "Mozilla/5.0".to_string(),
             make: "Apple".to_string(),
             model: "iPhone".to_string(),
