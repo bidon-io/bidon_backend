@@ -1,6 +1,6 @@
 #![allow(unused_qualifications)]
 
-use crate::protocol;
+use crate::sdk;
 
 /// Format of the banner ad
 /// Enumeration of values.
@@ -65,7 +65,7 @@ pub struct AdObject {
 
     #[serde(rename = "banner")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub banner: Option<protocol::BannerAdObject>,
+    pub banner: Option<sdk::BannerAdObject>,
 
     /// Map of demands
     #[serde(rename = "demands")]
@@ -78,7 +78,7 @@ pub struct AdObject {
 
     #[serde(rename = "orientation")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub orientation: Option<protocol::AdObjectOrientation>,
+    pub orientation: Option<sdk::AdObjectOrientation>,
 
     /// Empty schema for rewarded ad configuration
     #[serde(rename = "rewarded")]
@@ -283,7 +283,7 @@ pub struct AuctionAdUnitResult {
     pub price: Option<f64>,
 
     #[serde(rename = "status")]
-    pub status: protocol::AuctionAdUnitResultStatus,
+    pub status: sdk::AuctionAdUnitResultStatus,
 
     /// Timestamp when the token process finished
     #[serde(rename = "token_finish_ts")]
@@ -300,7 +300,7 @@ impl AuctionAdUnitResult {
     #[allow(clippy::new_without_default)]
     pub fn new(
         demand_id: String,
-        status: protocol::AuctionAdUnitResultStatus,
+        status: sdk::AuctionAdUnitResultStatus,
     ) -> AuctionAdUnitResult {
         AuctionAdUnitResult {
             ad_unit_label: None,
@@ -341,10 +341,10 @@ pub enum AuctionAdUnitResultStatus {
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
 pub struct AuctionRequest {
     #[serde(rename = "app")]
-    pub app: protocol::App,
+    pub app: sdk::App,
 
     #[serde(rename = "device")]
-    pub device: protocol::Device,
+    pub device: sdk::Device,
 
     #[serde(rename = "ext")]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -352,31 +352,31 @@ pub struct AuctionRequest {
 
     #[serde(rename = "geo")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub geo: Option<protocol::Geo>,
+    pub geo: Option<sdk::Geo>,
 
     #[serde(rename = "regs")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub regs: Option<protocol::Regulations>,
+    pub regs: Option<sdk::Regulations>,
 
     #[serde(rename = "segment")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub segment: Option<protocol::Segment>,
+    pub segment: Option<sdk::Segment>,
 
     #[serde(rename = "session")]
-    pub session: protocol::Session,
+    pub session: sdk::Session,
 
     #[serde(rename = "token")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub token: Option<String>,
 
     #[serde(rename = "user")]
-    pub user: protocol::User,
+    pub user: sdk::User,
 
     #[serde(rename = "ad_object")]
-    pub ad_object: protocol::AdObject,
+    pub ad_object: sdk::AdObject,
 
     #[serde(rename = "adapters")]
-    pub adapters: std::collections::HashMap<String, protocol::Adapter>,
+    pub adapters: std::collections::HashMap<String, sdk::Adapter>,
 
     /// Flag indicating that the request is a test
     #[serde(rename = "test")]
@@ -392,12 +392,12 @@ pub struct AuctionRequest {
 impl AuctionRequest {
     #[allow(clippy::new_without_default)]
     pub fn new(
-        app: protocol::App,
-        device: protocol::Device,
-        session: protocol::Session,
-        user: protocol::User,
-        ad_object: protocol::AdObject,
-        adapters: std::collections::HashMap<String, protocol::Adapter>,
+        app: sdk::App,
+        device: sdk::Device,
+        session: sdk::Session,
+        user: sdk::User,
+        ad_object: sdk::AdObject,
+        adapters: std::collections::HashMap<String, sdk::Adapter>,
     ) -> AuctionRequest {
         AuctionRequest {
             app,
@@ -421,7 +421,7 @@ impl AuctionRequest {
 pub struct AuctionResponse {
     /// List of ad units returned in the bidding
     #[serde(rename = "ad_units")]
-    pub ad_units: Vec<protocol::AdUnit>,
+    pub ad_units: Vec<sdk::AdUnit>,
 
     /// ID of the bidding configuration
     #[serde(rename = "auction_configuration_id")]
@@ -451,10 +451,10 @@ pub struct AuctionResponse {
     /// List of ad units that received no bids
     #[serde(rename = "no_bids")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_bids: Option<Vec<protocol::AdUnit>>,
+    pub no_bids: Option<Vec<sdk::AdUnit>>,
 
     #[serde(rename = "segment")]
-    pub segment: protocol::Segment,
+    pub segment: sdk::Segment,
 
     /// Token
     #[serde(rename = "token")]
@@ -464,14 +464,14 @@ pub struct AuctionResponse {
 impl AuctionResponse {
     #[allow(clippy::new_without_default)]
     pub fn new(
-        ad_units: Vec<protocol::AdUnit>,
+        ad_units: Vec<sdk::AdUnit>,
         auction_configuration_id: i64,
         auction_configuration_uid: String,
         auction_id: String,
         auction_pricefloor: f64,
         auction_timeout: i32,
         external_win_notifications: bool,
-        segment: protocol::Segment,
+        segment: sdk::Segment,
         token: String,
     ) -> AuctionResponse {
         AuctionResponse {
@@ -503,11 +503,11 @@ pub struct AuctionResult {
 
     #[serde(rename = "banner")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub banner: Option<protocol::BannerAdObject>,
+    pub banner: Option<sdk::BannerAdObject>,
 
     #[serde(rename = "bid_type")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub bid_type: Option<protocol::AuctionResultBidType>,
+    pub bid_type: Option<sdk::AuctionResultBidType>,
 
     /// Empty schema for interstitial ad configuration
     #[serde(rename = "interstitial")]
@@ -526,7 +526,7 @@ pub struct AuctionResult {
     pub rewarded: Option<serde_json::Value>,
 
     #[serde(rename = "status")]
-    pub status: protocol::AuctionResultStatus,
+    pub status: sdk::AuctionResultStatus,
 
     /// Label of the winning ad unit, if applicable
     #[serde(rename = "winner_ad_unit_label")]
@@ -546,7 +546,7 @@ pub struct AuctionResult {
 
 impl AuctionResult {
     #[allow(clippy::new_without_default)]
-    pub fn new(status: protocol::AuctionResultStatus) -> AuctionResult {
+    pub fn new(status: sdk::AuctionResultStatus) -> AuctionResult {
         AuctionResult {
             auction_finish_ts: None,
             auction_start_ts: None,
@@ -600,12 +600,12 @@ pub enum AuctionResultStatus {
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
 pub struct BannerAdObject {
     #[serde(rename = "format")]
-    pub format: protocol::AdFormat,
+    pub format: sdk::AdFormat,
 }
 
 impl BannerAdObject {
     #[allow(clippy::new_without_default)]
-    pub fn new(format: protocol::AdFormat) -> BannerAdObject {
+    pub fn new(format: sdk::AdFormat) -> BannerAdObject {
         BannerAdObject { format }
     }
 }
@@ -613,10 +613,10 @@ impl BannerAdObject {
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
 pub struct BaseRequest {
     #[serde(rename = "app")]
-    pub app: protocol::App,
+    pub app: sdk::App,
 
     #[serde(rename = "device")]
-    pub device: protocol::Device,
+    pub device: sdk::Device,
 
     #[serde(rename = "ext")]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -624,34 +624,34 @@ pub struct BaseRequest {
 
     #[serde(rename = "geo")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub geo: Option<protocol::Geo>,
+    pub geo: Option<sdk::Geo>,
 
     #[serde(rename = "regs")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub regs: Option<protocol::Regulations>,
+    pub regs: Option<sdk::Regulations>,
 
     #[serde(rename = "segment")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub segment: Option<protocol::Segment>,
+    pub segment: Option<sdk::Segment>,
 
     #[serde(rename = "session")]
-    pub session: protocol::Session,
+    pub session: sdk::Session,
 
     #[serde(rename = "token")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub token: Option<String>,
 
     #[serde(rename = "user")]
-    pub user: protocol::User,
+    pub user: sdk::User,
 }
 
 impl BaseRequest {
     #[allow(clippy::new_without_default)]
     pub fn new(
-        app: protocol::App,
-        device: protocol::Device,
-        session: protocol::Session,
-        user: protocol::User,
+        app: sdk::App,
+        device: sdk::Device,
+        session: sdk::Session,
+        user: sdk::User,
     ) -> BaseRequest {
         BaseRequest {
             app,
@@ -706,10 +706,10 @@ impl BiddingConfig {
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
 pub struct ClickRequest {
     #[serde(rename = "app")]
-    pub app: protocol::App,
+    pub app: sdk::App,
 
     #[serde(rename = "device")]
-    pub device: protocol::Device,
+    pub device: sdk::Device,
 
     #[serde(rename = "ext")]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -717,46 +717,46 @@ pub struct ClickRequest {
 
     #[serde(rename = "geo")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub geo: Option<protocol::Geo>,
+    pub geo: Option<sdk::Geo>,
 
     #[serde(rename = "regs")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub regs: Option<protocol::Regulations>,
+    pub regs: Option<sdk::Regulations>,
 
     #[serde(rename = "segment")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub segment: Option<protocol::Segment>,
+    pub segment: Option<sdk::Segment>,
 
     #[serde(rename = "session")]
-    pub session: protocol::Session,
+    pub session: sdk::Session,
 
     #[serde(rename = "token")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub token: Option<String>,
 
     #[serde(rename = "user")]
-    pub user: protocol::User,
+    pub user: sdk::User,
 
     #[serde(rename = "bid")]
     #[serde(deserialize_with = "swagger::nullable_format::deserialize_optional_nullable")]
     #[serde(default = "swagger::nullable_format::default_optional_nullable")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub bid: Option<swagger::Nullable<protocol::Bid>>,
+    pub bid: Option<swagger::Nullable<sdk::Bid>>,
 
     #[serde(rename = "show")]
     #[serde(deserialize_with = "swagger::nullable_format::deserialize_optional_nullable")]
     #[serde(default = "swagger::nullable_format::default_optional_nullable")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub show: Option<swagger::Nullable<protocol::Bid>>,
+    pub show: Option<swagger::Nullable<sdk::Bid>>,
 }
 
 impl ClickRequest {
     #[allow(clippy::new_without_default)]
     pub fn new(
-        app: protocol::App,
-        device: protocol::Device,
-        session: protocol::Session,
-        user: protocol::User,
+        app: sdk::App,
+        device: sdk::Device,
+        session: sdk::Session,
+        user: sdk::User,
     ) -> ClickRequest {
         ClickRequest {
             app,
@@ -777,10 +777,10 @@ impl ClickRequest {
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
 pub struct ConfigRequest {
     #[serde(rename = "app")]
-    pub app: protocol::App,
+    pub app: sdk::App,
 
     #[serde(rename = "device")]
-    pub device: protocol::Device,
+    pub device: sdk::Device,
 
     #[serde(rename = "ext")]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -788,38 +788,38 @@ pub struct ConfigRequest {
 
     #[serde(rename = "geo")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub geo: Option<protocol::Geo>,
+    pub geo: Option<sdk::Geo>,
 
     #[serde(rename = "regs")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub regs: Option<protocol::Regulations>,
+    pub regs: Option<sdk::Regulations>,
 
     #[serde(rename = "segment")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub segment: Option<protocol::Segment>,
+    pub segment: Option<sdk::Segment>,
 
     #[serde(rename = "session")]
-    pub session: protocol::Session,
+    pub session: sdk::Session,
 
     #[serde(rename = "token")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub token: Option<String>,
 
     #[serde(rename = "user")]
-    pub user: protocol::User,
+    pub user: sdk::User,
 
     #[serde(rename = "adapters")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub adapters: Option<std::collections::HashMap<String, protocol::Adapter>>,
+    pub adapters: Option<std::collections::HashMap<String, sdk::Adapter>>,
 }
 
 impl ConfigRequest {
     #[allow(clippy::new_without_default)]
     pub fn new(
-        app: protocol::App,
-        device: protocol::Device,
-        session: protocol::Session,
-        user: protocol::User,
+        app: sdk::App,
+        device: sdk::Device,
+        session: sdk::Session,
+        user: sdk::User,
     ) -> ConfigRequest {
         ConfigRequest {
             app,
@@ -840,11 +840,11 @@ impl ConfigRequest {
 pub struct ConfigResponse {
     #[serde(rename = "bidding")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub bidding: Option<protocol::BiddingConfig>,
+    pub bidding: Option<sdk::BiddingConfig>,
 
     #[serde(rename = "init")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub init: Option<protocol::InitConfig>,
+    pub init: Option<sdk::InitConfig>,
 
     #[serde(rename = "placements")]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -852,7 +852,7 @@ pub struct ConfigResponse {
 
     #[serde(rename = "segment")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub segment: Option<protocol::Segment>,
+    pub segment: Option<sdk::Segment>,
 
     #[serde(rename = "token")]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -880,11 +880,11 @@ pub struct Device {
     pub carrier: Option<String>,
 
     #[serde(rename = "connection_type")]
-    pub connection_type: protocol::DeviceConnectionType,
+    pub connection_type: sdk::DeviceConnectionType,
 
     #[serde(rename = "geo")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub geo: Option<protocol::Geo>,
+    pub geo: Option<sdk::Geo>,
 
     /// Height
     #[serde(rename = "h")]
@@ -933,7 +933,7 @@ pub struct Device {
 
     #[serde(rename = "type")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub r#type: Option<protocol::DeviceType>,
+    pub device_type: Option<sdk::DeviceType>,
 
     /// UserAgent
     #[serde(rename = "ua")]
@@ -947,7 +947,7 @@ pub struct Device {
 impl Device {
     #[allow(clippy::new_without_default)]
     pub fn new(
-        connection_type: protocol::DeviceConnectionType,
+        connection_type: sdk::DeviceConnectionType,
         h: i32,
         hwv: String,
         js: i32,
@@ -976,7 +976,7 @@ impl Device {
             osv,
             ppi,
             pxratio,
-            r#type: None,
+            device_type: None,
             ua,
             w,
         }
@@ -1031,7 +1031,7 @@ pub enum DeviceType {
 pub struct Error {
     #[serde(rename = "error")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub error: Option<protocol::ErrorError>,
+    pub error: Option<sdk::ErrorError>,
 }
 
 impl Error {
@@ -1206,10 +1206,10 @@ impl InitConfig {
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
 pub struct LossRequest {
     #[serde(rename = "app")]
-    pub app: protocol::App,
+    pub app: sdk::App,
 
     #[serde(rename = "device")]
-    pub device: protocol::Device,
+    pub device: sdk::Device,
 
     #[serde(rename = "ext")]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1217,50 +1217,50 @@ pub struct LossRequest {
 
     #[serde(rename = "geo")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub geo: Option<protocol::Geo>,
+    pub geo: Option<sdk::Geo>,
 
     #[serde(rename = "regs")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub regs: Option<protocol::Regulations>,
+    pub regs: Option<sdk::Regulations>,
 
     #[serde(rename = "segment")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub segment: Option<protocol::Segment>,
+    pub segment: Option<sdk::Segment>,
 
     #[serde(rename = "session")]
-    pub session: protocol::Session,
+    pub session: sdk::Session,
 
     #[serde(rename = "token")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub token: Option<String>,
 
     #[serde(rename = "user")]
-    pub user: protocol::User,
+    pub user: sdk::User,
 
     #[serde(rename = "bid")]
     #[serde(deserialize_with = "swagger::nullable_format::deserialize_optional_nullable")]
     #[serde(default = "swagger::nullable_format::default_optional_nullable")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub bid: Option<swagger::Nullable<protocol::Bid>>,
+    pub bid: Option<swagger::Nullable<sdk::Bid>>,
 
     #[serde(rename = "show")]
     #[serde(deserialize_with = "swagger::nullable_format::deserialize_optional_nullable")]
     #[serde(default = "swagger::nullable_format::default_optional_nullable")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub show: Option<swagger::Nullable<protocol::Bid>>,
+    pub show: Option<swagger::Nullable<sdk::Bid>>,
 
     #[serde(rename = "external_winner")]
-    pub external_winner: protocol::ExternalWinner,
+    pub external_winner: sdk::ExternalWinner,
 }
 
 impl LossRequest {
     #[allow(clippy::new_without_default)]
     pub fn new(
-        app: protocol::App,
-        device: protocol::Device,
-        session: protocol::Session,
-        user: protocol::User,
-        external_winner: protocol::ExternalWinner,
+        app: sdk::App,
+        device: sdk::Device,
+        session: sdk::Session,
+        user: sdk::User,
+        external_winner: sdk::ExternalWinner,
     ) -> LossRequest {
         LossRequest {
             app,
@@ -1336,10 +1336,10 @@ impl Regulations {
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
 pub struct RewardRequest {
     #[serde(rename = "app")]
-    pub app: protocol::App,
+    pub app: sdk::App,
 
     #[serde(rename = "device")]
-    pub device: protocol::Device,
+    pub device: sdk::Device,
 
     #[serde(rename = "ext")]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1347,46 +1347,46 @@ pub struct RewardRequest {
 
     #[serde(rename = "geo")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub geo: Option<protocol::Geo>,
+    pub geo: Option<sdk::Geo>,
 
     #[serde(rename = "regs")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub regs: Option<protocol::Regulations>,
+    pub regs: Option<sdk::Regulations>,
 
     #[serde(rename = "segment")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub segment: Option<protocol::Segment>,
+    pub segment: Option<sdk::Segment>,
 
     #[serde(rename = "session")]
-    pub session: protocol::Session,
+    pub session: sdk::Session,
 
     #[serde(rename = "token")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub token: Option<String>,
 
     #[serde(rename = "user")]
-    pub user: protocol::User,
+    pub user: sdk::User,
 
     #[serde(rename = "bid")]
     #[serde(deserialize_with = "swagger::nullable_format::deserialize_optional_nullable")]
     #[serde(default = "swagger::nullable_format::default_optional_nullable")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub bid: Option<swagger::Nullable<protocol::Bid>>,
+    pub bid: Option<swagger::Nullable<sdk::Bid>>,
 
     #[serde(rename = "show")]
     #[serde(deserialize_with = "swagger::nullable_format::deserialize_optional_nullable")]
     #[serde(default = "swagger::nullable_format::default_optional_nullable")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub show: Option<swagger::Nullable<protocol::Bid>>,
+    pub show: Option<swagger::Nullable<sdk::Bid>>,
 }
 
 impl RewardRequest {
     #[allow(clippy::new_without_default)]
     pub fn new(
-        app: protocol::App,
-        device: protocol::Device,
-        session: protocol::Session,
-        user: protocol::User,
+        app: sdk::App,
+        device: sdk::Device,
+        session: sdk::Session,
+        user: sdk::User,
     ) -> RewardRequest {
         RewardRequest {
             app,
@@ -1536,10 +1536,10 @@ impl Session {
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
 pub struct ShowRequest {
     #[serde(rename = "app")]
-    pub app: protocol::App,
+    pub app: sdk::App,
 
     #[serde(rename = "device")]
-    pub device: protocol::Device,
+    pub device: sdk::Device,
 
     #[serde(rename = "ext")]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1547,46 +1547,46 @@ pub struct ShowRequest {
 
     #[serde(rename = "geo")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub geo: Option<protocol::Geo>,
+    pub geo: Option<sdk::Geo>,
 
     #[serde(rename = "regs")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub regs: Option<protocol::Regulations>,
+    pub regs: Option<sdk::Regulations>,
 
     #[serde(rename = "segment")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub segment: Option<protocol::Segment>,
+    pub segment: Option<sdk::Segment>,
 
     #[serde(rename = "session")]
-    pub session: protocol::Session,
+    pub session: sdk::Session,
 
     #[serde(rename = "token")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub token: Option<String>,
 
     #[serde(rename = "user")]
-    pub user: protocol::User,
+    pub user: sdk::User,
 
     #[serde(rename = "bid")]
     #[serde(deserialize_with = "swagger::nullable_format::deserialize_optional_nullable")]
     #[serde(default = "swagger::nullable_format::default_optional_nullable")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub bid: Option<swagger::Nullable<protocol::Bid>>,
+    pub bid: Option<swagger::Nullable<sdk::Bid>>,
 
     #[serde(rename = "show")]
     #[serde(deserialize_with = "swagger::nullable_format::deserialize_optional_nullable")]
     #[serde(default = "swagger::nullable_format::default_optional_nullable")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub show: Option<swagger::Nullable<protocol::Bid>>,
+    pub show: Option<swagger::Nullable<sdk::Bid>>,
 }
 
 impl ShowRequest {
     #[allow(clippy::new_without_default)]
     pub fn new(
-        app: protocol::App,
-        device: protocol::Device,
-        session: protocol::Session,
-        user: protocol::User,
+        app: sdk::App,
+        device: sdk::Device,
+        session: sdk::Session,
+        user: sdk::User,
     ) -> ShowRequest {
         ShowRequest {
             app,
@@ -1610,10 +1610,10 @@ pub struct Stats();
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
 pub struct StatsRequest {
     #[serde(rename = "app")]
-    pub app: protocol::App,
+    pub app: sdk::App,
 
     #[serde(rename = "device")]
-    pub device: protocol::Device,
+    pub device: sdk::Device,
 
     #[serde(rename = "ext")]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1621,38 +1621,38 @@ pub struct StatsRequest {
 
     #[serde(rename = "geo")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub geo: Option<protocol::Geo>,
+    pub geo: Option<sdk::Geo>,
 
     #[serde(rename = "regs")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub regs: Option<protocol::Regulations>,
+    pub regs: Option<sdk::Regulations>,
 
     #[serde(rename = "segment")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub segment: Option<protocol::Segment>,
+    pub segment: Option<sdk::Segment>,
 
     #[serde(rename = "session")]
-    pub session: protocol::Session,
+    pub session: sdk::Session,
 
     #[serde(rename = "token")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub token: Option<String>,
 
     #[serde(rename = "user")]
-    pub user: protocol::User,
+    pub user: sdk::User,
 
     #[serde(rename = "stats")]
-    pub stats: swagger::Nullable<protocol::Stats>,
+    pub stats: swagger::Nullable<sdk::Stats>,
 }
 
 impl StatsRequest {
     #[allow(clippy::new_without_default)]
     pub fn new(
-        app: protocol::App,
-        device: protocol::Device,
-        session: protocol::Session,
-        user: protocol::User,
-        stats: swagger::Nullable<protocol::Stats>,
+        app: sdk::App,
+        device: sdk::Device,
+        session: sdk::Session,
+        user: sdk::User,
+        stats: swagger::Nullable<sdk::Stats>,
     ) -> StatsRequest {
         StatsRequest {
             app,
@@ -1732,10 +1732,10 @@ impl User {
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
 pub struct WinRequest {
     #[serde(rename = "app")]
-    pub app: protocol::App,
+    pub app: sdk::App,
 
     #[serde(rename = "device")]
-    pub device: protocol::Device,
+    pub device: sdk::Device,
 
     #[serde(rename = "ext")]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1743,46 +1743,46 @@ pub struct WinRequest {
 
     #[serde(rename = "geo")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub geo: Option<protocol::Geo>,
+    pub geo: Option<sdk::Geo>,
 
     #[serde(rename = "regs")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub regs: Option<protocol::Regulations>,
+    pub regs: Option<sdk::Regulations>,
 
     #[serde(rename = "segment")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub segment: Option<protocol::Segment>,
+    pub segment: Option<sdk::Segment>,
 
     #[serde(rename = "session")]
-    pub session: protocol::Session,
+    pub session: sdk::Session,
 
     #[serde(rename = "token")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub token: Option<String>,
 
     #[serde(rename = "user")]
-    pub user: protocol::User,
+    pub user: sdk::User,
 
     #[serde(rename = "bid")]
     #[serde(deserialize_with = "swagger::nullable_format::deserialize_optional_nullable")]
     #[serde(default = "swagger::nullable_format::default_optional_nullable")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub bid: Option<swagger::Nullable<protocol::Bid>>,
+    pub bid: Option<swagger::Nullable<sdk::Bid>>,
 
     #[serde(rename = "show")]
     #[serde(deserialize_with = "swagger::nullable_format::deserialize_optional_nullable")]
     #[serde(default = "swagger::nullable_format::default_optional_nullable")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub show: Option<swagger::Nullable<protocol::Bid>>,
+    pub show: Option<swagger::Nullable<sdk::Bid>>,
 }
 
 impl WinRequest {
     #[allow(clippy::new_without_default)]
     pub fn new(
-        app: protocol::App,
-        device: protocol::Device,
-        session: protocol::Session,
-        user: protocol::User,
+        app: sdk::App,
+        device: sdk::Device,
+        session: sdk::Session,
+        user: sdk::User,
     ) -> WinRequest {
         WinRequest {
             app,
