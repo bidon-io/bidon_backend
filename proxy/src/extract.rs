@@ -6,7 +6,7 @@ use axum::response::{IntoResponse, Response};
 
 use crate::adapter;
 use crate::com::iabtechlab::openrtb::v3::Openrtb;
-use crate::protocol::AuctionRequest;
+use crate::sdk::AuctionRequest;
 
 pub struct AuctionRequestPayload(pub Openrtb);
 
@@ -57,7 +57,7 @@ where
             .await
             .map_err(AuctionRequestRejection::InvalidJson)?;
 
-        let openrtb_request = adapter::try_from(auction_request, &bidon_version)
+        let openrtb_request = adapter::try_from(auction_request, bidon_version)
             .map_err(|_| AuctionRequestRejection::InvalidBiddingRequest)?;
 
         Ok(AuctionRequestPayload(openrtb_request))

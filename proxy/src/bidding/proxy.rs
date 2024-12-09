@@ -1,6 +1,6 @@
 use crate::bidding::BiddingError;
 use crate::bidding::BiddingService;
-use crate::bidon::v1::bidding_service_client::BiddingServiceClient;
+use crate::org::bidon::proto::v1::bidding_service_client::BiddingServiceClient;
 use crate::com::iabtechlab::openrtb::v3::Openrtb;
 use tonic::transport::Channel;
 use tonic::Request;
