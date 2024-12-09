@@ -1,6 +1,6 @@
 use crate::bidding::BiddingService;
-use crate::extractor::AuctionRequestPayload;
-use crate::protocol::GetAuctionAdTypeParameter;
+use crate::extract::AuctionRequestPayload;
+use crate::sdk::GetAuctionAdTypeParameter;
 use axum::extract::State;
 use axum::{extract::Path, http::StatusCode, response::IntoResponse};
 use prost::bytes::BytesMut;
