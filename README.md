@@ -1,4 +1,8 @@
 # BidOn
+
+
+
+
 ## Set up development environment
 ```shell
 make local-init
