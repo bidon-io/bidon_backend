@@ -1,30 +1,28 @@
-use crate::bidding::Api as BiddingApi;
+use crate::bidding::BiddingService;
 use axum::routing::post;
 use axum::Router;
 
 // Define the routes
-pub fn create_app<A>(auction: Box<A>) -> Router
+pub fn create_app<A>(bidding_service: Box<A>) -> Router
 where
     A: Clone + 'static,
-    A: BiddingApi + Send + Sync,
+    A: BiddingService + Send + Sync,
 {
     Router::new()
         .route(
             "/v2/auction/:ad_type",
-            post(controllers::auction::get_auction_handler),
+            post(handlers::auction::get_auction_handler),
         )
-        .with_state(auction)
+        .with_state(bidding_service)
 }
 
 // mod main;
 pub mod bidding;
-pub mod extractor;
-pub mod models;
+pub mod extract;
+pub mod sdk;
 
 mod adapter;
-mod controllers;
-
-pub(crate) mod header;
+mod handlers;
 
 pub mod com {
     pub mod iabtechlab {

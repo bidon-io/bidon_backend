@@ -5,11 +5,18 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
+	"runtime"
+	"strings"
 	"syscall"
 	"time"
+
+	grpcserver "github.com/bidon-io/bidon-backend/internal/sdkapi/grpc"
+	pb "github.com/bidon-io/bidon-backend/pkg/proto/org/bidon/proto/v1"
+	"google.golang.org/grpc"
 
 	"go.opentelemetry.io/otel/exporters/prometheus"
 	"go.opentelemetry.io/otel/sdk/metric"
@@ -46,6 +53,8 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
+var cpus = runtime.GOMAXPROCS(0)
+
 func main() {
 	config.ConfigureOTel()
 	exporter, err := prometheus.New()
@@ -70,8 +79,8 @@ func main() {
 
 	dbURL := os.Getenv("DATABASE_REPLICA_URL")
 	dbConfig := dbpkg.Config{
-		MaxOpenConns:    50,
-		MaxIdleConns:    13,
+		MaxOpenConns:    10 * cpus,
+		MaxIdleConns:    5 * cpus,
 		ConnMaxLifetime: 15 * time.Minute,
 		ReadOnly:        true,
 	}
@@ -80,13 +89,14 @@ func main() {
 		log.Fatalf("db.Open(%v): %v", dbURL, err)
 	}
 
-	redisURL := os.Getenv("REDIS_URL")
-	opts, err := redis.ParseURL(redisURL)
-	if err != nil {
-		log.Printf("REDIS_URL parsing failed, using default options: %v", err)
-		opts = &redis.Options{}
+	redisClusterAddrs := os.Getenv("REDIS_CLUSTER")
+	if redisClusterAddrs == "" {
+		log.Fatalf("REDIS_CLUSTER is not set")
 	}
-	rdb := redis.NewClient(opts)
+	rdb := redis.NewClusterClient(&redis.ClusterOptions{
+		Addrs:    strings.Split(redisClusterAddrs, ","),
+		PoolSize: 10 * cpus,
+	})
 
 	var maxMindDB *maxminddb.Reader
 
@@ -114,7 +124,7 @@ func main() {
 
 			err := client.Flush(ctx)
 			if err != nil {
-				log.Printf("client.Flush(): %v", err)
+				log.Printf("kgo.Client.Flush(): %v", err)
 			}
 		}()
 
@@ -130,19 +140,28 @@ func main() {
 		Cache:     config.NewMemoryCacheOf[*dbpkg.Country](cache.UnlimitedTTL), // We don't update countries
 	}
 	auctionCache := config.NewRedisCacheOf[*auction.Config](rdb, 10*time.Minute, "auction_configs")
-	auctionCache.Monitor(meter)
+	err = auctionCache.Monitor(meter)
+	if err != nil {
+		log.Fatalf("Unable to register observer for auctionCache: %v", err)
+	}
 	configFetcher := &auctionstore.ConfigFetcher{
 		DB:    db,
 		Cache: auctionCache,
 	}
 	appCache := config.NewRedisCacheOf[sdkapi.App](rdb, 10*time.Minute, "apps")
-	appCache.Monitor(meter)
+	err = appCache.Monitor(meter)
+	if err != nil {
+		log.Fatalf("Unable to register observer for appCache: %v", err)
+	}
 	appFetcher := &sdkapistore.AppFetcher{
 		DB:    db,
 		Cache: appCache,
 	}
 	segmentCache := config.NewRedisCacheOf[[]segment.Segment](rdb, 10*time.Minute, "segments")
-	segmentCache.Monitor(meter)
+	err = segmentCache.Monitor(meter)
+	if err != nil {
+		log.Fatalf("Unable to register observer for segmentCache: %v", err)
+	}
 	segmentMatcher := &segment.Matcher{
 		Fetcher: &segmentstore.SegmentFetcher{
 			DB:    db,
@@ -150,11 +169,11 @@ func main() {
 		},
 	}
 	biddingHttpClient := &http.Client{
-		Timeout: 5 * time.Second,
+		Timeout: 4 * time.Second,
 		Transport: otelhttp.NewTransport(&http.Transport{
-			MaxConnsPerHost:     200,
-			MaxIdleConns:        200,
-			MaxIdleConnsPerHost: 200, // TODO: Move to config
+			MaxConnsPerHost:     30 * cpus,
+			MaxIdleConns:        30 * cpus,
+			MaxIdleConnsPerHost: 30 * cpus,
 		}),
 	}
 	notificationHandler := notification.Handler{
@@ -172,7 +191,10 @@ func main() {
 		},
 	}
 	adUnitsCache := config.NewRedisCacheOf[[]auction.AdUnit](rdb, 10*time.Minute, "ad_units")
-	adUnitsCache.Monitor(meter)
+	err = adUnitsCache.Monitor(meter)
+	if err != nil {
+		log.Fatalf("Unable to register observer for adUnitsCache: %v", err)
+	}
 	adUnitsMatcher := &auctionstore.AdUnitsMatcher{
 		DB:    db,
 		Cache: adUnitsCache,
@@ -186,7 +208,10 @@ func main() {
 		NotificationHandler: notificationHandlerV2,
 	}
 	biddingAdaptersCfgCache := config.NewRedisCacheOf[adapter.RawConfigsMap](rdb, 10*time.Minute, "bidding_adapters_cfg")
-	biddingAdaptersCfgCache.Monitor(meter)
+	err = biddingAdaptersCfgCache.Monitor(meter)
+	if err != nil {
+		log.Fatalf("Unable to register observer for biddingAdaptersCfgCache: %v", err)
+	}
 	biddingAdaptersCfgBuilder := &adapters_builder.AdaptersConfigBuilder{
 		ConfigurationFetcher: &adapterstore.ConfigurationFetcher{
 			DB:    db,
@@ -194,18 +219,30 @@ func main() {
 		},
 	}
 	lineItemsCache := config.NewRedisCacheOf[[]auction.LineItem](rdb, 10*time.Minute, "line_items")
-	lineItemsCache.Monitor(meter)
+	err = lineItemsCache.Monitor(meter)
+	if err != nil {
+		log.Fatalf("Unable to register observer for lineItemsCache: %v", err)
+	}
 	lineItemsMatcher := &auctionstore.LineItemsMatcher{
 		DB:    db,
 		Cache: lineItemsCache,
 	}
 	profilesCache := config.NewRedisCacheOf[[]dbpkg.AppDemandProfile](rdb, 10*time.Minute, "app_demand_profiles")
-	profilesCache.Monitor(meter)
+	err = profilesCache.Monitor(meter)
+	if err != nil {
+		log.Fatalf("Unable to register observer for profilesCache: %v", err)
+	}
 	amazonSlotsCache := config.NewRedisCacheOf[[]sdkapi.AmazonSlot](rdb, 10*time.Minute, "amazon_slots")
-	amazonSlotsCache.Monitor(meter)
+	err = amazonSlotsCache.Monitor(meter)
+	if err != nil {
+		log.Fatalf("Unable to register observer for amazonSlotsCache: %v", err)
+	}
 	adapterInitConfigsFetcher := &sdkapistore.AdapterInitConfigsFetcher{DB: db, ProfilesCache: profilesCache, AmazonSlotsCache: amazonSlotsCache}
 	configsCache := config.NewRedisCacheOf[adapter.RawConfigsMap](rdb, 10*time.Minute, "configs")
-	configsCache.Monitor(meter)
+	err = configsCache.Monitor(meter)
+	if err != nil {
+		log.Fatalf("Unable to register observer for configsCache: %v", err)
+	}
 	configurationFetcher := &adapterstore.ConfigurationFetcher{
 		DB:    db,
 		Cache: configsCache,
@@ -272,6 +309,27 @@ func main() {
 		e.Logger.Warn(err)
 	}()
 
+	grpcServer := grpc.NewServer()
+	go func() {
+		grpcPort := os.Getenv("GRPC_PORT")
+		if grpcPort == "" {
+			grpcPort = "50051"
+		}
+		grpcAddr := fmt.Sprintf(":%s", grpcPort)
+
+		lis, err := net.Listen("tcp", grpcAddr)
+		if err != nil {
+			log.Fatalf("Failed to listen on %s: %v", grpcAddr, err)
+		}
+
+		pb.RegisterBiddingServiceServer(grpcServer, &grpcserver.Server{})
+
+		log.Printf("gRPC server is listening on %s", grpcAddr)
+		if err := grpcServer.Serve(lis); err != nil {
+			log.Fatalf("Failed to serve gRPC server: %v", err)
+		}
+	}()
+
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
@@ -280,4 +338,6 @@ func main() {
 	if err := e.Shutdown(ctx); err != nil {
 		e.Logger.Errorf("failed to gracefully shutdown http server: %v", err)
 	}
+
+	grpcServer.GracefulStop()
 }

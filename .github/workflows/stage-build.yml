@@ -19,7 +19,7 @@ on:
 jobs:
   build:
     name: Build image
-    uses: ./.github/workflows/build.yml
+    uses: ./.github/workflows/prod-build.yml
     with:
       tag: stage${{ inputs.stage-number }}
       registry: ghcr.io/bidon-io/stage

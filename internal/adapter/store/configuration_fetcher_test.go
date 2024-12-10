@@ -19,7 +19,7 @@ func TestAppDemandProfileFetcher_FetchCached(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	rdbCache, _ := redismock.NewClientMock()
+	rdbCache, _ := redismock.NewClusterMock()
 
 	user := dbtest.CreateUser(t, tx)
 

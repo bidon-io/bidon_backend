@@ -42,7 +42,7 @@ func (r *LineItemRepo) ListOwnedByUser(ctx context.Context, userID int64, qParam
 func (r *LineItemRepo) FindOwnedByUser(ctx context.Context, userID int64, id int64) (*admin.LineItem, error) {
 	return r.find(ctx, id, func(db *gorm.DB) *gorm.DB {
 		s := db.Session(&gorm.Session{NewDB: true})
-		return db.InnerJoins("App", s.Select("user_id").Where(map[string]any{"user_id": userID}))
+		return db.InnerJoins("App", s.Table("App").Where(map[string]any{"user_id": userID}))
 	})
 }
 

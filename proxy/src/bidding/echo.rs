@@ -1,4 +1,4 @@
-pub(crate) use crate::bidding::Api;
+pub(crate) use crate::bidding::BiddingService;
 pub(crate) use crate::bidding::BiddingError;
 use crate::com::iabtechlab::openrtb::v3::Openrtb;
 
@@ -15,8 +15,8 @@ impl EchoBiddingService {
 }
 
 #[async_trait::async_trait]
-impl Api for EchoBiddingService {
-    async fn bid(&mut self, bidding_request: Openrtb) -> Result<Openrtb, BiddingError> {
-        Ok(bidding_request)
+impl BiddingService for EchoBiddingService {
+    async fn bid(&self, request: Openrtb) -> Result<Openrtb, BiddingError> {
+        Ok(request)
     }
 }

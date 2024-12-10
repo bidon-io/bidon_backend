@@ -23,7 +23,7 @@ type KafkaConfig struct {
 }
 
 func Kafka() (conf KafkaConfig, err error) {
-	seeds := strings.Split(os.Getenv("KAFKA_BROKERS_LIST"), ", ")
+	seeds := strings.Split(os.Getenv("KAFKA_BROKERS_LIST"), ",")
 	clientID := os.Getenv("KAFKA_CLIENT_ID")
 
 	conf.ClientOpts = []kgo.Opt{
