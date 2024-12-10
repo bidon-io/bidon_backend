@@ -25,7 +25,7 @@ jobs:
       - name: Get latest release
         if: ${{ inputs.tag == 'latest' }}
         id: latest-release
-        uses: octokit/request-action@v2
+        uses: octokit/request-action@v2.x
         with:
           route: GET /repos/${{ github.repository }}/releases/latest
         env:
