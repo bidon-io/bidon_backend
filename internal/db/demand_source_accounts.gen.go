@@ -20,7 +20,7 @@ type DemandSourceAccount struct {
 	DemandSourceID int64          `gorm:"column:demand_source_id;type:bigint;not null;index:index_demand_source_accounts_on_demand_source_id,priority:1" json:"demand_source_id"`
 	UserID         int64          `gorm:"column:user_id;type:bigint" json:"user_id"`
 	Type           string         `gorm:"column:type;type:character varying;not null" json:"type"`
-	Extra          datatypes.JSON `gorm:"column:extra;type:jsonb;default:'{}'" json:"extra"`
+	Extra          datatypes.JSON `gorm:"column:extra;type:jsonb;default:{}" json:"extra"`
 	IsBidding      sql.NullBool   `gorm:"column:bidding;type:boolean;default:false" json:"bidding"`
 	IsDefault      sql.NullBool   `gorm:"column:is_default;type:boolean" json:"is_default"`
 	CreatedAt      time.Time      `gorm:"column:created_at;type:timestamp(6) without time zone;not null" json:"created_at"`

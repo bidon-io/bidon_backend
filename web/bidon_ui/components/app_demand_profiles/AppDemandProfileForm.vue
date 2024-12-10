@@ -23,6 +23,9 @@
         v-model:schema="dataSchema"
         :account-type="accountType"
       />
+      <FormField label="Enabled" :error="errors.enabled">
+        <Checkbox v-model="enabled" :binary="true" />
+      </FormField>
       <FormSubmitButton :disabled="!meta.valid" />
     </FormCard>
   </form>
@@ -53,6 +56,7 @@ const { errors, meta, useFieldModel, handleSubmit } = useForm({
       demandSourceId: yup.number().required().label("Deamand Source Id"),
       accountId: yup.number().required().label("Account Id"),
       data: dataSchema.value,
+      enabled: yup.boolean(),
     }),
   ),
   initialValues: {
@@ -61,12 +65,14 @@ const { errors, meta, useFieldModel, handleSubmit } = useForm({
     accountId: resource.value.accountId || null,
     data: resource.value.data || {},
     accountType: resource.value.accountType || "",
+    enabled: resource.value.enabled || true,
   },
 });
 
 const appId = useFieldModel("appId");
 const demandSourceId = useFieldModel("demandSourceId");
 const accountId = useFieldModel("accountId");
+const enabled = useFieldModel("enabled");
 
 // filter demand source accounts by demand source id
 const response = await axios.get("/demand_source_accounts");

@@ -16,9 +16,11 @@ func NewAdCacheAdaptersFilter() *AdCacheAdaptersFilter {
 		ad.AndroidOS: {
 			adapter.AdmobKey:      {ad.RewardedType: 1},
 			adapter.ApplovinKey:   {ad.InterstitialType: 1, ad.RewardedType: 1},
+			adapter.ChartboostKey: {ad.InterstitialType: 1, ad.RewardedType: 1, ad.BannerType: 1},
 			adapter.GAMKey:        {ad.RewardedType: 1},
 			adapter.IronSourceKey: {ad.InterstitialType: 1, ad.RewardedType: 1, ad.BannerType: 1},
 			adapter.UnityAdsKey:   {ad.InterstitialType: 1, ad.RewardedType: 1},
+			adapter.MintegralKey:  {ad.InterstitialType: 1, ad.RewardedType: 1},
 		},
 		ad.IOSOS: {
 			adapter.AdmobKey:      {ad.InterstitialType: 1, ad.RewardedType: 1},

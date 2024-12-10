@@ -10,9 +10,9 @@ use thiserror::Error;
 use crate::com::iabtechlab::openrtb::v3::Openrtb;
 
 #[async_trait::async_trait]
-pub trait Api {
+pub trait BiddingService {
     /// Bidding service
-    async fn bid(&mut self, bidding_request: Openrtb) -> Result<Openrtb, BiddingError>;
+    async fn bid(&self, request: Openrtb) -> Result<Openrtb, BiddingError>;
 }
 
 // todo check errors in openrtb
