@@ -5,10 +5,9 @@ use crate::com::iabtechlab::openrtb::v3 as openrtb;
 use crate::com::iabtechlab::openrtb::v3::AuctionType;
 use crate::models;
 use crate::models::{AdFormat, AuctionRequest, DeviceConnectionType, DeviceType, Geo, Segment};
-use crate::org::bidon::proto::v1 as bidon;
 use crate::org::bidon::proto::v1::mediation;
 use crate::org::bidon::proto::v1::mediation::{
-    AuctionResponseExt, Demand, DeviceExt, Orientation, APP_EXT, AUCTION_RESPONSE_EXT, BID_EXT,
+     Demand, DeviceExt, Orientation, APP_EXT, AUCTION_RESPONSE_EXT, BID_EXT,
     DEVICE_EXT, PLACEMENT_EXT, REGS_EXT, USER_EXT,
 };
 use anyhow::{anyhow, Result};
@@ -16,7 +15,6 @@ use models::AdObjectOrientation;
 use prost::{Extendable, Message};
 use serde_json::Value;
 use std::collections::HashMap;
-use uuid::Uuid;
 
 //TODO As it takes auction_request's ownership, it should be possible to remove most of the .clone() calls.
 pub(crate) fn try_from(
@@ -442,7 +440,7 @@ pub(crate) fn try_into(openrtb: openrtb::Openrtb) -> Result<models::AuctionRespo
         .extension_data(AUCTION_RESPONSE_EXT)
         .map_err(|_| anyhow!("Missing mediation ad object extension in response"))?;
 
-    let mut auction_response = models::AuctionResponse {
+    let auction_response = models::AuctionResponse {
         ad_units,
         auction_id: response.id.unwrap_or_default(),
         no_bids: Some(no_bids),
@@ -475,9 +473,8 @@ pub(crate) fn try_into(openrtb: openrtb::Openrtb) -> Result<models::AuctionRespo
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::models::{App, Device, Session, User};
+    use crate::models::{App,  Session };
     use crate::org::bidon::proto::v1::mediation::USER_EXT;
-    use adcom::placement::Placement;
     use prost::{Extension, ExtensionRegistry};
     use serde_json::json;
     use std::collections::HashMap;
