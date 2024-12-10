@@ -1,14 +1,17 @@
 use crate::adapter::adcom::enums::OperatingSystem;
-use crate::org::bidon::proto::v1::mediation::{AuctionResponseExt, Demand, DeviceExt, Orientation, APP_EXT, AUCTION_RESPONSE_EXT, BID_EXT, DEVICE_EXT, PLACEMENT_EXT, REGS_EXT, USER_EXT};
 use crate::com::iabtechlab::adcom::v1 as adcom;
 use crate::com::iabtechlab::adcom::v1::context::DistributionChannel;
 use crate::com::iabtechlab::openrtb::v3 as openrtb;
 use crate::com::iabtechlab::openrtb::v3::AuctionType;
+use crate::models;
 use crate::models::{AdFormat, AuctionRequest, DeviceConnectionType, DeviceType, Geo, Segment};
 use crate::org::bidon::proto::v1 as bidon;
-use anyhow::{anyhow, Result};
 use crate::org::bidon::proto::v1::mediation;
-use crate::models;
+use crate::org::bidon::proto::v1::mediation::{
+    AuctionResponseExt, Demand, DeviceExt, Orientation, APP_EXT, AUCTION_RESPONSE_EXT, BID_EXT,
+    DEVICE_EXT, PLACEMENT_EXT, REGS_EXT, USER_EXT,
+};
+use anyhow::{anyhow, Result};
 use models::AdObjectOrientation;
 use prost::{Extendable, Message};
 use serde_json::Value;
@@ -180,7 +183,10 @@ fn convert_user(
 ) -> Result<adcom::context::User> {
     let mut user = adcom::context::User {
         id: api_user.idg.map(|uuid| uuid.to_string()),
-        consent: api_user.consent.as_ref().and_then(|c| serde_json::to_string(c).ok()),
+        consent: api_user
+            .consent
+            .as_ref()
+            .and_then(|c| serde_json::to_string(c).ok()),
         ..Default::default()
     };
 
@@ -252,16 +258,18 @@ fn convert_iab(iab_json: &HashMap<String, Value>) -> Result<String> {
     serde_json::to_string(&iab_json).map_err(Into::into)
 }
 
-fn convert_ad_object_to_item(ad_object: &models::AdObject) -> Result<openrtb::Item> {
-    let mut item = openrtb::Item {
-        id: ad_object.auction_id.clone(),
-        flr: Some(ad_object.auction_pricefloor as f32),
-        flrcur: Some("USD".to_string()),
+fn create_placement(ad_object: &models::AdObject) -> Result<adcom::placement::Placement> {
+    let mut placement = crate::com::iabtechlab::adcom::v1::placement::Placement {
+        display: None,
+        video: None,
+        audio: None, // Assuming no audio placement in this context
+        // Common placement properties
+        secure: Some(1), // Assuming HTTPS is required
         ..Default::default()
     };
 
     // Create the AdObjectExtension
-    let placement_ext = crate::org::bidon::proto::v1::mediation::PlacementExt{
+    let placement_ext = crate::org::bidon::proto::v1::mediation::PlacementExt {
         auction_id: ad_object.auction_id.clone(),
         auction_key: ad_object.auction_key.clone(),
         auction_configuration_id: ad_object.auction_configuration_id.clone(),
@@ -280,7 +288,24 @@ fn convert_ad_object_to_item(ad_object: &models::AdObject) -> Result<openrtb::It
         rewarded: ad_object.rewarded.as_ref().map(|r| r.to_string()),
     };
 
-    item.set_extension_data(PLACEMENT_EXT, placement_ext)?;
+    placement.set_extension_data(PLACEMENT_EXT, placement_ext)?;
+    Ok(placement)
+}
+
+fn serialize_placement(placement: &adcom::placement::Placement) -> Result<Vec<u8>> {
+    let mut bytes = Vec::new();
+    placement.encode(&mut bytes)?;
+    Ok(bytes)
+}
+
+fn convert_ad_object_to_item(ad_object: &models::AdObject) -> Result<openrtb::Item> {
+    let item = openrtb::Item {
+        id: ad_object.auction_id.clone(),
+        flr: Some(ad_object.auction_pricefloor as f32),
+        flrcur: Some("USD".to_string()),
+        spec: Some(serialize_placement(&create_placement(ad_object)?)?),
+        ..Default::default()
+    };
 
     Ok(item)
 }
@@ -367,9 +392,7 @@ fn convert_demand(api_demand: &HashMap<String, Value>) -> Result<HashMap<String,
 
 // TODO: this is a temporary function to convert the OpenRTB response to the AuctionResponse
 // fix it later
-pub(crate) fn try_into(
-    openrtb: openrtb::Openrtb,
-) -> Result<models::AuctionResponse> {
+pub(crate) fn try_into(openrtb: openrtb::Openrtb) -> Result<models::AuctionResponse> {
     // Extract the Response from Openrtb
     let response = match openrtb.payload_oneof {
         Some(openrtb::openrtb::PayloadOneof::Response(response)) => response,
@@ -391,20 +414,22 @@ pub(crate) fn try_into(
                 label: bid_ext.label.clone().ok_or(anyhow!("Label is missing"))?,
                 uid: bid.item.unwrap_or_default(),
                 demand_id: bid.cid.unwrap_or_default(),
-                    // Start of Selection
-                    pricefloor: Some(bid.price.unwrap_or_default() as f64),
-                    bid_type: bid_ext.bid_type.clone().ok_or(anyhow!("Bid type is missing"))?,
-                    ext: Some(
-                        serde_json::to_value(bid_ext.ext.clone())
-                            .unwrap_or_default()
-                            .as_object()
-                            .map(|map| map.clone().into_iter().collect::<HashMap<String, Value>>())
-                            .unwrap_or_default(),
-                    ),
-                };
-                let price_threshold = bid.price.unwrap_or_default();
-                if bid.price.unwrap_or_default() > price_threshold {
-                    ad_units.push(ad_unit);
+                // Start of Selection
+                pricefloor: Some(bid.price.unwrap_or_default() as f64),
+                bid_type: bid_ext
+                    .bid_type
+                    .clone()
+                    .ok_or(anyhow!("Bid type is missing"))?,
+                ext: Some(
+                    serde_json::to_value(bid_ext.ext.clone())
+                        .unwrap_or_default()
+                        .as_object()
+                        .map(|map| map.clone().into_iter().collect::<HashMap<String, Value>>())
+                        .unwrap_or_default(),
+                ),
+            };
+            if bid.price.unwrap_or_default() > 0.0 {
+                ad_units.push(ad_unit);
             } else {
                 no_bids.push(ad_unit);
             }
@@ -422,14 +447,24 @@ pub(crate) fn try_into(
         auction_id: response.id.unwrap_or_default(),
         no_bids: Some(no_bids),
         token: auction_ext.token.clone().unwrap_or_default(),
-        external_win_notifications: auction_ext.external_win_notifications.clone().unwrap_or_default(),
-        segment: auction_ext.segment.as_ref().map(|s| models::Segment {
-            id: s.id.clone(),
-            uid: s.uid.clone(),
-            ext: s.ext.clone(),
-        }).ok_or(anyhow!("Segment is missing"))?,
+        external_win_notifications: auction_ext
+            .external_win_notifications
+            .clone()
+            .unwrap_or_default(),
+        segment: auction_ext
+            .segment
+            .as_ref()
+            .map(|s| models::Segment {
+                id: s.id.clone(),
+                uid: s.uid.clone(),
+                ext: s.ext.clone(),
+            })
+            .ok_or(anyhow!("Segment is missing"))?,
         auction_configuration_id: auction_ext.auction_configuration_id.unwrap_or_default(),
-        auction_configuration_uid: auction_ext.auction_configuration_uid.clone().unwrap_or_default(),
+        auction_configuration_uid: auction_ext
+            .auction_configuration_uid
+            .clone()
+            .unwrap_or_default(),
         auction_pricefloor: auction_ext.auction_pricefloor.unwrap_or_default(),
         auction_timeout: auction_ext.auction_timeout.unwrap_or_default(),
     };
@@ -440,8 +475,10 @@ pub(crate) fn try_into(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::org::bidon::proto::v1::mediation::USER_EXT;
     use crate::models::{App, Device, Session, User};
+    use crate::org::bidon::proto::v1::mediation::USER_EXT;
+    use adcom::placement::Placement;
+    use prost::{Extension, ExtensionRegistry};
     use serde_json::json;
     use std::collections::HashMap;
     use uuid::Uuid;
@@ -535,7 +572,7 @@ mod tests {
                 coppa: None,
                 consent: Some(HashMap::from([
                     ("meta".to_string(), json!({"consent": true})),
-                    ("gdpr".to_string(), json!({"status": "granted"}))
+                    ("gdpr".to_string(), json!({"status": "granted"})),
                 ])),
             },
         }
@@ -588,9 +625,7 @@ mod tests {
         let idfv = Uuid::new_v4();
         let idg = Uuid::new_v4();
 
-        let consent_map = HashMap::from([
-            ("meta".to_string(), json!({"consent": true})),
-        ]);
+        let consent_map = HashMap::from([("meta".to_string(), json!({"consent": true}))]);
 
         let api_user = models::User {
             idfa: Some(idfa),
@@ -610,8 +645,11 @@ mod tests {
         let user = convert_user(&api_user, segment.as_ref()).unwrap();
 
         assert_eq!(user.id, Some(idg.to_string()));
-        assert_eq!(user.consent, Some(serde_json::to_string(&consent_map).unwrap()));
-        
+        assert_eq!(
+            user.consent,
+            Some(serde_json::to_string(&consent_map).unwrap())
+        );
+
         let bidon_user = user.extension_set.extension_data(USER_EXT).unwrap();
         assert_eq!(bidon_user.idfa, Some(idfa.to_string()));
         assert_eq!(bidon_user.idfv, Some(idfv.to_string()));
@@ -702,7 +740,19 @@ mod tests {
         assert_eq!(item.id, Some("auction_id".to_string()));
         assert_eq!(item.flr, Some(1.0));
         assert_eq!(item.flrcur, Some("USD".to_string()));
-        let bidon_ad_object = item
+        let placement = item.spec.unwrap();
+        fn registry(extension: &'static dyn Extension) -> ExtensionRegistry {
+            let mut registry = ExtensionRegistry::new();
+            registry.register(extension);
+            registry
+        }
+        let placement =
+            crate::com::iabtechlab::adcom::v1::placement::Placement::decode_with_extensions(
+                placement.as_slice(),
+                &registry(PLACEMENT_EXT),
+            )
+            .unwrap();
+        let bidon_ad_object = placement
             .extension_set
             .extension_data(PLACEMENT_EXT)
             .unwrap();
@@ -754,37 +804,32 @@ mod tests {
 
     #[test]
     fn test_openrtb_to_auction_response() {
-        
         // Create a mock OpenRTB response
         let response = openrtb::Response {
             id: Some("auction123".to_string()),
             bidid: None,
             nbr: None,
-            seatbid: vec![
-                openrtb::SeatBid {
-                    bid: vec![
-                        openrtb::Bid {
-                            id: Some("bid1".to_string()),
-                            item: Some("item1".to_string()),
-                            price: Some(2.5),
-                            cid: Some("demand1".to_string()),
-                            extension_set: {
-                                let mut ext = prost::ExtensionSet::default();
-                                let bid_ext = mediation::BidExt {
-                                    label: Some("key123".to_string()),
-                                    bid_type: Some("bid_type".to_string()),
-                                    ext: HashMap::new(),
-                                };
-                                ext.set_extension_data(BID_EXT, bid_ext).unwrap();
-                                ext
-                            },
-                            ..Default::default()
-                        }
-                    ],
-                    seat: None,
+            seatbid: vec![openrtb::SeatBid {
+                bid: vec![openrtb::Bid {
+                    id: Some("bid1".to_string()),
+                    item: Some("item1".to_string()),
+                    price: Some(2.5),
+                    cid: Some("demand1".to_string()),
+                    extension_set: {
+                        let mut ext = prost::ExtensionSet::default();
+                        let bid_ext = mediation::BidExt {
+                            label: Some("key123".to_string()),
+                            bid_type: Some("bid_type".to_string()),
+                            ext: HashMap::new(),
+                        };
+                        ext.set_extension_data(BID_EXT, bid_ext).unwrap();
+                        ext
+                    },
                     ..Default::default()
-                }
-            ],
+                }],
+                seat: None,
+                ..Default::default()
+            }],
             extension_set: {
                 let mut ext = prost::ExtensionSet::default();
                 let auction_response_ext = mediation::AuctionResponseExt {
@@ -801,7 +846,8 @@ mod tests {
                         ext: None,
                     }),
                 };
-                ext.set_extension_data(AUCTION_RESPONSE_EXT, auction_response_ext).unwrap();
+                ext.set_extension_data(AUCTION_RESPONSE_EXT, auction_response_ext)
+                    .unwrap();
                 ext
             },
             ..Default::default()
@@ -814,7 +860,7 @@ mod tests {
             payload_oneof: Some(openrtb::openrtb::PayloadOneof::Response(response)),
         };
 
-        let auction_response = try_into(openrtb ).unwrap();
+        let auction_response = try_into(openrtb).unwrap();
 
         // Test assertions
         assert_eq!(auction_response.auction_id, "auction123");
@@ -854,13 +900,16 @@ mod tests {
         assert_eq!(device.lang, Some("en".to_string()));
         assert_eq!(device.carrier, Some("Verizon".to_string()));
         assert_eq!(device.mccmnc, Some("310012".to_string()));
-        assert_eq!(device.contype, Some(adcom::enums::ConnectionType::Wifi as i32));
+        assert_eq!(
+            device.contype,
+            Some(adcom::enums::ConnectionType::Wifi as i32)
+        );
 
         // Test geo fields
         let geo = device.geo.unwrap();
         assert_eq!(geo.lat, Some(37.7749));
         assert_eq!(geo.lon, Some(-122.4194));
-        assert_eq!(geo.accur, Some(10));  // Converted from f64 to i32
+        assert_eq!(geo.accur, Some(10)); // Converted from f64 to i32
         assert_eq!(geo.country, Some("US".to_string()));
         assert_eq!(geo.city, Some("San Francisco".to_string()));
         assert_eq!(geo.zip, Some("94103".to_string()));
@@ -886,4 +935,3 @@ mod tests {
         assert_eq!(device_ext.cpu_usage, Some(10.6));
     }
 }
-
