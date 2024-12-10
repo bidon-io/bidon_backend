@@ -65,7 +65,7 @@ const { errors, meta, useFieldModel, handleSubmit } = useForm({
     accountId: resource.value.accountId || null,
     data: resource.value.data || {},
     accountType: resource.value.accountType || "",
-    enabled: resource.value.enabled || true,
+    enabled: resource.value.enabled ?? true,
   },
 });
 
