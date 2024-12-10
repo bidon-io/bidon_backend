@@ -10,14 +10,14 @@ fn main() {
 
     // Compile the proto files, including all found directories for imports
     tonic_build::configure()
-        .compile(&["bidon/v1/services.proto"], &proto_dirs)
+        .compile(&["org/bidon/proto/v1/services.proto"], &proto_dirs)
         .unwrap_or_else(|e| panic!("Failed to compile protos: {:?}", e));
 
     Config::new()
         .compile_protos(
             &[
-                "bidon/v1/mediation/mediation.proto",
-                "bidon/v1/context/context.proto",
+                "org/bidon/proto/v1/mediation/mediation.proto",
+                "org/bidon/proto/v1/context/context.proto",
                 "com/iabtechlab/openrtb/v3/openrtb.proto",
                 "com/iabtechlab/adcom/v1/adcom.proto",
                 "com/iabtechlab/adcom/v1/context/context.proto",
