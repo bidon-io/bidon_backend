@@ -52,10 +52,12 @@ services:
       target: pre-commit-deps
     volumes:
       - .:/app
-      - gomodcache:/go/pkg/mod
-      - gocache:/root/.cache/go-build
+      - gomodcache-precommit:/go/pkg/mod
+      - gocache-precommit:/root/.cache/go-build
     working_dir: /app
     entrypoint: ["pre-commit", "run", "--all-files"]
+    networks:
+      - precommit-network
 
   postgres:
     image: postgres:17-alpine
@@ -151,4 +153,9 @@ volumes:
   pgdata-test:
   gomodcache:
   gocache:
+  gomodcache-precommit:
+  gocache-precommit:
   redisdata:
+
+networks:
+  precommit-network:
