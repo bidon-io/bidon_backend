@@ -1,20 +1,19 @@
 use crate::adapter::adcom::enums::OperatingSystem;
-use crate::bidon::v1::mediation::{
-    MediationSession, MEDIATION_AD_OBJECT, MEDIATION_SESSION, MEDIATION_USER,
-};
-use crate::bidon::v1::mediation::{MEDIATION_APP, MEDIATION_REGS};
+use crate::org::bidon::proto::v1::mediation::{AuctionResponseExt, Demand, DeviceExt, Orientation, APP_EXT, AUCTION_RESPONSE_EXT, BID_EXT, DEVICE_EXT, PLACEMENT_EXT, REGS_EXT, USER_EXT};
 use crate::com::iabtechlab::adcom::v1 as adcom;
 use crate::com::iabtechlab::adcom::v1::context::DistributionChannel;
 use crate::com::iabtechlab::openrtb::v3 as openrtb;
 use crate::com::iabtechlab::openrtb::v3::AuctionType;
 use crate::models::{AdFormat, AuctionRequest, DeviceConnectionType, DeviceType, Geo, Segment};
-use crate::{bidon, models};
+use crate::org::bidon::proto::v1 as bidon;
 use anyhow::{anyhow, Result};
-use bidon::v1::mediation::{Demand, Orientation};
+use crate::org::bidon::proto::v1::mediation;
+use crate::models;
 use models::AdObjectOrientation;
 use prost::{Extendable, Message};
 use serde_json::Value;
 use std::collections::HashMap;
+use uuid::Uuid;
 
 //TODO As it takes auction_request's ownership, it should be possible to remove most of the .clone() calls.
 pub(crate) fn try_from(
@@ -22,7 +21,7 @@ pub(crate) fn try_from(
     bidon_version: &String,
 ) -> Result<openrtb::Openrtb> {
     // Convert AuctionRequest to Openrtb::Request
-    let mut request = openrtb::Request {
+    let request = openrtb::Request {
         id: auction_request.ad_object.auction_id.to_owned(),
         test: auction_request.test,
         tmax: auction_request.tmax.map(|t| t as u32),
@@ -31,9 +30,6 @@ pub(crate) fn try_from(
         item: vec![convert_ad_object_to_item(&auction_request.ad_object)?],
         ..Default::default()
     };
-
-    let bidon_session = convert_session(&auction_request.session);
-    request.set_extension_data(MEDIATION_SESSION, bidon_session)?;
 
     // Create Openrtb instance with the converted request
     Ok(openrtb::Openrtb {
@@ -46,7 +42,7 @@ pub(crate) fn try_from(
 
 fn serialize_context(auction_request: &AuctionRequest, bidon_version: &String) -> Result<Vec<u8>> {
     // Create the AdCOM Context message
-    let context = bidon::v1::context::Context {
+    let context = crate::org::bidon::proto::v1::context::Context {
         distribution_channel: DistributionChannel {
             channel_oneof: Some(adcom::context::distribution_channel::ChannelOneof::App(
                 convert_app(&auction_request.app, bidon_version)?,
@@ -54,7 +50,7 @@ fn serialize_context(auction_request: &AuctionRequest, bidon_version: &String) -
             ..Default::default()
         }
         .into(),
-        device: convert_device(&auction_request.device, auction_request.geo.as_ref()).into(),
+        device: convert_device(&auction_request)?.into(),
         user: convert_user(&auction_request.user, auction_request.segment.as_ref())?.into(),
         regs: match auction_request.regs.as_ref() {
             Some(t) => convert_regs(&t)?.into(),
@@ -81,7 +77,7 @@ fn convert_app(
         ..Default::default()
     };
 
-    let bidon_app = bidon::v1::mediation::MediationApp {
+    let bidon_app = crate::org::bidon::proto::v1::mediation::AppExt {
         key: api_app.key.clone().into(),
         framework: api_app.framework_version.clone(),
         framework_version: api_app.framework_version.clone(),
@@ -91,12 +87,15 @@ fn convert_app(
         bidon_version: Some(bidon_version.clone()),
     };
 
-    app.set_extension_data(MEDIATION_APP, bidon_app)?;
+    app.set_extension_data(APP_EXT, bidon_app)?;
     Ok(app)
 }
 
-fn convert_device(api_device: &models::Device, geo: Option<&Geo>) -> adcom::context::Device {
-    let device = adcom::context::Device {
+fn convert_device(request: &AuctionRequest) -> Result<adcom::context::Device> {
+    let api_device: &models::Device = &request.device;
+    let geo: Option<&Geo> = request.geo.as_ref();
+
+    let mut device = adcom::context::Device {
         // Map standard fields
         r#type: convert_device_type(api_device.r#type.clone()).map(|dt| dt as i32),
         ua: api_device.ua.clone().into(),
@@ -119,7 +118,11 @@ fn convert_device(api_device: &models::Device, geo: Option<&Geo>) -> adcom::cont
         geo: geo.clone().map(|g| convert_geo(&g)),
         ..Default::default()
     };
-    device
+
+    let bidon_device_ext = convert_session(&request.session);
+    device.set_extension_data(DEVICE_EXT, bidon_device_ext)?;
+
+    Ok(device)
 }
 
 fn convert_device_type(device_type: Option<DeviceType>) -> Option<adcom::enums::DeviceType> {
@@ -177,25 +180,25 @@ fn convert_user(
 ) -> Result<adcom::context::User> {
     let mut user = adcom::context::User {
         id: api_user.idg.map(|uuid| uuid.to_string()),
+        consent: api_user.consent.as_ref().and_then(|c| serde_json::to_string(c).ok()),
         ..Default::default()
     };
 
-    let mediation_user = bidon::v1::mediation::MediationUser {
+    let bidon_user_ext = crate::org::bidon::proto::v1::mediation::UserExt {
         idfa: api_user.idfa.map(|uuid| uuid.to_string()),
         tracking_authorization_status: Some(api_user.tracking_authorization_status.clone()),
         idfv: api_user.idfv.map(|uuid| uuid.to_string()),
         idg: api_user.idg.map(|uuid| uuid.to_string()),
-        consent: Some(serde_json::to_string(&api_user.consent)?), // TODO there is a consent field in adcom::User. Should we have it here?
         segments: segment.into_iter().map(convert_segment).collect(),
     };
 
-    user.set_extension_data(MEDIATION_USER, mediation_user)?;
+    user.set_extension_data(USER_EXT, bidon_user_ext)?;
 
     Ok(user)
 }
 
-fn convert_segment(api_segment: &Segment) -> bidon::v1::mediation::Segment {
-    let segment = bidon::v1::mediation::Segment {
+fn convert_segment(api_segment: &Segment) -> crate::org::bidon::proto::v1::mediation::Segment {
+    let segment = crate::org::bidon::proto::v1::mediation::Segment {
         id: api_segment.id.clone(),
         uid: api_segment.uid.clone(),
         ext: api_segment.ext.clone(),
@@ -204,8 +207,8 @@ fn convert_segment(api_segment: &Segment) -> bidon::v1::mediation::Segment {
     segment
 }
 
-fn convert_session(api_session: &models::Session) -> MediationSession {
-    MediationSession {
+fn convert_session(api_session: &models::Session) -> DeviceExt {
+    DeviceExt {
         id: Some(api_session.id.to_string().clone()),
         launch_ts: Some(api_session.launch_ts),
         launch_monotonic_ts: api_session.launch_monotonic_ts.into(),
@@ -231,7 +234,7 @@ fn convert_regs(api_regs: &models::Regulations) -> Result<adcom::context::Regs> 
         ..Default::default()
     };
 
-    let mediation_regs = bidon::v1::mediation::MediationRegs {
+    let mediation_regs = crate::org::bidon::proto::v1::mediation::RegsExt {
         us_privacy: api_regs.us_privacy.clone(),
         eu_privacy: api_regs.eu_privacy.clone(),
         iab: match api_regs.iab.as_ref() {
@@ -240,7 +243,7 @@ fn convert_regs(api_regs: &models::Regulations) -> Result<adcom::context::Regs> 
         },
     };
 
-    regs.set_extension_data(MEDIATION_REGS, mediation_regs)?;
+    regs.set_extension_data(REGS_EXT, mediation_regs)?;
 
     Ok(regs)
 }
@@ -258,7 +261,7 @@ fn convert_ad_object_to_item(ad_object: &models::AdObject) -> Result<openrtb::It
     };
 
     // Create the AdObjectExtension
-    let mediation_ad_object = bidon::v1::mediation::MediationAdObject {
+    let placement_ext = crate::org::bidon::proto::v1::mediation::PlacementExt{
         auction_id: ad_object.auction_id.clone(),
         auction_key: ad_object.auction_key.clone(),
         auction_configuration_id: ad_object.auction_configuration_id.clone(),
@@ -277,7 +280,7 @@ fn convert_ad_object_to_item(ad_object: &models::AdObject) -> Result<openrtb::It
         rewarded: ad_object.rewarded.as_ref().map(|r| r.to_string()),
     };
 
-    item.set_extension_data(MEDIATION_AD_OBJECT, mediation_ad_object)?;
+    item.set_extension_data(PLACEMENT_EXT, placement_ext)?;
 
     Ok(item)
 }
@@ -289,20 +292,20 @@ fn convert_ad_orientation(orientation: &AdObjectOrientation) -> Orientation {
     }
 }
 
-fn convert_banner_ad(api_banner: &models::BannerAdObject) -> bidon::v1::mediation::BannerAd {
-    let banner = bidon::v1::mediation::BannerAd {
+fn convert_banner_ad(api_banner: &models::BannerAdObject) -> mediation::BannerAd {
+    let banner = mediation::BannerAd {
         format: Some(convert_ad_format(api_banner.format) as i32),
     };
 
     banner
 }
 
-fn convert_ad_format(format: AdFormat) -> bidon::v1::mediation::AdFormat {
+fn convert_ad_format(format: AdFormat) -> mediation::AdFormat {
     match format {
-        AdFormat::Banner => bidon::v1::mediation::AdFormat::Banner,
-        AdFormat::Leaderboard => bidon::v1::mediation::AdFormat::Leaderboard,
-        AdFormat::Mrec => bidon::v1::mediation::AdFormat::Mrec,
-        AdFormat::Adaptive => bidon::v1::mediation::AdFormat::Adaptive,
+        AdFormat::Banner => mediation::AdFormat::Banner,
+        AdFormat::Leaderboard => mediation::AdFormat::Leaderboard,
+        AdFormat::Mrec => mediation::AdFormat::Mrec,
+        AdFormat::Adaptive => mediation::AdFormat::Adaptive,
     }
 }
 
@@ -362,14 +365,181 @@ fn convert_demand(api_demand: &HashMap<String, Value>) -> Result<HashMap<String,
     Ok(demands)
 }
 
+// TODO: this is a temporary function to convert the OpenRTB response to the AuctionResponse
+// fix it later
+pub(crate) fn try_into(
+    openrtb: openrtb::Openrtb,
+) -> Result<models::AuctionResponse> {
+    // Extract the Response from Openrtb
+    let response = match openrtb.payload_oneof {
+        Some(openrtb::openrtb::PayloadOneof::Response(response)) => response,
+        _ => return Err(anyhow!("OpenRTB payload is not a Response")),
+    };
+
+    // Extract bid information from the response
+    let mut ad_units = Vec::new();
+    let mut no_bids = Vec::new();
+
+    for seatbid in response.seatbid {
+        for bid in seatbid.bid {
+            // Extract bid extension data
+            let bid_ext = bid
+                .extension_set
+                .extension_data(BID_EXT)
+                .map_err(|_| anyhow!("Missing mediation ad object extension in bid"))?;
+            let ad_unit = models::AdUnit {
+                label: bid_ext.label.clone().ok_or(anyhow!("Label is missing"))?,
+                uid: bid.item.unwrap_or_default(),
+                demand_id: bid.cid.unwrap_or_default(),
+                    // Start of Selection
+                    pricefloor: Some(bid.price.unwrap_or_default() as f64),
+                    bid_type: bid_ext.bid_type.clone().ok_or(anyhow!("Bid type is missing"))?,
+                    ext: Some(
+                        serde_json::to_value(bid_ext.ext.clone())
+                            .unwrap_or_default()
+                            .as_object()
+                            .map(|map| map.clone().into_iter().collect::<HashMap<String, Value>>())
+                            .unwrap_or_default(),
+                    ),
+                };
+                let price_threshold = bid.price.unwrap_or_default();
+                if bid.price.unwrap_or_default() > price_threshold {
+                    ad_units.push(ad_unit);
+            } else {
+                no_bids.push(ad_unit);
+            }
+        }
+    }
+
+    // Extract auction configuration from response extensions
+    let auction_ext = response
+        .extension_set
+        .extension_data(AUCTION_RESPONSE_EXT)
+        .map_err(|_| anyhow!("Missing mediation ad object extension in response"))?;
+
+    let mut auction_response = models::AuctionResponse {
+        ad_units,
+        auction_id: response.id.unwrap_or_default(),
+        no_bids: Some(no_bids),
+        token: auction_ext.token.clone().unwrap_or_default(),
+        external_win_notifications: auction_ext.external_win_notifications.clone().unwrap_or_default(),
+        segment: auction_ext.segment.as_ref().map(|s| models::Segment {
+            id: s.id.clone(),
+            uid: s.uid.clone(),
+            ext: s.ext.clone(),
+        }).ok_or(anyhow!("Segment is missing"))?,
+        auction_configuration_id: auction_ext.auction_configuration_id.unwrap_or_default(),
+        auction_configuration_uid: auction_ext.auction_configuration_uid.clone().unwrap_or_default(),
+        auction_pricefloor: auction_ext.auction_pricefloor.unwrap_or_default(),
+        auction_timeout: auction_ext.auction_timeout.unwrap_or_default(),
+    };
+
+    Ok(auction_response)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::bidon::v1::mediation::MEDIATION_USER;
+    use crate::org::bidon::proto::v1::mediation::USER_EXT;
     use crate::models::{App, Device, Session, User};
     use serde_json::json;
     use std::collections::HashMap;
     use uuid::Uuid;
+
+    fn create_test_auction_request() -> models::AuctionRequest {
+        models::AuctionRequest {
+            ad_object: models::AdObject {
+                auction_id: Some("auction123".to_string()),
+                auction_key: Some("key123".to_string()),
+                auction_configuration_id: Some(456),
+                auction_configuration_uid: Some("config789".to_string()),
+                auction_pricefloor: 1.0,
+                orientation: None,
+                demands: HashMap::new(),
+                banner: None,
+                interstitial: None,
+                rewarded: None,
+            },
+            adapters: HashMap::new(),
+            app: App {
+                bundle: "com.example.app".to_string(),
+                framework: "".to_string(),
+                framework_version: None,
+                key: "".to_string(),
+                plugin_version: None,
+                sdk_version: None,
+                skadn: None,
+                version: "".to_string(),
+            },
+            device: models::Device {
+                r#type: Some(DeviceType::Phone),
+                ua: "Mozilla/5.0".to_string(),
+                make: "Apple".to_string(),
+                model: "iPhone".to_string(),
+                os: "iOS".to_string(),
+                osv: "14.4".to_string(),
+                hwv: "A14".to_string(),
+                h: 1920,
+                w: 1080,
+                ppi: 326,
+                pxratio: 2.0,
+                js: 1,
+                language: "en".to_string(),
+                carrier: Some("Verizon".to_string()),
+                mccmnc: Some("310012".to_string()),
+                connection_type: DeviceConnectionType::Wifi,
+                geo: None,
+            },
+            ext: None,
+            geo: Some(Geo {
+                lat: Some(37.7749),
+                lon: Some(-122.4194),
+                accuracy: Some(10.6),
+                country: Some("US".to_string()),
+                city: Some("San Francisco".to_string()),
+                zip: Some("94103".to_string()),
+                utcoffset: Some(-8),
+                lastfix: Some(1234567890),
+            }),
+            regs: None,
+            segment: Some(models::Segment {
+                id: None,
+                uid: None,
+                ext: None,
+            }),
+            session: Session {
+                id: Uuid::new_v4(),
+                launch_ts: 1234567890,
+                launch_monotonic_ts: 1234567890,
+                start_ts: 1234567890,
+                start_monotonic_ts: 1234567890,
+                ts: 1234567890,
+                monotonic_ts: 1234567890,
+                memory_warnings_ts: vec![],
+                memory_warnings_monotonic_ts: vec![],
+                ram_used: 1024,
+                ram_size: 2048,
+                storage_free: Some(512),
+                storage_used: Some(256),
+                battery: 80.5,
+                cpu_usage: 10.6,
+            },
+            test: Some(false),
+            tmax: Some(500),
+            token: None,
+            user: models::User {
+                idfa: Some(Uuid::new_v4()),
+                tracking_authorization_status: "authorized".to_string(),
+                idfv: Some(Uuid::new_v4()),
+                idg: Some(Uuid::new_v4()),
+                coppa: None,
+                consent: Some(HashMap::from([
+                    ("meta".to_string(), json!({"consent": true})),
+                    ("gdpr".to_string(), json!({"status": "granted"}))
+                ])),
+            },
+        }
+    }
 
     #[test]
     fn test_convert_session() {
@@ -413,87 +583,21 @@ mod tests {
     }
 
     #[test]
-    fn test_convert_device() {
-        let api_device = Device {
-            r#type: Some(DeviceType::Phone),
-            ua: "Mozilla/5.0".to_string(),
-            make: "Apple".to_string(),
-            model: "iPhone".to_string(),
-            os: "iOS".to_string(),
-            osv: "14.4".to_string(),
-            hwv: "A14".to_string(),
-            h: 1920,
-            w: 1080,
-            ppi: 326,
-            pxratio: 2.0,
-            js: 1,
-            language: "en".to_string(),
-            carrier: Some("Verizon".to_string()),
-            mccmnc: Some("310012".to_string()),
-            connection_type: DeviceConnectionType::Wifi,
-            geo: None,
-        };
-
-        let geo = Some(Geo {
-            lat: Some(37.7749),
-            lon: Some(-122.4194),
-            accuracy: Some(10.6),
-            country: Some("US".to_string()),
-            city: Some("San Francisco".to_string()),
-            zip: Some("94103".to_string()),
-            utcoffset: Some(-8),
-            lastfix: Some(1234567890),
-        });
-
-        let device = convert_device(&api_device, geo.as_ref());
-
-        assert_eq!(device.r#type, Some(adcom::enums::DeviceType::Phone as i32));
-        assert_eq!(device.ua, Some("Mozilla/5.0".to_string()));
-        assert_eq!(device.make, Some("Apple".to_string()));
-        assert_eq!(device.model, Some("iPhone".to_string()));
-        assert_eq!(device.os, Some(adcom::enums::OperatingSystem::Ios as i32));
-        assert_eq!(device.osv, Some("14.4".to_string()));
-        assert_eq!(device.hwv, Some("A14".to_string()));
-        assert_eq!(device.h, Some(1920));
-        assert_eq!(device.w, Some(1080));
-        assert_eq!(device.ppi, Some(326));
-        assert_eq!(device.pxratio, Some(2.0));
-        assert_eq!(device.js, Some(true));
-        assert_eq!(device.lang, Some("en".to_string()));
-        assert_eq!(device.carrier, Some("Verizon".to_string()));
-        assert_eq!(device.mccmnc, Some("310012".to_string()));
-        assert_eq!(
-            device.contype,
-            Some(adcom::enums::ConnectionType::Wifi as i32)
-        );
-        assert_eq!(device.geo.as_ref().unwrap().lat, Some(37.7749));
-        assert_eq!(device.geo.as_ref().unwrap().lon, Some(-122.4194));
-        assert_eq!(device.geo.as_ref().unwrap().accur, Some(10));
-        assert_eq!(device.geo.as_ref().unwrap().country, Some("US".to_string()));
-        assert_eq!(
-            device.geo.as_ref().unwrap().city,
-            Some("San Francisco".to_string())
-        );
-        assert_eq!(device.geo.as_ref().unwrap().zip, Some("94103".to_string()));
-        assert_eq!(device.geo.as_ref().unwrap().utcoffset, Some(-8));
-        assert_eq!(device.geo.as_ref().unwrap().lastfix, Some(1234567890));
-    }
-
-    #[test]
     fn test_convert_user() {
         let idfa = Uuid::new_v4();
         let idfv = Uuid::new_v4();
         let idg = Uuid::new_v4();
 
-        let api_user = User {
+        let consent_map = HashMap::from([
+            ("meta".to_string(), json!({"consent": true})),
+        ]);
+
+        let api_user = models::User {
             idfa: Some(idfa),
             tracking_authorization_status: "authorized".to_string(),
             idfv: Some(idfv),
             idg: Some(idg),
-            consent: Some(HashMap::from([(
-                "meta".to_string(),
-                json!({"consent": true}),
-            )])),
+            consent: Some(consent_map.clone()),
             coppa: None,
         };
 
@@ -506,16 +610,14 @@ mod tests {
         let user = convert_user(&api_user, segment.as_ref()).unwrap();
 
         assert_eq!(user.id, Some(idg.to_string()));
-        let bidon_user = user.extension_set.extension_data(MEDIATION_USER).unwrap();
+        assert_eq!(user.consent, Some(serde_json::to_string(&consent_map).unwrap()));
+        
+        let bidon_user = user.extension_set.extension_data(USER_EXT).unwrap();
         assert_eq!(bidon_user.idfa, Some(idfa.to_string()));
         assert_eq!(bidon_user.idfv, Some(idfv.to_string()));
         assert_eq!(
             bidon_user.tracking_authorization_status,
             Some("authorized".to_string())
-        );
-        assert_eq!(
-            bidon_user.consent,
-            Some("{\"meta\":{\"consent\":true}}".to_string())
         );
         assert_eq!(bidon_user.segments[0].id, Some("segment_id".to_string()));
         assert_eq!(bidon_user.segments[0].uid, Some("segment_uid".to_string()));
@@ -538,7 +640,7 @@ mod tests {
 
         assert_eq!(app.ver, Some("1.0".to_string()));
         assert_eq!(app.bundle, Some("com.example.app".to_string()));
-        let bidon_app = app.extension_set.extension_data(MEDIATION_APP).unwrap();
+        let bidon_app = app.extension_set.extension_data(APP_EXT).unwrap();
         assert_eq!(bidon_app.key, Some("app_key".to_string()));
         assert_eq!(bidon_app.framework, Some("1.0".to_string()));
         assert_eq!(bidon_app.framework_version, Some("1.0".to_string()));
@@ -564,7 +666,7 @@ mod tests {
 
         assert_eq!(regs.coppa, Some(true));
         assert_eq!(regs.gdpr, Some(true));
-        let bidon_regs = regs.extension_set.extension_data(MEDIATION_REGS).unwrap();
+        let bidon_regs = regs.extension_set.extension_data(REGS_EXT).unwrap();
         assert_eq!(bidon_regs.us_privacy, Some("1YNN".to_string()));
         assert_eq!(bidon_regs.eu_privacy, Some("1".to_string()));
         assert_eq!(bidon_regs.iab, Some("{\"key\":\"value\"}".to_string()));
@@ -602,7 +704,7 @@ mod tests {
         assert_eq!(item.flrcur, Some("USD".to_string()));
         let bidon_ad_object = item
             .extension_set
-            .extension_data(MEDIATION_AD_OBJECT)
+            .extension_data(PLACEMENT_EXT)
             .unwrap();
         assert_eq!(bidon_ad_object.auction_id, Some("auction_id".to_string()));
         assert_eq!(bidon_ad_object.auction_key, Some("auction_key".to_string()));
@@ -641,7 +743,7 @@ mod tests {
         );
         assert_eq!(
             bidon_ad_object.banner.as_ref().unwrap().format,
-            Some(bidon::v1::mediation::AdFormat::Banner as i32)
+            Some(crate::org::bidon::proto::v1::mediation::AdFormat::Banner as i32)
         );
         assert_eq!(
             bidon_ad_object.interstitial,
@@ -649,4 +751,139 @@ mod tests {
         );
         assert_eq!(bidon_ad_object.rewarded, Some("\"rewarded\"".to_string()));
     }
+
+    #[test]
+    fn test_openrtb_to_auction_response() {
+        
+        // Create a mock OpenRTB response
+        let response = openrtb::Response {
+            id: Some("auction123".to_string()),
+            bidid: None,
+            nbr: None,
+            seatbid: vec![
+                openrtb::SeatBid {
+                    bid: vec![
+                        openrtb::Bid {
+                            id: Some("bid1".to_string()),
+                            item: Some("item1".to_string()),
+                            price: Some(2.5),
+                            cid: Some("demand1".to_string()),
+                            extension_set: {
+                                let mut ext = prost::ExtensionSet::default();
+                                let bid_ext = mediation::BidExt {
+                                    label: Some("key123".to_string()),
+                                    bid_type: Some("bid_type".to_string()),
+                                    ext: HashMap::new(),
+                                };
+                                ext.set_extension_data(BID_EXT, bid_ext).unwrap();
+                                ext
+                            },
+                            ..Default::default()
+                        }
+                    ],
+                    seat: None,
+                    ..Default::default()
+                }
+            ],
+            extension_set: {
+                let mut ext = prost::ExtensionSet::default();
+                let auction_response_ext = mediation::AuctionResponseExt {
+                    auction_id: Some("auction123".to_string()),
+                    auction_configuration_id: Some(456),
+                    auction_configuration_uid: Some("config789".to_string()),
+                    token: Some("key123".to_string()),
+                    auction_pricefloor: Some(1.0),
+                    auction_timeout: Some(500),
+                    external_win_notifications: Some(true),
+                    segment: Some(mediation::Segment {
+                        id: Some("segment_id".to_string()),
+                        uid: Some("segment_uid".to_string()),
+                        ext: None,
+                    }),
+                };
+                ext.set_extension_data(AUCTION_RESPONSE_EXT, auction_response_ext).unwrap();
+                ext
+            },
+            ..Default::default()
+        };
+
+        let openrtb = openrtb::Openrtb {
+            ver: Some("3.0".to_string()),
+            domainspec: Some("adcom".to_string()),
+            domainver: Some("1.0".to_string()),
+            payload_oneof: Some(openrtb::openrtb::PayloadOneof::Response(response)),
+        };
+
+        let auction_response = try_into(openrtb ).unwrap();
+
+        // Test assertions
+        assert_eq!(auction_response.auction_id, "auction123");
+        assert_eq!(auction_response.auction_configuration_id, 456);
+        assert_eq!(auction_response.auction_configuration_uid, "config789");
+        assert_eq!(auction_response.auction_pricefloor, 1.0);
+        assert_eq!(auction_response.auction_timeout, 500);
+        assert_eq!(auction_response.token, "key123");
+
+        // Test ad units
+        assert!(!auction_response.ad_units.is_empty());
+        let ad_unit = &auction_response.ad_units[0];
+        assert_eq!(ad_unit.label, "key123");
+        assert_eq!(ad_unit.uid, "item1");
+        assert_eq!(ad_unit.demand_id, "demand1");
+        assert_eq!(ad_unit.pricefloor, Some(2.5));
+    }
+
+    #[test]
+    fn test_convert_device() {
+        let request = create_test_auction_request();
+        let device = convert_device(&request).unwrap();
+
+        // Test standard fields
+        assert_eq!(device.r#type, Some(adcom::enums::DeviceType::Phone as i32));
+        assert_eq!(device.ua, Some("Mozilla/5.0".to_string()));
+        assert_eq!(device.make, Some("Apple".to_string()));
+        assert_eq!(device.model, Some("iPhone".to_string()));
+        assert_eq!(device.os, Some(OperatingSystem::Ios as i32));
+        assert_eq!(device.osv, Some("14.4".to_string()));
+        assert_eq!(device.hwv, Some("A14".to_string()));
+        assert_eq!(device.h, Some(1920));
+        assert_eq!(device.w, Some(1080));
+        assert_eq!(device.ppi, Some(326));
+        assert_eq!(device.pxratio, Some(2.0));
+        assert_eq!(device.js, Some(true));
+        assert_eq!(device.lang, Some("en".to_string()));
+        assert_eq!(device.carrier, Some("Verizon".to_string()));
+        assert_eq!(device.mccmnc, Some("310012".to_string()));
+        assert_eq!(device.contype, Some(adcom::enums::ConnectionType::Wifi as i32));
+
+        // Test geo fields
+        let geo = device.geo.unwrap();
+        assert_eq!(geo.lat, Some(37.7749));
+        assert_eq!(geo.lon, Some(-122.4194));
+        assert_eq!(geo.accur, Some(10));  // Converted from f64 to i32
+        assert_eq!(geo.country, Some("US".to_string()));
+        assert_eq!(geo.city, Some("San Francisco".to_string()));
+        assert_eq!(geo.zip, Some("94103".to_string()));
+        assert_eq!(geo.utcoffset, Some(-8));
+        assert_eq!(geo.lastfix, Some(1234567890));
+
+        // Test device extension fields
+        let device_ext = device.extension_set.extension_data(DEVICE_EXT).unwrap();
+        assert!(device_ext.id.is_some());
+        assert_eq!(device_ext.launch_ts, Some(1234567890));
+        assert_eq!(device_ext.launch_monotonic_ts, Some(1234567890));
+        assert_eq!(device_ext.start_ts, Some(1234567890));
+        assert_eq!(device_ext.start_monotonic_ts, Some(1234567890));
+        assert_eq!(device_ext.ts, Some(1234567890));
+        assert_eq!(device_ext.monotonic_ts, Some(1234567890));
+        assert!(device_ext.memory_warnings_ts.is_empty());
+        assert!(device_ext.memory_warnings_monotonic_ts.is_empty());
+        assert_eq!(device_ext.ram_used, Some(1024));
+        assert_eq!(device_ext.ram_size, Some(2048));
+        assert_eq!(device_ext.storage_free, Some(512));
+        assert_eq!(device_ext.storage_used, Some(256));
+        assert_eq!(device_ext.battery, Some(80.5));
+        assert_eq!(device_ext.cpu_usage, Some(10.6));
+    }
 }
+
