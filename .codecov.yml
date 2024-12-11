@@ -1,0 +1,27 @@
+ignore:
+  - "**/*.pb.go"
+  - "**/*.gen.go"
+component_management:
+  individual_components:
+    - component_id: go-api
+      name: go-api
+      paths:
+        - cmd
+        - internal
+        - config
+        - go.mod
+        - go.sum
+    - component_id: rust-proxy
+      name: rust-proxy
+      paths:
+        - proxy
+        - build.rs
+        - Cargo.toml
+        - Cargo.lock
+    - component_id: web-ui
+      name: web-ui
+      paths:
+        - web/bidon_ui
+flag_management:
+  default_rules:
+    carryforward: true
