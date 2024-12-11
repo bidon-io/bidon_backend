@@ -367,7 +367,7 @@ func parseJson(str string) map[string]any {
 	return m
 }
 
-func sliceToInt(in []int32) []int {
+func sliceToInt(in []int64) []int {
 	out := make([]int, len(in))
 	for i, v := range in {
 		out[i] = int(v)

@@ -1447,53 +1447,53 @@ pub struct Session {
 
     /// Monotonic timestamp of the session launch
     #[serde(rename = "launch_monotonic_ts")]
-    pub launch_monotonic_ts: i32,
+    pub launch_monotonic_ts: i64,
 
     /// Timestamp of the session launch
     #[serde(rename = "launch_ts")]
-    pub launch_ts: i32,
+    pub launch_ts: i64,
 
     /// Monotonic timestamps when memory warnings occurred
     #[serde(rename = "memory_warnings_monotonic_ts")]
-    pub memory_warnings_monotonic_ts: Vec<i32>,
+    pub memory_warnings_monotonic_ts: Vec<i64>,
 
     /// Timestamps when memory warnings occurred
     #[serde(rename = "memory_warnings_ts")]
-    pub memory_warnings_ts: Vec<i32>,
+    pub memory_warnings_ts: Vec<i64>,
 
     /// Current monotonic timestamp of the session
     #[serde(rename = "monotonic_ts")]
-    pub monotonic_ts: i32,
+    pub monotonic_ts: i64,
 
     /// Total size of RAM
     #[serde(rename = "ram_size")]
-    pub ram_size: i32,
+    pub ram_size: i64,
 
     /// Amount of RAM used
     #[serde(rename = "ram_used")]
-    pub ram_used: i32,
+    pub ram_used: i64,
 
     /// Monotonic timestamp of the session start
     #[serde(rename = "start_monotonic_ts")]
-    pub start_monotonic_ts: i32,
+    pub start_monotonic_ts: i64,
 
     /// Timestamp of the session start
     #[serde(rename = "start_ts")]
-    pub start_ts: i32,
+    pub start_ts: i64,
 
     /// Free storage space available
     #[serde(rename = "storage_free")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub storage_free: Option<i32>,
+    pub storage_free: Option<i64>,
 
     /// Used storage space
     #[serde(rename = "storage_used")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub storage_used: Option<i32>,
+    pub storage_used: Option<i64>,
 
     /// Current timestamp of the session
     #[serde(rename = "ts")]
-    pub ts: i32,
+    pub ts: i64,
 }
 
 impl Session {
@@ -1502,16 +1502,18 @@ impl Session {
         battery: f64,
         cpu_usage: f64,
         id: uuid::Uuid,
-        launch_monotonic_ts: i32,
-        launch_ts: i32,
-        memory_warnings_monotonic_ts: Vec<i32>,
-        memory_warnings_ts: Vec<i32>,
-        monotonic_ts: i32,
-        ram_size: i32,
-        ram_used: i32,
-        start_monotonic_ts: i32,
-        start_ts: i32,
-        ts: i32,
+        launch_monotonic_ts: i64,
+        launch_ts: i64,
+        memory_warnings_monotonic_ts: Vec<i64>,
+        memory_warnings_ts: Vec<i64>,
+        monotonic_ts: i64,
+        ram_size: i64,
+        ram_used: i64,
+        start_monotonic_ts: i64,
+        start_ts: i64,
+        storage_free: Option<i64>,
+        storage_used: Option<i64>,
+        ts: i64,
     ) -> Session {
         Session {
             battery,
@@ -1526,8 +1528,8 @@ impl Session {
             ram_used,
             start_monotonic_ts,
             start_ts,
-            storage_free: None,
-            storage_used: None,
+            storage_free,
+            storage_used,
             ts,
         }
     }

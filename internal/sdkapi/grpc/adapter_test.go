@@ -78,11 +78,11 @@ func TestAuctionRequestAdapter_OpenRTBToAuctionRequest(t *testing.T) {
 		}
 		deviceExt := &mediation.DeviceExt{
 			Id:          proto.String("session_id"),
-			LaunchTs:    proto.Int32(1617187200),
-			RamUsed:     proto.Int32(1024),
-			RamSize:     proto.Int32(2048),
-			StorageFree: proto.Int32(512),
-			StorageUsed: proto.Int32(256),
+			LaunchTs:    proto.Int64(1617187200),
+			RamUsed:     proto.Int64(1024),
+			RamSize:     proto.Int64(2048),
+			StorageFree: proto.Int64(512),
+			StorageUsed: proto.Int64(256),
 			Battery:     proto.Float64(80.5),
 			CpuUsage:    proto.Float64(10.6),
 		}
