@@ -22,7 +22,7 @@ path = "proxy/tests/integration_tests.rs"
 async-trait = "0.1"
 
 # gRPC and Protobuf
-tonic = "0.11.0"
+tonic = "0.12.3"
 prost = { git = 'https://github.com/bidon-io/prost', branch = "extensions" }
 
 serde = "1.0"
@@ -55,7 +55,7 @@ prost-build = { git = 'https://github.com/bidon-io/prost', branch = "extensions"
 dotenvy = { git = 'https://github.com/allan2/dotenvy', rev = "e2da1106" }
 
 [build-dependencies]
-tonic-build = "0.11.0"
+tonic-build = "0.12.3"
 prost-build = { git = 'https://github.com/bidon-io/prost', branch = "extensions" }
 
 [build]
