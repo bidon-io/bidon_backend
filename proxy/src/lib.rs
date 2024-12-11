@@ -1,19 +1,25 @@
 use crate::bidding::BiddingService;
 use axum::routing::post;
 use axum::Router;
+use tower_http::trace::TraceLayer;
+
+
+pub struct AppState<T: BiddingService> {
+    pub bidding_service: T,
+}
 
 // Define the routes
 pub fn create_app<A>(bidding_service: Box<A>) -> Router
 where
-    A: Clone + 'static,
-    A: BiddingService + Send + Sync,
+    A: BiddingService + Clone + Send + Sync + 'static
 {
-    Router::new()
+   Router::new()
         .route(
             "/v2/auction/:ad_type",
             post(handlers::auction::get_auction_handler),
         )
         .with_state(bidding_service)
+        .layer(TraceLayer::new_for_http())
 }
 
 // mod main;

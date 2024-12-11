@@ -1,11 +1,17 @@
-pub(crate) use bidon::bidding::EchoBiddingService;
+mod infrastructure;
+
+use infrastructure::{config, server};
 
 #[tokio::main]
 async fn main() {
-    let echo_bidding_service = Box::new(EchoBiddingService::new());
+    let listen_addr = format!("0.0.0.0:{}", config::settings().port());
 
-    let app = bidon::create_app(echo_bidding_service);
+    let welcome_string = format!(r#"Starting server at: {}
+    -> Log Level:   {}
+    -> Environment: {}."#, listen_addr, config::settings().log_level(), config::settings().env());
+    println!("{}", welcome_string);
+
     // Start the server
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
-    axum::serve(listener, app).await.unwrap();
+    let listener = tokio::net::TcpListener::bind(listen_addr).await.unwrap();
+    server::run(listener).await.unwrap();
 }
