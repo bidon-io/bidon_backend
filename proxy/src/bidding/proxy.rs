@@ -1,16 +1,17 @@
 use crate::bidding::BiddingError;
 use crate::bidding::BiddingService;
-use crate::org::bidon::proto::v1::bidding_service_client::BiddingServiceClient;
 use crate::com::iabtechlab::openrtb::v3::Openrtb;
+use crate::org::bidon::proto::v1::bidding_service_client::BiddingServiceClient;
 use tonic::transport::Channel;
 use tonic::Request;
 
+#[derive(Debug, Clone)]
 pub struct ProxyBiddingService {
     grpc_client: BiddingServiceClient<Channel>,
 }
 
 impl ProxyBiddingService {
-    pub async fn new(grpc_url: String) -> Result<Self, Box<dyn std::error::Error>> {
+    pub async fn new(grpc_url: &'static str) -> Result<Self, Box<dyn std::error::Error>> {
         let grpc_client = BiddingServiceClient::connect(grpc_url).await?;
         Ok(ProxyBiddingService { grpc_client })
     }
