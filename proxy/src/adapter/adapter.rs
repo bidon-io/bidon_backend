@@ -51,7 +51,7 @@ fn convert_context(request: &sdk::AuctionRequest, bidon_version: String) -> Resu
         device: convert_device(&request.device, &request.session, request.geo.as_ref())?.into(),
         user: convert_user(&request.user, request.segment.as_ref())?.into(),
         regs: match request.regs.as_ref() {
-            Some(t) => convert_regs(&t)?.into(),
+            Some(t) => convert_regs(t)?.into(),
             None => None,
         },
         restrictions: None, // TODO
@@ -76,7 +76,7 @@ fn convert_app(
         framework_version: app.framework_version.clone(),
         plugin_version: app.plugin_version.clone(),
         sdk_version: app.sdk_version.clone(),
-        skadn: app.skadn.clone().unwrap_or(vec![]),
+        skadn: app.skadn.clone().unwrap_or_default(),
         bidon_version: Some(bidon_version.clone()),
     };
 
@@ -91,11 +91,11 @@ fn convert_device(
 ) -> Result<adcom::context::Device> {
     let mut adcom_device = adcom::context::Device {
         // Map standard fields
-        r#type: convert_device_type(device.device_type.clone()).map(Into::into),
+        r#type: convert_device_type(device.device_type).map(Into::into),
         ua: device.ua.clone().into(),
         make: device.make.clone().into(),
         model: device.model.clone().into(),
-        os: Some(convert_os(device.os.clone())).map(Into::into),
+        os: Some(Into::into(convert_os(device.os.clone()))),
         osv: device.osv.clone().into(),
         hwv: device.hwv.clone().into(),
         h: device.h.into(),
@@ -106,7 +106,7 @@ fn convert_device(
         lang: device.language.clone().into(),
         carrier: device.clone().carrier,
         mccmnc: device.clone().mccmnc,
-        contype: Some(convert_connection_type(device.connection_type)).map(Into::into),
+        contype: Some(Into::into(convert_connection_type(device.connection_type))),
         geo: geo.map(convert_geo),
         ..Default::default()
     };
@@ -155,9 +155,9 @@ fn convert_geo(geo: &sdk::Geo) -> adcom::context::Geo {
         lat: geo.lat.map(|t| t as f32),
         lon: geo.lon.map(|t| t as f32),
         accur: geo.accuracy.map(|t| (t as i32)), // TODO check accuracy conversion. We convert it from f64 to i32 here.
-        country: geo.country.clone().into(),
-        city: geo.city.clone().into(),
-        zip: geo.zip.clone().into(),
+        country: geo.country.clone(),
+        city: geo.city.clone(),
+        zip: geo.zip.clone(),
         utcoffset: geo.utcoffset,
         lastfix: geo.lastfix,
         ..Default::default()
@@ -215,7 +215,7 @@ fn convert_session(session: &sdk::Session) -> mediation::DeviceExt {
 fn convert_regs(regs: &sdk::Regulations) -> Result<adcom::context::Regs> {
     let mut adcom_regs = adcom::context::Regs {
         coppa: regs.coppa,
-        gdpr: regs.gdpr.clone(),
+        gdpr: regs.gdpr,
         ..Default::default()
     };
 
@@ -246,7 +246,7 @@ fn convert_ad_object_to_item(ad_object: &sdk::AdObject) -> Result<openrtb::Item>
     let placement_ext = mediation::PlacementExt {
         auction_id: ad_object.auction_id.clone(), // Unique Request ID, same as OpenRtb.Request.id
         auction_key: ad_object.auction_key.clone(), // Generated key for the auction request
-        auction_configuration_id: ad_object.auction_configuration_id.clone(), // Deprecated: ID of the auction configuration
+        auction_configuration_id: ad_object.auction_configuration_id, // Deprecated: ID of the auction configuration
         auction_configuration_uid: ad_object.auction_configuration_uid.clone(), // UID of the auction configuration
         orientation: ad_object
             .orientation
@@ -254,10 +254,7 @@ fn convert_ad_object_to_item(ad_object: &sdk::AdObject) -> Result<openrtb::Item>
             .map(convert_ad_orientation)
             .map(|f| f as i32),
         demands: convert_demand(&ad_object.demands)?,
-        banner: match &ad_object.banner {
-            Some(ref banner) => Some(convert_banner_ad(banner)),
-            None => None,
-        },
+        banner: ad_object.banner.as_ref().map(convert_banner_ad),
         interstitial: ad_object.interstitial.as_ref().map(|i| i.to_string()), // TODO: remove String
         rewarded: ad_object.rewarded.as_ref().map(|r| r.to_string()),         // TODO: remove String
     };

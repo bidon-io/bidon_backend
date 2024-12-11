@@ -37,8 +37,12 @@ derive-new = "0.7.0"
 
 # Web
 axum = { version = "0.7", features = ["macros"] }
+tower-http = { version = "0.6", features = ["trace"] }
 tokio = { version = "1.41", features = ["full"] }
 thiserror = "2.0.3"
+dotenvy = "0.15.7"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
 
 [dev-dependencies]
 axum-test-helper = "0.4.0"
@@ -48,6 +52,7 @@ prost = { git = 'https://github.com/bidon-io/prost', branch = "extensions" }
 prost-derive = { git = 'https://github.com/bidon-io/prost', branch = "extensions" }
 prost-types = { git = 'https://github.com/bidon-io/prost', branch = "extensions" }
 prost-build = { git = 'https://github.com/bidon-io/prost', branch = "extensions" }
+dotenvy = { git = 'https://github.com/allan2/dotenvy', rev = "e2da1106" }
 
 [build-dependencies]
 tonic-build = "0.11.0"
