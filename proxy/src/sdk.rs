@@ -298,10 +298,7 @@ pub struct AuctionAdUnitResult {
 
 impl AuctionAdUnitResult {
     #[allow(clippy::new_without_default)]
-    pub fn new(
-        demand_id: String,
-        status: sdk::AuctionAdUnitResultStatus,
-    ) -> AuctionAdUnitResult {
+    pub fn new(demand_id: String, status: sdk::AuctionAdUnitResultStatus) -> AuctionAdUnitResult {
         AuctionAdUnitResult {
             ad_unit_label: None,
             ad_unit_uid: None,

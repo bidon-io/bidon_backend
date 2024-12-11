@@ -1,5 +1,5 @@
-pub(crate) use crate::bidding::BiddingService;
 pub(crate) use crate::bidding::BiddingError;
+pub(crate) use crate::bidding::BiddingService;
 use crate::com::iabtechlab::openrtb::v3::Openrtb;
 
 // This is a simple echo bidding that returns the same request as the response.
