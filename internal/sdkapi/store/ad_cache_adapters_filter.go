@@ -34,7 +34,7 @@ func NewAdCacheAdaptersFilter() *AdCacheAdaptersFilter {
 	}
 
 	return &AdCacheAdaptersFilter{
-		DefaultMaxCacheCount: 3,
+		DefaultMaxCacheCount: 2,
 		Settings:             defaultSettings,
 	}
 }
