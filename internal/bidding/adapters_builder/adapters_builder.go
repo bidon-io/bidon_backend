@@ -66,12 +66,12 @@ type AdaptersConfigBuilder struct {
 }
 
 func NewAdapters(keys []adapter.Key) adapter.ProcessedConfigsMap {
-	adapters := make(adapter.ProcessedConfigsMap, len(keys))
+	adaptersMap := make(adapter.ProcessedConfigsMap, len(keys))
 	for _, key := range keys {
 		// explicitly initialize with empty maps. nil maps are serialized to `null` in json, empty maps are serialized to `{}`
-		adapters[key] = map[string]any{}
+		adaptersMap[key] = map[string]any{}
 	}
-	return adapters
+	return adaptersMap
 }
 
 func (b *AdaptersConfigBuilder) Build(ctx context.Context, appID int64, adapterKeys []adapter.Key, adUnitsMap *auction.AdUnitsMap) (adapter.ProcessedConfigsMap, error) {
@@ -80,71 +80,68 @@ func (b *AdaptersConfigBuilder) Build(ctx context.Context, appID int64, adapterK
 		return nil, err
 	}
 
-	if err != nil {
-		return nil, err
-	}
-	adapters := NewAdapters(adapterKeys)
+	adaptersMap := NewAdapters(adapterKeys)
 
 	for key, profile := range profiles {
 		extra := profile.AccountExtra
 		appData := profile.AppData
 		switch key {
 		case adapter.AmazonKey:
-			adapters[key]["price_points_map"] = extra["price_points_map"]
+			adaptersMap[key]["price_points_map"] = extra["price_points_map"]
 		case adapter.BidmachineKey:
-			adapters[key]["seller_id"] = extra["seller_id"]
-			adapters[key]["endpoint"] = extra["endpoint"]
-			adapters[key]["mediation_config"] = extra["mediation_config"]
+			adaptersMap[key]["seller_id"] = extra["seller_id"]
+			adaptersMap[key]["endpoint"] = extra["endpoint"]
+			adaptersMap[key]["mediation_config"] = extra["mediation_config"]
 		case adapter.BigoAdsKey:
-			adapters[key]["app_id"] = appData["app_id"]
-			adapters[key]["seller_id"] = extra["publisher_id"]
+			adaptersMap[key]["app_id"] = appData["app_id"]
+			adaptersMap[key]["seller_id"] = extra["publisher_id"]
 
 			adUnit, _ := adUnitsMap.First(key, schema.RTBBidType)
 			if adUnit != nil {
-				adapters[key]["tag_id"] = adUnit.Extra["slot_id"]
-				adapters[key]["placement_id"] = adUnit.Extra["placement_id"]
+				adaptersMap[key]["tag_id"] = adUnit.Extra["slot_id"]
+				adaptersMap[key]["placement_id"] = adUnit.Extra["placement_id"]
 			}
 		case adapter.MintegralKey:
-			adapters[key]["app_id"] = appData["app_id"]
-			adapters[key]["seller_id"] = extra["publisher_id"]
+			adaptersMap[key]["app_id"] = appData["app_id"]
+			adaptersMap[key]["seller_id"] = extra["publisher_id"]
 
 			adUnit, _ := adUnitsMap.First(key, schema.RTBBidType)
 			if adUnit != nil {
-				adapters[key]["tag_id"] = adUnit.Extra["unit_id"]
-				adapters[key]["placement_id"] = adUnit.Extra["placement_id"]
+				adaptersMap[key]["tag_id"] = adUnit.Extra["unit_id"]
+				adaptersMap[key]["placement_id"] = adUnit.Extra["placement_id"]
 			}
 		case adapter.VKAdsKey:
-			adapters[key]["app_id"] = appData["app_id"]
+			adaptersMap[key]["app_id"] = appData["app_id"]
 
 			adUnit, _ := adUnitsMap.First(key, schema.RTBBidType)
 			if adUnit != nil {
-				adapters[key]["tag_id"] = adUnit.Extra["slot_id"]
+				adaptersMap[key]["tag_id"] = adUnit.Extra["slot_id"]
 			}
 		case adapter.VungleKey:
-			adapters[key]["app_id"] = appData["app_id"]
-			adapters[key]["seller_id"] = extra["account_id"]
+			adaptersMap[key]["app_id"] = appData["app_id"]
+			adaptersMap[key]["seller_id"] = extra["account_id"]
 
 			adUnit, _ := adUnitsMap.First(key, schema.RTBBidType)
 			if adUnit != nil {
-				adapters[key]["tag_id"] = adUnit.Extra["placement_id"]
+				adaptersMap[key]["tag_id"] = adUnit.Extra["placement_id"]
 			}
 		case adapter.MetaKey:
-			adapters[key]["app_id"] = appData["app_id"]
-			adapters[key]["app_secret"] = appData["app_secret"]
+			adaptersMap[key]["app_id"] = appData["app_id"]
+			adaptersMap[key]["app_secret"] = appData["app_secret"]
 
 			adUnit, _ := adUnitsMap.First(key, schema.RTBBidType)
 			if adUnit != nil {
-				adapters[key]["tag_id"] = adUnit.Extra["placement_id"]
+				adaptersMap[key]["tag_id"] = adUnit.Extra["placement_id"]
 			}
 		case adapter.MobileFuseKey:
 			adUnit, _ := adUnitsMap.First(key, schema.RTBBidType)
 			if adUnit != nil {
-				adapters[key]["tag_id"] = adUnit.Extra["placement_id"]
+				adaptersMap[key]["tag_id"] = adUnit.Extra["placement_id"]
 			}
 		default:
-			adapters[key] = extra
+			adaptersMap[key] = extra
 		}
 	}
 
-	return adapters, nil
+	return adaptersMap, nil
 }

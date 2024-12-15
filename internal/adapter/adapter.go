@@ -53,21 +53,33 @@ var Keys = []Key{
 	YandexKey,
 }
 
-func GetCommonAdapters(adapters1 []Key, adapters2 []Key) []Key {
-	result := make([]Key, 0)
-	hash := make(map[Key]bool)
+var itemExists = struct{}{}
 
-	for _, v := range adapters1 {
-		hash[v] = true
+// GetCommonAdapters returns the intersection of all the slices passed as arguments.
+func GetCommonAdapters(slices ...[]Key) []Key {
+	if len(slices) == 0 {
+		return []Key{}
 	}
 
-	for _, v := range adapters2 {
-		if _, ok := hash[v]; ok {
-			result = append(result, v)
+	elementCount := make(map[Key]int)
+	for _, slice := range slices {
+		uniqueElements := make(map[Key]struct{})
+		for _, elem := range slice {
+			if _, ok := uniqueElements[elem]; !ok {
+				elementCount[elem]++
+				uniqueElements[elem] = itemExists
+			}
 		}
 	}
 
-	return result
+	intersection := make([]Key, 0)
+	for elem, count := range elementCount {
+		if count == len(slices) {
+			intersection = append(intersection, elem)
+		}
+	}
+
+	return intersection
 }
 
 func IsDisabledForCOPPA(adapter Key) bool {

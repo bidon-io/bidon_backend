@@ -59,7 +59,7 @@ func upInsertAuctionConfigurationsV2(ctx context.Context, tx *sql.Tx) error {
 
 	for _, aucConf := range auctionConfigurations {
 		log.Printf("Processing auction configuration: %v", aucConf.ID)
-		if aucConf.Rounds == nil || len(aucConf.Rounds) == 0 {
+		if len(aucConf.Rounds) == 0 {
 			log.Printf("No rounds found for auction configuration: %v", aucConf.ID)
 			continue
 		}

@@ -8,11 +8,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/bidon-io/bidon-backend/internal/bidding/adapters/amazon"
-
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
+	"github.com/bidon-io/bidon-backend/internal/bidding/adapters/amazon"
 	"github.com/bidon-io/bidon-backend/internal/bidding/openrtb"
 	"github.com/bidon-io/bidon-backend/internal/device"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/geocoder"
@@ -107,8 +106,12 @@ func (b *Builder) HoldAuction(ctx context.Context, params *BuildParams) (Auction
 			}
 		}
 
-		adapterKeys = adapter.GetCommonAdapters(config.Bidding, br.Adapters.Keys())
-		adapterKeys = adapter.GetCommonAdapters(adapterKeys, maps.Keys(filteredDemands))
+		adapterKeys = adapter.GetCommonAdapters(
+			config.Bidding,
+			br.Adapters.Keys(),
+			maps.Keys(filteredDemands),
+			maps.Keys(params.AdapterConfigs),
+		)
 	} else {
 		// DEPRECATED: Remove after migration to V2
 		// Get adapters from request, demands from bidding request and demands from round config and merge them
@@ -123,8 +126,7 @@ func (b *Builder) HoldAuction(ctx context.Context, params *BuildParams) (Auction
 		if roundConfig == nil {
 			return emptyResponse, errors.New("round not found")
 		}
-		adapterKeys = adapter.GetCommonAdapters(roundConfig.Bidding, br.Adapters.Keys())
-		adapterKeys = adapter.GetCommonAdapters(adapterKeys, maps.Keys(br.Imp.Demands))
+		adapterKeys = adapter.GetCommonAdapters(roundConfig.Bidding, br.Adapters.Keys(), maps.Keys(br.Imp.Demands))
 	}
 
 	if len(adapterKeys) == 0 {

@@ -46,8 +46,8 @@ func TestBuilder_Build(t *testing.T) {
 	adaptersBuilder := &mocks.AdaptersBuilderMock{
 		BuildFunc: func(adapterKey adapter.Key, cfg adapter.ProcessedConfigsMap) (*adapters.Bidder, error) {
 			adpt := &bidmachine.BidmachineAdapter{
-				Endpoint: "https://example.com",
-				SellerID: "1",
+				Endpoint: cfg[adapter.BidmachineKey]["endpoint"].(string),
+				SellerID: cfg[adapter.BidmachineKey]["seller_id"].(string),
 			}
 
 			bidder := &adapters.Bidder{
@@ -80,6 +80,12 @@ func TestBuilder_Build(t *testing.T) {
 			notificationHandler: notificationHandler,
 			buildParams: &bidding.BuildParams{
 				AppID: 1,
+				AdapterConfigs: adapter.ProcessedConfigsMap{
+					adapter.BidmachineKey: {
+						"endpoint":  "https://example.com",
+						"seller_id": "1",
+					},
+				},
 				BiddingRequest: schema.BiddingRequest{
 					Imp: schema.Imp{
 						RoundID: "ROUND_2",
@@ -110,6 +116,12 @@ func TestBuilder_Build(t *testing.T) {
 			notificationHandler: notificationHandler,
 			buildParams: &bidding.BuildParams{
 				AppID: 1,
+				AdapterConfigs: adapter.ProcessedConfigsMap{
+					adapter.BidmachineKey: {
+						"endpoint":  "https://example.com",
+						"seller_id": "1",
+					},
+				},
 				BiddingRequest: schema.BiddingRequest{
 					Imp: schema.Imp{
 						Demands: map[adapter.Key]map[string]any{
