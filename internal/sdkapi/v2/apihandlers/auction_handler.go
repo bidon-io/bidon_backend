@@ -63,6 +63,8 @@ const (
 	DefaultAuctionTimeout = 30000
 )
 
+var adCacheAdaptersFilter = store.NewAdCacheAdaptersFilter()
+
 func (h *AuctionHandler) Handle(c echo.Context) error {
 	req, err := h.resolveRequest(c)
 	if err != nil {
@@ -79,8 +81,7 @@ func (h *AuctionHandler) Handle(c echo.Context) error {
 	req.raw.Segment.ID = sgmnt.StringID()
 	req.raw.Segment.UID = sgmnt.UID
 
-	adCacheAdaptersFilter := store.NewAdCacheAdaptersFilter()
-	adapters := adCacheAdaptersFilter.Filter(
+	adapterKeys := adCacheAdaptersFilter.Filter(
 		ad.OS(req.raw.Device.OS),
 		req.raw.AdType,
 		req.raw.Adapters.Keys(),
@@ -92,7 +93,7 @@ func (h *AuctionHandler) Handle(c echo.Context) error {
 		AdType:               req.raw.AdType,
 		AdFormat:             req.raw.AdObject.Format(),
 		DeviceType:           req.raw.Device.Type,
-		Adapters:             adapters,
+		Adapters:             adapterKeys,
 		Segment:              sgmnt,
 		PriceFloor:           req.raw.AdObject.PriceFloor,
 		MergedAuctionRequest: &req.raw,

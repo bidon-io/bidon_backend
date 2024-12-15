@@ -143,14 +143,12 @@ func parseAdObject(r *v3.Request) (schema.AdObjectV2, error) {
 
 	demands := make(map[adapter.Key]map[string]any)
 	mdemands := mi.GetDemands()
-	if mdemands != nil {
-		for k, v := range mdemands {
-			demands[adapter.Key(k)] = map[string]any{
-				"token":           v.GetToken(),
-				"status":          v.GetStatus(),
-				"token_finish_ts": v.GetTokenFinishTs(),
-				"token_start_ts":  v.GetTokenStartTs(),
-			}
+	for k, v := range mdemands {
+		demands[adapter.Key(k)] = map[string]any{
+			"token":           v.GetToken(),
+			"status":          v.GetStatus(),
+			"token_finish_ts": v.GetTokenFinishTs(),
+			"token_start_ts":  v.GetTokenStartTs(),
 		}
 	}
 
