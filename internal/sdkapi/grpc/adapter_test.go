@@ -4,6 +4,10 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/bidon-io/bidon-backend/internal/auction"
+	"github.com/bidon-io/bidon-backend/internal/auctionv2"
+	"google.golang.org/protobuf/testing/protocmp"
+
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 
@@ -25,7 +29,7 @@ func ptr[T any](t T) *T {
 	return &t
 }
 
-func TestAuctionRequestAdapter_OpenRTBToAuctionRequest(t *testing.T) {
+func TestAuctionAdapter_OpenRTBToAuctionRequest(t *testing.T) {
 	a := NewAuctionRequestAdapter()
 
 	buildValidRequest := func() *v3.Openrtb {
@@ -272,6 +276,207 @@ func TestAuctionRequestAdapter_OpenRTBToAuctionRequest(t *testing.T) {
 
 			if diff := cmp.Diff(tc.want, ar, cmpopts.EquateEmpty(), cmpopts.IgnoreUnexported(schema.AuctionV2Request{}, schema.BaseRequest{})); diff != "" {
 				t.Errorf("AuctionV2Request mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestAuctionAdapter_AuctionResponseToOpenRTB(t *testing.T) {
+	a := &AuctionAdapter{}
+
+	tests := []struct {
+		name   string
+		input  func() *auctionv2.Response
+		want   func() *v3.Openrtb
+		errMsg string
+	}{
+		{
+			name: "valid response",
+			input: func() *auctionv2.Response {
+				return &auctionv2.Response{
+					AuctionID:                "auction_id_123",
+					Token:                    "token_456",
+					ExternalWinNotifications: true,
+					Segment: auction.Segment{
+						ID:  "segment_id",
+						UID: "segment_uid",
+					},
+					ConfigID:       789,
+					ConfigUID:      "config_uid_456",
+					AuctionTimeout: 1000,
+					AdUnits: []auction.AdUnit{
+						{
+							UID:        "ad_unit_1",
+							PriceFloor: ptr(0.5),
+							DemandID:   "demand_1",
+							Label:      "label_1",
+							BidType:    schema.RTBBidType,
+							Extra: map[string]any{
+								"key1": "value1",
+							},
+						},
+					},
+					NoBids: []auction.AdUnit{
+						{
+							UID:        "ad_unit_2",
+							PriceFloor: nil,
+							DemandID:   "demand_2",
+							Label:      "label_2",
+							BidType:    schema.RTBBidType,
+							Extra: map[string]any{
+								"key2": "value2",
+							},
+						},
+					},
+				}
+			},
+			want: func() *v3.Openrtb {
+				resp := &v3.Response{
+					Id: proto.String("auction_id_123"),
+					Seatbid: []*v3.SeatBid{
+						{
+							Bid: []*v3.Bid{
+								{
+									Item:  proto.String("ad_unit_1"),
+									Price: proto.Float32(0.5),
+									Cid:   proto.String("demand_1"),
+								},
+								{
+									Item:  proto.String("ad_unit_2"),
+									Price: proto.Float32(0),
+									Cid:   proto.String("demand_2"),
+								},
+							},
+						},
+					},
+				}
+
+				// Set AuctionResponseExt
+				respExt := &mediation.AuctionResponseExt{
+					Token:                    proto.String("token_456"),
+					ExternalWinNotifications: proto.Bool(true),
+					Segment: &mediation.Segment{
+						Id:  proto.String("segment_id"),
+						Uid: proto.String("segment_uid"),
+					},
+					AuctionConfigurationId:  proto.Int64(789),
+					AuctionConfigurationUid: proto.String("config_uid_456"),
+					AuctionTimeout:          proto.Int32(1000),
+				}
+				proto.SetExtension(resp, mediation.E_AuctionResponseExt, respExt)
+
+				// Set BidExt for each bid
+				proto.SetExtension(resp.Seatbid[0].Bid[0], mediation.E_BidExt, &mediation.BidExt{
+					Label:   proto.String("label_1"),
+					BidType: proto.String(schema.RTBBidType.String()),
+					Ext: map[string]string{
+						"key1": "value1",
+					},
+				})
+				proto.SetExtension(resp.Seatbid[0].Bid[1], mediation.E_BidExt, &mediation.BidExt{
+					Label:   proto.String("label_2"),
+					BidType: proto.String(schema.RTBBidType.String()),
+					Ext: map[string]string{
+						"key2": "value2",
+					},
+				})
+
+				// Wrap in OpenRTB
+				return &v3.Openrtb{
+					PayloadOneof: &v3.Openrtb_Response{
+						Response: resp,
+					},
+				}
+			},
+		},
+		{
+			name: "empty response",
+			input: func() *auctionv2.Response {
+				return &auctionv2.Response{}
+			},
+			want: func() *v3.Openrtb {
+				resp := &v3.Response{
+					Id: proto.String(""),
+					Seatbid: []*v3.SeatBid{
+						{Bid: []*v3.Bid{}},
+					},
+				}
+
+				respExt := &mediation.AuctionResponseExt{
+					Token:                    proto.String(""),
+					ExternalWinNotifications: proto.Bool(false),
+					AuctionConfigurationId:   proto.Int64(0),
+					AuctionConfigurationUid:  proto.String(""),
+					AuctionTimeout:           proto.Int32(0),
+					Segment: &mediation.Segment{
+						Id:  proto.String(""),
+						Uid: proto.String(""),
+					},
+				}
+				proto.SetExtension(resp, mediation.E_AuctionResponseExt, respExt)
+
+				return &v3.Openrtb{
+					PayloadOneof: &v3.Openrtb_Response{
+						Response: resp,
+					},
+				}
+			},
+		},
+		{
+			name: "response with no ad units or bids",
+			input: func() *auctionv2.Response {
+				return &auctionv2.Response{
+					AuctionID:                "auction_id_empty",
+					Token:                    "token_empty",
+					ExternalWinNotifications: false,
+				}
+			},
+			want: func() *v3.Openrtb {
+				resp := &v3.Response{
+					Id: proto.String("auction_id_empty"),
+					Seatbid: []*v3.SeatBid{
+						{Bid: []*v3.Bid{}},
+					},
+				}
+
+				respExt := &mediation.AuctionResponseExt{
+					Token:                    proto.String("token_empty"),
+					ExternalWinNotifications: proto.Bool(false),
+					AuctionConfigurationId:   proto.Int64(0),
+					AuctionConfigurationUid:  proto.String(""),
+					AuctionTimeout:           proto.Int32(0),
+					Segment: &mediation.Segment{
+						Id:  proto.String(""),
+						Uid: proto.String(""),
+					},
+				}
+				proto.SetExtension(resp, mediation.E_AuctionResponseExt, respExt)
+
+				return &v3.Openrtb{
+					PayloadOneof: &v3.Openrtb_Response{
+						Response: resp,
+					},
+				}
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			or, err := a.AuctionResponseToOpenRTB(tc.input())
+			if (err != nil) != (tc.errMsg != "") {
+				t.Fatalf("expected error=%s, got %v", tc.errMsg, err)
+			}
+
+			if tc.errMsg != "" && err != nil {
+				if msg := err.Error(); !strings.Contains(msg, tc.errMsg) {
+					t.Errorf("expected error containing %q, got %q", tc.errMsg, msg)
+				}
+				return
+			}
+
+			if diff := cmp.Diff(tc.want(), or, protocmp.Transform()); diff != "" {
+				t.Errorf("OpenRTB Response mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}

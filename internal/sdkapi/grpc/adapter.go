@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/bidon-io/bidon-backend/internal/auction"
+	"github.com/bidon-io/bidon-backend/internal/auctionv2"
 	"google.golang.org/protobuf/reflect/protoreflect"
 
 	"github.com/bidon-io/bidon-backend/internal/ad"
@@ -17,15 +19,15 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-type AuctionRequestAdapter struct{}
+type AuctionAdapter struct{}
 
-func NewAuctionRequestAdapter() *AuctionRequestAdapter {
-	return &AuctionRequestAdapter{}
+func NewAuctionRequestAdapter() *AuctionAdapter {
+	return &AuctionAdapter{}
 }
 
 // OpenRTBToAuctionRequest converts a v3.Openrtb request into an AuctionV2Request.
 // TODO: missing Adapters, AdType
-func (*AuctionRequestAdapter) OpenRTBToAuctionRequest(o *v3.Openrtb) (*schema.AuctionV2Request, error) {
+func (*AuctionAdapter) OpenRTBToAuctionRequest(o *v3.Openrtb) (*schema.AuctionV2Request, error) {
 	req := o.GetRequest()
 	if req == nil {
 		return nil, fmt.Errorf("OpenRTBToAuctionRequest: request is nil")
@@ -49,6 +51,45 @@ func (*AuctionRequestAdapter) OpenRTBToAuctionRequest(o *v3.Openrtb) (*schema.Au
 	ar.AdObject = adObject
 
 	return ar, nil
+}
+
+// AuctionResponseToOpenRTB converts an AuctionResponse into a v3.Openrtb response.
+func (*AuctionAdapter) AuctionResponseToOpenRTB(r *auctionv2.Response) (*v3.Openrtb, error) {
+	bids := make([]*v3.Bid, 0, len(r.AdUnits)+len(r.NoBids))
+	adUnits := append(r.AdUnits, r.NoBids...)
+	for _, a := range adUnits {
+		bid, err := adUnitToBid(&a)
+		if err != nil {
+			return nil, fmt.Errorf("AuctionResponseToOpenRTB: %w", err)
+		}
+		bids = append(bids, bid)
+	}
+
+	resp := &v3.Response{
+		Id: proto.String(r.AuctionID),
+		Seatbid: []*v3.SeatBid{
+			{Bid: bids},
+		},
+	}
+
+	respExt := &mediation.AuctionResponseExt{
+		Token:                    proto.String(r.Token),
+		ExternalWinNotifications: proto.Bool(r.ExternalWinNotifications),
+		Segment: &mediation.Segment{
+			Id:  proto.String(r.Segment.ID),
+			Uid: proto.String(r.Segment.UID),
+		},
+		AuctionConfigurationId:  proto.Int64(r.ConfigID),
+		AuctionConfigurationUid: proto.String(r.ConfigUID),
+		AuctionTimeout:          proto.Int32(int32(r.AuctionTimeout)),
+	}
+	proto.SetExtension(resp, mediation.E_AuctionResponseExt, respExt)
+
+	return &v3.Openrtb{
+		PayloadOneof: &v3.Openrtb_Response{
+			Response: resp,
+		},
+	}, nil
 }
 
 func parseBaseRequest(req *v3.Request) (schema.BaseRequest, error) {
@@ -317,6 +358,31 @@ func parseRegs(c *pbctx.Context) (*schema.Regulations, error) {
 		EUPrivacy: mr.GetEuPrivacy(),
 		IAB:       parseJson(mr.GetIab()),
 	}, nil
+}
+
+func adUnitToBid(a *auction.AdUnit) (*v3.Bid, error) {
+	var price float32
+	if a.PriceFloor != nil {
+		price = float32(*a.PriceFloor)
+	}
+	bid := &v3.Bid{
+		Item:  proto.String(a.UID),
+		Price: proto.Float32(price),
+		Cid:   proto.String(a.DemandID),
+	}
+
+	ext := make(map[string]string, len(a.Extra))
+	for k, v := range a.Extra {
+		ext[k] = fmt.Sprintf("%v", v)
+	}
+	bidExt := &mediation.BidExt{
+		Label:   proto.String(a.Label),
+		BidType: proto.String(a.BidType.String()),
+		Ext:     ext,
+	}
+	proto.SetExtension(bid, mediation.E_BidExt, bidExt)
+
+	return bid, nil
 }
 
 func getMediationExtension[T proto.Message](m proto.Message, ext protoreflect.ExtensionType) (T, error) {
