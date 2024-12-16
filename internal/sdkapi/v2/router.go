@@ -39,14 +39,16 @@ func (r *Router) RegisterRoutes(g *echo.Group) {
 			ConfigFetcher: r.ConfigFetcher,
 			Geocoder:      r.GeoCoder,
 		},
-		SegmentMatcher: r.SegmentMatcher,
-		AuctionBuilder: &auctionv2.Builder{
-			ConfigFetcher:                r.ConfigFetcher,
-			AdUnitsMatcher:               r.AdUnitsMatcher,
-			BiddingBuilder:               r.BiddingBuilder,
-			BiddingAdaptersConfigBuilder: r.BiddingAdaptersCfgBuilder,
+		AuctionService: &auctionv2.Service{
+			SegmentMatcher: r.SegmentMatcher,
+			AuctionBuilder: &auctionv2.Builder{
+				ConfigFetcher:                r.ConfigFetcher,
+				AdUnitsMatcher:               r.AdUnitsMatcher,
+				BiddingBuilder:               r.BiddingBuilder,
+				BiddingAdaptersConfigBuilder: r.BiddingAdaptersCfgBuilder,
+			},
+			EventLogger: r.EventLogger,
 		},
-		EventLogger: r.EventLogger,
 	}
 	statsHandler := apihandlers.StatsHandler{
 		BaseHandler: &apihandlers.BaseHandler[schema.StatsV2Request, *schema.StatsV2Request]{

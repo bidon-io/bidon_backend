@@ -133,7 +133,7 @@ func testHelperAuctionV2Handler(t *testing.T) *apihandlers.AuctionHandler {
 	segmentMatcher := &segment.Matcher{
 		Fetcher: segmentFetcher,
 	}
-	biddingAdaptersConfigBuilder := &handlersmocks.AdaptersConfigBuilderMock{
+	biddingAdaptersConfigBuilder := &auctionv2mocks.BiddingAdaptersConfigBuilderMock{
 		BuildFunc: func(ctx context.Context, appID int64, adapterKeys []adapter.Key, adUnitsMap *auction.AdUnitsMap) (adapter.ProcessedConfigsMap, error) {
 			return adapter.ProcessedConfigsMap{
 				adapter.ApplovinKey: map[string]any{
@@ -157,7 +157,7 @@ func testHelperAuctionV2Handler(t *testing.T) *apihandlers.AuctionHandler {
 			}, nil
 		},
 	}
-	biddingBuilder := &handlersmocks.BiddingBuilderMock{
+	biddingBuilder := &auctionv2mocks.BiddingBuilderMock{
 		HoldAuctionFunc: func(ctx context.Context, params *bidding.BuildParams) (bidding.AuctionResult, error) {
 			return bidding.AuctionResult{
 				RoundNumber: 0,
@@ -205,6 +205,11 @@ func testHelperAuctionV2Handler(t *testing.T) *apihandlers.AuctionHandler {
 		BiddingBuilder:               biddingBuilder,
 		BiddingAdaptersConfigBuilder: biddingAdaptersConfigBuilder,
 	}
+	auctionService := &auctionv2.Service{
+		AuctionBuilder: auctionBuilderV2,
+		SegmentMatcher: segmentMatcher,
+		EventLogger:    &event.Logger{Engine: &engine.Log{}},
+	}
 
 	handler := &apihandlers.AuctionHandler{
 		BaseHandler: &apihandlers.BaseHandler[schema.AuctionV2Request, *schema.AuctionV2Request]{
@@ -212,9 +217,7 @@ func testHelperAuctionV2Handler(t *testing.T) *apihandlers.AuctionHandler {
 			ConfigFetcher: configFetcher,
 			Geocoder:      gcoder,
 		},
-		AuctionBuilder: auctionBuilderV2,
-		SegmentMatcher: segmentMatcher,
-		EventLogger:    &event.Logger{Engine: &engine.Log{}},
+		AuctionService: auctionService,
 	}
 
 	return handler
