@@ -4,6 +4,7 @@
   // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "configurations": [
+    
     {
       "name": "Debug tests",
       "type": "go",
@@ -28,5 +29,18 @@
       "cwd": ".",
       "program": "cmd/bidon-admin",
     },
+    {
+      "name": "Debug Rust tests",
+      "type": "lldb",
+      "request": "launch",
+      "cargo": {
+        "args": ["test", "--no-run"],
+        "filter": {
+          "kind": "test"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    }
   ]
 }
