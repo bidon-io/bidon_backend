@@ -3,7 +3,6 @@ use axum::routing::post;
 use axum::Router;
 use tower_http::trace::TraceLayer;
 
-
 pub struct AppState<T: BiddingService> {
     pub bidding_service: T,
 }
@@ -11,9 +10,9 @@ pub struct AppState<T: BiddingService> {
 // Define the routes
 pub fn create_app<A>(bidding_service: Box<A>) -> Router
 where
-    A: BiddingService + Clone + Send + Sync + 'static
+    A: BiddingService + Clone + Send + Sync + 'static,
 {
-   Router::new()
+    Router::new()
         .route(
             "/v2/auction/:ad_type",
             post(handlers::auction::get_auction_handler),
@@ -24,6 +23,7 @@ where
 
 // mod main;
 pub mod bidding;
+pub mod codec;
 pub mod extract;
 pub mod sdk;
 
