@@ -16,6 +16,7 @@ type Device struct {
 	PXRatio         float64     `json:"pxratio" validate:"required"`
 	JS              *int        `json:"js" validate:"required"`
 	Language        string      `json:"language" validate:"required"`
+	IP              string      `json:"ip"`
 	Carrier         string      `json:"carrier"`
 	MCCMNC          string      `json:"mccmnc"`
 	ConnectionType  string      `json:"connection_type" validate:"oneof=ETHERNET WIFI CELLULAR CELLULAR_UNKNOWN CELLULAR_2_G CELLULAR_3_G CELLULAR_4_G CELLULAR_5_G"`

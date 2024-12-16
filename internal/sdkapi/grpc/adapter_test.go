@@ -1,6 +1,7 @@
 package grpcserver
 
 import (
+	"github.com/bidon-io/bidon-backend/internal/ad"
 	"strings"
 	"testing"
 
@@ -30,7 +31,7 @@ func ptr[T any](t T) *T {
 }
 
 func TestAuctionAdapter_OpenRTBToAuctionRequest(t *testing.T) {
-	a := NewAuctionRequestAdapter()
+	a := NewAuctionAdapter()
 
 	buildValidRequest := func() *v3.Openrtb {
 		app := &adcomctx.DistributionChannel_App{
@@ -74,6 +75,7 @@ func TestAuctionAdapter_OpenRTBToAuctionRequest(t *testing.T) {
 		proto.SetExtension(regs, mediation.E_RegsExt, regsExt)
 
 		device := &adcomctx.Device{
+			Ip:    proto.String("8.8.8.8"),
 			Ua:    proto.String("Mozilla/5.0"),
 			Make:  proto.String("Apple"),
 			Model: proto.String("iPhone"),
@@ -132,14 +134,27 @@ func TestAuctionAdapter_OpenRTBToAuctionRequest(t *testing.T) {
 			Spec: placementBytes,
 		}
 
+		req := &v3.Request{
+			Test:    proto.Bool(true),
+			Tmax:    proto.Uint32(1000),
+			Context: ctxBytes,
+			Item:    []*v3.Item{item},
+		}
+		reqExt := &mediation.RequestExt{
+			Adapters: map[string]*mediation.SdkAdapter{
+				"applovin": {
+					Version:    proto.String("0.1.0"),
+					SdkVersion: proto.String("1.0.0"),
+				},
+			},
+			AdType: ptr(mediation.AdType_AD_TYPE_BANNER),
+			Ext:    proto.String(`{"mediation_mode":"bidon"}`),
+		}
+		proto.SetExtension(req, mediation.E_RequestExt, reqExt)
+
 		return &v3.Openrtb{
 			PayloadOneof: &v3.Openrtb_Request{
-				Request: &v3.Request{
-					Test:    proto.Bool(true),
-					Tmax:    proto.Uint32(1000),
-					Context: ctxBytes,
-					Item:    []*v3.Item{item},
-				},
+				Request: req,
 			},
 		}
 	}
@@ -165,6 +180,7 @@ func TestAuctionAdapter_OpenRTBToAuctionRequest(t *testing.T) {
 						OS:             "iOS",
 						OSVersion:      "14.4",
 						JS:             func() *int { i := 0; return &i }(),
+						IP:             "8.8.8.8",
 						ConnectionType: "ConnectionType_UNKNOWN",
 						Type:           "DeviceType_UNKNOWN",
 					},
@@ -204,7 +220,7 @@ func TestAuctionAdapter_OpenRTBToAuctionRequest(t *testing.T) {
 						EUPrivacy: "1",
 						IAB:       map[string]any{"key": "value"},
 					},
-					Ext:   "",
+					Ext:   `{"mediation_mode":"bidon"}`,
 					Token: "",
 					Segment: schema.Segment{
 						ID:  "segment_id",
@@ -231,6 +247,13 @@ func TestAuctionAdapter_OpenRTBToAuctionRequest(t *testing.T) {
 					Interstitial: nil,
 					Rewarded:     nil,
 				},
+				Adapters: schema.Adapters{
+					"applovin": schema.Adapter{
+						Version:    "0.1.0",
+						SDKVersion: "1.0.0",
+					},
+				},
+				AdType:  ad.BannerType,
 				AdCache: nil,
 			},
 		},
