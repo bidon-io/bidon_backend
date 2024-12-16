@@ -21,12 +21,11 @@ import (
 
 type AuctionAdapter struct{}
 
-func NewAuctionRequestAdapter() *AuctionAdapter {
+func NewAuctionAdapter() *AuctionAdapter {
 	return &AuctionAdapter{}
 }
 
 // OpenRTBToAuctionRequest converts a v3.Openrtb request into an AuctionV2Request.
-// TODO: missing Adapters, AdType
 func (*AuctionAdapter) OpenRTBToAuctionRequest(o *v3.Openrtb) (*schema.AuctionV2Request, error) {
 	req := o.GetRequest()
 	if req == nil {
@@ -34,21 +33,10 @@ func (*AuctionAdapter) OpenRTBToAuctionRequest(o *v3.Openrtb) (*schema.AuctionV2
 	}
 
 	ar := &schema.AuctionV2Request{}
-
-	ar.Test = req.GetTest()
-	ar.TMax = int64(req.GetTmax())
-
-	br, err := parseBaseRequest(req)
+	err := parseAuctionRequest(ar, req)
 	if err != nil {
 		return nil, fmt.Errorf("OpenRTBToAuctionRequest: %w", err)
 	}
-	ar.BaseRequest = br
-
-	adObject, err := parseAdObject(req)
-	if err != nil {
-		return nil, fmt.Errorf("OpenRTBToAuctionRequest: %w", err)
-	}
-	ar.AdObject = adObject
 
 	return ar, nil
 }
@@ -90,6 +78,60 @@ func (*AuctionAdapter) AuctionResponseToOpenRTB(r *auctionv2.Response) (*v3.Open
 			Response: resp,
 		},
 	}, nil
+}
+
+func parseAuctionRequest(ar *schema.AuctionV2Request, req *v3.Request) error {
+	ext, err := getMediationExtension[*mediation.RequestExt](req, mediation.E_RequestExt)
+	if err != nil {
+		return fmt.Errorf("parseAuctionRequest: %w", err)
+	}
+
+	br, err := parseBaseRequest(req)
+	if err != nil {
+		return err
+	}
+	ar.BaseRequest = br
+
+	adObject, err := parseAdObject(req)
+	if err != nil {
+		return err
+	}
+	ar.AdObject = adObject
+
+	ar.Test = req.GetTest()
+	ar.TMax = int64(req.GetTmax())
+	ar.Ext = ext.GetExt()
+	ar.Adapters = parseAdapters(ext)
+	ar.AdType = parseAdType(ext)
+
+	return nil
+}
+
+func parseAdapters(ext *mediation.RequestExt) schema.Adapters {
+	mAdapters := ext.GetAdapters()
+	adapters := make(schema.Adapters, len(mAdapters))
+	for key, ma := range mAdapters {
+		adapters[adapter.Key(key)] = schema.Adapter{
+			Version:    ma.GetVersion(),
+			SDKVersion: ma.GetSdkVersion(),
+		}
+	}
+
+	return adapters
+}
+
+func parseAdType(ext *mediation.RequestExt) ad.Type {
+	mAdType := ext.GetAdType()
+	switch mAdType {
+	case mediation.AdType_AD_TYPE_BANNER:
+		return ad.BannerType
+	case mediation.AdType_AD_TYPE_INTERSTITIAL:
+		return ad.InterstitialType
+	case mediation.AdType_AD_TYPE_REWARDED:
+		return ad.RewardedType
+	default:
+		return ad.UnknownType
+	}
 }
 
 func parseBaseRequest(req *v3.Request) (schema.BaseRequest, error) {
@@ -333,6 +375,7 @@ func parseDevice(c *pbctx.Context) (schema.Device, error) {
 		PXRatio:         float64(d.GetPxratio()),
 		JS:              parseJS(d.GetJs()),
 		Language:        d.GetLang(),
+		IP:              d.GetIp(),
 		Carrier:         d.GetCarrier(),
 		MCCMNC:          d.GetMccmnc(),
 		ConnectionType:  adcom.ConnectionType(d.GetContype()).String(),
