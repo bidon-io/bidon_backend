@@ -401,6 +401,12 @@ pub(crate) fn try_into(openrtb: openrtb::Openrtb) -> Result<sdk::AuctionResponse
         _ => return Err(anyhow!("OpenRTB payload is not a Response")),
     };
 
+    // Extract auction configuration from response extensions
+    let auction_ext = response
+        .extension_set
+        .extension_data(mediation::AUCTION_RESPONSE_EXT)
+        .map_err(|_| anyhow!("Missing mediation ad object extension in response"))?;
+
     // Extract bid information from the response
     let mut ad_units = Vec::new();
     let mut no_bids = Vec::new();
@@ -430,19 +436,15 @@ pub(crate) fn try_into(openrtb: openrtb::Openrtb) -> Result<sdk::AuctionResponse
                         .unwrap_or_default(),
                 ),
             };
-            if bid.price.unwrap_or_default() > 0.0 {
+            if bid.price.unwrap_or_default() as f64
+                > auction_ext.auction_pricefloor.unwrap_or_default()
+            {
                 ad_units.push(ad_unit);
             } else {
                 no_bids.push(ad_unit);
             }
         }
     }
-
-    // Extract auction configuration from response extensions
-    let auction_ext = response
-        .extension_set
-        .extension_data(mediation::AUCTION_RESPONSE_EXT)
-        .map_err(|_| anyhow!("Missing mediation ad object extension in response"))?;
 
     let auction_response = sdk::AuctionResponse {
         ad_units,

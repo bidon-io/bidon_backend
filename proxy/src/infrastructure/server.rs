@@ -13,7 +13,12 @@ pub async fn run(listener: tokio::net::TcpListener) -> Result<(), Box<dyn std::e
 
     let app = bidon::create_app(Box::new(bidding_service));
 
-    axum::serve(listener, app).await.unwrap();
+    axum::serve(
+        listener,
+        app.into_make_service_with_connect_info::<std::net::SocketAddr>(),
+    )
+    .await
+    .unwrap();
 
     Ok(())
 }
