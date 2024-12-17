@@ -140,6 +140,35 @@ func (csv applovinLineItemCSV) buildLineItemAttrs(account *DemandSourceAccount, 
 
 }
 
+type bigoAdsLineItemCSV struct {
+	AdFormat string          `csv:"ad_format"`
+	BidFloor decimal.Decimal `csv:"bid_floor"`
+	SlotID   string          `csv:"slot_id"`
+}
+
+func (csv bigoAdsLineItemCSV) buildLineItemAttrs(account *DemandSourceAccount, attrs LineItemImportCSVAttrs) (LineItemAttrs, error) {
+	adType, format := parseCSVAdFormat(csv.AdFormat)
+	if adType == ad.UnknownType {
+		return LineItemAttrs{}, fmt.Errorf("unknown ad format %q", csv.AdFormat)
+	}
+
+	lineItemAttrs := LineItemAttrs{
+		HumanName:   strings.ToLower(fmt.Sprintf("%v_%v_%v", account.DemandSource.ApiKey, csv.AdFormat, csv.BidFloor)),
+		AppID:       attrs.AppID,
+		BidFloor:    &csv.BidFloor,
+		AdType:      adType,
+		Format:      format,
+		AccountID:   account.ID,
+		AccountType: account.Type,
+		IsBidding:   &attrs.IsBidding,
+		Extra: map[string]any{
+			"slot_id": csv.SlotID,
+		},
+	}
+
+	return lineItemAttrs, nil
+}
+
 type chartboostLineItemCSV struct {
 	AdFormat   string          `csv:"ad_format"`
 	BidFloor   decimal.Decimal `csv:"bid_floor"`
@@ -389,6 +418,17 @@ func (s *LineItemService) ImportCSV(ctx context.Context, _ AuthContext, reader i
 		csvLineItems = make([]LineItemCSV, len(admobLineItems))
 		for i, admobLineItem := range admobLineItems {
 			csvLineItems[i] = admobLineItem
+		}
+	case adapter.BigoAdsKey:
+		var bigoAdsLineItems []bigoAdsLineItemCSV
+		err = csvutil.Unmarshal(csvInput, &bigoAdsLineItems)
+		if err != nil {
+			return fmt.Errorf("unmarshal csv: %v", err)
+		}
+
+		csvLineItems = make([]LineItemCSV, len(bigoAdsLineItems))
+		for i, bigoAdsLineItem := range bigoAdsLineItems {
+			csvLineItems[i] = bigoAdsLineItem
 		}
 	case adapter.ApplovinKey:
 		var applovinLineItems []applovinLineItemCSV
