@@ -255,7 +255,7 @@ func main() {
 		AuctionBuilder: &auctionv2.Builder{
 			ConfigFetcher:                configFetcher,
 			AdUnitsMatcher:               adUnitsMatcher,
-			BiddingBuilder:               biddingBuilder,
+			BiddingBuilder:               biddingBuilderV2,
 			BiddingAdaptersConfigBuilder: biddingAdaptersCfgBuilder,
 		},
 		EventLogger: eventLogger,
