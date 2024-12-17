@@ -30,6 +30,7 @@ type Router struct {
 	ConfigurationFetcher      *adapterstore.ConfigurationFetcher
 	BiddingBuilder            *bidding.Builder
 	BiddingAdaptersCfgBuilder *adapters_builder.AdaptersConfigBuilder
+	AuctionService            *auctionv2.Service
 }
 
 func (r *Router) RegisterRoutes(g *echo.Group) {
@@ -39,16 +40,7 @@ func (r *Router) RegisterRoutes(g *echo.Group) {
 			ConfigFetcher: r.ConfigFetcher,
 			Geocoder:      r.GeoCoder,
 		},
-		AuctionService: &auctionv2.Service{
-			SegmentMatcher: r.SegmentMatcher,
-			AuctionBuilder: &auctionv2.Builder{
-				ConfigFetcher:                r.ConfigFetcher,
-				AdUnitsMatcher:               r.AdUnitsMatcher,
-				BiddingBuilder:               r.BiddingBuilder,
-				BiddingAdaptersConfigBuilder: r.BiddingAdaptersCfgBuilder,
-			},
-			EventLogger: r.EventLogger,
-		},
+		AuctionService: r.AuctionService,
 	}
 	statsHandler := apihandlers.StatsHandler{
 		BaseHandler: &apihandlers.BaseHandler[schema.StatsV2Request, *schema.StatsV2Request]{

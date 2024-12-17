@@ -3,6 +3,8 @@ package adapter_test
 import (
 	"testing"
 
+	"github.com/google/go-cmp/cmp/cmpopts"
+
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/google/go-cmp/cmp"
 )
@@ -43,7 +45,7 @@ func TestAdapter_GetCommonAdapters(t *testing.T) {
 	for _, tC := range testCases {
 		got := adapter.GetCommonAdapters(tC.params...)
 
-		if diff := cmp.Diff(tC.want, got); diff != "" {
+		if diff := cmp.Diff(tC.want, got, cmpopts.SortSlices(func(a, b adapter.Key) bool { return a < b })); diff != "" {
 			t.Errorf("builder.Build -> %+v mismatch \n(-want, +got)\n%s", tC.name, diff)
 		}
 	}
