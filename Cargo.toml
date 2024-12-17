@@ -7,7 +7,7 @@ license = "Apache-2.0"
 edition = "2021"
 
 [[bin]]
-name = "bidon"
+name = "bidon-proxy"
 path = "proxy/src/main.rs"
 
 [lib]
@@ -23,7 +23,7 @@ async-trait = "0.1"
 
 # gRPC and Protobuf
 tonic = "0.12.3"
-prost = { git = 'https://github.com/bidon-io/prost', branch = "extensions" }
+prost = { git = 'https://github.com/bidon-io/prost' }
 
 serde = "1.0"
 serde_json = "1.0"
@@ -50,24 +50,32 @@ once_cell = "1.20.2"
 axum-test-helper = "0.4.0"
 
 [patch.crates-io]
-prost = { git = 'https://github.com/bidon-io/prost', branch = "extensions" }
-prost-derive = { git = 'https://github.com/bidon-io/prost', branch = "extensions" }
-prost-types = { git = 'https://github.com/bidon-io/prost', branch = "extensions" }
-prost-build = { git = 'https://github.com/bidon-io/prost', branch = "extensions" }
+prost = { git = 'https://github.com/bidon-io/prost' }
+prost-derive = { git = 'https://github.com/bidon-io/prost' }
+prost-types = { git = 'https://github.com/bidon-io/prost' }
+prost-build = { git = 'https://github.com/bidon-io/prost' }
 dotenvy = { git = 'https://github.com/allan2/dotenvy', rev = "e2da1106" }
 
 [build-dependencies]
 tonic-build = "0.12.3"
-prost-build = { git = 'https://github.com/bidon-io/prost', branch = "extensions" }
+prost-build = { git = 'https://github.com/bidon-io/prost' }
 
 [build]
 rustflags = [
-    "-W", "missing_docs", # detects missing documentation for public members
-    "-W", "trivial_casts", # detects trivial casts which could be removed
-    "-W", "trivial_numeric_casts", # detects trivial casts of numeric types which could be removed
-    "-W", "unsafe_code", # usage of `unsafe` code
-    "-W", "unused_qualifications", # detects unnecessarily qualified names
-    "-W", "unused_extern_crates", # extern crates that are never used
-    "-W", "unused_import_braces", # unnecessary braces around an imported item
-    "-D", "warnings", # all warnings should be denied
+    "-W",
+    "missing_docs",          # detects missing documentation for public members
+    "-W",
+    "trivial_casts",         # detects trivial casts which could be removed
+    "-W",
+    "trivial_numeric_casts", # detects trivial casts of numeric types which could be removed
+    "-W",
+    "unsafe_code",           # usage of `unsafe` code
+    "-W",
+    "unused_qualifications", # detects unnecessarily qualified names
+    "-W",
+    "unused_extern_crates",  # extern crates that are never used
+    "-W",
+    "unused_import_braces",  # unnecessary braces around an imported item
+    "-D",
+    "warnings",              # all warnings should be denied
 ]
