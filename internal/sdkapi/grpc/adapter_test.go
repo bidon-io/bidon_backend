@@ -1,9 +1,10 @@
 package grpcserver
 
 import (
-	"github.com/bidon-io/bidon-backend/internal/ad"
 	"strings"
 	"testing"
+
+	"github.com/bidon-io/bidon-backend/internal/ad"
 
 	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/auctionv2"
@@ -25,10 +26,6 @@ import (
 
 	"github.com/bidon-io/bidon-backend/pkg/proto/org/bidon/proto/v1/mediation"
 )
-
-func ptr[T any](t T) *T {
-	return &t
-}
 
 func TestAuctionAdapter_OpenRTBToAuctionRequest(t *testing.T) {
 	a := NewAuctionAdapter()
@@ -404,7 +401,6 @@ func TestAuctionAdapter_AuctionResponseToOpenRTB(t *testing.T) {
 					},
 				})
 
-				// Wrap in OpenRTB
 				return &v3.Openrtb{
 					PayloadOneof: &v3.Openrtb_Response{
 						Response: resp,

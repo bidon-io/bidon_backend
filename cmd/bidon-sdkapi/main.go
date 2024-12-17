@@ -14,6 +14,9 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/bidon-io/bidon-backend/internal/auctionv2"
+	"google.golang.org/grpc/reflection"
+
 	grpcserver "github.com/bidon-io/bidon-backend/internal/sdkapi/grpc"
 	pb "github.com/bidon-io/bidon-backend/pkg/proto/org/bidon/proto/v1"
 	"google.golang.org/grpc"
@@ -247,6 +250,16 @@ func main() {
 		DB:    db,
 		Cache: configsCache,
 	}
+	auctionService := &auctionv2.Service{
+		SegmentMatcher: segmentMatcher,
+		AuctionBuilder: &auctionv2.Builder{
+			ConfigFetcher:                configFetcher,
+			AdUnitsMatcher:               adUnitsMatcher,
+			BiddingBuilder:               biddingBuilder,
+			BiddingAdaptersConfigBuilder: biddingAdaptersCfgBuilder,
+		},
+		EventLogger: eventLogger,
+	}
 
 	e := config.Echo()
 
@@ -286,6 +299,7 @@ func main() {
 		LineItemsMatcher:          lineItemsMatcher,
 		AdapterInitConfigsFetcher: adapterInitConfigsFetcher,
 		ConfigurationFetcher:      configurationFetcher,
+		AuctionService:            auctionService,
 	}
 	routerV2.RegisterRoutes(v2Group)
 
@@ -322,7 +336,11 @@ func main() {
 			log.Fatalf("Failed to listen on %s: %v", grpcAddr, err)
 		}
 
-		pb.RegisterBiddingServiceServer(grpcServer, &grpcserver.Server{})
+		server := grpcserver.NewServer(auctionService, appFetcher, geoCoder)
+		pb.RegisterBiddingServiceServer(grpcServer, server)
+		if os.Getenv("ENVIRONMENT") == "development" {
+			reflection.Register(grpcServer)
+		}
 
 		log.Printf("gRPC server is listening on %s", grpcAddr)
 		if err := grpcServer.Serve(lis); err != nil {
