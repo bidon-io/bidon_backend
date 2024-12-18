@@ -38,3 +38,5 @@ jobs:
       run: cargo test --verbose
       env:
         CARGO_INCREMENTAL: '0'
+    - name: Run Docker rust tests
+      run: docker compose run --rm rust-test

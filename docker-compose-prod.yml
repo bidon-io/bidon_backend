@@ -134,6 +134,7 @@ services:
         condition: service_completed_successfully
     environment:
       PORT: 3100
+      GRPC_PORT: 50051
       ENVIRONMENT: production
       DATABASE_URL: postgres://bidon:${PG_PASSWORD:-password}@postgres:5432/bidon
       DATABASE_REPLICA_URL: postgres://bidon:${PG_PASSWORD:-password}@postgres:5432/bidon
@@ -149,8 +150,24 @@ services:
       MAXMIND_GEOIP_FILE_PATH: /public/system/GeoLite2-City.mmdb
     ports:
       - "3100:3100"
+      - "50051:50051"
     volumes:
       - geodb:/public/system
+    logging: *default-logging
+    <<: *restart-policy
+
+  bidon-proxy:
+    image: ghcr.io/bidon-io/bidon-proxy:latest
+    depends_on:
+      bidon-sdkapi:
+        condition: service_started
+    environment:
+      PROXY_PORT: 3000
+      PROXY_GRPC_URL: http://bidon-sdkapi:50051
+      PROXY_LOG_LEVEL: info
+      ENVIRONMENT: production
+    ports:
+      - "3000:3000"
     logging: *default-logging
     <<: *restart-policy
 
