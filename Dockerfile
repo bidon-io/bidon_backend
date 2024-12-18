@@ -45,7 +45,7 @@ FROM base AS bidon-migrate-builder
 
 RUN go build -o /bidon-migrate ./cmd/bidon-migrate
 
-FROM rust:1.75-alpine AS proxy-builder
+FROM rust:1.81-alpine AS proxy-builder
 
 WORKDIR /app
 
