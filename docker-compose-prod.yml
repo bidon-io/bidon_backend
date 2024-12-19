@@ -27,7 +27,7 @@ services:
     working_dir: /geodb
 
   postgres:
-    image: postgres:14.7
+    image: postgres:17.2
     environment:
       POSTGRES_PASSWORD: ${PG_PASSWORD:-password}
       POSTGRES_USER: bidon
@@ -88,6 +88,7 @@ services:
 
   bidon-migrate:
     image: ghcr.io/bidon-io/bidon-migrate:latest
+    platform: linux/amd64
     command: up
     depends_on:
       - postgres
