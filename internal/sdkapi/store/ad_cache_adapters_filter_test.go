@@ -44,9 +44,7 @@ func TestFilterCached(t *testing.T) {
 			OS:       ad.AndroidOS,
 			adType:   ad.RewardedType,
 			adapters: []adapter.Key{adapter.DTExchangeKey},
-			adCache: []schema.AdCacheObject{
-				{DemandID: string(adapter.DTExchangeKey), Price: 3.37},
-			},
+			adCache:  []schema.AdCacheObject{},
 			expected: []adapter.Key{adapter.DTExchangeKey},
 		},
 		{
@@ -56,8 +54,6 @@ func TestFilterCached(t *testing.T) {
 			adapters: []adapter.Key{adapter.MintegralKey},
 			adCache: []schema.AdCacheObject{
 				{DemandID: string(adapter.MintegralKey), Price: 3.37},
-				{DemandID: string(adapter.MintegralKey), Price: 4.37},
-				{DemandID: string(adapter.MintegralKey), Price: 5.37},
 			},
 			expected: []adapter.Key{},
 		},
@@ -68,7 +64,6 @@ func TestFilterCached(t *testing.T) {
 			adapters: []adapter.Key{adapter.IronSourceKey, adapter.AdmobKey},
 			adCache: []schema.AdCacheObject{
 				{DemandID: string(adapter.IronSourceKey), Price: 3.37},
-				{DemandID: string(adapter.AdmobKey), Price: 4.0},
 			},
 			expected: []adapter.Key{adapter.AdmobKey},
 		},
