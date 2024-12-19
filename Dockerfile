@@ -45,12 +45,12 @@ FROM base AS bidon-migrate-builder
 
 RUN go build -o /bidon-migrate ./cmd/bidon-migrate
 
-FROM rust:1.81-alpine AS proxy-builder
+FROM rust:1.83-alpine AS proxy-builder
 
 WORKDIR /app
 
 # Install build dependencies
-RUN apk add --no-cache musl-dev
+RUN apk add --no-cache musl-dev gcc make linux-headers protobuf-dev
 
 # Copy Cargo files first to cache dependencies
 COPY Cargo.toml Cargo.lock ./
