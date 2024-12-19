@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
+	"math/big"
 	"sort"
 	"strconv"
 
@@ -21,7 +23,8 @@ import (
 )
 
 type Service struct {
-	AuctionBuilder *Builder
+	ConfigFetcher  ConfigFetcher
+	AuctionBuilder AuctionBuilder
 	SegmentMatcher *segment.Matcher
 	EventLogger    *event.Logger
 }
@@ -48,6 +51,17 @@ type ExecutionParams struct {
 	LogErr  func(err error)
 }
 
+//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/service_mocks.go -pkg mocks . ConfigFetcher AuctionBuilder
+
+type ConfigFetcher interface {
+	Match(ctx context.Context, appID int64, adType ad.Type, segmentID int64, version string) (*auction.Config, error)
+	FetchByUIDCached(ctx context.Context, appId int64, id, uid string) *auction.Config
+}
+
+type AuctionBuilder interface {
+	Build(ctx context.Context, params *BuildParams) (*AuctionResult, error)
+}
+
 const (
 	DefaultAuctionTimeout = 30000
 )
@@ -56,6 +70,9 @@ var adCacheAdaptersFilter = store.NewAdCacheAdaptersFilter()
 
 func (s *Service) Run(ctx context.Context, params *ExecutionParams) (*Response, error) {
 	req := params.Req
+
+	var auctionConfig *auction.Config
+	var err error
 
 	segmentParams := &segment.Params{
 		Country: params.Country,
@@ -74,6 +91,26 @@ func (s *Service) Run(ctx context.Context, params *ExecutionParams) (*Response, 
 		req.AdCache,
 	)
 
+	if req.AdObject.AuctionKey != "" {
+		publicUid, success := new(big.Int).SetString(req.AdObject.AuctionKey, 32)
+		if !success {
+			return nil, sdkapi.ErrInvalidAuctionKey
+		}
+
+		auctionConfig = s.ConfigFetcher.FetchByUIDCached(ctx, params.AppID, "0", publicUid.String())
+		if auctionConfig == nil {
+			return nil, sdkapi.ErrInvalidAuctionKey
+		}
+	} else {
+		auctionConfig, err = s.ConfigFetcher.Match(ctx, params.AppID, req.AdType, sgmnt.ID, "v2")
+	}
+	if err != nil {
+		return nil, sdkapi.ErrNoAdsFound
+	}
+	req.AdObject.AuctionConfigurationID = auctionConfig.ID
+	req.AdObject.AuctionConfigurationUID = auctionConfig.UID
+	req.AdObject.PriceFloor = priceFloor(req, auctionConfig)
+
 	bp := &BuildParams{
 		AppID:                params.AppID,
 		AdType:               req.AdType,
@@ -85,6 +122,7 @@ func (s *Service) Run(ctx context.Context, params *ExecutionParams) (*Response, 
 		MergedAuctionRequest: req,
 		GeoData:              params.GeoData,
 		AuctionKey:           req.AdObject.AuctionKey,
+		AuctionConfiguration: auctionConfig,
 	}
 
 	auctionResult, err := s.AuctionBuilder.Build(ctx, bp)
@@ -92,19 +130,26 @@ func (s *Service) Run(ctx context.Context, params *ExecutionParams) (*Response, 
 		if errors.Is(err, auction.ErrNoAdsFound) {
 			err = sdkapi.ErrNoAdsFound
 		}
-		if errors.Is(err, auction.InvalidAuctionKey) {
-			err = sdkapi.ErrInvalidAuctionKey
-		}
 
 		return nil, err
 	}
-	params.Log(fmt.Sprintf("[AUCTION V2] auction: (%+v), err: (%s), took (%dms)", auctionResult, err, auctionResult.Stat.DurationTS))
+	params.Log(fmt.Sprintf("[AUCTION V2] auction: (%+v), err: (%s), took (%dms)", auctionResult, err, auctionResult.GetDuration()))
 
 	adUnitsMap := auction.BuildAdUnitsMap(auctionResult.AdUnits)
 
 	s.logEvents(req, params, auctionResult, adUnitsMap)
 
 	return s.buildResponse(req, auctionResult, adUnitsMap)
+}
+
+func priceFloor(req *schema.AuctionV2Request, auctionConfig *auction.Config) float64 {
+	priceFloor := req.AdObject.PriceFloor
+	for _, cacheObject := range req.AdCache {
+		priceFloor = math.Max(priceFloor, cacheObject.Price)
+	}
+	priceFloor = math.Max(auctionConfig.PriceFloor, priceFloor)
+
+	return priceFloor
 }
 
 func (s *Service) buildResponse(
@@ -122,6 +167,7 @@ func (s *Service) buildResponse(
 		AuctionPriceFloor:        adObject.PriceFloor,
 		AuctionTimeout:           auctionTimeout(auctionResult.AuctionConfiguration),
 		ExternalWinNotifications: auctionResult.AuctionConfiguration.ExternalWinNotifications,
+		AdUnits:                  make([]auction.AdUnit, 0),
 		NoBids:                   make([]auction.AdUnit, 0),
 	}
 
@@ -175,10 +221,8 @@ func (s *Service) logEvents(
 		auctionConfigurationUID = 0
 	}
 
-	br := req.ToBiddingRequest()
-	ar := req.ToAuctionRequest()
-	events := prepareBiddingEvents(&br, params, auctionResult.BiddingAuctionResult, adUnitsMap)
-	aucRequestEvent := prepareAuctionRequestEvent(&ar, params, auc, auctionConfigurationUID)
+	events := prepareBiddingEvents(req, params, auctionResult.BiddingAuctionResult, adUnitsMap)
+	aucRequestEvent := prepareAuctionRequestEvent(req, params, auc, auctionConfigurationUID)
 
 	events = append(events, aucRequestEvent)
 	for _, ev := range events {
@@ -219,7 +263,7 @@ func convertBidToAdUnit(demandResponse adapters.DemandResponse, adUnitsMap *auct
 }
 
 func prepareAuctionRequestEvent(
-	req *schema.AuctionRequest,
+	req *schema.AuctionV2Request,
 	params *ExecutionParams,
 	auc *auction.Auction,
 	auctionConfigurationUID int,
@@ -244,13 +288,13 @@ func prepareAuctionRequestEvent(
 }
 
 func prepareBiddingEvents(
-	req *schema.BiddingRequest,
+	req *schema.AuctionV2Request,
 	params *ExecutionParams,
 	auctionResult *bidding.AuctionResult,
 	adUnitsMap *auction.AdUnitsMap,
 ) []*event.AdEvent {
-	imp := req.Imp
-	auctionConfigurationUID, err := strconv.Atoi(imp.AuctionConfigurationUID)
+	adObject := req.AdObject
+	auctionConfigurationUID, err := strconv.Atoi(adObject.AuctionConfigurationUID)
 	if err != nil {
 		auctionConfigurationUID = 0
 	}
@@ -269,9 +313,9 @@ func prepareBiddingEvents(
 		adRequestParams := event.AdRequestParams{
 			EventType:               "bid_request",
 			AdType:                  string(req.AdType),
-			AdFormat:                string(req.Imp.Format()),
-			AuctionID:               imp.AuctionID,
-			AuctionConfigurationID:  imp.AuctionConfigurationID,
+			AdFormat:                string(req.AdObject.Format()),
+			AuctionID:               adObject.AuctionID,
+			AuctionConfigurationID:  adObject.AuctionConfigurationID,
 			AuctionConfigurationUID: int64(auctionConfigurationUID),
 			Status:                  fmt.Sprint(result.Status),
 			ImpID:                   "",
@@ -279,7 +323,7 @@ func prepareBiddingEvents(
 			AdUnitUID:               adUnitUID,
 			AdUnitLabel:             adUnitLabel,
 			ECPM:                    result.Price(),
-			PriceFloor:              imp.GetBidFloor(),
+			PriceFloor:              adObject.PriceFloor,
 			Bidding:                 true,
 			RawRequest:              result.RawRequest,
 			RawResponse:             result.RawResponse,
@@ -294,9 +338,9 @@ func prepareBiddingEvents(
 			adRequestParams = event.AdRequestParams{
 				EventType:               "bid",
 				AdType:                  string(req.AdType),
-				AdFormat:                string(req.Imp.Format()),
-				AuctionID:               imp.AuctionID,
-				AuctionConfigurationID:  imp.AuctionConfigurationID,
+				AdFormat:                string(adObject.Format()),
+				AuctionID:               adObject.AuctionID,
+				AuctionConfigurationID:  adObject.AuctionConfigurationID,
 				AuctionConfigurationUID: int64(auctionConfigurationUID),
 				Status:                  "SUCCESS",
 				ImpID:                   "",
@@ -304,7 +348,7 @@ func prepareBiddingEvents(
 				AdUnitUID:               adUnitUID,
 				AdUnitLabel:             adUnitLabel,
 				ECPM:                    result.Bid.Price,
-				PriceFloor:              imp.GetBidFloor(),
+				PriceFloor:              adObject.PriceFloor,
 				Bidding:                 true,
 				TimingMap: event.TimingMap{
 					"bid": {result.StartTS, result.EndTS},

@@ -88,7 +88,11 @@ func (b *Builder) HoldAuction(ctx context.Context, params *BuildParams) (Auction
 			},
 		},
 		Device: b.BuildDevice(br.Device, br.User, params.GeoData),
-		Imp:    []openrtb2.Imp{},
+		Imp: []openrtb2.Imp{
+			{
+				BidFloor: br.Imp.GetBidFloorForBidding(),
+			},
+		},
 		Regs: &openrtb2.Regs{
 			COPPA: *bool2int(br.GetRegulations().COPPA),
 			GDPR:  bool2int(br.GetRegulations().GDPR),

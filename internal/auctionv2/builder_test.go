@@ -7,7 +7,6 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/auctionv2"
@@ -18,19 +17,12 @@ import (
 )
 
 type BuilderMocks struct {
-	ConfigFetcher                *mocks.ConfigFetcherMock
 	AdUnitsMatcher               *mocks.AdUnitsMatcherMock
 	BiddingBuilder               *mocks.BiddingBuilderMock
 	BiddingAdaptersConfigBuilder *mocks.BiddingAdaptersConfigBuilderMock
 }
 
 type BuilderOption func(*BuilderMocks)
-
-func WithConfigFetcher(cf *mocks.ConfigFetcherMock) BuilderOption {
-	return func(b *BuilderMocks) {
-		b.ConfigFetcher = cf
-	}
-}
 
 func WithAdUnitsMatcher(au *mocks.AdUnitsMatcherMock) BuilderOption {
 	return func(b *BuilderMocks) {
@@ -45,13 +37,6 @@ func WithBiddingBuilder(bb *mocks.BiddingBuilderMock) BuilderOption {
 }
 
 func testHelperDefaultAuctionBuilderMocks() *BuilderMocks {
-	auctionConfig := &auction.Config{
-		ID:        1,
-		Demands:   []adapter.Key{adapter.GAMKey, adapter.DTExchangeKey},
-		Bidding:   []adapter.Key{adapter.BidmachineKey, adapter.AmazonKey, adapter.MetaKey},
-		AdUnitIDs: []int64{1, 2},
-		Timeout:   15000,
-	}
 	adUnits := []auction.AdUnit{
 		{
 			DemandID:   "gam",
@@ -74,18 +59,6 @@ func testHelperDefaultAuctionBuilderMocks() *BuilderMocks {
 			},
 		},
 	}
-	configFetcher := &mocks.ConfigFetcherMock{
-		MatchFunc: func(ctx context.Context, appID int64, adType ad.Type, segmentID int64, version string) (*auction.Config, error) {
-			return auctionConfig, nil
-		},
-		FetchByUIDCachedFunc: func(ctx context.Context, appId int64, key string, aucUID string) *auction.Config {
-			if aucUID == "1688565055735595008" {
-				return auctionConfig
-			} else {
-				return nil
-			}
-		},
-	}
 	adUnitsMatcher := &mocks.AdUnitsMatcherMock{
 		MatchCachedFunc: func(ctx context.Context, params *auction.BuildParams) ([]auction.AdUnit, error) {
 			return adUnits, nil
@@ -106,7 +79,6 @@ func testHelperDefaultAuctionBuilderMocks() *BuilderMocks {
 	}
 
 	return &BuilderMocks{
-		ConfigFetcher:                configFetcher,
 		AdUnitsMatcher:               adUnitsMatcher,
 		BiddingBuilder:               biddingBuilder,
 		BiddingAdaptersConfigBuilder: biddingAdaptersConfigBuilder,
@@ -125,7 +97,6 @@ func testHelperAuctionBuilder(opts ...BuilderOption) *auctionv2.Builder {
 	}
 
 	return &auctionv2.Builder{
-		ConfigFetcher:                m.ConfigFetcher,
 		AdUnitsMatcher:               m.AdUnitsMatcher,
 		BiddingBuilder:               m.BiddingBuilder,
 		BiddingAdaptersConfigBuilder: m.BiddingAdaptersConfigBuilder,
@@ -133,6 +104,13 @@ func testHelperAuctionBuilder(opts ...BuilderOption) *auctionv2.Builder {
 }
 
 func TestBuilder_Build(t *testing.T) {
+	auctionConfig := &auction.Config{
+		ID:        1,
+		Demands:   []adapter.Key{adapter.GAMKey, adapter.DTExchangeKey},
+		Bidding:   []adapter.Key{adapter.BidmachineKey, adapter.AmazonKey, adapter.MetaKey},
+		AdUnitIDs: []int64{1, 2},
+		Timeout:   15000,
+	}
 	request := &schema.AuctionV2Request{}
 	testCases := []struct {
 		name    string
@@ -154,15 +132,14 @@ func TestBuilder_Build(t *testing.T) {
 					}, nil
 				},
 			})),
-			params: &auctionv2.BuildParams{Adapters: []adapter.Key{adapter.GAMKey, adapter.BidmachineKey}, MergedAuctionRequest: request, PriceFloor: 0.01},
+			params: &auctionv2.BuildParams{
+				Adapters:             []adapter.Key{adapter.GAMKey, adapter.BidmachineKey},
+				MergedAuctionRequest: request,
+				PriceFloor:           0.01,
+				AuctionConfiguration: auctionConfig,
+			},
 			want: &auctionv2.AuctionResult{
-				AuctionConfiguration: &auction.Config{
-					ID:        1,
-					Demands:   []adapter.Key{adapter.GAMKey, adapter.DTExchangeKey},
-					Bidding:   []adapter.Key{adapter.BidmachineKey, adapter.AmazonKey, adapter.MetaKey},
-					AdUnitIDs: []int64{1, 2},
-					Timeout:   15000,
-				},
+				AuctionConfiguration: auctionConfig,
 				AdUnits: &[]auction.AdUnit{
 					{
 						DemandID:   "gam",
@@ -170,7 +147,7 @@ func TestBuilder_Build(t *testing.T) {
 						Label:      "gam",
 						PriceFloor: ptr(0.1),
 						BidType:    "CPM",
-						Extra:      map[string]any{"placement_id": string("123")},
+						Extra:      map[string]any{"placement_id": "123"},
 					},
 					{
 						DemandID:   "dtexchange",
@@ -191,7 +168,7 @@ func TestBuilder_Build(t *testing.T) {
 						Label:      "gam",
 						PriceFloor: ptr(0.1),
 						BidType:    "CPM",
-						Extra:      map[string]any{"placement_id": string("123")},
+						Extra:      map[string]any{"placement_id": "123"},
 					},
 				},
 				BiddingAuctionResult: &bidding.AuctionResult{
@@ -208,15 +185,14 @@ func TestBuilder_Build(t *testing.T) {
 					return bidding.AuctionResult{}, bidding.ErrNoAdaptersMatched
 				},
 			})),
-			params: &auctionv2.BuildParams{Adapters: []adapter.Key{adapter.GAMKey, adapter.BidmachineKey}, MergedAuctionRequest: request, PriceFloor: 0.01},
+			params: &auctionv2.BuildParams{
+				Adapters:             []adapter.Key{adapter.GAMKey, adapter.BidmachineKey},
+				MergedAuctionRequest: request,
+				PriceFloor:           0.01,
+				AuctionConfiguration: auctionConfig,
+			},
 			want: &auctionv2.AuctionResult{
-				AuctionConfiguration: &auction.Config{
-					ID:        1,
-					Demands:   []adapter.Key{adapter.GAMKey, adapter.DTExchangeKey},
-					Bidding:   []adapter.Key{adapter.BidmachineKey, adapter.AmazonKey, adapter.MetaKey},
-					AdUnitIDs: []int64{1, 2},
-					Timeout:   15000,
-				},
+				AuctionConfiguration: auctionConfig,
 				AdUnits: &[]auction.AdUnit{
 					{
 						DemandID:   "gam",
@@ -224,7 +200,7 @@ func TestBuilder_Build(t *testing.T) {
 						Label:      "gam",
 						PriceFloor: ptr(0.1),
 						BidType:    "CPM",
-						Extra:      map[string]any{"placement_id": string("123")},
+						Extra:      map[string]any{"placement_id": "123"},
 					},
 					{
 						DemandID:   "dtexchange",
@@ -244,7 +220,7 @@ func TestBuilder_Build(t *testing.T) {
 						Label:      "gam",
 						PriceFloor: ptr(0.1),
 						BidType:    "CPM",
-						Extra:      map[string]any{"placement_id": string("123")},
+						Extra:      map[string]any{"placement_id": "123"},
 					},
 				},
 				BiddingAuctionResult: &bidding.AuctionResult{},
@@ -264,7 +240,12 @@ func TestBuilder_Build(t *testing.T) {
 					},
 				}),
 			),
-			params:  &auctionv2.BuildParams{Adapters: []adapter.Key{adapter.GAMKey, adapter.BidmachineKey}, MergedAuctionRequest: request, PriceFloor: 0.01},
+			params: &auctionv2.BuildParams{
+				Adapters:             []adapter.Key{adapter.GAMKey, adapter.BidmachineKey},
+				MergedAuctionRequest: request,
+				PriceFloor:           0.01,
+				AuctionConfiguration: auctionConfig,
+			},
 			wantErr: true,
 			err:     auction.ErrNoAdsFound,
 		},
@@ -281,19 +262,19 @@ func TestBuilder_Build(t *testing.T) {
 						}, nil
 					},
 				}),
-				WithConfigFetcher(&mocks.ConfigFetcherMock{
-					MatchFunc: func(ctx context.Context, appID int64, adType ad.Type, segmentID int64, version string) (*auction.Config, error) {
-						return &auction.Config{
-							ID:        1,
-							Demands:   []adapter.Key{adapter.GAMKey, adapter.DTExchangeKey},
-							Bidding:   []adapter.Key{adapter.BidmachineKey, adapter.AmazonKey, adapter.MetaKey},
-							AdUnitIDs: []int64{},
-							Timeout:   15000,
-						}, nil
-					},
-				}),
 			),
-			params:  &auctionv2.BuildParams{Adapters: []adapter.Key{adapter.GAMKey, adapter.BidmachineKey}, MergedAuctionRequest: request, PriceFloor: 0.01},
+			params: &auctionv2.BuildParams{
+				Adapters:             []adapter.Key{adapter.GAMKey, adapter.BidmachineKey},
+				MergedAuctionRequest: request,
+				PriceFloor:           0.01,
+				AuctionConfiguration: &auction.Config{
+					ID:        1,
+					Demands:   []adapter.Key{adapter.GAMKey, adapter.DTExchangeKey},
+					Bidding:   []adapter.Key{adapter.BidmachineKey, adapter.AmazonKey, adapter.MetaKey},
+					AdUnitIDs: []int64{},
+					Timeout:   15000,
+				},
+			},
 			wantErr: true,
 			err:     auction.ErrNoAdsFound,
 		},
@@ -314,15 +295,10 @@ func TestBuilder_Build(t *testing.T) {
 				Adapters:             []adapter.Key{adapter.GAMKey, adapter.BidmachineKey},
 				MergedAuctionRequest: request,
 				PriceFloor:           0.01,
+				AuctionConfiguration: auctionConfig,
 			},
 			want: &auctionv2.AuctionResult{
-				AuctionConfiguration: &auction.Config{
-					ID:        1,
-					Demands:   []adapter.Key{adapter.GAMKey, adapter.DTExchangeKey},
-					Bidding:   []adapter.Key{adapter.BidmachineKey, adapter.AmazonKey, adapter.MetaKey},
-					AdUnitIDs: []int64{1, 2},
-					Timeout:   15000,
-				},
+				AuctionConfiguration: auctionConfig,
 				AdUnits: &[]auction.AdUnit{
 					{
 						DemandID:   "gam",
@@ -330,7 +306,7 @@ func TestBuilder_Build(t *testing.T) {
 						Label:      "gam",
 						PriceFloor: ptr(0.1),
 						BidType:    "CPM",
-						Extra:      map[string]any{"placement_id": string("123")},
+						Extra:      map[string]any{"placement_id": "123"},
 					},
 					{
 						DemandID:   "dtexchange",
@@ -350,7 +326,7 @@ func TestBuilder_Build(t *testing.T) {
 						Label:      "gam",
 						PriceFloor: ptr(0.1),
 						BidType:    "CPM",
-						Extra:      map[string]any{"placement_id": string("123")},
+						Extra:      map[string]any{"placement_id": "123"},
 					},
 				},
 				BiddingAuctionResult: &bidding.AuctionResult{
@@ -360,27 +336,6 @@ func TestBuilder_Build(t *testing.T) {
 				},
 			},
 			wantErr: false,
-		},
-		{
-			name: "No auction for AuctionKey",
-			builder: testHelperAuctionBuilder(WithBiddingBuilder(&mocks.BiddingBuilderMock{
-				HoldAuctionFunc: func(ctx context.Context, params *bidding.BuildParams) (bidding.AuctionResult, error) {
-					return bidding.AuctionResult{
-						RoundNumber: 0,
-						Bids: []adapters.DemandResponse{
-							{DemandID: "bidmachine", Bid: &adapters.BidDemandResponse{}},
-						},
-					}, nil
-				},
-			})),
-			params: &auctionv2.BuildParams{
-				AuctionKey:           "1F60CVMI00400",
-				Adapters:             []adapter.Key{adapter.GAMKey, adapter.BidmachineKey},
-				MergedAuctionRequest: request,
-				PriceFloor:           0.01,
-			},
-			wantErr: true,
-			err:     auction.InvalidAuctionKey,
 		},
 	}
 
@@ -402,5 +357,36 @@ func TestBuilder_Build(t *testing.T) {
 				t.Errorf("builder.Build -> %+v mismatch \n(-want, +got)\n%s", tC.name, diff)
 			}
 		}
+	}
+}
+
+func TestAuctionResult_GetDuration(t *testing.T) {
+	tests := []struct {
+		name  string
+		given auctionv2.AuctionResult
+		want  int64
+	}{
+		{
+			name: "Duration is 12345 when Stat present",
+			given: auctionv2.AuctionResult{
+				Stat: &auctionv2.Stat{
+					DurationTS: 12345,
+				},
+			},
+			want: 12345,
+		},
+		{
+			name:  "Duration is 0 when Stat is nil",
+			given: auctionv2.AuctionResult{},
+			want:  0,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.given.GetDuration(); got != tt.want {
+				t.Errorf("GetDuration() = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }

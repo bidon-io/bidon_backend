@@ -24,6 +24,7 @@ type Config struct {
 	Demands                  []adapter.Key `json:"demands"`
 	AdUnitIDs                []int64       `json:"ad_unit_ids"`
 	Timeout                  int           `json:"timeout"`
+	PriceFloor               float64       `json:"pricefloor"`
 	Rounds                   []RoundConfig // Deprecated: use root level fields instead
 }
 
@@ -101,6 +102,10 @@ func (m *AdUnitsMap) All(key adapter.Key, bidType schema.BidType) ([]AdUnit, err
 
 func BuildAdUnitsMap(adUnits *[]AdUnit) *AdUnitsMap {
 	m := make(AdUnitsMap)
+	if adUnits == nil {
+		return &m
+	}
+
 	for _, adUnit := range *adUnits {
 		key := adapter.Key(adUnit.DemandID)
 		m[key] = append(m[key], adUnit)

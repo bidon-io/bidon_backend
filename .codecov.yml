@@ -1,6 +1,7 @@
 ignore:
   - "**/*.pb.go"
   - "**/*.gen.go"
+  - "**/*mocks.go"
 component_management:
   individual_components:
     - component_id: go-api

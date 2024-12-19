@@ -23,22 +23,6 @@ func (r *AuctionV2Request) SetAuctionConfigurationParams(id int64, uid string) {
 	r.AdObject.AuctionConfigurationUID = uid
 }
 
-func (r *AuctionV2Request) ToAuctionRequest() AuctionRequest {
-	return AuctionRequest{
-		BaseRequest: r.BaseRequest,
-		AdType:      r.AdType,
-		Adapters:    r.Adapters,
-		AdObject: AdObject{
-			AuctionID:               r.AdObject.AuctionID,
-			AuctionConfigurationUID: r.AdObject.AuctionConfigurationUID,
-			PriceFloor:              r.AdObject.PriceFloor,
-			Banner:                  r.AdObject.Banner,
-			Interstitial:            r.AdObject.Interstitial,
-			Rewarded:                r.AdObject.Rewarded,
-		},
-	}
-}
-
 func (r *AuctionV2Request) ToBiddingRequest() BiddingRequest {
 	return BiddingRequest{
 		BaseRequest: r.BaseRequest,

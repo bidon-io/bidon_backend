@@ -57,6 +57,7 @@ func (m *ConfigFetcher) Match(ctx context.Context, appID int64, adType ad.Type, 
 		Demands:                  db.StringArrayToAdapterKeys(&dbConfig.Demands),
 		Bidding:                  db.StringArrayToAdapterKeys(&dbConfig.Bidding),
 		AdUnitIDs:                dbConfig.AdUnitIds,
+		PriceFloor:               dbConfig.Pricefloor,
 		Timeout:                  int(dbConfig.Timeout),
 	}
 
@@ -125,6 +126,7 @@ func (m *ConfigFetcher) FetchByUID(ctx context.Context, appID int64, id, uid str
 		Demands:                  db.StringArrayToAdapterKeys(&dbConfig.Demands),
 		Bidding:                  db.StringArrayToAdapterKeys(&dbConfig.Bidding),
 		AdUnitIDs:                dbConfig.AdUnitIds,
+		PriceFloor:               dbConfig.Pricefloor,
 		Timeout:                  int(dbConfig.Timeout),
 	}
 

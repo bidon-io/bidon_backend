@@ -200,12 +200,12 @@ func testHelperAuctionV2Handler(t *testing.T) *apihandlers.AuctionHandler {
 		},
 	}
 	auctionBuilderV2 := &auctionv2.Builder{
-		ConfigFetcher:                configFetcher,
 		AdUnitsMatcher:               adUnitsMatcher,
 		BiddingBuilder:               biddingBuilder,
 		BiddingAdaptersConfigBuilder: biddingAdaptersConfigBuilder,
 	}
 	auctionService := &auctionv2.Service{
+		ConfigFetcher:  configFetcher,
 		AuctionBuilder: auctionBuilderV2,
 		SegmentMatcher: segmentMatcher,
 		EventLogger:    &event.Logger{Engine: &engine.Log{}},
