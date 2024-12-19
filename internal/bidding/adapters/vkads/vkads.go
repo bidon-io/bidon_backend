@@ -73,8 +73,6 @@ func (a *VKAdsAdapter) rewarded(br *schema.BiddingRequest) *openrtb2.Imp {
 			W: &w,
 			H: &h,
 		},
-		BidFloor:    br.Imp.GetBidFloor(),
-		BidFloorCur: "USD",
 	}
 }
 
@@ -105,6 +103,8 @@ func (a *VKAdsAdapter) CreateRequest(request openrtb.BidRequest, br *schema.Bidd
 	impId, _ := uuid.NewV4()
 	imp.ID = impId.String()
 	imp.TagID = a.TagID
+	imp.BidFloor = adapters.CalculatePriceFloor(&request, br)
+	imp.BidFloorCur = "USD"
 
 	request.Imp = []openrtb2.Imp{*imp}
 	request.Cur = []string{"USD"}
