@@ -135,7 +135,7 @@ func TestBuilder_Build(t *testing.T) {
 			params: &auctionv2.BuildParams{
 				Adapters:             []adapter.Key{adapter.GAMKey, adapter.BidmachineKey},
 				MergedAuctionRequest: request,
-				PriceFloor:           0.01,
+				PriceFloor:           0.02,
 				AuctionConfiguration: auctionConfig,
 			},
 			want: &auctionv2.AuctionResult{
@@ -179,6 +179,70 @@ func TestBuilder_Build(t *testing.T) {
 			},
 		},
 		{
+			name: "Uplifts PriceFloor for BM CPM",
+			builder: testHelperAuctionBuilder(
+				WithAdUnitsMatcher(
+					&mocks.AdUnitsMatcherMock{
+						MatchCachedFunc: func(ctx context.Context, params *auction.BuildParams) ([]auction.AdUnit, error) {
+							return []auction.AdUnit{
+								{
+									DemandID:   "bidmachine",
+									Label:      "BM",
+									PriceFloor: ptr(0.1),
+									UID:        "123_bidmachine",
+									BidType:    schema.CPMBidType,
+								},
+							}, nil
+						},
+					},
+				),
+				WithBiddingBuilder(
+					&mocks.BiddingBuilderMock{
+						HoldAuctionFunc: func(ctx context.Context, params *bidding.BuildParams) (bidding.AuctionResult, error) {
+							return bidding.AuctionResult{
+								Bids: []adapters.DemandResponse{
+									{DemandID: "meta", Bid: &adapters.BidDemandResponse{Price: 0.5}},
+								},
+							}, nil
+						},
+					},
+				),
+			),
+			params: &auctionv2.BuildParams{
+				Adapters:             []adapter.Key{adapter.GAMKey, adapter.BidmachineKey},
+				MergedAuctionRequest: request,
+				PriceFloor:           0.02,
+				AuctionConfiguration: auctionConfig,
+			},
+			want: &auctionv2.AuctionResult{
+				AuctionConfiguration: auctionConfig,
+				AdUnits: &[]auction.AdUnit{
+					{
+						DemandID:   "bidmachine",
+						Label:      "BM",
+						PriceFloor: ptr(0.1),
+						UID:        "123_bidmachine",
+						BidType:    schema.CPMBidType,
+					},
+				},
+
+				CPMAdUnits: &[]auction.AdUnit{
+					{
+						DemandID:   "bidmachine",
+						Label:      "BM",
+						PriceFloor: ptr(0.51),
+						UID:        "123_bidmachine",
+						BidType:    schema.CPMBidType,
+					},
+				},
+				BiddingAuctionResult: &bidding.AuctionResult{
+					Bids: []adapters.DemandResponse{
+						{DemandID: "meta", Bid: &adapters.BidDemandResponse{Price: 0.5}},
+					},
+				},
+			},
+		},
+		{
 			name: "No Biding Adapters Matched",
 			builder: testHelperAuctionBuilder(WithBiddingBuilder(&mocks.BiddingBuilderMock{
 				HoldAuctionFunc: func(ctx context.Context, params *bidding.BuildParams) (bidding.AuctionResult, error) {
@@ -188,7 +252,7 @@ func TestBuilder_Build(t *testing.T) {
 			params: &auctionv2.BuildParams{
 				Adapters:             []adapter.Key{adapter.GAMKey, adapter.BidmachineKey},
 				MergedAuctionRequest: request,
-				PriceFloor:           0.01,
+				PriceFloor:           0.02,
 				AuctionConfiguration: auctionConfig,
 			},
 			want: &auctionv2.AuctionResult{
@@ -328,6 +392,16 @@ func TestBuilder_Build(t *testing.T) {
 						BidType:    "CPM",
 						Extra:      map[string]any{"placement_id": "123"},
 					},
+					{
+						DemandID:   "dtexchange",
+						Label:      "dtexchange",
+						PriceFloor: ptr(0.01),
+						UID:        "123_dtexchange",
+						BidType:    schema.CPMBidType,
+						Extra: map[string]any{
+							"placement_id": "123",
+						},
+					},
 				},
 				BiddingAuctionResult: &bidding.AuctionResult{
 					Bids: []adapters.DemandResponse{
@@ -386,6 +460,58 @@ func TestAuctionResult_GetDuration(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.given.GetDuration(); got != tt.want {
 				t.Errorf("GetDuration() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestAuctionResult_GetMaxBidPrice(t *testing.T) {
+	tests := []struct {
+		name     string
+		bids     []adapters.DemandResponse
+		expected float64
+	}{
+		{
+			name:     "no bids",
+			bids:     []adapters.DemandResponse{},
+			expected: 0.0,
+		},
+		{
+			name: "single bid",
+			bids: []adapters.DemandResponse{
+				{
+					Bid: &adapters.BidDemandResponse{
+						Price: 1.5,
+					},
+				},
+			},
+			expected: 1.5,
+		},
+		{
+			name: "multiple bids",
+			bids: []adapters.DemandResponse{
+				{
+					Bid: &adapters.BidDemandResponse{
+						Price: 1.5,
+					},
+				},
+				{},
+				{
+					Bid: &adapters.BidDemandResponse{
+						Price: 1,
+					},
+				},
+			},
+			expected: 1.5,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := bidding.AuctionResult{Bids: tt.bids}
+			maxPrice := result.GetMaxBidPrice()
+			if maxPrice != tt.expected {
+				t.Errorf("expected %v, got %v", tt.expected, maxPrice)
 			}
 		})
 	}

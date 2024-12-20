@@ -3,6 +3,7 @@ package auctionv2
 import (
 	"context"
 	"errors"
+	"math"
 	"time"
 
 	"github.com/bidon-io/bidon-backend/internal/ad"
@@ -71,6 +72,8 @@ type Stat struct {
 	DurationTS int64
 }
 
+const cent = 0.01
+
 func (b *Builder) Build(ctx context.Context, params *BuildParams) (*AuctionResult, error) {
 	start := time.Now()
 
@@ -100,20 +103,6 @@ func (b *Builder) Build(ctx context.Context, params *BuildParams) (*AuctionResul
 	}
 
 	adUnitsMap := auction.BuildAdUnitsMap(&adUnits)
-	var cpmAdUnits []auction.AdUnit
-	for _, adUnit := range adUnits {
-		// Use auction pricefloor as BM CPM price
-		if adUnit.DemandID == string(adapter.BidmachineKey) && adUnit.IsCPM() {
-			adUnit.PriceFloor = &params.PriceFloor
-			cpmAdUnits = append(cpmAdUnits, adUnit)
-			continue
-		}
-
-		if adUnit.GetPriceFloor() > params.PriceFloor && adUnit.IsCPM() {
-			cpmAdUnits = append(cpmAdUnits, adUnit)
-		}
-	}
-
 	adapterConfigs, err := b.BiddingAdaptersConfigBuilder.Build(ctx, params.AppID, params.Adapters, adUnitsMap)
 	if err != nil {
 		return nil, err
@@ -130,6 +119,23 @@ func (b *Builder) Build(ctx context.Context, params *BuildParams) (*AuctionResul
 	})
 	if err != nil && !errors.Is(err, bidding.ErrNoAdaptersMatched) {
 		return nil, err
+	}
+
+	maxPrice := biddingAuctionResult.GetMaxBidPrice() + cent // Try to get 1 cent more than the max bid price
+	maxPrice = math.Max(maxPrice, params.PriceFloor)
+	var cpmAdUnits []auction.AdUnit
+	for _, adUnit := range adUnits {
+		if !adUnit.IsCPM() {
+			continue
+		}
+		// Use bidding price as floor for Bidmachine and Admob
+		if adUnit.DemandID == string(adapter.BidmachineKey) || adUnit.DemandID == string(adapter.AdmobKey) {
+			adUnit.PriceFloor = &maxPrice
+		}
+
+		if adUnit.GetPriceFloor() >= params.PriceFloor {
+			cpmAdUnits = append(cpmAdUnits, adUnit)
+		}
 	}
 
 	if len(cpmAdUnits) == 0 && len(biddingAuctionResult.Bids) == 0 {

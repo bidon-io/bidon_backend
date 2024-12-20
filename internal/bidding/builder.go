@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 	"strconv"
 	"sync"
 	"time"
@@ -51,6 +52,15 @@ type BuildParams struct {
 type AuctionResult struct {
 	Bids        []adapters.DemandResponse
 	RoundNumber int
+}
+
+func (a AuctionResult) GetMaxBidPrice() float64 {
+	maxPrice := 0.0
+	for _, bid := range a.Bids {
+		maxPrice = math.Max(maxPrice, bid.Price())
+	}
+
+	return maxPrice
 }
 
 type AmazonSlot struct {
@@ -198,6 +208,7 @@ func (b *Builder) processAdapter(
 		for _, demandResponse := range demandResponses {
 			demandResponse.StartTS = params.StartTS
 			demandResponse.EndTS = time.Now().UnixMilli()
+			b.setTokenResponse(demandResponse, &br)
 
 			bids <- *demandResponse
 		}
@@ -223,6 +234,7 @@ func (b *Builder) processAdapter(
 	demandResponse := bidder.Adapter.ExecuteRequest(ctx, bidder.Client, bidRequest)
 	demandResponse.StartTS = params.StartTS
 	demandResponse.EndTS = time.Now().UnixMilli()
+	b.setTokenResponse(demandResponse, &br)
 	if demandResponse.Error != nil {
 		bids <- *demandResponse
 		return
@@ -230,8 +242,6 @@ func (b *Builder) processAdapter(
 
 	demandResponse, err = bidder.Adapter.ParseBids(demandResponse)
 	demandResponse.Error = err
-
-	b.setTokenResponse(demandResponse, &br)
 
 	bids <- *demandResponse
 }
