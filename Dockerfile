@@ -45,6 +45,25 @@ FROM base AS bidon-migrate-builder
 
 RUN go build -o /bidon-migrate ./cmd/bidon-migrate
 
+FROM rust:1.83-alpine AS proxy-builder
+
+WORKDIR /app
+
+# Install build dependencies
+RUN apk add --no-cache musl-dev gcc make linux-headers protobuf-dev
+
+# Copy Cargo files first to cache dependencies
+COPY Cargo.toml Cargo.lock ./
+RUN mkdir -p proxy/src \
+    && echo "fn main() {}" > proxy/src/main.rs \
+    && touch proxy/src/lib.rs
+RUN cargo build --release
+RUN rm -rf proxy/src
+
+# Copy actual source code and build
+COPY proxy/src ./proxy/src
+RUN cargo build --release
+
 FROM alpine:3.18 AS deploy
 
 RUN apk add --no-cache ca-certificates
@@ -74,3 +93,9 @@ COPY --from=bidon-migrate-builder --chown=deploy /bidon-migrate /bidon-migrate
 ENTRYPOINT [ "/bidon-migrate" ]
 
 CMD [ "status" ]
+
+FROM deploy AS bidon-proxy
+
+COPY --from=proxy-builder --chown=deploy /app/target/release/bidon-proxy /bidon-proxy
+
+CMD [ "/bidon-proxy" ]

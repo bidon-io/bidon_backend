@@ -148,6 +148,18 @@ services:
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'kafka:29092'
       SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
 
+  rust-test:
+    profiles: ['test']
+    build:
+      context: .
+      target: proxy-builder
+    volumes:
+      - .:/proxy/src
+      - cargo-cache:/usr/local/cargo/registry
+      - target-cache:/proxy/src/target
+    working_dir: /proxy/src
+    command: cargo test --all-features
+
 volumes:
   pgdata:
   pgdata-test:
@@ -156,6 +168,8 @@ volumes:
   gomodcache-precommit:
   gocache-precommit:
   redisdata:
+  cargo-cache:
+  target-cache:
 
 networks:
   precommit-network:
