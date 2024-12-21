@@ -7,11 +7,12 @@ import (
 	"sort"
 	"strconv"
 
+	"gorm.io/gorm"
+
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/db"
 	"github.com/bidon-io/bidon-backend/internal/device"
-	"gorm.io/gorm"
 )
 
 type LineItemsMatcher struct {

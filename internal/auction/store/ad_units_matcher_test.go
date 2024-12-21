@@ -3,12 +3,15 @@ package store_test
 import (
 	"context"
 	"database/sql"
-	"github.com/go-redis/redismock/v9"
 	"testing"
 	"time"
 
-	"github.com/bidon-io/bidon-backend/config"
+	"github.com/go-redis/redismock/v9"
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
+	"github.com/shopspring/decimal"
 
+	"github.com/bidon-io/bidon-backend/config"
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/auction"
@@ -17,9 +20,6 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/db/dbtest"
 	"github.com/bidon-io/bidon-backend/internal/device"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
-	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-cmp/cmp/cmpopts"
-	"github.com/shopspring/decimal"
 )
 
 func TestAdUnitsMatcher_Match(t *testing.T) {

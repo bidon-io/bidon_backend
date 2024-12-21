@@ -5,11 +5,12 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
+
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/auction"
 	auctionmocks "github.com/bidon-io/bidon-backend/internal/auction/mocks"
-	"github.com/google/go-cmp/cmp"
 )
 
 func TestBuilderV2_Build(t *testing.T) {

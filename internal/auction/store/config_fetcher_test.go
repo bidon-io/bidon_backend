@@ -4,11 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/go-redis/redismock/v9"
 	"strconv"
 	"testing"
 	"time"
 
+	"github.com/go-redis/redismock/v9"
+	"github.com/google/go-cmp/cmp"
 	"github.com/lib/pq"
 
 	"github.com/bidon-io/bidon-backend/config"
@@ -17,7 +18,6 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/auction/store"
 	"github.com/bidon-io/bidon-backend/internal/db"
 	"github.com/bidon-io/bidon-backend/internal/db/dbtest"
-	"github.com/google/go-cmp/cmp"
 )
 
 func TestConfigFetcher_Match(t *testing.T) {

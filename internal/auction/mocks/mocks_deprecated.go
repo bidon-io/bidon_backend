@@ -5,8 +5,9 @@ package mocks
 
 import (
 	"context"
-	"github.com/bidon-io/bidon-backend/internal/auction"
 	"sync"
+
+	"github.com/bidon-io/bidon-backend/internal/auction"
 )
 
 // Ensure, that LineItemsMatcherMock does implement auction.LineItemsMatcher.
