@@ -5,9 +5,10 @@ package mocks
 
 import (
 	"context"
+	"sync"
+
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/auction"
-	"sync"
 )
 
 // Ensure, that ConfigFetcherMock does implement auction.ConfigFetcher.

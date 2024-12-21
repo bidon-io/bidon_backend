@@ -7,12 +7,13 @@ import (
 	"sort"
 	"strconv"
 
+	"gorm.io/gorm"
+
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/db"
 	"github.com/bidon-io/bidon-backend/internal/device"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
-	"gorm.io/gorm"
 )
 
 const AdUnitTimeout = 10_000
