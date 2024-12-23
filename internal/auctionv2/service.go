@@ -176,14 +176,6 @@ func (s *Service) buildResponse(
 		isCOPPA = req.Regulations.COPPA
 	}
 
-	// Store CPM AdUnits from AuctionConfiguration
-	for _, adUnit := range *auctionResult.CPMAdUnits {
-		if isCOPPA && adapter.IsDisabledForCOPPA(adapter.Key(adUnit.DemandID)) {
-			continue
-		}
-		response.AdUnits = append(response.AdUnits, adUnit)
-	}
-
 	// Store Bids AS RTB AdUnits from BiddingAuctionResult
 	for _, bidResponse := range auctionResult.BiddingAuctionResult.Bids {
 		adUnit := convertBidToAdUnit(bidResponse, adUnitsMap)
@@ -202,6 +194,20 @@ func (s *Service) buildResponse(
 	sort.Slice(response.AdUnits, func(i, j int) bool {
 		return response.AdUnits[i].GetPriceFloor() > response.AdUnits[j].GetPriceFloor()
 	})
+
+	// Sort CPM AdUnits by price
+	cpmUnits := *auctionResult.CPMAdUnits
+	sort.Slice(cpmUnits, func(i, j int) bool {
+		return cpmUnits[i].GetPriceFloor() > cpmUnits[j].GetPriceFloor()
+	})
+
+	// Store CPM AdUnits from AuctionConfiguration
+	for _, adUnit := range cpmUnits {
+		if isCOPPA && adapter.IsDisabledForCOPPA(adapter.Key(adUnit.DemandID)) {
+			continue
+		}
+		response.AdUnits = append(response.AdUnits, adUnit)
+	}
 
 	return &response, nil
 }
