@@ -187,7 +187,7 @@ func TestAuctionHandler_Handle(t *testing.T) {
 			err:                sdkapi.ErrNoAdsFound,
 		},
 		{
-			name:               "Err Invalid SDKVesrion",
+			name:               "Err Invalid SDKVersion",
 			sdkVersion:         "",
 			requestPath:        "testdata/auction/valid_request.json",
 			expectedStatusCode: http.StatusUnprocessableEntity,

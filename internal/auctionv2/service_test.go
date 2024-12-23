@@ -3,6 +3,7 @@ package auctionv2_test
 import (
 	"context"
 	"errors"
+	"github.com/google/go-cmp/cmp"
 
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/auction"
@@ -38,6 +39,9 @@ func TestService_Run(t *testing.T) {
 			Device: schema.Device{
 				OS:   "android",
 				Type: "phone",
+			},
+			Regulations: &schema.Regulations{
+				COPPA: true,
 			},
 		},
 		AdType: ad.BannerType,
@@ -81,10 +85,42 @@ func TestService_Run(t *testing.T) {
 						BidType:    "CPM",
 						Extra:      map[string]any{"placement_id": "123"},
 					},
+					{
+						DemandID:   "applovin",
+						UID:        "123_applovin",
+						Label:      "applovin",
+						PriceFloor: ptr(0.1),
+						BidType:    "CPM",
+						Extra:      map[string]any{"placement_id": "123"},
+					},
+					{
+						DemandID:   "unity",
+						UID:        "123_unity",
+						Label:      "unity",
+						PriceFloor: ptr(0.3),
+						BidType:    "CPM",
+						Extra:      map[string]any{"placement_id": "123"},
+					},
+				},
+				AdUnits: &[]auction.AdUnit{
+					{
+						DemandID: "bidmachine",
+						UID:      "123_bidmachine",
+						Label:    "bidmachine",
+						BidType:  "RTB",
+					},
+					{
+						DemandID: "mobilefuse",
+						UID:      "123_mobilefuse",
+						Label:    "mobilefuse",
+						BidType:  "RTB",
+					},
 				},
 				BiddingAuctionResult: &bidding.AuctionResult{
 					Bids: []adapters.DemandResponse{
-						{DemandID: "bidmachine", Bid: &adapters.BidDemandResponse{}},
+						{DemandID: "bidmachine", Bid: &adapters.BidDemandResponse{Price: 0.2, Payload: "token"}},
+						{DemandID: "mobilefuse", Bid: &adapters.BidDemandResponse{Price: 0.5, Signaldata: "token"}},
+						{DemandID: "meta", Bid: &adapters.BidDemandResponse{}},
 					},
 				},
 			}, nil
@@ -100,6 +136,40 @@ func TestService_Run(t *testing.T) {
 	}
 
 	t.Run("Successful Run", func(t *testing.T) {
+		responseUnits := []auction.AdUnit{
+			{
+				DemandID:   "mobilefuse",
+				UID:        "123_mobilefuse",
+				Label:      "mobilefuse",
+				PriceFloor: ptr(0.5),
+				BidType:    "RTB",
+				Extra:      map[string]any{"signaldata": "token"},
+			},
+			{
+				DemandID:   "bidmachine",
+				UID:        "123_bidmachine",
+				Label:      "bidmachine",
+				PriceFloor: ptr(0.2),
+				BidType:    "RTB",
+				Extra:      map[string]any{"payload": "token"},
+			},
+			{
+				DemandID:   "unity",
+				UID:        "123_unity",
+				Label:      "unity",
+				PriceFloor: ptr(0.3),
+				BidType:    "CPM",
+				Extra:      map[string]any{"placement_id": "123"},
+			},
+			{
+				DemandID:   "gam",
+				UID:        "123_gam",
+				Label:      "gam",
+				PriceFloor: ptr(0.1),
+				BidType:    "CPM",
+				Extra:      map[string]any{"placement_id": "123"},
+			},
+		}
 		params := &auctionv2.ExecutionParams{
 			Req:     request,
 			AppID:   1,
@@ -114,6 +184,9 @@ func TestService_Run(t *testing.T) {
 		}
 		if response.ConfigID != auctionConfig.ID {
 			t.Errorf("Expected ConfigID %d, got %d", auctionConfig.ID, response.ConfigID)
+		}
+		if diff := cmp.Diff(response.AdUnits, responseUnits); diff != "" {
+			t.Errorf("Expected \n(-want, +got)\n%s", diff)
 		}
 	})
 

@@ -242,7 +242,7 @@ func TestAuctionV2Handler_Handle(t *testing.T) {
 			wantErr:              false,
 		},
 		{
-			name:                 "OK",
+			name:                 "OK_COPPA",
 			sdkVersion:           "0.5",
 			requestPath:          "testdata/auction/valid_request_coppa.json",
 			expectedResponsePath: "testdata/auction/valid_response_coppa.json",
