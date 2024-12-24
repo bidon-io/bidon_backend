@@ -3,13 +3,13 @@ package grpcserver
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/bidon-io/bidon-backend/internal/auctionv2"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/geocoder"
 	v3 "github.com/bidon-io/bidon-backend/pkg/proto/com/iabtechlab/openrtb/v3"
 	pb "github.com/bidon-io/bidon-backend/pkg/proto/org/bidon/proto/v1"
+	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap/ctxzap"
 )
 
 type Server struct {
@@ -58,16 +58,17 @@ func (s *Server) Bid(ctx context.Context, o *v3.Openrtb) (*v3.Openrtb, error) {
 		return &v3.Openrtb{}, fmt.Errorf("failed to lookup ip: %w", err)
 	}
 
+	logger := ctxzap.Extract(ctx)
 	params := &auctionv2.ExecutionParams{
 		Req:     ar,
 		AppID:   app.ID,
 		Country: geo.CountryCode,
 		GeoData: geo,
 		Log: func(s string) {
-			log.Print(s)
+			logger.Info(s)
 		},
 		LogErr: func(err error) {
-			log.Print(err)
+			logger.Error(err.Error())
 		},
 	}
 
