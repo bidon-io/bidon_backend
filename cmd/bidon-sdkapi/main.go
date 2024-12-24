@@ -19,8 +19,6 @@ import (
 
 	grpcserver "github.com/bidon-io/bidon-backend/internal/sdkapi/grpc"
 	pb "github.com/bidon-io/bidon-backend/pkg/proto/org/bidon/proto/v1"
-	"google.golang.org/grpc"
-
 	"go.opentelemetry.io/otel/exporters/prometheus"
 	"go.opentelemetry.io/otel/sdk/metric"
 
@@ -324,7 +322,7 @@ func main() {
 		e.Logger.Warn(err)
 	}()
 
-	grpcServer := grpc.NewServer()
+	grpcServer := config.NewGRPCServer(logger)
 	go func() {
 		grpcPort := os.Getenv("GRPC_PORT")
 		if grpcPort == "" {
