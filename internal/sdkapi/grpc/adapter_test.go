@@ -108,7 +108,6 @@ func TestAuctionAdapter_OpenRTBToAuctionRequest(t *testing.T) {
 			AuctionId:               proto.String("auction_id_123"),
 			AuctionKey:              proto.String("auction_key_789"),
 			AuctionConfigurationUid: proto.String("config_uid_456"),
-			Orientation:             ptr(mediation.Orientation_PORTRAIT),
 			Demands: map[string]*mediation.Demand{
 				"demand_key": {
 					Token:         proto.String("token_value"),
@@ -118,6 +117,14 @@ func TestAuctionAdapter_OpenRTBToAuctionRequest(t *testing.T) {
 				},
 			},
 		}
+
+		placement.Display = &adcom.Placement_DisplayPlacement{}
+		displayPlacementExt := &mediation.DisplayPlacementExt{
+			Format:      ptr(mediation.AdFormat_BANNER),
+			Orientation: ptr(mediation.Orientation_PORTRAIT),
+		}
+		proto.SetExtension(placement.Display, mediation.E_DisplayPlacementExt, displayPlacementExt)
+
 		proto.SetExtension(placement, mediation.E_PlacementExt, placementExt)
 
 		placementBytes, err := proto.Marshal(placement)
@@ -240,7 +247,7 @@ func TestAuctionAdapter_OpenRTBToAuctionRequest(t *testing.T) {
 							"token_finish_ts": int64(1234567890),
 						},
 					},
-					Banner:       nil,
+					Banner:       &schema.BannerAdObject{Format: "BANNER"},
 					Interstitial: nil,
 					Rewarded:     nil,
 				},
@@ -496,6 +503,180 @@ func TestAuctionAdapter_AuctionResponseToOpenRTB(t *testing.T) {
 
 			if diff := cmp.Diff(tc.want(), or, protocmp.Transform()); diff != "" {
 				t.Errorf("OpenRTB Response mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestParseAdObject(t *testing.T) {
+	// Add float comparison options
+	opts := []cmp.Option{
+		protocmp.Transform(),
+		cmpopts.EquateApprox(0.0001, 0), // Allows small differences in float values
+	}
+
+	tests := []struct {
+		name    string
+		req     *v3.Request
+		want    *schema.AdObjectV2
+		wantAd  ad.Type
+		wantErr string
+	}{
+		{
+			name:    "returns error when no items",
+			req:     &v3.Request{},
+			wantErr: "parseAdObject: no items in request",
+		},
+		{
+			name: "returns error when no placement spec",
+			req: &v3.Request{
+				Item: []*v3.Item{{}},
+			},
+			wantErr: "parseAdObject: placement is empty",
+		},
+		{
+			name: "parses rewarded ad",
+			req: func() *v3.Request {
+				placement := &adcom.Placement{
+					Reward: proto.Bool(true),
+				}
+				placementExt := &mediation.PlacementExt{
+					AuctionConfigurationUid: proto.String("config-123"),
+					AuctionKey:              proto.String("auction-key"),
+					Demands: map[string]*mediation.Demand{
+						"demand1": {
+							Token:         proto.String("token1"),
+							Status:        proto.String("ready"),
+							TokenStartTs:  proto.Int64(100),
+							TokenFinishTs: proto.Int64(200),
+						},
+					},
+				}
+				proto.SetExtension(placement, mediation.E_PlacementExt, placementExt)
+
+				placementBytes, _ := proto.Marshal(placement)
+
+				return &v3.Request{
+					Item: []*v3.Item{{
+						Id:   proto.String("auction-123"),
+						Spec: placementBytes,
+						Flr:  proto.Float32(2.34),
+					}},
+				}
+			}(),
+			want: &schema.AdObjectV2{
+				AuctionID:               "auction-123",
+				AuctionConfigurationUID: "config-123",
+				AuctionKey:              "auction-key",
+				PriceFloor:              float64(2.34),
+				Demands: map[adapter.Key]map[string]any{
+					"demand1": {
+						"token":           "token1",
+						"status":          "ready",
+						"token_start_ts":  int64(100),
+						"token_finish_ts": int64(200),
+					},
+				},
+				Rewarded:     &schema.RewardedAdObject{},
+				Banner:       nil,
+				Interstitial: nil,
+			},
+			wantAd: ad.RewardedType,
+		},
+		{
+			name: "parses banner ad",
+			req: func() *v3.Request {
+				display := &adcom.Placement_DisplayPlacement{}
+				display.Instl = proto.Int32(0)
+				displayExt := &mediation.DisplayPlacementExt{
+					Format:      ptr(mediation.AdFormat_BANNER),
+					Orientation: ptr(mediation.Orientation_PORTRAIT),
+				}
+				proto.SetExtension(display, mediation.E_DisplayPlacementExt, displayExt)
+
+				placement := &adcom.Placement{
+					Display: display,
+				}
+				placementExt := &mediation.PlacementExt{
+					AuctionConfigurationUid: proto.String("config-123"),
+				}
+				proto.SetExtension(placement, mediation.E_PlacementExt, placementExt)
+
+				placementBytes, _ := proto.Marshal(placement)
+
+				return &v3.Request{
+					Item: []*v3.Item{{
+						Spec: placementBytes,
+					}},
+				}
+			}(),
+			want: &schema.AdObjectV2{
+				AuctionConfigurationUID: "config-123",
+				Banner:                  &schema.BannerAdObject{Format: ad.BannerFormat},
+				Orientation:             "PORTRAIT",
+				Demands:                 map[adapter.Key]map[string]any{},
+			},
+			wantAd: ad.BannerType,
+		},
+		{
+			name: "parses interstitial ad",
+			req: func() *v3.Request {
+				display := &adcom.Placement_DisplayPlacement{
+					Instl: proto.Int32(int32(1)),
+				}
+				displayExt := &mediation.DisplayPlacementExt{
+					Orientation: ptr(mediation.Orientation_PORTRAIT),
+				}
+				proto.SetExtension(display, mediation.E_DisplayPlacementExt, displayExt)
+
+				placement := &adcom.Placement{
+					Display: display,
+				}
+				placementExt := &mediation.PlacementExt{
+					AuctionConfigurationUid: proto.String("config-123"),
+				}
+				proto.SetExtension(placement, mediation.E_PlacementExt, placementExt)
+
+				placementBytes, _ := proto.Marshal(placement)
+
+				return &v3.Request{
+					Item: []*v3.Item{{
+						Spec: placementBytes,
+					}},
+				}
+			}(),
+			want: &schema.AdObjectV2{
+				AuctionConfigurationUID: "config-123",
+				Interstitial:            &schema.InterstitialAdObject{},
+				Demands:                 map[adapter.Key]map[string]any{},
+				Orientation:             "PORTRAIT",
+			},
+			wantAd: ad.InterstitialType,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, gotAd, err := parseAdObject(tt.req)
+			if tt.wantErr != "" {
+				if err == nil {
+					t.Fatalf("expected error, got none")
+				}
+				if !strings.Contains(err.Error(), tt.wantErr) {
+					t.Errorf("expected error containing %q, got %q", tt.wantErr, err.Error())
+				}
+				return
+			}
+
+			if err != nil {
+				t.Fatalf("expected no error, got %v", err)
+			}
+
+			if gotAd != tt.wantAd {
+				t.Errorf("expected ad type %q, got %q", tt.wantAd, gotAd)
+			}
+			if diff := cmp.Diff(tt.want, &got, opts...); diff != "" {
+				t.Errorf("AdObjectV2 mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}

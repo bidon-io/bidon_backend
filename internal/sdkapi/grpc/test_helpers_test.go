@@ -114,7 +114,6 @@ func defaultValidReq() *v3.Request {
 		AuctionId:               proto.String("auction_id_123"),
 		AuctionKey:              proto.String("1F60CVMI00400"),
 		AuctionConfigurationUid: proto.String("config_uid_456"),
-		Orientation:             ptr(mediation.Orientation_PORTRAIT),
 		Demands: map[string]*mediation.Demand{
 			"demand_key": {
 				Token:         proto.String("token_value"),
@@ -124,6 +123,14 @@ func defaultValidReq() *v3.Request {
 			},
 		},
 	}
+
+	placement.Display = &adcom.Placement_DisplayPlacement{}
+	displayPlacementExt := &mediation.DisplayPlacementExt{
+		Format:      ptr(mediation.AdFormat_BANNER),
+		Orientation: ptr(mediation.Orientation_PORTRAIT),
+	}
+	proto.SetExtension(placement.Display, mediation.E_DisplayPlacementExt, displayPlacementExt)
+
 	proto.SetExtension(placement, mediation.E_PlacementExt, placementExt)
 
 	placementBytes, _ := proto.Marshal(placement)
