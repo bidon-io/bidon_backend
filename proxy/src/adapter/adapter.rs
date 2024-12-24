@@ -1,12 +1,12 @@
 use crate::com::iabtechlab::adcom::v1 as adcom;
 use crate::com::iabtechlab::adcom::v1::context::DistributionChannel;
 use crate::com::iabtechlab::adcom::v1::enums::{ConnectionType, OperatingSystem};
+use crate::com::iabtechlab::adcom::v1::placement::placement::DisplayPlacement;
 use crate::com::iabtechlab::openrtb::v3 as openrtb;
 use crate::com::iabtechlab::openrtb::v3::AuctionType;
 use crate::org::bidon::proto::v1::context::Context;
 use crate::org::bidon::proto::v1::mediation::{self, RequestExt, SdkAdapter};
 use crate::sdk;
-use crate::sdk::AdObjectOrientation;
 use anyhow::{anyhow, Result};
 use prost::{Extendable, Message};
 use serde_json::Value;
@@ -28,7 +28,7 @@ pub(crate) fn try_from(
         tmax: request.tmax.map(|t| t as u32),
         at: Some(AuctionType::FirstPrice as i32),
         context: context.encode_to_vec().into(),
-        item: vec![convert_ad_object_to_item(&request.ad_object)?],
+        item: vec![convert_ad_object_to_item(&request.ad_object, ad_type)?],
         ..Default::default()
     };
 
@@ -278,60 +278,86 @@ fn convert_iab(iab_json: &HashMap<String, Value>) -> Result<String> {
     serde_json::to_string(&iab_json).map_err(Into::into)
 }
 
-fn convert_ad_object_to_item(ad_object: &sdk::AdObject) -> Result<openrtb::Item> {
-    // TODO: model AdObject with Placement
+fn convert_ad_object_to_item(
+    ad_object: &sdk::AdObject,
+    ad_type: sdk::GetAuctionAdTypeParameter,
+) -> Result<openrtb::Item> {
     let mut placement = adcom::placement::Placement {
+        display: match (ad_object.orientation, ad_object.banner.as_ref()) {
+            (None, None) => None,
+            (orientation, banner) => Some(DisplayPlacement {
+                extension_set: {
+                    let mut ext = prost::ExtensionSet::default();
+                    let dpe = mediation::DisplayPlacementExt {
+                        orientation: orientation.map(|o| convert_ad_orientation(&o) as i32),
+                        format: banner.map(|b| convert_banner_format(b.format) as i32),
+                    };
+                    ext.set_extension_data(mediation::DISPLAY_PLACEMENT_EXT, dpe)?;
+                    ext
+                },
+                ..Default::default()
+            }),
+        },
         ..Default::default()
     };
 
+    // Convert based on ad type and orientation
+    match ad_type {
+        sdk::GetAuctionAdTypeParameter::Banner => {
+            // Regular banner. 0 is false, 1 is true
+            placement.display.get_or_insert(Default::default()).instl = Some(0);
+        }
+        sdk::GetAuctionAdTypeParameter::Interstitial => {
+            // Interstitial can be either display or video. 0 is false, 1 is true
+            placement.display.get_or_insert(Default::default()).instl = Some(1);
+            placement.video = Some(adcom::placement::placement::VideoPlacement {
+                ptype: Some(adcom::enums::VideoPlacementSubtype::Interstitial as i32),
+                ..Default::default()
+            });
+        }
+        sdk::GetAuctionAdTypeParameter::Rewarded => {
+            // Rewarded can be either display or video.
+            placement.reward = Some(true);
+            placement.video = Some(adcom::placement::placement::VideoPlacement {
+                ..Default::default()
+            });
+        }
+    }
+
+    // Add extension data for PlacementExt
     let placement_ext = mediation::PlacementExt {
-        auction_id: ad_object.auction_id.clone(), // Unique Request ID, same as OpenRtb.Request.id
-        auction_key: ad_object.auction_key.clone(), // Generated key for the auction request
-        auction_configuration_id: ad_object.auction_configuration_id, // Deprecated: ID of the auction configuration
-        auction_configuration_uid: ad_object.auction_configuration_uid.clone(), // UID of the auction configuration
-        orientation: ad_object
-            .orientation
-            .as_ref()
-            .map(convert_ad_orientation)
-            .map(|f| f as i32),
+        auction_id: ad_object.auction_id.clone(),
+        auction_key: ad_object.auction_key.clone(),
+        auction_configuration_id: ad_object.auction_configuration_id,
+        auction_configuration_uid: ad_object.auction_configuration_uid.clone(),
         demands: convert_demand(&ad_object.demands)?,
-        banner: ad_object.banner.as_ref().map(convert_banner_ad),
-        interstitial: ad_object.interstitial.as_ref().map(|i| i.to_string()), // TODO: remove String
-        rewarded: ad_object.rewarded.as_ref().map(|r| r.to_string()),         // TODO: remove String
+        ..Default::default()
     };
 
     placement.set_extension_data(mediation::PLACEMENT_EXT, placement_ext)?;
 
-    let item = openrtb::Item {
+    Ok(openrtb::Item {
         id: ad_object.auction_id.clone(),
         flr: Some(ad_object.auction_pricefloor as f32),
-        flrcur: Some("USD".to_string()), // TODO
+        flrcur: Some("USD".to_string()),
         spec: placement.encode_to_vec().into(),
         ..Default::default()
-    };
-
-    Ok(item)
+    })
 }
 
-fn convert_ad_orientation(orientation: &AdObjectOrientation) -> mediation::Orientation {
-    match orientation {
-        AdObjectOrientation::Portrait => mediation::Orientation::Portrait,
-        AdObjectOrientation::Landscape => mediation::Orientation::Landscape,
-    }
-}
-
-fn convert_banner_ad(banner: &sdk::BannerAdObject) -> mediation::BannerAd {
-    mediation::BannerAd {
-        format: Some(convert_ad_format(banner.format) as i32),
-    }
-}
-
-fn convert_ad_format(format: sdk::AdFormat) -> mediation::AdFormat {
+fn convert_banner_format(format: sdk::AdFormat) -> mediation::AdFormat {
     match format {
         sdk::AdFormat::Banner => mediation::AdFormat::Banner,
         sdk::AdFormat::Leaderboard => mediation::AdFormat::Leaderboard,
         sdk::AdFormat::Mrec => mediation::AdFormat::Mrec,
         sdk::AdFormat::Adaptive => mediation::AdFormat::Adaptive,
+    }
+}
+
+fn convert_ad_orientation(orientation: &sdk::AdObjectOrientation) -> mediation::Orientation {
+    match orientation {
+        sdk::AdObjectOrientation::Portrait => mediation::Orientation::Portrait,
+        sdk::AdObjectOrientation::Landscape => mediation::Orientation::Landscape,
     }
 }
 
@@ -745,12 +771,13 @@ mod tests {
 
     #[test]
     fn test_convert_ad_object_to_item() {
-        let ad_object = sdk::AdObject {
+        // Test banner ad object
+        let banner_ad_object = sdk::AdObject {
             auction_id: Some("auction_id".to_string()),
             auction_key: Some("auction_key".to_string()),
             auction_configuration_id: Some(123i64),
             auction_configuration_uid: Some("auction_configuration_uid".to_string()),
-            orientation: Some(AdObjectOrientation::Portrait),
+            orientation: Some(sdk::AdObjectOrientation::Portrait),
             demands: HashMap::from([(
                 "demand_key".to_string(),
                 json!({
@@ -763,15 +790,18 @@ mod tests {
             banner: Some(sdk::BannerAdObject {
                 format: sdk::AdFormat::Banner,
             }),
-            interstitial: Some(json!({"interstitial": "value"})),
-            rewarded: Some(json!("rewarded".to_string())),
+            interstitial: None,
+            rewarded: None,
             auction_pricefloor: 1.0,
         };
 
-        let item = convert_ad_object_to_item(&ad_object).unwrap();
+        let item =
+            convert_ad_object_to_item(&banner_ad_object, sdk::GetAuctionAdTypeParameter::Banner)
+                .unwrap();
 
         let mut registry = ExtensionRegistry::new();
         registry.register(mediation::PLACEMENT_EXT);
+        registry.register(mediation::DISPLAY_PLACEMENT_EXT);
 
         let placement = adcom::placement::Placement::decode_with_extensions(
             &mut Cursor::new(item.spec.unwrap()),
@@ -784,10 +814,12 @@ mod tests {
             .extension_data(mediation::PLACEMENT_EXT)
             .unwrap();
 
+        // Test basic item fields
         assert_eq!(item.id, Some("auction_id".to_string()));
         assert_eq!(item.flr, Some(1.0));
         assert_eq!(item.flrcur, Some("USD".to_string()));
 
+        // Test placement extension fields
         assert_eq!(placement_ext.auction_id, Some("auction_id".to_string()));
         assert_eq!(placement_ext.auction_key, Some("auction_key".to_string()));
         assert_eq!(placement_ext.auction_configuration_id, Some(123));
@@ -795,43 +827,28 @@ mod tests {
             placement_ext.auction_configuration_uid,
             Some("auction_configuration_uid".to_string())
         );
+
+        // Test demands
+        let demand = placement_ext.demands.get("demand_key").unwrap();
+        assert_eq!(demand.token, Some("token_value".to_string()));
+        assert_eq!(demand.status, Some("status_value".to_string()));
+        assert_eq!(demand.token_finish_ts, Some(1234567890));
+        assert_eq!(demand.token_start_ts, Some(1234567990));
+
+        // Test display placement fields
+        let display = placement.display.unwrap();
+        let display_ext = display
+            .extension_set
+            .extension_data(mediation::DISPLAY_PLACEMENT_EXT)
+            .unwrap();
+
+        assert_eq!(display.instl, Some(0)); // Regular banner
         assert_eq!(
-            placement_ext.orientation,
+            display_ext.orientation,
             Some(mediation::Orientation::Portrait as i32)
         );
-        assert_eq!(
-            placement_ext.demands.get("demand_key").unwrap().token,
-            Some("token_value".to_string())
-        );
-        assert_eq!(
-            placement_ext.demands.get("demand_key").unwrap().status,
-            Some("status_value".to_string())
-        );
-        assert_eq!(
-            placement_ext
-                .demands
-                .get("demand_key")
-                .unwrap()
-                .token_finish_ts,
-            Some(1234567890)
-        );
-        assert_eq!(
-            placement_ext
-                .demands
-                .get("demand_key")
-                .unwrap()
-                .token_start_ts,
-            Some(1234567990)
-        );
-        assert_eq!(
-            placement_ext.banner.as_ref().unwrap().format,
-            Some(mediation::AdFormat::Banner as i32)
-        );
-        assert_eq!(
-            placement_ext.interstitial,
-            Some("{\"interstitial\":\"value\"}".to_string())
-        );
-        assert_eq!(placement_ext.rewarded, Some("\"rewarded\"".to_string()));
+        assert_eq!(display_ext.format, Some(mediation::AdFormat::Banner as i32));
+        assert_eq!(display.instl, Some(0));
     }
 
     #[test]
