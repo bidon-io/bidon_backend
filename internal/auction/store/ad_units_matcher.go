@@ -16,7 +16,7 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 )
 
-const AdUnitTimeout = 10_000
+const AdUnitTimeout = 6_000
 
 type AdUnitsMatcher struct {
 	DB    *db.DB

@@ -9,7 +9,7 @@
       "pricefloor": 0.8,
       "label": "Applovin",
       "bid_type": "CPM",
-      "timeout": 10000,
+      "timeout": 6000,
       "ext": {
         "placement_id": "123"
       }
@@ -20,7 +20,7 @@
       "label": "mobilefuse",
       "pricefloor": 0.7,
       "uid": "123_mobilefuse",
-      "timeout": 10000,
+      "timeout": 6000,
       "ext": {
         "signaldata": "signal_data",
         "placement_id": "123"
@@ -32,7 +32,7 @@
       "label": "meta",
       "pricefloor": 0.6,
       "bid_type": "RTB",
-      "timeout": 10000,
+      "timeout": 6000,
       "ext": {
         "payload": "payload",
         "placement_id": "123"
@@ -44,7 +44,7 @@
       "label": "amazon",
       "pricefloor": 0.5,
       "uid": "123_amazon",
-      "timeout": 10000,
+      "timeout": 6000,
       "ext": {
         "slot_uuid": "uuid1"
       }
@@ -57,7 +57,7 @@
       "label": "vungle",
       "pricefloor": 0,
       "uid": "123_vungle",
-      "timeout": 10000,
+      "timeout": 6000,
       "ext": {
         "placement_id": "123"
       }
