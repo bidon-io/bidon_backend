@@ -16,18 +16,8 @@ services:
     volumes:
       - "geodb:/usr/share/GeoIP/"
 
-  geodb-sx:
-    image: bash:latest
-    command: >
-      bash -c "wget -O SxGeoCity_utf8.zip http://sypexgeo.net/files/SxGeoCity_utf8.zip &&
-      unzip -o SxGeoCity_utf8.zip &&
-      rm SxGeoCity_utf8.zip"
-    volumes:
-      - "geodb:/geodb"
-    working_dir: /geodb
-
   postgres:
-    image: postgres:14.7
+    image: postgres:17.2
     environment:
       POSTGRES_PASSWORD: ${PG_PASSWORD:-password}
       POSTGRES_USER: bidon
@@ -110,14 +100,29 @@ services:
       PORT: 3200
       ENVIRONMENT: production
       APP_SECRET: ${APP_SECRET}
-      SNOWFLAKE_NODE_ID: ${SNOWFLAKE_NODE_ID}
+      SUPERUSER_LOGIN: ${SUPERUSER_LOGIN}
+      SUPERUSER_PASSWORD: ${SUPERUSER_PASSWORD}
       DATABASE_URL: postgres://bidon:${PG_PASSWORD:-password}@postgres:5432/bidon
       DATABASE_REPLICA_URL: postgres://bidon:${PG_PASSWORD:-password}@postgres:5432/bidon
-      REDIS_URL: redis://redis:6379/0
+      SNOWFLAKE_NODE_ID: 1
     ports:
       - "3200:3200"
     logging: *default-logging
     <<: *restart-policy
+
+  bidon-admin-init:
+    image: curlimages/curl:latest
+    depends_on:
+      bidon-admin:
+        condition: service_started
+    environment:
+      SUPERUSER_LOGIN: ${SUPERUSER_LOGIN}
+      SUPERUSER_PASSWORD: ${SUPERUSER_PASSWORD}
+    volumes:
+      - ./scripts:/scripts:ro
+    entrypoint: ["/bin/sh", "/scripts/init-admin.sh"]
+    network_mode: "service:bidon-admin"
+    restart: "no"
 
   bidon-sdkapi:
     image: ghcr.io/bidon-io/bidon-sdkapi:latest
@@ -138,7 +143,7 @@ services:
       ENVIRONMENT: production
       DATABASE_URL: postgres://bidon:${PG_PASSWORD:-password}@postgres:5432/bidon
       DATABASE_REPLICA_URL: postgres://bidon:${PG_PASSWORD:-password}@postgres:5432/bidon
-      REDIS_URL: redis://redis:6379/0
+      REDIS_CLUSTER: redis://redis:6379/0
       USE_KAFKA: "true"
       KAFKA_BROKERS_LIST: kafka:9092
       KAFKA_CLIENT_ID: bidon_dev
