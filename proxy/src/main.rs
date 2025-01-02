@@ -5,9 +5,14 @@ use bidon::org::bidon::proto::v1::mediation::{
 };
 use infrastructure::{config, server};
 use prost::ExtensionRegistry;
+use tracing_subscriber::{
+    filter::LevelFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt, EnvFilter,
+};
 
 #[tokio::main]
 async fn main() {
+    init_logger();
+
     let registry = {
         let mut registry = ExtensionRegistry::new();
         registry.register(USER_EXT);
@@ -30,9 +35,20 @@ async fn main() {
         config::settings().log_level(),
         config::settings().env()
     );
-    println!("{}", welcome_string);
+    tracing::info!("{}", welcome_string);
 
     // Start the server
     let listener = tokio::net::TcpListener::bind(listen_addr).await.unwrap();
     server::run(listener).await.unwrap();
+}
+
+fn init_logger() {
+    tracing_subscriber::registry()
+        .with(
+            EnvFilter::builder()
+                .with_default_directive(LevelFilter::ERROR.into())
+                .parse_lossy(config::settings().log_level()),
+        )
+        .with(fmt::layer())
+        .init();
 }

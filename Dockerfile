@@ -62,6 +62,8 @@ RUN rm -rf proxy/src
 
 # Copy actual source code and build
 COPY proxy/src ./proxy/src
+COPY proto ./proto
+COPY build.rs ./build.rs
 RUN cargo build --release
 
 FROM alpine:3.18 AS deploy
@@ -99,3 +101,5 @@ FROM deploy AS bidon-proxy
 COPY --from=proxy-builder --chown=deploy /app/target/release/bidon-proxy /bidon-proxy
 
 CMD [ "/bidon-proxy" ]
+
+EXPOSE 3000
