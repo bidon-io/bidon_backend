@@ -79,6 +79,13 @@ func (h *ConfigHandler) Handle(c echo.Context) error {
 	setAmazonSlots := !sdkapi.Version05Constraint.Check(sdkVersion) // Do not set Amazon slots for SDK version 0.5.x
 
 	adapterInitConfigs, err := h.AdapterInitConfigsFetcher.FetchAdapterInitConfigs(ctx, req.app.ID, req.raw.Adapters.Keys(), setAmazonSlots, setOrder)
+
+	// TODO: Remove after experiment
+	// filter out BM for Join Blocks iOS except 1.25.7
+	if req.app.ID == 735385 && req.raw.App.Version != "1.25.7" {
+		adapterInitConfigs = filterOutBMConfigs(adapterInitConfigs)
+	}
+
 	if err != nil {
 		return err
 	}
@@ -127,4 +134,15 @@ func prepareConfigEvent(req *request[schema.ConfigRequest, *schema.ConfigRequest
 	}
 
 	return event.NewAdEvent(&req.raw.BaseRequest, adRequestParams, req.geoData)
+}
+
+func filterOutBMConfigs(configs []sdkapi.AdapterInitConfig) []sdkapi.AdapterInitConfig {
+	filteredConfigs := make([]sdkapi.AdapterInitConfig, 0, len(configs))
+	for _, config := range configs {
+		// Append all non-Bidmachine configs
+		if _, ok := config.(*sdkapi.BidmachineInitConfig); !ok {
+			filteredConfigs = append(filteredConfigs, config)
+		}
+	}
+	return filteredConfigs
 }
