@@ -210,8 +210,7 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Valid(t *testing.T) {
 					AppKey: fmt.Sprintf("ironsource_app_%d", apps[1].ID),
 				},
 				&sdkapi.MetaInitConfig{
-					AppID:     fmt.Sprintf("meta_app_%d", apps[1].ID),
-					AppSecret: fmt.Sprintf("meta_app_%d_secret", apps[1].ID),
+					AppID: fmt.Sprintf("meta_app_%d", apps[1].ID),
 				},
 				&sdkapi.MintegralInitConfig{
 					AppID:  fmt.Sprintf("mintegral_app_%d", apps[1].ID),
@@ -255,9 +254,8 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Valid(t *testing.T) {
 					Order:  2,
 				},
 				&sdkapi.MetaInitConfig{
-					AppID:     fmt.Sprintf("meta_app_%d", apps[1].ID),
-					AppSecret: fmt.Sprintf("meta_app_%d_secret", apps[1].ID),
-					Order:     0,
+					AppID: fmt.Sprintf("meta_app_%d", apps[1].ID),
+					Order: 0,
 				},
 				&sdkapi.MintegralInitConfig{
 					AppID:  fmt.Sprintf("mintegral_app_%d", apps[1].ID),

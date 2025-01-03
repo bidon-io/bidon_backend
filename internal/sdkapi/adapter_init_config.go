@@ -157,9 +157,8 @@ func (a *GAMInitConfig) SetDefaultOrder() {
 }
 
 type MetaInitConfig struct {
-	AppID     string `json:"app_id,omitempty"`
-	AppSecret string `json:"app_secret,omitempty"`
-	Order     int    `json:"order"`
+	AppID string `json:"app_id,omitempty"`
+	Order int    `json:"order"`
 }
 
 func (a *MetaInitConfig) Key() adapter.Key {

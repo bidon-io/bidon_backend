@@ -62,9 +62,10 @@ func compareErrors(want, got error) bool {
 
 func buildAdapter() meta.MetaAdapter {
 	return meta.MetaAdapter{
-		AppID:     "10182906",
-		AppSecret: "very$ecretapp",
-		TagID:     "10182906-10192212",
+		AppID:      "10182906",
+		AppSecret:  "very$ecretapp",
+		PlatformID: "687579938617452",
+		TagID:      "10182906-10192212",
 	}
 }
 
@@ -250,8 +251,9 @@ func TestMeta_CreateRequestTest(t *testing.T) {
 	}
 
 	adapter := &meta.MetaAdapter{
-		AppID: "10182906",
-		TagID: "10182906",
+		AppID:      "10182906",
+		TagID:      "10182906",
+		PlatformID: "687579938617452",
 	}
 
 	for _, tC := range testCases {
@@ -421,9 +423,10 @@ func TestMeta_Builder(t *testing.T) {
 	client := &http.Client{}
 	metaCfg := adapter.ProcessedConfigsMap{
 		adapter.MetaKey: map[string]any{
-			"app_id":     "10182906",
-			"tag_id":     "10182906-10192212",
-			"app_secret": "very$ecretapp",
+			"app_id":      "10182906",
+			"tag_id":      "10182906-10192212",
+			"platform_id": "687579938617452",
+			"app_secret":  "very$ecretapp",
 		},
 	}
 	bidder, err := meta.Builder(metaCfg, client)

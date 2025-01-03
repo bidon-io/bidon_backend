@@ -63,8 +63,7 @@ func SetupConfigHandler() apihandlers.ConfigHandler {
 					NetworkCode: "network_code",
 				},
 				&sdkapi.MetaInitConfig{
-					AppID:     fmt.Sprintf("meta_app_%d", app.ID),
-					AppSecret: fmt.Sprintf("meta_app_%d_secret", app.ID),
+					AppID: fmt.Sprintf("meta_app_%d", app.ID),
 				},
 				&sdkapi.MintegralInitConfig{
 					AppID:  fmt.Sprintf("mintegral_app_%d", app.ID),

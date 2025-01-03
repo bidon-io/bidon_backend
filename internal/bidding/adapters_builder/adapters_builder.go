@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/bidon-io/bidon-backend/config"
+
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters/vkads"
 
 	"github.com/bidon-io/bidon-backend/internal/auction"
@@ -37,6 +39,7 @@ var biddingAdapters = map[adapter.Key]adapters.Builder{
 type AdaptersBuilder struct {
 	AdaptersMap map[adapter.Key]adapters.Builder
 	Client      *http.Client
+	Config      *config.DemandConfig
 }
 
 func (b AdaptersBuilder) Build(adapterKey adapter.Key, cfg adapter.ProcessedConfigsMap) (*adapters.Bidder, error) {
@@ -63,6 +66,14 @@ type ConfigurationFetcher interface {
 
 type AdaptersConfigBuilder struct {
 	ConfigurationFetcher ConfigurationFetcher
+	DemandConfig         *config.DemandConfig
+}
+
+func NewAdaptersConfigBuilder(fetcher ConfigurationFetcher, config *config.DemandConfig) *AdaptersConfigBuilder {
+	return &AdaptersConfigBuilder{
+		ConfigurationFetcher: fetcher,
+		DemandConfig:         config,
+	}
 }
 
 func NewAdapters(keys []adapter.Key) adapter.ProcessedConfigsMap {
@@ -127,7 +138,8 @@ func (b *AdaptersConfigBuilder) Build(ctx context.Context, appID int64, adapterK
 			}
 		case adapter.MetaKey:
 			adaptersMap[key]["app_id"] = appData["app_id"]
-			adaptersMap[key]["app_secret"] = appData["app_secret"]
+			adaptersMap[key]["app_secret"] = b.DemandConfig.MetaAppSecret
+			adaptersMap[key]["platform_id"] = b.DemandConfig.MetaPlatformID
 
 			adUnit, _ := adUnitsMap.First(key, schema.RTBBidType)
 			if adUnit != nil {

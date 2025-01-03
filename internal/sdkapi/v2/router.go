@@ -5,7 +5,6 @@ import (
 	auctionstore "github.com/bidon-io/bidon-backend/internal/auction/store"
 	"github.com/bidon-io/bidon-backend/internal/auctionv2"
 	"github.com/bidon-io/bidon-backend/internal/bidding"
-	"github.com/bidon-io/bidon-backend/internal/bidding/adapters_builder"
 	"github.com/bidon-io/bidon-backend/internal/notification"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/geocoder"
@@ -29,7 +28,6 @@ type Router struct {
 	AdapterInitConfigsFetcher *sdkapistore.AdapterInitConfigsFetcher
 	ConfigurationFetcher      *adapterstore.ConfigurationFetcher
 	BiddingBuilder            *bidding.Builder
-	BiddingAdaptersCfgBuilder *adapters_builder.AdaptersConfigBuilder
 	AuctionService            *auctionv2.Service
 }
 
