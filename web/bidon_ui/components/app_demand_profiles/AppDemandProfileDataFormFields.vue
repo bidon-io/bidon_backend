@@ -31,7 +31,6 @@
   </template>
   <template v-if="accountType == 'DemandSourceAccount::Meta'">
     <VeeFormFieldWrapper field="data.appId" label="App Id" required />
-    <VeeFormFieldWrapper field="data.appSecret" label="App Secret" required />
   </template>
   <template v-if="accountType == 'DemandSourceAccount::Mintegral'">
     <VeeFormFieldWrapper field="data.appId" label="App Id" required />

@@ -146,9 +146,8 @@ func Test_appDemandProfileAttrsValidator_ValidateWithContext(t *testing.T) {
 			&AppDemandProfileAttrs{
 				DemandSourceID: 1,
 				Data: map[string]any{
-					"app_id":     "767803077426274",
-					"app_secret": "2457f83ef75ab78d249d13df9b74f45b",
-					"foo":        "bar",
+					"app_id": "767803077426274",
+					"foo":    "bar",
 				},
 			},
 			&DemandSource{

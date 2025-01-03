@@ -213,12 +213,14 @@ func main() {
 	if err != nil {
 		log.Fatalf("Unable to register observer for biddingAdaptersCfgCache: %v", err)
 	}
-	biddingAdaptersCfgBuilder := &adapters_builder.AdaptersConfigBuilder{
-		ConfigurationFetcher: &adapterstore.ConfigurationFetcher{
+	demandCfg := config.NewDemandConfig()
+	biddingAdaptersCfgBuilder := adapters_builder.NewAdaptersConfigBuilder(
+		&adapterstore.ConfigurationFetcher{
 			DB:    db,
 			Cache: biddingAdaptersCfgCache,
 		},
-	}
+		demandCfg,
+	)
 	lineItemsCache := config.NewRedisCacheOf[[]auction.LineItem](rdb, 10*time.Minute, "line_items")
 	err = lineItemsCache.Monitor(meter)
 	if err != nil {
@@ -290,7 +292,6 @@ func main() {
 		AppFetcher:                appFetcher,
 		SegmentMatcher:            segmentMatcher,
 		BiddingBuilder:            biddingBuilderV2,
-		BiddingAdaptersCfgBuilder: biddingAdaptersCfgBuilder,
 		AdUnitsMatcher:            adUnitsMatcher,
 		NotificationHandler:       notificationHandlerV2,
 		GeoCoder:                  geoCoder,

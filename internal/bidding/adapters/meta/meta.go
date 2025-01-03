@@ -24,9 +24,10 @@ import (
 )
 
 type MetaAdapter struct {
-	AppID     string
-	AppSecret string
-	TagID     string
+	AppID      string
+	AppSecret  string
+	PlatformID string
+	TagID      string
 }
 
 var bannerFormats = map[ad.Format][2]int64{
@@ -40,8 +41,6 @@ var fullscreenFormats = map[string][2]int64{
 	"PHONE":  {320, 480},
 	"TABLET": {768, 1024},
 }
-
-const platformID = "687579938617452"
 
 func (a *MetaAdapter) banner(br *schema.BiddingRequest) *openrtb2.Imp {
 	size := bannerFormats[br.Imp.Format()]
@@ -93,7 +92,7 @@ func (a *MetaAdapter) rewarded(br *schema.BiddingRequest) *openrtb2.Imp {
 	}
 }
 
-func (a *MetaAdapter) timeoutURL() string {
+func (a *MetaAdapter) timeoutURL(platformID string) string {
 	return "https://www.facebook.com/audiencenetwork/nurl/?partner=" + platformID + "&app=" + a.AppID + "&auction=${AUCTION_ID}&ortb_loss_code=2"
 }
 
@@ -135,7 +134,7 @@ func (a *MetaAdapter) CreateRequest(request openrtb.BidRequest, br *schema.Biddi
 	request.App.Publisher.ID = a.AppID
 
 	ext, err := json.Marshal(map[string]any{
-		"platformid":        platformID,
+		"platformid":        a.PlatformID,
 		"authentication_id": calculateHMACSHA256(request.ID, a.AppSecret),
 	})
 	if err != nil {
@@ -151,7 +150,7 @@ func (a *MetaAdapter) ExecuteRequest(ctx context.Context, client *http.Client, r
 	dr := &adapters.DemandResponse{
 		DemandID:   adapter.MetaKey,
 		RequestID:  request.ID,
-		TimeoutURL: a.timeoutURL(),
+		TimeoutURL: a.timeoutURL(a.PlatformID),
 		TagID:      a.TagID,
 	}
 	requestBody, err := json.Marshal(request)
@@ -161,7 +160,7 @@ func (a *MetaAdapter) ExecuteRequest(ctx context.Context, client *http.Client, r
 	}
 	dr.RawRequest = string(requestBody)
 
-	url := "https://an.facebook.com/" + platformID + "/placementbid.ortb"
+	url := "https://an.facebook.com/" + a.PlatformID + "/placementbid.ortb"
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(requestBody))
 	if err != nil {
 		dr.Error = err
@@ -246,15 +245,20 @@ func Builder(cfg adapter.ProcessedConfigsMap, client *http.Client) (*adapters.Bi
 	if !ok || appID == "" {
 		return nil, fmt.Errorf("missing app_secret param for %s adapter", adapter.MetaKey)
 	}
+	platformID, ok := mCfg["platform_id"].(string)
+	if !ok || platformID == "" {
+		return nil, fmt.Errorf("missing platform_id param for %s adapter", adapter.MetaKey)
+	}
 	tagID, ok := mCfg["tag_id"].(string)
 	if !ok {
 		tagID = ""
 	}
 
 	adpt := &MetaAdapter{
-		AppID:     appID,
-		AppSecret: appSecret,
-		TagID:     tagID,
+		AppID:      appID,
+		AppSecret:  appSecret,
+		PlatformID: platformID,
+		TagID:      tagID,
 	}
 
 	bidder := adapters.Bidder{
