@@ -27,7 +27,7 @@ pub mod codec;
 pub mod extract;
 pub mod sdk;
 
-mod adapter;
+pub mod adapter;
 mod handlers;
 
 pub mod com {

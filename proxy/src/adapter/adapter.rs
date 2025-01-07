@@ -420,7 +420,7 @@ fn convert_demand(demand: &HashMap<String, Value>) -> Result<HashMap<String, med
 
 // TODO: this is a temporary function to convert the OpenRTB response to the AuctionResponse
 // fix it later
-pub(crate) fn try_into(openrtb: openrtb::Openrtb) -> Result<sdk::AuctionResponse> {
+pub fn try_into(openrtb: openrtb::Openrtb) -> Result<sdk::AuctionResponse> {
     // Extract the Response from Openrtb
     let response = match openrtb.payload_oneof {
         Some(openrtb::openrtb::PayloadOneof::Response(response)) => response,
