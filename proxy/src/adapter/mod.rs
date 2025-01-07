@@ -1,3 +1,3 @@
-mod adapter;
+pub mod adapter;
 
-pub(crate) use crate::adapter::adapter::*;
+pub use crate::adapter::adapter::*;
