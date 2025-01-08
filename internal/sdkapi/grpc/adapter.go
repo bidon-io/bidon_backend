@@ -305,7 +305,7 @@ func parseSegment(c *pbctx.Context) (schema.Segment, error) {
 
 	segments := mu.GetSegments()
 	if len(segments) == 0 {
-		return schema.Segment{}, fmt.Errorf("parseSegment: segments is empty")
+		return schema.Segment{}, nil
 	}
 
 	ms := segments[0]
