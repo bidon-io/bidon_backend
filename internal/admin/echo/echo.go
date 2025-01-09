@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/pilagod/gorm-cursor-paginator/v2/paginator"
+
 	"github.com/bidon-io/bidon-backend/internal/admin"
 	"github.com/bidon-io/bidon-backend/internal/admin/auth"
 	v8n "github.com/go-ozzo/ozzo-validation/v4"
@@ -86,6 +88,7 @@ type resourceServiceHandler[Resource, ResourceData, ResourceAttrs any] struct {
 
 type resourceService[Resource, ResourceData, ResourceAttrs any] interface {
 	List(ctx context.Context, authCtx admin.AuthContext, qParams map[string][]string) ([]Resource, error)
+	ListWithCursor(ctx context.Context, authCtx admin.AuthContext, qParams map[string][]string) ([]Resource, *paginator.Cursor, error)
 	Find(ctx context.Context, authCtx admin.AuthContext, id int64) (*Resource, error)
 	Create(ctx context.Context, authCtx admin.AuthContext, attrs *ResourceAttrs) (*ResourceData, error)
 	Update(ctx context.Context, authCtx admin.AuthContext, id int64, attrs *ResourceAttrs) (*ResourceData, error)
@@ -115,6 +118,28 @@ func (s *resourceServiceHandler[Resource, ResourceData, ResourceAttrs]) list(c e
 	}
 
 	return c.JSON(http.StatusOK, resources)
+}
+
+func (s *resourceServiceHandler[Resource, ResourceData, ResourceAttrs]) listWithCursor(c echo.Context) error {
+	authCtx, err := getAuthContext(c)
+	if err != nil {
+		return err
+	}
+
+	resources, cursor, err := s.service.ListWithCursor(c.Request().Context(), authCtx, c.QueryParams())
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, ResourceListResponse[Resource]{
+		Data: resources,
+		Meta: Meta{
+			Total: len(resources),
+			Pagination: Pagination{
+				Cursor: cursor,
+			},
+		},
+	})
 }
 
 func (s *resourceServiceHandler[Resource, ResourceData, ResourceAttrs]) create(c echo.Context) error {

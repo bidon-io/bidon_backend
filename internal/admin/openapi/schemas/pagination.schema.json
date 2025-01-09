@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "pagination.schema.json",
+  "title": "Pagination",
+  "type": "object",
+  "properties": {
+    "total": {
+      "type": "integer",
+      "description": "Total number of items"
+    },
+    "cursor": {
+      "type": "object",
+      "properties": {
+        "before": {
+          "type": "string",
+          "description": "Cursor to the previous page"
+        },
+        "after": {
+          "type": "string",
+          "description": "Cursor to the next page"
+        }
+      }
+    }
+  }
+}

@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 
+	"github.com/pilagod/gorm-cursor-paginator/v2/paginator"
+
 	v8n "github.com/go-ozzo/ozzo-validation/v4"
 )
 
@@ -64,6 +66,7 @@ type resourcePolicy[Resource, ResourceAttrs any] interface {
 // resourceScope handles visibility of resource.
 type resourceScope[Resource any] interface {
 	list(context.Context, map[string][]string) ([]Resource, error)
+	listWithCursor(context.Context, map[string][]string) ([]Resource, *paginator.Cursor, error)
 	find(context.Context, int64) (*Resource, error)
 }
 
@@ -86,6 +89,20 @@ func (s *ResourceService[Resource, ResourceData, ResourceAttrs]) List(ctx contex
 	}
 
 	return resources, nil
+}
+
+func (s *ResourceService[Resource, ResourceData, ResourceAttrs]) ListWithCursor(ctx context.Context, authCtx AuthContext, qParams map[string][]string) ([]Resource, *paginator.Cursor, error) {
+	data, cursor, err := s.policy.getReadScope(authCtx).listWithCursor(ctx, qParams)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	resources := make([]Resource, len(data))
+	for i := range data {
+		resources[i] = s.prepareResource(authCtx, &data[i])
+	}
+
+	return resources, cursor, nil
 }
 
 func (s *ResourceService[Resource, ResourceData, ResourceAttrs]) Find(ctx context.Context, authCtx AuthContext, id int64) (*Resource, error) {
@@ -148,6 +165,18 @@ func (s *ResourceService[Resource, ResourceData, ResourceAttrs]) Delete(ctx cont
 
 	return s.repo.Delete(ctx, id)
 }
+
+//
+//func (s *ResourceService[Resource, ResourceData, ResourceAttrs]) GetTotalCount(ctx context.Context, authCtx AuthContext) (int64, error) {
+//	scope := s.policy.getReadScope(authCtx)
+//
+//	_, err := scope.list(ctx, nil)
+//	if err != nil {
+//		return 0, err
+//	}
+//
+//	return scope.getTotalCount(ctx)
+//}
 
 func (s *ResourceService[Resource, ResourceData, ResourceAttrs]) validate(ctx context.Context, attrs *ResourceAttrs) error {
 	if s.getValidator != nil {

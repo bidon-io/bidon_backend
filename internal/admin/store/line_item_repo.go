@@ -3,6 +3,7 @@ package adminstore
 import (
 	"context"
 	"database/sql"
+	"github.com/pilagod/gorm-cursor-paginator/v2/paginator"
 	"strconv"
 
 	"github.com/bidon-io/bidon-backend/internal/ad"
@@ -37,6 +38,33 @@ func (r *LineItemRepo) ListOwnedByUser(ctx context.Context, userID int64, qParam
 	filters.UserID = userID
 
 	return r.list(ctx, filters.apply)
+}
+
+func (r *LineItemRepo) ListWithCursor(ctx context.Context, qParams map[string][]string) ([]admin.LineItem, *paginator.Cursor, error) {
+	filters := queryToLineItemFilters(qParams)
+	pgn := queryToPaginator(qParams)
+
+	return r.listWithCursor(ctx, filters.apply, pgn)
+}
+
+func (r *LineItemRepo) ListOwnedByUserWithCursor(ctx context.Context, userID int64, qParams map[string][]string) ([]admin.LineItem, *paginator.Cursor, error) {
+	filters := queryToLineItemFilters(qParams)
+	filters.UserID = userID
+	pgn := queryToPaginator(qParams)
+
+	return r.listWithCursor(ctx, filters.apply, pgn)
+}
+
+func (r *LineItemRepo) GetTotal(ctx context.Context, qParams map[string][]string) (int64, error) {
+	filters := queryToLineItemFilters(qParams)
+	return r.getTotal(ctx, filters.apply)
+}
+
+func (r *LineItemRepo) GetTotalOwnedByUser(ctx context.Context, userID int64, qParams map[string][]string) (int64, error) {
+	filters := queryToLineItemFilters(qParams)
+	filters.UserID = userID
+
+	return r.getTotal(ctx, filters.apply)
 }
 
 func (r *LineItemRepo) FindOwnedByUser(ctx context.Context, userID int64, id int64) (*admin.LineItem, error) {
