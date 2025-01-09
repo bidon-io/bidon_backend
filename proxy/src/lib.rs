@@ -1,6 +1,7 @@
 use crate::bidding::BiddingService;
 use axum::routing::post;
 use axum::Router;
+use sentry_tower::NewSentryLayer;
 use tower_http::trace::TraceLayer;
 
 pub struct AppState<T: BiddingService> {
@@ -12,13 +13,20 @@ pub fn create_app<A>(bidding_service: Box<A>) -> Router
 where
     A: BiddingService + Clone + Send + Sync + 'static,
 {
+    let level = tracing::Level::INFO;
     Router::new()
         .route(
             "/v2/auction/:ad_type",
             post(handlers::auction::get_auction_handler),
         )
         .with_state(bidding_service)
-        .layer(TraceLayer::new_for_http())
+        .layer(
+            TraceLayer::new_for_http()
+                .make_span_with(tower_http::trace::DefaultMakeSpan::new().level(level))
+                // .on_request(tower_http::trace::DefaultOnRequest::new().level(level))
+                .on_response(tower_http::trace::DefaultOnResponse::new().level(level)),
+        )
+        .layer(NewSentryLayer::new_from_top())
 }
 
 // mod main;

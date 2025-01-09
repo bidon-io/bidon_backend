@@ -7,6 +7,7 @@ pub struct Config {
     env: String,
     log_level: String,
     port: String,
+    sentry_dsn: String,
 }
 
 impl Config {
@@ -18,14 +19,13 @@ impl Config {
         let env = env_map
             .var("ENVIRONMENT")
             .unwrap_or("development".to_string());
-        let log_level = env_map.var("PROXY_LOG_LEVEL").unwrap_or("info".to_string());
-        let port = env_map.var("PROXY_PORT").unwrap_or("3000".to_string());
 
         Ok(Config {
             grpc_url,
             env,
-            log_level,
-            port,
+            log_level: env_map.var("PROXY_LOG_LEVEL").unwrap_or("info".to_string()),
+            port: env_map.var("PROXY_PORT").unwrap_or("3000".to_string()),
+            sentry_dsn: env_map.var("SENTRY_DSN").unwrap_or("".to_string()),
         })
     }
 
@@ -43,6 +43,10 @@ impl Config {
 
     pub fn port(&self) -> &str {
         self.port.as_str()
+    }
+
+    pub fn sentry_dsn(&self) -> &str {
+        self.sentry_dsn.as_str()
     }
 }
 
