@@ -32,6 +32,7 @@ require (
 	github.com/oapi-codegen/oapi-codegen/v2 v2.3.0
 	github.com/oapi-codegen/runtime v1.1.1
 	github.com/oschwald/maxminddb-golang v1.12.0
+	github.com/pilagod/gorm-cursor-paginator/v2 v2.6.1
 	github.com/prebid/openrtb/v19 v19.0.0
 	github.com/pressly/goose/v3 v3.16.0
 	github.com/prometheus/client_golang v1.20.5

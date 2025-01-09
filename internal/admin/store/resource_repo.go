@@ -2,8 +2,10 @@ package adminstore
 
 import (
 	"context"
+	"errors"
 
 	"github.com/bidon-io/bidon-backend/internal/db"
+	"github.com/pilagod/gorm-cursor-paginator/v2/paginator"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -98,4 +100,48 @@ func (r *resourceRepo[Resource, ResourceAttrs, DBModel]) Delete(ctx context.Cont
 	var dbModel DBModel
 
 	return r.db.WithContext(ctx).Delete(&dbModel, id).Error
+}
+
+func (r *resourceRepo[Resource, ResourceAttrs, DBModel]) listWithCursor(ctx context.Context, addFilters func(*gorm.DB) *gorm.DB, pgn *paginator.Paginator) ([]Resource, *paginator.Cursor, error) {
+	if pgn == nil {
+		return nil, nil, errors.New("paginator not provided")
+	}
+
+	var dbModels []DBModel
+
+	db := r.db.WithContext(ctx)
+	for _, association := range r.associations {
+		db = db.Preload(association)
+	}
+
+	if addFilters != nil {
+		db = addFilters(db)
+	}
+
+	db, cursor, err := pgn.Paginate(db, &dbModels)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	resources := make([]Resource, len(dbModels))
+	for i := range dbModels {
+		resources[i] = r.mapper.resource(&dbModels[i])
+	}
+
+	return resources, &cursor, nil
+}
+
+func (r *resourceRepo[Resource, ResourceAttrs, DBModel]) getTotal(ctx context.Context, addFilters func(*gorm.DB) *gorm.DB) (int64, error) {
+	var total int64
+	db := r.db.WithContext(ctx)
+
+	if addFilters != nil {
+		db = addFilters(db)
+	}
+
+	if err := db.Model(new(DBModel)).Count(&total).Error; err != nil {
+		return 0, err
+	}
+
+	return total, nil
 }

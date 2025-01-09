@@ -716,7 +716,9 @@ func (s *LineItemService) ImportCSV(ctx context.Context, _ AuthContext, reader i
 
 type LineItemRepo interface {
 	AllResourceQuerier[LineItem]
+	AllResourceQuerierWithCursor[LineItem]
 	OwnedResourceQuerier[LineItem]
+	OwnedResourceQuerierWithCursor[LineItem]
 	ResourceManipulator[LineItem, LineItemAttrs]
 
 	CreateMany(ctx context.Context, items []LineItemAttrs) error
@@ -739,16 +741,24 @@ func newLineItemPolicy(store Store) *lineItemPolicy {
 }
 
 func (p *lineItemPolicy) getReadScope(authCtx AuthContext) resourceScope[LineItem] {
-	return &ownedResourceScope[LineItem]{
+	owned := &ownedResourceScope[LineItem]{
 		repo:    p.repo,
 		authCtx: authCtx,
+	}
+	return &ownedResourceScopeWithCursor[LineItem]{
+		ownedResourceScope: owned,
+		repo:               p.repo,
 	}
 }
 
 func (p *lineItemPolicy) getManageScope(authCtx AuthContext) resourceScope[LineItem] {
-	return &ownedResourceScope[LineItem]{
+	owned := &ownedResourceScope[LineItem]{
 		repo:    p.repo,
 		authCtx: authCtx,
+	}
+	return &ownedResourceScopeWithCursor[LineItem]{
+		ownedResourceScope: owned,
+		repo:               p.repo,
 	}
 }
 
