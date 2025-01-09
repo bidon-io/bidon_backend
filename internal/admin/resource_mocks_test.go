@@ -5,6 +5,7 @@ package admin
 
 import (
 	"context"
+	"github.com/pilagod/gorm-cursor-paginator/v2/paginator"
 	"sync"
 )
 
@@ -676,6 +677,9 @@ var _ resourceScope[any] = &resourceScopeMock[any]{}
 //			listFunc: func(contextMoqParam context.Context, stringToStrings map[string][]string) ([]Resource, error) {
 //				panic("mock out the list method")
 //			},
+//			listWithCursorFunc: func(contextMoqParam context.Context, stringToStrings map[string][]string) ([]Resource, *paginator.Cursor, error) {
+//				panic("mock out the listWithCursor method")
+//			},
 //		}
 //
 //		// use mockedresourceScope in code that requires resourceScope
@@ -688,6 +692,9 @@ type resourceScopeMock[Resource any] struct {
 
 	// listFunc mocks the list method.
 	listFunc func(contextMoqParam context.Context, stringToStrings map[string][]string) ([]Resource, error)
+
+	// listWithCursorFunc mocks the listWithCursor method.
+	listWithCursorFunc func(contextMoqParam context.Context, stringToStrings map[string][]string) ([]Resource, *paginator.Cursor, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -705,9 +712,17 @@ type resourceScopeMock[Resource any] struct {
 			// StringToStrings is the stringToStrings argument value.
 			StringToStrings map[string][]string
 		}
+		// listWithCursor holds details about calls to the listWithCursor method.
+		listWithCursor []struct {
+			// ContextMoqParam is the contextMoqParam argument value.
+			ContextMoqParam context.Context
+			// StringToStrings is the stringToStrings argument value.
+			StringToStrings map[string][]string
+		}
 	}
-	lockfind sync.RWMutex
-	locklist sync.RWMutex
+	lockfind           sync.RWMutex
+	locklist           sync.RWMutex
+	locklistWithCursor sync.RWMutex
 }
 
 // find calls findFunc.
@@ -779,5 +794,41 @@ func (mock *resourceScopeMock[Resource]) listCalls() []struct {
 	mock.locklist.RLock()
 	calls = mock.calls.list
 	mock.locklist.RUnlock()
+	return calls
+}
+
+// listWithCursor calls listWithCursorFunc.
+func (mock *resourceScopeMock[Resource]) listWithCursor(contextMoqParam context.Context, stringToStrings map[string][]string) ([]Resource, *paginator.Cursor, error) {
+	if mock.listWithCursorFunc == nil {
+		panic("resourceScopeMock.listWithCursorFunc: method is nil but resourceScope.listWithCursor was just called")
+	}
+	callInfo := struct {
+		ContextMoqParam context.Context
+		StringToStrings map[string][]string
+	}{
+		ContextMoqParam: contextMoqParam,
+		StringToStrings: stringToStrings,
+	}
+	mock.locklistWithCursor.Lock()
+	mock.calls.listWithCursor = append(mock.calls.listWithCursor, callInfo)
+	mock.locklistWithCursor.Unlock()
+	return mock.listWithCursorFunc(contextMoqParam, stringToStrings)
+}
+
+// listWithCursorCalls gets all the calls that were made to listWithCursor.
+// Check the length with:
+//
+//	len(mockedresourceScope.listWithCursorCalls())
+func (mock *resourceScopeMock[Resource]) listWithCursorCalls() []struct {
+	ContextMoqParam context.Context
+	StringToStrings map[string][]string
+} {
+	var calls []struct {
+		ContextMoqParam context.Context
+		StringToStrings map[string][]string
+	}
+	mock.locklistWithCursor.RLock()
+	calls = mock.calls.listWithCursor
+	mock.locklistWithCursor.RUnlock()
 	return calls
 }
