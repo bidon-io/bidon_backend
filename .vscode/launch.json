@@ -4,7 +4,6 @@
   // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "configurations": [
-    
     {
       "name": "Debug tests",
       "type": "go",
@@ -41,6 +40,18 @@
       },
       "args": [],
       "cwd": "${workspaceFolder}"
-    }
+    },
+    {
+      "name": "bidon-proxy",
+      "type": "lldb",
+      "request": "launch",
+      "cargo": {
+        "args": [
+          "build",
+          "--bin=bidon-proxy"
+        ]
+      },
+      "args": []
+    },
   ]
 }

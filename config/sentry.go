@@ -17,7 +17,7 @@ func Sentry() SentryConfig {
 	return SentryConfig{
 		ClientOptions: sentry.ClientOptions{
 			Dsn:              os.Getenv("SENTRY_DSN"),
-			Debug:            env != ProdEnv,
+			Debug:            Debug(),
 			AttachStacktrace: true,
 			EnableTracing:    true,
 			TracesSampleRate: 1.0,

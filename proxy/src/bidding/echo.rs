@@ -1,4 +1,4 @@
-pub(crate) use crate::bidding::BiddingError;
+use crate::bidding::error::BiddingError;
 pub(crate) use crate::bidding::BiddingService;
 use crate::com::iabtechlab::openrtb::v3::Openrtb;
 

@@ -1,4 +1,4 @@
-use crate::bidding::BiddingError;
+use crate::bidding::error::BiddingError;
 use crate::bidding::BiddingService;
 use crate::com::iabtechlab::openrtb::v3::Openrtb;
 use crate::org::bidon::proto::v1::bidding_service_client::BiddingServiceClient;
@@ -26,7 +26,8 @@ impl BiddingService for ProxyBiddingService {
             .clone() // Cloning is required here, because Tonic gRPC clients are mutable. Cloning is cheap.
             .bid(grpc_request)
             .await
-            .map_err(|e| BiddingError::new(e.to_string()))?;
+            .map_err(BiddingError::GrpcError)?;
+
         Ok(grpc_response.into_inner())
     }
 }
