@@ -15,7 +15,7 @@ import (
 
 func Echo() *echo.Echo {
 	e := echo.New()
-	e.Debug = GetEnv() != ProdEnv
+	e.Debug = Debug()
 	e.HTTPErrorHandler = HTTPErrorHandler
 	e.Validator = &echoValidator{validate: validator.New()}
 

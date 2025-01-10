@@ -28,6 +28,10 @@ func GetEnv() string {
 	}
 }
 
+func Debug() bool {
+	return GetEnv() != ProdEnv
+}
+
 func LoadEnvFile() {
 	var err error
 	if GetEnv() == TestEnv {

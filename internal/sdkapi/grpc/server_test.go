@@ -167,7 +167,7 @@ func TestServer_Bid(t *testing.T) {
 				return &v3.Openrtb{}
 			},
 			wantErr:  true,
-			errorMsg: "code=422, message=Invalid Auction Key",
+			errorMsg: "rpc error: code = InvalidArgument desc = {\"error\":{\"code\":422,\"message\":\"Invalid Auction Key\"}}",
 		},
 	}
 
