@@ -1,3 +1,4 @@
+use anyhow::Result;
 use dotenvy::EnvLoader;
 use std::sync::OnceLock;
 
@@ -7,10 +8,11 @@ pub struct Config {
     env: String,
     log_level: String,
     port: String,
+    metrics_port: u16,
 }
 
 impl Config {
-    pub fn new() -> Result<Self, Box<dyn std::error::Error>> {
+    pub fn new() -> Result<Self> {
         let env_map = EnvLoader::new().load()?;
         let grpc_url = env_map
             .var("PROXY_GRPC_URL")
@@ -20,12 +22,16 @@ impl Config {
             .unwrap_or("development".to_string());
         let log_level = env_map.var("PROXY_LOG_LEVEL").unwrap_or("info".to_string());
         let port = env_map.var("PROXY_PORT").unwrap_or("3000".to_string());
+        let metrics_port = env_map
+            .var("PROXY_METRICS_PORT")
+            .unwrap_or("9095".to_string());
 
         Ok(Config {
             grpc_url,
             env,
             log_level,
             port,
+            metrics_port: metrics_port.parse::<u16>().unwrap(),
         })
     }
 
@@ -43,6 +49,10 @@ impl Config {
 
     pub fn port(&self) -> &str {
         self.port.as_str()
+    }
+
+    pub fn metrics_port(&self) -> u16 {
+        self.metrics_port
     }
 }
 

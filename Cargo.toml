@@ -37,6 +37,7 @@ derive-new = "0.7.0"
 
 # Web
 axum = { version = "0.7", features = ["macros"] }
+axum-prometheus = "0.7.0"
 axum-client-ip = "0.6.1"
 tower-http = { version = "0.6", features = ["trace"] }
 tokio = { version = "1.41", features = ["full"] }
