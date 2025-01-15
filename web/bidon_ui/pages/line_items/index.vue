@@ -1,10 +1,11 @@
 <template>
   <CreateResourceButton label="New Line Item" :resources-path="resourcesPath" />
-  <ResourcesTable :columns="columns" :resources-path="resourcesPath" />
+  <LazyResourcesTable :columns="columns" :resources-path="resourcesPath" />
 </template>
 
 <script setup>
 import { ResourceTableFields } from "@/constants";
+import LazyResourcesTable from "~/components/resources/LazyResourcesTable.vue";
 
 const columns = [
   ResourceTableFields.PublicUid,
