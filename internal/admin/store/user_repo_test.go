@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/bidon-io/bidon-backend/internal/admin/resource"
+
 	"github.com/bidon-io/bidon-backend/internal/db"
 
 	"github.com/bidon-io/bidon-backend/internal/admin"
@@ -30,14 +32,19 @@ func TestUserRepo_List(t *testing.T) {
 		},
 	}
 
-	want := make([]admin.User, len(users))
+	items := make([]admin.User, len(users))
 	for i, attrs := range users {
 		user, err := repo.Create(context.Background(), &attrs)
 		if err != nil {
-			t.Fatalf("repo.Create(ctx, %+v) = %v, %q; want %T, %v", &attrs, nil, err, user, nil)
+			t.Fatalf("repo.Create(ctx, %+v) = %v, %q; items %T, %v", &attrs, nil, err, user, nil)
 		}
 
-		want[i] = *user
+		items[i] = *user
+	}
+
+	want := &resource.Collection[admin.User]{
+		Items: items,
+		Meta:  resource.CollectionMeta{TotalCount: int64(len(items))},
 	}
 
 	got, err := repo.List(context.Background(), nil)

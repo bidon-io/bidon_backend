@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/bidon-io/bidon-backend/internal/admin/resource"
+
 	"github.com/bidon-io/bidon-backend/internal/admin"
 	adminstore "github.com/bidon-io/bidon-backend/internal/admin/store"
 	"github.com/bidon-io/bidon-backend/internal/db"
@@ -37,20 +39,25 @@ func TestAppRepo_List(t *testing.T) {
 		},
 	}
 
-	want := make([]admin.App, len(apps))
+	wantItems := make([]admin.App, len(apps))
 	for i, attrs := range apps {
 		app, err := repo.Create(context.Background(), &attrs)
 		if err != nil {
-			t.Fatalf("repo.Create(ctx, %+v) = %v, %q; want %T, %v", &attrs, nil, err, app, nil)
+			t.Fatalf("repo.Create(ctx, %+v) = %v, %q; wantItems %T, %v", &attrs, nil, err, app, nil)
 		}
 
-		want[i] = *app
-		want[i].User = *adminstore.UserResource(&users[i])
+		wantItems[i] = *app
+		wantItems[i].User = *adminstore.UserResource(&users[i])
+	}
+
+	want := &resource.Collection[admin.App]{
+		Items: wantItems,
+		Meta:  resource.CollectionMeta{TotalCount: int64(len(wantItems))},
 	}
 
 	got, err := repo.List(context.Background(), nil)
 	if err != nil {
-		t.Fatalf("repo.List(ctx) = %v, %q; want %+v, %v", got, err, want, nil)
+		t.Fatalf("repo.List(ctx) = %v, %q; wantItems %+v, %v", got, err, wantItems, nil)
 	}
 
 	if diff := cmp.Diff(want, got); diff != "" {
@@ -92,22 +99,31 @@ func TestAppRepo_ListOwnedByUser(t *testing.T) {
 	tests := []struct {
 		name   string
 		userID int64
-		want   []admin.App
+		want   *resource.Collection[admin.App]
 	}{
 		{
 			"first user",
 			users[0].ID,
-			firstUserApps,
+			&resource.Collection[admin.App]{
+				Items: firstUserApps,
+				Meta:  resource.CollectionMeta{TotalCount: int64(len(firstUserApps))},
+			},
 		},
 		{
 			"second user",
 			users[1].ID,
-			secondUserApps,
+			&resource.Collection[admin.App]{
+				Items: secondUserApps,
+				Meta:  resource.CollectionMeta{TotalCount: int64(len(secondUserApps))},
+			},
 		},
 		{
 			"non-existent user",
 			999,
-			[]admin.App{},
+			&resource.Collection[admin.App]{
+				Items: []admin.App{},
+				Meta:  resource.CollectionMeta{TotalCount: 0},
+			},
 		},
 	}
 	for _, tt := range tests {

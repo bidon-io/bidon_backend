@@ -6,6 +6,8 @@ package admin
 import (
 	"context"
 	"sync"
+
+	"github.com/bidon-io/bidon-backend/internal/admin/resource"
 )
 
 // Ensure, that ResourceManipulatorMock does implement ResourceManipulator.
@@ -673,7 +675,7 @@ var _ resourceScope[any] = &resourceScopeMock[any]{}
 //			findFunc: func(contextMoqParam context.Context, n int64) (*Resource, error) {
 //				panic("mock out the find method")
 //			},
-//			listFunc: func(contextMoqParam context.Context, stringToStrings map[string][]string) ([]Resource, error) {
+//			listFunc: func(contextMoqParam context.Context, stringToStrings map[string][]string) (*resource.Collection[Resource], error) {
 //				panic("mock out the list method")
 //			},
 //		}
@@ -687,7 +689,7 @@ type resourceScopeMock[Resource any] struct {
 	findFunc func(contextMoqParam context.Context, n int64) (*Resource, error)
 
 	// listFunc mocks the list method.
-	listFunc func(contextMoqParam context.Context, stringToStrings map[string][]string) ([]Resource, error)
+	listFunc func(contextMoqParam context.Context, stringToStrings map[string][]string) (*resource.Collection[Resource], error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -747,7 +749,7 @@ func (mock *resourceScopeMock[Resource]) findCalls() []struct {
 }
 
 // list calls listFunc.
-func (mock *resourceScopeMock[Resource]) list(contextMoqParam context.Context, stringToStrings map[string][]string) ([]Resource, error) {
+func (mock *resourceScopeMock[Resource]) list(contextMoqParam context.Context, stringToStrings map[string][]string) (*resource.Collection[Resource], error) {
 	if mock.listFunc == nil {
 		panic("resourceScopeMock.listFunc: method is nil but resourceScope.list was just called")
 	}

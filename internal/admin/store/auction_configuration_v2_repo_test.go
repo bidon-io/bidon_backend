@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/bidon-io/bidon-backend/internal/admin/resource"
+
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/admin"
@@ -62,18 +64,23 @@ func TestAuctionConfigurationV2Repo_List(t *testing.T) {
 		},
 	}
 
-	want := make([]admin.AuctionConfigurationV2, len(configs))
+	items := make([]admin.AuctionConfigurationV2, len(configs))
 	for i, attrs := range configs {
 		config, err := repo.Create(context.Background(), &attrs)
 		if err != nil {
-			t.Fatalf("repo.Create(ctx, %+v) = %v, %q; want %T, %v", &attrs, nil, err, config, nil)
+			t.Fatalf("repo.Create(ctx, %+v) = %v, %q; items %T, %v", &attrs, nil, err, config, nil)
 		}
 
-		want[i] = *config
-		want[i].App = adminstore.AppAttrsWithId(&apps[i])
+		items[i] = *config
+		items[i].App = adminstore.AppAttrsWithId(&apps[i])
 		if segments[i].ID != 0 {
-			want[i].Segment = adminstore.SegmentAttrsWithId(&segments[i])
+			items[i].Segment = adminstore.SegmentAttrsWithId(&segments[i])
 		}
+	}
+
+	want := &resource.Collection[admin.AuctionConfigurationV2]{
+		Items: items,
+		Meta:  resource.CollectionMeta{TotalCount: int64(len(items))},
 	}
 
 	got, err := repo.List(context.Background(), nil)

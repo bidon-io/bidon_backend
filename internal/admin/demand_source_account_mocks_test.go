@@ -6,6 +6,8 @@ package admin
 import (
 	"context"
 	"sync"
+
+	"github.com/bidon-io/bidon-backend/internal/admin/resource"
 )
 
 // Ensure, that DemandSourceAccountRepoMock does implement DemandSourceAccountRepo.
@@ -33,13 +35,13 @@ var _ DemandSourceAccountRepo = &DemandSourceAccountRepoMock{}
 //			FindOwnedByUserOrSharedFunc: func(ctx context.Context, userID int64, id int64) (*DemandSourceAccount, error) {
 //				panic("mock out the FindOwnedByUserOrShared method")
 //			},
-//			ListFunc: func(contextMoqParam context.Context, stringToStrings map[string][]string) ([]DemandSourceAccount, error) {
+//			ListFunc: func(contextMoqParam context.Context, stringToStrings map[string][]string) (*resource.Collection[DemandSourceAccount], error) {
 //				panic("mock out the List method")
 //			},
-//			ListOwnedByUserFunc: func(ctx context.Context, userID int64, qParams map[string][]string) ([]DemandSourceAccount, error) {
+//			ListOwnedByUserFunc: func(ctx context.Context, userID int64, qParams map[string][]string) (*resource.Collection[DemandSourceAccount], error) {
 //				panic("mock out the ListOwnedByUser method")
 //			},
-//			ListOwnedByUserOrSharedFunc: func(ctx context.Context, userID int64) ([]DemandSourceAccount, error) {
+//			ListOwnedByUserOrSharedFunc: func(ctx context.Context, userID int64) (*resource.Collection[DemandSourceAccount], error) {
 //				panic("mock out the ListOwnedByUserOrShared method")
 //			},
 //			UpdateFunc: func(ctx context.Context, id int64, attrs *DemandSourceAccountAttrs) (*DemandSourceAccount, error) {
@@ -68,13 +70,13 @@ type DemandSourceAccountRepoMock struct {
 	FindOwnedByUserOrSharedFunc func(ctx context.Context, userID int64, id int64) (*DemandSourceAccount, error)
 
 	// ListFunc mocks the List method.
-	ListFunc func(contextMoqParam context.Context, stringToStrings map[string][]string) ([]DemandSourceAccount, error)
+	ListFunc func(contextMoqParam context.Context, stringToStrings map[string][]string) (*resource.Collection[DemandSourceAccount], error)
 
 	// ListOwnedByUserFunc mocks the ListOwnedByUser method.
-	ListOwnedByUserFunc func(ctx context.Context, userID int64, qParams map[string][]string) ([]DemandSourceAccount, error)
+	ListOwnedByUserFunc func(ctx context.Context, userID int64, qParams map[string][]string) (*resource.Collection[DemandSourceAccount], error)
 
 	// ListOwnedByUserOrSharedFunc mocks the ListOwnedByUserOrShared method.
-	ListOwnedByUserOrSharedFunc func(ctx context.Context, userID int64) ([]DemandSourceAccount, error)
+	ListOwnedByUserOrSharedFunc func(ctx context.Context, userID int64) (*resource.Collection[DemandSourceAccount], error)
 
 	// UpdateFunc mocks the Update method.
 	UpdateFunc func(ctx context.Context, id int64, attrs *DemandSourceAccountAttrs) (*DemandSourceAccount, error)
@@ -353,7 +355,7 @@ func (mock *DemandSourceAccountRepoMock) FindOwnedByUserOrSharedCalls() []struct
 }
 
 // List calls ListFunc.
-func (mock *DemandSourceAccountRepoMock) List(contextMoqParam context.Context, stringToStrings map[string][]string) ([]DemandSourceAccount, error) {
+func (mock *DemandSourceAccountRepoMock) List(contextMoqParam context.Context, stringToStrings map[string][]string) (*resource.Collection[DemandSourceAccount], error) {
 	if mock.ListFunc == nil {
 		panic("DemandSourceAccountRepoMock.ListFunc: method is nil but DemandSourceAccountRepo.List was just called")
 	}
@@ -389,7 +391,7 @@ func (mock *DemandSourceAccountRepoMock) ListCalls() []struct {
 }
 
 // ListOwnedByUser calls ListOwnedByUserFunc.
-func (mock *DemandSourceAccountRepoMock) ListOwnedByUser(ctx context.Context, userID int64, qParams map[string][]string) ([]DemandSourceAccount, error) {
+func (mock *DemandSourceAccountRepoMock) ListOwnedByUser(ctx context.Context, userID int64, qParams map[string][]string) (*resource.Collection[DemandSourceAccount], error) {
 	if mock.ListOwnedByUserFunc == nil {
 		panic("DemandSourceAccountRepoMock.ListOwnedByUserFunc: method is nil but DemandSourceAccountRepo.ListOwnedByUser was just called")
 	}
@@ -429,7 +431,7 @@ func (mock *DemandSourceAccountRepoMock) ListOwnedByUserCalls() []struct {
 }
 
 // ListOwnedByUserOrShared calls ListOwnedByUserOrSharedFunc.
-func (mock *DemandSourceAccountRepoMock) ListOwnedByUserOrShared(ctx context.Context, userID int64) ([]DemandSourceAccount, error) {
+func (mock *DemandSourceAccountRepoMock) ListOwnedByUserOrShared(ctx context.Context, userID int64) (*resource.Collection[DemandSourceAccount], error) {
 	if mock.ListOwnedByUserOrSharedFunc == nil {
 		panic("DemandSourceAccountRepoMock.ListOwnedByUserOrSharedFunc: method is nil but DemandSourceAccountRepo.ListOwnedByUserOrShared was just called")
 	}

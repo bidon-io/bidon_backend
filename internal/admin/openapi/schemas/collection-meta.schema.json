@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "line-item-list-response.schema.json",
+  "title": "CollectionMeta",
+  "type": "object",
+  "properties": {
+    "total_count": {
+      "type": "integer",
+      "format": "int64",
+      "description": "Total number of items in the collection"
+    }
+  }
+}

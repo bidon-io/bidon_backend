@@ -3,6 +3,8 @@ package adminstore
 import (
 	"context"
 
+	"github.com/bidon-io/bidon-backend/internal/admin/resource"
+
 	"github.com/bidon-io/bidon-backend/internal/db"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -22,11 +24,11 @@ type resourceMapper[Resource, ResourceAttrs, DBModel any] interface {
 	resource(*DBModel) Resource
 }
 
-func (r *resourceRepo[Resource, ResourceAttrs, DBModel]) List(ctx context.Context, _ map[string][]string) ([]Resource, error) {
-	return r.list(ctx, nil)
+func (r *resourceRepo[Resource, ResourceAttrs, DBModel]) List(ctx context.Context, _ map[string][]string) (*resource.Collection[Resource], error) {
+	return r.list(ctx, nil, nil)
 }
 
-func (r *resourceRepo[Resource, ResourceAttrs, DBModel]) list(ctx context.Context, addFilters func(*gorm.DB) *gorm.DB) ([]Resource, error) {
+func (r *resourceRepo[Resource, ResourceAttrs, DBModel]) list(ctx context.Context, addFilters func(*gorm.DB) *gorm.DB, pgn *Pagination[DBModel]) (*resource.Collection[Resource], error) {
 	var dbModels []DBModel
 	db := r.db.WithContext(ctx)
 	for _, association := range r.associations {
@@ -37,8 +39,15 @@ func (r *resourceRepo[Resource, ResourceAttrs, DBModel]) list(ctx context.Contex
 		db = addFilters(db)
 	}
 
-	if err := db.Find(&dbModels).Error; err != nil {
-		return nil, err
+	if pgn != nil {
+		if err := pgn.Paginate(&dbModels, db); err != nil {
+			return nil, err
+		}
+		dbModels = pgn.Rows
+	} else {
+		if err := db.Find(&dbModels).Error; err != nil {
+			return nil, err
+		}
 	}
 
 	resources := make([]Resource, len(dbModels))
@@ -46,7 +55,19 @@ func (r *resourceRepo[Resource, ResourceAttrs, DBModel]) list(ctx context.Contex
 		resources[i] = r.mapper.resource(&dbModels[i])
 	}
 
-	return resources, nil
+	totalCount := int64(len(dbModels))
+	if pgn != nil {
+		totalCount = pgn.TotalCount
+	}
+
+	collection := &resource.Collection[Resource]{
+		Items: resources,
+		Meta: resource.CollectionMeta{
+			TotalCount: totalCount,
+		},
+	}
+
+	return collection, nil
 }
 
 func (r *resourceRepo[Resource, ResourceAttrs, DBModel]) Find(ctx context.Context, id int64) (*Resource, error) {

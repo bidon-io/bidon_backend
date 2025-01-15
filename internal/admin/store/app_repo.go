@@ -7,6 +7,8 @@ import (
 	"encoding/hex"
 	"strconv"
 
+	"github.com/bidon-io/bidon-backend/internal/admin/resource"
+
 	"github.com/bidon-io/bidon-backend/internal/admin"
 	"github.com/bidon-io/bidon-backend/internal/db"
 	"gorm.io/gorm"
@@ -26,10 +28,10 @@ func NewAppRepo(d *db.DB) *AppRepo {
 	}
 }
 
-func (r *AppRepo) ListOwnedByUser(ctx context.Context, userID int64, _ map[string][]string) ([]admin.App, error) {
+func (r *AppRepo) ListOwnedByUser(ctx context.Context, userID int64, _ map[string][]string) (*resource.Collection[admin.App], error) {
 	return r.list(ctx, func(db *gorm.DB) *gorm.DB {
 		return db.Where("user_id = ?", userID)
-	})
+	}, nil)
 }
 
 func (r *AppRepo) FindOwnedByUser(ctx context.Context, userID int64, id int64) (*admin.App, error) {

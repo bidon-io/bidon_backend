@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"strconv"
 
+	"github.com/bidon-io/bidon-backend/internal/admin/resource"
+
 	"github.com/bidon-io/bidon-backend/internal/admin"
 	"github.com/bidon-io/bidon-backend/internal/db"
 	"gorm.io/gorm"
@@ -25,10 +27,10 @@ func NewDemandSourceAccountRepo(d *db.DB) *DemandSourceAccountRepo {
 	}
 }
 
-func (r DemandSourceAccountRepo) ListOwnedByUser(ctx context.Context, userID int64, _ map[string][]string) ([]admin.DemandSourceAccount, error) {
+func (r DemandSourceAccountRepo) ListOwnedByUser(ctx context.Context, userID int64, _ map[string][]string) (*resource.Collection[admin.DemandSourceAccount], error) {
 	return r.list(ctx, func(db *gorm.DB) *gorm.DB {
 		return db.Where("user_id = ?", userID)
-	})
+	}, nil)
 }
 
 func (r DemandSourceAccountRepo) FindOwnedByUser(ctx context.Context, userID int64, id int64) (*admin.DemandSourceAccount, error) {
@@ -37,10 +39,10 @@ func (r DemandSourceAccountRepo) FindOwnedByUser(ctx context.Context, userID int
 	})
 }
 
-func (r DemandSourceAccountRepo) ListOwnedByUserOrShared(ctx context.Context, userID int64) ([]admin.DemandSourceAccount, error) {
+func (r DemandSourceAccountRepo) ListOwnedByUserOrShared(ctx context.Context, userID int64) (*resource.Collection[admin.DemandSourceAccount], error) {
 	return r.list(ctx, func(db *gorm.DB) *gorm.DB {
 		return db.Where("user_id IN ?", []int64{userID, 0, 1})
-	})
+	}, nil)
 }
 
 func (r DemandSourceAccountRepo) FindOwnedByUserOrShared(ctx context.Context, userID int64, id int64) (*admin.DemandSourceAccount, error) {

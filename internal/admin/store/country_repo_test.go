@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/bidon-io/bidon-backend/internal/admin/resource"
+
 	"github.com/bidon-io/bidon-backend/internal/admin"
 	adminstore "github.com/bidon-io/bidon-backend/internal/admin/store"
 	"github.com/google/go-cmp/cmp"
@@ -28,14 +30,19 @@ func TestCountryRepo_List(t *testing.T) {
 		},
 	}
 
-	want := make([]admin.Country, len(countries))
+	wantItems := make([]admin.Country, len(countries))
 	for i, attrs := range countries {
 		country, err := repo.Create(context.Background(), &attrs)
 		if err != nil {
-			t.Fatalf("repo.Create(ctx, %+v) = %v, %q; want %T, %v", &attrs, nil, err, country, nil)
+			t.Fatalf("repo.Create(ctx, %+v) = %v, %q; wantItems %T, %v", &attrs, nil, err, country, nil)
 		}
 
-		want[i] = *country
+		wantItems[i] = *country
+	}
+
+	want := &resource.Collection[admin.Country]{
+		Items: wantItems,
+		Meta:  resource.CollectionMeta{TotalCount: int64(len(wantItems))},
 	}
 
 	got, err := repo.List(context.Background(), nil)

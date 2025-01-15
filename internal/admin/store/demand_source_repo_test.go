@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/bidon-io/bidon-backend/internal/admin/resource"
+
 	"github.com/bidon-io/bidon-backend/internal/admin"
 	adminstore "github.com/bidon-io/bidon-backend/internal/admin/store"
 	"github.com/google/go-cmp/cmp"
@@ -26,14 +28,19 @@ func TestDemandSourceRepo_List(t *testing.T) {
 		},
 	}
 
-	want := make([]admin.DemandSource, len(sources))
+	items := make([]admin.DemandSource, len(sources))
 	for i, attrs := range sources {
 		source, err := repo.Create(context.Background(), &attrs)
 		if err != nil {
-			t.Fatalf("repo.Create(ctx, %+v) = %v, %q; want %T, %v", &attrs, nil, err, source, nil)
+			t.Fatalf("repo.Create(ctx, %+v) = %v, %q; items %T, %v", &attrs, nil, err, source, nil)
 		}
 
-		want[i] = *source
+		items[i] = *source
+	}
+
+	want := &resource.Collection[admin.DemandSource]{
+		Items: items,
+		Meta:  resource.CollectionMeta{TotalCount: int64(len(items))},
 	}
 
 	got, err := repo.List(context.Background(), nil)

@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/bidon-io/bidon-backend/internal/admin/resource"
+
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/admin"
 	adminstore "github.com/bidon-io/bidon-backend/internal/admin/store"
@@ -52,16 +54,21 @@ func TestDemandSourceAccountRepo_List(t *testing.T) {
 		},
 	}
 
-	want := make([]admin.DemandSourceAccount, len(accounts))
+	items := make([]admin.DemandSourceAccount, len(accounts))
 	for i, attrs := range accounts {
 		account, err := repo.Create(context.Background(), &attrs)
 		if err != nil {
-			t.Fatalf("repo.Create(ctx, %+v) = %v, %q; want %T, %v", &attrs, nil, err, account, nil)
+			t.Fatalf("repo.Create(ctx, %+v) = %v, %q; items %T, %v", &attrs, nil, err, account, nil)
 		}
 
-		want[i] = *account
-		want[i].User = *adminstore.UserResource(&user)
-		want[i].DemandSource = *adminstore.DemandSourceResource(&demandSources[i])
+		items[i] = *account
+		items[i].User = *adminstore.UserResource(&user)
+		items[i].DemandSource = *adminstore.DemandSourceResource(&demandSources[i])
+	}
+
+	want := &resource.Collection[admin.DemandSourceAccount]{
+		Items: items,
+		Meta:  resource.CollectionMeta{TotalCount: int64(len(items))},
 	}
 
 	got, err := repo.List(context.Background(), nil)
@@ -120,22 +127,31 @@ func TestDemandSourceAccountRepo_ListOwnedByUserOrSharedRepo(t *testing.T) {
 	tests := []struct {
 		name   string
 		userID int64
-		want   []admin.DemandSourceAccount
+		want   *resource.Collection[admin.DemandSourceAccount]
 	}{
 		{
 			"first user",
 			users[0].ID,
-			firstUserAccounts,
+			&resource.Collection[admin.DemandSourceAccount]{
+				Items: firstUserAccounts,
+				Meta:  resource.CollectionMeta{TotalCount: int64(len(firstUserAccounts))},
+			},
 		},
 		{
 			"second user",
 			users[1].ID,
-			secondUserAccounts,
+			&resource.Collection[admin.DemandSourceAccount]{
+				Items: secondUserAccounts,
+				Meta:  resource.CollectionMeta{TotalCount: int64(len(secondUserAccounts))},
+			},
 		},
 		{
 			"other user",
 			999,
-			[]admin.DemandSourceAccount{},
+			&resource.Collection[admin.DemandSourceAccount]{
+				Items: []admin.DemandSourceAccount{},
+				Meta:  resource.CollectionMeta{TotalCount: 0},
+			},
 		},
 	}
 	for _, tt := range tests {

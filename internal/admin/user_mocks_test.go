@@ -6,6 +6,8 @@ package admin
 import (
 	"context"
 	"sync"
+
+	"github.com/bidon-io/bidon-backend/internal/admin/resource"
 )
 
 // Ensure, that UserRepoMock does implement UserRepo.
@@ -27,7 +29,7 @@ var _ UserRepo = &UserRepoMock{}
 //			FindFunc: func(ctx context.Context, id int64) (*User, error) {
 //				panic("mock out the Find method")
 //			},
-//			ListFunc: func(contextMoqParam context.Context, stringToStrings map[string][]string) ([]User, error) {
+//			ListFunc: func(contextMoqParam context.Context, stringToStrings map[string][]string) (*resource.Collection[User], error) {
 //				panic("mock out the List method")
 //			},
 //			UpdateFunc: func(ctx context.Context, id int64, attrs *UserAttrs) (*User, error) {
@@ -50,7 +52,7 @@ type UserRepoMock struct {
 	FindFunc func(ctx context.Context, id int64) (*User, error)
 
 	// ListFunc mocks the List method.
-	ListFunc func(contextMoqParam context.Context, stringToStrings map[string][]string) ([]User, error)
+	ListFunc func(contextMoqParam context.Context, stringToStrings map[string][]string) (*resource.Collection[User], error)
 
 	// UpdateFunc mocks the Update method.
 	UpdateFunc func(ctx context.Context, id int64, attrs *UserAttrs) (*User, error)
@@ -211,7 +213,7 @@ func (mock *UserRepoMock) FindCalls() []struct {
 }
 
 // List calls ListFunc.
-func (mock *UserRepoMock) List(contextMoqParam context.Context, stringToStrings map[string][]string) ([]User, error) {
+func (mock *UserRepoMock) List(contextMoqParam context.Context, stringToStrings map[string][]string) (*resource.Collection[User], error) {
 	if mock.ListFunc == nil {
 		panic("UserRepoMock.ListFunc: method is nil but UserRepo.List was just called")
 	}

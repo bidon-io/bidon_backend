@@ -6,6 +6,8 @@ package admin
 import (
 	"context"
 	"sync"
+
+	"github.com/bidon-io/bidon-backend/internal/admin/resource"
 )
 
 // Ensure, that AppRepoMock does implement AppRepo.
@@ -30,10 +32,10 @@ var _ AppRepo = &AppRepoMock{}
 //			FindOwnedByUserFunc: func(ctx context.Context, userID int64, id int64) (*App, error) {
 //				panic("mock out the FindOwnedByUser method")
 //			},
-//			ListFunc: func(contextMoqParam context.Context, stringToStrings map[string][]string) ([]App, error) {
+//			ListFunc: func(contextMoqParam context.Context, stringToStrings map[string][]string) (*resource.Collection[App], error) {
 //				panic("mock out the List method")
 //			},
-//			ListOwnedByUserFunc: func(ctx context.Context, userID int64, qParams map[string][]string) ([]App, error) {
+//			ListOwnedByUserFunc: func(ctx context.Context, userID int64, qParams map[string][]string) (*resource.Collection[App], error) {
 //				panic("mock out the ListOwnedByUser method")
 //			},
 //			UpdateFunc: func(ctx context.Context, id int64, attrs *AppAttrs) (*App, error) {
@@ -59,10 +61,10 @@ type AppRepoMock struct {
 	FindOwnedByUserFunc func(ctx context.Context, userID int64, id int64) (*App, error)
 
 	// ListFunc mocks the List method.
-	ListFunc func(contextMoqParam context.Context, stringToStrings map[string][]string) ([]App, error)
+	ListFunc func(contextMoqParam context.Context, stringToStrings map[string][]string) (*resource.Collection[App], error)
 
 	// ListOwnedByUserFunc mocks the ListOwnedByUser method.
-	ListOwnedByUserFunc func(ctx context.Context, userID int64, qParams map[string][]string) ([]App, error)
+	ListOwnedByUserFunc func(ctx context.Context, userID int64, qParams map[string][]string) (*resource.Collection[App], error)
 
 	// UpdateFunc mocks the Update method.
 	UpdateFunc func(ctx context.Context, id int64, attrs *AppAttrs) (*App, error)
@@ -283,7 +285,7 @@ func (mock *AppRepoMock) FindOwnedByUserCalls() []struct {
 }
 
 // List calls ListFunc.
-func (mock *AppRepoMock) List(contextMoqParam context.Context, stringToStrings map[string][]string) ([]App, error) {
+func (mock *AppRepoMock) List(contextMoqParam context.Context, stringToStrings map[string][]string) (*resource.Collection[App], error) {
 	if mock.ListFunc == nil {
 		panic("AppRepoMock.ListFunc: method is nil but AppRepo.List was just called")
 	}
@@ -319,7 +321,7 @@ func (mock *AppRepoMock) ListCalls() []struct {
 }
 
 // ListOwnedByUser calls ListOwnedByUserFunc.
-func (mock *AppRepoMock) ListOwnedByUser(ctx context.Context, userID int64, qParams map[string][]string) ([]App, error) {
+func (mock *AppRepoMock) ListOwnedByUser(ctx context.Context, userID int64, qParams map[string][]string) (*resource.Collection[App], error) {
 	if mock.ListOwnedByUserFunc == nil {
 		panic("AppRepoMock.ListOwnedByUserFunc: method is nil but AppRepo.ListOwnedByUser was just called")
 	}

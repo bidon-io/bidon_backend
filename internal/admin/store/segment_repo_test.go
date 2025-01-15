@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/bidon-io/bidon-backend/internal/admin/resource"
+
 	"github.com/bidon-io/bidon-backend/internal/admin"
 	adminstore "github.com/bidon-io/bidon-backend/internal/admin/store"
 	"github.com/bidon-io/bidon-backend/internal/db"
@@ -51,15 +53,20 @@ func TestSegmentRepo_List(t *testing.T) {
 		},
 	}
 
-	want := make([]admin.Segment, len(segments))
+	items := make([]admin.Segment, len(segments))
 	for i, attrs := range segments {
 		segment, err := repo.Create(context.Background(), &attrs)
 		if err != nil {
-			t.Fatalf("repo.Create(ctx, %+v) = %v, %q; want %T, %v", &attrs, nil, err, segment, nil)
+			t.Fatalf("repo.Create(ctx, %+v) = %v, %q; items %T, %v", &attrs, nil, err, segment, nil)
 		}
 
-		want[i] = *segment
-		want[i].App = adminstore.AppAttrsWithId(&apps[i])
+		items[i] = *segment
+		items[i].App = adminstore.AppAttrsWithId(&apps[i])
+	}
+
+	want := &resource.Collection[admin.Segment]{
+		Items: items,
+		Meta:  resource.CollectionMeta{TotalCount: int64(len(items))},
 	}
 
 	got, err := repo.List(context.Background(), nil)
