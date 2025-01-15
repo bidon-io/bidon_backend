@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"strconv"
 
+	"github.com/bidon-io/bidon-backend/internal/admin/resource"
+
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/admin"
 	"github.com/bidon-io/bidon-backend/internal/db"
@@ -26,17 +28,17 @@ func NewLineItemRepo(d *db.DB) *LineItemRepo {
 	}
 }
 
-func (r *LineItemRepo) List(ctx context.Context, qParams map[string][]string) ([]admin.LineItem, error) {
+func (r *LineItemRepo) List(ctx context.Context, qParams map[string][]string) (*resource.Collection[admin.LineItem], error) {
 	filters := queryToLineItemFilters(qParams)
-
-	return r.list(ctx, filters.apply)
+	pgn := PaginationFromQueryParams[db.LineItem](qParams)
+	return r.list(ctx, filters.apply, pgn)
 }
 
-func (r *LineItemRepo) ListOwnedByUser(ctx context.Context, userID int64, qParams map[string][]string) ([]admin.LineItem, error) {
+func (r *LineItemRepo) ListOwnedByUser(ctx context.Context, userID int64, qParams map[string][]string) (*resource.Collection[admin.LineItem], error) {
 	filters := queryToLineItemFilters(qParams)
 	filters.UserID = userID
-
-	return r.list(ctx, filters.apply)
+	pgn := PaginationFromQueryParams[db.LineItem](qParams)
+	return r.list(ctx, filters.apply, pgn)
 }
 
 func (r *LineItemRepo) FindOwnedByUser(ctx context.Context, userID int64, id int64) (*admin.LineItem, error) {
@@ -131,6 +133,7 @@ type lineItemFilters struct {
 	AccountID   int64
 	AccountType string
 	IsBidding   *bool
+	HumanName   string
 }
 
 func (f *lineItemFilters) apply(db *gorm.DB) *gorm.DB {
@@ -155,6 +158,9 @@ func (f *lineItemFilters) apply(db *gorm.DB) *gorm.DB {
 		} else {
 			db = db.Where("bidding = ? OR bidding IS NULL", false)
 		}
+	}
+	if f.HumanName != "" {
+		db = db.Where("human_name ILIKE ?", "%"+f.HumanName+"%")
 	}
 	return db
 }
@@ -181,6 +187,9 @@ func queryToLineItemFilters(qParams map[string][]string) lineItemFilters {
 	if v, ok := qParams["is_bidding"]; ok {
 		b := v[0] == "true"
 		filters.IsBidding = &b
+	}
+	if v, ok := qParams["human_name"]; ok {
+		filters.HumanName = v[0]
 	}
 	return filters
 }

@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/bidon-io/bidon-backend/internal/admin/resource"
+
 	"github.com/bidon-io/bidon-backend/internal/admin"
 	"github.com/bidon-io/bidon-backend/internal/admin/auth"
 	v8n "github.com/go-ozzo/ozzo-validation/v4"
@@ -85,7 +87,7 @@ type resourceServiceHandler[Resource, ResourceData, ResourceAttrs any] struct {
 }
 
 type resourceService[Resource, ResourceData, ResourceAttrs any] interface {
-	List(ctx context.Context, authCtx admin.AuthContext, qParams map[string][]string) ([]Resource, error)
+	List(ctx context.Context, authCtx admin.AuthContext, qParams map[string][]string) (*resource.Collection[Resource], error)
 	Find(ctx context.Context, authCtx admin.AuthContext, id int64) (*Resource, error)
 	Create(ctx context.Context, authCtx admin.AuthContext, attrs *ResourceAttrs) (*ResourceData, error)
 	Update(ctx context.Context, authCtx admin.AuthContext, id int64, attrs *ResourceAttrs) (*ResourceData, error)
@@ -109,12 +111,26 @@ func (s *resourceServiceHandler[Resource, ResourceData, ResourceAttrs]) list(c e
 		return err
 	}
 
-	resources, err := s.service.List(c.Request().Context(), authCtx, c.QueryParams())
+	collection, err := s.service.List(c.Request().Context(), authCtx, c.QueryParams())
 	if err != nil {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, resources)
+	return c.JSON(http.StatusOK, collection.Items)
+}
+
+func (s *resourceServiceHandler[Resource, ResourceData, ResourceAttrs]) listCollection(c echo.Context) error {
+	authCtx, err := getAuthContext(c)
+	if err != nil {
+		return err
+	}
+
+	collection, err := s.service.List(c.Request().Context(), authCtx, c.QueryParams())
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, collection)
 }
 
 func (s *resourceServiceHandler[Resource, ResourceData, ResourceAttrs]) create(c echo.Context) error {

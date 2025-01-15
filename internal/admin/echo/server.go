@@ -5,14 +5,15 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
+	"strconv"
+	"strings"
+
 	"github.com/bidon-io/bidon-backend/internal/admin"
 	"github.com/bidon-io/bidon-backend/internal/admin/api"
 	"github.com/bidon-io/bidon-backend/internal/admin/auth"
 	"github.com/labstack/echo/v4"
 	session "github.com/spazzymoto/echo-scs-session"
-	"net/http"
-	"strconv"
-	"strings"
 )
 
 type Server struct {
@@ -301,6 +302,10 @@ func (s *Server) DeleteUser(c echo.Context, _ api.IdParam) error {
 
 func (s *Server) GetLineItems(c echo.Context, _ api.GetLineItemsParams) error {
 	return s.LineItemHandler.list(c)
+}
+
+func (s *Server) GetLineItemsV2(c echo.Context, _ api.GetLineItemsV2Params) error {
+	return s.LineItemHandler.listCollection(c)
 }
 
 func (s *Server) CreateLineItem(c echo.Context) error {

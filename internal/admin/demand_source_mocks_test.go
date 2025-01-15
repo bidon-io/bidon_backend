@@ -6,6 +6,8 @@ package admin
 import (
 	"context"
 	"sync"
+
+	"github.com/bidon-io/bidon-backend/internal/admin/resource"
 )
 
 // Ensure, that DemandSourceRepoMock does implement DemandSourceRepo.
@@ -27,7 +29,7 @@ var _ DemandSourceRepo = &DemandSourceRepoMock{}
 //			FindFunc: func(ctx context.Context, id int64) (*DemandSource, error) {
 //				panic("mock out the Find method")
 //			},
-//			ListFunc: func(contextMoqParam context.Context, stringToStrings map[string][]string) ([]DemandSource, error) {
+//			ListFunc: func(contextMoqParam context.Context, stringToStrings map[string][]string) (*resource.Collection[DemandSource], error) {
 //				panic("mock out the List method")
 //			},
 //			UpdateFunc: func(ctx context.Context, id int64, attrs *DemandSourceAttrs) (*DemandSource, error) {
@@ -50,7 +52,7 @@ type DemandSourceRepoMock struct {
 	FindFunc func(ctx context.Context, id int64) (*DemandSource, error)
 
 	// ListFunc mocks the List method.
-	ListFunc func(contextMoqParam context.Context, stringToStrings map[string][]string) ([]DemandSource, error)
+	ListFunc func(contextMoqParam context.Context, stringToStrings map[string][]string) (*resource.Collection[DemandSource], error)
 
 	// UpdateFunc mocks the Update method.
 	UpdateFunc func(ctx context.Context, id int64, attrs *DemandSourceAttrs) (*DemandSource, error)
@@ -211,7 +213,7 @@ func (mock *DemandSourceRepoMock) FindCalls() []struct {
 }
 
 // List calls ListFunc.
-func (mock *DemandSourceRepoMock) List(contextMoqParam context.Context, stringToStrings map[string][]string) ([]DemandSource, error) {
+func (mock *DemandSourceRepoMock) List(contextMoqParam context.Context, stringToStrings map[string][]string) (*resource.Collection[DemandSource], error) {
 	if mock.ListFunc == nil {
 		panic("DemandSourceRepoMock.ListFunc: method is nil but DemandSourceRepo.List was just called")
 	}

@@ -5,6 +5,8 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/bidon-io/bidon-backend/internal/admin/resource"
+
 	v8n "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/google/go-cmp/cmp"
 )
@@ -24,16 +26,19 @@ type TestResourceAttrs struct {
 }
 
 func TestResourceService_List(t *testing.T) {
-	data := []TestResourceData{
-		{ID: 1, TestResourceAttrs: TestResourceAttrs{Name: "test1"}},
-		{ID: 2, TestResourceAttrs: TestResourceAttrs{Name: "test2"}},
+	data := &resource.Collection[TestResourceData]{
+		Items: []TestResourceData{
+			{ID: 1, TestResourceAttrs: TestResourceAttrs{Name: "test1"}},
+			{ID: 2, TestResourceAttrs: TestResourceAttrs{Name: "test2"}},
+		},
+		Meta: resource.CollectionMeta{TotalCount: 2},
 	}
 
 	s := ResourceService[TestResource, TestResourceData, TestResourceAttrs]{
 		policy: &resourcePolicyMock[TestResourceData, TestResourceAttrs]{
 			getReadScopeFunc: func(authCtx AuthContext) resourceScope[TestResourceData] {
 				return &resourceScopeMock[TestResourceData]{
-					listFunc: func(ctx context.Context, qParams map[string][]string) ([]TestResourceData, error) {
+					listFunc: func(ctx context.Context, qParams map[string][]string) (*resource.Collection[TestResourceData], error) {
 						return data, nil
 					},
 				}
@@ -50,9 +55,13 @@ func TestResourceService_List(t *testing.T) {
 		},
 	}
 
-	want := make([]TestResource, len(data))
-	for i := range data {
-		want[i] = s.prepareResource(nil, &data[i])
+	wantItems := make([]TestResource, len(data.Items))
+	for i := range data.Items {
+		wantItems[i] = s.prepareResource(nil, &data.Items[i])
+	}
+	want := &resource.Collection[TestResource]{
+		Items: wantItems,
+		Meta:  data.Meta,
 	}
 
 	resources, _ := s.List(context.Background(), nil, nil)

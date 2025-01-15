@@ -2,8 +2,10 @@ package adminstore_test
 
 import (
 	"context"
-	"github.com/google/go-cmp/cmp/cmpopts"
 	"testing"
+
+	"github.com/bidon-io/bidon-backend/internal/admin/resource"
+	"github.com/google/go-cmp/cmp/cmpopts"
 
 	"github.com/bidon-io/bidon-backend/internal/admin"
 	adminstore "github.com/bidon-io/bidon-backend/internal/admin/store"
@@ -53,17 +55,22 @@ func TestAppDemandProfileRepo_List(t *testing.T) {
 		},
 	}
 
-	want := make([]admin.AppDemandProfile, len(profiles))
+	items := make([]admin.AppDemandProfile, len(profiles))
 	for i, attrs := range profiles {
 		profile, err := repo.Create(context.Background(), &attrs)
 		if err != nil {
-			t.Fatalf("repo.Create(ctx, %+v) = %v, %q; want %T, %v", &attrs, nil, err, profile, nil)
+			t.Fatalf("repo.Create(ctx, %+v) = %v, %q; items %T, %v", &attrs, nil, err, profile, nil)
 		}
 
-		want[i] = *profile
-		want[i].App = adminstore.AppAttrsWithId(&apps[i])
-		want[i].DemandSource = *adminstore.DemandSourceResource(&demandSources[i])
-		want[i].Account = adminstore.DemandSourceAccountAttrsWithId(&accounts[i])
+		items[i] = *profile
+		items[i].App = adminstore.AppAttrsWithId(&apps[i])
+		items[i].DemandSource = *adminstore.DemandSourceResource(&demandSources[i])
+		items[i].Account = adminstore.DemandSourceAccountAttrsWithId(&accounts[i])
+	}
+
+	want := &resource.Collection[admin.AppDemandProfile]{
+		Items: items,
+		Meta:  resource.CollectionMeta{TotalCount: int64(len(items))},
 	}
 
 	got, err := repo.List(context.Background(), nil)
@@ -123,22 +130,31 @@ func TestAppDemandProfileRepo_ListOwnedByUser(t *testing.T) {
 	tests := []struct {
 		name   string
 		userID int64
-		want   []admin.AppDemandProfile
+		want   *resource.Collection[admin.AppDemandProfile]
 	}{
 		{
 			"first user",
 			users[0].ID,
-			firstUserProfiles,
+			&resource.Collection[admin.AppDemandProfile]{
+				Items: firstUserProfiles,
+				Meta:  resource.CollectionMeta{TotalCount: int64(len(firstUserProfiles))},
+			},
 		},
 		{
 			"second user",
 			users[1].ID,
-			secondUserProfiles,
+			&resource.Collection[admin.AppDemandProfile]{
+				Items: secondUserProfiles,
+				Meta:  resource.CollectionMeta{TotalCount: int64(len(secondUserProfiles))},
+			},
 		},
 		{
 			"non-existent user",
 			999,
-			[]admin.AppDemandProfile{},
+			&resource.Collection[admin.AppDemandProfile]{
+				Items: []admin.AppDemandProfile{},
+				Meta:  resource.CollectionMeta{TotalCount: 0},
+			},
 		},
 	}
 	for _, tt := range tests {

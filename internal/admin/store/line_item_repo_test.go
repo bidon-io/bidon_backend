@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/bidon-io/bidon-backend/internal/admin/resource"
+
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/admin"
@@ -142,62 +144,86 @@ func TestLineItemRepo_List(t *testing.T) {
 	testcases := []struct {
 		name    string
 		qParams map[string][]string
-		want    []admin.LineItem
+		want    *resource.Collection[admin.LineItem]
 		wantErr bool
 	}{
 		{
 			name:    "no filters",
 			qParams: nil,
-			want:    allItems,
+			want: &resource.Collection[admin.LineItem]{
+				Items: allItems,
+				Meta:  resource.CollectionMeta{TotalCount: 4},
+			},
 		},
 		{
 			name: "filter by user_id",
 			qParams: map[string][]string{
 				"user_id": {fmt.Sprint(users[0].ID)},
 			},
-			want: allItems[:3],
+			want: &resource.Collection[admin.LineItem]{
+				Items: allItems[:3],
+				Meta:  resource.CollectionMeta{TotalCount: 3},
+			},
 		},
 		{
 			name: "filter by app_id",
 			qParams: map[string][]string{
 				"app_id": {fmt.Sprint(apps[0].ID)},
 			},
-			want: allItems[:3],
+			want: &resource.Collection[admin.LineItem]{
+				Items: allItems[:3],
+				Meta:  resource.CollectionMeta{TotalCount: 3},
+			},
 		},
 		{
 			name: "filter by ad_type",
 			qParams: map[string][]string{
 				"ad_type": {string(ad.RewardedType)},
 			},
-			want: allItems[2:],
+			want: &resource.Collection[admin.LineItem]{
+				Items: allItems[2:],
+				Meta:  resource.CollectionMeta{TotalCount: 2},
+			},
 		},
 		{
 			name: "filter by account_id",
 			qParams: map[string][]string{
 				"account_id": {fmt.Sprint(unityAdsAccount1.ID)},
 			},
-			want: allItems[2:3],
+			want: &resource.Collection[admin.LineItem]{
+				Items: allItems[2:3],
+				Meta:  resource.CollectionMeta{TotalCount: 1},
+			},
 		},
 		{
 			name: "filter by account_type",
 			qParams: map[string][]string{
 				"account_type": {unityAdsAccount1.Type},
 			},
-			want: allItems[2:],
+			want: &resource.Collection[admin.LineItem]{
+				Items: allItems[2:],
+				Meta:  resource.CollectionMeta{TotalCount: 2},
+			},
 		},
 		{
 			name: "filter by is_bidding true",
 			qParams: map[string][]string{
 				"is_bidding": {"true"},
 			},
-			want: allItems[3:],
+			want: &resource.Collection[admin.LineItem]{
+				Items: allItems[3:],
+				Meta:  resource.CollectionMeta{TotalCount: 1},
+			},
 		},
 		{
 			name: "filter by is_bidding false",
 			qParams: map[string][]string{
 				"is_bidding": {"false"},
 			},
-			want: allItems[:3],
+			want: &resource.Collection[admin.LineItem]{
+				Items: allItems[:3],
+				Meta:  resource.CollectionMeta{TotalCount: 3},
+			},
 		},
 		{
 			name: "filter by AppID and AccountID",
@@ -205,7 +231,21 @@ func TestLineItemRepo_List(t *testing.T) {
 				"app_id":     {fmt.Sprint(apps[0].ID)},
 				"account_id": {fmt.Sprint(applovinAccount.ID)},
 			},
-			want: allItems[:1],
+			want: &resource.Collection[admin.LineItem]{
+				Items: allItems[:1],
+				Meta:  resource.CollectionMeta{TotalCount: 1},
+			},
+		},
+		{
+			name: "with pagination",
+			qParams: map[string][]string{
+				"limit": {"2"},
+				"page":  {"2"},
+			},
+			want: &resource.Collection[admin.LineItem]{
+				Items: allItems[2:],
+				Meta:  resource.CollectionMeta{TotalCount: 4},
+			},
 		},
 	}
 

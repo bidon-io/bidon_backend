@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/bidon-io/bidon-backend/internal/admin/resource"
+
 	"github.com/bidon-io/bidon-backend/internal/admin"
 	"github.com/bidon-io/bidon-backend/internal/db"
 	"gorm.io/gorm"
@@ -26,11 +28,11 @@ func NewAuctionConfigurationRepo(d *db.DB) *AuctionConfigurationRepo {
 	}
 }
 
-func (r *AuctionConfigurationRepo) ListOwnedByUser(ctx context.Context, userID int64, _ map[string][]string) ([]admin.AuctionConfiguration, error) {
+func (r *AuctionConfigurationRepo) ListOwnedByUser(ctx context.Context, userID int64, _ map[string][]string) (*resource.Collection[admin.AuctionConfiguration], error) {
 	return r.list(ctx, func(db *gorm.DB) *gorm.DB {
 		s := db.Session(&gorm.Session{NewDB: true})
 		return db.InnerJoins("App", s.Table("App").Where(map[string]any{"user_id": userID}))
-	})
+	}, nil)
 }
 
 func (r *AuctionConfigurationRepo) FindOwnedByUser(ctx context.Context, userID int64, id int64) (*admin.AuctionConfiguration, error) {

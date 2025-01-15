@@ -3,6 +3,8 @@ package admin
 import (
 	"context"
 	"errors"
+
+	"github.com/bidon-io/bidon-backend/internal/admin/resource"
 )
 
 //go:generate go run -mod=mod github.com/matryer/moq@latest -out resource_scopes_mocks_test.go . AllResourceQuerier OwnedResourceQuerier OwnedOrSharedResourceQuerier
@@ -10,21 +12,21 @@ import (
 // AllResourceQuerier defines the interface for querying all resources from persistence layer.
 // Resource repositories implement this interface.
 type AllResourceQuerier[Resource any] interface {
-	List(context.Context, map[string][]string) ([]Resource, error)
+	List(context.Context, map[string][]string) (*resource.Collection[Resource], error)
 	Find(ctx context.Context, id int64) (*Resource, error)
 }
 
 // OwnedResourceQuerier defines the interface for querying resources owned by a user from persistence layer.
 // Resource repositories implement this interface.
 type OwnedResourceQuerier[Resource any] interface {
-	ListOwnedByUser(ctx context.Context, userID int64, qParams map[string][]string) ([]Resource, error)
+	ListOwnedByUser(ctx context.Context, userID int64, qParams map[string][]string) (*resource.Collection[Resource], error)
 	FindOwnedByUser(ctx context.Context, userID, id int64) (*Resource, error)
 }
 
 // OwnedOrSharedResourceQuerier defines the interface for querying resources owned by a user or shared with a user from persistence layer.
 // Resource repositories implement this interface.
 type OwnedOrSharedResourceQuerier[Resource any] interface {
-	ListOwnedByUserOrShared(ctx context.Context, userID int64) ([]Resource, error)
+	ListOwnedByUserOrShared(ctx context.Context, userID int64) (*resource.Collection[Resource], error)
 	FindOwnedByUserOrShared(ctx context.Context, userID, id int64) (*Resource, error)
 }
 
@@ -33,7 +35,7 @@ type publicResourceScope[Resource any] struct {
 	repo AllResourceQuerier[Resource]
 }
 
-func (s *publicResourceScope[Resource]) list(ctx context.Context, _ map[string][]string) ([]Resource, error) {
+func (s *publicResourceScope[Resource]) list(ctx context.Context, _ map[string][]string) (*resource.Collection[Resource], error) {
 	return s.repo.List(ctx, nil)
 }
 
@@ -48,7 +50,7 @@ type privateResourceScope[Resource any] struct {
 	authCtx AuthContext
 }
 
-func (s *privateResourceScope[Resource]) list(ctx context.Context, qParams map[string][]string) ([]Resource, error) {
+func (s *privateResourceScope[Resource]) list(ctx context.Context, qParams map[string][]string) (*resource.Collection[Resource], error) {
 	if s.authCtx.IsAdmin() {
 		return s.repo.List(ctx, qParams)
 	}
@@ -78,7 +80,7 @@ type ownedResourceScope[Resource any] struct {
 	authCtx AuthContext
 }
 
-func (s *ownedResourceScope[Resource]) list(ctx context.Context, qParams map[string][]string) ([]Resource, error) {
+func (s *ownedResourceScope[Resource]) list(ctx context.Context, qParams map[string][]string) (*resource.Collection[Resource], error) {
 	if s.authCtx.IsAdmin() {
 		return s.repo.List(ctx, qParams)
 	}
@@ -104,7 +106,7 @@ type ownedOrSharedResourceScope[Resource any] struct {
 	authCtx AuthContext
 }
 
-func (s *ownedOrSharedResourceScope[Resource]) list(ctx context.Context, qParams map[string][]string) ([]Resource, error) {
+func (s *ownedOrSharedResourceScope[Resource]) list(ctx context.Context, qParams map[string][]string) (*resource.Collection[Resource], error) {
 	if s.authCtx.IsAdmin() {
 		return s.repo.List(ctx, qParams)
 	}

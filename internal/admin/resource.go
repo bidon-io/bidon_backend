@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 
+	"github.com/bidon-io/bidon-backend/internal/admin/resource"
+
 	v8n "github.com/go-ozzo/ozzo-validation/v4"
 )
 
@@ -14,6 +16,15 @@ var ErrActionForbidden = errors.New("action forbidden")
 type ResourceMeta struct {
 	Key         string              `json:"key"`
 	Permissions ResourcePermissions `json:"permissions"`
+}
+
+type ResourceCollectionMeta struct {
+	Total int `json:"total"`
+}
+
+type ResourceCollection[Resource any] struct {
+	Items []Resource             `json:"items"`
+	Meta  ResourceCollectionMeta `json:"meta"`
 }
 
 // ResourceService provides CRUD operations for managing a resource. It handles validation, authorization, and persistence.
@@ -63,7 +74,7 @@ type resourcePolicy[Resource, ResourceAttrs any] interface {
 
 // resourceScope handles visibility of resource.
 type resourceScope[Resource any] interface {
-	list(context.Context, map[string][]string) ([]Resource, error)
+	list(context.Context, map[string][]string) (*resource.Collection[Resource], error)
 	find(context.Context, int64) (*Resource, error)
 }
 
@@ -74,18 +85,23 @@ func (s *ResourceService[Resource, ResourceData, ResourceAttrs]) Meta(_ context.
 	}
 }
 
-func (s *ResourceService[Resource, ResourceData, ResourceAttrs]) List(ctx context.Context, authCtx AuthContext, qParams map[string][]string) ([]Resource, error) {
+func (s *ResourceService[Resource, ResourceData, ResourceAttrs]) List(ctx context.Context, authCtx AuthContext, qParams map[string][]string) (*resource.Collection[Resource], error) {
 	data, err := s.policy.getReadScope(authCtx).list(ctx, qParams)
 	if err != nil {
 		return nil, err
 	}
 
-	resources := make([]Resource, len(data))
-	for i := range data {
-		resources[i] = s.prepareResource(authCtx, &data[i])
+	items := data.Items
+	resources := make([]Resource, len(items))
+	for i := range data.Items {
+		resources[i] = s.prepareResource(authCtx, &items[i])
+	}
+	collection := &resource.Collection[Resource]{
+		Items: resources,
+		Meta:  data.Meta,
 	}
 
-	return resources, nil
+	return collection, nil
 }
 
 func (s *ResourceService[Resource, ResourceData, ResourceAttrs]) Find(ctx context.Context, authCtx AuthContext, id int64) (*Resource, error) {
