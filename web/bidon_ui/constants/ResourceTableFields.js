@@ -1,4 +1,5 @@
 import { FilterMatchMode } from "primevue/api";
+import { AdTypeEnum } from "~/types";
 
 export const ResourceTableFields = {
   Id: { field: "id", header: "Id", sortable: true },
@@ -20,6 +21,13 @@ export const ResourceTableFields = {
       type: "select-filter",
       matchMode: FilterMatchMode.EQUALS,
       placeholder: "App",
+      loadOptions: async () => {
+        const apps = await $apiFetch("/apps");
+        return apps.map(({ id, packageName, platformId }) => ({
+          label: `${packageName} (${platformId})`,
+          value: id,
+        }));
+      },
       extractOptions: (records) => [
         ...new Map(
           records.map(({ app }) => [
@@ -62,6 +70,11 @@ export const ResourceTableFields = {
       type: "select",
       matchMode: FilterMatchMode.EQUALS,
       placeholder: "AdType",
+      loadOptions: async () =>
+        Object.values(AdTypeEnum).map((adType) => ({
+          label: adType,
+          value: adType,
+        })),
       extractOptions: (records) => [
         ...new Map(
           records.map(({ adType }) => [
@@ -118,6 +131,13 @@ export const ResourceTableFields = {
       type: "select-filter",
       matchMode: FilterMatchMode.EQUALS,
       placeholder: "Account",
+      loadOptions: async () => {
+        const accounts = await $apiFetch("/demand_source_accounts");
+        return accounts.map(({ id, type, label }) => ({
+          label: `(${type.split("::")[1]}) ${label ? label : `#${id}`}`,
+          value: id,
+        }));
+      },
       extractOptions: (records) => [
         ...new Map(
           records.map(({ account }) => [

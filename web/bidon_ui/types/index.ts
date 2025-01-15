@@ -1,4 +1,4 @@
-export { ResourceLink };
+export { ResourceLink, AdTypeEnum, AdType };
 
 declare global {
   type SomeType = [boolean, string, number];
@@ -26,3 +26,11 @@ declare global {
     delete?: boolean;
   }
 }
+
+enum AdTypeEnum {
+  Banner = "banner",
+  Interstitial = "interstitial",
+  Rewarded = "rewarded",
+}
+
+type AdType = AdTypeEnum.Banner | AdTypeEnum.Interstitial | AdTypeEnum.Rewarded;
