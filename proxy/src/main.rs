@@ -47,7 +47,8 @@ fn init_logger() {
         .with(
             EnvFilter::builder()
                 .with_default_directive(LevelFilter::ERROR.into())
-                .parse_lossy(config::settings().log_level()),
+                .parse_lossy(config::settings().log_level())
+                .add_directive("h2::codec=error".parse().unwrap()),
         )
         .with(fmt::layer())
         .init();
