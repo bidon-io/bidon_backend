@@ -15,6 +15,7 @@ type Service struct {
 	LineItemService               *LineItemService
 	SegmentService                *SegmentService
 	UserService                   *UserService
+	SettingsService               *SettingsService
 }
 
 // NewService creates a new Service.
@@ -30,6 +31,7 @@ func NewService(store Store) *Service {
 		LineItemService:               NewLineItemService(store),
 		SegmentService:                NewSegmentService(store),
 		UserService:                   NewUserService(store),
+		SettingsService:               NewSettingsService(store),
 	}
 }
 

@@ -30,6 +30,7 @@ type Server struct {
 	LineItemImportHandler      *lineItemImportHandler
 	SegmentHandler             *segmentServiceHandler
 	UserHandler                *userHandler
+	SettingsHandler            *settingsServiceHandler
 }
 
 var _ api.ServerInterface = (*Server)(nil)
@@ -48,6 +49,7 @@ func NewServer(service *admin.Service, authService *auth.Service) *Server {
 	usrHandler := &userHandler{
 		userServiceHandler: &userServiceHandler{service.UserService},
 	}
+	settingsHandler := &settingsServiceHandler{service.SettingsService}
 
 	return &Server{
 		Service:                    service,
@@ -63,6 +65,7 @@ func NewServer(service *admin.Service, authService *auth.Service) *Server {
 		LineItemImportHandler:      liImportHandler,
 		SegmentHandler:             segmentHandler,
 		UserHandler:                usrHandler,
+		SettingsHandler:            settingsHandler,
 	}
 }
 
@@ -322,6 +325,17 @@ func (s *Server) UpdateLineItem(c echo.Context, _ api.IdParam) error {
 
 func (s *Server) DeleteLineItem(c echo.Context, _ api.IdParam) error {
 	return s.LineItemHandler.delete(c)
+}
+
+// Settings handler
+
+func (s *Server) UpdatePassword(c echo.Context) error {
+	authCtx, err := getAuthContext(c)
+	if err != nil {
+		return err
+	}
+
+	return s.SettingsHandler.updatePassword(c, authCtx)
 }
 
 func (s *Server) GetResources(c echo.Context) error {

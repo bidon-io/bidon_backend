@@ -62,6 +62,8 @@ func NewUserService(store Store) *UserService {
 type UserRepo interface {
 	AllResourceQuerier[User]
 	ResourceManipulator[User, UserAttrs]
+
+	UpdatePassword(ctx context.Context, userID int64, currentPassword, newPassword string) error
 }
 
 type userPolicy struct {

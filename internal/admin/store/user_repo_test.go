@@ -155,3 +155,86 @@ func TestUserRepo_Delete(t *testing.T) {
 		t.Fatalf("repo.Find(ctx, %v) = %+v, %q; want %v, %q", user.ID, got, err, nil, "record not found")
 	}
 }
+
+func TestUserRepo_UpdatePassword(t *testing.T) {
+	tx := testDB.Begin()
+	defer tx.Rollback()
+
+	repo := adminstore.NewUserRepo(tx)
+
+	attrs := &admin.UserAttrs{
+		Email:    "user1@example.com",
+		IsAdmin:  ptr(true),
+		Password: "oldpassword",
+	}
+
+	user, err := repo.Create(context.Background(), attrs)
+	if err != nil {
+		t.Fatalf("repo.Create(ctx, %+v) = %v, %q; want %T, %v", attrs, nil, err, user, nil)
+	}
+
+	tests := []struct {
+		name            string
+		userID          int64
+		currentPassword string
+		newPassword     string
+		expectError     bool
+		expectErrorMsg  string
+	}{
+		{
+			name:            "successful password update",
+			userID:          user.ID,
+			currentPassword: "oldpassword",
+			newPassword:     "newpassword",
+			expectError:     false,
+		},
+		{
+			name:            "incorrect current password",
+			userID:          user.ID,
+			currentPassword: "wrongpassword",
+			newPassword:     "newpassword",
+			expectError:     true,
+			expectErrorMsg:  "current password is incorrect",
+		},
+		{
+			name:            "user not found",
+			userID:          99999,
+			currentPassword: "oldpassword",
+			newPassword:     "newpassword",
+			expectError:     true,
+			expectErrorMsg:  "user not found",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := repo.UpdatePassword(context.Background(), tt.userID, tt.currentPassword, tt.newPassword)
+			if tt.expectError {
+				if err == nil {
+					t.Fatalf("expected error but got nil")
+				}
+				if err.Error() != tt.expectErrorMsg {
+					t.Fatalf("expected error %q but got %q", tt.expectErrorMsg, err.Error())
+				}
+				return
+			}
+
+			if err != nil {
+				t.Fatalf("unexpected error: %q", err)
+			}
+
+			dbUser := &db.User{}
+			if err := tx.First(dbUser, tt.userID).Error; err != nil {
+				t.Fatalf("tx.First(dbUser, %v) = %q; want %v", tt.userID, err, nil)
+			}
+
+			result, err := db.ComparePassword(dbUser.PasswordHash, tt.newPassword)
+			if err != nil {
+				t.Fatalf("db.ComparePassword(dbUser.PasswordHash, newPassword) = %q; want %v", err, nil)
+			}
+			if !result {
+				t.Fatalf("db.ComparePassword(dbUser.PasswordHash, newPassword) = %v; want %v", result, true)
+			}
+		})
+	}
+}
