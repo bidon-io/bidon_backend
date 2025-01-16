@@ -1,5 +1,6 @@
 use anyhow::Result;
-use dotenvy::EnvLoader;
+use dotenvy::{EnvLoader, EnvMap};
+use std::env;
 use std::sync::OnceLock;
 
 #[derive(Debug)]
@@ -13,7 +14,7 @@ pub struct Config {
 
 impl Config {
     pub fn new() -> Result<Self> {
-        let env_map = EnvLoader::new().load()?;
+        let env_map = Self::load_env_map();
         let grpc_url = env_map
             .var("PROXY_GRPC_URL")
             .unwrap_or("http://0.0.0.0:50051".to_string());
@@ -33,6 +34,16 @@ impl Config {
             port,
             metrics_port: metrics_port.parse::<u16>().unwrap(),
         })
+    }
+
+    fn load_env_map() -> EnvMap {
+        let path = ".env";
+
+        if std::path::Path::new(path).exists() {
+            EnvLoader::new().load().unwrap()
+        } else {
+            env::vars().collect()
+        }
     }
 
     pub fn grpc_url(&self) -> &str {
