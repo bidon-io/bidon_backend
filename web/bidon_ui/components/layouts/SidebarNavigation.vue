@@ -13,6 +13,21 @@
     >
       <span>{{ title(resource.key) }}</span>
     </NuxtLink>
+
+    <div class="mt-4 px-6">
+      <span class="text-gray-400 uppercase text-sm">Settings</span>
+      <NuxtLink
+        to="/settings/security"
+        :class="[
+          'flex items-center mt-4 px-6 py-2 text-gray-600 hover:bg-gray-700 hover:bg-opacity-25 hover:text-gray-100',
+          route.path === '/settings/security'
+            ? 'bg-gray-700 bg-opacity-25 text-blue-100'
+            : '',
+        ]"
+      >
+        <span>Security</span>
+      </NuxtLink>
+    </div>
   </nav>
 </template>
 

@@ -81,6 +81,9 @@ type demandSourceAccountServiceHandler = resourceServiceHandler[admin.DemandSour
 type lineItemServiceHandler = resourceServiceHandler[admin.LineItemResource, admin.LineItem, admin.LineItemAttrs]
 type segmentServiceHandler = resourceServiceHandler[admin.SegmentResource, admin.Segment, admin.SegmentAttrs]
 type userServiceHandler = resourceServiceHandler[admin.UserResource, admin.User, admin.UserAttrs]
+type settingsServiceHandler struct {
+	service *admin.SettingsService
+}
 
 type resourceServiceHandler[Resource, ResourceData, ResourceAttrs any] struct {
 	service resourceService[Resource, ResourceData, ResourceAttrs]
@@ -221,6 +224,10 @@ func (s *resourceServiceHandler[Resource, ResourceData, ResourceAttrs]) delete(c
 	}
 
 	return c.NoContent(http.StatusNoContent)
+}
+
+func (h *settingsServiceHandler) updatePassword(c echo.Context, authCtx admin.AuthContext) error {
+	return h.service.UpdatePassword(c, authCtx)
 }
 
 func getAuthContext(c echo.Context) (admin.AuthContext, error) {

@@ -1159,6 +1159,9 @@ type ServerInterface interface {
 	// Update segment
 	// (PATCH /api/segments/{id})
 	UpdateSegment(ctx echo.Context, id IdParam) error
+	// Update current user password
+	// (PATCH /api/settings/password)
+	UpdatePassword(ctx echo.Context) error
 	// List users
 	// (GET /api/users)
 	GetUsers(ctx echo.Context) error
@@ -1812,6 +1815,15 @@ func (w *ServerInterfaceWrapper) UpdateSegment(ctx echo.Context) error {
 	return err
 }
 
+// UpdatePassword converts echo context to params.
+func (w *ServerInterfaceWrapper) UpdatePassword(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.UpdatePassword(ctx)
+	return err
+}
+
 // GetUsers converts echo context to params.
 func (w *ServerInterfaceWrapper) GetUsers(ctx echo.Context) error {
 	var err error
@@ -2118,6 +2130,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.DELETE(baseURL+"/api/segments/:id", wrapper.DeleteSegment)
 	router.GET(baseURL+"/api/segments/:id", wrapper.GetSegment)
 	router.PATCH(baseURL+"/api/segments/:id", wrapper.UpdateSegment)
+	router.PATCH(baseURL+"/api/settings/password", wrapper.UpdatePassword)
 	router.GET(baseURL+"/api/users", wrapper.GetUsers)
 	router.POST(baseURL+"/api/users", wrapper.CreateUser)
 	router.GET(baseURL+"/api/users/me", wrapper.GetCurrentUser)
@@ -2221,14 +2234,14 @@ var swaggerSpec = []string{
 	"XifIf64l1aVkqX4BqerWy4k38/H0alJZwwUeWeK45TgUzjuXBUWMHxTy2dQ5pCvE+lk3bdLdnJLG2Y2p",
 	"Zic96Xei4+4iZ2XOjpyZ+v58IxuvszpjzCIrOUp2mkOa4fTKWJYzIOOl4Unb7PHaJCgYwm+bzCnjTh0L",
 	"3ZZlkWdz6XXamGd6cMigrM4d4zBbOG1hmK47ShDWONZJm6EO6e2q5jmGCgigaOHJQHHXKOa7n6BrVCPW",
-	"AVcnI06ZTiNUp+e3TCXCGh6NUp2gozsCKeJ7hZ9UD9eERPJ3G/DcqlR4Q6itzk05KuTkfZY5n8moT7DR",
-	"eQTLHC9o6IHKT1R7ejWlFBFuxDCQFdfxRXffL3fkCVa74TYWdYNhN49+cGe5HQWAawY3aXRJ+xDzvH8B",
-	"1459IIgd2FHtB1xHkpeG1RZbvD/u697ru+M93ny1P5g/6uVXIIc9wP1Xzc6x7pjdH38Vl2ANHV/RPdiO",
-	"Im61qGfchnXZ1t/xPuzzfcwzXcvXdCm2u+sZ717s6F7rK7ocuy/f1XQ/dnffteOZKtn+v09VlU9VtVdO",
-	"4LpToyGOMB/7mFbhgzPfyEktqcMp38h/Yor/RPaZoKIGz7MqA04wit+dGXvXtPhxFZfINAuUm8hjgwmg",
-	"eq8ylTNqyCGAJADqwyLqYyhCtD/0GAqqT9U6iLwlRpjBBGByD0McAJ+iABGOYdifki0YS1FxkLbfLHzq",
-	"xdI1yed6PZNfXfkr6lclJbVDeDpFM8jr/OW0Ri46KR3oqC1xyhvV5SIddo/miXLrlVtxyhvZ9fj4/wEA",
-	"AP//Z9+gHLeoAAA=",
+	"AVdHI1afajyw0102Sukyz2XZbshZZZDRlCcpcR/2SikVhp8yRO0Em/kI9Jcl8xGIqo2QestUKq/h8TTV",
+	"KUa6Y6givlcATfVwTVAnf7dB561K5jeE4ensmqOCZt5nmfOZjPqES50JsczxgoYeqAxLtedvleIbMQzk",
+	"h+r4cmrZXb9ncO2G21jULZBw8+gHd57eUUKImsFNGl3SPsQ871/AtWMfKEgY2FHtJzwYSV4aZFts8f64",
+	"r5u77473eHfX/uT/qNd3gRz2ADd4NTvHuiV3f/xVXOM1dHxFN3k7irjVop5xn9dlW3/HG73P9zHPdC1f",
+	"07Xe7q5nvJu9o3utr+h67758V9MN3919146nwmT7/z4XVj4X1l45getOjYY4wnzsg2aFT+Z8I2fNpA6n",
+	"fCP/iSn+E9mnmooaPM+qDDjBKH45Z+x93+LnYVwi0yxQbiKPDSaA6t1WuSwXQA4BJAFQn0ZRn3MRov2h",
+	"x1BQfWzXQeQtMcIMJgCTexjiAPgUBYhwDMP+lGzBWIqKg7T9ZuFjNZauST7X65n8bsxfUb8qSbUdwtNJ",
+	"pkFe5y+nNXLRSelAR22JU96oLhfpsLtMT5Rbr9yKU97IrsfH/w8AAP//ND1313mpAAA=",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

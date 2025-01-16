@@ -35,6 +35,9 @@ var _ UserRepo = &UserRepoMock{}
 //			UpdateFunc: func(ctx context.Context, id int64, attrs *UserAttrs) (*User, error) {
 //				panic("mock out the Update method")
 //			},
+//			UpdatePasswordFunc: func(ctx context.Context, userID int64, currentPassword string, newPassword string) error {
+//				panic("mock out the UpdatePassword method")
+//			},
 //		}
 //
 //		// use mockedUserRepo in code that requires UserRepo
@@ -56,6 +59,9 @@ type UserRepoMock struct {
 
 	// UpdateFunc mocks the Update method.
 	UpdateFunc func(ctx context.Context, id int64, attrs *UserAttrs) (*User, error)
+
+	// UpdatePasswordFunc mocks the UpdatePassword method.
+	UpdatePasswordFunc func(ctx context.Context, userID int64, currentPassword string, newPassword string) error
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -96,12 +102,24 @@ type UserRepoMock struct {
 			// Attrs is the attrs argument value.
 			Attrs *UserAttrs
 		}
+		// UpdatePassword holds details about calls to the UpdatePassword method.
+		UpdatePassword []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// UserID is the userID argument value.
+			UserID int64
+			// CurrentPassword is the currentPassword argument value.
+			CurrentPassword string
+			// NewPassword is the newPassword argument value.
+			NewPassword string
+		}
 	}
-	lockCreate sync.RWMutex
-	lockDelete sync.RWMutex
-	lockFind   sync.RWMutex
-	lockList   sync.RWMutex
-	lockUpdate sync.RWMutex
+	lockCreate         sync.RWMutex
+	lockDelete         sync.RWMutex
+	lockFind           sync.RWMutex
+	lockList           sync.RWMutex
+	lockUpdate         sync.RWMutex
+	lockUpdatePassword sync.RWMutex
 }
 
 // Create calls CreateFunc.
@@ -285,5 +303,49 @@ func (mock *UserRepoMock) UpdateCalls() []struct {
 	mock.lockUpdate.RLock()
 	calls = mock.calls.Update
 	mock.lockUpdate.RUnlock()
+	return calls
+}
+
+// UpdatePassword calls UpdatePasswordFunc.
+func (mock *UserRepoMock) UpdatePassword(ctx context.Context, userID int64, currentPassword string, newPassword string) error {
+	if mock.UpdatePasswordFunc == nil {
+		panic("UserRepoMock.UpdatePasswordFunc: method is nil but UserRepo.UpdatePassword was just called")
+	}
+	callInfo := struct {
+		Ctx             context.Context
+		UserID          int64
+		CurrentPassword string
+		NewPassword     string
+	}{
+		Ctx:             ctx,
+		UserID:          userID,
+		CurrentPassword: currentPassword,
+		NewPassword:     newPassword,
+	}
+	mock.lockUpdatePassword.Lock()
+	mock.calls.UpdatePassword = append(mock.calls.UpdatePassword, callInfo)
+	mock.lockUpdatePassword.Unlock()
+	return mock.UpdatePasswordFunc(ctx, userID, currentPassword, newPassword)
+}
+
+// UpdatePasswordCalls gets all the calls that were made to UpdatePassword.
+// Check the length with:
+//
+//	len(mockedUserRepo.UpdatePasswordCalls())
+func (mock *UserRepoMock) UpdatePasswordCalls() []struct {
+	Ctx             context.Context
+	UserID          int64
+	CurrentPassword string
+	NewPassword     string
+} {
+	var calls []struct {
+		Ctx             context.Context
+		UserID          int64
+		CurrentPassword string
+		NewPassword     string
+	}
+	mock.lockUpdatePassword.RLock()
+	calls = mock.calls.UpdatePassword
+	mock.lockUpdatePassword.RUnlock()
 	return calls
 }
