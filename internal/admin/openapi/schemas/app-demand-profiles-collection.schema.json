@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "app-demand-profiles-collection.schema.json",
+  "title": "Line Items Collection",
+  "type": "object",
+  "properties": {
+    "data": {
+      "type": "array",
+      "items": {
+        "$ref": "app-demand-profile-detailed.schema.json"
+      }
+    },
+    "meta": {
+      "$ref": "collection-meta.schema.json"
+    }
+  }
+}

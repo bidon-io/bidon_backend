@@ -157,7 +157,7 @@ type AuctionConfigurationFilters struct {
 
 func (f *AuctionConfigurationFilters) apply(db *gorm.DB) *gorm.DB {
 	if f.UserID != 0 {
-		db = db.Joins("INNER JOIN apps ON apps.id = line_items.app_id").Where("apps.user_id = ?", f.UserID)
+		db = db.Joins("INNER JOIN apps ON apps.id = auction_configurations.app_id").Where("apps.user_id = ?", f.UserID)
 	}
 	if f.AppID != 0 {
 		db = db.Where("app_id = ?", f.AppID)
