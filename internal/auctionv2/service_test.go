@@ -3,6 +3,7 @@ package auctionv2_test
 import (
 	"context"
 	"errors"
+	"github.com/bidon-io/bidon-backend/internal/adapter"
 
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/auction"
@@ -68,6 +69,11 @@ func TestService_Run(t *testing.T) {
 			return auctionConfig, nil
 		},
 	}
+	adapterKeysFetcher := &mocks.AdapterKeysFetcherMock{
+		FetchEnabledAdapterKeysFunc: func(ctx context.Context, appID int64, keys []adapter.Key) ([]adapter.Key, error) {
+			return keys, nil
+		},
+	}
 	auctionBuilder := &mocks.AuctionBuilderMock{
 		BuildFunc: func(ctx context.Context, params *auctionv2.BuildParams) (*auctionv2.AuctionResult, error) {
 			return &auctionv2.AuctionResult{
@@ -93,10 +99,11 @@ func TestService_Run(t *testing.T) {
 	eventLogger := &event.Logger{Engine: &engine.Log{}}
 
 	service := &auctionv2.Service{
-		ConfigFetcher:  configFetcher,
-		AuctionBuilder: auctionBuilder,
-		SegmentMatcher: segmentMatcher,
-		EventLogger:    eventLogger,
+		AdapterKeysFetcher: adapterKeysFetcher,
+		ConfigFetcher:      configFetcher,
+		AuctionBuilder:     auctionBuilder,
+		SegmentMatcher:     segmentMatcher,
+		EventLogger:        eventLogger,
 	}
 
 	t.Run("Successful Run", func(t *testing.T) {

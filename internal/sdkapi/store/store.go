@@ -57,7 +57,7 @@ type AdapterInitConfigsFetcher struct {
 }
 
 func (f *AdapterInitConfigsFetcher) FetchAdapterInitConfigs(ctx context.Context, appID int64, adapterKeys []adapter.Key, setAmazonSlots bool, setOrder bool) ([]sdkapi.AdapterInitConfig, error) {
-	dbProfiles, err := f.fetchAppDemandProfilesCached(ctx, appID, adapterKeys)
+	dbProfiles, err := f.fetchEnabledAppDemandProfilesCached(ctx, appID, adapterKeys)
 	if err != nil {
 		return nil, fmt.Errorf("fetch profiles from cache or DB: %w", err)
 	}
@@ -102,18 +102,31 @@ func (f *AdapterInitConfigsFetcher) FetchAdapterInitConfigs(ctx context.Context,
 	return configs, nil
 }
 
-func (f *AdapterInitConfigsFetcher) fetchAppDemandProfilesCached(ctx context.Context, appID int64, adapterKeys []adapter.Key) ([]db.AppDemandProfile, error) {
+func (f *AdapterInitConfigsFetcher) FetchEnabledAdapterKeys(ctx context.Context, appID int64, keys []adapter.Key) ([]adapter.Key, error) {
+	profiles, err := f.fetchEnabledAppDemandProfilesCached(ctx, appID, keys)
+	if err != nil {
+		return nil, err
+	}
+
+	enabledKeys := make([]adapter.Key, 0, len(profiles))
+	for _, profile := range profiles {
+		enabledKeys = append(enabledKeys, adapter.Key(profile.Account.DemandSource.APIKey))
+	}
+	return enabledKeys, nil
+}
+
+func (f *AdapterInitConfigsFetcher) fetchEnabledAppDemandProfilesCached(ctx context.Context, appID int64, adapterKeys []adapter.Key) ([]db.AppDemandProfile, error) {
 	cacheKey, err := f.profilesCacheKey(appID, adapterKeys)
 	if err != nil {
 		return nil, fmt.Errorf("generate profiles cache key: %w", err)
 	}
 
 	return f.ProfilesCache.Get(ctx, cacheKey, func(ctx context.Context) ([]db.AppDemandProfile, error) {
-		return f.fetchAppDemandProfiles(ctx, appID, adapterKeys)
+		return f.fetchEnabledAppDemandProfiles(ctx, appID, adapterKeys)
 	})
 }
 
-func (f *AdapterInitConfigsFetcher) fetchAppDemandProfiles(ctx context.Context, appID int64, adapterKeys []adapter.Key) ([]db.AppDemandProfile, error) {
+func (f *AdapterInitConfigsFetcher) fetchEnabledAppDemandProfiles(ctx context.Context, appID int64, adapterKeys []adapter.Key) ([]db.AppDemandProfile, error) {
 	var profiles []db.AppDemandProfile
 	err := f.DB.
 		WithContext(ctx).

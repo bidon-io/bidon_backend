@@ -204,11 +204,17 @@ func testHelperAuctionV2Handler(t *testing.T) *apihandlers.AuctionHandler {
 		BiddingBuilder:               biddingBuilder,
 		BiddingAdaptersConfigBuilder: biddingAdaptersConfigBuilder,
 	}
+	adapterKeyFetcher := &auctionv2mocks.AdapterKeysFetcherMock{
+		FetchEnabledAdapterKeysFunc: func(ctx context.Context, appID int64, keys []adapter.Key) ([]adapter.Key, error) {
+			return keys, nil
+		},
+	}
 	auctionService := &auctionv2.Service{
-		ConfigFetcher:  configFetcher,
-		AuctionBuilder: auctionBuilderV2,
-		SegmentMatcher: segmentMatcher,
-		EventLogger:    &event.Logger{Engine: &engine.Log{}},
+		AdapterKeysFetcher: adapterKeyFetcher,
+		ConfigFetcher:      configFetcher,
+		AuctionBuilder:     auctionBuilderV2,
+		SegmentMatcher:     segmentMatcher,
+		EventLogger:        &event.Logger{Engine: &engine.Log{}},
 	}
 
 	handler := &apihandlers.AuctionHandler{

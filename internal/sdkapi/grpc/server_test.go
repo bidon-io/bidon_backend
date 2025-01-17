@@ -80,6 +80,12 @@ func buildServer(p *serverParams) *Server {
 	segmentMatcher := &segment.Matcher{
 		Fetcher: segmentFetcher,
 	}
+	adapterKeysFetcher := &auctionv2mocks.AdapterKeysFetcherMock{
+		FetchEnabledAdapterKeysFunc: func(ctx context.Context, appID int64, keys []adapter.Key) ([]adapter.Key, error) {
+			return keys, nil
+		},
+	}
+
 	biddingAdaptersConfigBuilder := &auctionv2mocks.BiddingAdaptersConfigBuilderMock{
 		BuildFunc: func(ctx context.Context, appID int64, adapterKeys []adapter.Key, adUnitsMap *auction.AdUnitsMap) (adapter.ProcessedConfigsMap, error) {
 			return adapter.ProcessedConfigsMap{
@@ -105,10 +111,11 @@ func buildServer(p *serverParams) *Server {
 		BiddingAdaptersConfigBuilder: biddingAdaptersConfigBuilder,
 	}
 	auctionService := &auctionv2.Service{
-		ConfigFetcher:  configFetcher,
-		AuctionBuilder: auctionBuilderV2,
-		SegmentMatcher: segmentMatcher,
-		EventLogger:    &event.Logger{Engine: &engine.Log{}},
+		AdapterKeysFetcher: adapterKeysFetcher,
+		ConfigFetcher:      configFetcher,
+		AuctionBuilder:     auctionBuilderV2,
+		SegmentMatcher:     segmentMatcher,
+		EventLogger:        &event.Logger{Engine: &engine.Log{}},
 	}
 
 	return NewServer(auctionService, appFetcher, gcoder)
@@ -168,6 +175,30 @@ func TestServer_Bid(t *testing.T) {
 			},
 			wantErr:  true,
 			errorMsg: "rpc error: code = InvalidArgument desc = {\"error\":{\"code\":422,\"message\":\"Invalid Auction Key\"}}",
+		},
+		{
+			name: "all networks are disabled",
+			buildServer: func() *Server {
+				p := defaultServerParams()
+				s := buildServer(p)
+
+				as := s.AuctionService.(*auctionv2.Service)
+				as.AdapterKeysFetcher = &auctionv2mocks.AdapterKeysFetcherMock{
+					FetchEnabledAdapterKeysFunc: func(ctx context.Context, appID int64, keys []adapter.Key) ([]adapter.Key, error) {
+						return []adapter.Key{}, nil
+					},
+				}
+
+				return s
+			},
+			input: func() *v3.Openrtb {
+				return NewRequestBuilder().Build()
+			},
+			want: func() *v3.Openrtb {
+				return &v3.Openrtb{}
+			},
+			wantErr:  true,
+			errorMsg: "rpc error: code = InvalidArgument desc = {\"error\":{\"code\":422,\"message\":\"No ads found\"}}",
 		},
 	}
 

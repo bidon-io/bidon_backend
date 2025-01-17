@@ -23,10 +23,11 @@ import (
 )
 
 type Service struct {
-	ConfigFetcher  ConfigFetcher
-	AuctionBuilder AuctionBuilder
-	SegmentMatcher *segment.Matcher
-	EventLogger    *event.Logger
+	ConfigFetcher      ConfigFetcher
+	AuctionBuilder     AuctionBuilder
+	SegmentMatcher     *segment.Matcher
+	AdapterKeysFetcher AdapterKeysFetcher
+	EventLogger        *event.Logger
 }
 
 type Response struct {
@@ -51,11 +52,15 @@ type ExecutionParams struct {
 	LogErr  func(err error)
 }
 
-//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/service_mocks.go -pkg mocks . ConfigFetcher AuctionBuilder
+//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/service_mocks.go -pkg mocks . ConfigFetcher AuctionBuilder AdapterKeysFetcher
 
 type ConfigFetcher interface {
 	Match(ctx context.Context, appID int64, adType ad.Type, segmentID int64, version string) (*auction.Config, error)
 	FetchByUIDCached(ctx context.Context, appId int64, id, uid string) *auction.Config
+}
+
+type AdapterKeysFetcher interface {
+	FetchEnabledAdapterKeys(ctx context.Context, appID int64, adapterKeys []adapter.Key) ([]adapter.Key, error)
 }
 
 type AuctionBuilder interface {
@@ -90,6 +95,11 @@ func (s *Service) Run(ctx context.Context, params *ExecutionParams) (*Response, 
 		req.Adapters.Keys(),
 		req.AdCache,
 	)
+
+	adapterKeys, err = s.AdapterKeysFetcher.FetchEnabledAdapterKeys(ctx, params.AppID, adapterKeys)
+	if err != nil {
+		return nil, err
+	}
 
 	if req.AdObject.AuctionKey != "" {
 		publicUid, success := new(big.Int).SetString(req.AdObject.AuctionKey, 32)
