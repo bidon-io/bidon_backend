@@ -3,20 +3,27 @@
     label="New Auction Configuration"
     :resources-path="resourcesPath"
   />
-  <ResourcesTable :columns="columns" :resources-path="resourcesPath" />
+  <LazyResourcesTable
+    :columns="columns"
+    :resources-path="resourcesPath"
+    :collection-path="collectionPath"
+  />
 </template>
 
 <script setup>
 import { ResourceTableFields } from "@/constants";
+import LazyResourcesTable from "~/components/resources/LazyResourcesTable.vue";
 
 const columns = [
   ResourceTableFields.PublicUid,
   ResourceTableFields.App,
-  { field: "name", header: "Name" },
+  ResourceTableFields.Name,
   { field: "auctionKey", header: "Auction Key", copyable: true },
   ResourceTableFields.AdType,
   { field: "pricefloor", header: "Price Floor" },
+  ResourceTableFields.IsDefault,
   ResourceTableFields.Segment,
 ];
 const resourcesPath = "/auction_configurations";
+const collectionPath = "/auction_configurations_collection";
 </script>

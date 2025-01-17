@@ -139,6 +139,7 @@ interface PageEvent {
 
 const props = defineProps<{
   resourcesPath: string;
+  collectionPath: string;
   columns: Column[];
 }>();
 
@@ -199,10 +200,10 @@ const {
   error,
   execute: fetchData,
 } = useAsyncData(
-  "fetch-resources",
+  "fetch-resources-collection",
   async () => {
     const params = buildQueryParams();
-    return await $apiFetch(`/v2${props.resourcesPath}`, { params });
+    return await $apiFetch(props.collectionPath, { params });
   },
   {
     default: () => [],
@@ -212,9 +213,6 @@ const {
 
 const resources = computed(() => collection.value?.items ?? []);
 const totalRecords = computed(() => collection.value?.meta?.totalCount ?? 0);
-
-console.log("resources", resources.value);
-console.log("totalRecords", totalRecords.value);
 
 const onFilter = async () => {
   await fetchData();
