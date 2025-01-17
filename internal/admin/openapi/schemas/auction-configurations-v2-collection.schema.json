@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "auction-configuration-v2-collection.schema.json",
+  "title": "Line Items Collection",
+  "type": "object",
+  "properties": {
+    "data": {
+      "type": "array",
+      "items": {
+        "$ref": "auction-configuration-v2-detailed.schema.json"
+      }
+    },
+    "meta": {
+      "$ref": "collection-meta.schema.json"
+    }
+  }
+}

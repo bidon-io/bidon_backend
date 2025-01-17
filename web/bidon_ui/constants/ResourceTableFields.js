@@ -50,6 +50,16 @@ export const ResourceTableFields = {
       type: "select",
       matchMode: FilterMatchMode.EQUALS,
       placeholder: "Default",
+      loadOptions: async () => [
+        {
+          label: "True",
+          value: "true",
+        },
+        {
+          label: "False",
+          value: "false",
+        },
+      ],
       extractOptions: () => [
         {
           label: "True",
@@ -163,6 +173,16 @@ export const ResourceTableFields = {
       placeholder: "Human Name",
     },
   },
+  Name: {
+    field: "name",
+    header: "Name",
+    filter: {
+      field: "name",
+      type: "input",
+      matchMode: FilterMatchMode.CONTAINS,
+      placeholder: "Name",
+    },
+  },
   AppName: {
     field: "humanName",
     header: "App Name",
@@ -199,6 +219,13 @@ export const ResourceTableFields = {
       type: "select-filter",
       matchMode: FilterMatchMode.EQUALS,
       placeholder: "Segment",
+      loadOptions: async () => {
+        const segments = await $apiFetch("/segments");
+        return segments.map(({ id, name }) => ({
+          label: name,
+          value: id,
+        }));
+      },
       extractOptions: (records) => [
         ...new Map(
           records.map(({ segment }) => [

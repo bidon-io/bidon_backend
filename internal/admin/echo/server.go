@@ -119,6 +119,10 @@ func (s *Server) GetAuctionConfigurations(c echo.Context) error {
 	return s.AucCfgHandler.list(c)
 }
 
+func (s *Server) GetAuctionConfigurationsCollection(ctx echo.Context, _ api.GetAuctionConfigurationsCollectionParams) error {
+	return s.AucCfgHandler.listCollection(ctx)
+}
+
 func (s *Server) CreateAuctionConfiguration(c echo.Context) error {
 	return s.AucCfgHandler.create(c)
 }
@@ -139,6 +143,10 @@ func (s *Server) DeleteAuctionConfiguration(c echo.Context, _ api.IdParam) error
 
 func (s *Server) GetAuctionConfigurationsV2(c echo.Context) error {
 	return s.AucCfgV2Handler.list(c)
+}
+
+func (s *Server) GetAuctionConfigurationsCollectionV2(ctx echo.Context, _ api.GetAuctionConfigurationsCollectionV2Params) error {
+	return s.AucCfgV2Handler.listCollection(ctx)
 }
 
 func (s *Server) CreateAuctionConfigurationV2(c echo.Context) error {
@@ -307,7 +315,7 @@ func (s *Server) GetLineItems(c echo.Context, _ api.GetLineItemsParams) error {
 	return s.LineItemHandler.list(c)
 }
 
-func (s *Server) GetLineItemsV2(c echo.Context, _ api.GetLineItemsV2Params) error {
+func (s *Server) GetLineItemsCollection(c echo.Context, _ api.GetLineItemsCollectionParams) error {
 	return s.LineItemHandler.listCollection(c)
 }
 
