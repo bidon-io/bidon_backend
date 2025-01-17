@@ -251,10 +251,10 @@ func main() {
 		Cache: configsCache,
 	}
 	auctionService := &auctionv2.Service{
-		ConfigFetcher:  configFetcher,
-		SegmentMatcher: segmentMatcher,
+		ConfigFetcher:      configFetcher,
+		SegmentMatcher:     segmentMatcher,
+		AdapterKeysFetcher: adapterInitConfigsFetcher,
 		AuctionBuilder: &auctionv2.Builder{
-
 			AdUnitsMatcher:               adUnitsMatcher,
 			BiddingBuilder:               biddingBuilderV2,
 			BiddingAdaptersConfigBuilder: biddingAdaptersCfgBuilder,

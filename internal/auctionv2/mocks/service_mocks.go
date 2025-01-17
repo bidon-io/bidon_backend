@@ -6,6 +6,7 @@ package mocks
 import (
 	"context"
 	"github.com/bidon-io/bidon-backend/internal/ad"
+	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/auctionv2"
 	"sync"
@@ -232,5 +233,83 @@ func (mock *AuctionBuilderMock) BuildCalls() []struct {
 	mock.lockBuild.RLock()
 	calls = mock.calls.Build
 	mock.lockBuild.RUnlock()
+	return calls
+}
+
+// Ensure, that AdapterKeysFetcherMock does implement auctionv2.AdapterKeysFetcher.
+// If this is not the case, regenerate this file with moq.
+var _ auctionv2.AdapterKeysFetcher = &AdapterKeysFetcherMock{}
+
+// AdapterKeysFetcherMock is a mock implementation of auctionv2.AdapterKeysFetcher.
+//
+//	func TestSomethingThatUsesAdapterKeysFetcher(t *testing.T) {
+//
+//		// make and configure a mocked auctionv2.AdapterKeysFetcher
+//		mockedAdapterKeysFetcher := &AdapterKeysFetcherMock{
+//			FetchEnabledAdapterKeysFunc: func(ctx context.Context, appID int64, adapterKeys []adapter.Key) ([]adapter.Key, error) {
+//				panic("mock out the FetchEnabledAdapterKeys method")
+//			},
+//		}
+//
+//		// use mockedAdapterKeysFetcher in code that requires auctionv2.AdapterKeysFetcher
+//		// and then make assertions.
+//
+//	}
+type AdapterKeysFetcherMock struct {
+	// FetchEnabledAdapterKeysFunc mocks the FetchEnabledAdapterKeys method.
+	FetchEnabledAdapterKeysFunc func(ctx context.Context, appID int64, adapterKeys []adapter.Key) ([]adapter.Key, error)
+
+	// calls tracks calls to the methods.
+	calls struct {
+		// FetchEnabledAdapterKeys holds details about calls to the FetchEnabledAdapterKeys method.
+		FetchEnabledAdapterKeys []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// AppID is the appID argument value.
+			AppID int64
+			// AdapterKeys is the adapterKeys argument value.
+			AdapterKeys []adapter.Key
+		}
+	}
+	lockFetchEnabledAdapterKeys sync.RWMutex
+}
+
+// FetchEnabledAdapterKeys calls FetchEnabledAdapterKeysFunc.
+func (mock *AdapterKeysFetcherMock) FetchEnabledAdapterKeys(ctx context.Context, appID int64, adapterKeys []adapter.Key) ([]adapter.Key, error) {
+	if mock.FetchEnabledAdapterKeysFunc == nil {
+		panic("AdapterKeysFetcherMock.FetchEnabledAdapterKeysFunc: method is nil but AdapterKeysFetcher.FetchEnabledAdapterKeys was just called")
+	}
+	callInfo := struct {
+		Ctx         context.Context
+		AppID       int64
+		AdapterKeys []adapter.Key
+	}{
+		Ctx:         ctx,
+		AppID:       appID,
+		AdapterKeys: adapterKeys,
+	}
+	mock.lockFetchEnabledAdapterKeys.Lock()
+	mock.calls.FetchEnabledAdapterKeys = append(mock.calls.FetchEnabledAdapterKeys, callInfo)
+	mock.lockFetchEnabledAdapterKeys.Unlock()
+	return mock.FetchEnabledAdapterKeysFunc(ctx, appID, adapterKeys)
+}
+
+// FetchEnabledAdapterKeysCalls gets all the calls that were made to FetchEnabledAdapterKeys.
+// Check the length with:
+//
+//	len(mockedAdapterKeysFetcher.FetchEnabledAdapterKeysCalls())
+func (mock *AdapterKeysFetcherMock) FetchEnabledAdapterKeysCalls() []struct {
+	Ctx         context.Context
+	AppID       int64
+	AdapterKeys []adapter.Key
+} {
+	var calls []struct {
+		Ctx         context.Context
+		AppID       int64
+		AdapterKeys []adapter.Key
+	}
+	mock.lockFetchEnabledAdapterKeys.RLock()
+	calls = mock.calls.FetchEnabledAdapterKeys
+	mock.lockFetchEnabledAdapterKeys.RUnlock()
 	return calls
 }

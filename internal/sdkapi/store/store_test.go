@@ -436,3 +436,90 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Amazon(t *testing.T) 
 		})
 	}
 }
+
+func TestAdapterInitConfigsFetcher_FetchEnabledAdapterKeys(t *testing.T) {
+	tx := testDB.Begin()
+	defer tx.Rollback()
+
+	rdb, _ := redismock.NewClusterMock()
+
+	enabledKeys := []adapter.Key{adapter.AdmobKey, adapter.MintegralKey}
+	disabledKeys := []adapter.Key{adapter.MetaKey}
+	keys := append(enabledKeys, disabledKeys...)
+
+	demandSources := make([]db.DemandSource, len(keys))
+	for i, key := range keys {
+		demandSources[i] = dbtest.CreateDemandSource(t, tx, func(source *db.DemandSource) {
+			source.APIKey = string(key)
+		})
+	}
+
+	accounts := make([]db.DemandSourceAccount, len(demandSources))
+	for i, source := range demandSources {
+		accounts[i] = dbtest.CreateDemandSourceAccount(t, tx, func(account *db.DemandSourceAccount) {
+			account.DemandSource = source
+			account.Extra = dbtest.ValidDemandSourceAccountExtra(t, adapter.Key(source.APIKey))
+		})
+	}
+
+	app := dbtest.CreateApp(t, tx)
+
+	for _, account := range accounts {
+		key := adapter.Key(account.DemandSource.APIKey)
+		dbtest.CreateAppDemandProfile(t, tx, func(profile *db.AppDemandProfile) {
+			profile.App = app
+			profile.Account = account
+			profile.Data = dbtest.ValidAppDemandProfileData(t, adapter.Key(account.DemandSource.APIKey), profile.App.ID)
+			profile.Enabled = containsKey(enabledKeys, key)
+		})
+	}
+
+	profilesCache := config.NewRedisCacheOf[[]db.AppDemandProfile](rdb, 10*time.Minute, "app_demand_profiles")
+	fetcher := &AdapterInitConfigsFetcher{DB: tx, ProfilesCache: profilesCache}
+
+	tests := []struct {
+		name           string
+		appID          int64
+		adapterKeys    []adapter.Key
+		setAmazonSlots bool
+		setOrder       bool
+		want           []adapter.Key
+	}{
+		{
+			name:           "success",
+			appID:          app.ID,
+			adapterKeys:    adapter.Keys,
+			setAmazonSlots: true,
+			setOrder:       false,
+			want:           enabledKeys,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := fetcher.FetchEnabledAdapterKeys(context.Background(), tt.appID, tt.adapterKeys)
+			if err != nil {
+				t.Fatalf("FetchEnabledAdapterKeys() error = %v", err)
+			}
+
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Errorf("FetchEnabledAdapterKeys() mismatch (-want +got):\n%s", diff)
+			}
+		})
+
+	}
+
+}
+
+func containsKey(keys []adapter.Key, key adapter.Key) *bool {
+	for _, k := range keys {
+		if k == key {
+			return ptr(true)
+		}
+	}
+	return ptr(false)
+}
+
+func ptr[T any](v T) *T {
+	return &v
+}
