@@ -418,8 +418,6 @@ fn convert_demand(demand: &HashMap<String, Value>) -> Result<HashMap<String, med
     Ok(demands)
 }
 
-// TODO: this is a temporary function to convert the OpenRTB response to the AuctionResponse
-// fix it later
 pub fn try_into(openrtb: openrtb::Openrtb) -> Result<sdk::AuctionResponse> {
     // Extract the Response from Openrtb
     let response = match openrtb.payload_oneof {
@@ -454,6 +452,7 @@ pub fn try_into(openrtb: openrtb::Openrtb) -> Result<sdk::AuctionResponse> {
                     .bid_type
                     .clone()
                     .ok_or(anyhow!("Bid type is missing"))?,
+                timeout: bid_ext.timeout.unwrap_or_default(),
                 ext: Some(
                     serde_json::to_value(bid_ext.ext.clone())
                         .unwrap_or_default()
@@ -870,6 +869,7 @@ mod tests {
                             label: Some("key123".to_string()),
                             bid_type: Some("bid_type".to_string()),
                             ext: HashMap::new(),
+                            timeout: Some(500),
                         };
                         ext.set_extension_data(mediation::BID_EXT, bid_ext).unwrap();
                         ext
@@ -926,6 +926,7 @@ mod tests {
         assert_eq!(ad_unit.uid, "item1");
         assert_eq!(ad_unit.demand_id, "demand1");
         assert_eq!(ad_unit.pricefloor, Some(2.5));
+        assert_eq!(ad_unit.timeout, 500);
     }
 
     #[test]

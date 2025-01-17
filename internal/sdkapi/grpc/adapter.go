@@ -423,6 +423,7 @@ func adUnitToBid(a *auction.AdUnit) (*v3.Bid, error) {
 		Label:   proto.String(a.Label),
 		BidType: proto.String(a.BidType.String()),
 		Ext:     ext,
+		Timeout: proto.Int32(a.Timeout),
 	}
 	proto.SetExtension(bid, mediation.E_BidExt, bidExt)
 

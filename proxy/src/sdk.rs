@@ -151,11 +151,21 @@ pub struct AdUnit {
     /// Unique identifier for the ad unit
     #[serde(rename = "uid")]
     pub uid: String,
+
+    /// Timeout for the ad unit in milliseconds
+    #[serde(rename = "timeout")]
+    pub timeout: i32,
 }
 
 impl AdUnit {
     #[allow(clippy::new_without_default)]
-    pub fn new(bid_type: String, demand_id: String, label: String, uid: String) -> AdUnit {
+    pub fn new(
+        bid_type: String,
+        demand_id: String,
+        label: String,
+        uid: String,
+        timeout: i32,
+    ) -> AdUnit {
         AdUnit {
             bid_type,
             demand_id,
@@ -163,6 +173,7 @@ impl AdUnit {
             label,
             pricefloor: None,
             uid,
+            timeout,
         }
     }
 }

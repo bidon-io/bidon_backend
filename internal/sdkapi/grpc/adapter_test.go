@@ -341,6 +341,7 @@ func TestAuctionAdapter_AuctionResponseToOpenRTB(t *testing.T) {
 							Extra: map[string]any{
 								"key1": "value1",
 							},
+							Timeout: 1000,
 						},
 					},
 					NoBids: []auction.AdUnit{
@@ -353,6 +354,7 @@ func TestAuctionAdapter_AuctionResponseToOpenRTB(t *testing.T) {
 							Extra: map[string]any{
 								"key2": "value2",
 							},
+							Timeout: 2000,
 						},
 					},
 				}
@@ -399,6 +401,7 @@ func TestAuctionAdapter_AuctionResponseToOpenRTB(t *testing.T) {
 					Ext: map[string]string{
 						"key1": "value1",
 					},
+					Timeout: proto.Int32(1000),
 				})
 				proto.SetExtension(resp.Seatbid[0].Bid[1], mediation.E_BidExt, &mediation.BidExt{
 					Label:   proto.String("label_2"),
@@ -406,6 +409,7 @@ func TestAuctionAdapter_AuctionResponseToOpenRTB(t *testing.T) {
 					Ext: map[string]string{
 						"key2": "value2",
 					},
+					Timeout: proto.Int32(2000),
 				})
 
 				return &v3.Openrtb{
