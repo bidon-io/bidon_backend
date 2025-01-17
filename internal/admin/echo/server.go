@@ -97,6 +97,10 @@ func (s *Server) GetAppDemandProfiles(c echo.Context) error {
 	return s.AppDemandProfileHandler.list(c)
 }
 
+func (s *Server) GetAppDemandProfilesCollection(ctx echo.Context, _ api.GetAppDemandProfilesCollectionParams) error {
+	return s.AppDemandProfileHandler.listCollection(ctx)
+}
+
 func (s *Server) CreateAppDemandProfile(c echo.Context) error {
 	return s.AppDemandProfileHandler.create(c)
 }

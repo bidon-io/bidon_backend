@@ -26,11 +26,17 @@ func NewAppDemandProfileRepo(d *db.DB) *AppDemandProfileRepo {
 	}
 }
 
-func (r *AppDemandProfileRepo) ListOwnedByUser(ctx context.Context, userID int64, _ map[string][]string) (*resource.Collection[admin.AppDemandProfile], error) {
-	return r.list(ctx, func(db *gorm.DB) *gorm.DB {
-		s := db.Session(&gorm.Session{NewDB: true})
-		return db.InnerJoins("App", s.Table("App").Where(map[string]any{"user_id": userID}))
-	}, nil)
+func (r *AppDemandProfileRepo) List(ctx context.Context, qParams map[string][]string) (*resource.Collection[admin.AppDemandProfile], error) {
+	filters := queryToAppDemandProfilesFilters(qParams)
+	pgn := PaginationFromQueryParams[db.AppDemandProfile](qParams)
+	return r.list(ctx, filters.apply, pgn)
+}
+
+func (r *AppDemandProfileRepo) ListOwnedByUser(ctx context.Context, userID int64, qParams map[string][]string) (*resource.Collection[admin.AppDemandProfile], error) {
+	filters := queryToAppDemandProfilesFilters(qParams)
+	filters.UserID = userID
+	pgn := PaginationFromQueryParams[db.AppDemandProfile](qParams)
+	return r.list(ctx, filters.apply, pgn)
 }
 
 func (r *AppDemandProfileRepo) FindOwnedByUser(ctx context.Context, userID int64, id int64) (*admin.AppDemandProfile, error) {
@@ -92,4 +98,44 @@ func (m appDemandProfileMapper) resourceAttrs(p *db.AppDemandProfile) admin.AppD
 		AccountType:    p.AccountType,
 		Enabled:        p.Enabled,
 	}
+}
+
+type appDemandProfilesFilters struct {
+	UserID         int64
+	AppID          int64
+	AccountID      int64
+	DemandSourceID int64
+}
+
+func (f *appDemandProfilesFilters) apply(db *gorm.DB) *gorm.DB {
+	if f.UserID != 0 {
+		db = db.Joins("INNER JOIN apps ON apps.id = app_demand_profiles.app_id").Where("apps.user_id = ?", f.UserID)
+	}
+	if f.AppID != 0 {
+		db = db.Where("app_id = ?", f.AppID)
+	}
+	if f.AccountID != 0 {
+		db = db.Where("account_id = ?", f.AccountID)
+	}
+	if f.DemandSourceID != 0 {
+		db = db.Where("demand_source_id = ?", f.DemandSourceID)
+	}
+	return db
+}
+
+func queryToAppDemandProfilesFilters(qParams map[string][]string) appDemandProfilesFilters {
+	filters := appDemandProfilesFilters{}
+	if v, ok := qParams["user_id"]; ok {
+		filters.UserID, _ = strconv.ParseInt(v[0], 10, 64)
+	}
+	if v, ok := qParams["app_id"]; ok {
+		filters.AppID, _ = strconv.ParseInt(v[0], 10, 64)
+	}
+	if v, ok := qParams["account_id"]; ok {
+		filters.AccountID, _ = strconv.ParseInt(v[0], 10, 64)
+	}
+	if v, ok := qParams["demand_source_id"]; ok {
+		filters.DemandSourceID, _ = strconv.ParseInt(v[0], 10, 64)
+	}
+	return filters
 }

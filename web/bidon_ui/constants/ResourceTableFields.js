@@ -112,6 +112,13 @@ export const ResourceTableFields = {
       type: "select",
       matchMode: FilterMatchMode.EQUALS,
       placeholder: "Demand Source",
+      loadOptions: async () => {
+        const demandSources = await $apiFetch("/demand_sources");
+        return demandSources.map(({ id, humanName }) => ({
+          label: humanName,
+          value: id,
+        }));
+      },
       extractOptions: (records) => [
         ...new Map(
           records.map(({ demandSource }) => [
