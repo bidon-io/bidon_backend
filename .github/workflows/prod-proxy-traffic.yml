@@ -17,7 +17,7 @@ jobs:
     name: Enable proxy traffic
     runs-on: [self-hosted]
     steps:
-      - name: Checks-out repository devops
+      - name: Checks-out master of repository devops
         if: ${{ inputs.traffic == 'disable' }}
         uses: actions/checkout@v4
         with:
@@ -25,8 +25,8 @@ jobs:
           ref: master
           token: ${{ secrets.PAT_RUNNER }}
 
-      - name: Checks-out repository devops
-        if: ${{ inputs.traffic == enable }}
+      - name: Checks-out DO-2781/enable-traffic-to-proxy of repository devops
+        if: ${{ inputs.traffic == 'enable' }}
         uses: actions/checkout@v4
         with:
           repository: bidon-io/devops
