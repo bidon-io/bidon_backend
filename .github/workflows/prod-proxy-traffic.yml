@@ -1,0 +1,38 @@
+---
+name: Enable proxy traffic
+
+on:
+  workflow_dispatch:
+    inputs:
+      traffic:
+        type: choice
+        required: true
+        description: Action
+        options:
+          - 'disable'
+          - 'enable'
+
+jobs:
+  traffic:
+    name: Enable proxy traffic
+    runs-on: [self-hosted]
+    steps:
+      - name: Checks-out repository devops
+        if: ${{ inputs.traffic == 'disable' }}
+        uses: actions/checkout@v4
+        with:
+          repository: bidon-io/devops
+          ref: master
+          token: ${{ secrets.PAT_RUNNER }}
+
+      - name: Checks-out repository devops
+        if: ${{ inputs.traffic == enable }}
+        uses: actions/checkout@v4
+        with:
+          repository: bidon-io/devops
+          ref: DO-2781/enable-traffic-to-proxy
+          token: ${{ secrets.PAT_RUNNER }}
+
+      - name: Deploy ingress rules for proxy traffic
+        working-directory: ./prod
+        run: ANSIBLE_VAULT_PASSWORD_FILE=$ANSIBLE_VAULT_PASSWORD_FILE_BIDON && make k8s-dfw-bidon-sdkapi-ingress-rule
