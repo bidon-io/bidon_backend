@@ -1,15 +1,7 @@
 name: Rust build and test
 
 on:
-  push:
-    paths:
-      - "proxy/**"
-      - "proto/**"
-      - "Cargo.toml"
-      - "build.rs"
-      - "Cargo.lock"
   pull_request:
-    branches: [ "main" ]
     paths:
       - "proxy/**"
       - "proto/**"
@@ -22,7 +14,6 @@ env:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:

@@ -5,6 +5,7 @@ use bidon::org::bidon::proto::v1::mediation::{
 };
 use infrastructure::{config, server};
 use prost::ExtensionRegistry;
+use sentry::IntoDsn;
 use tracing_subscriber::{
     filter::LevelFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt, EnvFilter,
 };
@@ -28,9 +29,7 @@ async fn main() {
     let listen_addr = format!("0.0.0.0:{}", config::settings().port());
 
     let welcome_string = format!(
-        r#"Starting server at: {}
-    -> Log Level:   {}
-    -> Environment: {}."#,
+        "Starting server at: {}, Log Level: {}, Environment: {}",
         listen_addr,
         config::settings().log_level(),
         config::settings().env()
@@ -43,6 +42,16 @@ async fn main() {
 }
 
 fn init_logger() {
+    let _guard = sentry::init(sentry::ClientOptions {
+        // Enable capturing of traces; set this a to lower value in production:
+        traces_sample_rate: 1.0,
+        dsn: config::settings()
+            .sentry_dsn()
+            .into_dsn()
+            .expect("Invalid Sentry DSN"),
+        ..sentry::ClientOptions::default()
+    });
+
     tracing_subscriber::registry()
         .with(
             EnvFilter::builder()
@@ -50,6 +59,7 @@ fn init_logger() {
                 .parse_lossy(config::settings().log_level())
                 .add_directive("h2::codec=error".parse().unwrap()),
         )
-        .with(fmt::layer())
+        .with(fmt::layer().json())
+        .with(sentry_tracing::layer())
         .init();
 }
