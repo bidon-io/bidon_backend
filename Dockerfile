@@ -50,7 +50,7 @@ FROM rust:1.83-alpine AS proxy-builder
 WORKDIR /app
 
 # Install build dependencies
-RUN apk add --no-cache musl-dev gcc make linux-headers protobuf-dev
+RUN apk add --no-cache musl-dev gcc make linux-headers protobuf-dev openssl-dev perl
 
 # Copy Cargo files first to cache dependencies
 COPY Cargo.toml Cargo.lock ./
