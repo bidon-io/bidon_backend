@@ -19,24 +19,37 @@
           />
         </span>
       </template>
-      <Fieldset legend="Ad Units">
-        <div class="flex flex-col gap-3">
+      <Fieldset legend="Ad Units" class="p-fieldset">
+        <div class="p-datatable p-datatable-striped">
+          <div
+            class="p-datatable-header p-grid"
+            style="grid-template-columns: 5% 45% 25% 10% 15%"
+          >
+            <div class="p-text-center">#</div>
+            <div>Label</div>
+            <div>UID</div>
+            <div class="p-text-center">Price</div>
+            <div class="p-text-center">Account</div>
+          </div>
           <div
             v-for="adUnit in network.adUnits"
             :key="adUnit.id"
-            class="flex align-items-center"
+            class="p-datatable-row p-grid"
+            style="
+              grid-template-columns: 5% 45% 25% 10% 15%;
+              align-items: center;
+            "
           >
-            <Checkbox v-model="network.selectedAdUnitIds" :value="adUnit.id" />
-            <div class="flex gap-2 ml-4 text-sm">
-              <span><b>Label:</b> {{ adUnit.label }}</span>
-              <span><b>UID:</b> {{ adUnit.uid }}</span>
-              <span
-                ><b>Price Floor:</b>
-                {{ `$${adUnit.pricefloor.toFixed(2)}` }}</span
-              >
-              <span><b>Account:</b> {{ adUnit.account }}</span>
-              <span><b>Bidding:</b> {{ adUnit.isBidding }}</span>
+            <div class="p-text-center">
+              <Checkbox
+                v-model="network.selectedAdUnitIds"
+                :value="adUnit.id"
+              />
             </div>
+            <div>{{ adUnit.label }}</div>
+            <div>{{ adUnit.uid }}</div>
+            <div class="p-text-center">${{ adUnit.pricefloor.toFixed(2) }}</div>
+            <div class="p-text-center">{{ adUnit.account }}</div>
           </div>
         </div>
       </Fieldset>
@@ -301,9 +314,9 @@ watch(
       (network) => network.isBidding === props.isBidding,
     );
     const updatedNetworks = bidTypeNetworks.map((network) => {
-      const networkAdUnits = adUnits.filter(
-        (adUnit) => adUnit.networkKey === network.key,
-      );
+      const networkAdUnits = adUnits
+        .filter((adUnit) => adUnit.networkKey === network.key)
+        .sort((adUnit) => adUnit.pricefloor);
       return {
         ...network,
         enabled: props.networkKeys.includes(network.key),
@@ -332,3 +345,17 @@ watchEffect(() => {
   emit("update:adUnitIds", selectedAdUnitIds);
 });
 </script>
+<style scoped>
+.p-datatable-header,
+.p-datatable-row {
+  display: grid;
+}
+.p-datatable-header {
+  font-weight: bold;
+  background-color: var(--surface-b);
+  border-bottom: 1px solid var(--surface-d);
+}
+.p-datatable-row {
+  border-bottom: 1px solid var(--surface-d);
+}
+</style>
