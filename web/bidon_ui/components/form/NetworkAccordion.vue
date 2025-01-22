@@ -316,7 +316,7 @@ watch(
     const updatedNetworks = bidTypeNetworks.map((network) => {
       const networkAdUnits = adUnits
         .filter((adUnit) => adUnit.networkKey === network.key)
-        .sort((adUnit) => adUnit.pricefloor);
+        .sort((a, b) => a.pricefloor - b.pricefloor);
       return {
         ...network,
         enabled: props.networkKeys.includes(network.key),
