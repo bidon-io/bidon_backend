@@ -23,8 +23,30 @@ import (
 
 func UseAuthorization(g *echo.Group, authService *auth.Service) {
 	sm := authService.GetSessionManager()
+	g.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			skipper := skipIfAny(skipIfWebAppOrAuth("Bearer", "Basic"), skipIfAuthRoutes())
+			if skipper(c) {
+				return next(c)
+			}
+
+			apiKey := c.Request().Header.Get("X-Bidon-Api-Key")
+			if apiKey == "" {
+				return next(c)
+			}
+
+			authCtx, err := authService.ResolveAPIKey(c.Request().Context(), apiKey)
+			if err != nil {
+				return err
+			}
+
+			c.Set("authCtx", authCtx)
+
+			return next(c)
+		}
+	})
 	g.Use(middleware.BasicAuthWithConfig(middleware.BasicAuthConfig{
-		Skipper: skipIfAny(skipIfWebAppOrAuth("Bearer"), skipIfAuthRoutes()),
+		Skipper: skipIfAny(skipIfWebAppOrAuth("Bearer"), skipIfAuthRoutes(), skipIfApiKey()),
 		Validator: func(username, password string, c echo.Context) (bool, error) {
 			if authService.IsSuperUser(username, password) {
 				c.Set("authCtx", stubAuthContext{})
@@ -36,7 +58,7 @@ func UseAuthorization(g *echo.Group, authService *auth.Service) {
 		},
 	}))
 	g.Use(echojwt.WithConfig(echojwt.Config{
-		Skipper: skipIfAny(skipIfWebAppOrAuth("Basic"), skipIfAuthRoutes()),
+		Skipper: skipIfAny(skipIfWebAppOrAuth("Basic"), skipIfAuthRoutes(), skipIfApiKey()),
 		SuccessHandler: func(c echo.Context) {
 			token := c.Get("user").(*jwt.Token)
 			claims := token.Claims.(*auth.JWTClaims)
@@ -239,6 +261,12 @@ func getAuthContext(c echo.Context) (admin.AuthContext, error) {
 	}
 
 	return authCtx, nil
+}
+
+func skipIfApiKey() middleware.Skipper {
+	return func(c echo.Context) bool {
+		return c.Request().Header.Get("X-Bidon-Api-Key") != ""
+	}
 }
 
 func skipIfWebAppOrAuth(prefixes ...string) middleware.Skipper {

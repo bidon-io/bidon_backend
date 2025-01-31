@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	openapi_types "github.com/oapi-codegen/runtime/types"
 	"net/http"
 	"strconv"
 	"strings"
@@ -369,6 +370,7 @@ func (s *Server) GetResources(c echo.Context) error {
 		s.LineItemService,
 		s.SegmentService,
 		s.UserService,
+		s.APIKeyService,
 	}
 
 	response := make(map[string]admin.ResourceMeta, len(services))
@@ -383,6 +385,64 @@ func (s *Server) GetResources(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, response)
+}
+
+// API keys handlers
+
+func (s *Server) GetApiKeys(c echo.Context) error {
+	authCtx, err := getAuthContext(c)
+	if err != nil {
+		return err
+	}
+
+	collection, err := s.APIKeyService.List(c.Request().Context(), authCtx)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, collection.Items)
+}
+
+func (s *Server) CreateApiKey(c echo.Context) error {
+	authCtx, err := getAuthContext(c)
+	if err != nil {
+		return err
+	}
+
+	resource, err := s.APIKeyService.Create(c.Request().Context(), authCtx)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusCreated, resource)
+}
+
+func (s *Server) GetApiKey(c echo.Context, uuid openapi_types.UUID) error {
+	authCtx, err := getAuthContext(c)
+	if err != nil {
+		return err
+	}
+
+	resource, err := s.APIKeyService.Find(c.Request().Context(), authCtx, uuid.String())
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, resource)
+}
+
+func (s *Server) DeleteApiKey(c echo.Context, uuid openapi_types.UUID) error {
+	authCtx, err := getAuthContext(c)
+	if err != nil {
+		return err
+	}
+
+	err = s.APIKeyService.Delete(c.Request().Context(), authCtx, uuid.String())
+	if err != nil {
+		return err
+	}
+
+	return c.NoContent(http.StatusNoContent)
 }
 
 // Import LineItems handlers

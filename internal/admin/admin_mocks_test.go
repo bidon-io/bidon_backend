@@ -17,6 +17,9 @@ var _ Store = &StoreMock{}
 //
 //		// make and configure a mocked Store
 //		mockedStore := &StoreMock{
+//			APIKeysFunc: func() APIKeyRepo {
+//				panic("mock out the APIKeys method")
+//			},
 //			AppDemandProfilesFunc: func() AppDemandProfileRepo {
 //				panic("mock out the AppDemandProfiles method")
 //			},
@@ -54,6 +57,9 @@ var _ Store = &StoreMock{}
 //
 //	}
 type StoreMock struct {
+	// APIKeysFunc mocks the APIKeys method.
+	APIKeysFunc func() APIKeyRepo
+
 	// AppDemandProfilesFunc mocks the AppDemandProfiles method.
 	AppDemandProfilesFunc func() AppDemandProfileRepo
 
@@ -86,6 +92,9 @@ type StoreMock struct {
 
 	// calls tracks calls to the methods.
 	calls struct {
+		// APIKeys holds details about calls to the APIKeys method.
+		APIKeys []struct {
+		}
 		// AppDemandProfiles holds details about calls to the AppDemandProfiles method.
 		AppDemandProfiles []struct {
 		}
@@ -117,6 +126,7 @@ type StoreMock struct {
 		Users []struct {
 		}
 	}
+	lockAPIKeys                 sync.RWMutex
 	lockAppDemandProfiles       sync.RWMutex
 	lockApps                    sync.RWMutex
 	lockAuctionConfigurations   sync.RWMutex
@@ -127,6 +137,33 @@ type StoreMock struct {
 	lockLineItems               sync.RWMutex
 	lockSegments                sync.RWMutex
 	lockUsers                   sync.RWMutex
+}
+
+// APIKeys calls APIKeysFunc.
+func (mock *StoreMock) APIKeys() APIKeyRepo {
+	if mock.APIKeysFunc == nil {
+		panic("StoreMock.APIKeysFunc: method is nil but Store.APIKeys was just called")
+	}
+	callInfo := struct {
+	}{}
+	mock.lockAPIKeys.Lock()
+	mock.calls.APIKeys = append(mock.calls.APIKeys, callInfo)
+	mock.lockAPIKeys.Unlock()
+	return mock.APIKeysFunc()
+}
+
+// APIKeysCalls gets all the calls that were made to APIKeys.
+// Check the length with:
+//
+//	len(mockedStore.APIKeysCalls())
+func (mock *StoreMock) APIKeysCalls() []struct {
+} {
+	var calls []struct {
+	}
+	mock.lockAPIKeys.RLock()
+	calls = mock.calls.APIKeys
+	mock.lockAPIKeys.RUnlock()
+	return calls
 }
 
 // AppDemandProfiles calls AppDemandProfilesFunc.
