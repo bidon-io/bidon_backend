@@ -16,6 +16,7 @@ type Service struct {
 	SegmentService                *SegmentService
 	UserService                   *UserService
 	SettingsService               *SettingsService
+	APIKeyService                 *APIKeyService
 }
 
 // NewService creates a new Service.
@@ -32,6 +33,7 @@ func NewService(store Store) *Service {
 		SegmentService:                NewSegmentService(store),
 		UserService:                   NewUserService(store),
 		SettingsService:               NewSettingsService(store),
+		APIKeyService:                 NewAPIKeyService(store),
 	}
 }
 
@@ -47,4 +49,5 @@ type Store interface {
 	LineItems() LineItemRepo
 	Segments() SegmentRepo
 	Users() UserRepo
+	APIKeys() APIKeyRepo
 }

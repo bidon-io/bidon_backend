@@ -99,7 +99,7 @@
 </template>
 
 <script setup lang="ts">
-import { FilterMatchModeOptions } from "primevue/api";
+import type { FilterMatchModeOptions } from "primevue/api";
 
 import useDeleteResource from "@/composables/useDeleteResource";
 
@@ -123,7 +123,7 @@ interface Column {
   sortable?: boolean;
   copyable?: boolean;
   link?: ResourceLink;
-  associatedResourcesLink: AssociatedResourcesLink;
+  associatedResourcesLink?: AssociatedResourcesLink;
 }
 
 const props = defineProps<{
@@ -200,7 +200,8 @@ const deleteHandle = useDeleteResource({
     )),
 });
 
-const copyField = (field) => {
+// eslint-disable-next-line  @typescript-eslint/no-explicit-any
+const copyField = (field: any) => {
   navigator.clipboard.writeText(field);
 };
 </script>

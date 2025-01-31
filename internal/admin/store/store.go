@@ -16,6 +16,7 @@ type Store struct {
 	LineItemRepo               *LineItemRepo
 	SegmentRepo                *SegmentRepo
 	UserRepo                   *UserRepo
+	APIKeyRepo                 *APIKeyRepo
 }
 
 func New(db *db.DB) *Store {
@@ -30,6 +31,7 @@ func New(db *db.DB) *Store {
 		LineItemRepo:               NewLineItemRepo(db),
 		SegmentRepo:                NewSegmentRepo(db),
 		UserRepo:                   NewUserRepo(db),
+		APIKeyRepo:                 NewAPIKeyRepo(db),
 	}
 }
 
@@ -71,6 +73,10 @@ func (s *Store) Segments() admin.SegmentRepo {
 
 func (s *Store) Users() admin.UserRepo {
 	return s.UserRepo
+}
+
+func (s *Store) APIKeys() admin.APIKeyRepo {
+	return s.APIKeyRepo
 }
 
 func platformID(platformID db.PlatformID) admin.PlatformID {

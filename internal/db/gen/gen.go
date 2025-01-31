@@ -25,6 +25,12 @@ func GenerateModels(db *sql.DB) {
 		}),
 	)
 
+	g.GenerateModel(
+		"api_keys",
+		gen.FieldRelate(field.BelongsTo, "User", user, &field.RelateConfig{}),
+		gen.FieldType("id", "uuid.UUID"),
+	)
+
 	app := g.GenerateModel(
 		"apps",
 		gen.FieldRelate(field.BelongsTo, "User", user, &field.RelateConfig{}),
@@ -149,6 +155,9 @@ func newGenerator(sqlDB *sql.DB, config gen.Config) *gen.Generator {
 	g := gen.NewGenerator(config)
 
 	g.WithDataTypeMap(dataTypeMap)
+	g.WithImportPkgPath(
+		"github.com/gofrs/uuid/v5",
+	)
 
 	db, err := gorm.Open(postgres.New(postgres.Config{Conn: sqlDB}))
 	if err != nil {

@@ -85,7 +85,7 @@ func main() {
 			log.Fatal(err)
 		}
 	}
-	authService := auth.NewAuthService(store.UserRepo, authConfig)
+	authService := auth.NewAuthService(store.UserRepo, store.APIKeyRepo, authConfig)
 	adminService := admin.NewService(store)
 
 	g := e.Group("")

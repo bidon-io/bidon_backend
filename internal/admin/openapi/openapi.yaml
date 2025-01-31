@@ -1036,6 +1036,91 @@ paths:
       responses:
         '204':
           description: Password Update successful
+  /api/api_keys:
+    get:
+      operationId: getApiKeys
+      summary: List API keys
+      tags:
+        - API keys
+      responses:
+        '200':
+          description: A list of API keys
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      $ref: './schemas/uuid.schema.json'
+                    last_accessed_at:
+                      type: string
+                      format: date-time
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    post:
+      operationId: createApiKey
+      summary: Create API key
+      tags:
+        - API keys
+      responses:
+        '201':
+          description: An API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                      $ref: './schemas/uuid.schema.json'
+                  value:
+                      type: string
+                  last_accessed_at:
+                      type: string
+                      format: date-time
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/api_keys/{uuid}:
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: 'An API key UUID'
+        schema:
+          $ref: './schemas/uuid.schema.json'
+    get:
+      operationId: getApiKey
+      tags:
+        - API keys
+      summary: Get API key
+      responses:
+        '200':
+          description: An API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                      $ref: './schemas/uuid.schema.json'
+                  value:
+                      type: string
+                  last_accessed_at:
+                      type: string
+                      format: date-time
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    delete:
+      operationId: deleteApiKey
+      tags:
+        - API keys
+      summary: Delete API key
+      responses:
+        '204':
+          description: API key deleted successfully
+        default:
+          $ref: '#/components/responses/ErrorResponse'
   /api/openapi.json:
     get:
       summary: Get OpenAPI specification

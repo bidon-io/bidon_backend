@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"crypto/subtle"
+	"github.com/gofrs/uuid/v5"
 	"time"
 
 	"github.com/alexedwards/scs/v2"
@@ -13,12 +14,17 @@ import (
 
 type Service struct {
 	userRepo       UserRepo
+	apiKeyRepo     APIKeyRepo
 	config         Config
 	sessionManager *scs.SessionManager
 }
 
 type UserRepo interface {
 	FindByEmailAndPassword(ctx context.Context, email, password string) (User, error)
+}
+
+type APIKeyRepo interface {
+	Access(ctx context.Context, keyID uuid.UUID) (APIKey, error)
 }
 
 type Config struct {
@@ -28,7 +34,7 @@ type Config struct {
 	SuperUserPassword []byte
 }
 
-func NewAuthService(userRepo UserRepo, config Config) *Service {
+func NewAuthService(userRepo UserRepo, apiKeyRepo APIKeyRepo, config Config) *Service {
 	sm := scs.New()
 
 	sm.Lifetime = 72 * time.Hour
@@ -39,6 +45,7 @@ func NewAuthService(userRepo UserRepo, config Config) *Service {
 
 	return &Service{
 		userRepo:       userRepo,
+		apiKeyRepo:     apiKeyRepo,
 		config:         config,
 		sessionManager: sm,
 	}
@@ -106,4 +113,18 @@ func (s *Service) GetSecretKey() []byte {
 func (s *Service) IsSuperUser(username, password string) bool {
 	return subtle.ConstantTimeCompare([]byte(username), s.config.SuperUserLogin) == 1 &&
 		subtle.ConstantTimeCompare([]byte(password), s.config.SuperUserPassword) == 1
+}
+
+func (s *Service) ResolveAPIKey(ctx context.Context, key string) (admin.AuthContext, error) {
+	keyID, err := ParseAPIKey(key)
+	if err != nil {
+		return nil, err
+	}
+
+	apiKey, err := s.apiKeyRepo.Access(ctx, keyID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &apiKey, nil
 }
