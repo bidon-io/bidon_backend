@@ -26,12 +26,20 @@ func Echo() *echo.Echo {
 	return e
 }
 
-func UseCommonMiddleware(g *echo.Group, service string, logger *zap.Logger) {
-	g.Use(otelecho.Middleware(service))
+type Middleware struct {
+	Service               string
+	Logger                *zap.Logger
+	LogRequestAndResponse bool
+}
+
+func UseCommonMiddleware(g *echo.Group, config Middleware) {
+	g.Use(otelecho.Middleware(config.Service))
 
 	g.Use(middleware.RequestID())
-	g.Use(echoRequestLogger(logger))
-	g.Use(echoBodyDump(logger))
+	g.Use(echoRequestLogger(config.Logger))
+	if config.LogRequestAndResponse {
+		g.Use(echoBodyDump())
+	}
 	g.Use(middleware.Recover())
 
 	g.Use(sentryecho.New(sentryecho.Options{
@@ -96,7 +104,7 @@ func (v *echoValidator) Validate(i any) error {
 	return nil
 }
 
-func echoBodyDump(logger *zap.Logger) echo.MiddlewareFunc {
+func echoBodyDump() echo.MiddlewareFunc {
 	return middleware.BodyDump(func(c echo.Context, reqBody, resBody []byte) {
 		c.Set("reqBody", reqBody)
 		c.Set("resBody", resBody)
@@ -115,10 +123,7 @@ func echoRequestLogger(logger *zap.Logger) echo.MiddlewareFunc {
 		LogError:     true,
 		LogLatency:   true,
 		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
-			reqBody, _ := c.Get("reqBody").([]byte)
-			resBody, _ := c.Get("resBody").([]byte)
-
-			logger.Info("request",
+			fields := []zap.Field{
 				zap.String("id", v.RequestID),
 				zap.String("remote_ip", v.RemoteIP),
 				zap.String("host", v.Host),
@@ -128,9 +133,18 @@ func echoRequestLogger(logger *zap.Logger) echo.MiddlewareFunc {
 				zap.Int("status", v.Status),
 				zap.NamedError("error", v.Error),
 				zap.Duration("latency", v.Latency),
-				zap.ByteString("request_body", reqBody),
-				zap.ByteString("response_body", resBody),
-			)
+			}
+
+			reqBody, ok := c.Get("reqBody").([]byte)
+			if ok {
+				fields = append(fields, zap.ByteString("request_body", reqBody))
+			}
+			resBody, ok := c.Get("resBody").([]byte)
+			if ok {
+				fields = append(fields, zap.ByteString("response_body", resBody))
+			}
+
+			logger.Info("request", fields...)
 
 			return nil
 		},

@@ -265,7 +265,11 @@ func main() {
 	e := config.Echo()
 
 	v1Group := e.Group("")
-	config.UseCommonMiddleware(v1Group, "bidon-sdkapi", logger)
+	config.UseCommonMiddleware(v1Group, config.Middleware{
+		Service:               "bidon-sdkapi",
+		Logger:                logger,
+		LogRequestAndResponse: true,
+	})
 	v1Group.Use(sdkapi.CheckBidonHeader)
 
 	routerV1 := v1.Router{
@@ -285,7 +289,11 @@ func main() {
 	routerV1.RegisterRoutes(v1Group)
 
 	v2Group := e.Group("")
-	config.UseCommonMiddleware(v2Group, "bidon-sdkapi", logger)
+	config.UseCommonMiddleware(v2Group, config.Middleware{
+		Service:               "bidon-sdkapi",
+		Logger:                logger,
+		LogRequestAndResponse: true,
+	})
 	v2Group.Use(sdkapi.CheckBidonHeader)
 	routerV2 := v2.Router{
 		ConfigFetcher:             configFetcher,

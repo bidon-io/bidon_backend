@@ -89,7 +89,11 @@ func main() {
 	adminService := admin.NewService(store)
 
 	g := e.Group("")
-	config.UseCommonMiddleware(g, "bidon-admin", logger)
+	config.UseCommonMiddleware(g, config.Middleware{
+		Service:               "bidon-admin",
+		Logger:                logger,
+		LogRequestAndResponse: config.Debug(),
+	})
 	adminecho.UseAuthorization(g, authService)
 	serv := adminecho.NewServer(adminService, authService)
 	api.RegisterHandlers(g, serv)
