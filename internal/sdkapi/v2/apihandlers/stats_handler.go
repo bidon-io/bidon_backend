@@ -116,6 +116,7 @@ func prepareStatsEvents(req *request[schema.StatsV2Request, *schema.StatsV2Reque
 					"fill":  {adUnit.FillStartTS, adUnit.FillFinishTS},
 					"token": {adUnit.TokenStartTS, adUnit.TokenFinishTS},
 				},
+				Error: adUnit.ErrorMessage,
 			}
 			events = append(events, event.NewAdEvent(&req.raw.BaseRequest, adRequestParams, req.geoData))
 		}
