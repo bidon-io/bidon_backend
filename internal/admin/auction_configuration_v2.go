@@ -127,7 +127,7 @@ func (p *auctionConfigurationV2Policy) authorizeUpdate(ctx context.Context, auth
 	}
 
 	// If user tries to change the segment and segment is not the same as before, check if user can read the new segment.
-	if attrs.SegmentID != nil && *attrs.SegmentID != *config.SegmentID {
+	if attrs.SegmentID != nil && (config.SegmentID == nil || *attrs.SegmentID != *config.SegmentID) {
 		_, err := p.segmentPolicy.getReadScope(authCtx).find(ctx, *attrs.SegmentID)
 		if err != nil {
 			return err
