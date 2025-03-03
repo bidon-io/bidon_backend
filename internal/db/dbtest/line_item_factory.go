@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/shopspring/decimal"
 
+	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/db"
 )

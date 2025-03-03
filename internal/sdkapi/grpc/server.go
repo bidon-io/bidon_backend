@@ -7,16 +7,17 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap/ctxzap"
+	"github.com/labstack/echo/v4"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+
 	"github.com/bidon-io/bidon-backend/config"
 	"github.com/bidon-io/bidon-backend/internal/auctionv2"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/geocoder"
 	v3 "github.com/bidon-io/bidon-backend/pkg/proto/com/iabtechlab/openrtb/v3"
 	pb "github.com/bidon-io/bidon-backend/pkg/proto/org/bidon/proto/v1"
-	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap/ctxzap"
-	"github.com/labstack/echo/v4"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 type Server struct {

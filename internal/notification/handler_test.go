@@ -7,13 +7,14 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/go-cmp/cmp"
+
 	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/bidding"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
 	"github.com/bidon-io/bidon-backend/internal/notification"
 	"github.com/bidon-io/bidon-backend/internal/notification/mocks"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
-	"github.com/google/go-cmp/cmp"
 )
 
 func TestHandler_HandleBiddingRound(t *testing.T) {

@@ -10,14 +10,15 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/gofrs/uuid/v5"
+	"github.com/prebid/openrtb/v19/adcom1"
+	"github.com/prebid/openrtb/v19/openrtb2"
+
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
 	"github.com/bidon-io/bidon-backend/internal/bidding/openrtb"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
-	"github.com/gofrs/uuid/v5"
-	"github.com/prebid/openrtb/v19/adcom1"
-	"github.com/prebid/openrtb/v19/openrtb2"
 )
 
 type BigoAdsAdapter struct {
@@ -144,7 +145,7 @@ func (a *BigoAdsAdapter) ExecuteRequest(ctx context.Context, client *http.Client
 	dr.RawRequest = string(requestBody)
 
 	url := "https://api.gov-static.tech/Ad/GetUniAdS2s?id=200104"
-	httpReq, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(requestBody))
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewBuffer(requestBody))
 	if err != nil {
 		dr.Error = err
 		return dr

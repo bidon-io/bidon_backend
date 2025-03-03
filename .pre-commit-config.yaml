@@ -18,3 +18,17 @@ repos:
         entry: buf generate
         language: system
         pass_filenames: false
+      - id: golangci-lint
+        name: Run golangci-lint on modified files
+        description: Only modified files are linted, so linters like 'unused' that need to scan all files won't work as expected.
+        entry: golangci-lint run --new-from-rev HEAD --fix
+        types: [ go ]
+        language: golang
+        require_serial: true
+        pass_filenames: false
+      - id: go-mod-tidy
+        name: Run go mod tidy
+        entry: go mod tidy
+        types: [ go ]
+        language: golang
+        pass_filenames: false

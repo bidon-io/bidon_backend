@@ -2,17 +2,17 @@ package store_test
 
 import (
 	"context"
-	"github.com/go-redis/redismock/v9"
 	"testing"
 	"time"
 
-	"github.com/bidon-io/bidon-backend/config"
+	"github.com/go-redis/redismock/v9"
+	"github.com/google/go-cmp/cmp"
 
+	"github.com/bidon-io/bidon-backend/config"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/adapter/store"
 	"github.com/bidon-io/bidon-backend/internal/db"
 	"github.com/bidon-io/bidon-backend/internal/db/dbtest"
-	"github.com/google/go-cmp/cmp"
 )
 
 func TestAppDemandProfileFetcher_FetchCached(t *testing.T) {

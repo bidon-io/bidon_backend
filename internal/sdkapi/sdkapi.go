@@ -1,13 +1,13 @@
 package sdkapi
 
 import (
-	"github.com/labstack/echo/v4/middleware"
 	"net/http"
 	"strings"
 
 	"github.com/getsentry/sentry-go"
 	sentryecho "github.com/getsentry/sentry-go/echo"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 // App represents an app for the purposes of the SDK API

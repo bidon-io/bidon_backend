@@ -5,9 +5,10 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/labstack/echo/v4"
+
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/v2/api"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/v2/api/mocks"
-	"github.com/labstack/echo/v4"
 )
 
 func TestServer_GetAuction(t *testing.T) {

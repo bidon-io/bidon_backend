@@ -6,15 +6,13 @@ import (
 	"os"
 	"testing"
 
-	"github.com/bidon-io/bidon-backend/internal/sdkapi/v2/apihandlers"
-
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/auction"
-	"github.com/bidon-io/bidon-backend/internal/sdkapi/v2/apihandlers/mocks"
-
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event/engine"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
+	"github.com/bidon-io/bidon-backend/internal/sdkapi/v2/apihandlers"
+	"github.com/bidon-io/bidon-backend/internal/sdkapi/v2/apihandlers/mocks"
 )
 
 func SetupStatsV2Handler() apihandlers.StatsHandler {

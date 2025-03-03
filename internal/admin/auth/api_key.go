@@ -5,9 +5,10 @@ import (
 	"encoding/base32"
 	"encoding/binary"
 	"fmt"
-	"github.com/gofrs/uuid/v5"
 	"hash/crc32"
 	"time"
+
+	"github.com/gofrs/uuid/v5"
 )
 
 var (

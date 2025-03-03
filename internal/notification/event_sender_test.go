@@ -7,12 +7,12 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
-	"github.com/bidon-io/bidon-backend/internal/sdkapi/event/engine"
-
-	"github.com/bidon-io/bidon-backend/internal/notification"
 	"github.com/google/go-cmp/cmp"
 	"github.com/prebid/openrtb/v19/openrtb3"
+
+	"github.com/bidon-io/bidon-backend/internal/notification"
+	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
+	"github.com/bidon-io/bidon-backend/internal/sdkapi/event/engine"
 )
 
 func TestHandler_SendEvent(t *testing.T) {

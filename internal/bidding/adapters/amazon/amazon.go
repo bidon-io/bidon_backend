@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/gofrs/uuid/v5"
+
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
-	"github.com/gofrs/uuid/v5"
 )
 
 type Slot struct {

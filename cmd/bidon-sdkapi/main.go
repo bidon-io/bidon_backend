@@ -14,35 +14,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/bidon-io/bidon-backend/internal/auctionv2"
-	"google.golang.org/grpc/reflection"
-
-	grpcserver "github.com/bidon-io/bidon-backend/internal/sdkapi/grpc"
-	pb "github.com/bidon-io/bidon-backend/pkg/proto/org/bidon/proto/v1"
-	"go.opentelemetry.io/otel/exporters/prometheus"
-	"go.opentelemetry.io/otel/sdk/metric"
-
-	"github.com/bidon-io/bidon-backend/config"
-	"github.com/bidon-io/bidon-backend/internal/adapter"
-	adapterstore "github.com/bidon-io/bidon-backend/internal/adapter/store"
-	"github.com/bidon-io/bidon-backend/internal/auction"
-	auctionstore "github.com/bidon-io/bidon-backend/internal/auction/store"
-	"github.com/bidon-io/bidon-backend/internal/bidding"
-	"github.com/bidon-io/bidon-backend/internal/bidding/adapters_builder"
-	dbpkg "github.com/bidon-io/bidon-backend/internal/db"
-	"github.com/bidon-io/bidon-backend/internal/notification"
-	notificationstore "github.com/bidon-io/bidon-backend/internal/notification/store"
-	"github.com/bidon-io/bidon-backend/internal/sdkapi"
-	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
-	"github.com/bidon-io/bidon-backend/internal/sdkapi/event/engine"
-	"github.com/bidon-io/bidon-backend/internal/sdkapi/geocoder"
-	sdkapistore "github.com/bidon-io/bidon-backend/internal/sdkapi/store"
-	v1 "github.com/bidon-io/bidon-backend/internal/sdkapi/v1"
-	v2 "github.com/bidon-io/bidon-backend/internal/sdkapi/v2"
-	"github.com/bidon-io/bidon-backend/internal/sdkapi/v2/openapi"
-	"github.com/bidon-io/bidon-backend/internal/segment"
-	segmentstore "github.com/bidon-io/bidon-backend/internal/segment/store"
-
 	"github.com/bool64/cache"
 	"github.com/getsentry/sentry-go"
 	_ "github.com/joho/godotenv/autoload"
@@ -52,6 +23,34 @@ import (
 	"github.com/redis/go-redis/v9"
 	"github.com/twmb/franz-go/pkg/kgo"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"go.opentelemetry.io/otel/exporters/prometheus"
+	"go.opentelemetry.io/otel/sdk/metric"
+	"google.golang.org/grpc/reflection"
+
+	"github.com/bidon-io/bidon-backend/config"
+	"github.com/bidon-io/bidon-backend/internal/adapter"
+	adapterstore "github.com/bidon-io/bidon-backend/internal/adapter/store"
+	"github.com/bidon-io/bidon-backend/internal/auction"
+	auctionstore "github.com/bidon-io/bidon-backend/internal/auction/store"
+	"github.com/bidon-io/bidon-backend/internal/auctionv2"
+	"github.com/bidon-io/bidon-backend/internal/bidding"
+	"github.com/bidon-io/bidon-backend/internal/bidding/adapters_builder"
+	dbpkg "github.com/bidon-io/bidon-backend/internal/db"
+	"github.com/bidon-io/bidon-backend/internal/notification"
+	notificationstore "github.com/bidon-io/bidon-backend/internal/notification/store"
+	"github.com/bidon-io/bidon-backend/internal/sdkapi"
+	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
+	"github.com/bidon-io/bidon-backend/internal/sdkapi/event/engine"
+	"github.com/bidon-io/bidon-backend/internal/sdkapi/geocoder"
+	grpcserver "github.com/bidon-io/bidon-backend/internal/sdkapi/grpc"
+	sdkapistore "github.com/bidon-io/bidon-backend/internal/sdkapi/store"
+	v1 "github.com/bidon-io/bidon-backend/internal/sdkapi/v1"
+	v2 "github.com/bidon-io/bidon-backend/internal/sdkapi/v2"
+	"github.com/bidon-io/bidon-backend/internal/sdkapi/v2/openapi"
+	"github.com/bidon-io/bidon-backend/internal/segment"
+	segmentstore "github.com/bidon-io/bidon-backend/internal/segment/store"
+	"github.com/bidon-io/bidon-backend/pkg/clock"
+	pb "github.com/bidon-io/bidon-backend/pkg/proto/org/bidon/proto/v1"
 )
 
 var cpus = runtime.GOMAXPROCS(0)
@@ -69,7 +68,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("config.NewLogger(): %v", err)
 	}
-	defer logger.Sync()
+	defer logger.Sync() //nolint:errcheck
 
 	sentryConf := config.Sentry()
 	err = sentry.Init(sentryConf.ClientOptions)
@@ -169,7 +168,7 @@ func main() {
 			Cache: segmentCache,
 		},
 	}
-	biddingHttpClient := &http.Client{
+	biddingHTTPClient := &http.Client{
 		Timeout: 4 * time.Second,
 		Transport: otelhttp.NewTransport(&http.Transport{
 			MaxConnsPerHost:     30 * cpus,
@@ -180,14 +179,14 @@ func main() {
 	notificationHandler := notification.Handler{
 		AuctionResultRepo: notificationstore.AuctionResultRepo{Redis: rdb},
 		Sender: notification.EventSender{
-			HttpClient:  biddingHttpClient,
+			HttpClient:  biddingHTTPClient,
 			EventLogger: eventLogger,
 		},
 	}
 	notificationHandlerV2 := notification.HandlerV2{
 		AuctionResultRepo: notificationstore.AuctionResultV2Repo{Redis: rdb},
 		Sender: notification.EventSender{
-			HttpClient:  biddingHttpClient,
+			HttpClient:  biddingHTTPClient,
 			EventLogger: eventLogger,
 		},
 	}
@@ -201,12 +200,13 @@ func main() {
 		Cache: adUnitsCache,
 	}
 	biddingBuilder := &bidding.Builder{
-		AdaptersBuilder:     adapters_builder.BuildBiddingAdapters(biddingHttpClient),
+		AdaptersBuilder:     adapters_builder.BuildBiddingAdapters(biddingHTTPClient),
 		NotificationHandler: notificationHandler,
 	}
 	biddingBuilderV2 := &bidding.Builder{
-		AdaptersBuilder:     adapters_builder.BuildBiddingAdapters(biddingHttpClient),
+		AdaptersBuilder:     adapters_builder.BuildBiddingAdapters(biddingHTTPClient),
 		NotificationHandler: notificationHandlerV2,
+		BidCacher:           &bidding.BidCache{Redis: rdb, Clock: clock.New()},
 	}
 	biddingAdaptersCfgCache := config.NewRedisCacheOf[adapter.RawConfigsMap](rdb, 10*time.Minute, "bidding_adapters_cfg")
 	err = biddingAdaptersCfgCache.Monitor(meter)

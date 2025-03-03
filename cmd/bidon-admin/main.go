@@ -16,6 +16,13 @@ import (
 	"time"
 
 	"github.com/alexedwards/scs/gormstore"
+	"github.com/bwmarrin/snowflake"
+	"github.com/getsentry/sentry-go"
+	_ "github.com/joho/godotenv/autoload"
+	"github.com/labstack/echo-contrib/echoprometheus"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+
 	"github.com/bidon-io/bidon-backend/cmd/bidon-admin/web"
 	"github.com/bidon-io/bidon-backend/config"
 	"github.com/bidon-io/bidon-backend/internal/admin"
@@ -25,12 +32,6 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/admin/openapi"
 	adminstore "github.com/bidon-io/bidon-backend/internal/admin/store"
 	dbpkg "github.com/bidon-io/bidon-backend/internal/db"
-	"github.com/bwmarrin/snowflake"
-	"github.com/getsentry/sentry-go"
-	_ "github.com/joho/godotenv/autoload"
-	"github.com/labstack/echo-contrib/echoprometheus"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 )
 
 func main() {

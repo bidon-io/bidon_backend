@@ -10,19 +10,19 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/bidon-io/bidon-backend/config"
-	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
-	"github.com/bidon-io/bidon-backend/internal/sdkapi/v1/apihandlers"
 	"github.com/google/go-cmp/cmp"
 
+	"github.com/bidon-io/bidon-backend/config"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/bidding"
+	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event/engine"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/geocoder"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
+	"github.com/bidon-io/bidon-backend/internal/sdkapi/v1/apihandlers"
 	sdkapimocks "github.com/bidon-io/bidon-backend/internal/sdkapi/v1/apihandlers/mocks"
 )
 

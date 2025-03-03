@@ -4,20 +4,19 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/go-redis/redismock/v9"
 	"os"
 	"testing"
 	"time"
 
+	"github.com/go-redis/redismock/v9"
+	"github.com/google/go-cmp/cmp"
+
 	"github.com/bidon-io/bidon-backend/config"
-
 	"github.com/bidon-io/bidon-backend/internal/ad"
-
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/db"
 	"github.com/bidon-io/bidon-backend/internal/db/dbtest"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
-	"github.com/google/go-cmp/cmp"
 )
 
 var testDB *db.DB

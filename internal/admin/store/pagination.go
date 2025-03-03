@@ -92,5 +92,5 @@ func (p *Pagination[DBModel]) GetSort() string {
 	default:
 		return "id asc"
 	}
-	return p.Sort
+
 }

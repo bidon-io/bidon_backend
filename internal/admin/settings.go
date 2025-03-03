@@ -1,10 +1,11 @@
 package admin
 
 import (
-	v8n "github.com/go-ozzo/ozzo-validation/v4"
-	"github.com/labstack/echo/v4"
 	"net/http"
 	"regexp"
+
+	v8n "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/labstack/echo/v4"
 )
 
 type PasswordUpdateRequest struct {

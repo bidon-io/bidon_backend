@@ -32,6 +32,9 @@ RUN curl -sSL \
     -o "${BIN}/buf" && \
     chmod +x "${BIN}/buf"
 
+RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh \
+    | sh -s -- -b $(go env GOPATH)/bin
+
 FROM base AS bidon-admin-builder
 
 COPY --from=frontend-deps /app/.output/public ./cmd/bidon-admin/web/ui

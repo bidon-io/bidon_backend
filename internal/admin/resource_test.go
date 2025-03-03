@@ -5,10 +5,10 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/bidon-io/bidon-backend/internal/admin/resource"
-
 	v8n "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/google/go-cmp/cmp"
+
+	"github.com/bidon-io/bidon-backend/internal/admin/resource"
 )
 
 type TestResource struct {

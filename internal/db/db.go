@@ -8,15 +8,15 @@ import (
 	"os"
 	"time"
 
-	"github.com/bidon-io/bidon-backend/internal/adapter"
-	"github.com/lib/pq"
-
-	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bwmarrin/snowflake"
+	"github.com/lib/pq"
 	"github.com/uptrace/opentelemetry-go-extra/otelgorm"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
+
+	"github.com/bidon-io/bidon-backend/internal/ad"
+	"github.com/bidon-io/bidon-backend/internal/adapter"
 )
 
 type DB struct {

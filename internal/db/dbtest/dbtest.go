@@ -8,9 +8,10 @@ import (
 	"runtime"
 	"sync"
 
-	"github.com/bidon-io/bidon-backend/internal/db"
 	"github.com/bwmarrin/snowflake"
 	"github.com/joho/godotenv"
+
+	"github.com/bidon-io/bidon-backend/internal/db"
 )
 
 // Prepare sets up the database for testing and initializes test factories.

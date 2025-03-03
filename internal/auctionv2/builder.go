@@ -46,7 +46,6 @@ type BuildParams struct {
 	MergedAuctionRequest *schema.AuctionV2Request
 	GeoData              geocoder.GeoData
 	AuctionKey           string
-	AdUnitIds            []int64
 	AuctionConfiguration *auction.Config
 }
 

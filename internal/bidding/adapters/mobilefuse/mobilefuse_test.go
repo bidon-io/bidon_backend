@@ -8,15 +8,16 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
+	"github.com/prebid/openrtb/v19/adcom1"
+	"github.com/prebid/openrtb/v19/openrtb2"
+
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters/mobilefuse"
 	"github.com/bidon-io/bidon-backend/internal/bidding/openrtb"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
-	"github.com/google/go-cmp/cmp"
-	"github.com/prebid/openrtb/v19/adcom1"
-	"github.com/prebid/openrtb/v19/openrtb2"
 )
 
 type createRequestTestParams struct {
@@ -259,7 +260,7 @@ func TestMobileFuseAdapter_ExecuteRequest(t *testing.T) {
 	responseBody := []byte(`{"key": "value"`)
 
 	customClient := NewTestClient(func(req *http.Request) *http.Response {
-		if req.Method != "POST" {
+		if req.Method != http.MethodPost {
 			t.Errorf("Expected POST request")
 		}
 		if req.URL.String() != "https://mfx.mobilefuse.com/openrtb?ssp=4020" {

@@ -40,12 +40,12 @@ func BuildSegment(opts ...func(*db.Segment)) db.Segment {
 	return seg
 }
 
-func CreateSegment(t testing.TB, tx *db.DB, opts ...func(*db.Segment)) db.Segment {
-	t.Helper()
+func CreateSegment(tb testing.TB, tx *db.DB, opts ...func(*db.Segment)) db.Segment {
+	tb.Helper()
 
 	seg := BuildSegment(opts...)
 	if err := tx.Create(&seg).Error; err != nil {
-		t.Fatalf("Failed to create segment: %v", err)
+		tb.Fatalf("Failed to create segment: %v", err)
 	}
 
 	return seg

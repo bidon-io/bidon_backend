@@ -1,3 +1,5 @@
 bidon_back
 perf
 node_modules
+web/bidon_ui/node_modules
+target/debug

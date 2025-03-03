@@ -7,8 +7,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/bidon-io/bidon-backend/internal/sdkapi/v1/apihandlers"
-
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/auction"
@@ -18,6 +16,7 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event/engine"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/geocoder"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
+	"github.com/bidon-io/bidon-backend/internal/sdkapi/v1/apihandlers"
 	sdkapimocks "github.com/bidon-io/bidon-backend/internal/sdkapi/v1/apihandlers/mocks"
 	"github.com/bidon-io/bidon-backend/internal/segment"
 	segmentmocks "github.com/bidon-io/bidon-backend/internal/segment/mocks"

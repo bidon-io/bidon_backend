@@ -1,6 +1,8 @@
 package grpcserver
 
 import (
+	"google.golang.org/protobuf/proto"
+
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/auction/store"
@@ -11,8 +13,6 @@ import (
 	adcomctx "github.com/bidon-io/bidon-backend/pkg/proto/com/iabtechlab/adcom/v1/context"
 	v3 "github.com/bidon-io/bidon-backend/pkg/proto/com/iabtechlab/openrtb/v3"
 	pbctx "github.com/bidon-io/bidon-backend/pkg/proto/org/bidon/proto/v1/context"
-	"google.golang.org/protobuf/proto"
-
 	"github.com/bidon-io/bidon-backend/pkg/proto/org/bidon/proto/v1/mediation"
 )
 

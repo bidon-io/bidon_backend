@@ -6,11 +6,12 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/labstack/echo/v4"
+
 	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
-	"github.com/labstack/echo/v4"
 )
 
 type StatsHandler struct {

@@ -4,9 +4,8 @@ import (
 	"testing"
 
 	"github.com/bidon-io/bidon-backend/config"
-	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
-
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/geocoder"
+	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 )
 
 func TestNewAdEvent(t *testing.T) {
@@ -43,6 +42,8 @@ func TestNewNotificationEvent(t *testing.T) {
 }
 
 func testImplementEvent(t *testing.T, e any) {
+	t.Helper()
+
 	_, ok := e.(Event)
 	if !ok {
 		t.Errorf("NewAdEvent: expected event to implement Event interface")

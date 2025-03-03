@@ -6,20 +6,17 @@ import (
 	"net/http"
 
 	"github.com/bidon-io/bidon-backend/config"
-
-	"github.com/bidon-io/bidon-backend/internal/bidding/adapters/vkads"
-
-	"github.com/bidon-io/bidon-backend/internal/auction"
-	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
-
 	"github.com/bidon-io/bidon-backend/internal/adapter"
+	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters/bidmachine"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters/bigoads"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters/meta"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters/mintegral"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters/mobilefuse"
+	"github.com/bidon-io/bidon-backend/internal/bidding/adapters/vkads"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters/vungle"
+	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 )
 
 var biddingAdapters = map[adapter.Key]adapters.Builder{

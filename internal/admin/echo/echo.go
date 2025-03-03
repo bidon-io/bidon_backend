@@ -9,16 +9,16 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/bidon-io/bidon-backend/internal/admin/resource"
-
-	"github.com/bidon-io/bidon-backend/internal/admin"
-	"github.com/bidon-io/bidon-backend/internal/admin/auth"
 	v8n "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/golang-jwt/jwt/v5"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	session "github.com/spazzymoto/echo-scs-session"
+
+	"github.com/bidon-io/bidon-backend/internal/admin"
+	"github.com/bidon-io/bidon-backend/internal/admin/auth"
+	"github.com/bidon-io/bidon-backend/internal/admin/resource"
 )
 
 func UseAuthorization(g *echo.Group, authService *auth.Service) {

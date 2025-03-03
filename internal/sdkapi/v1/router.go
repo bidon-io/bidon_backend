@@ -1,6 +1,8 @@
 package v1
 
 import (
+	"github.com/labstack/echo/v4"
+
 	adapterstore "github.com/bidon-io/bidon-backend/internal/adapter/store"
 	"github.com/bidon-io/bidon-backend/internal/auction"
 	auctionstore "github.com/bidon-io/bidon-backend/internal/auction/store"
@@ -14,7 +16,6 @@ import (
 	apihandlersv1 "github.com/bidon-io/bidon-backend/internal/sdkapi/v1/apihandlers"
 	apihandlersv2 "github.com/bidon-io/bidon-backend/internal/sdkapi/v2/apihandlers"
 	"github.com/bidon-io/bidon-backend/internal/segment"
-	"github.com/labstack/echo/v4"
 )
 
 type Router struct {

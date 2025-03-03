@@ -51,19 +51,19 @@ func TestBuilderV2_Build(t *testing.T) {
 	}
 
 	configFetcher := &auctionmocks.ConfigFetcherMock{
-		MatchFunc: func(ctx context.Context, appID int64, adType ad.Type, segmentID int64, version string) (*auction.Config, error) {
+		MatchFunc: func(_ context.Context, _ int64, _ ad.Type, _ int64, _ string) (*auction.Config, error) {
 			return config, nil
 		},
-		FetchByUIDCachedFunc: func(ctx context.Context, appId int64, key string, aucUID string) *auction.Config {
+		FetchByUIDCachedFunc: func(_ context.Context, _ int64, _ string, aucUID string) *auction.Config {
 			if aucUID == "1688565055735595008" {
 				return config
-			} else {
-				return nil
 			}
+
+			return nil
 		},
 	}
 	adUnitsMatcher := &auctionmocks.AdUnitsMatcherMock{
-		MatchCachedFunc: func(ctx context.Context, params *auction.BuildParams) ([]auction.AdUnit, error) {
+		MatchCachedFunc: func(_ context.Context, _ *auction.BuildParams) ([]auction.AdUnit, error) {
 			return adUnits, nil
 		},
 	}
@@ -136,7 +136,7 @@ func TestBuilderV2_Build(t *testing.T) {
 			params:  &auction.BuildParams{AuctionKey: "1F60CVMI00400", Adapters: []adapter.Key{adapter.ApplovinKey}},
 			want:    nil,
 			wantErr: true,
-			err:     auction.InvalidAuctionKey,
+			err:     auction.ErrInvalidAuctionKey,
 		},
 	}
 
