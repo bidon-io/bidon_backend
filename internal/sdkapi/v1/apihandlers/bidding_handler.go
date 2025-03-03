@@ -9,16 +9,16 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/bidon-io/bidon-backend/internal/sdkapi"
-
 	"github.com/Masterminds/semver/v3"
+	"github.com/labstack/echo/v4"
+
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/bidding"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
+	"github.com/bidon-io/bidon-backend/internal/sdkapi"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
-	"github.com/labstack/echo/v4"
 )
 
 type BiddingHandler struct {

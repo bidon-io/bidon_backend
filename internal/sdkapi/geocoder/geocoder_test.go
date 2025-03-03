@@ -8,11 +8,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bidon-io/bidon-backend/config"
+	"github.com/oschwald/maxminddb-golang"
 
+	"github.com/bidon-io/bidon-backend/config"
 	"github.com/bidon-io/bidon-backend/internal/db"
 	"github.com/bidon-io/bidon-backend/internal/db/dbtest"
-	"github.com/oschwald/maxminddb-golang"
 )
 
 var testDB *db.DB

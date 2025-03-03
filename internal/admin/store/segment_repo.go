@@ -4,11 +4,11 @@ import (
 	"context"
 	"strconv"
 
-	"github.com/bidon-io/bidon-backend/internal/admin/resource"
+	"gorm.io/gorm"
 
 	"github.com/bidon-io/bidon-backend/internal/admin"
+	"github.com/bidon-io/bidon-backend/internal/admin/resource"
 	"github.com/bidon-io/bidon-backend/internal/db"
-	"gorm.io/gorm"
 )
 
 type SegmentRepo struct {

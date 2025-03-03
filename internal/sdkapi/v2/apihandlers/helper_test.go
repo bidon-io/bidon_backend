@@ -7,12 +7,13 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
+	"github.com/labstack/echo/v4"
+
 	"github.com/bidon-io/bidon-backend/config"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/geocoder"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/v1/apihandlers/mocks"
-	"github.com/google/go-cmp/cmp"
-	"github.com/labstack/echo/v4"
 )
 
 type Handler interface {

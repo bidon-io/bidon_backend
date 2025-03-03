@@ -173,3 +173,81 @@ func (mock *NotificationHandlerMock) HandleBiddingRoundCalls() []struct {
 	mock.lockHandleBiddingRound.RUnlock()
 	return calls
 }
+
+// Ensure, that BidCacherMock does implement bidding.BidCacher.
+// If this is not the case, regenerate this file with moq.
+var _ bidding.BidCacher = &BidCacherMock{}
+
+// BidCacherMock is a mock implementation of bidding.BidCacher.
+//
+//	func TestSomethingThatUsesBidCacher(t *testing.T) {
+//
+//		// make and configure a mocked bidding.BidCacher
+//		mockedBidCacher := &BidCacherMock{
+//			ApplyBidCacheFunc: func(ctx context.Context, br *schema.BiddingRequest, result *bidding.AuctionResult) []adapters.DemandResponse {
+//				panic("mock out the ApplyBidCache method")
+//			},
+//		}
+//
+//		// use mockedBidCacher in code that requires bidding.BidCacher
+//		// and then make assertions.
+//
+//	}
+type BidCacherMock struct {
+	// ApplyBidCacheFunc mocks the ApplyBidCache method.
+	ApplyBidCacheFunc func(ctx context.Context, br *schema.BiddingRequest, result *bidding.AuctionResult) []adapters.DemandResponse
+
+	// calls tracks calls to the methods.
+	calls struct {
+		// ApplyBidCache holds details about calls to the ApplyBidCache method.
+		ApplyBidCache []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Br is the br argument value.
+			Br *schema.BiddingRequest
+			// Result is the result argument value.
+			Result *bidding.AuctionResult
+		}
+	}
+	lockApplyBidCache sync.RWMutex
+}
+
+// ApplyBidCache calls ApplyBidCacheFunc.
+func (mock *BidCacherMock) ApplyBidCache(ctx context.Context, br *schema.BiddingRequest, result *bidding.AuctionResult) []adapters.DemandResponse {
+	if mock.ApplyBidCacheFunc == nil {
+		panic("BidCacherMock.ApplyBidCacheFunc: method is nil but BidCacher.ApplyBidCache was just called")
+	}
+	callInfo := struct {
+		Ctx    context.Context
+		Br     *schema.BiddingRequest
+		Result *bidding.AuctionResult
+	}{
+		Ctx:    ctx,
+		Br:     br,
+		Result: result,
+	}
+	mock.lockApplyBidCache.Lock()
+	mock.calls.ApplyBidCache = append(mock.calls.ApplyBidCache, callInfo)
+	mock.lockApplyBidCache.Unlock()
+	return mock.ApplyBidCacheFunc(ctx, br, result)
+}
+
+// ApplyBidCacheCalls gets all the calls that were made to ApplyBidCache.
+// Check the length with:
+//
+//	len(mockedBidCacher.ApplyBidCacheCalls())
+func (mock *BidCacherMock) ApplyBidCacheCalls() []struct {
+	Ctx    context.Context
+	Br     *schema.BiddingRequest
+	Result *bidding.AuctionResult
+} {
+	var calls []struct {
+		Ctx    context.Context
+		Br     *schema.BiddingRequest
+		Result *bidding.AuctionResult
+	}
+	mock.lockApplyBidCache.RLock()
+	calls = mock.calls.ApplyBidCache
+	mock.lockApplyBidCache.RUnlock()
+	return calls
+}

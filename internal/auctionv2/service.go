@@ -102,12 +102,12 @@ func (s *Service) Run(ctx context.Context, params *ExecutionParams) (*Response, 
 	}
 
 	if req.AdObject.AuctionKey != "" {
-		publicUid, success := new(big.Int).SetString(req.AdObject.AuctionKey, 32)
+		publicUID, success := new(big.Int).SetString(req.AdObject.AuctionKey, 32)
 		if !success {
 			return nil, sdkapi.ErrInvalidAuctionKey
 		}
 
-		auctionConfig = s.ConfigFetcher.FetchByUIDCached(ctx, params.AppID, "0", publicUid.String())
+		auctionConfig = s.ConfigFetcher.FetchByUIDCached(ctx, params.AppID, "0", publicUID.String())
 		if auctionConfig == nil {
 			return nil, sdkapi.ErrInvalidAuctionKey
 		}

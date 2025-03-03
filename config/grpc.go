@@ -4,8 +4,6 @@ import (
 	"context"
 	"runtime/debug"
 
-	"google.golang.org/grpc/status"
-
 	"github.com/getsentry/sentry-go"
 	grpczap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
 	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap/ctxzap"
@@ -18,6 +16,7 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 // NewGRPCServer creates a new gRPC server with all middleware configured

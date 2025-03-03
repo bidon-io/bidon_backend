@@ -3,13 +3,14 @@ package auth
 import (
 	"context"
 	"crypto/subtle"
-	"github.com/gofrs/uuid/v5"
 	"time"
 
 	"github.com/alexedwards/scs/v2"
+	"github.com/gofrs/uuid/v5"
+	"github.com/golang-jwt/jwt/v5"
+
 	appconfig "github.com/bidon-io/bidon-backend/config"
 	"github.com/bidon-io/bidon-backend/internal/admin"
-	"github.com/golang-jwt/jwt/v5"
 )
 
 type Service struct {

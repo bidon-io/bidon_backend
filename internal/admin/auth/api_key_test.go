@@ -1,9 +1,11 @@
 package auth_test
 
 import (
-	"github.com/bidon-io/bidon-backend/internal/admin/auth"
-	"github.com/gofrs/uuid/v5"
 	"testing"
+
+	"github.com/gofrs/uuid/v5"
+
+	"github.com/bidon-io/bidon-backend/internal/admin/auth"
 )
 
 func TestNewAPIKey(t *testing.T) {

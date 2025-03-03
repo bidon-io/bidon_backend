@@ -49,12 +49,12 @@ func TestBuilder_Build(t *testing.T) {
 	}
 
 	configFetcher := &auctionmocks.ConfigFetcherMock{
-		MatchFunc: func(ctx context.Context, appID int64, adType ad.Type, segmentID int64, version string) (*auction.Config, error) {
+		MatchFunc: func(_ context.Context, _ int64, _ ad.Type, _ int64, _ string) (*auction.Config, error) {
 			return config, nil
 		},
 	}
 	lineItemsMatcher := &auctionmocks.LineItemsMatcherMock{
-		MatchCachedFunc: func(ctx context.Context, params *auction.BuildParams) ([]auction.LineItem, error) {
+		MatchCachedFunc: func(_ context.Context, _ *auction.BuildParams) ([]auction.LineItem, error) {
 			return lineItems, nil
 		},
 	}

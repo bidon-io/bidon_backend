@@ -4,11 +4,11 @@ import (
 	"context"
 	"testing"
 
-	"github.com/bidon-io/bidon-backend/internal/admin/resource"
+	"github.com/google/go-cmp/cmp"
 
 	"github.com/bidon-io/bidon-backend/internal/admin"
+	"github.com/bidon-io/bidon-backend/internal/admin/resource"
 	adminstore "github.com/bidon-io/bidon-backend/internal/admin/store"
-	"github.com/google/go-cmp/cmp"
 )
 
 func TestCountryRepo_List(t *testing.T) {

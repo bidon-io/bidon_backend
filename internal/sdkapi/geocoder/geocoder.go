@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/bidon-io/bidon-backend/internal/db"
 	"github.com/oschwald/maxminddb-golang"
+
+	"github.com/bidon-io/bidon-backend/internal/db"
 )
 
 // Geocoder represents an geocoder.

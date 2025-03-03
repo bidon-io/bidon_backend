@@ -6,11 +6,11 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/bidon-io/bidon-backend/internal/sdkapi"
+	"github.com/labstack/echo/v4"
 
+	"github.com/bidon-io/bidon-backend/internal/sdkapi"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
-	"github.com/labstack/echo/v4"
 )
 
 type LossHandler struct {

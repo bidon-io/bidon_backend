@@ -4,10 +4,11 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
+
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
-	"github.com/google/go-cmp/cmp"
 )
 
 func compareErrors(x, y error) bool {

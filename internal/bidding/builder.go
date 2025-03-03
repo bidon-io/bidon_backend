@@ -9,6 +9,11 @@ import (
 	"sync"
 	"time"
 
+	"github.com/gofrs/uuid/v5"
+	"github.com/prebid/openrtb/v19/adcom1"
+	"github.com/prebid/openrtb/v19/openrtb2"
+	"golang.org/x/exp/maps"
+
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
@@ -17,20 +22,17 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/device"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/geocoder"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
-	"github.com/gofrs/uuid/v5"
-	"github.com/prebid/openrtb/v19/adcom1"
-	"github.com/prebid/openrtb/v19/openrtb2"
-	"golang.org/x/exp/maps"
 )
 
 type Builder struct {
 	AdaptersBuilder     AdaptersBuilder
 	NotificationHandler NotificationHandler
+	BidCacher           BidCacher
 }
 
 var ErrNoAdaptersMatched = errors.New("no adapters matched")
 
-//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/mocks.go -pkg mocks . AdaptersBuilder NotificationHandler
+//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/mocks.go -pkg mocks . AdaptersBuilder NotificationHandler BidCacher
 
 type AdaptersBuilder interface {
 	Build(adapterKey adapter.Key, cfg adapter.ProcessedConfigsMap) (*adapters.Bidder, error)
@@ -38,6 +40,10 @@ type AdaptersBuilder interface {
 
 type NotificationHandler interface {
 	HandleBiddingRound(context.Context, *schema.Imp, AuctionResult, string, string) error
+}
+
+type BidCacher interface {
+	ApplyBidCache(ctx context.Context, br *schema.BiddingRequest, result *AuctionResult) []adapters.DemandResponse
 }
 
 type BuildParams struct {
@@ -80,12 +86,12 @@ func (b *Builder) HoldAuction(ctx context.Context, params *BuildParams) (Auction
 	br := params.BiddingRequest
 	config := params.AuctionConfig
 
-	bidId, err := uuid.NewV4()
+	bidID, err := uuid.NewV4()
 	if err != nil {
 		return emptyResponse, fmt.Errorf("cannot generate Bid UUID: %s", err)
 	}
 	baseBidRequest := openrtb.BidRequest{
-		ID:   bidId.String(),
+		ID:   bidID.String(),
 		Test: *bool2int(br.Test),
 		AT:   1,
 		TMax: 2000,
@@ -177,7 +183,10 @@ func (b *Builder) HoldAuction(ctx context.Context, params *BuildParams) (Auction
 		auctionResult.Bids = append(auctionResult.Bids, bid)
 	}
 
-	b.NotificationHandler.HandleBiddingRound(ctx, &br.Imp, auctionResult, br.App.Bundle, string(br.AdType))
+	// Cache Bids
+	auctionResult.Bids = b.BidCacher.ApplyBidCache(ctx, &br, &auctionResult)
+
+	b.NotificationHandler.HandleBiddingRound(ctx, &br.Imp, auctionResult, br.App.Bundle, string(br.AdType)) //nolint:errcheck
 
 	return auctionResult, nil
 }

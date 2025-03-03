@@ -9,17 +9,17 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/bidon-io/bidon-backend/internal/device"
+	"github.com/google/go-cmp/cmp"
+	"github.com/prebid/openrtb/v19/adcom1"
+	"github.com/prebid/openrtb/v19/openrtb2"
 
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters/bidmachine"
 	"github.com/bidon-io/bidon-backend/internal/bidding/openrtb"
+	"github.com/bidon-io/bidon-backend/internal/device"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
-	"github.com/google/go-cmp/cmp"
-	"github.com/prebid/openrtb/v19/adcom1"
-	"github.com/prebid/openrtb/v19/openrtb2"
 )
 
 type createRequestTestParams struct {
@@ -344,7 +344,7 @@ func TestBidmachineAdapter_ExecuteRequest(t *testing.T) {
 	responseBody := []byte(`{"key": "value"`)
 
 	customClient := NewTestClient(func(req *http.Request) *http.Response {
-		if req.Method != "POST" {
+		if req.Method != http.MethodPost {
 			t.Errorf("Expected POST request")
 		}
 		if req.URL.String() != "https://api-eu.bidmachine.io/auction/prebid/bidon" {

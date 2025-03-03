@@ -1,8 +1,9 @@
 package schema
 
 import (
-	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"golang.org/x/exp/maps"
+
+	"github.com/bidon-io/bidon-backend/internal/adapter"
 )
 
 type Adapters map[adapter.Key]Adapter

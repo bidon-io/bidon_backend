@@ -4,26 +4,20 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/bidon-io/bidon-backend/internal/ad"
-
-	"github.com/bidon-io/bidon-backend/internal/auction"
-	"github.com/bidon-io/bidon-backend/internal/auctionv2"
-	"google.golang.org/protobuf/testing/protocmp"
-
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/testing/protocmp"
 
+	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
-
+	"github.com/bidon-io/bidon-backend/internal/auction"
+	"github.com/bidon-io/bidon-backend/internal/auctionv2"
+	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	adcom "github.com/bidon-io/bidon-backend/pkg/proto/com/iabtechlab/adcom/v1"
 	adcomctx "github.com/bidon-io/bidon-backend/pkg/proto/com/iabtechlab/adcom/v1/context"
-	pbctx "github.com/bidon-io/bidon-backend/pkg/proto/org/bidon/proto/v1/context"
-
-	"google.golang.org/protobuf/proto"
-
-	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	v3 "github.com/bidon-io/bidon-backend/pkg/proto/com/iabtechlab/openrtb/v3"
-
+	pbctx "github.com/bidon-io/bidon-backend/pkg/proto/org/bidon/proto/v1/context"
 	"github.com/bidon-io/bidon-backend/pkg/proto/org/bidon/proto/v1/mediation"
 )
 

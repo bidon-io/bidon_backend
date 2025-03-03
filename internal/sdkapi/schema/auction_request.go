@@ -15,6 +15,6 @@ func (r *AuctionRequest) GetAuctionConfigurationParams() (string, string) {
 	return "", r.AdObject.AuctionConfigurationUID
 }
 
-func (r *AuctionRequest) SetAuctionConfigurationParams(id int64, uid string) {
+func (r *AuctionRequest) SetAuctionConfigurationParams(_ int64, uid string) {
 	r.AdObject.AuctionConfigurationUID = uid
 }

@@ -2,8 +2,9 @@ package admin
 
 import (
 	"context"
-	"github.com/bidon-io/bidon-backend/internal/admin/resource"
 	"time"
+
+	"github.com/bidon-io/bidon-backend/internal/admin/resource"
 )
 
 type APIKeyShort struct {

@@ -20,11 +20,11 @@ type BuilderV2 struct {
 //go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/mocks.go -pkg mocks . ConfigFetcher AdUnitsMatcher
 
 var ErrNoAdsFound = errors.New("no ads found")
-var InvalidAuctionKey = errors.New("invalid auction_key")
+var ErrInvalidAuctionKey = errors.New("invalid auction_key")
 
 type ConfigFetcher interface {
 	Match(ctx context.Context, appID int64, adType ad.Type, segmentID int64, version string) (*Config, error)
-	FetchByUIDCached(ctx context.Context, appId int64, id, uid string) *Config
+	FetchByUIDCached(ctx context.Context, appID int64, id, uid string) *Config
 }
 
 type AdUnitsMatcher interface {
@@ -47,14 +47,14 @@ func (b *BuilderV2) Build(ctx context.Context, params *BuildParams) (*Auction, e
 	var config *Config
 	var err error
 	if params.AuctionKey != "" {
-		publicUid, success := new(big.Int).SetString(params.AuctionKey, 32)
+		publicUID, success := new(big.Int).SetString(params.AuctionKey, 32)
 		if !success {
-			return nil, InvalidAuctionKey
+			return nil, ErrInvalidAuctionKey
 		}
 
-		config = b.ConfigFetcher.FetchByUIDCached(ctx, params.AppID, "0", publicUid.String())
+		config = b.ConfigFetcher.FetchByUIDCached(ctx, params.AppID, "0", publicUID.String())
 		if config == nil {
-			return nil, InvalidAuctionKey
+			return nil, ErrInvalidAuctionKey
 		}
 	} else {
 		config, err = b.ConfigFetcher.Match(ctx, params.AppID, params.AdType, params.Segment.ID, "v1")
@@ -86,12 +86,12 @@ func (b *BuilderV2) Build(ctx context.Context, params *BuildParams) (*Auction, e
 	return &auction, nil
 }
 
-func filterRounds(rounds []RoundConfig, sdk_adapters []adapter.Key) []RoundConfig {
+func filterRounds(rounds []RoundConfig, sdkAdapters []adapter.Key) []RoundConfig {
 	filteredRounds := []RoundConfig{}
 
 	for _, round := range rounds {
-		demands := adapter.GetCommonAdapters(round.Demands, sdk_adapters)
-		bidding := adapter.GetCommonAdapters(round.Bidding, sdk_adapters)
+		demands := adapter.GetCommonAdapters(round.Demands, sdkAdapters)
+		bidding := adapter.GetCommonAdapters(round.Bidding, sdkAdapters)
 
 		if len(demands) == 0 && len(bidding) == 0 {
 			continue // If both demands and bidding arrays empty => remove this round from Auction

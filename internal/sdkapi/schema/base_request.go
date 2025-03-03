@@ -2,8 +2,9 @@ package schema
 
 import (
 	"encoding/json"
-	"github.com/Masterminds/semver/v3"
 	"strings"
+
+	"github.com/Masterminds/semver/v3"
 )
 
 type BaseRequest struct {
@@ -72,6 +73,18 @@ func (r *BaseRequest) GetExtData() map[string]any {
 	}
 
 	return r.extData
+}
+
+func (r *BaseRequest) GetNestedExtData() map[string]any {
+	if r.extData == nil {
+		return map[string]any{}
+	}
+
+	if nested, ok := r.extData["ext"].(map[string]any); ok {
+		return nested
+	}
+
+	return map[string]any{}
 }
 
 func (r *BaseRequest) GetMediationMode() string {

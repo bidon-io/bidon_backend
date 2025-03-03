@@ -3,9 +3,10 @@ package auctionv2_test
 import (
 	"context"
 	"errors"
-	"github.com/bidon-io/bidon-backend/internal/adapter"
+	"testing"
 
 	"github.com/bidon-io/bidon-backend/internal/ad"
+	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/auctionv2"
 	"github.com/bidon-io/bidon-backend/internal/auctionv2/mocks"
@@ -18,7 +19,6 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	"github.com/bidon-io/bidon-backend/internal/segment"
 	segmentmocks "github.com/bidon-io/bidon-backend/internal/segment/mocks"
-	"testing"
 )
 
 func TestService_Run(t *testing.T) {

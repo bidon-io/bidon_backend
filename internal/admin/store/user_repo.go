@@ -5,10 +5,11 @@ import (
 	"errors"
 	"strconv"
 
+	"gorm.io/gorm"
+
 	"github.com/bidon-io/bidon-backend/internal/admin"
 	"github.com/bidon-io/bidon-backend/internal/admin/auth"
 	"github.com/bidon-io/bidon-backend/internal/db"
-	"gorm.io/gorm"
 )
 
 type UserRepo struct {

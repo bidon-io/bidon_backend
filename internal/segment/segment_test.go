@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/bidon-io/bidon-backend/internal/segment"
-
 	segmentmocks "github.com/bidon-io/bidon-backend/internal/segment/mocks"
 )
 

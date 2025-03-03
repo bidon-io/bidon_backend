@@ -88,16 +88,15 @@ services:
       interval: 5s
 
   redis:
-    image: redis:7.0.0-alpine
-    volumes:
-      - redisdata:/data
+    build:
+        context: .
+        dockerfile: docker/redis/Dockerfile
     ports:
-      - '6381:6379'
-    healthcheck:
-      test: redis-cli ping
-      interval: 1s
-      timeout: 3s
-      retries: 30
+      - '7001-7003:7001-7003'
+    environment:
+      - REDIS_CLUSTER_START_PORT=7001
+    volumes:
+      - redis-data:/data
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.2.1
@@ -170,6 +169,7 @@ volumes:
   redisdata:
   cargo-cache:
   target-cache:
+  redis-data:
 
 networks:
   precommit-network:

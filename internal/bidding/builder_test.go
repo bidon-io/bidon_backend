@@ -44,7 +44,7 @@ func TestBuilder_Build(t *testing.T) {
 	}
 
 	adaptersBuilder := &mocks.AdaptersBuilderMock{
-		BuildFunc: func(adapterKey adapter.Key, cfg adapter.ProcessedConfigsMap) (*adapters.Bidder, error) {
+		BuildFunc: func(_ adapter.Key, cfg adapter.ProcessedConfigsMap) (*adapters.Bidder, error) {
 			adpt := &bidmachine.BidmachineAdapter{
 				Endpoint: cfg[adapter.BidmachineKey]["endpoint"].(string),
 				SellerID: cfg[adapter.BidmachineKey]["seller_id"].(string),
@@ -63,6 +63,12 @@ func TestBuilder_Build(t *testing.T) {
 	notificationHandler := &mocks.NotificationHandlerMock{
 		HandleBiddingRoundFunc: func(_ context.Context, _ *schema.Imp, _ bidding.AuctionResult, _ string, _ string) error {
 			return nil
+		},
+	}
+
+	bidCacher := &mocks.BidCacherMock{ // Pass through bids
+		ApplyBidCacheFunc: func(_ context.Context, _ *schema.BiddingRequest, aucRes *bidding.AuctionResult) []adapters.DemandResponse {
+			return aucRes.Bids
 		},
 	}
 
@@ -182,6 +188,7 @@ func TestBuilder_Build(t *testing.T) {
 			builder := &bidding.Builder{
 				AdaptersBuilder:     tt.adaptersBuilder,
 				NotificationHandler: tt.notificationHandler,
+				BidCacher:           bidCacher,
 			}
 
 			result, err := builder.HoldAuction(context.Background(), tt.buildParams)

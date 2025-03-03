@@ -5,9 +5,10 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/redis/go-redis/v9"
+
 	"github.com/bidon-io/bidon-backend/internal/notification"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
-	"github.com/redis/go-redis/v9"
 )
 
 type AuctionResultV2Repo struct {
