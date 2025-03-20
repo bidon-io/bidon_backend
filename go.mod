@@ -36,7 +36,7 @@ require (
 	github.com/prebid/openrtb/v19 v19.0.0
 	github.com/pressly/goose/v3 v3.24.1
 	github.com/prometheus/client_golang v1.20.5
-	github.com/redis/go-redis/v9 v9.7.0
+	github.com/redis/go-redis/v9 v9.7.3
 	github.com/shopspring/decimal v1.4.0
 	github.com/spazzymoto/echo-scs-session v1.0.0
 	github.com/twmb/franz-go v1.18.1
