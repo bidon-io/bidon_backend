@@ -1,0 +1,33 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate release tag
+        id: tag
+        run: |
+          YEAR=$(date +'%y')
+          MONTH=$(date +'%m')
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          RELEASE_TAG="v${YEAR}.${MONTH}.${SHORT_SHA}"
+          echo "RELEASE_TAG=${RELEASE_TAG}" >> $GITHUB_ENV
+          echo "tag=${RELEASE_TAG}" >> $GITHUB_OUTPUT
+
+      - name: Create release
+        run: |
+          gh release create ${{ env.RELEASE_TAG }} \
+            --fail-on-no-commits
+            --latest=false
+            --prerelease
