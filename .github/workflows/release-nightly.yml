@@ -1,10 +1,9 @@
-name: Release
+name: Release Nightly
 
 on:
   push:
     branches:
       - main
-  workflow_dispatch:
 
 jobs:
   release:
@@ -21,13 +20,13 @@ jobs:
           YEAR=$(date +'%y')
           MONTH=$(date +'%-m')
           SHORT_SHA=$(git rev-parse --short HEAD)
-          RELEASE_TAG="v${YEAR}.${MONTH}.${SHORT_SHA}"
+          RELEASE_TAG="v${YEAR}.${MONTH}.nightly+${SHORT_SHA}"
           echo "RELEASE_TAG=${RELEASE_TAG}" >> $GITHUB_ENV
-          echo "tag=${RELEASE_TAG}" >> $GITHUB_OUTPUT
 
       - name: Create release
         run: |
           gh release create ${{ env.RELEASE_TAG }} \
+            --generate-notes \
             --fail-on-no-commits \
             --latest=false \
             --prerelease
