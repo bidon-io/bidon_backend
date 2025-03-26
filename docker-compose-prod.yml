@@ -112,6 +112,7 @@ services:
 
   bidon-admin-init:
     image: curlimages/curl:latest
+    profiles: ["init"]
     depends_on:
       bidon-admin:
         condition: service_started
@@ -123,6 +124,19 @@ services:
     entrypoint: ["/bin/sh", "/scripts/init-admin.sh"]
     network_mode: "service:bidon-admin"
     restart: "no"
+
+  bidon-seed:
+    image: ghcr.io/bidon-io/bidon-seed:latest
+    profiles: ["init"]
+    depends_on:
+      postgres:
+        condition: service_started
+      bidon-migrate:
+        condition: service_completed_successfully
+    environment:
+      ENVIRONMENT: production
+      DATABASE_URL: postgres://bidon:${PG_PASSWORD:-password}@postgres:5432/bidon
+    logging: *default-logging
 
   bidon-sdkapi:
     image: ghcr.io/bidon-io/bidon-sdkapi:latest

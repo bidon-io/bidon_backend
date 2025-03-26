@@ -48,6 +48,10 @@ FROM base AS bidon-migrate-builder
 
 RUN go build -o /bidon-migrate ./cmd/bidon-migrate
 
+FROM base AS bidon-seed-builder
+
+RUN go build -o /bidon-seed ./cmd/bidon-seed
+
 FROM rust:1.83-alpine AS proxy-builder
 
 WORKDIR /app
@@ -98,6 +102,12 @@ COPY --from=bidon-migrate-builder --chown=deploy /bidon-migrate /bidon-migrate
 ENTRYPOINT [ "/bidon-migrate" ]
 
 CMD [ "status" ]
+
+FROM deploy AS bidon-seed
+
+COPY --from=bidon-seed-builder --chown=deploy /bidon-seed /bidon-seed
+
+CMD [ "/bidon-seed" ]
 
 FROM deploy AS bidon-proxy
 
