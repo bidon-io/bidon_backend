@@ -18,10 +18,9 @@ jobs:
         id: tag
         run: |
           import os
-          import datetime
           with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
             if '${{ github.event_name }}' == 'push':
-                print(f'v{datetime.datetime.now().strftime("%y")}.{datetime.datetime.now().month}.{"${{ github.sha }}"[:8]}', file=fh)
+                print(f'TAG=main-{"${{ github.sha }}"[:8]}', file=fh)
             elif '${{ github.event_name }}' == 'release':
                 print('TAG=${{ github.event.release.tag_name }}', file=fh)
         shell: python
@@ -38,7 +37,7 @@ jobs:
   deploy:
     name: Deploy
     needs: [tag, build]
-    if: always() && needs.build.result == 'success' && github.event_name == 'push'
+    if: always() && needs.build.result == 'success'
     uses: ./.github/workflows/prod-deploy.yml
     with:
       tag:  ${{ needs.tag.outputs.tag }}
@@ -65,3 +64,4 @@ jobs:
           environment: production
           projects: bidon-admin bidon-sdkapi
           version: ${{ github.ref }}
+
