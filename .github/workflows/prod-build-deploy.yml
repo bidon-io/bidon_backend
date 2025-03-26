@@ -3,7 +3,7 @@ name: Prod Build Deploy
 on:
   push:
     branches:
-      - 'main'
+#      - 'main'
   release:
     types: [published]
 
@@ -26,42 +26,42 @@ jobs:
                 print('TAG=${{ github.event.release.tag_name }}', file=fh)
         shell: python
 
-  build:
-    name: Build image
-    needs: [tag]
-    uses: ./.github/workflows/prod-build.yml
-    with:
-      tag: ${{ needs.tag.outputs.tag }}
-      registry: ghcr.io/bidon-io
-    secrets: inherit
-
-  deploy:
-    name: Deploy
-    needs: [tag, build]
-    if: always() && needs.build.result == 'success' && github.event_name == 'push'
-    uses: ./.github/workflows/prod-deploy.yml
-    with:
-      tag:  ${{ needs.tag.outputs.tag }}
-    secrets: inherit
-
-  sentry-release:
-    name: Create Sentry release
-    needs: [tag, build]
-    if: github.event_name == 'release'
-    runs-on: [self-hosted]
-    steps:
-      - name: Checout repo
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Create Sentry release
-        uses: getsentry/action-release@v3
-        env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_RELEASE_AUTH_TOKEN }}
-          SENTRY_ORG: sentry
-          SENTRY_URL: ${{ secrets.SENTRY_URL }}
-        with:
-          environment: production
-          projects: bidon-admin bidon-sdkapi
-          version: ${{ github.ref }}
+#  build:
+#    name: Build image
+#    needs: [tag]
+#    uses: ./.github/workflows/prod-build.yml
+#    with:
+#      tag: ${{ needs.tag.outputs.tag }}
+#      registry: ghcr.io/bidon-io
+#    secrets: inherit
+#
+#  deploy:
+#    name: Deploy
+#    needs: [tag, build]
+#    if: always() && needs.build.result == 'success' && github.event_name == 'push'
+#    uses: ./.github/workflows/prod-deploy.yml
+#    with:
+#      tag:  ${{ needs.tag.outputs.tag }}
+#    secrets: inherit
+#
+#  sentry-release:
+#    name: Create Sentry release
+#    needs: [tag, build]
+#    if: github.event_name == 'release'
+#    runs-on: [self-hosted]
+#    steps:
+#      - name: Checout repo
+#        uses: actions/checkout@v4
+#        with:
+#          fetch-depth: 0
+#
+#      - name: Create Sentry release
+#        uses: getsentry/action-release@v3
+#        env:
+#          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_RELEASE_AUTH_TOKEN }}
+#          SENTRY_ORG: sentry
+#          SENTRY_URL: ${{ secrets.SENTRY_URL }}
+#        with:
+#          environment: production
+#          projects: bidon-admin bidon-sdkapi
+#          version: ${{ github.ref }}
