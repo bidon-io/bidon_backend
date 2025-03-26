@@ -19,7 +19,7 @@ jobs:
         id: tag
         run: |
           YEAR=$(date +'%y')
-          MONTH=$(date +'%m')
+          MONTH=$(date +'%-m')
           SHORT_SHA=$(git rev-parse --short HEAD)
           RELEASE_TAG="v${YEAR}.${MONTH}.${SHORT_SHA}"
           echo "RELEASE_TAG=${RELEASE_TAG}" >> $GITHUB_ENV
@@ -31,3 +31,5 @@ jobs:
             --fail-on-no-commits
             --latest=false
             --prerelease
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
