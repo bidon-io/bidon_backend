@@ -29,7 +29,7 @@ jobs:
     uses: ./.github/workflows/prod-build.yml
     with:
       tag: stage${{ inputs.stage-number }}
-      registry: ghcr.io/bidon-io/stage
+      registry: ${{ secrets.REGISTRY_ADDRESS }}/bidon/stage
     secrets: inherit
 
   deploy:
