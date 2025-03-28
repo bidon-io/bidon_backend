@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "resource-permissions.schema.json",
+  "title": "ResourcePermissions",
+  "type": "object",
+  "properties": {
+    "read": {
+      "type": "boolean",
+      "description": "Whether the user has read permission for the resource"
+    },
+    "create": {
+      "type": "boolean",
+      "description": "Whether the user has create permission for the resource"
+    }
+  },
+  "required": ["read", "create"]
+}
