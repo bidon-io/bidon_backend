@@ -5,7 +5,7 @@ on:
     types: [published]
   workflow_dispatch:
     inputs:
-      registry: &registry_input
+      registry:
         description: Registry
         type: string
         required: true
@@ -16,7 +16,10 @@ on:
         required: false
   workflow_call:
     inputs:
-      registry: *registry_input
+      registry:
+        type: string
+        required: true
+        default: ghcr.io/bidon-io
       tag:
         type: string
         required: true
