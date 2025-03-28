@@ -1,34 +1,50 @@
----
+version: "2"
 linters:
-  disable-all: true
+  default: none
   enable:
-    - errcheck # for checking for unchecked errors in Go code.
-    - gosimple # Linter for Go source code that specializes in simplifying code.
-    - govet # Vet examines Go source code and reports suspicious constructs.
-    - ineffassign # Detects when assignments to existing variables are not used.
-    - staticcheck # It's a set of rules from staticcheck. See https://staticcheck.io/
-    - revive # Drop-in replacement of golint.
-    - goimports # fix (add, remove) your Go imports automatically.
-    - gci # Checks if code and import statements are formatted, with additional rules.
-    - thelper # make sure to use t.Helper() when needed
-    - mirror # mirror suggests rewrites to avoid unnecessary []byte/string conversion
-    - usestdlibvars # detect the possibility to use variables/constants from the Go standard library.
-    - loggercheck # linter to detect errors invalid key values count
-    - fatcontext # detects nested contexts in loops or function literals
-linters-settings:
-  goimports:
-    local-prefixes: github.com/bidon-io/bidon-backend
-
-  gci:
-    # Section configuration to compare against.
-    # Section names are case-insensitive and may contain parameters in ().
-    # The default order of sections is `standard > default > custom > blank > dot > alias > localmodule`,
-    # If `custom-order` is `true`, it follows the order of `sections` option.
-    # Default: ["standard", "default"]
-    sections:
-      - standard # Standard section: captures all standard packages.
-      - default # Default section: contains all imports that could not be matched to another section type.
-      - prefix(github.com/bidon-io/bidon-backend)
-
-  staticcheck:
-    checks: ["all", "-SA1019", "-SA5008"] # SA1019: disable deprecations, SA5008: disable JSON option check
+    - errcheck
+    - fatcontext
+    - govet
+    - ineffassign
+    - loggercheck
+    - mirror
+    - revive
+    - staticcheck
+    - thelper
+    - usestdlibvars
+  settings:
+    staticcheck:
+      checks:
+        - -SA1019
+        - -SA5008
+        - all
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gci
+    - goimports
+  settings:
+    gci:
+      sections:
+        - standard
+        - default
+        - prefix(github.com/bidon-io/bidon-backend)
+    goimports:
+      local-prefixes:
+        - github.com/bidon-io/bidon-backend
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
