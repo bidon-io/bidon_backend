@@ -18,7 +18,6 @@ on:
     inputs:
       registry:
         type: string
-        required: true
         default: ghcr.io/bidon-io
       tag:
         type: string
