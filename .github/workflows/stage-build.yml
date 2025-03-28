@@ -1,57 +1,57 @@
-name: Stage build and deploy
+name: Build and Deploy Stage
 
 on:
   workflow_dispatch:
     inputs:
       stage-number:
+        description: Stage number
         type: choice
         required: true
-        description: Stage number
-        options:
-          - 1
-          - 2
+        options: ['1', '2']
       mirror-traffic:
-        type: choice
         description: Production traffic
-        default: 'disable'
-        options:
-          - 'disable'
-          - 'enable'
+        type: choice
+        options: [disable, enable]
+        default: disable
       refresh-db:
-        type: boolean
         description: Refresh DB
+        type: boolean
         default: false
 
+env:
+  STAGE: ${{ inputs.stage-number }}
 
 jobs:
   build:
-    name: Build image
+    name: Build and push images
     uses: ./.github/workflows/prod-build.yml
+    secrets: inherit
     with:
       tag: stage${{ inputs.stage-number }}
       registry: ghcr.io/bidon-io/stage
-    secrets: inherit
 
   deploy:
-    name: Deploy
+    name: Deploy stage
     needs: [build]
     runs-on: [self-hosted]
     steps:
-      - name: Checks-out repository devops
+      - name: Check out devops repository
         uses: actions/checkout@v4
         with:
           repository: ${{ secrets.ANSIBLE_SECRET }}/devops
           token: ${{ secrets.PAT_RUNNER }}
 
       - name: Refresh DB
-        if: ${{ inputs.refresh-db == true }}
+        if: inputs.refresh-db
         working-directory: ./${{ secrets.ANSIBLE_SECRET }}/stage
-        run: make bidon-refresh-db STAGE=${{ inputs.stage-number }}
+        run: make bidon-refresh-db
 
       - name: Deploy stage
         working-directory: ./${{ secrets.ANSIBLE_SECRET }}/stage
-        run: make bidon-backend STAGE=${{ inputs.stage-number }}
+        run: make bidon-backend
 
       - name: Production mirror traffic
         working-directory: ./${{ secrets.ANSIBLE_SECRET }}/stage
-        run: make bidon-prod-traffic STAGE=${{ inputs.stage-number }} ACTION=${{ inputs.mirror-traffic }}
+        env:
+          ACTION: ${{ inputs.mirror-traffic }}
+        run: make bidon-prod-traffic

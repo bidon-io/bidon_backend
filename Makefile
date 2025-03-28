@@ -1,4 +1,4 @@
-REGISTRY ?= "ghcr.io/bidon-io"
+REGISTRY ?= ghcr.io/bidon-io
 
 .PHONY: test
 
@@ -19,22 +19,24 @@ update-submodules:
 test:
 	docker compose run --rm go-test
 
-docker-build-push-prod-admin:
-	docker buildx build --platform linux/amd64 --provenance=false \
-	--target bidon-admin --cache-to type=inline --cache-from $(REGISTRY)/bidon-admin \
-	-t $(REGISTRY)/bidon-admin:$(TAG) -t $(REGISTRY)/bidon-admin:latest --push .
+tags = -t $(REGISTRY)/$(TARGET):$(VERSION)
+ifneq ($(TAG),)
+	tags += -t $(REGISTRY)/$(TARGET):$(TAG)
+endif
 
-docker-build-push-prod-sdkapi:
+docker-build-push-prod:
 	docker buildx build --platform linux/amd64 --provenance=false \
-	--target bidon-sdkapi --cache-to type=inline --cache-from $(REGISTRY)/bidon-sdkapi \
-	-t $(REGISTRY)/bidon-sdkapi:$(TAG) -t $(REGISTRY)/bidon-sdkapi:latest --push .
+	--target $(TARGET) --cache-to type=inline --cache-from $(REGISTRY)/$(TARGET) \
+	$(tags) --push .
 
-docker-build-push-prod-migrate:
-	docker buildx build --platform linux/amd64 --provenance=false \
-	--target bidon-migrate --cache-to type=inline --cache-from $(REGISTRY)/bidon-migrate \
-	-t $(REGISTRY)/bidon-migrate:$(TAG) -t $(REGISTRY)/bidon-migrate:latest --push .
+docker-build-push-prod-admin: override TARGET=bidon-admin
+docker-build-push-prod-admin: docker-build-push-prod
 
-docker-build-push-prod-proxy:
-	docker buildx build --platform linux/amd64 --provenance=false \
-	--target bidon-proxy --cache-to type=inline --cache-from $(REGISTRY)/bidon-proxy \
-	-t $(REGISTRY)/bidon-proxy:$(TAG) -t $(REGISTRY)/bidon-proxy:latest --push .
+docker-build-push-prod-sdkapi: override TARGET=bidon-sdkapi
+docker-build-push-prod-sdkapi: docker-build-push-prod
+
+docker-build-push-prod-migrate: override TARGET=bidon-migrate
+docker-build-push-prod-migrate: docker-build-push-prod
+
+docker-build-push-prod-proxy: override TARGET=bidon-proxy
+docker-build-push-prod-proxy: docker-build-push-prod

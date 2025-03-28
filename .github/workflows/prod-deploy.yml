@@ -1,41 +1,28 @@
-name: Prod Deploy
+name: Deploy Prod
 
 on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Image tag'
+        type: string
+        required: false
   workflow_call:
     inputs:
       tag:
         type: string
         required: true
-        default: latest
-  workflow_dispatch:
-    inputs:
-      tag:
-        type: string
-        required: true
-        default: latest
+
+env:
+  TAG: ${{ inputs.tag || github.ref_name == 'main' && github.sha || github.ref_name }}
 
 jobs:
   deploy:
     name: Deploy
     runs-on: [self-hosted]
     environment: production
-    env:
-      TAG: ${{ inputs.tag }}
     steps:
-      - name: Get latest release
-        if: ${{ inputs.tag == 'latest' }}
-        id: latest-release
-        uses: octokit/request-action@v2.x
-        with:
-          route: GET /repos/${{ github.repository }}/releases/latest
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT_RUNNER }}
-
-      - name: Set TAG
-        if: ${{ inputs.tag == 'latest' }}
-        run: echo "TAG=${{ fromJson(steps.latest-release.outputs.data).tag_name }}" >> $GITHUB_ENV
-
-      - name: Checks-out repository devops
+      - name: Check out devops repository
         uses: actions/checkout@v4
         with:
           repository: bidon-io/devops
@@ -44,8 +31,8 @@ jobs:
 
       - name: Deploy bidon-admin
         working-directory: ./prod
-        run: ANSIBLE_VAULT_PASSWORD_FILE=$ANSIBLE_VAULT_PASSWORD_FILE_BIDON && make k8s-dfw-bidon-admin TAG=$TAG
+        run: ANSIBLE_VAULT_PASSWORD_FILE=$ANSIBLE_VAULT_PASSWORD_FILE_BIDON && make k8s-dfw-bidon-admin
 
       - name: Deploy bidon-sdkapi
         working-directory: ./prod
-        run: ANSIBLE_VAULT_PASSWORD_FILE=$ANSIBLE_VAULT_PASSWORD_FILE_BIDON && make k8s-dfw-bidon-sdkapi TAG=$TAG
+        run: ANSIBLE_VAULT_PASSWORD_FILE=$ANSIBLE_VAULT_PASSWORD_FILE_BIDON && make k8s-dfw-bidon-sdkapi
