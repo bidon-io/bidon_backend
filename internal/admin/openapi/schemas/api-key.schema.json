@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "api-key.schema.json",
+  "title": "ApiKey",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "uuid.schema.json",
+      "description": "The unique identifier for the API key"
+    },
+    "value": {
+      "type": "string",
+      "description": "The API key value (only returned when creating a new key)"
+    },
+    "last_accessed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "The timestamp when the API key was last used"
+    }
+  },
+  "required": ["id"]
+}

@@ -19,19 +19,7 @@
         ]
       },
       "permissions": {
-        "type": "object",
-        "properties": {
-          "read": {
-            "type": "boolean",
-            "description": "Permission to read the resource"
-          },
-          "create": {
-            "type": "boolean",
-            "description": "Permission to create the resource"
-          }
-        },
-        "required": ["read", "create"],
-        "additionalProperties": false
+        "$ref": "resource-permissions.schema.json"
       }
     },
     "required": ["key", "permissions"],

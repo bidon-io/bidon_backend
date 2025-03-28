@@ -12,6 +12,10 @@
         "user": {
           "$ref": "user.schema.json",
           "description": "Details of the user associated with the app"
+        },
+        "_permissions": {
+          "$ref": "resource-instance-permissions.schema.json",
+          "description": "Permissions for the current user on this app instance"
         }
       }
     }

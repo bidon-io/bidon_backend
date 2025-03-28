@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "resource-instance-permissions.schema.json",
+  "title": "ResourceInstancePermissions",
+  "type": "object",
+  "properties": {
+    "update": {
+      "type": "boolean",
+      "description": "Whether the user has update permission for the resource instance"
+    },
+    "delete": {
+      "type": "boolean",
+      "description": "Whether the user has delete permission for the resource instance"
+    }
+  },
+  "required": ["update", "delete"]
+}
