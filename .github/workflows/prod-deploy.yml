@@ -11,10 +11,10 @@ on:
     inputs:
       tag:
         type: string
-        required: true
+        required: false
 
 env:
-  TAG: ${{ inputs.tag || github.ref_name == 'main' && github.sha || github.ref_name }}
+  TAG: ${{ inputs.tag || startsWith(github.ref, 'refs/tags') && github.ref_name || github.sha }}
 
 jobs:
   deploy:
