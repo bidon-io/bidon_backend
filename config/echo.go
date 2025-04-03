@@ -1,6 +1,7 @@
 package config
 
 import (
+	"context"
 	"errors"
 	"net/http"
 
@@ -18,10 +19,6 @@ func Echo() *echo.Echo {
 	e.Debug = Debug()
 	e.HTTPErrorHandler = HTTPErrorHandler
 	e.Validator = &echoValidator{validate: validator.New()}
-
-	e.GET("/health_checks", func(c echo.Context) error {
-		return c.String(http.StatusOK, "OK")
-	})
 
 	return e
 }
@@ -90,6 +87,36 @@ func HTTPErrorHandler(err error, c echo.Context) {
 	if err := c.JSON(herr.Code, response); err != nil {
 		c.Logger().Error(err)
 	}
+}
+
+type Pinger interface {
+	Ping(ctx context.Context) error
+}
+type HealthCheckParams map[string]Pinger
+
+func UseHealthCheckHandler(e *echo.Echo, services HealthCheckParams) {
+	e.GET("/health_checks", func(c echo.Context) error {
+		var err error
+		ctx := c.Request().Context()
+		result := make(map[string]string)
+		result["status"] = "ok"
+		status := http.StatusOK
+
+		for service, pinger := range services {
+			if pinger == nil {
+				continue
+			}
+			if err = pinger.Ping(ctx); err != nil {
+				result[service] = "error"
+				result["status"] = "error"
+				status = http.StatusInternalServerError
+			} else {
+				result[service] = "ok"
+			}
+		}
+
+		return c.JSON(status, result)
+	})
 }
 
 type echoValidator struct {

@@ -102,6 +102,10 @@ func main() {
 	e.Use(echoprometheus.NewMiddleware("admin"))   // adds middleware to gather metrics
 	e.GET("/metrics", echoprometheus.NewHandler()) // adds route to serve gathered metrics
 
+	config.UseHealthCheckHandler(e, config.HealthCheckParams{
+		"db": db,
+	})
+
 	oapiWebServer := http.FileServer(http.FS(openapi.FS))
 	e.GET("/docs/*", echo.WrapHandler(http.StripPrefix("/docs/", oapiWebServer)))
 

@@ -317,6 +317,12 @@ func main() {
 	e.Use(echoprometheus.NewMiddleware("sdkapi"))  // adds middleware to gather metrics
 	e.GET("/metrics", echoprometheus.NewHandler()) // adds route to serve gathered metrics
 
+	config.UseHealthCheckHandler(e, config.HealthCheckParams{
+		"db":    db,
+		"redis": config.NewRedisPinger(rdb),
+		"kafka": eventLogger.Engine,
+	})
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "1323"
