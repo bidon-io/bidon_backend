@@ -33,3 +33,10 @@ func (e *Kafka) Produce(message event.LogMessage, handleErr func(error)) {
 		}
 	})
 }
+
+func (e *Kafka) Ping(ctx context.Context) error {
+	if err := e.Client.Ping(ctx); err != nil {
+		return fmt.Errorf("kafka ping: %v", err)
+	}
+	return nil
+}

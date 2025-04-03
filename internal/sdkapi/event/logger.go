@@ -1,6 +1,7 @@
 package event
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -13,6 +14,7 @@ type Logger struct {
 
 type LoggerEngine interface {
 	Produce(message LogMessage, handleErr func(error))
+	Ping(ctx context.Context) error
 }
 
 type LogMessage struct {

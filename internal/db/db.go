@@ -1,6 +1,7 @@
 package db
 
 import (
+	"context"
 	"database/sql"
 	"database/sql/driver"
 	"fmt"
@@ -128,6 +129,19 @@ func (db *DB) Begin(opts ...*sql.TxOptions) *DB {
 
 func (db *DB) SetDebug() {
 	db.Logger = db.Logger.LogMode(logger.Info)
+}
+
+func (db *DB) Ping(ctx context.Context) error {
+	sqlDB, err := db.DB.DB()
+	if err != nil {
+		return fmt.Errorf("ping database: %v", err)
+	}
+
+	if err = sqlDB.PingContext(ctx); err != nil {
+		return fmt.Errorf("ping database: %v", err)
+	}
+
+	return nil
 }
 
 type AdType int32
