@@ -10,6 +10,12 @@
         </button>
         {{ localResource[field.key] }}
       </div>
+      <div v-if="field.type === 'static'" class="text-gray-900">
+        <button v-if="field.copyable" @click="copyField(field.value)">
+          <i class="pi pi-copy" style="color: slateblue"></i>
+        </button>
+        {{ field.value }}
+      </div>
       <ResourceLink
         v-if="field.type === 'link'"
         :link="field.link"

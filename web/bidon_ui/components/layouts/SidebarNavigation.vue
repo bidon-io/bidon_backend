@@ -42,6 +42,10 @@ function title(key: string) {
     return "Auction Configurations V2";
   }
 
+  if (key === "api_key") {
+    return "API Credentials";
+  }
+
   return pluralize(titleize(key));
 }
 
