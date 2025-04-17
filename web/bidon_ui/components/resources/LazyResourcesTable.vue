@@ -106,7 +106,7 @@
 </template>
 
 <script setup lang="ts">
-import { FilterMatchModeOptions } from "primevue/api";
+import type { FilterMatchModeOptions } from "primevue/api";
 import { decamelize } from "humps";
 import { debounce } from "~/utils/debounce";
 
@@ -172,6 +172,7 @@ const debouncedFilter = debounce(
   500,
 );
 
+// Initialize filters from URL query parameters
 const filters = ref<
   Record<
     string,
@@ -186,12 +187,63 @@ const filters = ref<
         ...result,
         [filter.field]: {
           matchMode: filter.matchMode,
-          value: route.query[filter.field] as string | undefined,
+          value:
+            (route.query[decamelize(filter.field)] as string | undefined) ||
+            (route.query[filter.field] as string | undefined),
         },
       }),
       {},
     ),
 );
+
+const filtersOptions = ref<Record<string, { label: string; value: string }[]>>(
+  {},
+);
+
+const loadFilterOptions = async (field: string) => {
+  if (filtersOptions.value[field]) {
+    return filtersOptions.value[field];
+  }
+
+  const column = props.columns.find((column) => column.filter?.field === field);
+  const filter = column?.filter as SelectFilter;
+  const options = await filter?.loadOptions?.();
+
+  if (options) {
+    filtersOptions.value = {
+      ...filtersOptions.value,
+      [field]: options,
+    };
+
+    const currentFilterValue = filters.value[field]?.value;
+    const matchedOption = options.find(
+      (opt) => opt.value == currentFilterValue,
+    );
+
+    if (matchedOption) {
+      filters.value = {
+        ...filters.value,
+        [field]: {
+          ...filters.value[field],
+          value: matchedOption.value,
+        },
+      };
+    }
+  }
+
+  return options;
+};
+
+// Preload filter options for filters with values in URL
+const preloadFilterOptions = async () => {
+  const filtersWithValues = Object.entries(filters.value)
+    .filter(([, filter]) => filter?.value)
+    .map(([field]) => field);
+
+  for (const field of filtersWithValues) {
+    await loadFilterOptions(field);
+  }
+};
 
 // Fetch resources
 const {
@@ -202,6 +254,7 @@ const {
 } = useAsyncData(
   "fetch-resources-collection",
   async () => {
+    await preloadFilterOptions();
     const params = buildQueryParams();
     return await $apiFetch(props.collectionPath, { params });
   },
@@ -220,40 +273,23 @@ const onFilter = async () => {
 
 const onPage = async (event: PageEvent) => {
   page.value = event.page + 1;
-
   await fetchData();
 };
 
 const onLimit = async (value: number) => {
   limit.value = value;
-
   await fetchData();
 };
 
-const filtersOptions = ref<Record<string, { label: string; value: string }[]>>(
-  {},
+// Update URL when filters, page, or limit change
+watch(
+  [page, limit, filters],
+  () => {
+    const query = buildQueryParams();
+    router.push({ query });
+  },
+  { deep: true },
 );
-const loadFilterOptions = async (field: string) => {
-  if (filtersOptions.value[field]) {
-    return filtersOptions.value[field];
-  }
-
-  const column = props.columns.find((column) => column.filter?.field === field);
-  const filter = column?.filter as SelectFilter;
-  const options = await filter?.loadOptions?.();
-
-  if (options) {
-    filtersOptions.value = {
-      ...filtersOptions.value,
-      [field]: options,
-    };
-  }
-};
-
-watch([page, limit, filters], () => {
-  const query = buildQueryParams();
-  router.push({ query });
-});
 
 const deleteHandle = useDeleteResource({
   path: props.resourcesPath,
@@ -263,7 +299,7 @@ const deleteHandle = useDeleteResource({
     )),
 });
 
-const copyField = (field) => {
+const copyField = (field: string) => {
   navigator.clipboard.writeText(field);
 };
 </script>
