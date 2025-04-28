@@ -10,7 +10,9 @@ import (
 
 func (ac *AuctionConfiguration) BeforeSave(tx *gorm.DB) (err error) {
 	// Exit check if configuration w/o segment and not default
-	if ac.SegmentID == nil && (ac.IsDefault == nil || !*ac.IsDefault) {
+	isNotDefault := ac.IsDefault == nil || !*ac.IsDefault
+	withSegment := ac.SegmentID != nil && ac.SegmentID.Valid
+	if !withSegment && isNotDefault {
 		return nil
 	}
 
@@ -33,7 +35,6 @@ func (ac *AuctionConfiguration) BeforeSave(tx *gorm.DB) (err error) {
 		query = query.Where("settings->>'v2' IS NULL")
 	}
 
-	withSegment := ac.SegmentID != nil && ac.SegmentID.Valid
 	if withSegment {
 		query = query.Where("segment_id = ?", ac.SegmentID.Int64)
 	} else {
