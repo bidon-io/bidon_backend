@@ -53,7 +53,7 @@ const value = computed({
 const buildOptions = (accounts) =>
   accounts.map(({ id, type, label }) => ({
     id,
-    label: `(${type.split("::")[1]}) ${label ? label : `#${id}`}`,
+    label: `(${type.split("::")[1]}) ${label ? `${label} #${id}` : `#${id}`}`,
   }));
 
 const fetchAccounts = async () => {
