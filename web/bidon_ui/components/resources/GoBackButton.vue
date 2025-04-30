@@ -17,7 +17,20 @@ const props = defineProps({
 });
 
 const router = useRouter();
+const route = useRoute();
+const nuxtApp = useNuxtApp();
+
 const goBack = () => {
-  router.push(props.path);
+  const previousRoute = nuxtApp.$routeHistory().getPrevious();
+
+  if (
+    previousRoute &&
+    previousRoute.path !== "" &&
+    previousRoute.path !== route.path
+  ) {
+    router.push(previousRoute);
+  } else {
+    router.push(props.path);
+  }
 };
 </script>
