@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"math/big"
+	"strings"
 
 	"gorm.io/gorm"
 )
@@ -66,6 +68,9 @@ func (ac *AuctionConfiguration) BeforeCreate(tx *gorm.DB) error {
 			Valid: true,
 		}
 	}
-
+	if ac.AuctionKey == "" {
+		bi := big.NewInt(ac.PublicUID.Int64)
+		ac.AuctionKey = strings.ToUpper(bi.Text(32))
+	}
 	return nil
 }
