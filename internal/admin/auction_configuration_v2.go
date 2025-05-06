@@ -28,6 +28,7 @@ type AuctionConfigurationV2Attrs struct {
 	Name                     string         `json:"name"`
 	AppID                    int64          `json:"app_id"`
 	AdType                   ad.Type        `json:"ad_type"`
+	AuctionKey               string         `json:"auction_key"`
 	Pricefloor               float64        `json:"pricefloor"`
 	SegmentID                *int64         `json:"segment_id"`
 	IsDefault                *bool          `json:"is_default"`

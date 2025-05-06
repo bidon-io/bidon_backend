@@ -200,6 +200,17 @@ export const ResourceTableFields = {
       placeholder: "App Name",
     },
   },
+  AuctionKey: {
+    field: "auctionKey",
+    header: "Auction Key",
+    copyable: true,
+    filter: {
+      field: "auctionKey",
+      type: "input",
+      matchMode: FilterMatchMode.CONTAINS,
+      placeholder: "Auction Key",
+    },
+  },
   Label: {
     field: "label",
     header: "Label",

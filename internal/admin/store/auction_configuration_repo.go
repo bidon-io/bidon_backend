@@ -3,9 +3,7 @@ package adminstore
 import (
 	"context"
 	"database/sql"
-	"math/big"
 	"strconv"
-	"strings"
 
 	"gorm.io/gorm"
 
@@ -90,7 +88,6 @@ func (m auctionConfigurationMapper) resource(c *db.AuctionConfiguration) admin.A
 	return admin.AuctionConfiguration{
 		ID:                        c.ID,
 		PublicUID:                 strconv.FormatInt(c.PublicUID.Int64, 10),
-		AuctionKey:                strings.ToUpper(big.NewInt(c.PublicUID.Int64).Text(32)),
 		AuctionConfigurationAttrs: m.resourceAttrs(c),
 		App: admin.App{
 			ID:       c.App.ID,
@@ -112,6 +109,7 @@ func (m auctionConfigurationMapper) resourceAttrs(c *db.AuctionConfiguration) ad
 		Name:                     c.Name.String,
 		AppID:                    c.AppID,
 		AdType:                   c.AdType.Domain(),
+		AuctionKey:               c.AuctionKey,
 		Rounds:                   c.Rounds,
 		Pricefloor:               c.Pricefloor,
 		SegmentID:                segmentID,

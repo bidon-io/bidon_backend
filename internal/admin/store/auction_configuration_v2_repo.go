@@ -134,6 +134,7 @@ func (m auctionConfigurationV2Mapper) resourceAttrs(c *db.AuctionConfiguration) 
 		Name:                     c.Name.String,
 		AppID:                    c.AppID,
 		AdType:                   c.AdType.Domain(),
+		AuctionKey:               c.AuctionKey,
 		Pricefloor:               c.Pricefloor,
 		SegmentID:                segmentID,
 		IsDefault:                c.IsDefault,
@@ -147,12 +148,13 @@ func (m auctionConfigurationV2Mapper) resourceAttrs(c *db.AuctionConfiguration) 
 }
 
 type AuctionConfigurationFilters struct {
-	UserID    int64
-	AppID     int64
-	AdType    db.AdType
-	SegmentID int64
-	IsDefault *bool
-	Name      string
+	UserID     int64
+	AppID      int64
+	AdType     db.AdType
+	SegmentID  int64
+	IsDefault  *bool
+	AuctionKey string
+	Name       string
 }
 
 func (f *AuctionConfigurationFilters) apply(db *gorm.DB) *gorm.DB {
@@ -178,6 +180,9 @@ func (f *AuctionConfigurationFilters) apply(db *gorm.DB) *gorm.DB {
 	if f.Name != "" {
 		db = db.Where("name ILIKE ?", "%"+f.Name+"%")
 	}
+	if f.AuctionKey != "" {
+		db = db.Where("auction_key = ?", f.AuctionKey)
+	}
 	return db
 }
 
@@ -196,6 +201,9 @@ func queryToAuctionConfigurationFilters(qParams map[string][]string) AuctionConf
 	if v, ok := qParams["ad_type"]; ok {
 		dbAdType := db.AdTypeFromDomain(ad.Type(v[0]))
 		filters.AdType = dbAdType
+	}
+	if v, ok := qParams["auction_key"]; ok {
+		filters.AuctionKey = v[0]
 	}
 	if v, ok := qParams["segment_id"]; ok {
 		filters.SegmentID, _ = strconv.ParseInt(v[0], 10, 64)

@@ -18,7 +18,7 @@ const columns = [
   ResourceTableFields.PublicUid,
   ResourceTableFields.App,
   ResourceTableFields.Name,
-  { field: "auctionKey", header: "Auction Key", copyable: true },
+  ResourceTableFields.AuctionKey,
   ResourceTableFields.AdType,
   { field: "pricefloor", header: "Price Floor" },
   ResourceTableFields.IsDefault,

@@ -36,6 +36,7 @@ type AuctionConfiguration struct {
 	AdUnitIds                pq.Int64Array         `gorm:"column:ad_unit_ids;type:bigint[];default:ARRAY[]" json:"ad_unit_ids"`
 	IsDefault                *bool                 `gorm:"column:is_default;type:boolean;not null;uniqueIndex:auction_configurations_default_uniq_idx,priority:3;uniqueIndex:auction_configurations_default_segment_uniq_idx,priority:3;default:false" json:"is_default"`
 	DeletedAt                gorm.DeletedAt        `gorm:"column:deleted_at;type:timestamp(6) without time zone" json:"deleted_at"`
+	AuctionKey               string                `gorm:"column:auction_key;type:text;index:idx_auction_configurations_auction_key,priority:1" json:"auction_key"`
 	App                      App                   `json:"app"`
 	Segment                  *Segment              `json:"segment"`
 }

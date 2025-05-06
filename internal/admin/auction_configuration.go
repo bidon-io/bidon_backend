@@ -15,9 +15,8 @@ type AuctionConfigurationResource struct {
 }
 
 type AuctionConfiguration struct {
-	ID         int64  `json:"id"`
-	PublicUID  string `json:"public_uid"`
-	AuctionKey string `json:"auction_key"`
+	ID        int64  `json:"id"`
+	PublicUID string `json:"public_uid"`
 	AuctionConfigurationAttrs
 	App     App      `json:"app"`
 	Segment *Segment `json:"segment"`
@@ -28,6 +27,7 @@ type AuctionConfigurationAttrs struct {
 	Name                     string                `json:"name"`
 	AppID                    int64                 `json:"app_id"`
 	AdType                   ad.Type               `json:"ad_type"`
+	AuctionKey               string                `json:"auction_key"`
 	Rounds                   []auction.RoundConfig `json:"rounds"`
 	Pricefloor               float64               `json:"pricefloor"`
 	SegmentID                *int64                `json:"segment_id"`
