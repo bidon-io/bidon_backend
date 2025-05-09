@@ -96,6 +96,15 @@ func (r *BaseRequest) GetMediationMode() string {
 	return ""
 }
 
+func (r *BaseRequest) GetPrevAuctionPrice() *float64 {
+	ext := r.GetExtData()
+	if pricefloor, ok := ext["previous_auction_price"].(float64); ok {
+		return &pricefloor
+	}
+
+	return nil
+}
+
 func (r *BaseRequest) parseExt() {
 	if r.Ext == "" {
 		return
