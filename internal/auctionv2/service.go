@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math"
 	"math/big"
+	"slices"
 	"sort"
 	"strconv"
 
@@ -152,12 +153,23 @@ func (s *Service) Run(ctx context.Context, params *ExecutionParams) (*Response, 
 	return s.buildResponse(req, auctionResult, adUnitsMap)
 }
 
+var customAdapters = [...]string{"max", "lp_ca"}
+
 func priceFloor(req *schema.AuctionV2Request, auctionConfig *auction.Config) float64 {
+	// Default floor logic
 	priceFloor := req.AdObject.PriceFloor
 	for _, cacheObject := range req.AdCache {
 		priceFloor = math.Max(priceFloor, cacheObject.Price)
 	}
 	priceFloor = math.Max(auctionConfig.PriceFloor, priceFloor)
+
+	// Custom Adapter floor logic
+	// Check if previous auction price is higher than the current price floor
+	isCustomAdapter := slices.Contains(customAdapters[:], req.GetMediationMode())
+	prevFloor := req.GetPrevAuctionPrice()
+	if prevFloor != nil && isCustomAdapter {
+		priceFloor = math.Max(*prevFloor, priceFloor)
+	}
 
 	return priceFloor
 }
