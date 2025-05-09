@@ -22,6 +22,7 @@ import AccordionTab from "primevue/accordiontab";
 import Badge from "primevue/badge";
 import Fieldset from "primevue/fieldset";
 import ToggleButton from "primevue/togglebutton";
+import Menu from "primevue/menu";
 
 export default defineNuxtPlugin((nuxtApp) => {
   nuxtApp.vueApp.use(PrimeVue, { ripple: true });
@@ -47,4 +48,5 @@ export default defineNuxtPlugin((nuxtApp) => {
   nuxtApp.vueApp.component("Badge", Badge);
   nuxtApp.vueApp.component("Fieldset", Fieldset);
   nuxtApp.vueApp.component("ToggleButton", ToggleButton);
+  nuxtApp.vueApp.component("Menu", Menu);
 });

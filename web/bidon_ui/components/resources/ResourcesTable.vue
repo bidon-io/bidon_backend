@@ -22,6 +22,9 @@
       :copyable="column.copyable"
       :filter-field="column.filter?.field"
       :show-filter-menu="false"
+      :body-class="column.bodyClass"
+      :body-style="column.bodyStyle"
+      :header-style="column.headerStyle"
     >
       <template
         v-if="column.link || column.associatedResourcesLink || column.copyable"
@@ -124,6 +127,10 @@ interface Column {
   copyable?: boolean;
   link?: ResourceLink;
   associatedResourcesLink?: AssociatedResourcesLink;
+
+  bodyClass?: string;
+  bodyStyle?: string;
+  headerStyle?: string;
 }
 
 const props = defineProps<{

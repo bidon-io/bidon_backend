@@ -21,11 +21,7 @@
         :error="errors.platformId"
         required
       />
-      <FormField
-        label="Bundle ID / Package Name"
-        :error="errors.packageName"
-        required
-      >
+      <FormField label="Package Name" :error="errors.packageName" required>
         <InputText v-model="packageName" type="text" placeholder="Name" />
       </FormField>
       <FormSubmitButton />
@@ -53,7 +49,7 @@ const { currentUser } = useAuthStore();
 let validationFields = {
   platformId: yup.string().required().label("Platform"),
   humanName: yup.string().required().label("Owner Name"),
-  packageName: yup.string().required().label("Bundle ID / Package Name"),
+  packageName: yup.string().required().label("Package Name"),
 };
 
 if (currentUser.isAdmin) {
