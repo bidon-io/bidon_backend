@@ -28,6 +28,9 @@
       :copyable="column.copyable"
       :filter-field="column.filter?.field"
       :show-filter-menu="false"
+      :body-class="column.bodyClass"
+      :body-style="column.bodyStyle"
+      :header-style="column.headerStyle"
     >
       <template
         v-if="column.link || column.associatedResourcesLink || column.copyable"
@@ -130,7 +133,11 @@ interface Column {
   sortable?: boolean;
   copyable?: boolean;
   link?: ResourceLink;
-  associatedResourcesLink: AssociatedResourcesLink;
+  associatedResourcesLink?: AssociatedResourcesLink;
+
+  bodyClass?: string;
+  bodyStyle?: string;
+  headerStyle?: string;
 }
 
 interface PageEvent {
@@ -293,10 +300,9 @@ watch(
 
 const deleteHandle = useDeleteResource({
   path: props.resourcesPath,
-  hook: (id: number) =>
-    (resources.value = resources.value.filter(
-      (item: { id: number }) => item.id !== id,
-    )),
+  hook: () => {
+    fetchData();
+  },
 });
 
 const copyField = (field: string) => {

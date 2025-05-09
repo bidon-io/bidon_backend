@@ -9,9 +9,14 @@
 </template>
 
 <script setup>
+const props = defineProps({ path: { type: String, default: "/" } });
 const router = useRouter();
 
 const goBack = () => {
-  router.back();
+  if (history.state?.back !== null) {
+    router.back();
+  } else {
+    router.push(props.path);
+  }
 };
 </script>

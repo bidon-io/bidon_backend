@@ -29,12 +29,12 @@ const response = await axios.get(`${resourcesPath}/${id}`);
 const resource = response.data;
 
 const fields = [
-  ResourceCardFields.PublicUid,
-  { label: "App Key", key: "appKey" },
+  { ...ResourceCardFields.PublicUid, copyable: true },
+  { label: "App Key", key: "appKey", copyable: true },
   ResourceCardFields.Owner,
   { label: "App Name", key: "humanName" },
   { label: "Platform", key: "platformId" },
-  { label: "Bundle ID / Package Name", key: "packageName" },
+  { label: "Package Name", key: "packageName" },
   {
     key: "lineItems",
     label: "Line Items",
@@ -54,6 +54,17 @@ const fields = [
       extractLinkData: ({ id }) => ({
         label: "App Demand Profiles",
         path: `/app_demand_profiles?appId=${id}`,
+      }),
+    },
+  },
+  {
+    key: "auctionConfigurations",
+    label: "Auction Configurations",
+    type: "associatedResourcesLink",
+    associatedResourcesLink: {
+      extractLinkData: ({ id }) => ({
+        label: "Auction Configurations",
+        path: `/v2/auction_configurations?appId=${id}`,
       }),
     },
   },
