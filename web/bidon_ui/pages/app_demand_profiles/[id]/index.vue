@@ -24,6 +24,7 @@
 <script setup>
 import axios from "@/services/ApiService.js";
 import { ResourceCardFields } from "@/constants";
+import { jsonToFields } from "@/utils/jsonToFields";
 
 const route = useRoute();
 const id = route.params.id;
@@ -32,13 +33,14 @@ const resourcesPath = "/app_demand_profiles";
 const response = await axios.get(`${resourcesPath}/${id}`);
 const resource = response.data;
 
+const jsonFields = jsonToFields(resource.data, "data", "static");
+
 const fields = [
   ResourceCardFields.PublicUid,
   ResourceCardFields.App,
   ResourceCardFields.DemandSource,
   ResourceCardFields.DemandSourceAccount,
-  { label: "Data", key: "data", type: "textarea" },
-  { label: "Account Type", key: "accountType" },
+  ...jsonFields,
   { label: "Enabled", key: "enabled" },
 ];
 </script>
