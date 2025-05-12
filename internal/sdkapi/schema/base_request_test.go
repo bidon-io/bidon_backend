@@ -62,6 +62,64 @@ func TestBaseRequest_GetMediationMode(t *testing.T) {
 	}
 }
 
+func TestBaseRequest_GetMediator(t *testing.T) {
+	tests := []struct {
+		name     string
+		ext      string
+		expected string
+	}{
+		{
+			name:     "Empty ext",
+			ext:      "",
+			expected: "",
+		},
+		{
+			name:     "Empty JSON",
+			ext:      "{}",
+			expected: "",
+		},
+		{
+			name:     "With mediator",
+			ext:      `{"mediator":"max"}`,
+			expected: "max",
+		},
+		{
+			name:     "With mediator lp_ca",
+			ext:      `{"mediator":"lp_ca"}`,
+			expected: "lp_ca",
+		},
+		{
+			name:     "With mediator regular",
+			ext:      `{"mediator":"regular"}`,
+			expected: "regular",
+		},
+		{
+			name:     "With other fields",
+			ext:      `{"mediator":"max","other_field":"value"}`,
+			expected: "max",
+		},
+		{
+			name:     "With mediator as non-string",
+			ext:      `{"mediator":123}`,
+			expected: "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req := &BaseRequest{
+				Ext: tt.ext,
+			}
+			req.parseExt() // Parse the Ext field to populate extData
+
+			result := req.GetMediator()
+			if result != tt.expected {
+				t.Errorf("GetMediator() = %v, want %v", result, tt.expected)
+			}
+		})
+	}
+}
+
 func TestBaseRequest_GetPrevAuctionPrice(t *testing.T) {
 	tests := []struct {
 		name     string

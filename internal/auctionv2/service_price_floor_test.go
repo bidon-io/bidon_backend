@@ -21,7 +21,7 @@ func TestPriceFloor(t *testing.T) {
 					PriceFloor: 0.01,
 				},
 				BaseRequest: schema.BaseRequest{
-					Ext: `{"mediation_mode":"max","previous_auction_price":0.25}`,
+					Ext: `{"mediator":"max","previous_auction_price":0.25}`,
 				},
 				AdCache: []schema.AdCacheObject{
 					{Price: 0.02},
@@ -39,7 +39,7 @@ func TestPriceFloor(t *testing.T) {
 					PriceFloor: 0.01,
 				},
 				BaseRequest: schema.BaseRequest{
-					Ext: `{"mediation_mode":"max","previous_auction_price":0.03}`,
+					Ext: `{"mediator":"max","previous_auction_price":0.03}`,
 				},
 				AdCache: []schema.AdCacheObject{
 					{Price: 0.02},
@@ -57,7 +57,7 @@ func TestPriceFloor(t *testing.T) {
 					PriceFloor: 0.01,
 				},
 				BaseRequest: schema.BaseRequest{
-					Ext: `{"mediation_mode":"max"}`,
+					Ext: `{"mediator":"max"}`,
 				},
 				AdCache: []schema.AdCacheObject{
 					{Price: 0.02},
@@ -75,7 +75,7 @@ func TestPriceFloor(t *testing.T) {
 					PriceFloor: 0.01,
 				},
 				BaseRequest: schema.BaseRequest{
-					Ext: `{"mediation_mode":"regular","previous_auction_price":0.25}`,
+					Ext: `{""mediator":"regular","previous_auction_price":0.25}`,
 				},
 				AdCache: []schema.AdCacheObject{
 					{Price: 0.02},
@@ -138,7 +138,7 @@ func TestPriceFloor(t *testing.T) {
 					PriceFloor: 0.01,
 				},
 				BaseRequest: schema.BaseRequest{
-					Ext: `{"mediation_mode":"lp_ca","previous_auction_price":0.25}`,
+					Ext: `{"mediator":"lp_ca","previous_auction_price":0.25}`,
 				},
 				AdCache: []schema.AdCacheObject{
 					{Price: 0.02},
@@ -156,7 +156,7 @@ func TestPriceFloor(t *testing.T) {
 					PriceFloor: 0.01,
 				},
 				BaseRequest: schema.BaseRequest{
-					Ext: `{"mediation_mode":"lp_ca","previous_auction_price":0.0}`,
+					Ext: `{"mediator":"lp_ca","previous_auction_price":0.0}`,
 				},
 				AdCache: []schema.AdCacheObject{
 					{Price: 0.02},
