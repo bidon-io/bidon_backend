@@ -165,7 +165,7 @@ func priceFloor(req *schema.AuctionV2Request, auctionConfig *auction.Config) flo
 
 	// Custom Adapter floor logic
 	// Check if previous auction price is higher than the current price floor
-	isCustomAdapter := slices.Contains(customAdapters[:], req.GetMediationMode())
+	isCustomAdapter := slices.Contains(customAdapters[:], req.GetMediator())
 	prevFloor := req.GetPrevAuctionPrice()
 	if prevFloor != nil && isCustomAdapter {
 		priceFloor = math.Max(*prevFloor, priceFloor)
