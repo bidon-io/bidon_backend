@@ -128,7 +128,8 @@ func (b *Builder) Build(ctx context.Context, params *BuildParams) (*AuctionResul
 			continue
 		}
 		// Use bidding price as floor for Bidmachine and Admob
-		if adUnit.DemandID == string(adapter.BidmachineKey) || adUnit.DemandID == string(adapter.AdmobKey) {
+		// Allow Bidmachine to work as usual for 366 auction
+		if (adUnit.DemandID == string(adapter.BidmachineKey) && params.AuctionConfiguration.ID != 366) || adUnit.DemandID == string(adapter.AdmobKey) {
 			adUnit.PriceFloor = &maxPrice
 		}
 
