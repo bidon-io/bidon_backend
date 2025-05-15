@@ -1,12 +1,11 @@
 <template>
-  <div v-if="hasDropdown" class="relative flex justify-center">
-    <Button
-      icon="pi pi-ellipsis-v"
-      class="p-button-rounded p-button-outlined"
+  <div v-if="hasDropdown" class="relative flex justify-center h-6">
+    <i
+      class="pi pi-ellipsis-v cursor-pointer text-sm p-1"
       aria-haspopup="true"
       aria-controls="dropdown-menu"
       @click="toggleDropdown"
-    />
+    ></i>
     <Menu ref="menu" :model="dropdownItems" :popup="true" />
   </div>
   <NuxtLink v-else :to="path" class="text-blue-500">

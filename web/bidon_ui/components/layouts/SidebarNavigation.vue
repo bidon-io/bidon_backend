@@ -39,7 +39,7 @@ const route = useRoute();
 
 function title(key: string) {
   if (key === "auction_configuration_v2") {
-    return "Auction Configurations V2";
+    return "Auction Configurations";
   }
 
   if (key === "api_key") {
