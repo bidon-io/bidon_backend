@@ -15,12 +15,10 @@ import { ResourceTableFields } from "@/constants";
 import LazyResourcesTable from "~/components/resources/LazyResourcesTable.vue";
 
 const columns = [
-  ResourceTableFields.PublicUid,
   ResourceTableFields.App,
   ResourceTableFields.Name,
   ResourceTableFields.AuctionKey,
   ResourceTableFields.AdType,
-  { field: "pricefloor", header: "Price Floor" },
   ResourceTableFields.IsDefault,
   ResourceTableFields.Segment,
 ];
