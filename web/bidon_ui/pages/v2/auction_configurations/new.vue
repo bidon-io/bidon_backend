@@ -3,7 +3,7 @@
     <NavigationContainer>
       <GoBackButton :path="resourcesPath" />
     </NavigationContainer>
-    <AuctionConfigurationFormV2 :value="resource" @submit="handleSubmit" />
+    <AuctionConfigurationsForm :value="resource" @submit="handleSubmit" />
   </PageContainer>
 </template>
 

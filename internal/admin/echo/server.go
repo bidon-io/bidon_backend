@@ -363,7 +363,6 @@ func (s *Server) GetResources(c echo.Context) error {
 	}{
 		s.AppService,
 		s.AppDemandProfileService,
-		s.AuctionConfigurationService,
 		s.AuctionConfigurationV2Service,
 		s.CountryService,
 		s.DemandSourceService,
