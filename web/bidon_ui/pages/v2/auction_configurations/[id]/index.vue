@@ -17,7 +17,14 @@
       title="Auction Configuration"
       :fields="fields"
       :resource="resource"
-    />
+    >
+      <NetworksDisplay
+        :app-id="resource.appId"
+        :ad-type="resource.adType"
+        :bidding="resource.bidding"
+        :ad-unit-ids="resource.adUnitIds"
+      />
+    </ResourceCard>
   </PageContainer>
 </template>
 
@@ -39,9 +46,6 @@ const fields = [
   { label: "Auction Key", key: "auctionKey", copyable: true },
   { label: "Ad type", key: "adType" },
   { label: "Price floor", key: "pricefloor" },
-  { label: "Demands", key: "demands" },
-  { label: "Bidding", key: "bidding" },
-  { label: "Ad Unit IDs", key: "adUnitIds" },
   { label: "Timeout", key: "timeout" },
   { label: "Default", key: "isDefault" },
   { label: "External Win Notification", key: "externalWinNotifications" },

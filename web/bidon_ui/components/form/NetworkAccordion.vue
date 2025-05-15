@@ -20,38 +20,56 @@
         </span>
       </template>
       <Fieldset legend="Ad Units" class="p-fieldset">
-        <div class="p-datatable p-datatable-striped">
-          <div
-            class="p-datatable-header p-grid"
-            style="grid-template-columns: 5% 45% 25% 10% 15%"
-          >
-            <div class="p-text-center">#</div>
-            <div>Label</div>
-            <div>UID</div>
-            <div class="p-text-center">Price</div>
-            <div class="p-text-center">Account</div>
-          </div>
-          <div
-            v-for="adUnit in network.adUnits"
-            :key="adUnit.id"
-            class="p-datatable-row p-grid"
-            style="
-              grid-template-columns: 5% 45% 25% 10% 15%;
-              align-items: center;
-            "
-          >
-            <div class="p-text-center">
+        <!-- For CPM Networks -->
+        <template v-if="!network.isBidding">
+          <div class="flex flex-col gap-2">
+            <div
+              v-for="(adUnit, index) in network.adUnits"
+              :key="adUnit.id"
+              class="flex items-center p-2"
+              :class="{
+                'border-b border-gray-200':
+                  index !== network.adUnits.length - 1,
+              }"
+            >
               <Checkbox
                 v-model="network.selectedAdUnitIds"
                 :value="adUnit.id"
+                class="mr-3"
               />
+              <div class="flex-grow">
+                {{ adUnit.label }} -
+                <span class="font-medium"
+                  >${{ adUnit.pricefloor.toFixed(2) }}</span
+                >
+              </div>
             </div>
-            <div>{{ adUnit.label }}</div>
-            <div>{{ adUnit.uid }}</div>
-            <div class="p-text-center">${{ adUnit.pricefloor.toFixed(2) }}</div>
-            <div class="p-text-center">{{ adUnit.account }}</div>
           </div>
-        </div>
+        </template>
+
+        <!-- For Bidding Networks -->
+        <template v-else>
+          <div class="flex flex-col gap-2">
+            <div
+              v-for="(adUnit, index) in network.adUnits"
+              :key="adUnit.id"
+              class="flex items-center p-2"
+              :class="{
+                'border-b border-gray-200':
+                  index !== network.adUnits.length - 1,
+              }"
+            >
+              <Checkbox
+                v-model="network.selectedAdUnitIds"
+                :value="adUnit.id"
+                class="mr-3"
+              />
+              <div class="flex-grow">
+                {{ adUnit.label }}
+              </div>
+            </div>
+          </div>
+        </template>
       </Fieldset>
     </AccordionTab>
   </Accordion>

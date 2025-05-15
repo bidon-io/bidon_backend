@@ -6,6 +6,7 @@
       </FormField>
       <AppDropdown v-model="appId" :error="errors.appId" required />
       <AdTypeDropdown v-model="adType" :error="errors.adType" required />
+      <SegmentDropdown v-model="segmentId" :error="errors.segmentId" />
       <FormField label="Price floor" :error="errors.pricefloor" required>
         <InputNumber
           v-model="pricefloor"
@@ -15,7 +16,6 @@
           placeholder="Price floor"
         />
       </FormField>
-      <SegmentDropdown v-model="segmentId" :error="errors.segmentId" />
       <FormField label="Is Default" :error="errors.isDefault">
         <Checkbox v-model="isDefault" :binary="true" />
       </FormField>
@@ -29,7 +29,7 @@
         <InputNumber
           v-model="timeout"
           input-id="timeout"
-          placeholder="Timeout"
+          placeholder="Timeout (ms)"
         />
       </FormField>
       <FormField v-if="showNetworks" label="CPM Networks">
@@ -86,7 +86,10 @@ const { errors, useFieldModel, handleSubmit } = useForm({
     pricefloor: resource.value.pricefloor || null,
     segmentId: resource.value.segmentId || null,
     isDefault: resource.value.isDefault || false,
-    externalWinNotifications: resource.value.externalWinNotifications || false,
+    externalWinNotifications:
+      resource.value.externalWinNotifications !== undefined
+        ? resource.value.externalWinNotifications
+        : true,
     timeout: resource.value.timeout || null,
     settings: resource.value.settings || {},
   },

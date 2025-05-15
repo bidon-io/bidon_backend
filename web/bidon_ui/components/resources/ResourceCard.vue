@@ -34,6 +34,11 @@
         disabled
       />
     </FormField>
+
+    <!-- Slot for additional content -->
+    <div class="mt-6 pt-6 border-t border-gray-200">
+      <slot></slot>
+    </div>
   </FormCard>
 </template>
 
