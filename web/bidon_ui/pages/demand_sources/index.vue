@@ -7,11 +7,8 @@
 </template>
 
 <script setup>
-import { ResourceTableFields } from "@/constants";
-
 const columns = [
-  ResourceTableFields.Id,
-  { field: "humanName", header: "Human Name" },
+  { field: "humanName", header: "Name" },
   { field: "apiKey", header: "Api Key" },
 ];
 const resourcesPath = "/demand_sources";
