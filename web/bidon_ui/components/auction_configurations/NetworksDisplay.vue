@@ -17,9 +17,9 @@
       </div>
     </div>
 
-    <!-- CPM Networks Section -->
+    <!-- Waterfall Networks Section -->
     <div v-if="cpmNetworks && cpmNetworks.length > 0" class="mt-8 mb-6">
-      <h2 class="text-xl font-semibold mb-4">CPM Networks</h2>
+      <h2 class="text-xl font-semibold mb-4">Waterfall Networks</h2>
       <div class="flex flex-col gap-2">
         <div
           v-for="(network, index) in cpmNetworks"
@@ -97,11 +97,11 @@ const biddingNetworks = computed(() => {
 
 // Helper method to get appropriate icon based on network type
 const getNetworkIcon = (isBidding = false) => {
-  // Use different icons for bidding vs CPM networks
+  // Use different icons for bidding vs waterfall networks
   if (isBidding) {
     return "pi pi-bolt text-blue-500"; // Bidding networks icon
   } else {
-    return "pi pi-tag text-green-500"; // CPM networks icon
+    return "pi pi-tag text-green-500"; // Waterfall networks icon
   }
 };
 

@@ -33,7 +33,12 @@
       :header-style="column.headerStyle"
     >
       <template
-        v-if="column.link || column.associatedResourcesLink || column.copyable"
+        v-if="
+          column.link ||
+          column.associatedResourcesLink ||
+          column.copyable ||
+          column.customBody
+        "
         #body="{ data, field }"
       >
         <div v-if="column.copyable">
@@ -42,6 +47,7 @@
           </button>
           <span>{{ data[field] }}</span>
         </div>
+        <span v-else-if="column.customBody">{{ column.customBody(data) }}</span>
         <ResourceLink v-if="column.link" :link="column.link" :data="data" />
         <AssociatedResourcesLink
           v-if="column.associatedResourcesLink"
@@ -112,6 +118,17 @@
 import type { FilterMatchModeOptions } from "primevue/api";
 import { decamelize } from "humps";
 import { debounce } from "~/utils/debounce";
+import { buildQueryParams as buildFilterQueryParams } from "~/utils/filterUtils";
+
+// Define a Resource interface for the table rows
+interface Resource {
+  id: string | number;
+  _permissions: {
+    update: boolean;
+    delete: boolean;
+  };
+  [key: string]: unknown;
+}
 
 interface Filter {
   field: string;
@@ -134,6 +151,7 @@ interface Column {
   copyable?: boolean;
   link?: ResourceLink;
   associatedResourcesLink?: AssociatedResourcesLink;
+  customBody?: (rowData: Resource) => string;
 
   bodyClass?: string;
   bodyStyle?: string;
@@ -160,19 +178,10 @@ const page = ref(+(route.query.page ?? 1));
 const limit = ref(+(route.query.limit ?? 12));
 
 const buildQueryParams = () => {
-  const query: Record<string, string | number | undefined> = {
-    page: page.value,
-    limit: limit.value,
-  };
-
-  Object.entries(filters.value)
-    .filter(([, filter]) => filter?.value)
-    .forEach(([key, filter]) => {
-      query[decamelize(key)] = filter.value;
-    });
-
-  return query;
+  return buildFilterQueryParams(filters.value, page.value, limit.value);
 };
+
+type FilterValue = string | undefined | { adType: string; format: string };
 
 const debouncedFilter = debounce(
   (filterCallback: () => void) => filterCallback(),
@@ -183,24 +192,38 @@ const debouncedFilter = debounce(
 const filters = ref<
   Record<
     string,
-    { matchMode: keyof FilterMatchModeOptions; value: string | undefined }
+    { matchMode: keyof FilterMatchModeOptions; value: FilterValue }
   >
 >(
   props.columns
     .filter((column) => column.filter)
     .map((column) => column.filter as Filter)
-    .reduce(
-      (result, filter) => ({
+    .reduce((result, filter) => {
+      let value;
+
+      // Special handling for AdTypeWithFormat
+      if (filter.field === "adTypeWithFormat") {
+        const adType = route.query["ad_type"] as string;
+        const format = route.query["format"] as string;
+
+        if (adType) {
+          value = { adType, format: format || "" };
+        }
+      } else {
+        // Regular handling for other fields
+        value =
+          (route.query[decamelize(filter.field)] as string | undefined) ||
+          (route.query[filter.field] as string | undefined);
+      }
+
+      return {
         ...result,
         [filter.field]: {
           matchMode: filter.matchMode,
-          value:
-            (route.query[decamelize(filter.field)] as string | undefined) ||
-            (route.query[filter.field] as string | undefined),
+          value,
         },
-      }),
-      {},
-    ),
+      };
+    }, {}),
 );
 
 const filtersOptions = ref<Record<string, { label: string; value: string }[]>>(
@@ -293,7 +316,7 @@ watch(
   [page, limit, filters],
   () => {
     const query = buildQueryParams();
-    router.push({ query });
+    router.push({ query: query as Record<string, string | number> });
   },
   { deep: true },
 );

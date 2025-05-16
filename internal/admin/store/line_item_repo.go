@@ -130,6 +130,7 @@ type lineItemFilters struct {
 	UserID      int64
 	AppID       int64
 	AdType      db.AdType
+	Format      string
 	AccountID   int64
 	AccountType string
 	IsBidding   *bool
@@ -145,6 +146,9 @@ func (f *lineItemFilters) apply(db *gorm.DB) *gorm.DB {
 	}
 	if f.AdType != 0 {
 		db = db.Where("ad_type = ?", f.AdType)
+	}
+	if f.Format != "" {
+		db = db.Where("format = ?", f.Format)
 	}
 	if f.AccountID != 0 {
 		db = db.Where("account_id = ?", f.AccountID)
@@ -174,9 +178,11 @@ func queryToLineItemFilters(qParams map[string][]string) lineItemFilters {
 		filters.AppID, _ = strconv.ParseInt(v[0], 10, 64)
 	}
 	if v, ok := qParams["ad_type"]; ok {
-
 		dbAdType := db.AdTypeFromDomain(ad.Type(v[0]))
 		filters.AdType = dbAdType
+	}
+	if v, ok := qParams["format"]; ok {
+		filters.Format = v[0]
 	}
 	if v, ok := qParams["account_id"]; ok {
 		filters.AccountID, _ = strconv.ParseInt(v[0], 10, 64)
