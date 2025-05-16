@@ -33,7 +33,7 @@ const resourcesPath = "/app_demand_profiles";
 const response = await axios.get(`${resourcesPath}/${id}`);
 const resource = response.data;
 
-const jsonFields = jsonToFields(resource.data, "data", "static");
+const jsonFields = jsonToFields(resource.data, "data", "static", true);
 
 const fields = [
   ResourceCardFields.PublicUid,

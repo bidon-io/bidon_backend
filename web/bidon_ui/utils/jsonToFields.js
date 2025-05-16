@@ -14,9 +14,15 @@ export const formatLabel = (key) => {
  * @param {Object} jsonData - The JSON data to convert
  * @param {string} prefix - Optional prefix for the key (e.g., 'data')
  * @param {string} type - The type of field to create (default: 'static')
+ * @param {boolean} copyable - Whether the field is copyable (default: false)
  * @returns {Array} - Array of field objects
  */
-export const jsonToFields = (jsonData, prefix = "", type = "") => {
+export const jsonToFields = (
+  jsonData,
+  prefix = "",
+  type = "",
+  copyable = false,
+) => {
   if (!jsonData || typeof jsonData !== "object") {
     return [];
   }
@@ -29,6 +35,7 @@ export const jsonToFields = (jsonData, prefix = "", type = "") => {
       key: fieldKey,
       value: jsonData[key],
       type: type || undefined,
+      copyable,
     };
   });
 };

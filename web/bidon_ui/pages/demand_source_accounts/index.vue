@@ -10,7 +10,6 @@
 import { ResourceTableFields } from "@/constants";
 
 const columns = [
-  ResourceTableFields.PublicUid,
   ResourceTableFields.DemandSource,
   ResourceTableFields.Owner,
   ResourceTableFields.Label,

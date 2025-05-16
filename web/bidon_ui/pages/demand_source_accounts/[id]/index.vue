@@ -32,11 +32,12 @@ const resourcesPath = "/demand_source_accounts";
 const response = await axios.get(`${resourcesPath}/${id}`);
 const resource = response.data;
 
+const jsonFields = jsonToFields(resource.extra, "extra", "static", true);
 const fields = [
   ResourceCardFields.PublicUid,
   ResourceCardFields.DemandSource,
   ResourceCardFields.Owner,
   { label: "Label", key: "label" },
-  { label: "Extra", key: "extra", type: "textarea" },
+  ...jsonFields,
 ];
 </script>
