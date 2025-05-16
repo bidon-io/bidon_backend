@@ -28,16 +28,16 @@ const resourcesPath = "/line_items";
 const response = await axios.get(`${resourcesPath}/${id}`);
 const resource = response.data;
 
+const jsonFields = jsonToFields(resource.extra, "extra", "static", true);
 const fields = [
   ResourceCardFields.PublicUid,
   ResourceCardFields.HumanName,
   ResourceCardFields.App,
   ResourceCardFields.BidFloor,
   ResourceCardFields.AdType,
-  { key: "format", label: "Format" },
+  ...(resource.format ? [{ key: "format", label: "Format" }] : []),
   ResourceCardFields.DemandSourceAccount,
-  ResourceCardFields.AccountType,
   { key: "isBidding", label: "Bidding" },
-  { key: "extra", label: "Extra", type: "textarea" },
+  ...jsonFields,
 ];
 </script>

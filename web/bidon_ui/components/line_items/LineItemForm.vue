@@ -42,16 +42,16 @@
           <div class="flex align-items-center">
             <RadioButton
               v-model="auctionType"
-              input-id="defaultAuction"
+              input-id="waterfallAuction"
               name="auctionType"
-              value="default"
+              value="waterfall"
             />
-            <label for="defaultAuction" class="ml-2">Default</label>
+            <label for="waterfallAuction" class="ml-2">Waterfall</label>
           </div>
         </div>
       </FormField>
       <FormField
-        v-if="auctionType === 'default'"
+        v-if="auctionType === 'waterfall'"
         label="Bid Floor"
         :error="errors.bidFloor"
         required
@@ -93,7 +93,7 @@ const emit = defineEmits(["submit"]);
 const resource = ref(props.value);
 
 const extraSchema = ref(yup.object());
-const auctionType = ref(resource.value.isBidding ? "bidding" : "default");
+const auctionType = ref(resource.value.isBidding ? "bidding" : "waterfall");
 
 const adTypeWithFormat = ref({
   adType: resource.value.adType,

@@ -20,7 +20,7 @@
         </span>
       </template>
       <Fieldset legend="Ad Units" class="p-fieldset">
-        <!-- For CPM Networks -->
+        <!-- For Waterfall Networks -->
         <template v-if="!network.isBidding">
           <div class="flex flex-col gap-2">
             <div
@@ -123,7 +123,7 @@ const emit = defineEmits(["update:networkKeys", "update:adUnitIds"]);
 
 // TODO: Fetch from API instead of hardcoded
 const networks = ref<Network[]>([
-  // CPM networks
+  // Waterfall networks
   {
     label: "Admob",
     key: "admob",
