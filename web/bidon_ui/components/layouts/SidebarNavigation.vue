@@ -25,7 +25,7 @@
             : '',
         ]"
       >
-        <span>Security</span>
+        <span>Passwords</span>
       </NuxtLink>
     </div>
   </nav>
