@@ -7,7 +7,6 @@
 import { ResourceTableFields } from "@/constants";
 
 const columns = [
-  ResourceTableFields.PublicUid,
   ResourceTableFields.Email,
   { field: "isAdmin", header: "Is Admin" },
 ];
