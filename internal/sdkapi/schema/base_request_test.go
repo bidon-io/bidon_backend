@@ -26,9 +26,9 @@ func TestBaseRequest_GetMediationMode(t *testing.T) {
 			expected: "max",
 		},
 		{
-			name:     "With mediation_mode lp_ca",
-			ext:      `{"mediation_mode":"lp_ca"}`,
-			expected: "lp_ca",
+			name:     "With mediation_mode level_play",
+			ext:      `{"mediation_mode":"level_play"}`,
+			expected: "level_play",
 		},
 		{
 			name:     "With mediation_mode regular",
@@ -84,9 +84,9 @@ func TestBaseRequest_GetMediator(t *testing.T) {
 			expected: "max",
 		},
 		{
-			name:     "With mediator lp_ca",
-			ext:      `{"mediator":"lp_ca"}`,
-			expected: "lp_ca",
+			name:     "With mediator level_play",
+			ext:      `{"mediator":"level_play"}`,
+			expected: "level_play",
 		},
 		{
 			name:     "With mediator regular",

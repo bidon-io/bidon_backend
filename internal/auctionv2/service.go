@@ -153,7 +153,7 @@ func (s *Service) Run(ctx context.Context, params *ExecutionParams) (*Response, 
 	return s.buildResponse(req, auctionResult, adUnitsMap)
 }
 
-var customAdapters = [...]string{"max", "lp_ca"}
+var customAdapters = [...]string{"max", "level_play"}
 
 func priceFloor(req *schema.AuctionV2Request, auctionConfig *auction.Config) float64 {
 	// Default floor logic

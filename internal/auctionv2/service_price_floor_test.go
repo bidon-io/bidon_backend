@@ -132,13 +132,13 @@ func TestPriceFloor(t *testing.T) {
 			expected: 0.05, // Should use config price floor
 		},
 		{
-			name: "Custom adapter (lp_ca) with previous auction price",
+			name: "Custom adapter (level_play) with previous auction price",
 			req: &schema.AuctionV2Request{
 				AdObject: schema.AdObjectV2{
 					PriceFloor: 0.01,
 				},
 				BaseRequest: schema.BaseRequest{
-					Ext: `{"mediator":"lp_ca","previous_auction_price":0.25}`,
+					Ext: `{"mediator":"level_play","previous_auction_price":0.25}`,
 				},
 				AdCache: []schema.AdCacheObject{
 					{Price: 0.02},
@@ -150,13 +150,13 @@ func TestPriceFloor(t *testing.T) {
 			expected: 0.25, // Should use previous auction price
 		},
 		{
-			name: "Custom adapter (lp_ca) with previous auction price of zero",
+			name: "Custom adapter (level_play) with previous auction price of zero",
 			req: &schema.AuctionV2Request{
 				AdObject: schema.AdObjectV2{
 					PriceFloor: 0.01,
 				},
 				BaseRequest: schema.BaseRequest{
-					Ext: `{"mediator":"lp_ca","previous_auction_price":0.0}`,
+					Ext: `{"mediator":"level_play","previous_auction_price":0.0}`,
 				},
 				AdCache: []schema.AdCacheObject{
 					{Price: 0.02},
