@@ -187,7 +187,7 @@ func (f *AuctionConfigurationFilters) apply(db *gorm.DB) *gorm.DB {
 }
 
 func (r *AuctionConfigurationV2Repo) v2Scope(db *gorm.DB) *gorm.DB {
-	return db.Where("settings->>'v2' = ?", "true")
+	return db.Where("auction_configurations.settings->>'v2' = ?", "true")
 }
 
 func queryToAuctionConfigurationFilters(qParams map[string][]string) AuctionConfigurationFilters {
