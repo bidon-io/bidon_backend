@@ -25,3 +25,4 @@ public/system
 # Ignore files related to Rust.
 target
 .cargo
+/docker/kafka-connect/connector-config.json
