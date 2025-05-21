@@ -10,6 +10,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/bidon-io/bidon-backend/internal/ad"
+	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/db"
 	"github.com/bidon-io/bidon-backend/internal/device"
@@ -126,4 +127,13 @@ func (m *AdUnitsMatcher) selectAdFormats(params *auction.BuildParams) []ad.Forma
 	}
 
 	return adFormats
+}
+
+// timeout 6 seconds for all adapters except admob, which is 10 seconds
+func (m *AdUnitsMatcher) timeout(demandID string) int64 {
+	if demandID == string(adapter.AdmobKey) {
+		return 10_000
+	}
+
+	return AdUnitTimeout
 }
