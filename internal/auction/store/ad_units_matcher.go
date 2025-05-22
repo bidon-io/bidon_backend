@@ -91,7 +91,7 @@ func (m *AdUnitsMatcher) find(query *gorm.DB) ([]auction.AdUnit, error) {
 			adUnits[i].PriceFloor = &pf
 		}
 		adUnits[i].Extra = dbLineItem.Extra
-		adUnits[i].Timeout = AdUnitTimeout
+		adUnits[i].Timeout = m.timeout(adUnits[i].DemandID)
 	}
 
 	return adUnits, nil
@@ -130,7 +130,7 @@ func (m *AdUnitsMatcher) selectAdFormats(params *auction.BuildParams) []ad.Forma
 }
 
 // timeout 6 seconds for all adapters except admob, which is 10 seconds
-func (m *AdUnitsMatcher) timeout(demandID string) int64 {
+func (m *AdUnitsMatcher) timeout(demandID string) int32 {
 	if demandID == string(adapter.AdmobKey) {
 		return 10_000
 	}
