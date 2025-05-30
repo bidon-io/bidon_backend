@@ -17,11 +17,16 @@ type ShowHandler struct {
 	*BaseHandler[schema.ShowRequest, *schema.ShowRequest]
 	EventLogger         *event.Logger
 	NotificationHandler ShowNotificationHandler
+	AdUnitLookup        AdUnitLookup
 }
 
-//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/show_mocks.go -pkg mocks . ShowNotificationHandler
+//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/show_mocks.go -pkg mocks . ShowNotificationHandler AdUnitLookup
 type ShowNotificationHandler interface {
 	HandleShow(context.Context, *schema.Bid, string, string)
+}
+
+type AdUnitLookup interface {
+	GetInternalIDByUIDCached(context.Context, string) (int64, error)
 }
 
 func (h *ShowHandler) Handle(c echo.Context) error {
@@ -30,7 +35,7 @@ func (h *ShowHandler) Handle(c echo.Context) error {
 		return err
 	}
 
-	demandRequestEvent := prepareShowEvent(req)
+	demandRequestEvent := prepareShowEvent(c.Request().Context(), req, h.AdUnitLookup)
 	h.EventLogger.Log(demandRequestEvent, func(err error) {
 		sdkapi.LogError(c, fmt.Errorf("log show event: %v", err))
 	})
@@ -40,12 +45,17 @@ func (h *ShowHandler) Handle(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]any{"success": true})
 }
 
-func prepareShowEvent(req *request[schema.ShowRequest, *schema.ShowRequest]) *event.AdEvent {
+func prepareShowEvent(ctx context.Context, req *request[schema.ShowRequest, *schema.ShowRequest], adUnitLookup AdUnitLookup) *event.AdEvent {
 	bid := req.raw.Bid
 
 	auctionConfigurationUID, err := strconv.ParseInt(bid.AuctionConfigurationUID, 10, 64)
 	if err != nil {
 		auctionConfigurationUID = 0
+	}
+
+	adUnitInternalID, err := adUnitLookup.GetInternalIDByUIDCached(ctx, bid.AdUnitUID)
+	if err != nil {
+		adUnitInternalID = 0
 	}
 
 	adRequestParams := event.AdRequestParams{
@@ -61,6 +71,7 @@ func prepareShowEvent(req *request[schema.ShowRequest, *schema.ShowRequest]) *ev
 		ImpID:                   bid.ImpID,
 		DemandID:                bid.DemandID,
 		AdUnitUID:               int64(bid.GetAdUnitUID()),
+		AdUnitInternalID:        adUnitInternalID,
 		AdUnitLabel:             bid.AdUnitLabel,
 		ECPM:                    bid.GetPrice(),
 		PriceFloor:              bid.AuctionPriceFloor,

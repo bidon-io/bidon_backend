@@ -93,3 +93,75 @@ func (mock *ShowNotificationHandlerMock) HandleShowCalls() []struct {
 	mock.lockHandleShow.RUnlock()
 	return calls
 }
+
+// Ensure, that AdUnitLookupMock does implement apihandlers.AdUnitLookup.
+// If this is not the case, regenerate this file with moq.
+var _ apihandlers.AdUnitLookup = &AdUnitLookupMock{}
+
+// AdUnitLookupMock is a mock implementation of apihandlers.AdUnitLookup.
+//
+//	func TestSomethingThatUsesAdUnitLookup(t *testing.T) {
+//
+//		// make and configure a mocked apihandlers.AdUnitLookup
+//		mockedAdUnitLookup := &AdUnitLookupMock{
+//			GetInternalIDByUIDCachedFunc: func(contextMoqParam context.Context, s string) (int64, error) {
+//				panic("mock out the GetInternalIDByUIDCached method")
+//			},
+//		}
+//
+//		// use mockedAdUnitLookup in code that requires apihandlers.AdUnitLookup
+//		// and then make assertions.
+//
+//	}
+type AdUnitLookupMock struct {
+	// GetInternalIDByUIDCachedFunc mocks the GetInternalIDByUIDCached method.
+	GetInternalIDByUIDCachedFunc func(contextMoqParam context.Context, s string) (int64, error)
+
+	// calls tracks calls to the methods.
+	calls struct {
+		// GetInternalIDByUIDCached holds details about calls to the GetInternalIDByUIDCached method.
+		GetInternalIDByUIDCached []struct {
+			// ContextMoqParam is the contextMoqParam argument value.
+			ContextMoqParam context.Context
+			// S is the s argument value.
+			S string
+		}
+	}
+	lockGetInternalIDByUIDCached sync.RWMutex
+}
+
+// GetInternalIDByUIDCached calls GetInternalIDByUIDCachedFunc.
+func (mock *AdUnitLookupMock) GetInternalIDByUIDCached(contextMoqParam context.Context, s string) (int64, error) {
+	if mock.GetInternalIDByUIDCachedFunc == nil {
+		panic("AdUnitLookupMock.GetInternalIDByUIDCachedFunc: method is nil but AdUnitLookup.GetInternalIDByUIDCached was just called")
+	}
+	callInfo := struct {
+		ContextMoqParam context.Context
+		S               string
+	}{
+		ContextMoqParam: contextMoqParam,
+		S:               s,
+	}
+	mock.lockGetInternalIDByUIDCached.Lock()
+	mock.calls.GetInternalIDByUIDCached = append(mock.calls.GetInternalIDByUIDCached, callInfo)
+	mock.lockGetInternalIDByUIDCached.Unlock()
+	return mock.GetInternalIDByUIDCachedFunc(contextMoqParam, s)
+}
+
+// GetInternalIDByUIDCachedCalls gets all the calls that were made to GetInternalIDByUIDCached.
+// Check the length with:
+//
+//	len(mockedAdUnitLookup.GetInternalIDByUIDCachedCalls())
+func (mock *AdUnitLookupMock) GetInternalIDByUIDCachedCalls() []struct {
+	ContextMoqParam context.Context
+	S               string
+} {
+	var calls []struct {
+		ContextMoqParam context.Context
+		S               string
+	}
+	mock.lockGetInternalIDByUIDCached.RLock()
+	calls = mock.calls.GetInternalIDByUIDCached
+	mock.lockGetInternalIDByUIDCached.RUnlock()
+	return calls
+}
