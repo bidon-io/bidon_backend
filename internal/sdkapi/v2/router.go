@@ -30,6 +30,7 @@ type Router struct {
 	ConfigurationFetcher      *adapterstore.ConfigurationFetcher
 	BiddingBuilder            *bidding.Builder
 	AuctionService            *auctionv2.Service
+	AdUnitLookup              *sdkapistore.AdUnitLookup
 }
 
 func (r *Router) RegisterRoutes(g *echo.Group) {
@@ -68,6 +69,7 @@ func (r *Router) RegisterRoutes(g *echo.Group) {
 		},
 		EventLogger:         r.EventLogger,
 		NotificationHandler: r.NotificationHandler,
+		AdUnitLookup:        r.AdUnitLookup,
 	}
 	clickHandler := apihandlers.ClickHandler{
 		BaseHandler: &apihandlers.BaseHandler[schema.ClickRequest, *schema.ClickRequest]{
