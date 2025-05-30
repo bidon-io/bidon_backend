@@ -16,6 +16,16 @@ import (
 func SetupShowHandler() apihandlers.ShowHandler {
 	mockHandler := &mocks.ShowNotificationHandlerMock{}
 	mockHandler.HandleShowFunc = func(ctx context.Context, imp *schema.Bid, _ string, _ string) {}
+
+	mockAdUnitLookup := &mocks.AdUnitLookupMock{}
+	mockAdUnitLookup.GetInternalIDByUIDCachedFunc = func(ctx context.Context, uid string) (int64, error) {
+		// Return a test internal ID based on the UID
+		if uid == "test_uid_123" {
+			return 456, nil
+		}
+		return 0, nil
+	}
+
 	return apihandlers.ShowHandler{
 		BaseHandler: &apihandlers.BaseHandler[schema.ShowRequest, *schema.ShowRequest]{
 			AppFetcher: AppFetcherMock(),
@@ -23,6 +33,7 @@ func SetupShowHandler() apihandlers.ShowHandler {
 		},
 		EventLogger:         &event.Logger{Engine: &engine.Log{}},
 		NotificationHandler: mockHandler,
+		AdUnitLookup:        mockAdUnitLookup,
 	}
 }
 

@@ -31,6 +31,7 @@ func NewAdEvent(request *schema.BaseRequest, adRequestParams AdRequestParams, ge
 	requestEvent.DemandID = adRequestParams.DemandID
 	requestEvent.Bidding = adRequestParams.Bidding
 	requestEvent.AdUnitUID = adRequestParams.AdUnitUID
+	requestEvent.AdUnitInternalID = adRequestParams.AdUnitInternalID
 	requestEvent.AdUnitLabel = adRequestParams.AdUnitLabel
 	requestEvent.ECPM = adRequestParams.ECPM
 	requestEvent.PriceFloor = adRequestParams.PriceFloor
@@ -127,6 +128,7 @@ type AdRequestParams struct {
 	DemandID                string
 	Bidding                 bool
 	AdUnitUID               int64
+	AdUnitInternalID        int64
 	AdUnitLabel             string
 	ECPM                    float64
 	PriceFloor              float64
@@ -153,6 +155,7 @@ type AdEvent struct {
 	DemandID                    string    `json:"demand_id"`
 	Bidding                     bool      `json:"bidding"`
 	AdUnitUID                   int64     `json:"ad_unit_uid"`
+	AdUnitInternalID            int64     `json:"ad_unit_internal_id"`
 	AdUnitLabel                 string    `json:"ad_unit_label"`
 	ECPM                        float64   `json:"ecpm"`
 	PriceFloor                  float64   `json:"price_floor"`

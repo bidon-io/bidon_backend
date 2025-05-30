@@ -64,6 +64,7 @@
     "auction_configuration_id": 11,
     "auction_id": "93be3de1-3cf7-4537-9b5e-8c8cf16c2391",
     "demand_id": "bigoads",
+    "ad_unit_uid": "test_uid_123",
     "ecpm": 2.5,
     "imp_id": "05316d9f-f8a5-47af-b9a9-0582eed74c3e",
     "interstitial": {},
