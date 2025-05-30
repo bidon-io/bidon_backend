@@ -250,6 +250,15 @@ func main() {
 		DB:    db,
 		Cache: configsCache,
 	}
+	adUnitLookupCache := config.NewRedisCacheOf[int64](rdb, 10*time.Minute, "ad_unit_lookup")
+	err = adUnitLookupCache.Monitor(meter)
+	if err != nil {
+		log.Fatalf("Unable to register observer for adUnitLookupCache: %v", err)
+	}
+	adUnitLookup := &sdkapistore.AdUnitLookup{
+		DB:    db,
+		Cache: adUnitLookupCache,
+	}
 	auctionService := &auctionv2.Service{
 		ConfigFetcher:      configFetcher,
 		SegmentMatcher:     segmentMatcher,
@@ -308,6 +317,7 @@ func main() {
 		AdapterInitConfigsFetcher: adapterInitConfigsFetcher,
 		ConfigurationFetcher:      configurationFetcher,
 		AuctionService:            auctionService,
+		AdUnitLookup:              adUnitLookup,
 	}
 	routerV2.RegisterRoutes(v2Group)
 
