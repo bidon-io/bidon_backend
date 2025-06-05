@@ -203,12 +203,18 @@ func (s *Service) buildResponse(
 		if isCOPPA && adapter.IsDisabledForCOPPA(adapter.Key(adUnit.DemandID)) {
 			continue
 		}
+		if adUnit.DemandID == string(adapter.BidmachineKey) && req.GetMediator() != "" {
+			adUnit.Extra["custom_parameters"] = map[string]any{
+				"mediator": req.GetMediator(),
+			}
+		}
+
 		response.AdUnits = append(response.AdUnits, adUnit)
 	}
 
 	// Store Bids AS RTB AdUnits from BiddingAuctionResult
 	for _, bidResponse := range auctionResult.BiddingAuctionResult.Bids {
-		adUnit := convertBidToAdUnit(bidResponse, adUnitsMap)
+		adUnit := convertBidToAdUnit(req, bidResponse, adUnitsMap)
 		if adUnit == nil {
 			continue
 		}
@@ -254,7 +260,7 @@ func (s *Service) logEvents(
 	}
 }
 
-func convertBidToAdUnit(demandResponse adapters.DemandResponse, adUnitsMap *auction.AdUnitsMap) *auction.AdUnit {
+func convertBidToAdUnit(req *schema.AuctionV2Request, demandResponse adapters.DemandResponse, adUnitsMap *auction.AdUnitsMap) *auction.AdUnit {
 	storeAdUnit, err := selectAdUnit(demandResponse, adUnitsMap)
 	if err != nil {
 		return nil
@@ -266,7 +272,7 @@ func convertBidToAdUnit(demandResponse adapters.DemandResponse, adUnitsMap *auct
 	priceFloor := demandResponse.Price()
 	ext := map[string]any{}
 	if demandResponse.IsBid() {
-		ext = buildDemandExt(demandResponse)
+		ext = buildDemandExt(req, demandResponse)
 	}
 
 	for key, value := range storeAdUnit.Extra {
@@ -403,7 +409,7 @@ func selectAdUnit(demandResponse adapters.DemandResponse, adUnitsMap *auction.Ad
 	return nil, fmt.Errorf("ad unit not found for demand %s", demandResponse.DemandID)
 }
 
-func buildDemandExt(demandResponse adapters.DemandResponse) map[string]any {
+func buildDemandExt(req *schema.AuctionV2Request, demandResponse adapters.DemandResponse) map[string]any {
 	switch demandResponse.DemandID {
 	case adapter.AmazonKey:
 		return map[string]any{}
@@ -415,6 +421,16 @@ func buildDemandExt(demandResponse adapters.DemandResponse) map[string]any {
 		return map[string]any{
 			"bid_id": demandResponse.Bid.ID,
 		}
+	case adapter.BidmachineKey:
+		extra := map[string]any{
+			"payload": demandResponse.Bid.Payload,
+		}
+		if req.GetMediator() != "" {
+			extra["custom_parameters"] = map[string]any{
+				"mediator": req.GetMediator(),
+			}
+		}
+		return extra
 	default:
 		return map[string]any{
 			"payload": demandResponse.Bid.Payload,
