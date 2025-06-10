@@ -324,30 +324,41 @@ const fetchAdUnits = async () => {
   return data.value || [];
 };
 
+const updateNetworks = async () => {
+  const adUnits = await fetchAdUnits();
+  const bidTypeNetworks = networks.value.filter(
+    (network) => network.isBidding === props.isBidding,
+  );
+  const updatedNetworks = bidTypeNetworks.map((network) => {
+    const networkAdUnits = adUnits
+      .filter((adUnit) => adUnit.networkKey === network.key)
+      .sort((a, b) => a.pricefloor - b.pricefloor);
+    return {
+      ...network,
+      enabled: props.networkKeys.includes(network.key),
+      adUnits: networkAdUnits,
+      selectedAdUnitIds: props.adUnitIds.filter((id) =>
+        networkAdUnits.some((unit) => unit.id === id),
+      ),
+    };
+  });
+  isLoaded.value = true;
+  networks.value = updatedNetworks;
+};
+
+// Watch for changes in app/ad type configuration
+watch(() => [props.appId, props.adType, props.isBidding], updateNetworks, {
+  immediate: true,
+});
+
+// Watch for changes in network selection (for copy settings functionality)
 watch(
-  () => [props.appId, props.adType, props.isBidding],
-  async () => {
-    const adUnits = await fetchAdUnits();
-    const bidTypeNetworks = networks.value.filter(
-      (network) => network.isBidding === props.isBidding,
-    );
-    const updatedNetworks = bidTypeNetworks.map((network) => {
-      const networkAdUnits = adUnits
-        .filter((adUnit) => adUnit.networkKey === network.key)
-        .sort((a, b) => a.pricefloor - b.pricefloor);
-      return {
-        ...network,
-        enabled: props.networkKeys.includes(network.key),
-        adUnits: networkAdUnits,
-        selectedAdUnitIds: props.adUnitIds.filter((id) =>
-          networkAdUnits.some((unit) => unit.id === id),
-        ),
-      };
-    });
-    isLoaded.value = true;
-    networks.value = updatedNetworks;
+  () => [props.networkKeys, props.adUnitIds],
+  () => {
+    if (!isLoaded.value) return;
+    updateNetworks();
   },
-  { immediate: true },
+  { deep: true },
 );
 
 watchEffect(() => {
