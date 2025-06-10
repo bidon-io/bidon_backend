@@ -12,6 +12,7 @@
         :id="id"
         :path="resourcesPath"
       />
+      <CloneButton :id="id" :path="resourcesPath" />
     </NavigationContainer>
     <ResourceCard
       title="Auction Configuration"

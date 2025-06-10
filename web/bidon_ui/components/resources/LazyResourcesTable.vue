@@ -82,7 +82,7 @@
       </template>
     </Column>
     <Column
-      style="width: 10%; min-width: 8rem"
+      style="width: 12%; min-width: 10rem"
       body-style="text-align:center; position: sticky; right: 0; background-color: white"
     >
       <template #body="slotProps">
@@ -99,6 +99,13 @@
             :to="`${resourcesPath}/${slotProps.data.id}/edit`"
           >
             <i class="pi pi-pencil" style="color: green"></i>
+          </NuxtLink>
+          <NuxtLink
+            v-if="resourcePermissions?.create"
+            :key="slotProps.data.id"
+            :to="`${resourcesPath}/new?clone=${slotProps.data.id}`"
+          >
+            <i class="pi pi-copy" style="color: orange"></i>
           </NuxtLink>
           <a
             v-if="slotProps.data._permissions.delete"
@@ -117,6 +124,7 @@
 <script setup lang="ts">
 import type { FilterMatchModeOptions } from "primevue/api";
 import { decamelize } from "humps";
+import { camelize, singularize } from "inflection";
 import { debounce } from "~/utils/debounce";
 import { buildQueryParams as buildFilterQueryParams } from "~/utils/filterUtils";
 
@@ -172,6 +180,19 @@ const selectedResources = ref([]);
 
 const route = useRoute();
 const router = useRouter();
+
+// Get resource permissions for clone functionality
+const resourceKey = computed(() => {
+  if (props.resourcesPath === "/v2/auction_configurations") {
+    return "auctionConfigurationV2";
+  }
+  return camelize(singularize(props.resourcesPath.replace("/", "")), true);
+});
+
+const resourcesStore = useResources();
+const resourcePermissions = computed(
+  () => resourcesStore.state[resourceKey.value]?.permissions ?? {},
+);
 
 // read query params
 const page = ref(+(route.query.page ?? 1));
