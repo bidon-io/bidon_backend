@@ -13,7 +13,7 @@ import (
 	"github.com/bidon-io/bidon-backend/config"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/geocoder"
-	"github.com/bidon-io/bidon-backend/internal/sdkapi/v1/apihandlers/mocks"
+	"github.com/bidon-io/bidon-backend/internal/sdkapi/v2/apihandlers/mocks"
 )
 
 type Handler interface {
