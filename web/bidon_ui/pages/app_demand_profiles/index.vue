@@ -12,6 +12,7 @@
 
 <script setup>
 import { ResourceTableFields } from "@/constants";
+import LazyResourcesTable from "~/components/resources/LazyResourcesTable.vue";
 
 const columns = [
   ResourceTableFields.App,
