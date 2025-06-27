@@ -44,7 +44,6 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/geocoder"
 	grpcserver "github.com/bidon-io/bidon-backend/internal/sdkapi/grpc"
 	sdkapistore "github.com/bidon-io/bidon-backend/internal/sdkapi/store"
-	v1 "github.com/bidon-io/bidon-backend/internal/sdkapi/v1"
 	v2 "github.com/bidon-io/bidon-backend/internal/sdkapi/v2"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/v2/openapi"
 	"github.com/bidon-io/bidon-backend/internal/segment"
@@ -176,13 +175,6 @@ func main() {
 			MaxIdleConnsPerHost: 30 * cpus,
 		}),
 	}
-	notificationHandler := notification.Handler{
-		AuctionResultRepo: notificationstore.AuctionResultRepo{Redis: rdb},
-		Sender: notification.EventSender{
-			HttpClient:  biddingHTTPClient,
-			EventLogger: eventLogger,
-		},
-	}
 	notificationHandlerV2 := notification.HandlerV2{
 		AuctionResultRepo: notificationstore.AuctionResultV2Repo{Redis: rdb},
 		Sender: notification.EventSender{
@@ -198,10 +190,6 @@ func main() {
 	adUnitsMatcher := &auctionstore.AdUnitsMatcher{
 		DB:    db,
 		Cache: adUnitsCache,
-	}
-	biddingBuilder := &bidding.Builder{
-		AdaptersBuilder:     adapters_builder.BuildBiddingAdapters(biddingHTTPClient),
-		NotificationHandler: notificationHandler,
 	}
 	biddingBuilderV2 := &bidding.Builder{
 		AdaptersBuilder:     adapters_builder.BuildBiddingAdapters(biddingHTTPClient),
@@ -272,30 +260,6 @@ func main() {
 	}
 
 	e := config.Echo()
-
-	v1Group := e.Group("")
-	config.UseCommonMiddleware(v1Group, config.Middleware{
-		Service:               "bidon-sdkapi",
-		Logger:                logger,
-		LogRequestAndResponse: true,
-	})
-	v1Group.Use(sdkapi.CheckBidonHeader)
-
-	routerV1 := v1.Router{
-		ConfigFetcher:             configFetcher,
-		AppFetcher:                appFetcher,
-		SegmentMatcher:            segmentMatcher,
-		BiddingBuilder:            biddingBuilder,
-		BiddingAdaptersCfgBuilder: biddingAdaptersCfgBuilder,
-		AdUnitsMatcher:            adUnitsMatcher,
-		NotificationHandler:       notificationHandler,
-		GeoCoder:                  geoCoder,
-		EventLogger:               eventLogger,
-		LineItemsMatcher:          lineItemsMatcher,
-		AdapterInitConfigsFetcher: adapterInitConfigsFetcher,
-		ConfigurationFetcher:      configurationFetcher,
-	}
-	routerV1.RegisterRoutes(v1Group)
 
 	v2Group := e.Group("")
 	config.UseCommonMiddleware(v2Group, config.Middleware{
