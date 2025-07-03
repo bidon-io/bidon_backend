@@ -70,6 +70,20 @@
           placeholder="Timeout (ms)"
         />
       </FormField>
+      <!-- App Demand Profile Validation Warnings -->
+      <div v-if="hasValidationWarnings" class="mb-4">
+        <transition-group name="p-message" tag="div">
+          <Message
+            v-for="(warning, index) in validationWarnings"
+            :key="index"
+            :severity="warning.severity"
+            class="mb-2"
+          >
+            {{ warning.message }}
+          </Message>
+        </transition-group>
+      </div>
+
       <FormField v-if="showNetworks" label="CPM Networks">
         <NetworkAccordion
           v-model:network-keys="demands"
@@ -77,6 +91,8 @@
           :ad-type="adType"
           :app-id="appId"
           :is-bidding="false"
+          @network-enabled="onNetworkEnabled"
+          @network-disabled="onNetworkDisabled"
         />
       </FormField>
       <FormField v-if="showNetworks" label="Bidding Networks">
@@ -86,6 +102,8 @@
           :ad-type="adType"
           :app-id="appId"
           :is-bidding="true"
+          @network-enabled="onNetworkEnabled"
+          @network-disabled="onNetworkDisabled"
         />
       </FormField>
       <FormSubmitButton />
@@ -97,6 +115,7 @@
 import * as yup from "yup";
 import { useToast } from "primevue/usetoast";
 import axios from "@/services/ApiService.js";
+import { useAppDemandProfileValidation } from "@/composables/useAppDemandProfileValidation.js";
 
 const props = defineProps({
   value: {
@@ -153,6 +172,28 @@ const showNetworks = computed(() => appId.value && adType.value);
 const adUnitIds = computed(() => [
   ...new Set(demandAdUnitIds.value.concat(biddingAdUnitIds.value)),
 ]);
+
+// App Demand Profile Validation
+const {
+  validateNetworkEnabled,
+  validateNetworkDisabled,
+  clearAllWarnings,
+  warningMessages: validationWarnings,
+  hasWarnings: hasValidationWarnings,
+} = useAppDemandProfileValidation(appId);
+
+const onNetworkEnabled = async (networkApiKey) => {
+  await validateNetworkEnabled(networkApiKey);
+};
+
+const onNetworkDisabled = (networkApiKey) => {
+  validateNetworkDisabled(networkApiKey);
+};
+
+// Clear warnings when app changes
+watch(appId, () => {
+  clearAllWarnings();
+});
 
 const toast = useToast();
 const copyAuctionKey = ref("");
