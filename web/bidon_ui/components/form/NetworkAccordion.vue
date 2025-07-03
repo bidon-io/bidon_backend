@@ -1,5 +1,9 @@
 <template>
-  <Accordion v-if="isLoaded" :active-index="0" :multiple="true">
+  <div v-if="adUnitsStatus === 'pending'" class="flex items-center p-4">
+    <i class="pi pi-spin pi-spinner mr-2"></i>
+    <span>Loading networks...</span>
+  </div>
+  <Accordion v-else-if="isLoaded" :active-index="0" :multiple="true">
     <AccordionTab v-for="network in networks" :key="network.key">
       <ToggleButton
         v-model="network.enabled"
@@ -77,6 +81,7 @@
 
 <script lang="ts" setup>
 import axios from "@/services/ApiService";
+import { useDebounceFn } from "@vueuse/core";
 
 type Network = {
   label: string;
@@ -301,10 +306,17 @@ const networks = ref<Network[]>([
 ]);
 const isLoaded = ref(false);
 
-const fetchAdUnits = async () => {
-  if (!props.appId || !props.adType) return [];
-  const url = `/line_items?app_id=${props.appId}&ad_type=${props.adType}&is_bidding=${props.isBidding}`;
-  const { data, error } = await useAsyncData(url, async () => {
+// Fetch ad units using useAsyncData with proper caching
+const {
+  data: adUnitsData,
+  status: adUnitsStatus,
+  error: adUnitsError,
+} = useAsyncData(
+  `line-items-${props.appId}-${props.adType}-${props.isBidding}`,
+  async () => {
+    if (!props.appId || !props.adType) return [];
+
+    const url = `/line_items?app_id=${props.appId}&ad_type=${props.adType}&is_bidding=${props.isBidding}`;
     const result = (await axios.get(url)).data;
     return result.map(
       (
@@ -321,16 +333,24 @@ const fetchAdUnits = async () => {
         isBidding: adUnit.isBidding,
       }),
     ) as AdUnit[];
-  });
-  if (error.value !== null) {
-    console.error("Failed to fetch ad units:", error);
-    return [];
-  }
-  return data.value || [];
-};
+  },
+  {
+    default: () => [],
+    server: false,
+  },
+);
 
-const updateNetworks = async () => {
-  const adUnits = await fetchAdUnits();
+// Watch for errors in ad units fetching
+watch(adUnitsError, (error) => {
+  if (error) {
+    console.error("Failed to fetch ad units:", error);
+  }
+});
+
+const updateNetworks = () => {
+  if (!adUnitsData.value) return;
+
+  const adUnits = adUnitsData.value;
   const bidTypeNetworks = networks.value.filter(
     (network) => network.isBidding === props.isBidding,
   );
@@ -351,17 +371,26 @@ const updateNetworks = async () => {
   networks.value = updatedNetworks;
 };
 
-// Watch for changes in app/ad type configuration
-watch(() => [props.appId, props.adType, props.isBidding], updateNetworks, {
-  immediate: true,
-});
+// Watch for data availability and prop changes with debouncing
+const debouncedUpdateNetworks = useDebounceFn(updateNetworks, 100);
+
+// Watch for when ad units data becomes available
+watch(
+  adUnitsData,
+  () => {
+    if (adUnitsData.value) {
+      updateNetworks();
+    }
+  },
+  { immediate: true },
+);
 
 // Watch for changes in network selection (for copy settings functionality)
 watch(
   () => [props.networkKeys, props.adUnitIds],
   () => {
-    if (!isLoaded.value) return;
-    updateNetworks();
+    if (!isLoaded.value || !adUnitsData.value) return;
+    debouncedUpdateNetworks();
   },
   { deep: true },
 );
