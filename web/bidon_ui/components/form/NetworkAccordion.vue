@@ -119,7 +119,12 @@ const props = defineProps({
     default: () => [],
   },
 });
-const emit = defineEmits(["update:networkKeys", "update:adUnitIds"]);
+const emit = defineEmits([
+  "update:networkKeys",
+  "update:adUnitIds",
+  "network-enabled",
+  "network-disabled",
+]);
 
 // TODO: Fetch from API instead of hardcoded
 const networks = ref<Network[]>([
@@ -373,6 +378,29 @@ watchEffect(() => {
   emit("update:networkKeys", selectedNetworkKeys);
   emit("update:adUnitIds", selectedAdUnitIds);
 });
+
+// Watch for individual network enabled state changes for validation
+watch(
+  () =>
+    networks.value.map((network) => ({
+      key: network.key,
+      enabled: network.enabled,
+    })),
+  (newNetworks, oldNetworks) => {
+    if (!isLoaded.value || !oldNetworks) return;
+
+    newNetworks.forEach((newNetwork, index) => {
+      const oldNetwork = oldNetworks[index];
+      if (oldNetwork && newNetwork.enabled !== oldNetwork.enabled) {
+        const event = newNetwork.enabled
+          ? "network-enabled"
+          : "network-disabled";
+        emit(event, newNetwork.key);
+      }
+    });
+  },
+  { deep: true },
+);
 </script>
 <style scoped>
 .p-datatable-header,
