@@ -81,7 +81,6 @@
 
 <script lang="ts" setup>
 import axios from "@/services/ApiService";
-import { useDebounceFn } from "@vueuse/core";
 
 type Network = {
   label: string;
@@ -371,12 +370,8 @@ const updateNetworks = () => {
   networks.value = updatedNetworks;
 };
 
-// Watch for data availability and prop changes with debouncing
-const debouncedUpdateNetworks = useDebounceFn(updateNetworks, 100);
-
-// Watch for when ad units data becomes available
 watch(
-  adUnitsData,
+  [adUnitsData, () => props.networkKeys, () => props.adUnitIds],
   () => {
     if (adUnitsData.value) {
       updateNetworks();
@@ -385,19 +380,7 @@ watch(
   { immediate: true },
 );
 
-// Watch for changes in network selection (for copy settings functionality)
-watch(
-  () => [props.networkKeys, props.adUnitIds],
-  () => {
-    if (!isLoaded.value || !adUnitsData.value) return;
-    debouncedUpdateNetworks();
-  },
-  { deep: true },
-);
-
-watchEffect(() => {
-  if (!isLoaded.value) return;
-
+const emitUpdates = () => {
   const enabledNetworks = networks.value.filter((network) => network.enabled);
   const selectedNetworkKeys = enabledNetworks.map((network) => network.key);
   const selectedAdUnitIds = enabledNetworks
@@ -406,27 +389,42 @@ watchEffect(() => {
 
   emit("update:networkKeys", selectedNetworkKeys);
   emit("update:adUnitIds", selectedAdUnitIds);
-});
+};
 
-// Watch for individual network enabled state changes for validation
 watch(
   () =>
     networks.value.map((network) => ({
       key: network.key,
       enabled: network.enabled,
+      selectedAdUnitIds: [...network.selectedAdUnitIds],
     })),
   (newNetworks, oldNetworks) => {
     if (!isLoaded.value || !oldNetworks) return;
 
+    let hasChanges = false;
+
     newNetworks.forEach((newNetwork, index) => {
       const oldNetwork = oldNetworks[index];
-      if (oldNetwork && newNetwork.enabled !== oldNetwork.enabled) {
+      if (!oldNetwork) return;
+
+      if (newNetwork.enabled !== oldNetwork.enabled) {
         const event = newNetwork.enabled
           ? "network-enabled"
           : "network-disabled";
         emit(event, newNetwork.key);
+        hasChanges = true;
+      }
+
+      const oldIds = JSON.stringify(oldNetwork.selectedAdUnitIds.sort());
+      const newIds = JSON.stringify(newNetwork.selectedAdUnitIds.sort());
+      if (oldIds !== newIds) {
+        hasChanges = true;
       }
     });
+
+    if (hasChanges) {
+      emitUpdates();
+    }
   },
   { deep: true },
 );
