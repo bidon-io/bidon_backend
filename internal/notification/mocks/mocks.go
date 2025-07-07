@@ -20,7 +20,7 @@ var _ notification.AuctionResultRepo = &AuctionResultRepoMock{}
 //
 //		// make and configure a mocked notification.AuctionResultRepo
 //		mockedAuctionResultRepo := &AuctionResultRepoMock{
-//			CreateOrUpdateFunc: func(ctx context.Context, imp *schema.Imp, bids []notification.Bid) error {
+//			CreateOrUpdateFunc: func(ctx context.Context, adObject *schema.AdObject, bids []notification.Bid) error {
 //				panic("mock out the CreateOrUpdate method")
 //			},
 //			FindFunc: func(ctx context.Context, auctionID string) (*notification.AuctionResult, error) {
@@ -34,7 +34,7 @@ var _ notification.AuctionResultRepo = &AuctionResultRepoMock{}
 //	}
 type AuctionResultRepoMock struct {
 	// CreateOrUpdateFunc mocks the CreateOrUpdate method.
-	CreateOrUpdateFunc func(ctx context.Context, imp *schema.Imp, bids []notification.Bid) error
+	CreateOrUpdateFunc func(ctx context.Context, adObject *schema.AdObject, bids []notification.Bid) error
 
 	// FindFunc mocks the Find method.
 	FindFunc func(ctx context.Context, auctionID string) (*notification.AuctionResult, error)
@@ -45,8 +45,8 @@ type AuctionResultRepoMock struct {
 		CreateOrUpdate []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
-			// Imp is the imp argument value.
-			Imp *schema.Imp
+			// AdObject is the adObject argument value.
+			AdObject *schema.AdObject
 			// Bids is the bids argument value.
 			Bids []notification.Bid
 		}
@@ -63,23 +63,23 @@ type AuctionResultRepoMock struct {
 }
 
 // CreateOrUpdate calls CreateOrUpdateFunc.
-func (mock *AuctionResultRepoMock) CreateOrUpdate(ctx context.Context, imp *schema.Imp, bids []notification.Bid) error {
+func (mock *AuctionResultRepoMock) CreateOrUpdate(ctx context.Context, adObject *schema.AdObject, bids []notification.Bid) error {
 	if mock.CreateOrUpdateFunc == nil {
 		panic("AuctionResultRepoMock.CreateOrUpdateFunc: method is nil but AuctionResultRepo.CreateOrUpdate was just called")
 	}
 	callInfo := struct {
-		Ctx  context.Context
-		Imp  *schema.Imp
-		Bids []notification.Bid
+		Ctx      context.Context
+		AdObject *schema.AdObject
+		Bids     []notification.Bid
 	}{
-		Ctx:  ctx,
-		Imp:  imp,
-		Bids: bids,
+		Ctx:      ctx,
+		AdObject: adObject,
+		Bids:     bids,
 	}
 	mock.lockCreateOrUpdate.Lock()
 	mock.calls.CreateOrUpdate = append(mock.calls.CreateOrUpdate, callInfo)
 	mock.lockCreateOrUpdate.Unlock()
-	return mock.CreateOrUpdateFunc(ctx, imp, bids)
+	return mock.CreateOrUpdateFunc(ctx, adObject, bids)
 }
 
 // CreateOrUpdateCalls gets all the calls that were made to CreateOrUpdate.
@@ -87,14 +87,14 @@ func (mock *AuctionResultRepoMock) CreateOrUpdate(ctx context.Context, imp *sche
 //
 //	len(mockedAuctionResultRepo.CreateOrUpdateCalls())
 func (mock *AuctionResultRepoMock) CreateOrUpdateCalls() []struct {
-	Ctx  context.Context
-	Imp  *schema.Imp
-	Bids []notification.Bid
+	Ctx      context.Context
+	AdObject *schema.AdObject
+	Bids     []notification.Bid
 } {
 	var calls []struct {
-		Ctx  context.Context
-		Imp  *schema.Imp
-		Bids []notification.Bid
+		Ctx      context.Context
+		AdObject *schema.AdObject
+		Bids     []notification.Bid
 	}
 	mock.lockCreateOrUpdate.RLock()
 	calls = mock.calls.CreateOrUpdate

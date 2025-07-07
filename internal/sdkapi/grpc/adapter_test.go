@@ -12,7 +12,6 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/auction"
-	"github.com/bidon-io/bidon-backend/internal/auctionv2"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	adcom "github.com/bidon-io/bidon-backend/pkg/proto/com/iabtechlab/adcom/v1"
 	adcomctx "github.com/bidon-io/bidon-backend/pkg/proto/com/iabtechlab/adcom/v1/context"
@@ -160,13 +159,13 @@ func TestAuctionAdapter_OpenRTBToAuctionRequest(t *testing.T) {
 	tests := []struct {
 		name   string
 		input  *v3.Openrtb
-		want   *schema.AuctionV2Request
+		want   *schema.AuctionRequest
 		errMsg string
 	}{
 		{
 			name:  "valid request with extensions",
 			input: buildValidRequest(),
-			want: &schema.AuctionV2Request{
+			want: &schema.AuctionRequest{
 				TMax: 1000,
 				Test: true,
 				BaseRequest: schema.BaseRequest{
@@ -226,7 +225,7 @@ func TestAuctionAdapter_OpenRTBToAuctionRequest(t *testing.T) {
 						Ext: "",
 					},
 				},
-				AdObject: schema.AdObjectV2{
+				AdObject: schema.AdObject{
 					AuctionID:               "auction_id_123",
 					AuctionKey:              "auction_key_789",
 					AuctionConfigurationID:  0,
@@ -295,8 +294,8 @@ func TestAuctionAdapter_OpenRTBToAuctionRequest(t *testing.T) {
 				}
 			}
 
-			if diff := cmp.Diff(tc.want, ar, cmpopts.EquateEmpty(), cmpopts.IgnoreUnexported(schema.AuctionV2Request{}, schema.BaseRequest{})); diff != "" {
-				t.Errorf("AuctionV2Request mismatch (-want +got):\n%s", diff)
+			if diff := cmp.Diff(tc.want, ar, cmpopts.EquateEmpty(), cmpopts.IgnoreUnexported(schema.AuctionRequest{}, schema.BaseRequest{})); diff != "" {
+				t.Errorf("AuctionRequest mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}
@@ -307,14 +306,14 @@ func TestAuctionAdapter_AuctionResponseToOpenRTB(t *testing.T) {
 
 	tests := []struct {
 		name   string
-		input  func() *auctionv2.Response
+		input  func() *auction.Response
 		want   func() *v3.Openrtb
 		errMsg string
 	}{
 		{
 			name: "valid response",
-			input: func() *auctionv2.Response {
-				return &auctionv2.Response{
+			input: func() *auction.Response {
+				return &auction.Response{
 					AuctionID:                "auction_id_123",
 					Token:                    "token_456",
 					ExternalWinNotifications: true,
@@ -415,8 +414,8 @@ func TestAuctionAdapter_AuctionResponseToOpenRTB(t *testing.T) {
 		},
 		{
 			name: "empty response",
-			input: func() *auctionv2.Response {
-				return &auctionv2.Response{}
+			input: func() *auction.Response {
+				return &auction.Response{}
 			},
 			want: func() *v3.Openrtb {
 				resp := &v3.Response{
@@ -448,8 +447,8 @@ func TestAuctionAdapter_AuctionResponseToOpenRTB(t *testing.T) {
 		},
 		{
 			name: "response with no ad units or bids",
-			input: func() *auctionv2.Response {
-				return &auctionv2.Response{
+			input: func() *auction.Response {
+				return &auction.Response{
 					AuctionID:                "auction_id_empty",
 					Token:                    "token_empty",
 					ExternalWinNotifications: false,
@@ -516,7 +515,7 @@ func TestParseAdObject(t *testing.T) {
 	tests := []struct {
 		name    string
 		req     *v3.Request
-		want    *schema.AdObjectV2
+		want    *schema.AdObject
 		wantAd  ad.Type
 		wantErr string
 	}{
@@ -562,7 +561,7 @@ func TestParseAdObject(t *testing.T) {
 					}},
 				}
 			}(),
-			want: &schema.AdObjectV2{
+			want: &schema.AdObject{
 				AuctionID:               "auction-123",
 				AuctionConfigurationUID: "config-123",
 				AuctionKey:              "auction-key",
@@ -608,7 +607,7 @@ func TestParseAdObject(t *testing.T) {
 					}},
 				}
 			}(),
-			want: &schema.AdObjectV2{
+			want: &schema.AdObject{
 				AuctionConfigurationUID: "config-123",
 				Banner:                  &schema.BannerAdObject{Format: ad.BannerFormat},
 				Orientation:             "PORTRAIT",
@@ -643,7 +642,7 @@ func TestParseAdObject(t *testing.T) {
 					}},
 				}
 			}(),
-			want: &schema.AdObjectV2{
+			want: &schema.AdObject{
 				AuctionConfigurationUID: "config-123",
 				Interstitial:            &schema.InterstitialAdObject{},
 				Demands:                 map[adapter.Key]map[string]any{},
@@ -674,7 +673,7 @@ func TestParseAdObject(t *testing.T) {
 				t.Errorf("expected ad type %q, got %q", tt.wantAd, gotAd)
 			}
 			if diff := cmp.Diff(tt.want, &got, opts...); diff != "" {
-				t.Errorf("AdObjectV2 mismatch (-want +got):\n%s", diff)
+				t.Errorf("AdObject mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}

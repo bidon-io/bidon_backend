@@ -10,8 +10,7 @@ import (
 type ShowRequest struct {
 	BaseRequest
 	AdType ad.Type `param:"ad_type"`
-	Bid    *Bid    `json:"bid" validate:"required_without=Show"`
-	Show   *Bid    `json:"show" validate:"required_without=Bid"`
+	Bid    *Bid    `json:"bid" validate:"required"`
 }
 
 func (r *ShowRequest) NormalizeValues() {

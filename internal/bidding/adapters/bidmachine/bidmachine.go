@@ -39,10 +39,10 @@ var fullscreenFormats = map[string][2]int64{
 	"TABLET": {768, 1024},
 }
 
-func (a *BidmachineAdapter) banner(br *schema.BiddingRequest) *openrtb2.Imp {
-	size := bannerFormats[br.Imp.Format()]
+func (a *BidmachineAdapter) banner(auctionRequest *schema.AuctionRequest) *openrtb2.Imp {
+	size := bannerFormats[auctionRequest.AdObject.Format()]
 
-	if br.Imp.IsAdaptive() && br.Device.IsTablet() {
+	if auctionRequest.AdObject.IsAdaptive() && auctionRequest.Device.IsTablet() {
 		size = bannerFormats[ad.LeaderboardFormat]
 	}
 
@@ -58,10 +58,10 @@ func (a *BidmachineAdapter) banner(br *schema.BiddingRequest) *openrtb2.Imp {
 	}
 }
 
-func (a *BidmachineAdapter) interstitial(br *schema.BiddingRequest) *openrtb2.Imp {
-	size := fullscreenFormats[string(br.Device.Type)]
+func (a *BidmachineAdapter) interstitial(auctionRequest *schema.AuctionRequest) *openrtb2.Imp {
+	size := fullscreenFormats[string(auctionRequest.Device.Type)]
 	w, h := size[0], size[1]
-	if !br.Imp.IsPortrait() {
+	if !auctionRequest.AdObject.IsPortrait() {
 		w, h = h, w
 	}
 	return &openrtb2.Imp{
@@ -82,10 +82,10 @@ func (a *BidmachineAdapter) interstitial(br *schema.BiddingRequest) *openrtb2.Im
 	}
 }
 
-func (a *BidmachineAdapter) rewarded(br *schema.BiddingRequest) *openrtb2.Imp {
-	size := fullscreenFormats[string(br.Device.Type)]
+func (a *BidmachineAdapter) rewarded(auctionRequest *schema.AuctionRequest) *openrtb2.Imp {
+	size := fullscreenFormats[string(auctionRequest.Device.Type)]
 	w, h := size[0], size[1]
-	if !br.Imp.IsPortrait() {
+	if !auctionRequest.AdObject.IsPortrait() {
 		w, h = h, w
 	}
 	return &openrtb2.Imp{
@@ -109,17 +109,17 @@ func (a *BidmachineAdapter) rewarded(br *schema.BiddingRequest) *openrtb2.Imp {
 	}
 }
 
-func (a *BidmachineAdapter) CreateRequest(request openrtb.BidRequest, br *schema.BiddingRequest) (openrtb.BidRequest, error) {
+func (a *BidmachineAdapter) CreateRequest(request openrtb.BidRequest, auctionRequest *schema.AuctionRequest) (openrtb.BidRequest, error) {
 	secure := int8(1)
 
 	var imp *openrtb2.Imp
-	switch br.Imp.Type() {
+	switch auctionRequest.AdObject.Type() {
 	case ad.BannerType:
-		imp = a.banner(br)
+		imp = a.banner(auctionRequest)
 	case ad.InterstitialType:
-		imp = a.interstitial(br)
+		imp = a.interstitial(auctionRequest)
 	case ad.RewardedType:
-		imp = a.rewarded(br)
+		imp = a.rewarded(auctionRequest)
 	default:
 		return request, errors.New("unknown impression type")
 	}
@@ -127,16 +127,16 @@ func (a *BidmachineAdapter) CreateRequest(request openrtb.BidRequest, br *schema
 	impId, _ := uuid.NewV4()
 	imp.ID = impId.String()
 	imp.DisplayManager = string(adapter.BidmachineKey)
-	imp.DisplayManagerVer = br.Adapters[adapter.BidmachineKey].SDKVersion
+	imp.DisplayManagerVer = auctionRequest.Adapters[adapter.BidmachineKey].SDKVersion
 	imp.Secure = &secure
-	imp.BidFloor = adapters.CalculatePriceFloor(&request, br)
+	imp.BidFloor = adapters.CalculatePriceFloor(&request, auctionRequest)
 
 	request.App.Publisher.ID = a.SellerID
 
 	extStructure := &map[string]interface{}{}
 	_ = json.Unmarshal(imp.Ext, extStructure)
 
-	(*extStructure)["bid_token"] = br.Imp.Demands[adapter.BidmachineKey]["token"]
+	(*extStructure)["bid_token"] = auctionRequest.AdObject.Demands[adapter.BidmachineKey]["token"]
 
 	raw, _ := json.Marshal(extStructure)
 

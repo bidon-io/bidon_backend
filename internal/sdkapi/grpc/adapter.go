@@ -10,7 +10,6 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/auction"
-	"github.com/bidon-io/bidon-backend/internal/auctionv2"
 	"github.com/bidon-io/bidon-backend/internal/device"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	adcom "github.com/bidon-io/bidon-backend/pkg/proto/com/iabtechlab/adcom/v1"
@@ -25,14 +24,14 @@ func NewAuctionAdapter() *AuctionAdapter {
 	return &AuctionAdapter{}
 }
 
-// OpenRTBToAuctionRequest converts a v3.Openrtb request into an AuctionV2Request.
-func (*AuctionAdapter) OpenRTBToAuctionRequest(o *v3.Openrtb) (*schema.AuctionV2Request, error) {
+// OpenRTBToAuctionRequest converts a v3.Openrtb request into an AuctionRequest.
+func (*AuctionAdapter) OpenRTBToAuctionRequest(o *v3.Openrtb) (*schema.AuctionRequest, error) {
 	req := o.GetRequest()
 	if req == nil {
 		return nil, fmt.Errorf("OpenRTBToAuctionRequest: request is nil")
 	}
 
-	ar := &schema.AuctionV2Request{}
+	ar := &schema.AuctionRequest{}
 	err := parseAuctionRequest(ar, req)
 	if err != nil {
 		return nil, fmt.Errorf("OpenRTBToAuctionRequest: %w", err)
@@ -42,7 +41,7 @@ func (*AuctionAdapter) OpenRTBToAuctionRequest(o *v3.Openrtb) (*schema.AuctionV2
 }
 
 // AuctionResponseToOpenRTB converts an AuctionResponse into a v3.Openrtb response.
-func (*AuctionAdapter) AuctionResponseToOpenRTB(r *auctionv2.Response) (*v3.Openrtb, error) {
+func (*AuctionAdapter) AuctionResponseToOpenRTB(r *auction.Response) (*v3.Openrtb, error) {
 	bids := make([]*v3.Bid, 0, len(r.AdUnits)+len(r.NoBids))
 	adUnits := append(r.AdUnits, r.NoBids...)
 	for _, a := range adUnits {
@@ -80,7 +79,7 @@ func (*AuctionAdapter) AuctionResponseToOpenRTB(r *auctionv2.Response) (*v3.Open
 	}, nil
 }
 
-func parseAuctionRequest(ar *schema.AuctionV2Request, req *v3.Request) error {
+func parseAuctionRequest(ar *schema.AuctionRequest, req *v3.Request) error {
 	ext, err := getMediationExtension[*mediation.RequestExt](req, mediation.E_RequestExt)
 	if err != nil {
 		return fmt.Errorf("parseAuctionRequest: %w", err)
@@ -172,25 +171,25 @@ func parseBaseRequest(req *v3.Request) (schema.BaseRequest, error) {
 	}, nil
 }
 
-func parseAdObject(r *v3.Request) (schema.AdObjectV2, ad.Type, error) {
+func parseAdObject(r *v3.Request) (schema.AdObject, ad.Type, error) {
 	items := r.GetItem()
 	if len(items) == 0 {
-		return schema.AdObjectV2{}, ad.UnknownType, fmt.Errorf("parseAdObject: no items in request")
+		return schema.AdObject{}, ad.UnknownType, fmt.Errorf("parseAdObject: no items in request")
 	}
 	i := items[0]
 	placementBytes := i.GetSpec()
 	if placementBytes == nil {
-		return schema.AdObjectV2{}, ad.UnknownType, fmt.Errorf("parseAdObject: placement is empty")
+		return schema.AdObject{}, ad.UnknownType, fmt.Errorf("parseAdObject: placement is empty")
 	}
 
 	var placement adcom.Placement
 	if err := proto.Unmarshal(placementBytes, &placement); err != nil {
-		return schema.AdObjectV2{}, ad.UnknownType, fmt.Errorf("parseAdObject: failed to unmarshal placement: %w", err)
+		return schema.AdObject{}, ad.UnknownType, fmt.Errorf("parseAdObject: failed to unmarshal placement: %w", err)
 	}
 
 	mi, err := getMediationExtension[*mediation.PlacementExt](&placement, mediation.E_PlacementExt)
 	if err != nil {
-		return schema.AdObjectV2{}, ad.UnknownType, fmt.Errorf("parseAdObject: %w", err)
+		return schema.AdObject{}, ad.UnknownType, fmt.Errorf("parseAdObject: %w", err)
 	}
 
 	var adType ad.Type
@@ -206,7 +205,7 @@ func parseAdObject(r *v3.Request) (schema.AdObjectV2, ad.Type, error) {
 	if display := placement.GetDisplay(); display != nil {
 		dpi, err := getMediationExtension[*mediation.DisplayPlacementExt](display, mediation.E_DisplayPlacementExt)
 		if err != nil {
-			return schema.AdObjectV2{}, ad.UnknownType, fmt.Errorf("parseAdObject: Missing DisplayPlacementExt %w", err)
+			return schema.AdObject{}, ad.UnknownType, fmt.Errorf("parseAdObject: Missing DisplayPlacementExt %w", err)
 		}
 		orientation = dpi.GetOrientation().String()
 
@@ -222,7 +221,7 @@ func parseAdObject(r *v3.Request) (schema.AdObjectV2, ad.Type, error) {
 	}
 
 	if rewarded == nil && interstitial == nil && banner == nil {
-		return schema.AdObjectV2{}, ad.UnknownType, fmt.Errorf("parseAdObject: no ad type found")
+		return schema.AdObject{}, ad.UnknownType, fmt.Errorf("parseAdObject: no ad type found")
 	}
 
 	demands := make(map[adapter.Key]map[string]any)
@@ -236,7 +235,7 @@ func parseAdObject(r *v3.Request) (schema.AdObjectV2, ad.Type, error) {
 		}
 	}
 
-	return schema.AdObjectV2{
+	return schema.AdObject{
 		AuctionID:               i.GetId(),
 		AuctionConfigurationUID: mi.GetAuctionConfigurationUid(),
 		Orientation:             orientation,

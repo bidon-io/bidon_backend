@@ -81,10 +81,6 @@ func GenerateModels(db *sql.DB) {
 			return tag.Set("default", "false")
 		}),
 		gen.FieldType("ad_type", "AdType"),
-		gen.FieldType("rounds", "[]auction.RoundConfig"),
-		gen.FieldGORMTag("rounds", func(tag field.GormTag) field.GormTag {
-			return tag.Set("serializer", "json")
-		}),
 		gen.FieldGORMTag("external_win_notifications", func(tag field.GormTag) field.GormTag {
 			return tag.Set("default", "false")
 		}),

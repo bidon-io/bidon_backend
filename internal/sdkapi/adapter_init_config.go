@@ -73,8 +73,6 @@ func (a *AdmobInitConfig) SetDefaultOrder() {
 }
 
 type ApplovinInitConfig struct {
-	// AppKey is deprecated, it must be the same as SDKKey
-	AppKey string `json:"app_key,omitempty"`
 	SDKKey string `json:"sdk_key,omitempty"`
 	Order  int    `json:"order"`
 }

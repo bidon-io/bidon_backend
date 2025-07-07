@@ -94,7 +94,7 @@ var _ bidding.NotificationHandler = &NotificationHandlerMock{}
 //
 //		// make and configure a mocked bidding.NotificationHandler
 //		mockedNotificationHandler := &NotificationHandlerMock{
-//			HandleBiddingRoundFunc: func(contextMoqParam context.Context, imp *schema.Imp, auctionResult bidding.AuctionResult, s1 string, s2 string) error {
+//			HandleBiddingRoundFunc: func(contextMoqParam context.Context, adObject *schema.AdObject, auctionResult bidding.AuctionResult, s1 string, s2 string) error {
 //				panic("mock out the HandleBiddingRound method")
 //			},
 //		}
@@ -105,7 +105,7 @@ var _ bidding.NotificationHandler = &NotificationHandlerMock{}
 //	}
 type NotificationHandlerMock struct {
 	// HandleBiddingRoundFunc mocks the HandleBiddingRound method.
-	HandleBiddingRoundFunc func(contextMoqParam context.Context, imp *schema.Imp, auctionResult bidding.AuctionResult, s1 string, s2 string) error
+	HandleBiddingRoundFunc func(contextMoqParam context.Context, adObject *schema.AdObject, auctionResult bidding.AuctionResult, s1 string, s2 string) error
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -113,8 +113,8 @@ type NotificationHandlerMock struct {
 		HandleBiddingRound []struct {
 			// ContextMoqParam is the contextMoqParam argument value.
 			ContextMoqParam context.Context
-			// Imp is the imp argument value.
-			Imp *schema.Imp
+			// AdObject is the adObject argument value.
+			AdObject *schema.AdObject
 			// AuctionResult is the auctionResult argument value.
 			AuctionResult bidding.AuctionResult
 			// S1 is the s1 argument value.
@@ -127,19 +127,19 @@ type NotificationHandlerMock struct {
 }
 
 // HandleBiddingRound calls HandleBiddingRoundFunc.
-func (mock *NotificationHandlerMock) HandleBiddingRound(contextMoqParam context.Context, imp *schema.Imp, auctionResult bidding.AuctionResult, s1 string, s2 string) error {
+func (mock *NotificationHandlerMock) HandleBiddingRound(contextMoqParam context.Context, adObject *schema.AdObject, auctionResult bidding.AuctionResult, s1 string, s2 string) error {
 	if mock.HandleBiddingRoundFunc == nil {
 		panic("NotificationHandlerMock.HandleBiddingRoundFunc: method is nil but NotificationHandler.HandleBiddingRound was just called")
 	}
 	callInfo := struct {
 		ContextMoqParam context.Context
-		Imp             *schema.Imp
+		AdObject        *schema.AdObject
 		AuctionResult   bidding.AuctionResult
 		S1              string
 		S2              string
 	}{
 		ContextMoqParam: contextMoqParam,
-		Imp:             imp,
+		AdObject:        adObject,
 		AuctionResult:   auctionResult,
 		S1:              s1,
 		S2:              s2,
@@ -147,7 +147,7 @@ func (mock *NotificationHandlerMock) HandleBiddingRound(contextMoqParam context.
 	mock.lockHandleBiddingRound.Lock()
 	mock.calls.HandleBiddingRound = append(mock.calls.HandleBiddingRound, callInfo)
 	mock.lockHandleBiddingRound.Unlock()
-	return mock.HandleBiddingRoundFunc(contextMoqParam, imp, auctionResult, s1, s2)
+	return mock.HandleBiddingRoundFunc(contextMoqParam, adObject, auctionResult, s1, s2)
 }
 
 // HandleBiddingRoundCalls gets all the calls that were made to HandleBiddingRound.
@@ -156,14 +156,14 @@ func (mock *NotificationHandlerMock) HandleBiddingRound(contextMoqParam context.
 //	len(mockedNotificationHandler.HandleBiddingRoundCalls())
 func (mock *NotificationHandlerMock) HandleBiddingRoundCalls() []struct {
 	ContextMoqParam context.Context
-	Imp             *schema.Imp
+	AdObject        *schema.AdObject
 	AuctionResult   bidding.AuctionResult
 	S1              string
 	S2              string
 } {
 	var calls []struct {
 		ContextMoqParam context.Context
-		Imp             *schema.Imp
+		AdObject        *schema.AdObject
 		AuctionResult   bidding.AuctionResult
 		S1              string
 		S2              string
@@ -184,7 +184,7 @@ var _ bidding.BidCacher = &BidCacherMock{}
 //
 //		// make and configure a mocked bidding.BidCacher
 //		mockedBidCacher := &BidCacherMock{
-//			ApplyBidCacheFunc: func(ctx context.Context, br *schema.BiddingRequest, result *bidding.AuctionResult) []adapters.DemandResponse {
+//			ApplyBidCacheFunc: func(ctx context.Context, ar *schema.AuctionRequest, result *bidding.AuctionResult) []adapters.DemandResponse {
 //				panic("mock out the ApplyBidCache method")
 //			},
 //		}
@@ -195,7 +195,7 @@ var _ bidding.BidCacher = &BidCacherMock{}
 //	}
 type BidCacherMock struct {
 	// ApplyBidCacheFunc mocks the ApplyBidCache method.
-	ApplyBidCacheFunc func(ctx context.Context, br *schema.BiddingRequest, result *bidding.AuctionResult) []adapters.DemandResponse
+	ApplyBidCacheFunc func(ctx context.Context, ar *schema.AuctionRequest, result *bidding.AuctionResult) []adapters.DemandResponse
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -203,8 +203,8 @@ type BidCacherMock struct {
 		ApplyBidCache []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
-			// Br is the br argument value.
-			Br *schema.BiddingRequest
+			// Ar is the ar argument value.
+			Ar *schema.AuctionRequest
 			// Result is the result argument value.
 			Result *bidding.AuctionResult
 		}
@@ -213,23 +213,23 @@ type BidCacherMock struct {
 }
 
 // ApplyBidCache calls ApplyBidCacheFunc.
-func (mock *BidCacherMock) ApplyBidCache(ctx context.Context, br *schema.BiddingRequest, result *bidding.AuctionResult) []adapters.DemandResponse {
+func (mock *BidCacherMock) ApplyBidCache(ctx context.Context, ar *schema.AuctionRequest, result *bidding.AuctionResult) []adapters.DemandResponse {
 	if mock.ApplyBidCacheFunc == nil {
 		panic("BidCacherMock.ApplyBidCacheFunc: method is nil but BidCacher.ApplyBidCache was just called")
 	}
 	callInfo := struct {
 		Ctx    context.Context
-		Br     *schema.BiddingRequest
+		Ar     *schema.AuctionRequest
 		Result *bidding.AuctionResult
 	}{
 		Ctx:    ctx,
-		Br:     br,
+		Ar:     ar,
 		Result: result,
 	}
 	mock.lockApplyBidCache.Lock()
 	mock.calls.ApplyBidCache = append(mock.calls.ApplyBidCache, callInfo)
 	mock.lockApplyBidCache.Unlock()
-	return mock.ApplyBidCacheFunc(ctx, br, result)
+	return mock.ApplyBidCacheFunc(ctx, ar, result)
 }
 
 // ApplyBidCacheCalls gets all the calls that were made to ApplyBidCache.
@@ -238,12 +238,12 @@ func (mock *BidCacherMock) ApplyBidCache(ctx context.Context, br *schema.Bidding
 //	len(mockedBidCacher.ApplyBidCacheCalls())
 func (mock *BidCacherMock) ApplyBidCacheCalls() []struct {
 	Ctx    context.Context
-	Br     *schema.BiddingRequest
+	Ar     *schema.AuctionRequest
 	Result *bidding.AuctionResult
 } {
 	var calls []struct {
 		Ctx    context.Context
-		Br     *schema.BiddingRequest
+		Ar     *schema.AuctionRequest
 		Result *bidding.AuctionResult
 	}
 	mock.lockApplyBidCache.RLock()

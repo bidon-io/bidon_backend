@@ -8,8 +8,8 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/lib/pq"
+	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
@@ -17,28 +17,28 @@ const TableNameAuctionConfiguration = "auction_configurations"
 
 // AuctionConfiguration mapped from table <auction_configurations>
 type AuctionConfiguration struct {
-	ID                       int64                 `gorm:"column:id;type:bigint;primaryKey;autoIncrement:true" json:"id"`
-	Name                     sql.NullString        `gorm:"column:name;type:character varying" json:"name"`
-	AppID                    int64                 `gorm:"column:app_id;type:bigint;not null;uniqueIndex:auction_configurations_default_uniq_idx,priority:2;uniqueIndex:auction_configurations_default_segment_uniq_idx,priority:2;index:index_auction_configurations_on_app_id,priority:1" json:"app_id"`
-	AdType                   AdType                `gorm:"column:ad_type;type:integer;not null;uniqueIndex:auction_configurations_default_uniq_idx,priority:1;uniqueIndex:auction_configurations_default_segment_uniq_idx,priority:1" json:"ad_type"`
-	Rounds                   []auction.RoundConfig `gorm:"column:rounds;type:jsonb;default:[];serializer:json" json:"rounds"`
-	Status                   sql.NullInt32         `gorm:"column:status;type:integer" json:"status"`
-	Settings                 map[string]any        `gorm:"column:settings;type:jsonb;default:{};serializer:json" json:"settings"`
-	Pricefloor               float64               `gorm:"column:pricefloor;type:double precision;not null" json:"pricefloor"`
-	CreatedAt                time.Time             `gorm:"column:created_at;type:timestamp(6) without time zone;not null" json:"created_at"`
-	UpdatedAt                time.Time             `gorm:"column:updated_at;type:timestamp(6) without time zone;not null" json:"updated_at"`
-	SegmentID                *sql.NullInt64        `gorm:"column:segment_id;type:bigint;uniqueIndex:auction_configurations_default_segment_uniq_idx,priority:4;index:index_auction_configurations_on_segment_id,priority:1" json:"segment_id"`
-	ExternalWinNotifications *bool                 `gorm:"column:external_win_notifications;type:boolean;not null;default:false" json:"external_win_notifications"`
-	PublicUID                sql.NullInt64         `gorm:"column:public_uid;type:bigint;uniqueIndex:index_auction_configurations_on_public_uid,priority:1" json:"public_uid"`
-	Timeout                  int32                 `gorm:"column:timeout;type:integer;not null" json:"timeout"`
-	Demands                  pq.StringArray        `gorm:"column:demands;type:character varying[];default:ARRAY[]" json:"demands"`
-	Bidding                  pq.StringArray        `gorm:"column:bidding;type:character varying[];default:ARRAY[]" json:"bidding"`
-	AdUnitIds                pq.Int64Array         `gorm:"column:ad_unit_ids;type:bigint[];default:ARRAY[]" json:"ad_unit_ids"`
-	IsDefault                *bool                 `gorm:"column:is_default;type:boolean;not null;uniqueIndex:auction_configurations_default_uniq_idx,priority:3;uniqueIndex:auction_configurations_default_segment_uniq_idx,priority:3;default:false" json:"is_default"`
-	DeletedAt                gorm.DeletedAt        `gorm:"column:deleted_at;type:timestamp(6) without time zone" json:"deleted_at"`
-	AuctionKey               string                `gorm:"column:auction_key;type:text;index:idx_auction_configurations_auction_key,priority:1" json:"auction_key"`
-	App                      App                   `json:"app"`
-	Segment                  *Segment              `json:"segment"`
+	ID                       int64          `gorm:"column:id;type:bigint;primaryKey;autoIncrement:true" json:"id"`
+	Name                     sql.NullString `gorm:"column:name;type:character varying" json:"name"`
+	AppID                    int64          `gorm:"column:app_id;type:bigint;not null;uniqueIndex:auction_configurations_default_uniq_idx,priority:2;uniqueIndex:auction_configurations_default_segment_uniq_idx,priority:2;index:index_auction_configurations_on_app_id,priority:1" json:"app_id"`
+	AdType                   AdType         `gorm:"column:ad_type;type:integer;not null;uniqueIndex:auction_configurations_default_uniq_idx,priority:1;uniqueIndex:auction_configurations_default_segment_uniq_idx,priority:1" json:"ad_type"`
+	Rounds                   datatypes.JSON `gorm:"column:rounds;type:jsonb;default:[]" json:"rounds"`
+	Status                   sql.NullInt32  `gorm:"column:status;type:integer" json:"status"`
+	Settings                 map[string]any `gorm:"column:settings;type:jsonb;default:{};serializer:json" json:"settings"`
+	Pricefloor               float64        `gorm:"column:pricefloor;type:double precision;not null" json:"pricefloor"`
+	CreatedAt                time.Time      `gorm:"column:created_at;type:timestamp(6) without time zone;not null" json:"created_at"`
+	UpdatedAt                time.Time      `gorm:"column:updated_at;type:timestamp(6) without time zone;not null" json:"updated_at"`
+	SegmentID                *sql.NullInt64 `gorm:"column:segment_id;type:bigint;uniqueIndex:auction_configurations_default_segment_uniq_idx,priority:4;index:index_auction_configurations_on_segment_id,priority:1" json:"segment_id"`
+	ExternalWinNotifications *bool          `gorm:"column:external_win_notifications;type:boolean;not null;default:false" json:"external_win_notifications"`
+	PublicUID                sql.NullInt64  `gorm:"column:public_uid;type:bigint;uniqueIndex:index_auction_configurations_on_public_uid,priority:1" json:"public_uid"`
+	Timeout                  int32          `gorm:"column:timeout;type:integer;not null" json:"timeout"`
+	Demands                  pq.StringArray `gorm:"column:demands;type:character varying[];default:ARRAY[]" json:"demands"`
+	Bidding                  pq.StringArray `gorm:"column:bidding;type:character varying[];default:ARRAY[]" json:"bidding"`
+	AdUnitIds                pq.Int64Array  `gorm:"column:ad_unit_ids;type:bigint[];default:ARRAY[]" json:"ad_unit_ids"`
+	IsDefault                *bool          `gorm:"column:is_default;type:boolean;not null;uniqueIndex:auction_configurations_default_uniq_idx,priority:3;uniqueIndex:auction_configurations_default_segment_uniq_idx,priority:3;default:false" json:"is_default"`
+	DeletedAt                gorm.DeletedAt `gorm:"column:deleted_at;type:timestamp(6) without time zone" json:"deleted_at"`
+	AuctionKey               string         `gorm:"column:auction_key;type:text;index:idx_auction_configurations_auction_key,priority:1" json:"auction_key"`
+	App                      App            `json:"app"`
+	Segment                  *Segment       `json:"segment"`
 }
 
 // TableName AuctionConfiguration's table name

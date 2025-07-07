@@ -124,11 +124,11 @@ func (cb CachedBid) toDemandResponse() adapters.DemandResponse {
 // ApplyBidCache gets the auction result, stores it in the cache and enhances response with the cache data if available
 // The cache key is generated based on the session ID and the ad type
 // TTL is set to 5 minutes
-func (b *BidCache) ApplyBidCache(ctx context.Context, br *schema.BiddingRequest, result *AuctionResult) []adapters.DemandResponse {
-	if _, ok := br.GetNestedExtData()["bid_cache"]; !ok { // If the request has bid_cache field, only then cache the bids
+func (b *BidCache) ApplyBidCache(ctx context.Context, auctionRequest *schema.AuctionRequest, result *AuctionResult) []adapters.DemandResponse {
+	if _, ok := auctionRequest.GetNestedExtData()["bid_cache"]; !ok { // If the request has bid_cache field, only then cache the bids
 		return result.Bids
 	}
-	cacheKey := fmt.Sprintf("bidding:%s:%s", br.Session.ID, br.AdType)
+	cacheKey := fmt.Sprintf("bidding:%s:%s", auctionRequest.Session.ID, auctionRequest.AdType)
 	inCache := &Cache{Bids: make(map[adapter.Key]CacheEntry)}
 	err := b.Redis.GetDel(ctx, cacheKey).Scan(inCache)
 	if err != nil && !errors.Is(err, redis.Nil) { // Some error occurred while fetching the cache
@@ -155,7 +155,7 @@ func (b *BidCache) ApplyBidCache(ctx context.Context, br *schema.BiddingRequest,
 	// Select the highest bid for each adapter
 	now := b.Clock.Now()
 	for _, bid := range toCache {
-		cacheEntry := CacheEntry{Bid: cachedBidFromDemandResponse(bid), CreatedAt: now, AuctionID: br.Session.ID}
+		cacheEntry := CacheEntry{Bid: cachedBidFromDemandResponse(bid), CreatedAt: now, AuctionID: auctionRequest.Session.ID}
 		if existing, ok := inCache.Bids[bid.DemandID]; ok {
 			if bid.Price() > existing.Bid.Price {
 				inCache.Bids[bid.DemandID] = cacheEntry

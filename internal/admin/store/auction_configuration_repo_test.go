@@ -7,11 +7,9 @@ import (
 	"github.com/google/go-cmp/cmp"
 
 	"github.com/bidon-io/bidon-backend/internal/ad"
-	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/admin"
 	"github.com/bidon-io/bidon-backend/internal/admin/resource"
 	adminstore "github.com/bidon-io/bidon-backend/internal/admin/store"
-	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/db"
 	"github.com/bidon-io/bidon-backend/internal/db/dbtest"
 )
@@ -36,7 +34,6 @@ func TestAuctionConfigurationRepo_List(t *testing.T) {
 			Name:       "Config 1",
 			AppID:      apps[0].ID,
 			AdType:     ad.BannerType,
-			Rounds:     []auction.RoundConfig{{ID: "1", Demands: []adapter.Key{"demand1", "demand2"}, Timeout: 10}},
 			Pricefloor: 0.5,
 			SegmentID:  &segments[0].ID,
 		},
@@ -44,14 +41,12 @@ func TestAuctionConfigurationRepo_List(t *testing.T) {
 			Name:       "Config 2",
 			AppID:      apps[1].ID,
 			AdType:     ad.InterstitialType,
-			Rounds:     []auction.RoundConfig{{ID: "2", Demands: []adapter.Key{"demand3", "demand4"}, Timeout: 20}},
 			Pricefloor: 0.75,
 		},
 		{
 			Name:       "Config 3",
 			AppID:      apps[2].ID,
 			AdType:     ad.RewardedType,
-			Rounds:     []auction.RoundConfig{{ID: "3", Demands: []adapter.Key{"demand5", "demand6"}, Timeout: 30}},
 			Pricefloor: 1.0,
 		},
 	}
@@ -96,7 +91,6 @@ func TestAuctionConfigurationRepo_Find(t *testing.T) {
 		Name:       "Config 1",
 		AppID:      app.ID,
 		AdType:     ad.BannerType,
-		Rounds:     []auction.RoundConfig{{ID: "1", Demands: []adapter.Key{"demand1", "demand2"}, Timeout: 10}},
 		Pricefloor: 0.5,
 	}
 
@@ -127,7 +121,6 @@ func TestAuctionConfigurationRepo_Update(t *testing.T) {
 		Name:       "Config 1",
 		AppID:      app.ID,
 		AdType:     ad.BannerType,
-		Rounds:     []auction.RoundConfig{{ID: "1", Demands: []adapter.Key{"demand1", "demand2"}, Timeout: 10}},
 		Pricefloor: 0.5,
 	}
 
@@ -163,7 +156,6 @@ func TestAuctionConfigurationRepo_Delete(t *testing.T) {
 		Name:       "Config 1",
 		AppID:      app.ID,
 		AdType:     ad.BannerType,
-		Rounds:     []auction.RoundConfig{{ID: "1", Demands: []adapter.Key{"demand1", "demand2"}, Timeout: 10}},
 		Pricefloor: 0.5,
 	}
 	config, err := repo.Create(context.Background(), attrs)

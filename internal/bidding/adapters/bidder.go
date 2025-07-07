@@ -11,7 +11,7 @@ import (
 
 type BidderInterface interface {
 	// CreateRequest makes the HTTP requests which should be made to fetch bids.
-	CreateRequest(openrtb.BidRequest, *schema.BiddingRequest) (openrtb.BidRequest, error)
+	CreateRequest(openrtb.BidRequest, *schema.AuctionRequest) (openrtb.BidRequest, error)
 
 	// ExecuteRequest sends request to bidder endpoint.
 	ExecuteRequest(context.Context, *http.Client, openrtb.BidRequest) *DemandResponse

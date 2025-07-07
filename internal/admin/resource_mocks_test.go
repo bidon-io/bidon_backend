@@ -5,9 +5,8 @@ package admin
 
 import (
 	"context"
-	"sync"
-
 	"github.com/bidon-io/bidon-backend/internal/admin/resource"
+	"sync"
 )
 
 // Ensure, that ResourceManipulatorMock does implement ResourceManipulator.

@@ -1,4 +1,4 @@
-package auctionv2
+package auction
 
 import (
 	"context"
@@ -12,7 +12,6 @@ import (
 
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
-	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/bidding"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
@@ -32,20 +31,20 @@ type Service struct {
 }
 
 type Response struct {
-	ConfigID                 int64            `json:"auction_configuration_id"`
-	ConfigUID                string           `json:"auction_configuration_uid"`
-	ExternalWinNotifications bool             `json:"external_win_notifications"`
-	AdUnits                  []auction.AdUnit `json:"ad_units"`
-	NoBids                   []auction.AdUnit `json:"no_bids"`
-	Segment                  auction.Segment  `json:"segment"`
-	Token                    string           `json:"token"`
-	AuctionPriceFloor        float64          `json:"auction_pricefloor"`
-	AuctionTimeout           int              `json:"auction_timeout"`
-	AuctionID                string           `json:"auction_id"`
+	ConfigID                 int64    `json:"auction_configuration_id"`
+	ConfigUID                string   `json:"auction_configuration_uid"`
+	ExternalWinNotifications bool     `json:"external_win_notifications"`
+	AdUnits                  []AdUnit `json:"ad_units"`
+	NoBids                   []AdUnit `json:"no_bids"`
+	Segment                  Segment  `json:"segment"`
+	Token                    string   `json:"token"`
+	AuctionPriceFloor        float64  `json:"auction_pricefloor"`
+	AuctionTimeout           int      `json:"auction_timeout"`
+	AuctionID                string   `json:"auction_id"`
 }
 
 type ExecutionParams struct {
-	Req     *schema.AuctionV2Request
+	Req     *schema.AuctionRequest
 	AppID   int64
 	Country string
 	GeoData geocoder.GeoData
@@ -56,16 +55,16 @@ type ExecutionParams struct {
 //go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/service_mocks.go -pkg mocks . ConfigFetcher AuctionBuilder AdapterKeysFetcher
 
 type ConfigFetcher interface {
-	Match(ctx context.Context, appID int64, adType ad.Type, segmentID int64, version string) (*auction.Config, error)
-	FetchByUIDCached(ctx context.Context, appId int64, id, uid string) *auction.Config
+	Match(ctx context.Context, appID int64, adType ad.Type, segmentID int64, version string) (*Config, error)
+	FetchByUIDCached(ctx context.Context, appID int64, id, uid string) *Config
 }
 
 type AdapterKeysFetcher interface {
 	FetchEnabledAdapterKeys(ctx context.Context, appID int64, adapterKeys []adapter.Key) ([]adapter.Key, error)
 }
 
-type AuctionBuilder interface {
-	Build(ctx context.Context, params *BuildParams) (*AuctionResult, error)
+type AuctionBuilder interface { //nolint:revive
+	Build(ctx context.Context, params *BuildParams) (*Result, error)
 }
 
 const (
@@ -77,7 +76,7 @@ var adCacheAdaptersFilter = store.NewAdCacheAdaptersFilter()
 func (s *Service) Run(ctx context.Context, params *ExecutionParams) (*Response, error) {
 	req := params.Req
 
-	var auctionConfig *auction.Config
+	var auctionConfig *Config
 	var err error
 
 	segmentParams := &segment.Params{
@@ -130,7 +129,7 @@ func (s *Service) Run(ctx context.Context, params *ExecutionParams) (*Response, 
 		Adapters:             adapterKeys,
 		Segment:              sgmnt,
 		PriceFloor:           req.AdObject.PriceFloor,
-		MergedAuctionRequest: req,
+		AuctionRequest:       req,
 		GeoData:              params.GeoData,
 		AuctionKey:           req.AdObject.AuctionKey,
 		AuctionConfiguration: auctionConfig,
@@ -138,7 +137,7 @@ func (s *Service) Run(ctx context.Context, params *ExecutionParams) (*Response, 
 
 	auctionResult, err := s.AuctionBuilder.Build(ctx, bp)
 	if err != nil {
-		if errors.Is(err, auction.ErrNoAdsFound) {
+		if errors.Is(err, ErrNoAdsFound) {
 			err = sdkapi.ErrNoAdsFound
 		}
 
@@ -146,7 +145,7 @@ func (s *Service) Run(ctx context.Context, params *ExecutionParams) (*Response, 
 	}
 	params.Log(fmt.Sprintf("[AUCTION V2] auction: (%+v), err: (%s), took (%dms)", auctionResult, err, auctionResult.GetDuration()))
 
-	adUnitsMap := auction.BuildAdUnitsMap(auctionResult.AdUnits)
+	adUnitsMap := BuildAdUnitsMap(auctionResult.AdUnits)
 
 	s.logEvents(req, params, auctionResult, adUnitsMap)
 
@@ -155,7 +154,7 @@ func (s *Service) Run(ctx context.Context, params *ExecutionParams) (*Response, 
 
 var customAdapters = [...]string{"max", "level_play"}
 
-func priceFloor(req *schema.AuctionV2Request, auctionConfig *auction.Config) float64 {
+func priceFloor(req *schema.AuctionRequest, auctionConfig *Config) float64 {
 	// Default floor logic
 	priceFloor := req.AdObject.PriceFloor
 	for _, cacheObject := range req.AdCache {
@@ -175,22 +174,22 @@ func priceFloor(req *schema.AuctionV2Request, auctionConfig *auction.Config) flo
 }
 
 func (s *Service) buildResponse(
-	req *schema.AuctionV2Request,
-	auctionResult *AuctionResult,
-	adUnitsMap *auction.AdUnitsMap,
+	req *schema.AuctionRequest,
+	auctionResult *Result,
+	adUnitsMap *AdUnitsMap,
 ) (*Response, error) {
 	adObject := req.AdObject
 	response := Response{
 		ConfigID:                 auctionResult.AuctionConfiguration.ID,
 		ConfigUID:                auctionResult.AuctionConfiguration.UID,
-		Segment:                  auction.Segment{ID: req.Segment.ID, UID: req.Segment.UID},
+		Segment:                  Segment{ID: req.Segment.ID, UID: req.Segment.UID},
 		Token:                    "{}",
 		AuctionID:                adObject.AuctionID,
 		AuctionPriceFloor:        adObject.PriceFloor,
 		AuctionTimeout:           auctionTimeout(auctionResult.AuctionConfiguration),
 		ExternalWinNotifications: auctionResult.AuctionConfiguration.ExternalWinNotifications,
-		AdUnits:                  make([]auction.AdUnit, 0),
-		NoBids:                   make([]auction.AdUnit, 0),
+		AdUnits:                  make([]AdUnit, 0),
+		NoBids:                   make([]AdUnit, 0),
 	}
 
 	isCOPPA := false
@@ -235,12 +234,12 @@ func (s *Service) buildResponse(
 }
 
 func (s *Service) logEvents(
-	req *schema.AuctionV2Request,
+	req *schema.AuctionRequest,
 	params *ExecutionParams,
-	auctionResult *AuctionResult,
-	adUnitsMap *auction.AdUnitsMap,
+	auctionResult *Result,
+	adUnitsMap *AdUnitsMap,
 ) {
-	auc := &auction.Auction{
+	auc := &Auction{
 		ConfigID:  auctionResult.AuctionConfiguration.ID,
 		ConfigUID: auctionResult.AuctionConfiguration.UID,
 	}
@@ -260,7 +259,7 @@ func (s *Service) logEvents(
 	}
 }
 
-func convertBidToAdUnit(req *schema.AuctionV2Request, demandResponse adapters.DemandResponse, adUnitsMap *auction.AdUnitsMap) *auction.AdUnit {
+func convertBidToAdUnit(req *schema.AuctionRequest, demandResponse adapters.DemandResponse, adUnitsMap *AdUnitsMap) *AdUnit {
 	storeAdUnit, err := selectAdUnit(demandResponse, adUnitsMap)
 	if err != nil {
 		return nil
@@ -279,7 +278,7 @@ func convertBidToAdUnit(req *schema.AuctionV2Request, demandResponse adapters.De
 		ext[key] = value
 	}
 
-	return &auction.AdUnit{
+	return &AdUnit{
 		DemandID:   string(demandResponse.DemandID),
 		UID:        storeAdUnit.UID,
 		Label:      storeAdUnit.Label,
@@ -291,9 +290,9 @@ func convertBidToAdUnit(req *schema.AuctionV2Request, demandResponse adapters.De
 }
 
 func prepareAuctionRequestEvent(
-	req *schema.AuctionV2Request,
+	req *schema.AuctionRequest,
 	params *ExecutionParams,
-	auc *auction.Auction,
+	auc *Auction,
 	auctionConfigurationUID int,
 ) *event.AdEvent {
 	adRequestParams := event.AdRequestParams{
@@ -316,10 +315,10 @@ func prepareAuctionRequestEvent(
 }
 
 func prepareBiddingEvents(
-	req *schema.AuctionV2Request,
+	req *schema.AuctionRequest,
 	params *ExecutionParams,
 	auctionResult *bidding.AuctionResult,
-	adUnitsMap *auction.AdUnitsMap,
+	adUnitsMap *AdUnitsMap,
 ) []*event.AdEvent {
 	adObject := req.AdObject
 	auctionConfigurationUID, err := strconv.Atoi(adObject.AuctionConfigurationUID)
@@ -389,7 +388,7 @@ func prepareBiddingEvents(
 	return events
 }
 
-func selectAdUnit(demandResponse adapters.DemandResponse, adUnitsMap *auction.AdUnitsMap) (*auction.AdUnit, error) {
+func selectAdUnit(demandResponse adapters.DemandResponse, adUnitsMap *AdUnitsMap) (*AdUnit, error) {
 	adUnits, err := adUnitsMap.All(demandResponse.DemandID, schema.RTBBidType)
 	if err != nil {
 		return nil, err
@@ -409,7 +408,7 @@ func selectAdUnit(demandResponse adapters.DemandResponse, adUnitsMap *auction.Ad
 	return nil, fmt.Errorf("ad unit not found for demand %s", demandResponse.DemandID)
 }
 
-func buildDemandExt(req *schema.AuctionV2Request, demandResponse adapters.DemandResponse) map[string]any {
+func buildDemandExt(req *schema.AuctionRequest, demandResponse adapters.DemandResponse) map[string]any {
 	switch demandResponse.DemandID {
 	case adapter.AmazonKey:
 		return map[string]any{}
@@ -438,7 +437,7 @@ func buildDemandExt(req *schema.AuctionV2Request, demandResponse adapters.Demand
 	}
 }
 
-func auctionTimeout(conf *auction.Config) int {
+func auctionTimeout(conf *Config) int {
 	if conf.Timeout > 0 {
 		return conf.Timeout
 	}

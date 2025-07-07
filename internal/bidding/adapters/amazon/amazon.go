@@ -27,8 +27,8 @@ type Adapter struct {
 	PricePointsMap PricePointsMap
 }
 
-func (a *Adapter) FetchBids(br *schema.BiddingRequest) ([]*adapters.DemandResponse, error) {
-	slotsJSON, ok := br.Imp.Demands[adapter.AmazonKey]["token"].(string)
+func (a *Adapter) FetchBids(auctionRequest *schema.AuctionRequest) ([]*adapters.DemandResponse, error) {
+	slotsJSON, ok := auctionRequest.AdObject.Demands[adapter.AmazonKey]["token"].(string)
 	if !ok {
 		return nil, fmt.Errorf("no token in request")
 	}

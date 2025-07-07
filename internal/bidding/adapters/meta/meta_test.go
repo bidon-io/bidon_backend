@@ -23,7 +23,7 @@ import (
 
 type createRequestTestParams struct {
 	BaseBidRequest openrtb.BidRequest
-	Br             *schema.BiddingRequest
+	AuctionRequest *schema.AuctionRequest
 }
 
 type createRequestTestOutput struct {
@@ -78,17 +78,17 @@ func buildBaseRequest() openrtb.BidRequest {
 	}
 }
 
-func buildTestParams(imp schema.Imp) createRequestTestParams {
+func buildTestParams(adObject schema.AdObject) createRequestTestParams {
 	request := buildBaseRequest()
 
-	br := schema.BiddingRequest{
+	auctionRequest := schema.AuctionRequest{
 		Adapters: schema.Adapters{
 			"meta": schema.Adapter{
 				Version:    "1.0.0",
 				SDKVersion: "1.0.0",
 			},
 		},
-		Imp: schema.Imp{
+		AdObject: schema.AdObject{
 			Demands: map[adapter.Key]map[string]any{
 				adapter.MetaKey: {
 					"token": "token",
@@ -103,19 +103,19 @@ func buildTestParams(imp schema.Imp) createRequestTestParams {
 		},
 	}
 
-	if imp.Banner != nil {
-		br.Imp.Banner = imp.Banner
+	if adObject.Banner != nil {
+		auctionRequest.AdObject.Banner = adObject.Banner
 	}
-	if imp.Interstitial != nil {
-		br.Imp.Interstitial = imp.Interstitial
+	if adObject.Interstitial != nil {
+		auctionRequest.AdObject.Interstitial = adObject.Interstitial
 	}
-	if imp.Rewarded != nil {
-		br.Imp.Rewarded = imp.Rewarded
+	if adObject.Rewarded != nil {
+		auctionRequest.AdObject.Rewarded = adObject.Rewarded
 	}
 
 	return createRequestTestParams{
 		BaseBidRequest: request,
-		Br:             &br,
+		AuctionRequest: &auctionRequest,
 	}
 }
 
@@ -166,7 +166,7 @@ func TestMeta_CreateRequestTest(t *testing.T) {
 		{
 			name: "Banner MREC",
 			params: buildTestParams(
-				schema.Imp{
+				schema.AdObject{
 					Banner: &schema.BannerAdObject{
 						Format: ad.MRECFormat,
 					},
@@ -188,7 +188,7 @@ func TestMeta_CreateRequestTest(t *testing.T) {
 		{
 			name: "Banner BANNER",
 			params: buildTestParams(
-				schema.Imp{
+				schema.AdObject{
 					Banner: &schema.BannerAdObject{
 						Format: ad.BannerFormat,
 					},
@@ -210,7 +210,7 @@ func TestMeta_CreateRequestTest(t *testing.T) {
 		{
 			name: "Interstitial",
 			params: buildTestParams(
-				schema.Imp{
+				schema.AdObject{
 					Interstitial: &schema.InterstitialAdObject{},
 				},
 			),
@@ -230,7 +230,7 @@ func TestMeta_CreateRequestTest(t *testing.T) {
 		{
 			name: "Rewarded",
 			params: buildTestParams(
-				schema.Imp{
+				schema.AdObject{
 					Rewarded: &schema.RewardedAdObject{},
 				},
 			),
@@ -257,7 +257,7 @@ func TestMeta_CreateRequestTest(t *testing.T) {
 	}
 
 	for _, tC := range testCases {
-		request, err := adapter.CreateRequest(tC.params.BaseBidRequest, tC.params.Br)
+		request, err := adapter.CreateRequest(tC.params.BaseBidRequest, tC.params.AuctionRequest)
 		if err == nil {
 			request.Imp[0].ID = "1" // ommit random uuid
 		}
@@ -268,7 +268,7 @@ func TestMeta_CreateRequestTest(t *testing.T) {
 		if diff := cmp.Diff(tC.want, got, cmp.Comparer(func(x, y error) bool {
 			return x == y
 		})); diff != "" {
-			t.Errorf("%s: adapter.CreateRequest(ctx, %v, %v) mismatch (-want, +got):\n%s", tC.name, tC.params.BaseBidRequest, tC.params.Br, diff)
+			t.Errorf("%s: adapter.CreateRequest(ctx, %v, %v) mismatch (-want, +got):\n%s", tC.name, tC.params.BaseBidRequest, tC.params.AuctionRequest, diff)
 		}
 	}
 }

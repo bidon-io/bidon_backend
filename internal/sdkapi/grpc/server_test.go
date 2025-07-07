@@ -10,8 +10,7 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/auction"
-	"github.com/bidon-io/bidon-backend/internal/auctionv2"
-	auctionv2mocks "github.com/bidon-io/bidon-backend/internal/auctionv2/mocks"
+	auctionmocks "github.com/bidon-io/bidon-backend/internal/auction/mocks"
 	"github.com/bidon-io/bidon-backend/internal/bidding"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
@@ -48,7 +47,7 @@ func defaultServerParams() *serverParams {
 }
 
 func buildServer(p *serverParams) *Server {
-	adUnitsMatcher := &auctionv2mocks.AdUnitsMatcherMock{
+	adUnitsMatcher := &auctionmocks.AdUnitsMatcherMock{
 		MatchCachedFunc: func(ctx context.Context, params *auction.BuildParams) ([]auction.AdUnit, error) {
 			return *p.adUnits, nil
 		},
@@ -79,13 +78,13 @@ func buildServer(p *serverParams) *Server {
 	segmentMatcher := &segment.Matcher{
 		Fetcher: segmentFetcher,
 	}
-	adapterKeysFetcher := &auctionv2mocks.AdapterKeysFetcherMock{
+	adapterKeysFetcher := &auctionmocks.AdapterKeysFetcherMock{
 		FetchEnabledAdapterKeysFunc: func(ctx context.Context, appID int64, keys []adapter.Key) ([]adapter.Key, error) {
 			return keys, nil
 		},
 	}
 
-	biddingAdaptersConfigBuilder := &auctionv2mocks.BiddingAdaptersConfigBuilderMock{
+	biddingAdaptersConfigBuilder := &auctionmocks.BiddingAdaptersConfigBuilderMock{
 		BuildFunc: func(ctx context.Context, appID int64, adapterKeys []adapter.Key, adUnitsMap *auction.AdUnitsMap) (adapter.ProcessedConfigsMap, error) {
 			return adapter.ProcessedConfigsMap{
 				adapter.MetaKey: map[string]any{
@@ -97,19 +96,19 @@ func buildServer(p *serverParams) *Server {
 			}, nil
 		},
 	}
-	biddingBuilder := &auctionv2mocks.BiddingBuilderMock{
+	biddingBuilder := &auctionmocks.BiddingBuilderMock{
 		HoldAuctionFunc: func(ctx context.Context, params *bidding.BuildParams) (bidding.AuctionResult, error) {
 			return bidding.AuctionResult{
 				Bids: *p.demandResponses,
 			}, nil
 		},
 	}
-	auctionBuilderV2 := &auctionv2.Builder{
+	auctionBuilderV2 := &auction.Builder{
 		AdUnitsMatcher:               adUnitsMatcher,
 		BiddingBuilder:               biddingBuilder,
 		BiddingAdaptersConfigBuilder: biddingAdaptersConfigBuilder,
 	}
-	auctionService := &auctionv2.Service{
+	auctionService := &auction.Service{
 		AdapterKeysFetcher: adapterKeysFetcher,
 		ConfigFetcher:      configFetcher,
 		AuctionBuilder:     auctionBuilderV2,
@@ -181,8 +180,8 @@ func TestServer_Bid(t *testing.T) {
 				p := defaultServerParams()
 				s := buildServer(p)
 
-				as := s.AuctionService.(*auctionv2.Service)
-				as.AdapterKeysFetcher = &auctionv2mocks.AdapterKeysFetcherMock{
+				as := s.AuctionService.(*auction.Service)
+				as.AdapterKeysFetcher = &auctionmocks.AdapterKeysFetcherMock{
 					FetchEnabledAdapterKeysFunc: func(ctx context.Context, appID int64, keys []adapter.Key) ([]adapter.Key, error) {
 						return []adapter.Key{}, nil
 					},

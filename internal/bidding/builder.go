@@ -15,7 +15,6 @@ import (
 	"golang.org/x/exp/maps"
 
 	"github.com/bidon-io/bidon-backend/internal/adapter"
-	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters/amazon"
 	"github.com/bidon-io/bidon-backend/internal/bidding/openrtb"
@@ -39,20 +38,20 @@ type AdaptersBuilder interface {
 }
 
 type NotificationHandler interface {
-	HandleBiddingRound(context.Context, *schema.Imp, AuctionResult, string, string) error
+	HandleBiddingRound(context.Context, *schema.AdObject, AuctionResult, string, string) error
 }
 
 type BidCacher interface {
-	ApplyBidCache(ctx context.Context, br *schema.BiddingRequest, result *AuctionResult) []adapters.DemandResponse
+	ApplyBidCache(ctx context.Context, ar *schema.AuctionRequest, result *AuctionResult) []adapters.DemandResponse
 }
 
 type BuildParams struct {
-	AppID          int64
-	BiddingRequest schema.BiddingRequest
-	GeoData        geocoder.GeoData
-	AdapterConfigs adapter.ProcessedConfigsMap
-	AuctionConfig  auction.Config
-	StartTS        int64
+	AppID           int64
+	AuctionRequest  schema.AuctionRequest
+	GeoData         geocoder.GeoData
+	AdapterConfigs  adapter.ProcessedConfigsMap
+	BiddingAdapters []adapter.Key
+	StartTS         int64
 }
 
 type AuctionResult struct {
@@ -83,8 +82,7 @@ func (b *Builder) HoldAuction(ctx context.Context, params *BuildParams) (Auction
 	// collect results
 	// build response
 	emptyResponse := AuctionResult{}
-	br := params.BiddingRequest
-	config := params.AuctionConfig
+	auctionRequest := params.AuctionRequest
 
 	bidID, err := uuid.NewV4()
 	if err != nil {
@@ -92,62 +90,44 @@ func (b *Builder) HoldAuction(ctx context.Context, params *BuildParams) (Auction
 	}
 	baseBidRequest := openrtb.BidRequest{
 		ID:   bidID.String(),
-		Test: *bool2int(br.Test),
+		Test: *bool2int(auctionRequest.Test),
 		AT:   1,
 		TMax: 2000,
 		App: &openrtb2.App{
-			Ver:    br.App.Version,
-			Bundle: br.App.Bundle,
+			Ver:    auctionRequest.App.Version,
+			Bundle: auctionRequest.App.Bundle,
 			ID:     strconv.FormatInt(params.AppID, 10),
 			Publisher: &openrtb2.Publisher{
 				ID: "SELLER_ID",
 			},
 		},
-		Device: b.BuildDevice(br.Device, br.User, params.GeoData),
+		Device: b.BuildDevice(auctionRequest.Device, auctionRequest.User, params.GeoData),
 		Imp: []openrtb2.Imp{
 			{
-				BidFloor: br.Imp.GetBidFloorForBidding(),
+				BidFloor: auctionRequest.AdObject.GetBidFloorForBidding(),
 			},
 		},
 		Regs: &openrtb2.Regs{
-			COPPA: *bool2int(br.GetRegulations().COPPA),
-			GDPR:  bool2int(br.GetRegulations().GDPR),
+			COPPA: *bool2int(auctionRequest.GetRegulations().COPPA),
+			GDPR:  bool2int(auctionRequest.GetRegulations().GDPR),
 		},
 	}
 
 	var adapterKeys []adapter.Key
 	roundNumber := 0
-	isV2Auction := len(config.Rounds) == 0 && (len(config.Bidding) > 0 || len(config.Demands) > 0)
-	if isV2Auction {
-		filteredDemands := make(map[adapter.Key]map[string]any)
-		for key, value := range br.Imp.Demands {
-			if token, ok := value["token"]; ok && token != "" {
-				filteredDemands[key] = value
-			}
+	filteredDemands := make(map[adapter.Key]map[string]any)
+	for key, value := range auctionRequest.AdObject.Demands {
+		if token, ok := value["token"]; ok && token != "" {
+			filteredDemands[key] = value
 		}
-
-		adapterKeys = adapter.GetCommonAdapters(
-			config.Bidding,
-			br.Adapters.Keys(),
-			maps.Keys(filteredDemands),
-			maps.Keys(params.AdapterConfigs),
-		)
-	} else {
-		// DEPRECATED: Remove after migration to V2
-		// Get adapters from request, demands from bidding request and demands from round config and merge them
-		var roundConfig *auction.RoundConfig
-		for idx, round := range config.Rounds {
-			if round.ID == br.Imp.RoundID {
-				roundConfig = &round
-				roundNumber = idx
-				break
-			}
-		}
-		if roundConfig == nil {
-			return emptyResponse, errors.New("round not found")
-		}
-		adapterKeys = adapter.GetCommonAdapters(roundConfig.Bidding, br.Adapters.Keys(), maps.Keys(br.Imp.Demands))
 	}
+
+	adapterKeys = adapter.GetCommonAdapters(
+		params.BiddingAdapters,
+		auctionRequest.Adapters.Keys(),
+		maps.Keys(filteredDemands),
+		maps.Keys(params.AdapterConfigs),
+	)
 
 	if len(adapterKeys) == 0 {
 		return emptyResponse, ErrNoAdaptersMatched
@@ -171,7 +151,7 @@ func (b *Builder) HoldAuction(ctx context.Context, params *BuildParams) (Auction
 
 	for _, adapterKey := range adapterKeys {
 		wg.Add(1)
-		go b.processAdapter(ctx, adapterKey, br, baseBidRequest, params, bids, &wg, handleError)
+		go b.processAdapter(ctx, adapterKey, auctionRequest, baseBidRequest, params, bids, &wg, handleError)
 	}
 
 	go func() {
@@ -184,9 +164,9 @@ func (b *Builder) HoldAuction(ctx context.Context, params *BuildParams) (Auction
 	}
 
 	// Cache Bids
-	auctionResult.Bids = b.BidCacher.ApplyBidCache(ctx, &br, &auctionResult)
+	auctionResult.Bids = b.BidCacher.ApplyBidCache(ctx, &auctionRequest, &auctionResult)
 
-	b.NotificationHandler.HandleBiddingRound(ctx, &br.Imp, auctionResult, br.App.Bundle, string(br.AdType)) //nolint:errcheck
+	b.NotificationHandler.HandleBiddingRound(ctx, &auctionRequest.AdObject, auctionResult, auctionRequest.App.Bundle, string(auctionRequest.AdType)) //nolint:errcheck
 
 	return auctionResult, nil
 }
@@ -194,7 +174,7 @@ func (b *Builder) HoldAuction(ctx context.Context, params *BuildParams) (Auction
 func (b *Builder) processAdapter(
 	ctx context.Context,
 	adapterKey adapter.Key,
-	br schema.BiddingRequest,
+	auctionRequest schema.AuctionRequest,
 	baseBidRequest openrtb.BidRequest,
 	params *BuildParams,
 	bids chan adapters.DemandResponse,
@@ -209,7 +189,7 @@ func (b *Builder) processAdapter(
 			handleError(adapterKey, err)
 			return
 		}
-		demandResponses, err := bidder.FetchBids(&br)
+		demandResponses, err := bidder.FetchBids(&auctionRequest)
 		if err != nil {
 			handleError(adapterKey, err)
 			return
@@ -217,7 +197,7 @@ func (b *Builder) processAdapter(
 		for _, demandResponse := range demandResponses {
 			demandResponse.StartTS = params.StartTS
 			demandResponse.EndTS = time.Now().UnixMilli()
-			b.setTokenResponse(demandResponse, &br)
+			b.setTokenResponse(demandResponse, &auctionRequest)
 
 			bids <- *demandResponse
 		}
@@ -234,7 +214,7 @@ func (b *Builder) processAdapter(
 		return
 	}
 
-	bidRequest, err := bidder.Adapter.CreateRequest(baseBidRequest, &br)
+	bidRequest, err := bidder.Adapter.CreateRequest(baseBidRequest, &auctionRequest)
 	if err != nil {
 		handleError(adapterKey, err)
 		return
@@ -243,7 +223,7 @@ func (b *Builder) processAdapter(
 	demandResponse := bidder.Adapter.ExecuteRequest(ctx, bidder.Client, bidRequest)
 	demandResponse.StartTS = params.StartTS
 	demandResponse.EndTS = time.Now().UnixMilli()
-	b.setTokenResponse(demandResponse, &br)
+	b.setTokenResponse(demandResponse, &auctionRequest)
 	if demandResponse.Error != nil {
 		bids <- *demandResponse
 		return
@@ -292,9 +272,9 @@ func (b *Builder) BuildDevice(device schema.Device, user schema.User, geo geocod
 	}
 }
 
-func (b *Builder) setTokenResponse(demandResponse *adapters.DemandResponse, br *schema.BiddingRequest) {
+func (b *Builder) setTokenResponse(demandResponse *adapters.DemandResponse, auctionRequest *schema.AuctionRequest) {
 	adapterKey := demandResponse.DemandID
-	demandData, ok := br.Imp.Demands[adapterKey]
+	demandData, ok := auctionRequest.AdObject.Demands[adapterKey]
 	if !ok || demandData == nil {
 		return
 	}

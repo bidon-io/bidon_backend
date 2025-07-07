@@ -7,18 +7,17 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/bidon-io/bidon-backend/internal/auction"
-	"github.com/bidon-io/bidon-backend/internal/auctionv2"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 )
 
 type AuctionHandler struct {
-	*BaseHandler[schema.AuctionV2Request, *schema.AuctionV2Request]
+	*BaseHandler[schema.AuctionRequest, *schema.AuctionRequest]
 	AuctionService AuctionService
 }
 
 type AuctionService interface {
-	Run(ctx context.Context, params *auctionv2.ExecutionParams) (*auctionv2.Response, error)
+	Run(ctx context.Context, params *auction.ExecutionParams) (*auction.Response, error)
 }
 
 type AuctionResponse struct {
@@ -40,7 +39,7 @@ func (h *AuctionHandler) Handle(c echo.Context) error {
 		return err
 	}
 
-	params := &auctionv2.ExecutionParams{
+	params := &auction.ExecutionParams{
 		Req:     &req.raw,
 		AppID:   req.app.ID,
 		Country: req.countryCode(),

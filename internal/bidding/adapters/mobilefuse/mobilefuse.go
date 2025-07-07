@@ -33,10 +33,10 @@ var bannerFormats = map[ad.Format][2]int64{
 	ad.EmptyFormat:       {320, 50}, // Default
 }
 
-func (a *MobileFuseAdapter) banner(br *schema.BiddingRequest) *openrtb2.Imp {
-	size := bannerFormats[br.Imp.Format()]
+func (a *MobileFuseAdapter) banner(auctionRequest *schema.AuctionRequest) *openrtb2.Imp {
+	size := bannerFormats[auctionRequest.AdObject.Format()]
 
-	if br.Imp.IsAdaptive() && br.Device.IsTablet() {
+	if auctionRequest.AdObject.IsAdaptive() && auctionRequest.Device.IsTablet() {
 		size = bannerFormats[ad.LeaderboardFormat]
 	}
 
@@ -70,7 +70,7 @@ func (a *MobileFuseAdapter) rewarded() *openrtb2.Imp {
 	}
 }
 
-func (a *MobileFuseAdapter) CreateRequest(request openrtb.BidRequest, br *schema.BiddingRequest) (openrtb.BidRequest, error) {
+func (a *MobileFuseAdapter) CreateRequest(request openrtb.BidRequest, auctionRequest *schema.AuctionRequest) (openrtb.BidRequest, error) {
 	if a.TagID == "" {
 		return request, errors.New("TagID is empty")
 	}
@@ -78,9 +78,9 @@ func (a *MobileFuseAdapter) CreateRequest(request openrtb.BidRequest, br *schema
 	secure := int8(1)
 
 	var imp *openrtb2.Imp
-	switch br.Imp.Type() {
+	switch auctionRequest.AdObject.Type() {
 	case ad.BannerType:
-		imp = a.banner(br)
+		imp = a.banner(auctionRequest)
 	case ad.InterstitialType:
 		imp = a.interstitial()
 	case ad.RewardedType:
@@ -94,9 +94,9 @@ func (a *MobileFuseAdapter) CreateRequest(request openrtb.BidRequest, br *schema
 	imp.TagID = a.TagID
 
 	imp.DisplayManager = string(adapter.MobileFuseKey)
-	imp.DisplayManagerVer = br.Adapters[adapter.MobileFuseKey].SDKVersion
+	imp.DisplayManagerVer = auctionRequest.Adapters[adapter.MobileFuseKey].SDKVersion
 	imp.Secure = &secure
-	imp.BidFloor = adapters.CalculatePriceFloor(&request, br)
+	imp.BidFloor = adapters.CalculatePriceFloor(&request, auctionRequest)
 	request.Imp = []openrtb2.Imp{*imp}
 	request.Cur = []string{"USD"}
 
@@ -105,7 +105,7 @@ func (a *MobileFuseAdapter) CreateRequest(request openrtb.BidRequest, br *schema
 			{
 				Segment: []openrtb.Segment{
 					{
-						Signal: br.Imp.Demands[adapter.MobileFuseKey]["token"].(string),
+						Signal: auctionRequest.AdObject.Demands[adapter.MobileFuseKey]["token"].(string),
 					},
 				},
 			},

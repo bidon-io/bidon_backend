@@ -8,19 +8,18 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/auction"
-	"github.com/bidon-io/bidon-backend/internal/auctionv2"
 	"sync"
 )
 
-// Ensure, that ConfigFetcherMock does implement auctionv2.ConfigFetcher.
+// Ensure, that ConfigFetcherMock does implement auction.ConfigFetcher.
 // If this is not the case, regenerate this file with moq.
-var _ auctionv2.ConfigFetcher = &ConfigFetcherMock{}
+var _ auction.ConfigFetcher = &ConfigFetcherMock{}
 
-// ConfigFetcherMock is a mock implementation of auctionv2.ConfigFetcher.
+// ConfigFetcherMock is a mock implementation of auction.ConfigFetcher.
 //
 //	func TestSomethingThatUsesConfigFetcher(t *testing.T) {
 //
-//		// make and configure a mocked auctionv2.ConfigFetcher
+//		// make and configure a mocked auction.ConfigFetcher
 //		mockedConfigFetcher := &ConfigFetcherMock{
 //			FetchByUIDCachedFunc: func(ctx context.Context, appId int64, id string, uid string) *auction.Config {
 //				panic("mock out the FetchByUIDCached method")
@@ -30,7 +29,7 @@ var _ auctionv2.ConfigFetcher = &ConfigFetcherMock{}
 //			},
 //		}
 //
-//		// use mockedConfigFetcher in code that requires auctionv2.ConfigFetcher
+//		// use mockedConfigFetcher in code that requires auction.ConfigFetcher
 //		// and then make assertions.
 //
 //	}
@@ -164,28 +163,28 @@ func (mock *ConfigFetcherMock) MatchCalls() []struct {
 	return calls
 }
 
-// Ensure, that AuctionBuilderMock does implement auctionv2.AuctionBuilder.
+// Ensure, that AuctionBuilderMock does implement auction.AuctionBuilder.
 // If this is not the case, regenerate this file with moq.
-var _ auctionv2.AuctionBuilder = &AuctionBuilderMock{}
+var _ auction.AuctionBuilder = &AuctionBuilderMock{}
 
-// AuctionBuilderMock is a mock implementation of auctionv2.AuctionBuilder.
+// AuctionBuilderMock is a mock implementation of auction.AuctionBuilder.
 //
 //	func TestSomethingThatUsesAuctionBuilder(t *testing.T) {
 //
-//		// make and configure a mocked auctionv2.AuctionBuilder
+//		// make and configure a mocked auction.AuctionBuilder
 //		mockedAuctionBuilder := &AuctionBuilderMock{
-//			BuildFunc: func(ctx context.Context, params *auctionv2.BuildParams) (*auctionv2.AuctionResult, error) {
+//			BuildFunc: func(ctx context.Context, params *auction.BuildParams) (*auction.Result, error) {
 //				panic("mock out the Build method")
 //			},
 //		}
 //
-//		// use mockedAuctionBuilder in code that requires auctionv2.AuctionBuilder
+//		// use mockedAuctionBuilder in code that requires auction.AuctionBuilder
 //		// and then make assertions.
 //
 //	}
 type AuctionBuilderMock struct {
 	// BuildFunc mocks the Build method.
-	BuildFunc func(ctx context.Context, params *auctionv2.BuildParams) (*auctionv2.AuctionResult, error)
+	BuildFunc func(ctx context.Context, params *auction.BuildParams) (*auction.Result, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -194,20 +193,20 @@ type AuctionBuilderMock struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// Params is the params argument value.
-			Params *auctionv2.BuildParams
+			Params *auction.BuildParams
 		}
 	}
 	lockBuild sync.RWMutex
 }
 
 // Build calls BuildFunc.
-func (mock *AuctionBuilderMock) Build(ctx context.Context, params *auctionv2.BuildParams) (*auctionv2.AuctionResult, error) {
+func (mock *AuctionBuilderMock) Build(ctx context.Context, params *auction.BuildParams) (*auction.Result, error) {
 	if mock.BuildFunc == nil {
 		panic("AuctionBuilderMock.BuildFunc: method is nil but AuctionBuilder.Build was just called")
 	}
 	callInfo := struct {
 		Ctx    context.Context
-		Params *auctionv2.BuildParams
+		Params *auction.BuildParams
 	}{
 		Ctx:    ctx,
 		Params: params,
@@ -224,11 +223,11 @@ func (mock *AuctionBuilderMock) Build(ctx context.Context, params *auctionv2.Bui
 //	len(mockedAuctionBuilder.BuildCalls())
 func (mock *AuctionBuilderMock) BuildCalls() []struct {
 	Ctx    context.Context
-	Params *auctionv2.BuildParams
+	Params *auction.BuildParams
 } {
 	var calls []struct {
 		Ctx    context.Context
-		Params *auctionv2.BuildParams
+		Params *auction.BuildParams
 	}
 	mock.lockBuild.RLock()
 	calls = mock.calls.Build
@@ -236,22 +235,22 @@ func (mock *AuctionBuilderMock) BuildCalls() []struct {
 	return calls
 }
 
-// Ensure, that AdapterKeysFetcherMock does implement auctionv2.AdapterKeysFetcher.
+// Ensure, that AdapterKeysFetcherMock does implement auction.AdapterKeysFetcher.
 // If this is not the case, regenerate this file with moq.
-var _ auctionv2.AdapterKeysFetcher = &AdapterKeysFetcherMock{}
+var _ auction.AdapterKeysFetcher = &AdapterKeysFetcherMock{}
 
-// AdapterKeysFetcherMock is a mock implementation of auctionv2.AdapterKeysFetcher.
+// AdapterKeysFetcherMock is a mock implementation of auction.AdapterKeysFetcher.
 //
 //	func TestSomethingThatUsesAdapterKeysFetcher(t *testing.T) {
 //
-//		// make and configure a mocked auctionv2.AdapterKeysFetcher
+//		// make and configure a mocked auction.AdapterKeysFetcher
 //		mockedAdapterKeysFetcher := &AdapterKeysFetcherMock{
 //			FetchEnabledAdapterKeysFunc: func(ctx context.Context, appID int64, adapterKeys []adapter.Key) ([]adapter.Key, error) {
 //				panic("mock out the FetchEnabledAdapterKeys method")
 //			},
 //		}
 //
-//		// use mockedAdapterKeysFetcher in code that requires auctionv2.AdapterKeysFetcher
+//		// use mockedAdapterKeysFetcher in code that requires auction.AdapterKeysFetcher
 //		// and then make assertions.
 //
 //	}

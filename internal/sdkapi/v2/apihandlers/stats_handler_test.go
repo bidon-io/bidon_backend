@@ -6,7 +6,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event/engine"
@@ -15,20 +14,12 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/v2/apihandlers/mocks"
 )
 
-func SetupStatsV2Handler() apihandlers.StatsHandler {
+func SetupStatsHandler() apihandlers.StatsHandler {
 	mockHandler := &mocks.StatsNotificationHandlerMock{}
-	mockHandler.HandleStatsFunc = func(contextMoqParam context.Context, stats schema.StatsV2, config *auction.Config, _ string, _ string) {
-	}
+	mockHandler.HandleStatsFunc = func(_ context.Context, _ schema.Stats, _ *auction.Config, _ string, _ string) {}
 	auctionConfig := &auction.Config{
 		ID:  1,
 		UID: "123",
-		Rounds: []auction.RoundConfig{
-			{
-				ID:      "ROUND_BANNER_1",
-				Demands: []adapter.Key{adapter.ApplovinKey, adapter.BidmachineKey},
-				Timeout: 15000,
-			},
-		},
 	}
 	configFetcher := mocks.ConfigFetcherMock{
 		FetchByUIDCachedFunc: func(ctx context.Context, appId int64, key string, aucUID string) *auction.Config {
@@ -37,7 +28,7 @@ func SetupStatsV2Handler() apihandlers.StatsHandler {
 	}
 
 	return apihandlers.StatsHandler{
-		BaseHandler: &apihandlers.BaseHandler[schema.StatsV2Request, *schema.StatsV2Request]{
+		BaseHandler: &apihandlers.BaseHandler[schema.StatsRequest, *schema.StatsRequest]{
 			AppFetcher:    AppFetcherMock(),
 			ConfigFetcher: &configFetcher,
 			Geocoder:      GeocoderMock(),
@@ -47,7 +38,7 @@ func SetupStatsV2Handler() apihandlers.StatsHandler {
 	}
 }
 
-func TestStatsV2Handler_Handle(t *testing.T) {
+func TestStatsHandler_Handle(t *testing.T) {
 	tests := []struct {
 		name         string
 		requestPath  string
@@ -72,7 +63,7 @@ func TestStatsV2Handler_Handle(t *testing.T) {
 			if err != nil {
 				t.Fatalf("Error reading request file: %v", err)
 			}
-			handler := SetupStatsV2Handler()
+			handler := SetupStatsHandler()
 			rec, err := ExecuteRequest(t, &handler, http.MethodPost, "/v2/stats/banner", string(reqBody), nil)
 
 			if (err != nil) != tt.wantErr {

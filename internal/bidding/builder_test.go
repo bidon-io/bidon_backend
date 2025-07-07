@@ -22,19 +22,7 @@ func TestMain(m *testing.M) {
 
 func TestBuilder_Build(t *testing.T) {
 	auctionConfig := auction.Config{
-		Rounds: []auction.RoundConfig{
-			{
-				ID:      "ROUND_1",
-				Demands: []adapter.Key{adapter.ApplovinKey, adapter.BidmachineKey},
-				Timeout: 15000,
-			},
-			{
-				ID:      "ROUND_2",
-				Demands: []adapter.Key{adapter.UnityAdsKey},
-				Bidding: []adapter.Key{adapter.BidmachineKey},
-				Timeout: 15000,
-			},
-		},
+		Bidding: []adapter.Key{adapter.BidmachineKey},
 	}
 
 	auctionConfigV2 := auction.Config{
@@ -61,13 +49,13 @@ func TestBuilder_Build(t *testing.T) {
 	defer http.DefaultClient.CloseIdleConnections()
 
 	notificationHandler := &mocks.NotificationHandlerMock{
-		HandleBiddingRoundFunc: func(_ context.Context, _ *schema.Imp, _ bidding.AuctionResult, _ string, _ string) error {
+		HandleBiddingRoundFunc: func(_ context.Context, _ *schema.AdObject, _ bidding.AuctionResult, _ string, _ string) error {
 			return nil
 		},
 	}
 
 	bidCacher := &mocks.BidCacherMock{ // Pass through bids
-		ApplyBidCacheFunc: func(_ context.Context, _ *schema.BiddingRequest, aucRes *bidding.AuctionResult) []adapters.DemandResponse {
+		ApplyBidCacheFunc: func(_ context.Context, _ *schema.AuctionRequest, aucRes *bidding.AuctionResult) []adapters.DemandResponse {
 			return aucRes.Bids
 		},
 	}
@@ -92,12 +80,11 @@ func TestBuilder_Build(t *testing.T) {
 						"seller_id": "1",
 					},
 				},
-				BiddingRequest: schema.BiddingRequest{
-					Imp: schema.Imp{
-						RoundID: "ROUND_2",
+				AuctionRequest: schema.AuctionRequest{
+					AdObject: schema.AdObject{
 						Demands: map[adapter.Key]map[string]any{
 							adapter.BidmachineKey: {
-								"bid_token": "token",
+								"token": "token",
 							},
 						},
 					},
@@ -108,7 +95,7 @@ func TestBuilder_Build(t *testing.T) {
 						},
 					},
 				},
-				AuctionConfig: auctionConfig,
+				BiddingAdapters: auctionConfig.Bidding,
 			},
 			expectedResult: adapters.DemandResponse{
 				Status:   204,
@@ -128,8 +115,8 @@ func TestBuilder_Build(t *testing.T) {
 						"seller_id": "1",
 					},
 				},
-				BiddingRequest: schema.BiddingRequest{
-					Imp: schema.Imp{
+				AuctionRequest: schema.AuctionRequest{
+					AdObject: schema.AdObject{
 						Demands: map[adapter.Key]map[string]any{
 							adapter.BidmachineKey: {
 								"token":           "bid_token",
@@ -146,7 +133,7 @@ func TestBuilder_Build(t *testing.T) {
 						},
 					},
 				},
-				AuctionConfig: auctionConfigV2,
+				BiddingAdapters: auctionConfigV2.Bidding,
 			},
 			expectedResult: adapters.DemandResponse{
 				Status:   204,
@@ -160,8 +147,8 @@ func TestBuilder_Build(t *testing.T) {
 			notificationHandler: notificationHandler,
 			buildParams: &bidding.BuildParams{
 				AppID: 1,
-				BiddingRequest: schema.BiddingRequest{
-					Imp: schema.Imp{
+				AuctionRequest: schema.AuctionRequest{
+					AdObject: schema.AdObject{
 						Demands: map[adapter.Key]map[string]any{
 							adapter.BidmachineKey: {"status": "SUCCESS"},
 						},
@@ -173,7 +160,7 @@ func TestBuilder_Build(t *testing.T) {
 						},
 					},
 				},
-				AuctionConfig: auctionConfigV2,
+				BiddingAdapters: auctionConfigV2.Bidding,
 			},
 			expectedResult: adapters.DemandResponse{
 				Status:   204,

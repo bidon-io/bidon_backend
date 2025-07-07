@@ -352,7 +352,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 				AdFormat:   ad.EmptyFormat,
 				DeviceType: device.PhoneType,
 				Adapters:   []adapter.Key{adapter.ApplovinKey, adapter.BidmachineKey},
-				PriceFloor: ptr(0.2),
+				PriceFloor: 0.2,
 			},
 			want: []auction.AdUnit{
 				{
@@ -406,7 +406,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 				AdFormat:   ad.AdaptiveFormat,
 				DeviceType: device.PhoneType,
 				Adapters:   []adapter.Key{adapter.ApplovinKey},
-				PriceFloor: &pf,
+				PriceFloor: pf,
 			},
 			want: []auction.AdUnit{
 				{
@@ -429,7 +429,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 				AdFormat:   ad.EmptyFormat,
 				DeviceType: device.PhoneType,
 				Adapters:   []adapter.Key{adapter.ApplovinKey, adapter.BidmachineKey},
-				PriceFloor: ptr(0.2),
+				PriceFloor: 0.2,
 				AdUnitIDs:  []int64{applovinInterstitialAdUnitID},
 			},
 			want: []auction.AdUnit{
@@ -453,7 +453,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 				AdFormat:   ad.EmptyFormat,
 				DeviceType: device.PhoneType,
 				Adapters:   []adapter.Key{adapter.ApplovinKey, adapter.BidmachineKey},
-				PriceFloor: ptr(0.2),
+				PriceFloor: 0.2,
 				AdUnitIDs:  []int64{},
 			},
 			want: []auction.AdUnit{

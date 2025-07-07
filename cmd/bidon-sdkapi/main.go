@@ -32,7 +32,6 @@ import (
 	adapterstore "github.com/bidon-io/bidon-backend/internal/adapter/store"
 	"github.com/bidon-io/bidon-backend/internal/auction"
 	auctionstore "github.com/bidon-io/bidon-backend/internal/auction/store"
-	"github.com/bidon-io/bidon-backend/internal/auctionv2"
 	"github.com/bidon-io/bidon-backend/internal/bidding"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters_builder"
 	dbpkg "github.com/bidon-io/bidon-backend/internal/db"
@@ -175,8 +174,8 @@ func main() {
 			MaxIdleConnsPerHost: 30 * cpus,
 		}),
 	}
-	notificationHandlerV2 := notification.HandlerV2{
-		AuctionResultRepo: notificationstore.AuctionResultV2Repo{Redis: rdb},
+	notificationHandler := notification.Handler{
+		AuctionResultRepo: notificationstore.AuctionResultRepo{Redis: rdb},
 		Sender: notification.EventSender{
 			HttpClient:  biddingHTTPClient,
 			EventLogger: eventLogger,
@@ -191,9 +190,9 @@ func main() {
 		DB:    db,
 		Cache: adUnitsCache,
 	}
-	biddingBuilderV2 := &bidding.Builder{
+	biddingBuilder := &bidding.Builder{
 		AdaptersBuilder:     adapters_builder.BuildBiddingAdapters(biddingHTTPClient),
-		NotificationHandler: notificationHandlerV2,
+		NotificationHandler: notificationHandler,
 		BidCacher:           &bidding.BidCache{Redis: rdb, Clock: clock.New()},
 	}
 	biddingAdaptersCfgCache := config.NewRedisCacheOf[adapter.RawConfigsMap](rdb, 10*time.Minute, "bidding_adapters_cfg")
@@ -213,10 +212,6 @@ func main() {
 	err = lineItemsCache.Monitor(meter)
 	if err != nil {
 		log.Fatalf("Unable to register observer for lineItemsCache: %v", err)
-	}
-	lineItemsMatcher := &auctionstore.LineItemsMatcher{
-		DB:    db,
-		Cache: lineItemsCache,
 	}
 	profilesCache := config.NewRedisCacheOf[[]dbpkg.AppDemandProfile](rdb, 10*time.Minute, "app_demand_profiles")
 	err = profilesCache.Monitor(meter)
@@ -247,13 +242,13 @@ func main() {
 		DB:    db,
 		Cache: adUnitLookupCache,
 	}
-	auctionService := &auctionv2.Service{
+	auctionService := &auction.Service{
 		ConfigFetcher:      configFetcher,
 		SegmentMatcher:     segmentMatcher,
 		AdapterKeysFetcher: adapterInitConfigsFetcher,
-		AuctionBuilder: &auctionv2.Builder{
+		AuctionBuilder: &auction.Builder{
 			AdUnitsMatcher:               adUnitsMatcher,
-			BiddingBuilder:               biddingBuilderV2,
+			BiddingBuilder:               biddingBuilder,
 			BiddingAdaptersConfigBuilder: biddingAdaptersCfgBuilder,
 		},
 		EventLogger: eventLogger,
@@ -272,12 +267,11 @@ func main() {
 		ConfigFetcher:             configFetcher,
 		AppFetcher:                appFetcher,
 		SegmentMatcher:            segmentMatcher,
-		BiddingBuilder:            biddingBuilderV2,
+		BiddingBuilder:            biddingBuilder,
 		AdUnitsMatcher:            adUnitsMatcher,
-		NotificationHandler:       notificationHandlerV2,
+		NotificationHandler:       notificationHandler,
 		GeoCoder:                  geoCoder,
 		EventLogger:               eventLogger,
-		LineItemsMatcher:          lineItemsMatcher,
 		AdapterInitConfigsFetcher: adapterInitConfigsFetcher,
 		ConfigurationFetcher:      configurationFetcher,
 		AuctionService:            auctionService,

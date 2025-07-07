@@ -43,7 +43,6 @@ func SetupConfigHandler() apihandlers.ConfigHandler {
 					AppID: fmt.Sprintf("admob_app_%d", app.ID),
 				},
 				&sdkapi.ApplovinInitConfig{
-					AppKey: "applovin",
 					SDKKey: "applovin",
 				},
 				&sdkapi.BidmachineInitConfig{

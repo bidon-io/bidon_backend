@@ -8,13 +8,11 @@ import (
 )
 
 type Auction struct {
-	ConfigID                 int64         `json:"auction_configuration_id"`
-	ConfigUID                string        `json:"auction_configuration_uid"`
-	ExternalWinNotifications bool          `json:"external_win_notifications"`
-	Rounds                   []RoundConfig `json:"rounds"`
-	LineItems                []LineItem    `json:"line_items"` // Deprecated: use AdUnits instead
-	AdUnits                  []AdUnit      `json:"ad_units"`
-	Segment                  Segment       `json:"segment"`
+	ConfigID                 int64    `json:"auction_configuration_id"`
+	ConfigUID                string   `json:"auction_configuration_uid"`
+	ExternalWinNotifications bool     `json:"external_win_notifications"`
+	AdUnits                  []AdUnit `json:"ad_units"`
+	Segment                  Segment  `json:"segment"`
 }
 type Config struct {
 	ID                       int64
@@ -25,14 +23,6 @@ type Config struct {
 	AdUnitIDs                []int64       `json:"ad_unit_ids"`
 	Timeout                  int           `json:"timeout"`
 	PriceFloor               float64       `json:"pricefloor"`
-	Rounds                   []RoundConfig // Deprecated: use root level fields instead
-}
-
-type RoundConfig struct {
-	ID      string        `json:"id"`
-	Demands []adapter.Key `json:"demands"`
-	Bidding []adapter.Key `json:"bidding"`
-	Timeout int           `json:"timeout"`
 }
 
 type LineItem struct {

@@ -35,10 +35,10 @@ var bannerFormats = map[ad.Format][2]int64{
 	ad.EmptyFormat:    {320, 50}, // Default
 }
 
-func (a *BigoAdsAdapter) banner(br *schema.BiddingRequest) (*openrtb2.Imp, error) {
-	size, ok := bannerFormats[br.Imp.Format()]
-	if !ok || br.Imp.IsAdaptive() && br.Device.IsTablet() { // Does not support leaderboard format
-		return nil, fmt.Errorf("unknown banner format: %s", br.Imp.Format())
+func (a *BigoAdsAdapter) banner(auctionRequest *schema.AuctionRequest) (*openrtb2.Imp, error) {
+	size, ok := bannerFormats[auctionRequest.AdObject.Format()]
+	if !ok || auctionRequest.AdObject.IsAdaptive() && auctionRequest.Device.IsTablet() { // Does not support leaderboard format
+		return nil, fmt.Errorf("unknown banner format: %s", auctionRequest.AdObject.Format())
 	}
 
 	w, h := size[0], size[1]
@@ -71,7 +71,7 @@ func (a *BigoAdsAdapter) rewarded() *openrtb2.Imp {
 	}
 }
 
-func (a *BigoAdsAdapter) CreateRequest(request openrtb.BidRequest, br *schema.BiddingRequest) (openrtb.BidRequest, error) {
+func (a *BigoAdsAdapter) CreateRequest(request openrtb.BidRequest, auctionRequest *schema.AuctionRequest) (openrtb.BidRequest, error) {
 	if a.TagID == "" {
 		return request, errors.New("TagID is empty")
 	}
@@ -80,9 +80,9 @@ func (a *BigoAdsAdapter) CreateRequest(request openrtb.BidRequest, br *schema.Bi
 
 	var imp *openrtb2.Imp
 	var impAdType int
-	switch br.Imp.Type() {
+	switch auctionRequest.AdObject.Type() {
 	case ad.BannerType:
-		bannerImp, err := a.banner(br)
+		bannerImp, err := a.banner(auctionRequest)
 		if err != nil {
 			return request, err
 		}
@@ -116,13 +116,13 @@ func (a *BigoAdsAdapter) CreateRequest(request openrtb.BidRequest, br *schema.Bi
 	imp.Ext = impExt
 
 	imp.DisplayManager = string(adapter.BigoAdsKey)
-	imp.DisplayManagerVer = br.Adapters[adapter.BigoAdsKey].SDKVersion
+	imp.DisplayManagerVer = auctionRequest.Adapters[adapter.BigoAdsKey].SDKVersion
 	imp.Secure = &secure
-	imp.BidFloor = adapters.CalculatePriceFloor(&request, br)
+	imp.BidFloor = adapters.CalculatePriceFloor(&request, auctionRequest)
 	request.Imp = []openrtb2.Imp{*imp}
 	request.Cur = []string{"USD"}
 	request.User = &openrtb.User{
-		BuyerUID: br.Imp.Demands[adapter.BigoAdsKey]["token"].(string),
+		BuyerUID: auctionRequest.AdObject.Demands[adapter.BigoAdsKey]["token"].(string),
 	}
 	request.App.Publisher.ID = a.SellerID
 	request.App.ID = a.AppID

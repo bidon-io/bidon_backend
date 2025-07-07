@@ -24,14 +24,14 @@ func TestBidCache_ApplyBidCache(t *testing.T) {
 	bidCache := &bidding.BidCache{Redis: redisClient, Clock: mockTime}
 
 	ctx := context.Background()
-	br := &schema.BiddingRequest{
+	auctionRequest := &schema.AuctionRequest{
 		BaseRequest: schema.BaseRequest{
 			Session: schema.Session{ID: "session1"},
 			Ext:     "{\"ext\":{\"bid_cache\": true}}",
 		},
 		AdType: "banner",
 	}
-	br.NormalizeValues()
+	auctionRequest.NormalizeValues()
 
 	tests := []struct {
 		name     string
@@ -238,7 +238,7 @@ func TestBidCache_ApplyBidCache(t *testing.T) {
 				mock.ExpectSet("bidding:session1:banner", string(bytes), bidding.TTL).SetVal("OK")
 			}
 
-			got := bidCache.ApplyBidCache(ctx, br, aucResult)
+			got := bidCache.ApplyBidCache(ctx, auctionRequest, aucResult)
 
 			if diff := cmp.Diff(tt.want, got, cmpopts.IgnoreFields(adapters.DemandResponse{}, "Error")); diff != "" {
 				t.Errorf("Create() mismatch (-want +got):\n%s", diff)

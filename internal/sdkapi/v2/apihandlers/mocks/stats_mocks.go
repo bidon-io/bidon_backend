@@ -21,7 +21,7 @@ var _ apihandlers.StatsNotificationHandler = &StatsNotificationHandlerMock{}
 //
 //		// make and configure a mocked apihandlers.StatsNotificationHandler
 //		mockedStatsNotificationHandler := &StatsNotificationHandlerMock{
-//			HandleStatsFunc: func(contextMoqParam context.Context, statsV2 schema.StatsV2, config *auction.Config, s1 string, s2 string)  {
+//			HandleStatsFunc: func(contextMoqParam context.Context, stats schema.Stats, config *auction.Config, s1 string, s2 string)  {
 //				panic("mock out the HandleStats method")
 //			},
 //		}
@@ -32,7 +32,7 @@ var _ apihandlers.StatsNotificationHandler = &StatsNotificationHandlerMock{}
 //	}
 type StatsNotificationHandlerMock struct {
 	// HandleStatsFunc mocks the HandleStats method.
-	HandleStatsFunc func(contextMoqParam context.Context, statsV2 schema.StatsV2, config *auction.Config, s1 string, s2 string)
+	HandleStatsFunc func(contextMoqParam context.Context, stats schema.Stats, config *auction.Config, s1 string, s2 string)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -40,8 +40,8 @@ type StatsNotificationHandlerMock struct {
 		HandleStats []struct {
 			// ContextMoqParam is the contextMoqParam argument value.
 			ContextMoqParam context.Context
-			// StatsV2 is the statsV2 argument value.
-			StatsV2 schema.StatsV2
+			// Stats is the stats argument value.
+			Stats schema.Stats
 			// Config is the config argument value.
 			Config *auction.Config
 			// S1 is the s1 argument value.
@@ -54,19 +54,19 @@ type StatsNotificationHandlerMock struct {
 }
 
 // HandleStats calls HandleStatsFunc.
-func (mock *StatsNotificationHandlerMock) HandleStats(contextMoqParam context.Context, statsV2 schema.StatsV2, config *auction.Config, s1 string, s2 string) {
+func (mock *StatsNotificationHandlerMock) HandleStats(contextMoqParam context.Context, stats schema.Stats, config *auction.Config, s1 string, s2 string) {
 	if mock.HandleStatsFunc == nil {
 		panic("StatsNotificationHandlerMock.HandleStatsFunc: method is nil but StatsNotificationHandler.HandleStats was just called")
 	}
 	callInfo := struct {
 		ContextMoqParam context.Context
-		StatsV2         schema.StatsV2
+		Stats           schema.Stats
 		Config          *auction.Config
 		S1              string
 		S2              string
 	}{
 		ContextMoqParam: contextMoqParam,
-		StatsV2:         statsV2,
+		Stats:           stats,
 		Config:          config,
 		S1:              s1,
 		S2:              s2,
@@ -74,7 +74,7 @@ func (mock *StatsNotificationHandlerMock) HandleStats(contextMoqParam context.Co
 	mock.lockHandleStats.Lock()
 	mock.calls.HandleStats = append(mock.calls.HandleStats, callInfo)
 	mock.lockHandleStats.Unlock()
-	mock.HandleStatsFunc(contextMoqParam, statsV2, config, s1, s2)
+	mock.HandleStatsFunc(contextMoqParam, stats, config, s1, s2)
 }
 
 // HandleStatsCalls gets all the calls that were made to HandleStats.
@@ -83,14 +83,14 @@ func (mock *StatsNotificationHandlerMock) HandleStats(contextMoqParam context.Co
 //	len(mockedStatsNotificationHandler.HandleStatsCalls())
 func (mock *StatsNotificationHandlerMock) HandleStatsCalls() []struct {
 	ContextMoqParam context.Context
-	StatsV2         schema.StatsV2
+	Stats           schema.Stats
 	Config          *auction.Config
 	S1              string
 	S2              string
 } {
 	var calls []struct {
 		ContextMoqParam context.Context
-		StatsV2         schema.StatsV2
+		Stats           schema.Stats
 		Config          *auction.Config
 		S1              string
 		S2              string

@@ -5,10 +5,9 @@ package mocks
 
 import (
 	"context"
-	"sync"
-
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters_builder"
+	"sync"
 )
 
 // Ensure, that ConfigurationFetcherMock does implement adapters_builder.ConfigurationFetcher.
