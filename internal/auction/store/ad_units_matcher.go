@@ -49,7 +49,7 @@ func (m *AdUnitsMatcher) Match(ctx context.Context, params *auction.BuildParams)
 		InnerJoins("Account", m.DB.Select("id")).
 		InnerJoins("Account.DemandSource", m.DB.Select("api_key").Where(map[string]any{"api_key": params.Adapters}))
 
-	if params.PriceFloor != nil {
+	if params.PriceFloor >= 0 {
 		query = query.Where("(bid_floor >= ? OR line_items.bidding)", params.PriceFloor)
 	}
 

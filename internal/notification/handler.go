@@ -21,7 +21,7 @@ type Handler struct {
 //go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/mocks.go -pkg mocks . AuctionResultRepo Sender
 
 type AuctionResultRepo interface {
-	CreateOrUpdate(ctx context.Context, imp *schema.Imp, bids []Bid) error
+	CreateOrUpdate(ctx context.Context, adObject *schema.AdObject, bids []Bid) error
 	Find(ctx context.Context, auctionID string) (*AuctionResult, error)
 }
 
@@ -31,9 +31,9 @@ type Sender interface {
 
 // HandleBiddingRound is used to handle bidding round, it is called after all adapters have responded with bids or errors
 // Results saved to redis
-func (h Handler) HandleBiddingRound(ctx context.Context, imp *schema.Imp, auctionResult bidding.AuctionResult, bundle, adType string) error {
+func (h Handler) HandleBiddingRound(ctx context.Context, adObject *schema.AdObject, auctionResult bidding.AuctionResult, bundle, adType string) error {
 	var bids []Bid
-	bidFloor := imp.GetBidFloor()
+	bidFloor := adObject.GetBidFloor()
 
 	for _, resp := range auctionResult.Bids {
 		if errors.Is(resp.Error, context.DeadlineExceeded) && resp.TimeoutURL != "" {
@@ -41,7 +41,7 @@ func (h Handler) HandleBiddingRound(ctx context.Context, imp *schema.Imp, auctio
 			p := Params{
 				Bundle:           bundle,
 				AdType:           adType,
-				AuctionID:        imp.AuctionID,
+				AuctionID:        adObject.AuctionID,
 				NotificationType: "TimeoutURL",
 				URL:              resp.TimeoutURL,
 				Bid:              Bid{RequestID: resp.RequestID, DemandID: resp.DemandID},
@@ -71,7 +71,7 @@ func (h Handler) HandleBiddingRound(ctx context.Context, imp *schema.Imp, auctio
 				go h.Sender.SendEvent(ctx, Params{
 					Bundle:           bundle,
 					AdType:           adType,
-					AuctionID:        imp.AuctionID,
+					AuctionID:        adObject.AuctionID,
 					NotificationType: "LURL",
 					URL:              bid.LURL,
 					Bid:              bid,
@@ -84,13 +84,13 @@ func (h Handler) HandleBiddingRound(ctx context.Context, imp *schema.Imp, auctio
 	}
 
 	if len(bids) > 0 {
-		return h.AuctionResultRepo.CreateOrUpdate(ctx, imp, bids)
+		return h.AuctionResultRepo.CreateOrUpdate(ctx, adObject, bids)
 	}
 
 	return nil
 }
 
-// HandleStats is used to handle /stats request
+// HandleStats is used to handle v2/stats request
 // Finalize results of auction in redis
 // If external_win_notification is enabled - do nothing, wait /win or /loss request
 // If external_win_notification is disabled - send win/loss notifications to demands
@@ -99,11 +99,6 @@ func (h Handler) HandleStats(ctx context.Context, stats schema.Stats, config *au
 		log.Printf("HandleStats: cannot find config: %v", stats.AuctionConfigurationID)
 		return
 	}
-
-	// Disable external_win_notification until we have cancel notifications
-	//if config.ExternalWinNotifications {
-	//	return
-	//}
 
 	// Get AuctionResult from redis
 	auctionResult, err := h.AuctionResultRepo.Find(ctx, stats.AuctionID)
@@ -119,21 +114,15 @@ func (h Handler) HandleStats(ctx context.Context, stats schema.Stats, config *au
 
 	var notifications []Params
 	var prices []float64
-	for _, round := range stats.Rounds {
-		prices = append(prices, round.PriceFloor)
 
-		for _, bid := range round.Demands {
-			if bid.IsFill() {
-				prices = append(prices, bid.GetPrice())
-			}
-		}
+	prices = append(prices, stats.AuctionPricefloor)
 
-		for _, bid := range round.Bidding.Bids {
-			if bid.IsFill() {
-				prices = append(prices, bid.GetPrice())
-			}
+	for _, adUnit := range stats.AdUnits {
+		if adUnit.IsFill() {
+			prices = append(prices, adUnit.GetPrice())
 		}
 	}
+
 	slices.Sort(prices)
 	var firstPrice, secondPrice float64
 
@@ -150,71 +139,60 @@ func (h Handler) HandleStats(ctx context.Context, stats schema.Stats, config *au
 
 	switch stats.Result.Status {
 	case "SUCCESS": // We have winner
-		// Find all bidding rounds for this auction
-		for _, round := range auctionResult.Rounds {
-			// Find all bids for this round
-			for _, bid := range round.Bids {
-				if bid.Price == firstPrice {
-					notifications = append(notifications, Params{
-						Bundle:           bundle,
-						AdType:           adType,
-						AuctionID:        stats.AuctionID,
-						NotificationType: "NURL",
-						URL:              bid.NURL,
-						Bid:              bid,
-						Reason:           openrtb3.LossWon,
-						FirstPrice:       firstPrice,
-						SecondPrice:      secondPrice,
-					})
-				} else {
-					notifications = append(notifications, Params{
-						Bundle:           bundle,
-						AdType:           adType,
-						AuctionID:        stats.AuctionID,
-						NotificationType: "LURL",
-						URL:              bid.LURL,
-						Bid:              bid,
-						Reason:           openrtb3.LossLostToHigherBid,
-						FirstPrice:       firstPrice,
-						SecondPrice:      secondPrice,
-					})
-				}
+		for _, bid := range auctionResult.Bids {
+			if bid.Price == firstPrice {
+				notifications = append(notifications, Params{
+					Bundle:           bundle,
+					AdType:           adType,
+					AuctionID:        stats.AuctionID,
+					NotificationType: "NURL",
+					URL:              bid.NURL,
+					Bid:              bid,
+					Reason:           openrtb3.LossWon,
+					FirstPrice:       firstPrice,
+					SecondPrice:      secondPrice,
+				})
+			} else {
+				notifications = append(notifications, Params{
+					Bundle:           bundle,
+					AdType:           adType,
+					AuctionID:        stats.AuctionID,
+					NotificationType: "LURL",
+					URL:              bid.LURL,
+					Bid:              bid,
+					Reason:           openrtb3.LossLostToHigherBid,
+					FirstPrice:       firstPrice,
+					SecondPrice:      secondPrice,
+				})
 			}
 		}
 	case "FAIL":
-		// Find all bidding rounds for this auction
-		for _, round := range auctionResult.Rounds {
-			// Find all bids for this round
-			for _, bid := range round.Bids {
-				notifications = append(notifications, Params{
-					Bundle:           bundle,
-					AdType:           adType,
-					AuctionID:        stats.AuctionID,
-					NotificationType: "LURL",
-					URL:              bid.LURL,
-					Bid:              bid,
-					Reason:           openrtb3.LossInternalError,
-					FirstPrice:       firstPrice,
-					SecondPrice:      secondPrice,
-				})
-			}
+		for _, bid := range auctionResult.Bids {
+			notifications = append(notifications, Params{
+				Bundle:           bundle,
+				AdType:           adType,
+				AuctionID:        stats.AuctionID,
+				NotificationType: "LURL",
+				URL:              bid.LURL,
+				Bid:              bid,
+				Reason:           openrtb3.LossInternalError,
+				FirstPrice:       firstPrice,
+				SecondPrice:      secondPrice,
+			})
 		}
 	case "AUCTION_CANCELLED":
-		for _, round := range auctionResult.Rounds {
-			// Find all bids for this round
-			for _, bid := range round.Bids {
-				notifications = append(notifications, Params{
-					Bundle:           bundle,
-					AdType:           adType,
-					AuctionID:        stats.AuctionID,
-					NotificationType: "LURL",
-					URL:              bid.LURL,
-					Bid:              bid,
-					Reason:           openrtb3.LossExpired,
-					FirstPrice:       firstPrice,
-					SecondPrice:      secondPrice,
-				})
-			}
+		for _, bid := range auctionResult.Bids {
+			notifications = append(notifications, Params{
+				Bundle:           bundle,
+				AdType:           adType,
+				AuctionID:        stats.AuctionID,
+				NotificationType: "LURL",
+				URL:              bid.LURL,
+				Bid:              bid,
+				Reason:           openrtb3.LossExpired,
+				FirstPrice:       firstPrice,
+				SecondPrice:      secondPrice,
+			})
 		}
 	}
 
@@ -242,23 +220,21 @@ func (h Handler) HandleShow(ctx context.Context, impression *schema.Bid, bundle,
 		return
 	}
 
-	for _, round := range auctionResult.Rounds {
-		for _, bid := range round.Bids {
-			if bid.Price == impression.GetPrice() {
-				go h.Sender.SendEvent(ctx, Params{
-					Bundle:           bundle,
-					AdType:           adType,
-					AuctionID:        impression.AuctionID,
-					NotificationType: "BURL",
-					URL:              bid.BURL,
-					Bid:              bid,
-					Reason:           openrtb3.LossWon,
-					FirstPrice:       impression.GetPrice(),
-					SecondPrice:      0,
-				})
+	for _, bid := range auctionResult.Bids {
+		if bid.Price == impression.GetPrice() {
+			go h.Sender.SendEvent(ctx, Params{
+				Bundle:           bundle,
+				AdType:           adType,
+				AuctionID:        impression.AuctionID,
+				NotificationType: "BURL",
+				URL:              bid.BURL,
+				Bid:              bid,
+				Reason:           openrtb3.LossWon,
+				FirstPrice:       impression.GetPrice(),
+				SecondPrice:      0,
+			})
 
-				break
-			}
+			break
 		}
 	}
 }

@@ -13,7 +13,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	"github.com/bidon-io/bidon-backend/config"
-	"github.com/bidon-io/bidon-backend/internal/auctionv2"
+	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/geocoder"
 	v3 "github.com/bidon-io/bidon-backend/pkg/proto/com/iabtechlab/openrtb/v3"
@@ -46,7 +46,7 @@ type Geocoder interface {
 }
 
 type AuctionService interface {
-	Run(ctx context.Context, params *auctionv2.ExecutionParams) (*auctionv2.Response, error)
+	Run(ctx context.Context, params *auction.ExecutionParams) (*auction.Response, error)
 }
 
 func (s *Server) Bid(ctx context.Context, o *v3.Openrtb) (*v3.Openrtb, error) {
@@ -67,7 +67,7 @@ func (s *Server) Bid(ctx context.Context, o *v3.Openrtb) (*v3.Openrtb, error) {
 	}
 
 	logger := ctxzap.Extract(ctx)
-	params := &auctionv2.ExecutionParams{
+	params := &auction.ExecutionParams{
 		Req:     ar,
 		AppID:   app.ID,
 		Country: geo.CountryCode,

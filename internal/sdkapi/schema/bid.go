@@ -14,12 +14,9 @@ type Bid struct {
 	DemandID                string                `json:"demand_id" validate:"required"`
 	RoundID                 string                `json:"round_id"`
 	RoundIndex              int                   `json:"round_idx"`
-	AdUnitID                string                `json:"ad_unit_id"`    // Deprecated: use AdUnitUID instead
-	LineItemUID             string                `json:"line_item_uid"` // Deprecated: use AdUnitUID instead
 	AdUnitUID               string                `json:"ad_unit_uid"`
 	AdUnitLabel             string                `json:"ad_unit_label"`
-	ECPM                    float64               `json:"ecpm" validate:"required_without=Price"` // Deprecated: use Price instead
-	Price                   float64               `json:"price" validate:"required_without=ECPM"`
+	Price                   float64               `json:"price"`
 	BidType                 BidType               `json:"bid_type" validate:"omitempty,oneof=RTB CPM"`
 	AuctionPriceFloor       float64               `json:"auction_pricefloor"`
 	Banner                  *BannerAdObject       `json:"banner"`
@@ -32,14 +29,7 @@ func (b *Bid) IsBidding() bool {
 }
 
 func (b *Bid) GetAdUnitUID() int {
-	var adUnitUIDStr string
-	if b.AdUnitUID != "" {
-		adUnitUIDStr = b.AdUnitUID
-	} else {
-		adUnitUIDStr = b.LineItemUID
-	}
-
-	adUnitUID, err := strconv.Atoi(adUnitUIDStr)
+	adUnitUID, err := strconv.Atoi(b.AdUnitUID)
 	if err != nil {
 		return 0
 	}
@@ -47,10 +37,7 @@ func (b *Bid) GetAdUnitUID() int {
 }
 
 func (b *Bid) GetPrice() float64 {
-	if b.Price != 0 {
-		return b.Price
-	}
-	return b.ECPM
+	return b.Price
 }
 
 func (b *Bid) Format() ad.Format {

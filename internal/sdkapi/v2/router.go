@@ -4,8 +4,8 @@ import (
 	"github.com/labstack/echo/v4"
 
 	adapterstore "github.com/bidon-io/bidon-backend/internal/adapter/store"
+	"github.com/bidon-io/bidon-backend/internal/auction"
 	auctionstore "github.com/bidon-io/bidon-backend/internal/auction/store"
-	"github.com/bidon-io/bidon-backend/internal/auctionv2"
 	"github.com/bidon-io/bidon-backend/internal/bidding"
 	"github.com/bidon-io/bidon-backend/internal/notification"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
@@ -22,20 +22,19 @@ type Router struct {
 	AppFetcher                *sdkapistore.AppFetcher
 	SegmentMatcher            *segment.Matcher
 	AdUnitsMatcher            *auctionstore.AdUnitsMatcher
-	NotificationHandler       notification.HandlerV2
+	NotificationHandler       notification.Handler
 	GeoCoder                  *geocoder.Geocoder
 	EventLogger               *event.Logger
-	LineItemsMatcher          *auctionstore.LineItemsMatcher
 	AdapterInitConfigsFetcher *sdkapistore.AdapterInitConfigsFetcher
 	ConfigurationFetcher      *adapterstore.ConfigurationFetcher
 	BiddingBuilder            *bidding.Builder
-	AuctionService            *auctionv2.Service
+	AuctionService            *auction.Service
 	AdUnitLookup              *sdkapistore.AdUnitLookup
 }
 
 func (r *Router) RegisterRoutes(g *echo.Group) {
 	auctionHandler := apihandlers.AuctionHandler{
-		BaseHandler: &apihandlers.BaseHandler[schema.AuctionV2Request, *schema.AuctionV2Request]{
+		BaseHandler: &apihandlers.BaseHandler[schema.AuctionRequest, *schema.AuctionRequest]{
 			AppFetcher:    r.AppFetcher,
 			ConfigFetcher: r.ConfigFetcher,
 			Geocoder:      r.GeoCoder,
@@ -43,7 +42,7 @@ func (r *Router) RegisterRoutes(g *echo.Group) {
 		AuctionService: r.AuctionService,
 	}
 	statsHandler := apihandlers.StatsHandler{
-		BaseHandler: &apihandlers.BaseHandler[schema.StatsV2Request, *schema.StatsV2Request]{
+		BaseHandler: &apihandlers.BaseHandler[schema.StatsRequest, *schema.StatsRequest]{
 			AppFetcher:    r.AppFetcher,
 			ConfigFetcher: r.ConfigFetcher,
 			Geocoder:      r.GeoCoder,

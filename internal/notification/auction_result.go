@@ -7,15 +7,8 @@ import (
 )
 
 type AuctionResult struct {
-	AuctionID string  `json:"auction_id"`
-	Bids      []Bid   `json:"bids"`
-	Rounds    []Round `json:"rounds"` // Deprecated after auction v2 migration
-}
-
-type Round struct {
-	RoundID  string  `json:"round_id"`
-	Bids     []Bid   `json:"bids"`
-	BidFloor float64 `json:"bidfloor"`
+	AuctionID string `json:"auction_id"`
+	Bids      []Bid  `json:"bids"`
 }
 
 type Bid struct {

@@ -2,100 +2,70 @@ package notification_test
 
 import (
 	"context"
-	"fmt"
 	"sync"
 	"testing"
 	"time"
 
-	"github.com/google/go-cmp/cmp"
-
 	"github.com/bidon-io/bidon-backend/internal/auction"
-	"github.com/bidon-io/bidon-backend/internal/bidding"
-	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
 	"github.com/bidon-io/bidon-backend/internal/notification"
 	"github.com/bidon-io/bidon-backend/internal/notification/mocks"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 )
 
-func TestHandler_HandleBiddingRound(t *testing.T) {
-	ctx := context.Background()
-	floor := float64(2)
-	imp := &schema.Imp{BidFloor: &floor}
-	responses := bidding.AuctionResult{
-		Bids: []adapters.DemandResponse{
-			{Bid: &adapters.BidDemandResponse{ID: "bid-1", ImpID: "imp-1", Price: 1.23}},
-			{Bid: &adapters.BidDemandResponse{ID: "bid-2", ImpID: "imp-1", Price: 4.56}},
-			{Bid: &adapters.BidDemandResponse{ID: "bid-3", ImpID: "imp-1", Price: 7.89}},
-			{Bid: &adapters.BidDemandResponse{ID: "bid-4", ImpID: "imp-1", Price: 0.12}},
-			{Error: fmt.Errorf("error-1")},
-		},
-	}
-	expectedBids := []notification.Bid{
-		{ID: "bid-2", ImpID: "imp-1", Price: 4.56},
-		{ID: "bid-3", ImpID: "imp-1", Price: 7.89},
-	}
-
-	mockRepo := &mocks.AuctionResultRepoMock{
-		CreateOrUpdateFunc: func(ctx context.Context, imp *schema.Imp, bids []notification.Bid) error {
-			if diff := cmp.Diff(expectedBids, bids); diff != "" {
-				t.Errorf("CreateOrUpdate() mismatched arguments (-want, +got)\n%s", diff)
-			}
-			return nil
-		},
-	}
-	wg := &sync.WaitGroup{}
-	wg.Add(2) // We have 2 bids lower than floor, send 2 events
-
-	sender := &mocks.SenderMock{SendEventFunc: func(ctx context.Context, p notification.Params) {
-		wg.Done()
-	}}
-
-	handler := notification.Handler{
-		AuctionResultRepo: mockRepo,
-		Sender:            sender,
-	}
-
-	err := handler.HandleBiddingRound(ctx, imp, responses, "bundle-1", "banner")
-	if err != nil {
-		t.Errorf("unexpected error: %v", err)
-	}
-
-	if waitTimeout(wg, 1*time.Second) {
-		t.Errorf("timeout waiting for events, sent event lower than expected")
-	}
-}
-
 func TestHandler_HandleStats_WinBid(t *testing.T) {
 	ctx := context.Background()
 	imp := schema.Stats{
-		Result: schema.StatsResult{Status: "SUCCESS", ECPM: 7.89},
-		Rounds: []schema.StatsRound{{
-			ID:         "round-1",
-			PriceFloor: 7.0,
-			Demands: []schema.StatsDemand{{
-				Price:  7.30,
-				ID:     "bid-1",
-				Status: "WIN",
-			}},
-			Bidding: schema.StatsBidding{
-				Bids: []schema.StatsBid{
-					{ID: "bid-1", Status: "LOSS", Price: 1.23},
-					{ID: "bid-2", Status: "LOSS", Price: 4.56},
-					{ID: "bid-3", Status: "WIN", Price: 7.89},
-					{ID: "bid-4", Status: "NO_BID", Price: 0.12},
-				},
+		AuctionID:               "f26af577-869e-41cb-909e-4d3eba57a28b",
+		AuctionPricefloor:       7.0,
+		AuctionConfigurationID:  10,
+		AuctionConfigurationUID: "1701972528521547776",
+		Result: schema.AuctionResult{
+			Status:            "SUCCESS",
+			BidType:           schema.RTBBidType,
+			Price:             7.89,
+			WinnerDemandID:    "vungle",
+			WinnerAdUnitUID:   "1633824270331281408",
+			WinnerAdUnitLabel: "vungle_inter_mergeblock_ios_3",
+		},
+		AdUnits: []schema.AuctionAdUnitResult{
+			{
+				Price:       7.30,
+				DemandID:    "applovin",
+				BidType:     schema.CPMBidType,
+				AdUnitUID:   "1633833116256829440",
+				AdUnitLabel: "applovin_inter_mergeblock_ios_6",
+				Status:      "WIN",
 			},
-		}},
+			{
+				Price:       1.23,
+				DemandID:    "bigoads",
+				BidType:     schema.RTBBidType,
+				AdUnitUID:   "1633833116256829140",
+				AdUnitLabel: "bigoads_inter_mergeblock_ios_5",
+				Status:      "LOSS",
+			},
+			{
+				DemandID: "meta",
+				BidType:  schema.RTBBidType,
+				Status:   "NO_BID",
+			},
+			{
+				Price:       7.89,
+				DemandID:    "vungle",
+				BidType:     schema.RTBBidType,
+				AdUnitUID:   "1633824270331281408",
+				AdUnitLabel: "vungle_inter_mergeblock_ios_3",
+				Status:      "WIN",
+			},
+		},
 	}
 	result := notification.AuctionResult{
-		Rounds: []notification.Round{{
-			Bids: []notification.Bid{
-				{ID: "bid-1", ImpID: "imp-1", Price: 1.23},
-				{ID: "bid-2", ImpID: "imp-1", Price: 4.56},
-				{ID: "bid-3", ImpID: "imp-2", Price: 7.89},
-				{ID: "bid-4", ImpID: "imp-1", Price: 0.12},
-			},
-		}},
+		Bids: []notification.Bid{
+			{ID: "bid-1", ImpID: "imp-1", Price: 1.23},
+			{ID: "bid-2", ImpID: "imp-1", Price: 4.56},
+			{ID: "bid-3", ImpID: "imp-2", Price: 7.89},
+			{ID: "bid-4", ImpID: "imp-1", Price: 0.12},
+		},
 	}
 	config := auction.Config{ExternalWinNotifications: false}
 	mockRepo := &mocks.AuctionResultRepoMock{}
@@ -117,9 +87,9 @@ func TestHandler_HandleStats_WinBid(t *testing.T) {
 		}
 	}}
 
-	handler := notification.Handler{AuctionResultRepo: mockRepo, Sender: sender}
+	handlerV2 := notification.Handler{AuctionResultRepo: mockRepo, Sender: sender}
 
-	handler.HandleStats(ctx, imp, &config, "bundle-1", "banner")
+	handlerV2.HandleStats(ctx, imp, &config, "bundle-1", "banner")
 
 	if waitTimeout(wg, 1*time.Second) {
 		t.Errorf("timeout waiting for events, sent event lower than expected")
@@ -128,41 +98,48 @@ func TestHandler_HandleStats_WinBid(t *testing.T) {
 
 func TestHandler_HandleStats_Loss(t *testing.T) {
 	ctx := context.Background()
+
 	imp := schema.Stats{
-		Result: schema.StatsResult{
-			Status: "SUCCESS",
-			Price:  7.89,
+		AuctionID:               "f26af577-869e-41cb-909e-4d3eba57a28b",
+		AuctionPricefloor:       7.0,
+		AuctionConfigurationID:  10,
+		AuctionConfigurationUID: "1701972528521547776",
+		Result: schema.AuctionResult{
+			Status:            "SUCCESS",
+			BidType:           schema.CPMBidType,
+			Price:             7.89,
+			WinnerDemandID:    "vungle",
+			WinnerAdUnitUID:   "1633824270331281408",
+			WinnerAdUnitLabel: "vungle_inter_mergeblock_ios_3",
 		},
-		Rounds: []schema.StatsRound{{
-			ID:         "round-1",
-			PriceFloor: 7.0,
-			Demands: []schema.StatsDemand{{
-				Price:  7.89,
-				ID:     "bid-1",
-				Status: "WIN",
-			}},
-			Bidding: schema.StatsBidding{
-				Bids: []schema.StatsBid{{
-					ID:     "bid-2",
-					Status: "LOSS",
-					Price:  7.6,
-				}},
+		AdUnits: []schema.AuctionAdUnitResult{
+			{
+				Price:       7.89,
+				DemandID:    "dtexchange",
+				BidType:     schema.CPMBidType,
+				AdUnitUID:   "1633833116256829440",
+				AdUnitLabel: "dtexchange_inter_mergeblock_ios_6",
+				Status:      "WIN",
 			},
-		}},
+			{
+				Price:       7.6,
+				DemandID:    "vungle",
+				BidType:     schema.RTBBidType,
+				AdUnitUID:   "1633824270331281408",
+				AdUnitLabel: "vungle_inter_mergeblock_ios_3",
+				Status:      "LOSS",
+			},
+		},
 	}
 
 	config := auction.Config{ExternalWinNotifications: false}
 	repoMock := &mocks.AuctionResultRepoMock{
 		FindFunc: func(ctx context.Context, auctionID string) (*notification.AuctionResult, error) {
 			return &notification.AuctionResult{
-				Rounds: []notification.Round{{
-					RoundID:  "round-1",
-					BidFloor: 7.0,
-					Bids: []notification.Bid{{
-						ID:    "bid-2",
-						ImpID: "imp-1",
-						Price: 7.6,
-					}},
+				Bids: []notification.Bid{{
+					ID:    "bid-2",
+					ImpID: "imp-1",
+					Price: 7.6,
 				}},
 			}, nil
 		},
@@ -175,117 +152,15 @@ func TestHandler_HandleStats_Loss(t *testing.T) {
 		wg.Done()
 	}}
 
-	handler := notification.Handler{
+	handlerV2 := notification.Handler{
 		AuctionResultRepo: repoMock,
 		Sender:            sender,
 	}
 
-	handler.HandleStats(ctx, imp, &config, "bundle-1", "banner")
+	handlerV2.HandleStats(ctx, imp, &config, "bundle-1", "banner")
 
 	if waitTimeout(wg, 1*time.Second) {
 		t.Errorf("timeout waiting for events, sent event lower than expected")
-	}
-}
-
-func TestHandler_HandleShow_BiddingImpression(t *testing.T) {
-	ctx := context.Background()
-	impression := &schema.Bid{AuctionID: "auction-1", Price: 1.23, BidType: schema.RTBBidType}
-
-	mockRepo := &mocks.AuctionResultRepoMock{
-		FindFunc: func(ctx context.Context, auctionID string) (*notification.AuctionResult, error) {
-			return &notification.AuctionResult{
-				Rounds: []notification.Round{{
-					Bids: []notification.Bid{{
-						ID:    "bid-1",
-						ImpID: "imp-1",
-						Price: 1.23,
-					}},
-				}},
-			}, nil
-		},
-	}
-
-	sender := &mocks.SenderMock{SendEventFunc: func(ctx context.Context, p notification.Params) {
-		if p.NotificationType != "BURL" {
-			t.Errorf("expected BURL notification, got %s", p.NotificationType)
-		}
-		if p.Bid.Price != impression.GetPrice() {
-			t.Errorf("expected price %f, got %f", impression.GetPrice(), p.Bid.Price)
-		}
-	}}
-
-	handler := notification.Handler{
-		AuctionResultRepo: mockRepo,
-		Sender:            sender,
-	}
-
-	handler.HandleShow(ctx, impression, "bundle-1", "banner")
-}
-
-func TestHandler_HandleShow_NonBiddingImpression(t *testing.T) {
-	ctx := context.Background()
-	impression := &schema.Bid{AuctionID: "auction-1", Price: 1.23, BidType: schema.CPMBidType}
-
-	mockRepo := &mocks.AuctionResultRepoMock{}
-	sender := &mocks.SenderMock{
-		SendEventFunc: func(ctx context.Context, p notification.Params) {
-			t.Errorf("expected no notification, got %s", p.NotificationType)
-		},
-	}
-
-	handler := notification.Handler{
-		AuctionResultRepo: mockRepo,
-		Sender:            sender,
-	}
-
-	handler.HandleShow(ctx, impression, "bundle-1", "banner")
-}
-
-func TestHandler_HandleShow_AuctionResultNotFound(t *testing.T) {
-	ctx := context.Background()
-	impression := &schema.Bid{AuctionID: "auction-1", Price: 1.23, BidType: schema.RTBBidType}
-
-	mockRepo := &mocks.AuctionResultRepoMock{
-		FindFunc: func(ctx context.Context, auctionID string) (*notification.AuctionResult, error) {
-			return nil, nil
-		},
-	}
-
-	sender := &mocks.SenderMock{
-		SendEventFunc: func(ctx context.Context, p notification.Params) {
-			t.Errorf("expected no notification, got %s", p.NotificationType)
-		},
-	}
-
-	handler := notification.Handler{
-		AuctionResultRepo: mockRepo,
-		Sender:            sender,
-	}
-
-	handler.HandleShow(ctx, impression, "bundle-1", "banner")
-}
-
-func TestHandler_HandleWin(t *testing.T) {
-	ctx := context.Background()
-	imp := &schema.Bid{}
-
-	handler := notification.Handler{}
-
-	err := handler.HandleWin(ctx, imp)
-	if err != nil {
-		t.Errorf("unexpected error: %v", err)
-	}
-}
-
-func TestHandler_HandleLoss(t *testing.T) {
-	ctx := context.Background()
-	imp := &schema.Bid{}
-
-	handler := notification.Handler{}
-
-	err := handler.HandleLoss(ctx, imp)
-	if err != nil {
-		t.Errorf("unexpected error: %v", err)
 	}
 }
 

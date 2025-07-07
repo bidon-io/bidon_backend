@@ -5,7 +5,7 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 )
 
-func CalculatePriceFloor(rtbRequest *openrtb.BidRequest, incomingRequest *schema.BiddingRequest) float64 {
+func CalculatePriceFloor(rtbRequest *openrtb.BidRequest, incomingRequest *schema.AuctionRequest) float64 {
 	if rtbRequest == nil || incomingRequest == nil {
 		return 0
 	}
@@ -13,6 +13,6 @@ func CalculatePriceFloor(rtbRequest *openrtb.BidRequest, incomingRequest *schema
 	if len(rtbRequest.Imp) == 1 {
 		return rtbRequest.Imp[0].BidFloor
 	} else {
-		return incomingRequest.Imp.GetBidFloorForBidding()
+		return incomingRequest.AdObject.GetBidFloorForBidding()
 	}
 }

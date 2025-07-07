@@ -10,9 +10,8 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/auction"
+	auctionmocks "github.com/bidon-io/bidon-backend/internal/auction/mocks"
 	"github.com/bidon-io/bidon-backend/internal/auction/store"
-	"github.com/bidon-io/bidon-backend/internal/auctionv2"
-	auctionv2mocks "github.com/bidon-io/bidon-backend/internal/auctionv2/mocks"
 	"github.com/bidon-io/bidon-backend/internal/bidding"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
@@ -26,7 +25,7 @@ import (
 	segmentmocks "github.com/bidon-io/bidon-backend/internal/segment/mocks"
 )
 
-func testHelperAuctionV2Handler(t *testing.T) *apihandlers.AuctionHandler {
+func testHelperAuctionHandler() *apihandlers.AuctionHandler {
 	app := sdkapi.App{ID: 1}
 	geodata := geocoder.GeoData{CountryCode: "US"}
 	segments := []segment.Segment{
@@ -102,7 +101,7 @@ func testHelperAuctionV2Handler(t *testing.T) *apihandlers.AuctionHandler {
 		},
 	}
 
-	adUnitsMatcher := &auctionv2mocks.AdUnitsMatcherMock{
+	adUnitsMatcher := &auctionmocks.AdUnitsMatcherMock{
 		MatchCachedFunc: func(ctx context.Context, params *auction.BuildParams) ([]auction.AdUnit, error) {
 			return adUnits, nil
 		},
@@ -133,7 +132,7 @@ func testHelperAuctionV2Handler(t *testing.T) *apihandlers.AuctionHandler {
 	segmentMatcher := &segment.Matcher{
 		Fetcher: segmentFetcher,
 	}
-	biddingAdaptersConfigBuilder := &auctionv2mocks.BiddingAdaptersConfigBuilderMock{
+	biddingAdaptersConfigBuilder := &auctionmocks.BiddingAdaptersConfigBuilderMock{
 		BuildFunc: func(ctx context.Context, appID int64, adapterKeys []adapter.Key, adUnitsMap *auction.AdUnitsMap) (adapter.ProcessedConfigsMap, error) {
 			return adapter.ProcessedConfigsMap{
 				adapter.ApplovinKey: map[string]any{
@@ -157,7 +156,7 @@ func testHelperAuctionV2Handler(t *testing.T) *apihandlers.AuctionHandler {
 			}, nil
 		},
 	}
-	biddingBuilder := &auctionv2mocks.BiddingBuilderMock{
+	biddingBuilder := &auctionmocks.BiddingBuilderMock{
 		HoldAuctionFunc: func(ctx context.Context, params *bidding.BuildParams) (bidding.AuctionResult, error) {
 			return bidding.AuctionResult{
 				RoundNumber: 0,
@@ -199,17 +198,17 @@ func testHelperAuctionV2Handler(t *testing.T) *apihandlers.AuctionHandler {
 			}, nil
 		},
 	}
-	auctionBuilderV2 := &auctionv2.Builder{
+	auctionBuilderV2 := &auction.Builder{
 		AdUnitsMatcher:               adUnitsMatcher,
 		BiddingBuilder:               biddingBuilder,
 		BiddingAdaptersConfigBuilder: biddingAdaptersConfigBuilder,
 	}
-	adapterKeyFetcher := &auctionv2mocks.AdapterKeysFetcherMock{
+	adapterKeyFetcher := &auctionmocks.AdapterKeysFetcherMock{
 		FetchEnabledAdapterKeysFunc: func(ctx context.Context, appID int64, keys []adapter.Key) ([]adapter.Key, error) {
 			return keys, nil
 		},
 	}
-	auctionService := &auctionv2.Service{
+	auctionService := &auction.Service{
 		AdapterKeysFetcher: adapterKeyFetcher,
 		ConfigFetcher:      configFetcher,
 		AuctionBuilder:     auctionBuilderV2,
@@ -218,7 +217,7 @@ func testHelperAuctionV2Handler(t *testing.T) *apihandlers.AuctionHandler {
 	}
 
 	handler := &apihandlers.AuctionHandler{
-		BaseHandler: &apihandlers.BaseHandler[schema.AuctionV2Request, *schema.AuctionV2Request]{
+		BaseHandler: &apihandlers.BaseHandler[schema.AuctionRequest, *schema.AuctionRequest]{
 			AppFetcher:    appFetcher,
 			ConfigFetcher: configFetcher,
 			Geocoder:      gcoder,
@@ -229,7 +228,7 @@ func testHelperAuctionV2Handler(t *testing.T) *apihandlers.AuctionHandler {
 	return handler
 }
 
-func TestAuctionV2Handler_Handle(t *testing.T) {
+func TestAuctionHandler_Handle(t *testing.T) {
 	tests := []struct {
 		name                 string
 		sdkVersion           string
@@ -272,7 +271,7 @@ func TestAuctionV2Handler_Handle(t *testing.T) {
 				t.Fatalf("Error reading request file: %v", err)
 			}
 
-			handler := testHelperAuctionV2Handler(t)
+			handler := testHelperAuctionHandler()
 			rec, err := ExecuteRequest(t, handler, http.MethodPost, "/v2/auction/interstitial", string(reqBody), &RequestOptions{
 				Headers: map[string]string{
 					"X-Bidon-Version": tt.sdkVersion,

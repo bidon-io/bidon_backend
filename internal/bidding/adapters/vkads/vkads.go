@@ -39,10 +39,10 @@ const (
 	rewardedHeight int64 = 1080
 )
 
-func (a *VKAdsAdapter) banner(br *schema.BiddingRequest) *openrtb2.Imp {
-	size := bannerFormats[br.Imp.Format()]
+func (a *VKAdsAdapter) banner(auctionRequest *schema.AuctionRequest) *openrtb2.Imp {
+	size := bannerFormats[auctionRequest.AdObject.Format()]
 
-	if br.Imp.IsAdaptive() && br.Device.IsTablet() {
+	if auctionRequest.AdObject.IsAdaptive() && auctionRequest.Device.IsTablet() {
 		size = bannerFormats[ad.LeaderboardFormat]
 	}
 
@@ -67,7 +67,7 @@ func (a *VKAdsAdapter) interstitial() *openrtb2.Imp {
 	}
 }
 
-func (a *VKAdsAdapter) rewarded(br *schema.BiddingRequest) *openrtb2.Imp {
+func (a *VKAdsAdapter) rewarded() *openrtb2.Imp {
 	w, h := rewardedWidth, rewardedHeight
 	return &openrtb2.Imp{
 		Banner: &openrtb2.Banner{
@@ -77,26 +77,26 @@ func (a *VKAdsAdapter) rewarded(br *schema.BiddingRequest) *openrtb2.Imp {
 	}
 }
 
-func (a *VKAdsAdapter) CreateRequest(request openrtb.BidRequest, br *schema.BiddingRequest) (openrtb.BidRequest, error) {
+func (a *VKAdsAdapter) CreateRequest(request openrtb.BidRequest, auctionRequest *schema.AuctionRequest) (openrtb.BidRequest, error) {
 	if a.AppID == "" {
 		return request, errors.New("AppID is empty")
 	}
 	if a.TagID == "" {
 		return request, errors.New("TagID is empty")
 	}
-	token, ok := br.Imp.Demands[adapter.VKAdsKey]["token"].(string)
+	token, ok := auctionRequest.AdObject.Demands[adapter.VKAdsKey]["token"].(string)
 	if !ok || token == "" {
 		return request, errors.New("token is empty")
 	}
 
 	var imp *openrtb2.Imp
-	switch br.Imp.Type() {
+	switch auctionRequest.AdObject.Type() {
 	case ad.BannerType:
-		imp = a.banner(br)
+		imp = a.banner(auctionRequest)
 	case ad.InterstitialType:
 		imp = a.interstitial()
 	case ad.RewardedType:
-		imp = a.rewarded(br)
+		imp = a.rewarded()
 	default:
 		return request, errors.New("unknown impression type")
 	}
@@ -104,14 +104,14 @@ func (a *VKAdsAdapter) CreateRequest(request openrtb.BidRequest, br *schema.Bidd
 	impId, _ := uuid.NewV4()
 	imp.ID = impId.String()
 	imp.TagID = a.TagID
-	imp.BidFloor = adapters.CalculatePriceFloor(&request, br)
+	imp.BidFloor = adapters.CalculatePriceFloor(&request, auctionRequest)
 	imp.BidFloorCur = "USD"
 
 	request.Imp = []openrtb2.Imp{*imp}
 	request.Cur = []string{"USD"}
 
 	request.User = &openrtb.User{
-		ID:  br.User.IDG,
+		ID:  auctionRequest.User.IDG,
 		Ext: json.RawMessage(fmt.Sprintf(`{"buyeruid": "%s"}`, token)),
 	}
 

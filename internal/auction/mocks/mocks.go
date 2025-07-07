@@ -5,163 +5,11 @@ package mocks
 
 import (
 	"context"
-	"sync"
-
-	"github.com/bidon-io/bidon-backend/internal/ad"
+	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/auction"
+	"github.com/bidon-io/bidon-backend/internal/bidding"
+	"sync"
 )
-
-// Ensure, that ConfigFetcherMock does implement auction.ConfigFetcher.
-// If this is not the case, regenerate this file with moq.
-var _ auction.ConfigFetcher = &ConfigFetcherMock{}
-
-// ConfigFetcherMock is a mock implementation of auction.ConfigFetcher.
-//
-//	func TestSomethingThatUsesConfigFetcher(t *testing.T) {
-//
-//		// make and configure a mocked auction.ConfigFetcher
-//		mockedConfigFetcher := &ConfigFetcherMock{
-//			FetchByUIDCachedFunc: func(ctx context.Context, appId int64, id string, uid string) *auction.Config {
-//				panic("mock out the FetchByUIDCached method")
-//			},
-//			MatchFunc: func(ctx context.Context, appID int64, adType ad.Type, segmentID int64, version string) (*auction.Config, error) {
-//				panic("mock out the Match method")
-//			},
-//		}
-//
-//		// use mockedConfigFetcher in code that requires auction.ConfigFetcher
-//		// and then make assertions.
-//
-//	}
-type ConfigFetcherMock struct {
-	// FetchByUIDCachedFunc mocks the FetchByUIDCached method.
-	FetchByUIDCachedFunc func(ctx context.Context, appId int64, id string, uid string) *auction.Config
-
-	// MatchFunc mocks the Match method.
-	MatchFunc func(ctx context.Context, appID int64, adType ad.Type, segmentID int64, version string) (*auction.Config, error)
-
-	// calls tracks calls to the methods.
-	calls struct {
-		// FetchByUIDCached holds details about calls to the FetchByUIDCached method.
-		FetchByUIDCached []struct {
-			// Ctx is the ctx argument value.
-			Ctx context.Context
-			// AppId is the appId argument value.
-			AppId int64
-			// ID is the id argument value.
-			ID string
-			// UID is the uid argument value.
-			UID string
-		}
-		// Match holds details about calls to the Match method.
-		Match []struct {
-			// Ctx is the ctx argument value.
-			Ctx context.Context
-			// AppID is the appID argument value.
-			AppID int64
-			// AdType is the adType argument value.
-			AdType ad.Type
-			// SegmentID is the segmentID argument value.
-			SegmentID int64
-			// Version is the version argument value.
-			Version string
-		}
-	}
-	lockFetchByUIDCached sync.RWMutex
-	lockMatch            sync.RWMutex
-}
-
-// FetchByUIDCached calls FetchByUIDCachedFunc.
-func (mock *ConfigFetcherMock) FetchByUIDCached(ctx context.Context, appId int64, id string, uid string) *auction.Config {
-	if mock.FetchByUIDCachedFunc == nil {
-		panic("ConfigFetcherMock.FetchByUIDCachedFunc: method is nil but ConfigFetcher.FetchByUIDCached was just called")
-	}
-	callInfo := struct {
-		Ctx   context.Context
-		AppId int64
-		ID    string
-		UID   string
-	}{
-		Ctx:   ctx,
-		AppId: appId,
-		ID:    id,
-		UID:   uid,
-	}
-	mock.lockFetchByUIDCached.Lock()
-	mock.calls.FetchByUIDCached = append(mock.calls.FetchByUIDCached, callInfo)
-	mock.lockFetchByUIDCached.Unlock()
-	return mock.FetchByUIDCachedFunc(ctx, appId, id, uid)
-}
-
-// FetchByUIDCachedCalls gets all the calls that were made to FetchByUIDCached.
-// Check the length with:
-//
-//	len(mockedConfigFetcher.FetchByUIDCachedCalls())
-func (mock *ConfigFetcherMock) FetchByUIDCachedCalls() []struct {
-	Ctx   context.Context
-	AppId int64
-	ID    string
-	UID   string
-} {
-	var calls []struct {
-		Ctx   context.Context
-		AppId int64
-		ID    string
-		UID   string
-	}
-	mock.lockFetchByUIDCached.RLock()
-	calls = mock.calls.FetchByUIDCached
-	mock.lockFetchByUIDCached.RUnlock()
-	return calls
-}
-
-// Match calls MatchFunc.
-func (mock *ConfigFetcherMock) Match(ctx context.Context, appID int64, adType ad.Type, segmentID int64, version string) (*auction.Config, error) {
-	if mock.MatchFunc == nil {
-		panic("ConfigFetcherMock.MatchFunc: method is nil but ConfigFetcher.Match was just called")
-	}
-	callInfo := struct {
-		Ctx       context.Context
-		AppID     int64
-		AdType    ad.Type
-		SegmentID int64
-		Version   string
-	}{
-		Ctx:       ctx,
-		AppID:     appID,
-		AdType:    adType,
-		SegmentID: segmentID,
-		Version:   version,
-	}
-	mock.lockMatch.Lock()
-	mock.calls.Match = append(mock.calls.Match, callInfo)
-	mock.lockMatch.Unlock()
-	return mock.MatchFunc(ctx, appID, adType, segmentID, version)
-}
-
-// MatchCalls gets all the calls that were made to Match.
-// Check the length with:
-//
-//	len(mockedConfigFetcher.MatchCalls())
-func (mock *ConfigFetcherMock) MatchCalls() []struct {
-	Ctx       context.Context
-	AppID     int64
-	AdType    ad.Type
-	SegmentID int64
-	Version   string
-} {
-	var calls []struct {
-		Ctx       context.Context
-		AppID     int64
-		AdType    ad.Type
-		SegmentID int64
-		Version   string
-	}
-	mock.lockMatch.RLock()
-	calls = mock.calls.Match
-	mock.lockMatch.RUnlock()
-	return calls
-}
 
 // Ensure, that AdUnitsMatcherMock does implement auction.AdUnitsMatcher.
 // If this is not the case, regenerate this file with moq.
@@ -232,5 +80,161 @@ func (mock *AdUnitsMatcherMock) MatchCachedCalls() []struct {
 	mock.lockMatchCached.RLock()
 	calls = mock.calls.MatchCached
 	mock.lockMatchCached.RUnlock()
+	return calls
+}
+
+// Ensure, that BiddingBuilderMock does implement auction.BiddingBuilder.
+// If this is not the case, regenerate this file with moq.
+var _ auction.BiddingBuilder = &BiddingBuilderMock{}
+
+// BiddingBuilderMock is a mock implementation of auction.BiddingBuilder.
+//
+//	func TestSomethingThatUsesBiddingBuilder(t *testing.T) {
+//
+//		// make and configure a mocked auction.BiddingBuilder
+//		mockedBiddingBuilder := &BiddingBuilderMock{
+//			HoldAuctionFunc: func(ctx context.Context, params *bidding.BuildParams) (bidding.AuctionResult, error) {
+//				panic("mock out the HoldAuction method")
+//			},
+//		}
+//
+//		// use mockedBiddingBuilder in code that requires auction.BiddingBuilder
+//		// and then make assertions.
+//
+//	}
+type BiddingBuilderMock struct {
+	// HoldAuctionFunc mocks the HoldAuction method.
+	HoldAuctionFunc func(ctx context.Context, params *bidding.BuildParams) (bidding.AuctionResult, error)
+
+	// calls tracks calls to the methods.
+	calls struct {
+		// HoldAuction holds details about calls to the HoldAuction method.
+		HoldAuction []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Params is the params argument value.
+			Params *bidding.BuildParams
+		}
+	}
+	lockHoldAuction sync.RWMutex
+}
+
+// HoldAuction calls HoldAuctionFunc.
+func (mock *BiddingBuilderMock) HoldAuction(ctx context.Context, params *bidding.BuildParams) (bidding.AuctionResult, error) {
+	if mock.HoldAuctionFunc == nil {
+		panic("BiddingBuilderMock.HoldAuctionFunc: method is nil but BiddingBuilder.HoldAuction was just called")
+	}
+	callInfo := struct {
+		Ctx    context.Context
+		Params *bidding.BuildParams
+	}{
+		Ctx:    ctx,
+		Params: params,
+	}
+	mock.lockHoldAuction.Lock()
+	mock.calls.HoldAuction = append(mock.calls.HoldAuction, callInfo)
+	mock.lockHoldAuction.Unlock()
+	return mock.HoldAuctionFunc(ctx, params)
+}
+
+// HoldAuctionCalls gets all the calls that were made to HoldAuction.
+// Check the length with:
+//
+//	len(mockedBiddingBuilder.HoldAuctionCalls())
+func (mock *BiddingBuilderMock) HoldAuctionCalls() []struct {
+	Ctx    context.Context
+	Params *bidding.BuildParams
+} {
+	var calls []struct {
+		Ctx    context.Context
+		Params *bidding.BuildParams
+	}
+	mock.lockHoldAuction.RLock()
+	calls = mock.calls.HoldAuction
+	mock.lockHoldAuction.RUnlock()
+	return calls
+}
+
+// Ensure, that BiddingAdaptersConfigBuilderMock does implement auction.BiddingAdaptersConfigBuilder.
+// If this is not the case, regenerate this file with moq.
+var _ auction.BiddingAdaptersConfigBuilder = &BiddingAdaptersConfigBuilderMock{}
+
+// BiddingAdaptersConfigBuilderMock is a mock implementation of auction.BiddingAdaptersConfigBuilder.
+//
+//	func TestSomethingThatUsesBiddingAdaptersConfigBuilder(t *testing.T) {
+//
+//		// make and configure a mocked auction.BiddingAdaptersConfigBuilder
+//		mockedBiddingAdaptersConfigBuilder := &BiddingAdaptersConfigBuilderMock{
+//			BuildFunc: func(ctx context.Context, appID int64, adapterKeys []adapter.Key, adUnitsMap *auction.AdUnitsMap) (adapter.ProcessedConfigsMap, error) {
+//				panic("mock out the Build method")
+//			},
+//		}
+//
+//		// use mockedBiddingAdaptersConfigBuilder in code that requires auction.BiddingAdaptersConfigBuilder
+//		// and then make assertions.
+//
+//	}
+type BiddingAdaptersConfigBuilderMock struct {
+	// BuildFunc mocks the Build method.
+	BuildFunc func(ctx context.Context, appID int64, adapterKeys []adapter.Key, adUnitsMap *auction.AdUnitsMap) (adapter.ProcessedConfigsMap, error)
+
+	// calls tracks calls to the methods.
+	calls struct {
+		// Build holds details about calls to the Build method.
+		Build []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// AppID is the appID argument value.
+			AppID int64
+			// AdapterKeys is the adapterKeys argument value.
+			AdapterKeys []adapter.Key
+			// AdUnitsMap is the adUnitsMap argument value.
+			AdUnitsMap *auction.AdUnitsMap
+		}
+	}
+	lockBuild sync.RWMutex
+}
+
+// Build calls BuildFunc.
+func (mock *BiddingAdaptersConfigBuilderMock) Build(ctx context.Context, appID int64, adapterKeys []adapter.Key, adUnitsMap *auction.AdUnitsMap) (adapter.ProcessedConfigsMap, error) {
+	if mock.BuildFunc == nil {
+		panic("BiddingAdaptersConfigBuilderMock.BuildFunc: method is nil but BiddingAdaptersConfigBuilder.Build was just called")
+	}
+	callInfo := struct {
+		Ctx         context.Context
+		AppID       int64
+		AdapterKeys []adapter.Key
+		AdUnitsMap  *auction.AdUnitsMap
+	}{
+		Ctx:         ctx,
+		AppID:       appID,
+		AdapterKeys: adapterKeys,
+		AdUnitsMap:  adUnitsMap,
+	}
+	mock.lockBuild.Lock()
+	mock.calls.Build = append(mock.calls.Build, callInfo)
+	mock.lockBuild.Unlock()
+	return mock.BuildFunc(ctx, appID, adapterKeys, adUnitsMap)
+}
+
+// BuildCalls gets all the calls that were made to Build.
+// Check the length with:
+//
+//	len(mockedBiddingAdaptersConfigBuilder.BuildCalls())
+func (mock *BiddingAdaptersConfigBuilderMock) BuildCalls() []struct {
+	Ctx         context.Context
+	AppID       int64
+	AdapterKeys []adapter.Key
+	AdUnitsMap  *auction.AdUnitsMap
+} {
+	var calls []struct {
+		Ctx         context.Context
+		AppID       int64
+		AdapterKeys []adapter.Key
+		AdUnitsMap  *auction.AdUnitsMap
+	}
+	mock.lockBuild.RLock()
+	calls = mock.calls.Build
+	mock.lockBuild.RUnlock()
 	return calls
 }

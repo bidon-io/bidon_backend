@@ -83,11 +83,6 @@ func (f *AdapterInitConfigsFetcher) FetchAdapterInitConfigs(ctx context.Context,
 			return nil, fmt.Errorf("unmarshal profile data: %v", err)
 		}
 
-		applovinConfig, ok := config.(*sdkapi.ApplovinInitConfig)
-		if ok {
-			applovinConfig.AppKey = applovinConfig.SDKKey
-		}
-
 		if setAmazonSlots {
 			amazonConfig, ok := config.(*sdkapi.AmazonInitConfig)
 			if ok {

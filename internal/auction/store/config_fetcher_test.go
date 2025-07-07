@@ -111,7 +111,6 @@ func TestConfigFetcher_Match(t *testing.T) {
 			want: &auction.Config{
 				ID:        app1BannerConfig.ID,
 				UID:       strconv.FormatInt(app1BannerConfig.PublicUID.Int64, 10),
-				Rounds:    app1BannerConfig.Rounds,
 				Demands:   db.StringArrayToAdapterKeys(&app1BannerConfig.Demands),
 				Bidding:   db.StringArrayToAdapterKeys(&app1BannerConfig.Bidding),
 				AdUnitIDs: app1BannerConfig.AdUnitIds,
@@ -122,7 +121,6 @@ func TestConfigFetcher_Match(t *testing.T) {
 			want: &auction.Config{
 				ID:        app2BannerConfig.ID,
 				UID:       strconv.FormatInt(app2BannerConfig.PublicUID.Int64, 10),
-				Rounds:    app2BannerConfig.Rounds,
 				Demands:   db.StringArrayToAdapterKeys(&app2BannerConfig.Demands),
 				Bidding:   db.StringArrayToAdapterKeys(&app2BannerConfig.Bidding),
 				AdUnitIDs: app2BannerConfig.AdUnitIds,
@@ -133,7 +131,6 @@ func TestConfigFetcher_Match(t *testing.T) {
 			want: &auction.Config{
 				ID:        app2InterstitialConfig.ID,
 				UID:       strconv.FormatInt(app2InterstitialConfig.PublicUID.Int64, 10),
-				Rounds:    app2InterstitialConfig.Rounds,
 				Demands:   db.StringArrayToAdapterKeys(&app2InterstitialConfig.Demands),
 				Bidding:   db.StringArrayToAdapterKeys(&app2InterstitialConfig.Bidding),
 				AdUnitIDs: app2InterstitialConfig.AdUnitIds,
@@ -144,7 +141,6 @@ func TestConfigFetcher_Match(t *testing.T) {
 			want: &auction.Config{
 				ID:        app3InterstitialConfig.ID,
 				UID:       strconv.FormatInt(app3InterstitialConfig.PublicUID.Int64, 10),
-				Rounds:    app3InterstitialConfig.Rounds,
 				Demands:   db.StringArrayToAdapterKeys(&app3InterstitialConfig.Demands),
 				Bidding:   db.StringArrayToAdapterKeys(&app3InterstitialConfig.Bidding),
 				AdUnitIDs: app3InterstitialConfig.AdUnitIds,
@@ -156,7 +152,6 @@ func TestConfigFetcher_Match(t *testing.T) {
 			want: &auction.Config{
 				ID:        app4DefaultInterstitialConfig.ID,
 				UID:       strconv.FormatInt(app4DefaultInterstitialConfig.PublicUID.Int64, 10),
-				Rounds:    app4DefaultInterstitialConfig.Rounds,
 				Demands:   db.StringArrayToAdapterKeys(&app4DefaultInterstitialConfig.Demands),
 				Bidding:   db.StringArrayToAdapterKeys(&app4DefaultInterstitialConfig.Bidding),
 				AdUnitIDs: app4DefaultInterstitialConfig.AdUnitIds,
@@ -168,7 +163,6 @@ func TestConfigFetcher_Match(t *testing.T) {
 			want: &auction.Config{
 				ID:        app4SegmentInterstitialConfig.ID,
 				UID:       strconv.FormatInt(app4SegmentInterstitialConfig.PublicUID.Int64, 10),
-				Rounds:    app4SegmentInterstitialConfig.Rounds,
 				Demands:   db.StringArrayToAdapterKeys(&app4SegmentInterstitialConfig.Demands),
 				Bidding:   db.StringArrayToAdapterKeys(&app4SegmentInterstitialConfig.Bidding),
 				AdUnitIDs: app4SegmentInterstitialConfig.AdUnitIds,
@@ -249,7 +243,6 @@ func TestConfigFetcher_FetchByUID(t *testing.T) {
 			want: &auction.Config{
 				ID:        app1BannerConfig.ID,
 				UID:       strconv.FormatInt(app1BannerConfig.PublicUID.Int64, 10),
-				Rounds:    app1BannerConfig.Rounds,
 				Demands:   db.StringArrayToAdapterKeys(&app1BannerConfig.Demands),
 				Bidding:   db.StringArrayToAdapterKeys(&app1BannerConfig.Bidding),
 				AdUnitIDs: app1BannerConfig.AdUnitIds,
@@ -260,7 +253,6 @@ func TestConfigFetcher_FetchByUID(t *testing.T) {
 			want: &auction.Config{
 				ID:        app2BannerConfig.ID,
 				UID:       strconv.FormatInt(app2BannerConfig.PublicUID.Int64, 10),
-				Rounds:    app2BannerConfig.Rounds,
 				Demands:   db.StringArrayToAdapterKeys(&app2BannerConfig.Demands),
 				Bidding:   db.StringArrayToAdapterKeys(&app2BannerConfig.Bidding),
 				AdUnitIDs: app2BannerConfig.AdUnitIds,
@@ -271,7 +263,6 @@ func TestConfigFetcher_FetchByUID(t *testing.T) {
 			want: &auction.Config{
 				ID:        app2InterstitialConfig.ID,
 				UID:       strconv.FormatInt(app2InterstitialConfig.PublicUID.Int64, 10),
-				Rounds:    app2InterstitialConfig.Rounds,
 				Demands:   db.StringArrayToAdapterKeys(&app2InterstitialConfig.Demands),
 				Bidding:   db.StringArrayToAdapterKeys(&app2InterstitialConfig.Bidding),
 				AdUnitIDs: app2InterstitialConfig.AdUnitIds,
@@ -286,7 +277,6 @@ func TestConfigFetcher_FetchByUID(t *testing.T) {
 				Bidding:   db.StringArrayToAdapterKeys(&app3InterstitialConfig.Bidding),
 				AdUnitIDs: app3InterstitialConfig.AdUnitIds,
 				Timeout:   int(app3InterstitialConfig.Timeout),
-				Rounds:    app3InterstitialConfig.Rounds,
 			},
 		},
 		{
@@ -355,7 +345,6 @@ func TestConfigFetcher_FetchByUIDCached(t *testing.T) {
 			want: &auction.Config{
 				ID:        app1BannerConfig.ID,
 				UID:       strconv.FormatInt(app1BannerConfig.PublicUID.Int64, 10),
-				Rounds:    app1BannerConfig.Rounds,
 				Demands:   db.StringArrayToAdapterKeys(&app1BannerConfig.Demands),
 				Bidding:   db.StringArrayToAdapterKeys(&app1BannerConfig.Bidding),
 				AdUnitIDs: app1BannerConfig.AdUnitIds,
@@ -366,7 +355,6 @@ func TestConfigFetcher_FetchByUIDCached(t *testing.T) {
 			want: &auction.Config{
 				ID:        app2BannerConfig.ID,
 				UID:       strconv.FormatInt(app2BannerConfig.PublicUID.Int64, 10),
-				Rounds:    app2BannerConfig.Rounds,
 				Demands:   db.StringArrayToAdapterKeys(&app2BannerConfig.Demands),
 				Bidding:   db.StringArrayToAdapterKeys(&app2BannerConfig.Bidding),
 				AdUnitIDs: app2BannerConfig.AdUnitIds,
@@ -377,7 +365,6 @@ func TestConfigFetcher_FetchByUIDCached(t *testing.T) {
 			want: &auction.Config{
 				ID:        latestConfig.ID,
 				UID:       strconv.FormatInt(latestConfig.PublicUID.Int64, 10),
-				Rounds:    latestConfig.Rounds,
 				Demands:   db.StringArrayToAdapterKeys(&latestConfig.Demands),
 				Bidding:   db.StringArrayToAdapterKeys(&latestConfig.Bidding),
 				AdUnitIDs: latestConfig.AdUnitIds,

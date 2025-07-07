@@ -23,7 +23,7 @@ func TestAdapter_FetchBids(t *testing.T) {
 		PricePointsMap PricePointsMap
 	}
 	type args struct {
-		br *schema.BiddingRequest
+		auctionRequest *schema.AuctionRequest
 	}
 	tests := []struct {
 		name    string
@@ -47,8 +47,8 @@ func TestAdapter_FetchBids(t *testing.T) {
 				},
 			},
 			args: args{
-				br: &schema.BiddingRequest{
-					Imp: schema.Imp{
+				auctionRequest: &schema.AuctionRequest{
+					AdObject: schema.AdObject{
 						Demands: map[adapter.Key]map[string]interface{}{
 							adapter.AmazonKey: {
 								"token": `[
@@ -100,7 +100,7 @@ func TestAdapter_FetchBids(t *testing.T) {
 		adapter := Adapter{
 			PricePointsMap: tt.fields.PricePointsMap,
 		}
-		got, err := adapter.FetchBids(tt.args.br)
+		got, err := adapter.FetchBids(tt.args.auctionRequest)
 		if (err != nil) != tt.wantErr {
 			t.Errorf("%q. Adapter.FetchBids() error = %v, wantErr %v", tt.name, err, tt.wantErr)
 			continue

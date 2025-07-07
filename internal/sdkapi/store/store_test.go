@@ -169,7 +169,6 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Valid(t *testing.T) {
 					Slots:  []sdkapi.AmazonSlot{},
 				},
 				&sdkapi.ApplovinInitConfig{
-					AppKey: "applovin",
 					SDKKey: "applovin",
 				},
 				&sdkapi.BidmachineInitConfig{

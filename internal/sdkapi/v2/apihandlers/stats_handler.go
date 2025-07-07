@@ -15,7 +15,7 @@ import (
 )
 
 type StatsHandler struct {
-	*BaseHandler[schema.StatsV2Request, *schema.StatsV2Request]
+	*BaseHandler[schema.StatsRequest, *schema.StatsRequest]
 	EventLogger         *event.Logger
 	NotificationHandler StatsNotificationHandler
 }
@@ -23,7 +23,7 @@ type StatsHandler struct {
 //go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/stats_mocks.go -pkg mocks . StatsNotificationHandler
 
 type StatsNotificationHandler interface {
-	HandleStats(context.Context, schema.StatsV2, *auction.Config, string, string)
+	HandleStats(context.Context, schema.Stats, *auction.Config, string, string)
 }
 
 func (h *StatsHandler) Handle(c echo.Context) error {
@@ -44,7 +44,7 @@ func (h *StatsHandler) Handle(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]any{"success": true})
 }
 
-func prepareStatsEvents(req *request[schema.StatsV2Request, *schema.StatsV2Request]) []*event.AdEvent {
+func prepareStatsEvents(req *request[schema.StatsRequest, *schema.StatsRequest]) []*event.AdEvent {
 	// 1 event whole auction
 	// 1 event for each Auction Ad Unit Result
 	stats := req.raw.Stats

@@ -1,4 +1,4 @@
-package auctionv2_test
+package auction_test
 
 import (
 	"context"
@@ -8,8 +8,7 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/auction"
-	"github.com/bidon-io/bidon-backend/internal/auctionv2"
-	"github.com/bidon-io/bidon-backend/internal/auctionv2/mocks"
+	"github.com/bidon-io/bidon-backend/internal/auction/mocks"
 	"github.com/bidon-io/bidon-backend/internal/bidding"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
@@ -30,8 +29,8 @@ func TestService_Run(t *testing.T) {
 		Timeout:    15000,
 	}
 	geoData := geocoder.GeoData{}
-	request := &schema.AuctionV2Request{
-		AdObject: schema.AdObjectV2{
+	request := &schema.AuctionRequest{
+		AdObject: schema.AdObject{
 			AuctionKey: "1ERNSV33K4000",
 			PriceFloor: 0.01,
 		},
@@ -54,7 +53,7 @@ func TestService_Run(t *testing.T) {
 		},
 	}
 	segmentFetcher := &segmentmocks.FetcherMock{
-		FetchCachedFunc: func(ctx context.Context, appID int64) ([]segment.Segment, error) {
+		FetchCachedFunc: func(_ context.Context, _ int64) ([]segment.Segment, error) {
 			return []segment.Segment{sgmnt}, nil
 		},
 	}
@@ -62,21 +61,21 @@ func TestService_Run(t *testing.T) {
 		Fetcher: segmentFetcher,
 	}
 	configFetcher := &mocks.ConfigFetcherMock{
-		FetchByUIDCachedFunc: func(ctx context.Context, appId int64, id, uid string) *auction.Config {
+		FetchByUIDCachedFunc: func(_ context.Context, _ int64, _, _ string) *auction.Config {
 			return auctionConfig
 		},
-		MatchFunc: func(ctx context.Context, appID int64, adType ad.Type, segmentID int64, version string) (*auction.Config, error) {
+		MatchFunc: func(_ context.Context, _ int64, _ ad.Type, _ int64, _ string) (*auction.Config, error) {
 			return auctionConfig, nil
 		},
 	}
 	adapterKeysFetcher := &mocks.AdapterKeysFetcherMock{
-		FetchEnabledAdapterKeysFunc: func(ctx context.Context, appID int64, keys []adapter.Key) ([]adapter.Key, error) {
+		FetchEnabledAdapterKeysFunc: func(_ context.Context, _ int64, keys []adapter.Key) ([]adapter.Key, error) {
 			return keys, nil
 		},
 	}
 	auctionBuilder := &mocks.AuctionBuilderMock{
-		BuildFunc: func(ctx context.Context, params *auctionv2.BuildParams) (*auctionv2.AuctionResult, error) {
-			return &auctionv2.AuctionResult{
+		BuildFunc: func(_ context.Context, _ *auction.BuildParams) (*auction.Result, error) {
+			return &auction.Result{
 				AuctionConfiguration: auctionConfig,
 				CPMAdUnits: &[]auction.AdUnit{
 					{
@@ -98,7 +97,7 @@ func TestService_Run(t *testing.T) {
 	}
 	eventLogger := &event.Logger{Engine: &engine.Log{}}
 
-	service := &auctionv2.Service{
+	service := &auction.Service{
 		AdapterKeysFetcher: adapterKeysFetcher,
 		ConfigFetcher:      configFetcher,
 		AuctionBuilder:     auctionBuilder,
@@ -107,13 +106,13 @@ func TestService_Run(t *testing.T) {
 	}
 
 	t.Run("Successful Run", func(t *testing.T) {
-		params := &auctionv2.ExecutionParams{
+		params := &auction.ExecutionParams{
 			Req:     request,
 			AppID:   1,
 			Country: "US",
 			GeoData: geoData,
 			Log:     func(string) {},
-			LogErr:  func(err error) {},
+			LogErr:  func(_ error) {},
 		}
 		response, err := service.Run(ctx, params)
 		if err != nil {
@@ -127,13 +126,13 @@ func TestService_Run(t *testing.T) {
 	t.Run("Invalid Auction Key", func(t *testing.T) {
 		invalidRequest := *request
 		invalidRequest.AdObject.AuctionKey = "invalid_key"
-		params := &auctionv2.ExecutionParams{
+		params := &auction.ExecutionParams{
 			Req:     &invalidRequest,
 			AppID:   1,
 			Country: "US",
 			GeoData: geoData,
 			Log:     func(string) {},
-			LogErr:  func(err error) {},
+			LogErr:  func(_ error) {},
 		}
 		_, err := service.Run(ctx, params)
 		if !errors.Is(err, sdkapi.ErrInvalidAuctionKey) {
@@ -142,16 +141,16 @@ func TestService_Run(t *testing.T) {
 	})
 
 	t.Run("No Ads Found", func(t *testing.T) {
-		auctionBuilder.BuildFunc = func(ctx context.Context, params *auctionv2.BuildParams) (*auctionv2.AuctionResult, error) {
+		auctionBuilder.BuildFunc = func(_ context.Context, _ *auction.BuildParams) (*auction.Result, error) {
 			return nil, auction.ErrNoAdsFound
 		}
-		params := &auctionv2.ExecutionParams{
+		params := &auction.ExecutionParams{
 			Req:     request,
 			AppID:   1,
 			Country: "US",
 			GeoData: geoData,
 			Log:     func(string) {},
-			LogErr:  func(err error) {},
+			LogErr:  func(_ error) {},
 		}
 		_, err := service.Run(ctx, params)
 		if !errors.Is(err, sdkapi.ErrNoAdsFound) {
@@ -169,8 +168,8 @@ func TestService_Run_BidmachineWithMediator(t *testing.T) {
 		Timeout:    15000,
 	}
 	geoData := geocoder.GeoData{}
-	request := &schema.AuctionV2Request{
-		AdObject: schema.AdObjectV2{
+	request := &schema.AuctionRequest{
+		AdObject: schema.AdObject{
 			AuctionKey: "1ERNSV33K4000",
 			PriceFloor: 0.01,
 		},
@@ -192,7 +191,7 @@ func TestService_Run_BidmachineWithMediator(t *testing.T) {
 		},
 	}
 	segmentFetcher := &segmentmocks.FetcherMock{
-		FetchCachedFunc: func(ctx context.Context, appID int64) ([]segment.Segment, error) {
+		FetchCachedFunc: func(_ context.Context, _ int64) ([]segment.Segment, error) {
 			return []segment.Segment{sgmnt}, nil
 		},
 	}
@@ -200,21 +199,21 @@ func TestService_Run_BidmachineWithMediator(t *testing.T) {
 		Fetcher: segmentFetcher,
 	}
 	configFetcher := &mocks.ConfigFetcherMock{
-		FetchByUIDCachedFunc: func(ctx context.Context, appId int64, id, uid string) *auction.Config {
+		FetchByUIDCachedFunc: func(_ context.Context, _ int64, _, _ string) *auction.Config {
 			return auctionConfig
 		},
-		MatchFunc: func(ctx context.Context, appID int64, adType ad.Type, segmentID int64, version string) (*auction.Config, error) {
+		MatchFunc: func(_ context.Context, _ int64, _ ad.Type, _ int64, _ string) (*auction.Config, error) {
 			return auctionConfig, nil
 		},
 	}
 	adapterKeysFetcher := &mocks.AdapterKeysFetcherMock{
-		FetchEnabledAdapterKeysFunc: func(ctx context.Context, appID int64, keys []adapter.Key) ([]adapter.Key, error) {
+		FetchEnabledAdapterKeysFunc: func(_ context.Context, _ int64, keys []adapter.Key) ([]adapter.Key, error) {
 			return keys, nil
 		},
 	}
 	auctionBuilder := &mocks.AuctionBuilderMock{
-		BuildFunc: func(ctx context.Context, params *auctionv2.BuildParams) (*auctionv2.AuctionResult, error) {
-			return &auctionv2.AuctionResult{
+		BuildFunc: func(_ context.Context, _ *auction.BuildParams) (*auction.Result, error) {
+			return &auction.Result{
 				AuctionConfiguration: auctionConfig,
 				CPMAdUnits: &[]auction.AdUnit{
 					{
@@ -234,7 +233,7 @@ func TestService_Run_BidmachineWithMediator(t *testing.T) {
 	}
 	eventLogger := &event.Logger{Engine: &engine.Log{}}
 
-	service := &auctionv2.Service{
+	service := &auction.Service{
 		AdapterKeysFetcher: adapterKeysFetcher,
 		ConfigFetcher:      configFetcher,
 		AuctionBuilder:     auctionBuilder,
@@ -242,13 +241,13 @@ func TestService_Run_BidmachineWithMediator(t *testing.T) {
 		EventLogger:        eventLogger,
 	}
 
-	params := &auctionv2.ExecutionParams{
+	params := &auction.ExecutionParams{
 		Req:     request,
 		AppID:   1,
 		Country: "US",
 		GeoData: geoData,
 		Log:     func(string) {},
-		LogErr:  func(err error) {},
+		LogErr:  func(_ error) {},
 	}
 
 	request.NormalizeValues()
@@ -283,8 +282,8 @@ func TestService_Run_BiddingWithDemandExt(t *testing.T) {
 		Timeout:    15000,
 	}
 	geoData := geocoder.GeoData{}
-	request := &schema.AuctionV2Request{
-		AdObject: schema.AdObjectV2{
+	request := &schema.AuctionRequest{
+		AdObject: schema.AdObject{
 			AuctionKey: "1ERNSV33K4000",
 			PriceFloor: 0.01,
 		},
@@ -306,7 +305,7 @@ func TestService_Run_BiddingWithDemandExt(t *testing.T) {
 		},
 	}
 	segmentFetcher := &segmentmocks.FetcherMock{
-		FetchCachedFunc: func(ctx context.Context, appID int64) ([]segment.Segment, error) {
+		FetchCachedFunc: func(_ context.Context, _ int64) ([]segment.Segment, error) {
 			return []segment.Segment{sgmnt}, nil
 		},
 	}
@@ -314,20 +313,20 @@ func TestService_Run_BiddingWithDemandExt(t *testing.T) {
 		Fetcher: segmentFetcher,
 	}
 	configFetcher := &mocks.ConfigFetcherMock{
-		FetchByUIDCachedFunc: func(ctx context.Context, appId int64, id, uid string) *auction.Config {
+		FetchByUIDCachedFunc: func(_ context.Context, _ int64, _, _ string) *auction.Config {
 			return auctionConfig
 		},
-		MatchFunc: func(ctx context.Context, appID int64, adType ad.Type, segmentID int64, version string) (*auction.Config, error) {
+		MatchFunc: func(_ context.Context, _ int64, _ ad.Type, _ int64, _ string) (*auction.Config, error) {
 			return auctionConfig, nil
 		},
 	}
 	adapterKeysFetcher := &mocks.AdapterKeysFetcherMock{
-		FetchEnabledAdapterKeysFunc: func(ctx context.Context, appID int64, keys []adapter.Key) ([]adapter.Key, error) {
+		FetchEnabledAdapterKeysFunc: func(_ context.Context, _ int64, keys []adapter.Key) ([]adapter.Key, error) {
 			return keys, nil
 		},
 	}
 	auctionBuilder := &mocks.AuctionBuilderMock{
-		BuildFunc: func(ctx context.Context, params *auctionv2.BuildParams) (*auctionv2.AuctionResult, error) {
+		BuildFunc: func(_ context.Context, _ *auction.BuildParams) (*auction.Result, error) {
 			adUnits := []auction.AdUnit{
 				{
 					DemandID: string(adapter.BidmachineKey),
@@ -339,7 +338,7 @@ func TestService_Run_BiddingWithDemandExt(t *testing.T) {
 				},
 			}
 
-			return &auctionv2.AuctionResult{
+			return &auction.Result{
 				AuctionConfiguration: auctionConfig,
 				CPMAdUnits:           &[]auction.AdUnit{},
 				AdUnits:              &adUnits,
@@ -361,7 +360,7 @@ func TestService_Run_BiddingWithDemandExt(t *testing.T) {
 	}
 	eventLogger := &event.Logger{Engine: &engine.Log{}}
 
-	service := &auctionv2.Service{
+	service := &auction.Service{
 		AdapterKeysFetcher: adapterKeysFetcher,
 		ConfigFetcher:      configFetcher,
 		AuctionBuilder:     auctionBuilder,
@@ -369,13 +368,13 @@ func TestService_Run_BiddingWithDemandExt(t *testing.T) {
 		EventLogger:        eventLogger,
 	}
 
-	params := &auctionv2.ExecutionParams{
+	params := &auction.ExecutionParams{
 		Req:     request,
 		AppID:   1,
 		Country: "US",
 		GeoData: geoData,
 		Log:     func(string) {},
-		LogErr:  func(err error) {},
+		LogErr:  func(_ error) {},
 	}
 
 	request.NormalizeValues()
@@ -399,8 +398,8 @@ func TestService_Run_BidmachineWithMediatorInBidding(t *testing.T) {
 		Timeout:    15000,
 	}
 	geoData := geocoder.GeoData{}
-	request := &schema.AuctionV2Request{
-		AdObject: schema.AdObjectV2{
+	request := &schema.AuctionRequest{
+		AdObject: schema.AdObject{
 			AuctionKey: "1ERNSV33K4000",
 			PriceFloor: 0.01,
 		},
@@ -422,7 +421,7 @@ func TestService_Run_BidmachineWithMediatorInBidding(t *testing.T) {
 		},
 	}
 	segmentFetcher := &segmentmocks.FetcherMock{
-		FetchCachedFunc: func(ctx context.Context, appID int64) ([]segment.Segment, error) {
+		FetchCachedFunc: func(_ context.Context, _ int64) ([]segment.Segment, error) {
 			return []segment.Segment{sgmnt}, nil
 		},
 	}
@@ -430,20 +429,20 @@ func TestService_Run_BidmachineWithMediatorInBidding(t *testing.T) {
 		Fetcher: segmentFetcher,
 	}
 	configFetcher := &mocks.ConfigFetcherMock{
-		FetchByUIDCachedFunc: func(ctx context.Context, appId int64, id, uid string) *auction.Config {
+		FetchByUIDCachedFunc: func(_ context.Context, _ int64, _, _ string) *auction.Config {
 			return auctionConfig
 		},
-		MatchFunc: func(ctx context.Context, appID int64, adType ad.Type, segmentID int64, version string) (*auction.Config, error) {
+		MatchFunc: func(_ context.Context, _ int64, _ ad.Type, _ int64, _ string) (*auction.Config, error) {
 			return auctionConfig, nil
 		},
 	}
 	adapterKeysFetcher := &mocks.AdapterKeysFetcherMock{
-		FetchEnabledAdapterKeysFunc: func(ctx context.Context, appID int64, keys []adapter.Key) ([]adapter.Key, error) {
+		FetchEnabledAdapterKeysFunc: func(_ context.Context, _ int64, keys []adapter.Key) ([]adapter.Key, error) {
 			return keys, nil
 		},
 	}
 	auctionBuilder := &mocks.AuctionBuilderMock{
-		BuildFunc: func(ctx context.Context, params *auctionv2.BuildParams) (*auctionv2.AuctionResult, error) {
+		BuildFunc: func(_ context.Context, _ *auction.BuildParams) (*auction.Result, error) {
 			adUnits := []auction.AdUnit{
 				{
 					DemandID: string(adapter.BidmachineKey),
@@ -455,7 +454,7 @@ func TestService_Run_BidmachineWithMediatorInBidding(t *testing.T) {
 				},
 			}
 
-			return &auctionv2.AuctionResult{
+			return &auction.Result{
 				AuctionConfiguration: auctionConfig,
 				CPMAdUnits:           &[]auction.AdUnit{},
 				AdUnits:              &adUnits,
@@ -477,7 +476,7 @@ func TestService_Run_BidmachineWithMediatorInBidding(t *testing.T) {
 	}
 	eventLogger := &event.Logger{Engine: &engine.Log{}}
 
-	service := &auctionv2.Service{
+	service := &auction.Service{
 		AdapterKeysFetcher: adapterKeysFetcher,
 		ConfigFetcher:      configFetcher,
 		AuctionBuilder:     auctionBuilder,
@@ -485,13 +484,13 @@ func TestService_Run_BidmachineWithMediatorInBidding(t *testing.T) {
 		EventLogger:        eventLogger,
 	}
 
-	params := &auctionv2.ExecutionParams{
+	params := &auction.ExecutionParams{
 		Req:     request,
 		AppID:   1,
 		Country: "US",
 		GeoData: geoData,
 		Log:     func(string) {},
-		LogErr:  func(err error) {},
+		LogErr:  func(_ error) {},
 	}
 
 	request.NormalizeValues()
@@ -540,8 +539,8 @@ func TestService_Run_BuildDemandExtVariousAdapters(t *testing.T) {
 		Timeout:    15000,
 	}
 	geoData := geocoder.GeoData{}
-	request := &schema.AuctionV2Request{
-		AdObject: schema.AdObjectV2{
+	request := &schema.AuctionRequest{
+		AdObject: schema.AdObject{
 			AuctionKey: "1ERNSV33K4000",
 			PriceFloor: 0.01,
 		},
@@ -563,7 +562,7 @@ func TestService_Run_BuildDemandExtVariousAdapters(t *testing.T) {
 		},
 	}
 	segmentFetcher := &segmentmocks.FetcherMock{
-		FetchCachedFunc: func(ctx context.Context, appID int64) ([]segment.Segment, error) {
+		FetchCachedFunc: func(_ context.Context, _ int64) ([]segment.Segment, error) {
 			return []segment.Segment{sgmnt}, nil
 		},
 	}
@@ -571,20 +570,20 @@ func TestService_Run_BuildDemandExtVariousAdapters(t *testing.T) {
 		Fetcher: segmentFetcher,
 	}
 	configFetcher := &mocks.ConfigFetcherMock{
-		FetchByUIDCachedFunc: func(ctx context.Context, appId int64, id, uid string) *auction.Config {
+		FetchByUIDCachedFunc: func(_ context.Context, _ int64, _, _ string) *auction.Config {
 			return auctionConfig
 		},
-		MatchFunc: func(ctx context.Context, appID int64, adType ad.Type, segmentID int64, version string) (*auction.Config, error) {
+		MatchFunc: func(_ context.Context, _ int64, _ ad.Type, _ int64, _ string) (*auction.Config, error) {
 			return auctionConfig, nil
 		},
 	}
 	adapterKeysFetcher := &mocks.AdapterKeysFetcherMock{
-		FetchEnabledAdapterKeysFunc: func(ctx context.Context, appID int64, keys []adapter.Key) ([]adapter.Key, error) {
+		FetchEnabledAdapterKeysFunc: func(_ context.Context, _ int64, keys []adapter.Key) ([]adapter.Key, error) {
 			return keys, nil
 		},
 	}
 	auctionBuilder := &mocks.AuctionBuilderMock{
-		BuildFunc: func(ctx context.Context, params *auctionv2.BuildParams) (*auctionv2.AuctionResult, error) {
+		BuildFunc: func(_ context.Context, _ *auction.BuildParams) (*auction.Result, error) {
 			adUnits := []auction.AdUnit{
 				{
 					DemandID: string(adapter.AmazonKey),
@@ -620,7 +619,7 @@ func TestService_Run_BuildDemandExtVariousAdapters(t *testing.T) {
 				},
 			}
 
-			return &auctionv2.AuctionResult{
+			return &auction.Result{
 				AuctionConfiguration: auctionConfig,
 				CPMAdUnits:           &[]auction.AdUnit{},
 				AdUnits:              &adUnits,
@@ -671,7 +670,7 @@ func TestService_Run_BuildDemandExtVariousAdapters(t *testing.T) {
 	}
 	eventLogger := &event.Logger{Engine: &engine.Log{}}
 
-	service := &auctionv2.Service{
+	service := &auction.Service{
 		AdapterKeysFetcher: adapterKeysFetcher,
 		ConfigFetcher:      configFetcher,
 		AuctionBuilder:     auctionBuilder,
@@ -679,13 +678,13 @@ func TestService_Run_BuildDemandExtVariousAdapters(t *testing.T) {
 		EventLogger:        eventLogger,
 	}
 
-	params := &auctionv2.ExecutionParams{
+	params := &auction.ExecutionParams{
 		Req:     request,
 		AppID:   1,
 		Country: "US",
 		GeoData: geoData,
 		Log:     func(string) {},
-		LogErr:  func(err error) {},
+		LogErr:  func(_ error) {},
 	}
 
 	request.NormalizeValues()

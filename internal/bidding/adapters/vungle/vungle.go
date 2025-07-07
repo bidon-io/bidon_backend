@@ -40,10 +40,10 @@ var fullscreenFormats = map[string][2]int64{
 	"TABLET": {768, 1024},
 }
 
-func (a *VungleAdapter) banner(br *schema.BiddingRequest) *openrtb2.Imp {
-	size := bannerFormats[br.Imp.Format()]
+func (a *VungleAdapter) banner(auctionRequest *schema.AuctionRequest) *openrtb2.Imp {
+	size := bannerFormats[auctionRequest.AdObject.Format()]
 
-	if br.Imp.IsAdaptive() && br.Device.IsTablet() {
+	if auctionRequest.AdObject.IsAdaptive() && auctionRequest.Device.IsTablet() {
 		size = bannerFormats[ad.LeaderboardFormat]
 	}
 
@@ -59,10 +59,10 @@ func (a *VungleAdapter) banner(br *schema.BiddingRequest) *openrtb2.Imp {
 	}
 }
 
-func (a *VungleAdapter) interstitial(br *schema.BiddingRequest) *openrtb2.Imp {
-	size := fullscreenFormats[string(br.Device.Type)]
+func (a *VungleAdapter) interstitial(auctionRequest *schema.AuctionRequest) *openrtb2.Imp {
+	size := fullscreenFormats[string(auctionRequest.Device.Type)]
 	w, h := size[0], size[1]
-	if !br.Imp.IsPortrait() {
+	if !auctionRequest.AdObject.IsPortrait() {
 		w, h = h, w
 	}
 	return &openrtb2.Imp{
@@ -75,10 +75,10 @@ func (a *VungleAdapter) interstitial(br *schema.BiddingRequest) *openrtb2.Imp {
 	}
 }
 
-func (a *VungleAdapter) rewarded(br *schema.BiddingRequest) *openrtb2.Imp {
-	size := fullscreenFormats[string(br.Device.Type)]
+func (a *VungleAdapter) rewarded(auctionRequest *schema.AuctionRequest) *openrtb2.Imp {
+	size := fullscreenFormats[string(auctionRequest.Device.Type)]
 	w, h := size[0], size[1]
-	if !br.Imp.IsPortrait() {
+	if !auctionRequest.AdObject.IsPortrait() {
 		w, h = h, w
 	}
 	return &openrtb2.Imp{
@@ -91,17 +91,17 @@ func (a *VungleAdapter) rewarded(br *schema.BiddingRequest) *openrtb2.Imp {
 	}
 }
 
-func (a *VungleAdapter) CreateRequest(request openrtb.BidRequest, br *schema.BiddingRequest) (openrtb.BidRequest, error) {
+func (a *VungleAdapter) CreateRequest(request openrtb.BidRequest, auctionRequest *schema.AuctionRequest) (openrtb.BidRequest, error) {
 	secure := int8(1)
 
 	var imp *openrtb2.Imp
-	switch br.Imp.Type() {
+	switch auctionRequest.AdObject.Type() {
 	case ad.BannerType:
-		imp = a.banner(br)
+		imp = a.banner(auctionRequest)
 	case ad.InterstitialType:
-		imp = a.interstitial(br)
+		imp = a.interstitial(auctionRequest)
 	case ad.RewardedType:
-		imp = a.rewarded(br)
+		imp = a.rewarded(auctionRequest)
 	default:
 		return request, errors.New("unknown impression type")
 	}
@@ -115,13 +115,13 @@ func (a *VungleAdapter) CreateRequest(request openrtb.BidRequest, br *schema.Bid
 	imp.TagID = a.TagID
 
 	imp.DisplayManager = string(adapter.VungleKey)
-	imp.DisplayManagerVer = br.Adapters[adapter.VungleKey].SDKVersion
+	imp.DisplayManagerVer = auctionRequest.Adapters[adapter.VungleKey].SDKVersion
 	imp.Secure = &secure
-	imp.BidFloor = adapters.CalculatePriceFloor(&request, br)
+	imp.BidFloor = adapters.CalculatePriceFloor(&request, auctionRequest)
 	imp.BidFloorCur = "USD"
 
 	vungleData := make(map[string]interface{})
-	vungleData["bid_token"] = br.Imp.Demands[adapter.VungleKey]["token"]
+	vungleData["bid_token"] = auctionRequest.AdObject.Demands[adapter.VungleKey]["token"]
 
 	extStructure := &map[string]interface{}{}
 	_ = json.Unmarshal(imp.Ext, extStructure)

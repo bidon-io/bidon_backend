@@ -5,7 +5,7 @@ package mocks
 
 import (
 	"context"
-	"github.com/bidon-io/bidon-backend/internal/auctionv2"
+	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/geocoder"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/grpc"
@@ -100,7 +100,7 @@ var _ grpcserver.AuctionService = &AuctionServiceMock{}
 //
 //		// make and configure a mocked grpcserver.AuctionService
 //		mockedAuctionService := &AuctionServiceMock{
-//			RunFunc: func(ctx context.Context, params *auctionv2.ExecutionParams) (*auctionv2.Response, error) {
+//			RunFunc: func(ctx context.Context, params *auction.ExecutionParams) (*auction.Response, error) {
 //				panic("mock out the Run method")
 //			},
 //		}
@@ -111,7 +111,7 @@ var _ grpcserver.AuctionService = &AuctionServiceMock{}
 //	}
 type AuctionServiceMock struct {
 	// RunFunc mocks the Run method.
-	RunFunc func(ctx context.Context, params *auctionv2.ExecutionParams) (*auctionv2.Response, error)
+	RunFunc func(ctx context.Context, params *auction.ExecutionParams) (*auction.Response, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -120,20 +120,20 @@ type AuctionServiceMock struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// Params is the params argument value.
-			Params *auctionv2.ExecutionParams
+			Params *auction.ExecutionParams
 		}
 	}
 	lockRun sync.RWMutex
 }
 
 // Run calls RunFunc.
-func (mock *AuctionServiceMock) Run(ctx context.Context, params *auctionv2.ExecutionParams) (*auctionv2.Response, error) {
+func (mock *AuctionServiceMock) Run(ctx context.Context, params *auction.ExecutionParams) (*auction.Response, error) {
 	if mock.RunFunc == nil {
 		panic("AuctionServiceMock.RunFunc: method is nil but AuctionService.Run was just called")
 	}
 	callInfo := struct {
 		Ctx    context.Context
-		Params *auctionv2.ExecutionParams
+		Params *auction.ExecutionParams
 	}{
 		Ctx:    ctx,
 		Params: params,
@@ -150,11 +150,11 @@ func (mock *AuctionServiceMock) Run(ctx context.Context, params *auctionv2.Execu
 //	len(mockedAuctionService.RunCalls())
 func (mock *AuctionServiceMock) RunCalls() []struct {
 	Ctx    context.Context
-	Params *auctionv2.ExecutionParams
+	Params *auction.ExecutionParams
 } {
 	var calls []struct {
 		Ctx    context.Context
-		Params *auctionv2.ExecutionParams
+		Params *auction.ExecutionParams
 	}
 	mock.lockRun.RLock()
 	calls = mock.calls.Run

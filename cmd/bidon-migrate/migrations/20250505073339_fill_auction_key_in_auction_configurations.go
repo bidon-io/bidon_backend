@@ -4,10 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/lib/pq"
-	"github.com/pressly/goose/v3"
 	"math/big"
 	"strings"
+
+	"github.com/lib/pq"
+	"github.com/pressly/goose/v3"
 )
 
 func init() {
