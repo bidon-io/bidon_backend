@@ -140,6 +140,11 @@ type AdRequestParams struct {
 	ExternalWinnerEcpm      float64
 }
 
+const (
+	SuccessAdRequestStatus = "SUCCESS"
+	ErrorAdRequestStatus   = "ERROR"
+)
+
 type AdEvent struct {
 	Timestamp                   float64   `json:"timestamp"`
 	EventType                   string    `json:"event_type"`

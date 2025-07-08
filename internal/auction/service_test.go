@@ -2,7 +2,9 @@ package auction_test
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"strings"
 	"testing"
 
 	"github.com/bidon-io/bidon-backend/internal/ad"
@@ -19,6 +21,23 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/segment"
 	segmentmocks "github.com/bidon-io/bidon-backend/internal/segment/mocks"
 )
+
+// MockEventLogger captures logged events for testing
+type MockEventLogger struct {
+	LoggedEvents []event.Event
+}
+
+func (m *MockEventLogger) Produce(message event.LogMessage, _ func(error)) {
+	// For testing, we'll unmarshal the message back to an event
+	var adEvent event.AdEvent
+	if err := json.Unmarshal(message.Value, &adEvent); err == nil {
+		m.LoggedEvents = append(m.LoggedEvents, &adEvent)
+	}
+}
+
+func (m *MockEventLogger) Ping(_ context.Context) error {
+	return nil
+}
 
 func TestService_Run(t *testing.T) {
 	ctx := context.Background()
@@ -155,6 +174,317 @@ func TestService_Run(t *testing.T) {
 		_, err := service.Run(ctx, params)
 		if !errors.Is(err, sdkapi.ErrNoAdsFound) {
 			t.Fatalf("Expected error %v, got %v", sdkapi.ErrNoAdsFound, err)
+		}
+	})
+
+	t.Run("AdapterKeysFetcher Error - Events Still Logged", func(t *testing.T) {
+		// Create a mock event logger to capture events
+		mockEventLogger := &MockEventLogger{}
+		service.EventLogger = &event.Logger{Engine: mockEventLogger}
+
+		// Make AdapterKeysFetcher return an error
+		adapterKeysFetcher.FetchEnabledAdapterKeysFunc = func(_ context.Context, _ int64, _ []adapter.Key) ([]adapter.Key, error) {
+			return nil, errors.New("adapter keys fetch failed")
+		}
+
+		params := &auction.ExecutionParams{
+			Req:     request,
+			AppID:   1,
+			Country: "US",
+			GeoData: geoData,
+			Log:     func(string) {},
+			LogErr:  func(_ error) {},
+		}
+
+		_, err := service.Run(ctx, params)
+		if err == nil {
+			t.Fatal("Expected error, got nil")
+		}
+
+		// Verify that events were still logged despite the error
+		if len(mockEventLogger.LoggedEvents) == 0 {
+			t.Fatal("Expected events to be logged even on error, but no events were logged")
+		}
+
+		// Find the auction_request event
+		var auctionEvent *event.AdEvent
+		for _, ev := range mockEventLogger.LoggedEvents {
+			if adEvent, ok := ev.(*event.AdEvent); ok && adEvent.EventType == "auction_request" {
+				auctionEvent = adEvent
+				break
+			}
+		}
+
+		if auctionEvent == nil {
+			t.Fatal("Expected auction_request event to be logged")
+		}
+
+		// Verify error status and message
+		if auctionEvent.Status != event.ErrorAdRequestStatus {
+			t.Errorf("Expected Status to be 'ERROR', got '%s'", auctionEvent.Status)
+		}
+		if auctionEvent.Error == "" {
+			t.Error("Expected Error field to contain error message, got empty string")
+		}
+		if !strings.Contains(auctionEvent.Error, "adapter keys fetch failed") {
+			t.Errorf("Expected Error field to contain 'adapter keys fetch failed', got '%s'", auctionEvent.Error)
+		}
+	})
+
+	t.Run("Invalid Auction Key Error - Events Still Logged", func(t *testing.T) {
+		// Create a mock event logger to capture events
+		mockEventLogger := &MockEventLogger{}
+		service.EventLogger = &event.Logger{Engine: mockEventLogger}
+
+		// Reset AdapterKeysFetcher to success
+		adapterKeysFetcher.FetchEnabledAdapterKeysFunc = func(_ context.Context, _ int64, keys []adapter.Key) ([]adapter.Key, error) {
+			return keys, nil
+		}
+
+		// Create request with invalid auction key
+		invalidRequest := *request
+		invalidRequest.AdObject.AuctionKey = "invalid_key"
+
+		params := &auction.ExecutionParams{
+			Req:     &invalidRequest,
+			AppID:   1,
+			Country: "US",
+			GeoData: geoData,
+			Log:     func(string) {},
+			LogErr:  func(_ error) {},
+		}
+
+		_, err := service.Run(ctx, params)
+		if !errors.Is(err, sdkapi.ErrInvalidAuctionKey) {
+			t.Fatalf("Expected ErrInvalidAuctionKey, got %v", err)
+		}
+
+		// Verify that events were still logged despite the error
+		if len(mockEventLogger.LoggedEvents) == 0 {
+			t.Fatal("Expected events to be logged even on error, but no events were logged")
+		}
+
+		// Find the auction_request event
+		var auctionEvent *event.AdEvent
+		for _, ev := range mockEventLogger.LoggedEvents {
+			if adEvent, ok := ev.(*event.AdEvent); ok && adEvent.EventType == "auction_request" {
+				auctionEvent = adEvent
+				break
+			}
+		}
+
+		if auctionEvent == nil {
+			t.Fatal("Expected auction_request event to be logged")
+		}
+
+		// Verify error status and message
+		if auctionEvent.Status != event.ErrorAdRequestStatus {
+			t.Errorf("Expected Status to be 'ERROR', got '%s'", auctionEvent.Status)
+		}
+		if auctionEvent.Error == "" {
+			t.Error("Expected Error field to contain error message, got empty string")
+		}
+	})
+
+	t.Run("Config Match Error - Events Still Logged", func(t *testing.T) {
+		// Create a mock event logger to capture events
+		mockEventLogger := &MockEventLogger{}
+		service.EventLogger = &event.Logger{Engine: mockEventLogger}
+
+		// Make ConfigFetcher.Match return an error
+		configFetcher.MatchFunc = func(_ context.Context, _ int64, _ ad.Type, _ int64, _ string) (*auction.Config, error) {
+			return nil, errors.New("config match failed")
+		}
+
+		// Create request without auction key to trigger Match call
+		noKeyRequest := *request
+		noKeyRequest.AdObject.AuctionKey = ""
+
+		params := &auction.ExecutionParams{
+			Req:     &noKeyRequest,
+			AppID:   1,
+			Country: "US",
+			GeoData: geoData,
+			Log:     func(string) {},
+			LogErr:  func(_ error) {},
+		}
+
+		_, err := service.Run(ctx, params)
+		if !errors.Is(err, sdkapi.ErrNoAdsFound) {
+			t.Fatalf("Expected ErrNoAdsFound, got %v", err)
+		}
+
+		// Verify that events were still logged despite the error
+		if len(mockEventLogger.LoggedEvents) == 0 {
+			t.Fatal("Expected events to be logged even on error, but no events were logged")
+		}
+
+		// Find the auction_request event
+		var auctionEvent *event.AdEvent
+		for _, ev := range mockEventLogger.LoggedEvents {
+			if adEvent, ok := ev.(*event.AdEvent); ok && adEvent.EventType == "auction_request" {
+				auctionEvent = adEvent
+				break
+			}
+		}
+
+		if auctionEvent == nil {
+			t.Fatal("Expected auction_request event to be logged")
+		}
+
+		// Verify error status and message
+		if auctionEvent.Status != event.ErrorAdRequestStatus {
+			t.Errorf("Expected Status to be 'ERROR', got '%s'", auctionEvent.Status)
+		}
+		if auctionEvent.Error == "" {
+			t.Error("Expected Error field to contain error message, got empty string")
+		}
+	})
+
+	t.Run("Auction Builder Error - Events Still Logged", func(t *testing.T) {
+		// Create a mock event logger to capture events
+		mockEventLogger := &MockEventLogger{}
+		service.EventLogger = &event.Logger{Engine: mockEventLogger}
+
+		// Reset ConfigFetcher to success
+		configFetcher.MatchFunc = func(_ context.Context, _ int64, _ ad.Type, _ int64, _ string) (*auction.Config, error) {
+			return auctionConfig, nil
+		}
+
+		// Make AuctionBuilder return an error
+		auctionBuilder.BuildFunc = func(_ context.Context, _ *auction.BuildParams) (*auction.Result, error) {
+			return nil, errors.New("auction build failed")
+		}
+
+		// Create request without auction key to trigger Match call
+		noKeyRequest := *request
+		noKeyRequest.AdObject.AuctionKey = ""
+
+		params := &auction.ExecutionParams{
+			Req:     &noKeyRequest,
+			AppID:   1,
+			Country: "US",
+			GeoData: geoData,
+			Log:     func(string) {},
+			LogErr:  func(_ error) {},
+		}
+
+		_, err := service.Run(ctx, params)
+		if err == nil {
+			t.Fatal("Expected error, got nil")
+		}
+
+		// Verify that events were still logged despite the error
+		if len(mockEventLogger.LoggedEvents) == 0 {
+			t.Fatal("Expected events to be logged even on error, but no events were logged")
+		}
+
+		// Find the auction_request event
+		var auctionEvent *event.AdEvent
+		for _, ev := range mockEventLogger.LoggedEvents {
+			if adEvent, ok := ev.(*event.AdEvent); ok && adEvent.EventType == "auction_request" {
+				auctionEvent = adEvent
+				break
+			}
+		}
+
+		if auctionEvent == nil {
+			t.Fatal("Expected auction_request event to be logged")
+		}
+
+		// Verify error status and message
+		if auctionEvent.Status != event.ErrorAdRequestStatus {
+			t.Errorf("Expected Status to be 'ERROR', got '%s'", auctionEvent.Status)
+		}
+		if auctionEvent.Error == "" {
+			t.Error("Expected Error field to contain error message, got empty string")
+		}
+		if !strings.Contains(auctionEvent.Error, "auction build failed") {
+			t.Errorf("Expected Error field to contain 'auction build failed', got '%s'", auctionEvent.Error)
+		}
+
+		// Verify auction configuration is properly set even in error case
+		if auctionEvent.AuctionConfigurationID != auctionConfig.ID {
+			t.Errorf("Expected AuctionConfigurationID to be %d, got %d", auctionConfig.ID, auctionEvent.AuctionConfigurationID)
+		}
+	})
+
+	t.Run("Successful Run - Events Logged with Correct Status", func(t *testing.T) {
+		// Create a mock event logger to capture events
+		mockEventLogger := &MockEventLogger{}
+		service.EventLogger = &event.Logger{Engine: mockEventLogger}
+
+		// Create a successful auction result
+		successfulAuctionResult := &auction.Result{
+			AuctionConfiguration: auctionConfig,
+			CPMAdUnits: &[]auction.AdUnit{
+				{
+					DemandID:   "gam",
+					UID:        "123_gam",
+					Label:      "gam",
+					PriceFloor: ptr(0.1),
+					BidType:    "CPM",
+					Extra:      map[string]any{"placement_id": "123"},
+				},
+			},
+			BiddingAuctionResult: &bidding.AuctionResult{
+				Bids: []adapters.DemandResponse{
+					{DemandID: "bidmachine", Bid: &adapters.BidDemandResponse{}},
+				},
+			},
+		}
+
+		// Reset all mocks to success
+		configFetcher.MatchFunc = func(_ context.Context, _ int64, _ ad.Type, _ int64, _ string) (*auction.Config, error) {
+			return auctionConfig, nil
+		}
+		auctionBuilder.BuildFunc = func(_ context.Context, _ *auction.BuildParams) (*auction.Result, error) {
+			return successfulAuctionResult, nil
+		}
+
+		// Create request without auction key to trigger Match call
+		noKeyRequest := *request
+		noKeyRequest.AdObject.AuctionKey = ""
+
+		params := &auction.ExecutionParams{
+			Req:     &noKeyRequest,
+			AppID:   1,
+			Country: "US",
+			GeoData: geoData,
+			Log:     func(string) {},
+			LogErr:  func(_ error) {},
+		}
+
+		_, err := service.Run(ctx, params)
+		if err != nil {
+			t.Fatalf("Expected no error, got %v", err)
+		}
+
+		// Verify that events were logged
+		if len(mockEventLogger.LoggedEvents) == 0 {
+			t.Fatal("Expected events to be logged, but no events were logged")
+		}
+
+		// Find the auction_request event
+		var auctionEvent *event.AdEvent
+		for _, ev := range mockEventLogger.LoggedEvents {
+			if adEvent, ok := ev.(*event.AdEvent); ok && adEvent.EventType == "auction_request" {
+				auctionEvent = adEvent
+				break
+			}
+		}
+
+		if auctionEvent == nil {
+			t.Fatal("Expected auction_request event to be logged")
+		}
+
+		// Verify success status - should be "SUCCESS" for success (actual behavior)
+		if auctionEvent.Status != "SUCCESS" {
+			t.Errorf("Expected Status to be 'SUCCESS' for success, got '%s'", auctionEvent.Status)
+		}
+		// Verify Error field is empty for success
+		if auctionEvent.Error != "" {
+			t.Errorf("Expected Error field to be empty for success, got '%s'", auctionEvent.Error)
 		}
 	})
 }
