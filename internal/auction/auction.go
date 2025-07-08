@@ -90,7 +90,7 @@ func (m *AdUnitsMap) All(key adapter.Key, bidType schema.BidType) ([]AdUnit, err
 	return nil, ErrNoAdUnitsFound
 }
 
-func BuildAdUnitsMap(adUnits *[]AdUnit) *AdUnitsMap {
+func buildAdUnitsMap(adUnits *[]AdUnit) *AdUnitsMap {
 	m := make(AdUnitsMap)
 	if adUnits == nil {
 		return &m

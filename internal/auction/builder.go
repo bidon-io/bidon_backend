@@ -104,7 +104,7 @@ func (b *Builder) Build(ctx context.Context, params *BuildParams) (*Result, erro
 		return nil, err
 	}
 
-	adUnitsMap := BuildAdUnitsMap(&adUnits)
+	adUnitsMap := buildAdUnitsMap(&adUnits)
 	adapterConfigs, err := b.BiddingAdaptersConfigBuilder.Build(ctx, params.AppID, params.Adapters, adUnitsMap)
 	if err != nil {
 		return nil, err
