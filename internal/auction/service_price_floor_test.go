@@ -166,6 +166,120 @@ func TestPriceFloor(t *testing.T) {
 			},
 			expected: 0.05, // Should use calculated floor since previous auction price is lower
 		},
+		{
+			name: "Disabled floor - Custom adapter (max) with disabled auction key",
+			req: &schema.AuctionRequest{
+				AdObject: schema.AdObject{
+					AuctionKey: "1LOQ1LROG0000", // Inter - should disable floor
+					PriceFloor: 0.01,
+				},
+				BaseRequest: schema.BaseRequest{
+					Ext: `{"mediator":"max"}`,
+				},
+				AdCache: []schema.AdCacheObject{
+					{Price: 0.02},
+				},
+			},
+			auctionConfig: &Config{
+				PriceFloor: 0.05,
+			},
+			expected: 0.0, // Should return 0 (disabled floor) for specified auction key with custom adapter
+		},
+		{
+			name: "Disabled floor - Custom adapter (level_play) with disabled auction key",
+			req: &schema.AuctionRequest{
+				AdObject: schema.AdObject{
+					AuctionKey: "1LOQ2BFG00000", // Banner - should disable floor
+					PriceFloor: 0.01,
+				},
+				BaseRequest: schema.BaseRequest{
+					Ext: `{"mediator":"level_play"}`,
+				},
+				AdCache: []schema.AdCacheObject{
+					{Price: 0.02},
+				},
+			},
+			auctionConfig: &Config{
+				PriceFloor: 0.05,
+			},
+			expected: 0.0, // Should return 0 (disabled floor) for specified auction key with custom adapter
+		},
+		{
+			name: "Disabled floor - Custom adapter (max) with rewarded auction key",
+			req: &schema.AuctionRequest{
+				AdObject: schema.AdObject{
+					AuctionKey: "1LOQ2KLES0400", // Rewarded - should disable floor
+					PriceFloor: 0.01,
+				},
+				BaseRequest: schema.BaseRequest{
+					Ext: `{"mediator":"max"}`,
+				},
+				AdCache: []schema.AdCacheObject{
+					{Price: 0.02},
+				},
+			},
+			auctionConfig: &Config{
+				PriceFloor: 0.05,
+			},
+			expected: 0.0, // Should return 0 (disabled floor) for specified auction key with custom adapter
+		},
+		{
+			name: "No disabled floor - Non-custom adapter with disabled auction key",
+			req: &schema.AuctionRequest{
+				AdObject: schema.AdObject{
+					AuctionKey: "1LOQ1LROG0000", // Inter key but non-custom adapter
+					PriceFloor: 0.01,
+				},
+				BaseRequest: schema.BaseRequest{
+					Ext: `{"mediator":"regular"}`,
+				},
+				AdCache: []schema.AdCacheObject{
+					{Price: 0.02},
+				},
+			},
+			auctionConfig: &Config{
+				PriceFloor: 0.05,
+			},
+			expected: 0.05, // Should use normal floor logic since adapter is not custom
+		},
+		{
+			name: "No disabled floor - Custom adapter with non-disabled auction key",
+			req: &schema.AuctionRequest{
+				AdObject: schema.AdObject{
+					AuctionKey: "SOMEOTHERKEY", // Different auction key
+					PriceFloor: 0.01,
+				},
+				BaseRequest: schema.BaseRequest{
+					Ext: `{"mediator":"max"}`,
+				},
+				AdCache: []schema.AdCacheObject{
+					{Price: 0.02},
+				},
+			},
+			auctionConfig: &Config{
+				PriceFloor: 0.05,
+			},
+			expected: 0.05, // Should use normal floor logic since auction key is not in disabled list
+		},
+		{
+			name: "No disabled floor - Custom adapter with empty auction key",
+			req: &schema.AuctionRequest{
+				AdObject: schema.AdObject{
+					AuctionKey: "", // Empty auction key
+					PriceFloor: 0.01,
+				},
+				BaseRequest: schema.BaseRequest{
+					Ext: `{"mediator":"max"}`,
+				},
+				AdCache: []schema.AdCacheObject{
+					{Price: 0.02},
+				},
+			},
+			auctionConfig: &Config{
+				PriceFloor: 0.05,
+			},
+			expected: 0.05, // Should use normal floor logic since auction key is empty
+		},
 	}
 
 	for _, tt := range tests {
