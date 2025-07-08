@@ -161,7 +161,20 @@ func (s *Service) Run(ctx context.Context, params *ExecutionParams) (*Response, 
 
 var customAdapters = [...]string{"max", "level_play"}
 
+// Auction keys that should have disabled price floors when using custom adapters
+var disabledFloorAuctionKeys = [...]string{
+	"1LOQ1LROG0000", // Inter
+	"1LOQ2BFG00000", // Banner
+	"1LOQ2KLES0400", // Rewarded
+}
+
 func priceFloor(req *schema.AuctionRequest, auctionConfig *Config) float64 {
+	// Check if price floor should be disabled for this auction key with custom adapter
+	isCustomAdapter := slices.Contains(customAdapters[:], req.GetMediator())
+	if isCustomAdapter && slices.Contains(disabledFloorAuctionKeys[:], req.AdObject.AuctionKey) {
+		return 0 // Disable price floor for specified auction keys with custom adapters
+	}
+
 	// Default floor logic
 	priceFloor := req.AdObject.PriceFloor
 	for _, cacheObject := range req.AdCache {
@@ -171,7 +184,6 @@ func priceFloor(req *schema.AuctionRequest, auctionConfig *Config) float64 {
 
 	// Custom Adapter floor logic
 	// Check if previous auction price is higher than the current price floor
-	isCustomAdapter := slices.Contains(customAdapters[:], req.GetMediator())
 	prevFloor := req.GetPrevAuctionPrice()
 	if prevFloor != nil && isCustomAdapter {
 		priceFloor = math.Max(*prevFloor, priceFloor)
