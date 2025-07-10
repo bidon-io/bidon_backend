@@ -2,13 +2,13 @@ package apihandlers
 
 import (
 	"context"
-	"net/http"
-
 	"github.com/labstack/echo/v4"
+	"net/http"
 
 	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
+	"github.com/bidon-io/bidon-backend/internal/ad"
 )
 
 type AuctionHandler struct {
@@ -39,6 +39,10 @@ func (h *AuctionHandler) Handle(c echo.Context) error {
 		return err
 	}
 
+	if h.shouldReturnErrNoAdsFound(&req.raw) {
+		return sdkapi.ErrNoAdsFound
+	}
+
 	params := &auction.ExecutionParams{
 		Req:     &req.raw,
 		AppID:   req.app.ID,
@@ -57,4 +61,30 @@ func (h *AuctionHandler) Handle(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, result)
+}
+
+// shouldReturnEmptyResponse checks if the request matches conditions for returning ErrNoAdsFound:
+// - OS is NOT android
+// - Mediator is max (BCAMAX case)
+// - SDK version is 0.7.x or 0.8.1
+// - ad_type = rewarded_video
+func (h *AuctionHandler) shouldReturnErrNoAdsFound(req *schema.AuctionRequest) bool {
+	if req.Device.OS == "android" {
+		return false
+	}
+
+	if req.GetMediator() != "max" {
+		return false
+	}
+
+	if req.AdType != ad.RewardedType {
+		return false
+	}
+
+	sdkVersion, err := req.GetSDKVersionSemver()
+	if err != nil {
+		return false
+	}
+
+	return sdkapi.Version07xConstraint.Check(sdkVersion) || sdkapi.Version081Constraint.Check(sdkVersion)
 }
