@@ -6,6 +6,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/bidon-io/bidon-backend/internal/db"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event/engine"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
@@ -18,12 +19,20 @@ func SetupShowHandler() apihandlers.ShowHandler {
 	mockHandler.HandleShowFunc = func(ctx context.Context, imp *schema.Bid, _ string, _ string) {}
 
 	mockAdUnitLookup := &mocks.AdUnitLookupMock{}
-	mockAdUnitLookup.GetInternalIDByUIDCachedFunc = func(ctx context.Context, uid string) (int64, error) {
-		// Return a test internal ID based on the UID
+	mockAdUnitLookup.GetByUIDCachedFunc = func(ctx context.Context, uid string) (*db.LineItem, error) {
+		// Return a test LineItem based on the UID
 		if uid == "test_uid_123" {
-			return 456, nil
+			return &db.LineItem{
+				ID: 456,
+				Extra: map[string]any{
+					"api_key":   "sk_test_123",
+					"placement": "banner_main",
+					"timeout":   30,
+					"enabled":   true,
+				},
+			}, nil
 		}
-		return 0, nil
+		return nil, nil
 	}
 
 	return apihandlers.ShowHandler{
