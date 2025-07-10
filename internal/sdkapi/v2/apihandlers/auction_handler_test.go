@@ -2,9 +2,11 @@ package apihandlers_test
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"net/http"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/bidon-io/bidon-backend/internal/ad"
@@ -23,6 +25,7 @@ import (
 	handlersmocks "github.com/bidon-io/bidon-backend/internal/sdkapi/v2/apihandlers/mocks"
 	"github.com/bidon-io/bidon-backend/internal/segment"
 	segmentmocks "github.com/bidon-io/bidon-backend/internal/segment/mocks"
+	"github.com/labstack/echo/v4"
 )
 
 func testHelperAuctionHandler() *apihandlers.AuctionHandler {
@@ -289,6 +292,155 @@ func TestAuctionHandler_Handle(t *testing.T) {
 					t.Fatalf("Error reading response file: %v", err)
 				}
 				CheckResponses(t, expectedResponseJson, rec.Body.Bytes())
+			}
+		})
+	}
+}
+
+func TestAuctionHandler_EmptyResponseForNonAndroidMaxSDKVersions(t *testing.T) {
+	tests := []struct {
+		name          string
+		requestFile   string
+		endpoint      string
+		sdkVersion    string
+		shouldBeEmpty bool
+		description   string
+	}{
+		{
+			name:          "iOS_MAX_rewarded_0.7.0_should_return_empty",
+			requestFile:   "testdata/auction/ios_max_mediator_rewarded_request.json",
+			endpoint:      "/v2/auction/rewarded",
+			sdkVersion:    "0.7.0",
+			shouldBeEmpty: true,
+			description:   "iOS with MAX mediator, rewarded ad type and SDK version 0.7.0 should return empty ads",
+		},
+		{
+			name:          "iOS_MAX_rewarded_0.7.5_should_return_empty",
+			requestFile:   "testdata/auction/ios_max_mediator_rewarded_request.json",
+			endpoint:      "/v2/auction/rewarded",
+			sdkVersion:    "0.7.5",
+			shouldBeEmpty: true,
+			description:   "iOS with MAX mediator, rewarded ad type and SDK version 0.7.5 should return empty ads",
+		},
+		{
+			name:          "iOS_MAX_rewarded_0.8.1_should_return_empty",
+			requestFile:   "testdata/auction/ios_max_mediator_rewarded_request.json",
+			endpoint:      "/v2/auction/rewarded",
+			sdkVersion:    "0.8.1",
+			shouldBeEmpty: true,
+			description:   "iOS with MAX mediator, rewarded ad type and SDK version 0.8.1 should return empty ads",
+		},
+		{
+			name:          "iOS_MAX_rewarded_0.6.0_should_not_be_empty",
+			requestFile:   "testdata/auction/ios_max_mediator_rewarded_request.json",
+			endpoint:      "/v2/auction/rewarded",
+			sdkVersion:    "0.6.0",
+			shouldBeEmpty: false,
+			description:   "iOS with MAX mediator, rewarded ad type and SDK version 0.6.0 should NOT return empty ads",
+		},
+		{
+			name:          "iOS_MAX_rewarded_0.8.0_should_not_be_empty",
+			requestFile:   "testdata/auction/ios_max_mediator_rewarded_request.json",
+			endpoint:      "/v2/auction/rewarded",
+			sdkVersion:    "0.8.0",
+			shouldBeEmpty: false,
+			description:   "iOS with MAX mediator, rewarded ad type and SDK version 0.8.0 should NOT return empty ads",
+		},
+		{
+			name:          "iOS_MAX_rewarded_0.8.2_should_not_be_empty",
+			requestFile:   "testdata/auction/ios_max_mediator_rewarded_request.json",
+			endpoint:      "/v2/auction/rewarded",
+			sdkVersion:    "0.8.2",
+			shouldBeEmpty: false,
+			description:   "iOS with MAX mediator, rewarded ad type and SDK version 0.8.2 should NOT return empty ads",
+		},
+		{
+			name:          "iOS_MAX_interstitial_0.7.0_should_not_be_empty",
+			requestFile:   "testdata/auction/ios_max_mediator_interstitial_request.json",
+			endpoint:      "/v2/auction/interstitial",
+			sdkVersion:    "0.7.0",
+			shouldBeEmpty: false,
+			description:   "iOS with MAX mediator, interstitial ad type and SDK version 0.7.0 should NOT return empty ads",
+		},
+		{
+			name:          "Android_MAX_rewarded_0.7.0_should_not_be_empty",
+			requestFile:   "testdata/auction/android_max_mediator_rewarded_request.json",
+			endpoint:      "/v2/auction/rewarded",
+			sdkVersion:    "0.7.0",
+			shouldBeEmpty: false,
+			description:   "Android with MAX mediator, rewarded ad type and SDK version 0.7.0 should NOT return empty ads",
+		},
+		{
+			name:          "iOS_other_mediator_rewarded_0.7.0_should_not_be_empty",
+			requestFile:   "testdata/auction/ios_other_mediator_rewarded_request.json",
+			endpoint:      "/v2/auction/rewarded",
+			sdkVersion:    "0.7.0",
+			shouldBeEmpty: false,
+			description:   "iOS with other mediator, rewarded ad type and SDK version 0.7.0 should NOT return empty ads",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			reqBody, err := os.ReadFile(tt.requestFile)
+			if err != nil {
+				t.Fatalf("Error reading request file: %v", err)
+			}
+
+			handler := testHelperAuctionHandler()
+
+			// Extract ad_type from endpoint path
+			adType := ""
+			if strings.Contains(tt.endpoint, "/rewarded") {
+				adType = "rewarded"
+			} else if strings.Contains(tt.endpoint, "/interstitial") {
+				adType = "interstitial"
+			} else if strings.Contains(tt.endpoint, "/banner") {
+				adType = "banner"
+			}
+
+			rec, err := ExecuteRequest(t, handler, http.MethodPost, tt.endpoint, string(reqBody), &RequestOptions{
+				Headers: map[string]string{
+					"X-Bidon-Version": tt.sdkVersion,
+				},
+				Params: map[string]string{
+					"ad_type": adType,
+				},
+			})
+			if tt.shouldBeEmpty {
+				if err == nil {
+					t.Fatalf("%s: Expected error to be returned, got nil", tt.description)
+				}
+				if echoErr, ok := err.(*echo.HTTPError); ok {
+					if echoErr.Code != http.StatusUnprocessableEntity {
+						t.Errorf("%s: Expected error code 422, got %d", tt.description, echoErr.Code)
+					}
+					if echoErr.Message != "No ads found" {
+						t.Errorf("%s: Expected error message 'No ads found', got '%v'", tt.description, echoErr.Message)
+					}
+				} else {
+					t.Errorf("%s: Expected echo.HTTPError, got %T: %v", tt.description, err, err)
+				}
+			} else {
+				if err != nil {
+					t.Fatalf("ExecuteRequest failed: %v", err)
+				}
+			}
+
+			if !tt.shouldBeEmpty {
+				if rec.Code != http.StatusOK {
+					t.Errorf("%s: Expected status %d, got %d", tt.description, http.StatusOK, rec.Code)
+				}
+
+				var response auction.Response
+				err = json.Unmarshal(rec.Body.Bytes(), &response)
+				if err != nil {
+					t.Fatalf("Failed to unmarshal response: %v", err)
+				}
+
+				if len(response.AdUnits) == 0 {
+					t.Errorf("%s: Expected non-empty AdUnits, got empty", tt.description)
+				}
 			}
 		})
 	}

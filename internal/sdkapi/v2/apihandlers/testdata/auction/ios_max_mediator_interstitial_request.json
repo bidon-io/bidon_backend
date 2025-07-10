@@ -1,0 +1,103 @@
+{
+  "adapters": {
+    "mobilefuse": {
+      "version": "0.2.1.11",
+      "sdk_version": "21.5.0"
+    },
+    "meta": {
+      "version": "0.2.1.12",
+      "sdk_version": "2.1.13"
+    },
+    "amazon": {
+      "version": "0.2.1.11",
+      "sdk_version": "8.2.3"
+    },
+    "vungle": {
+      "version": "0.2.1.11",
+      "sdk_version": "4.5.0"
+    },
+    "applovin": {
+      "version": "1",
+      "sdk_version": "11.8.2"
+    }
+  },
+  "device": {
+    "connection_type": "WIFI",
+    "model": "iPhone14,2",
+    "hwv": "iPhone14,2",
+    "h": 2556,
+    "js": 1,
+    "language": "en_US",
+    "make": "Apple",
+    "os": "iOS",
+    "osv": "16.0",
+    "ppi": 460,
+    "pxratio": 3.0,
+    "type": "PHONE",
+    "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1",
+    "w": 1179
+  },
+  "app": {
+    "bundle": "com.app.name",
+    "framework": "unity",
+    "framework_version": "2020.3.48f1",
+    "key": "123",
+    "version": "22.66.33"
+  },
+  "token": "{}",
+  "session": {
+    "battery": 100,
+    "cpu_usage": 0.7714286,
+    "id": "d0b9ec0e-60e9-4501-bcbc-67712562dab9",
+    "launch_monotonic_ts": 68406545,
+    "launch_ts": 1687863971253,
+    "memory_warnings_monotonic_ts": [],
+    "memory_warnings_ts": [],
+    "start_monotonic_ts": 68406545,
+    "monotonic_ts": 68471084,
+    "ram_size": 3753299968,
+    "ram_used": 413565952,
+    "start_ts": 1687863971253,
+    "storage_free": 30742986752,
+    "storage_used": 24636485632,
+    "ts": 1687864035792
+  },
+  "user": {
+    "idg": "8020a0a6-5e55-4b8f-af9a-7b01a9aad4fc",
+    "coppa": false,
+    "idfa": "0d95325a-71b7-4334-8816-9e2935ec0eef",
+    "tracking_authorization_status": "AUTHORIZED"
+  },
+  "ext": "{\"mediator\":\"max\"}",
+  "regs": {
+    "coppa": false,
+    "gdpr": false,
+    "iab": {}
+  },
+  "test": false,
+  "tmax": 500,
+  "ad_object": {
+    "auction_id": "1d7fa438-cd08-4849-80ed-e20d5657a5ea",
+    "auction_pricefloor": 0.001,
+    "demands": {
+      "meta": {
+        "token": "token",
+        "status": "FAILURE",
+        "token_finish_ts": 1718366945771,
+        "token_start_ts": 1718366945741
+      },
+      "amazon": {
+        "token": "[{\"slot_uuid\":\"uuid1\",\"price_point\":\"price_point_1\"},{\"slot_uuid\":\"uuid2\",\"price_point\":\"price_point_2\"}]"
+      },
+      "mobilefuse": {
+        "token": "token",
+        "status": "SUCCESS",
+        "token_finish_ts": 1718366945771,
+        "token_start_ts": 1718366945741
+      }
+    },
+    "id": "f2d0dc19-b43f-43c1-8ca0-ae895ec76970",
+    "interstitial": {},
+    "orientation": "PORTRAIT"
+  }
+}
