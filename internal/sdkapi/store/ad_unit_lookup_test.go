@@ -12,132 +12,176 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/db/dbtest"
 )
 
-func TestAdUnitLookup_GetInternalIDByUID(t *testing.T) {
+func TestAdUnitLookup_GetByUID(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
 	lineItem1 := dbtest.CreateLineItem(t, tx, func(item *db.LineItem) {
 		item.PublicUID.Int64 = 12345
 		item.PublicUID.Valid = true
+		item.Extra = map[string]any{"test_key": "test_value"}
 	})
 
 	lineItem2 := dbtest.CreateLineItem(t, tx, func(item *db.LineItem) {
 		item.PublicUID.Int64 = 67890
 		item.PublicUID.Valid = true
+		item.Extra = map[string]any{"another_key": "another_value"}
 	})
 
 	// Pure database method - no cache needed
 	lookup := &AdUnitLookup{DB: tx}
 
 	tests := []struct {
-		name       string
-		uid        string
-		expectedID int64
+		name           string
+		uid            string
+		expectedAdUnit *db.LineItem
+		expectNil      bool
 	}{
 		{
-			name:       "valid UID returns correct internal ID",
-			uid:        "12345",
-			expectedID: lineItem1.ID,
+			name: "valid UID returns correct LineItem",
+			uid:  "12345",
+			expectedAdUnit: &db.LineItem{
+				ID:    lineItem1.ID,
+				Extra: lineItem1.Extra,
+			},
+			expectNil: false,
 		},
 		{
-			name:       "different UID returns different internal ID",
-			uid:        "67890",
-			expectedID: lineItem2.ID,
+			name: "different UID returns different LineItem",
+			uid:  "67890",
+			expectedAdUnit: &db.LineItem{
+				ID:    lineItem2.ID,
+				Extra: lineItem2.Extra,
+			},
+			expectNil: false,
 		},
 		{
-			name:       "invalid UID returns 0",
-			uid:        "invalid",
-			expectedID: 0,
+			name:      "invalid UID returns nil",
+			uid:       "invalid",
+			expectNil: true,
 		},
 		{
-			name:       "empty UID returns 0",
-			uid:        "",
-			expectedID: 0,
+			name:      "empty UID returns nil",
+			uid:       "",
+			expectNil: true,
 		},
 		{
-			name:       "non-existent UID returns 0",
-			uid:        "99999",
-			expectedID: 0,
+			name:      "non-existent UID returns nil",
+			uid:       "99999",
+			expectNil: true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := lookup.GetInternalIDByUID(context.Background(), tt.uid)
+			result, err := lookup.GetByUID(context.Background(), tt.uid)
 
 			if err != nil {
-				t.Fatalf("GetInternalIDByUID() error = %v", err)
+				t.Fatalf("GetByUID() error = %v", err)
 			}
 
-			if diff := cmp.Diff(tt.expectedID, result); diff != "" {
-				t.Errorf("GetInternalIDByUID() mismatch (-want +got):\n%s", diff)
+			if tt.expectNil {
+				if result != nil {
+					t.Errorf("GetByUID() expected nil, got %v", result)
+				}
+				return
+			}
+
+			if result == nil {
+				t.Fatalf("GetByUID() expected non-nil result")
+			}
+
+			if diff := cmp.Diff(tt.expectedAdUnit, result); diff != "" {
+				t.Errorf("GetByUID() mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}
 }
 
-func TestAdUnitLookup_GetInternalIDByUIDCached(t *testing.T) {
+func TestAdUnitLookup_GetByUIDCached(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
 	lineItem1 := dbtest.CreateLineItem(t, tx, func(item *db.LineItem) {
 		item.PublicUID.Int64 = 12345
 		item.PublicUID.Valid = true
+		item.Extra = map[string]any{"test_key": "test_value"}
 	})
 
 	lineItem2 := dbtest.CreateLineItem(t, tx, func(item *db.LineItem) {
 		item.PublicUID.Int64 = 67890
 		item.PublicUID.Valid = true
+		item.Extra = map[string]any{"another_key": "another_value"}
 	})
 
 	tests := []struct {
-		name       string
-		uid        string
-		expectedID int64
+		name           string
+		uid            string
+		expectedAdUnit *db.LineItem
+		expectNil      bool
 	}{
 		{
-			name:       "valid UID returns correct internal ID",
-			uid:        "12345",
-			expectedID: lineItem1.ID,
+			name: "valid UID returns correct LineItem",
+			uid:  "12345",
+			expectedAdUnit: &db.LineItem{
+				ID:    lineItem1.ID,
+				Extra: lineItem1.Extra,
+			},
+			expectNil: false,
 		},
 		{
-			name:       "different UID returns different internal ID",
-			uid:        "67890",
-			expectedID: lineItem2.ID,
+			name: "different UID returns different LineItem",
+			uid:  "67890",
+			expectedAdUnit: &db.LineItem{
+				ID:    lineItem2.ID,
+				Extra: lineItem2.Extra,
+			},
+			expectNil: false,
 		},
 		{
-			name:       "invalid UID returns 0",
-			uid:        "invalid",
-			expectedID: 0,
+			name:      "invalid UID returns nil",
+			uid:       "invalid",
+			expectNil: true,
 		},
 		{
-			name:       "empty UID returns 0",
-			uid:        "",
-			expectedID: 0,
+			name:      "empty UID returns nil",
+			uid:       "",
+			expectNil: true,
 		},
 		{
-			name:       "non-existent UID returns 0",
-			uid:        "99999",
-			expectedID: 0,
+			name:      "non-existent UID returns nil",
+			uid:       "99999",
+			expectNil: true,
 		},
 	}
 
-	cache := config.NewMemoryCacheOf[int64](time.Minute)
+	adUnitLookupCache := config.NewMemoryCacheOf[*db.LineItem](time.Minute)
 	lookup := &AdUnitLookup{
 		DB:    tx,
-		Cache: cache,
+		Cache: adUnitLookupCache,
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := lookup.GetInternalIDByUIDCached(context.Background(), tt.uid)
+			result, err := lookup.GetByUIDCached(context.Background(), tt.uid)
 
 			if err != nil {
-				t.Fatalf("GetInternalIDByUIDCached() error = %v", err)
+				t.Fatalf("GetByUIDCached() error = %v", err)
 			}
 
-			if diff := cmp.Diff(tt.expectedID, result); diff != "" {
-				t.Errorf("GetInternalIDByUIDCached() mismatch (-want +got):\n%s", diff)
+			if tt.expectNil {
+				if result != nil {
+					t.Errorf("GetByUIDCached() expected nil, got %v", result)
+				}
+				return
+			}
+
+			if result == nil {
+				t.Fatalf("GetByUIDCached() expected non-nil result")
+			}
+
+			if diff := cmp.Diff(tt.expectedAdUnit, result); diff != "" {
+				t.Errorf("GetByUIDCached() mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}

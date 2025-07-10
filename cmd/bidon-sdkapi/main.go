@@ -233,7 +233,7 @@ func main() {
 		DB:    db,
 		Cache: configsCache,
 	}
-	adUnitLookupCache := config.NewRedisCacheOf[int64](rdb, 10*time.Minute, "ad_unit_lookup")
+	adUnitLookupCache := config.NewRedisCacheOf[*dbpkg.LineItem](rdb, 10*time.Minute, "ad_unit_lookup")
 	err = adUnitLookupCache.Monitor(meter)
 	if err != nil {
 		log.Fatalf("Unable to register observer for adUnitLookupCache: %v", err)

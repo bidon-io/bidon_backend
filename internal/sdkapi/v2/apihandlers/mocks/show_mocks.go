@@ -5,6 +5,7 @@ package mocks
 
 import (
 	"context"
+	"github.com/bidon-io/bidon-backend/internal/db"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/v2/apihandlers"
 	"sync"
@@ -104,8 +105,8 @@ var _ apihandlers.AdUnitLookup = &AdUnitLookupMock{}
 //
 //		// make and configure a mocked apihandlers.AdUnitLookup
 //		mockedAdUnitLookup := &AdUnitLookupMock{
-//			GetInternalIDByUIDCachedFunc: func(contextMoqParam context.Context, s string) (int64, error) {
-//				panic("mock out the GetInternalIDByUIDCached method")
+//			GetByUIDCachedFunc: func(contextMoqParam context.Context, s string) (*db.LineItem, error) {
+//				panic("mock out the GetByUIDCached method")
 //			},
 //		}
 //
@@ -114,26 +115,26 @@ var _ apihandlers.AdUnitLookup = &AdUnitLookupMock{}
 //
 //	}
 type AdUnitLookupMock struct {
-	// GetInternalIDByUIDCachedFunc mocks the GetInternalIDByUIDCached method.
-	GetInternalIDByUIDCachedFunc func(contextMoqParam context.Context, s string) (int64, error)
+	// GetByUIDCachedFunc mocks the GetByUIDCached method.
+	GetByUIDCachedFunc func(contextMoqParam context.Context, s string) (*db.LineItem, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
-		// GetInternalIDByUIDCached holds details about calls to the GetInternalIDByUIDCached method.
-		GetInternalIDByUIDCached []struct {
+		// GetByUIDCached holds details about calls to the GetByUIDCached method.
+		GetByUIDCached []struct {
 			// ContextMoqParam is the contextMoqParam argument value.
 			ContextMoqParam context.Context
 			// S is the s argument value.
 			S string
 		}
 	}
-	lockGetInternalIDByUIDCached sync.RWMutex
+	lockGetByUIDCached sync.RWMutex
 }
 
-// GetInternalIDByUIDCached calls GetInternalIDByUIDCachedFunc.
-func (mock *AdUnitLookupMock) GetInternalIDByUIDCached(contextMoqParam context.Context, s string) (int64, error) {
-	if mock.GetInternalIDByUIDCachedFunc == nil {
-		panic("AdUnitLookupMock.GetInternalIDByUIDCachedFunc: method is nil but AdUnitLookup.GetInternalIDByUIDCached was just called")
+// GetByUIDCached calls GetByUIDCachedFunc.
+func (mock *AdUnitLookupMock) GetByUIDCached(contextMoqParam context.Context, s string) (*db.LineItem, error) {
+	if mock.GetByUIDCachedFunc == nil {
+		panic("AdUnitLookupMock.GetByUIDCachedFunc: method is nil but AdUnitLookup.GetByUIDCached was just called")
 	}
 	callInfo := struct {
 		ContextMoqParam context.Context
@@ -142,17 +143,17 @@ func (mock *AdUnitLookupMock) GetInternalIDByUIDCached(contextMoqParam context.C
 		ContextMoqParam: contextMoqParam,
 		S:               s,
 	}
-	mock.lockGetInternalIDByUIDCached.Lock()
-	mock.calls.GetInternalIDByUIDCached = append(mock.calls.GetInternalIDByUIDCached, callInfo)
-	mock.lockGetInternalIDByUIDCached.Unlock()
-	return mock.GetInternalIDByUIDCachedFunc(contextMoqParam, s)
+	mock.lockGetByUIDCached.Lock()
+	mock.calls.GetByUIDCached = append(mock.calls.GetByUIDCached, callInfo)
+	mock.lockGetByUIDCached.Unlock()
+	return mock.GetByUIDCachedFunc(contextMoqParam, s)
 }
 
-// GetInternalIDByUIDCachedCalls gets all the calls that were made to GetInternalIDByUIDCached.
+// GetByUIDCachedCalls gets all the calls that were made to GetByUIDCached.
 // Check the length with:
 //
-//	len(mockedAdUnitLookup.GetInternalIDByUIDCachedCalls())
-func (mock *AdUnitLookupMock) GetInternalIDByUIDCachedCalls() []struct {
+//	len(mockedAdUnitLookup.GetByUIDCachedCalls())
+func (mock *AdUnitLookupMock) GetByUIDCachedCalls() []struct {
 	ContextMoqParam context.Context
 	S               string
 } {
@@ -160,8 +161,8 @@ func (mock *AdUnitLookupMock) GetInternalIDByUIDCachedCalls() []struct {
 		ContextMoqParam context.Context
 		S               string
 	}
-	mock.lockGetInternalIDByUIDCached.RLock()
-	calls = mock.calls.GetInternalIDByUIDCached
-	mock.lockGetInternalIDByUIDCached.RUnlock()
+	mock.lockGetByUIDCached.RLock()
+	calls = mock.calls.GetByUIDCached
+	mock.lockGetByUIDCached.RUnlock()
 	return calls
 }

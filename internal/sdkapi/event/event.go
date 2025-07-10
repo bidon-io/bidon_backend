@@ -33,6 +33,7 @@ func NewAdEvent(request *schema.BaseRequest, adRequestParams AdRequestParams, ge
 	requestEvent.AdUnitUID = adRequestParams.AdUnitUID
 	requestEvent.AdUnitInternalID = adRequestParams.AdUnitInternalID
 	requestEvent.AdUnitLabel = adRequestParams.AdUnitLabel
+	requestEvent.AdUnitCredentials = adRequestParams.AdUnitCredentials
 	requestEvent.ECPM = adRequestParams.ECPM
 	requestEvent.PriceFloor = adRequestParams.PriceFloor
 	requestEvent.RawRequest = adRequestParams.RawRequest
@@ -130,6 +131,7 @@ type AdRequestParams struct {
 	AdUnitUID               int64
 	AdUnitInternalID        int64
 	AdUnitLabel             string
+	AdUnitCredentials       map[string]string
 	ECPM                    float64
 	PriceFloor              float64
 	RawRequest              string
@@ -146,60 +148,61 @@ const (
 )
 
 type AdEvent struct {
-	Timestamp                   float64   `json:"timestamp"`
-	EventType                   string    `json:"event_type"`
-	AdType                      string    `json:"ad_type"`
-	AdFormat                    string    `json:"ad_format"`
-	AuctionID                   string    `json:"auction_id"`
-	AuctionConfigurationID      int64     `json:"auction_configuration_id"`
-	AuctionConfigurationUID     int64     `json:"auction_configuration_uid"`
-	Status                      string    `json:"status"`
-	RoundID                     string    `json:"round_id"`
-	RoundNumber                 int       `json:"round_number"`
-	ImpID                       string    `json:"impid"`
-	DemandID                    string    `json:"demand_id"`
-	Bidding                     bool      `json:"bidding"`
-	AdUnitUID                   int64     `json:"ad_unit_uid"`
-	AdUnitInternalID            int64     `json:"ad_unit_internal_id"`
-	AdUnitLabel                 string    `json:"ad_unit_label"`
-	ECPM                        float64   `json:"ecpm"`
-	PriceFloor                  float64   `json:"price_floor"`
-	RawRequest                  string    `json:"raw_request"`
-	RawResponse                 string    `json:"raw_response"`
-	Error                       string    `json:"error"`
-	TimingMap                   TimingMap `json:"timing_map"`
-	ExternalWinnerDemandID      string    `json:"external_winner_demand_id"`
-	ExternalWinnerEcpm          float64   `json:"external_winner_ecpm"`
-	Manufacturer                string    `json:"manufacturer"`
-	Model                       string    `json:"model"`
-	Os                          string    `json:"os"`
-	OsVersion                   string    `json:"os_version"`
-	ConnectionType              string    `json:"connection_type"`
-	DeviceType                  string    `json:"device_type"`
-	SessionID                   string    `json:"session_id"`
-	SessionUptime               int       `json:"session_uptime"`
-	Bundle                      string    `json:"bundle"`
-	Framework                   string    `json:"framework"`
-	FrameworkVersion            string    `json:"framework_version"`
-	PluginVersion               string    `json:"plugin_version"`
-	PackageVersion              string    `json:"package_version"`
-	SdkVersion                  string    `json:"sdk_version"`
-	IDFA                        string    `json:"idfa"`
-	IDG                         string    `json:"idg"`
-	IDFV                        string    `json:"idfv"`
-	TrackingAuthorizationStatus string    `json:"tracking_authorization_status"`
-	COPPA                       bool      `json:"coppa"`
-	GDPR                        bool      `json:"gdpr"`
-	CountryCode                 string    `json:"country_code"`
-	City                        string    `json:"city"`
-	Ip                          string    `json:"ip"`
-	CountryID                   int64     `json:"country_id"`
-	SegmentID                   string    `json:"segment_id"`
-	SegmentUID                  int64     `json:"segment_uid"`
-	Ext                         string    `json:"ext"`
-	Session                     Session   `json:"session"`
-	MediationMode               string    `json:"mediation_mode"`
-	Mediator                    string    `json:"mediator"`
+	Timestamp                   float64           `json:"timestamp"`
+	EventType                   string            `json:"event_type"`
+	AdType                      string            `json:"ad_type"`
+	AdFormat                    string            `json:"ad_format"`
+	AuctionID                   string            `json:"auction_id"`
+	AuctionConfigurationID      int64             `json:"auction_configuration_id"`
+	AuctionConfigurationUID     int64             `json:"auction_configuration_uid"`
+	Status                      string            `json:"status"`
+	RoundID                     string            `json:"round_id"`
+	RoundNumber                 int               `json:"round_number"`
+	ImpID                       string            `json:"impid"`
+	DemandID                    string            `json:"demand_id"`
+	Bidding                     bool              `json:"bidding"`
+	AdUnitUID                   int64             `json:"ad_unit_uid"`
+	AdUnitInternalID            int64             `json:"ad_unit_internal_id"`
+	AdUnitLabel                 string            `json:"ad_unit_label"`
+	AdUnitCredentials           map[string]string `json:"ad_unit_credentials"`
+	ECPM                        float64           `json:"ecpm"`
+	PriceFloor                  float64           `json:"price_floor"`
+	RawRequest                  string            `json:"raw_request"`
+	RawResponse                 string            `json:"raw_response"`
+	Error                       string            `json:"error"`
+	TimingMap                   TimingMap         `json:"timing_map"`
+	ExternalWinnerDemandID      string            `json:"external_winner_demand_id"`
+	ExternalWinnerEcpm          float64           `json:"external_winner_ecpm"`
+	Manufacturer                string            `json:"manufacturer"`
+	Model                       string            `json:"model"`
+	Os                          string            `json:"os"`
+	OsVersion                   string            `json:"os_version"`
+	ConnectionType              string            `json:"connection_type"`
+	DeviceType                  string            `json:"device_type"`
+	SessionID                   string            `json:"session_id"`
+	SessionUptime               int               `json:"session_uptime"`
+	Bundle                      string            `json:"bundle"`
+	Framework                   string            `json:"framework"`
+	FrameworkVersion            string            `json:"framework_version"`
+	PluginVersion               string            `json:"plugin_version"`
+	PackageVersion              string            `json:"package_version"`
+	SdkVersion                  string            `json:"sdk_version"`
+	IDFA                        string            `json:"idfa"`
+	IDG                         string            `json:"idg"`
+	IDFV                        string            `json:"idfv"`
+	TrackingAuthorizationStatus string            `json:"tracking_authorization_status"`
+	COPPA                       bool              `json:"coppa"`
+	GDPR                        bool              `json:"gdpr"`
+	CountryCode                 string            `json:"country_code"`
+	City                        string            `json:"city"`
+	Ip                          string            `json:"ip"`
+	CountryID                   int64             `json:"country_id"`
+	SegmentID                   string            `json:"segment_id"`
+	SegmentUID                  int64             `json:"segment_uid"`
+	Ext                         string            `json:"ext"`
+	Session                     Session           `json:"session"`
+	MediationMode               string            `json:"mediation_mode"`
+	Mediator                    string            `json:"mediator"`
 }
 
 type Session struct {
