@@ -128,7 +128,7 @@ func (a *MobileFuseAdapter) ExecuteRequest(ctx context.Context, client *http.Cli
 	}
 	dr.RawRequest = string(requestBody)
 
-	url := "https://mfx.mobilefuse.com/openrtb?ssp=4020"
+	url := "https://mfx.mobilefuse.com/openrtb?ssp=bidon"
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewBuffer(requestBody))
 	if err != nil {
 		dr.Error = err

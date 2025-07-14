@@ -263,8 +263,8 @@ func TestMobileFuseAdapter_ExecuteRequest(t *testing.T) {
 		if req.Method != http.MethodPost {
 			t.Errorf("Expected POST request")
 		}
-		if req.URL.String() != "https://mfx.mobilefuse.com/openrtb?ssp=4020" {
-			t.Errorf("Expected URL: https://mfx.mobilefuse.com/openrtb?ssp=4020")
+		if req.URL.String() != "https://mfx.mobilefuse.com/openrtb?ssp=bidon" {
+			t.Errorf("Expected URL: https://mfx.mobilefuse.com/openrtb?ssp=bidon")
 		}
 		contentType := req.Header.Get("Content-Type")
 		if contentType != "application/json" {
