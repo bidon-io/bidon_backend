@@ -1063,3 +1063,130 @@ func TestService_Run_BuildDemandExtVariousAdapters(t *testing.T) {
 		t.Error("Expected unknown adapter ad unit to have payload")
 	}
 }
+
+func TestBidmachineWithPlacementID(t *testing.T) {
+	ctx := context.Background()
+	auctionConfig := &auction.Config{
+		ID:         1,
+		UID:        "config_uid",
+		PriceFloor: 0.05,
+		Timeout:    15000,
+	}
+	geoData := geocoder.GeoData{}
+	request := &schema.AuctionRequest{
+		AdObject: schema.AdObject{
+			AuctionKey: "1ERNSV33K4000",
+			PriceFloor: 0.01,
+		},
+		BaseRequest: schema.BaseRequest{
+			Device: schema.Device{
+				OS:   "android",
+				Type: "phone",
+			},
+		},
+		AdType: ad.BannerType,
+	}
+	sgmnt := segment.Segment{
+		ID:  1,
+		UID: "1",
+		Filters: []segment.Filter{
+			{Type: "country", Operator: "IN", Values: []string{"US"}},
+		},
+	}
+	segmentFetcher := &segmentmocks.FetcherMock{
+		FetchCachedFunc: func(_ context.Context, _ int64) ([]segment.Segment, error) {
+			return []segment.Segment{sgmnt}, nil
+		},
+	}
+	segmentMatcher := &segment.Matcher{
+		Fetcher: segmentFetcher,
+	}
+	configFetcher := &mocks.ConfigFetcherMock{
+		FetchByUIDCachedFunc: func(_ context.Context, _ int64, _, _ string) *auction.Config {
+			return auctionConfig
+		},
+	}
+	adapterKeysFetcher := &mocks.AdapterKeysFetcherMock{
+		FetchEnabledAdapterKeysFunc: func(_ context.Context, _ int64, keys []adapter.Key) ([]adapter.Key, error) {
+			return keys, nil
+		},
+	}
+
+	placementID := "test_placement_123"
+	priceFloor := 0.1
+	auctionBuilder := &mocks.AuctionBuilderMock{
+		BuildFunc: func(_ context.Context, _ *auction.BuildParams) (*auction.Result, error) {
+			return &auction.Result{
+				AuctionConfiguration: auctionConfig,
+				CPMAdUnits:           &[]auction.AdUnit{},
+				AdUnits: &[]auction.AdUnit{
+					{
+						DemandID:   "bidmachine",
+						UID:        "123_bidmachine",
+						Label:      "bidmachine",
+						PriceFloor: &priceFloor,
+						BidType:    schema.RTBBidType,
+						Extra: map[string]any{
+							"placement_id": placementID,
+						},
+					},
+				},
+				BiddingAuctionResult: &bidding.AuctionResult{
+					Bids: []adapters.DemandResponse{
+						{
+							DemandID: adapter.BidmachineKey,
+							Bid:      &adapters.BidDemandResponse{Payload: "test_payload", Price: 0.15}, // Higher than price floor
+						},
+					},
+				},
+			}, nil
+		},
+	}
+	eventLogger := &event.Logger{Engine: &engine.Log{}}
+
+	service := &auction.Service{
+		AdapterKeysFetcher: adapterKeysFetcher,
+		ConfigFetcher:      configFetcher,
+		AuctionBuilder:     auctionBuilder,
+		SegmentMatcher:     segmentMatcher,
+		EventLogger:        eventLogger,
+	}
+
+	params := &auction.ExecutionParams{
+		Req:     request,
+		AppID:   1,
+		Country: "US",
+		GeoData: geoData,
+		Log:     func(string) {},
+		LogErr:  func(_ error) {},
+	}
+
+	response, err := service.Run(ctx, params)
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+
+	// Check that the response contains the BidMachine ad unit with placement_id in ext
+	if len(response.AdUnits) == 0 {
+		t.Fatal("Expected at least one ad unit in response")
+	}
+
+	bidmachineAdUnit := response.AdUnits[0]
+	if bidmachineAdUnit.DemandID != "bidmachine" {
+		t.Errorf("Expected DemandID to be 'bidmachine', got '%s'", bidmachineAdUnit.DemandID)
+	}
+
+	// Check that placement_id is included in the ext object (from the Extra field)
+	if placementIDValue, exists := bidmachineAdUnit.Extra["placement_id"]; !exists {
+		t.Error("Expected placement_id to be present in ext object")
+	} else if placementIDValue != placementID {
+		t.Errorf("Expected placement_id to be '%s', got '%v'", placementID, placementIDValue)
+	}
+
+	// Check that payload is also present
+	if payload, exists := bidmachineAdUnit.Extra["payload"]; !exists {
+		t.Error("Expected payload to be present in ext object")
+	} else if payload != "test_payload" {
+		t.Errorf("Expected payload to be 'test_payload', got '%v'", payload)
+	}
+}

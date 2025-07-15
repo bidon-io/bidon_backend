@@ -5,10 +5,10 @@ import (
 	"github.com/labstack/echo/v4"
 	"net/http"
 
+	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
-	"github.com/bidon-io/bidon-backend/internal/ad"
 )
 
 type AuctionHandler struct {

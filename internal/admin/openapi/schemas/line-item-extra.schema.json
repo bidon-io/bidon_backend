@@ -41,6 +41,15 @@
     {
       "type": "object",
       "properties": {
+        "placement_id": {
+          "type": "string",
+          "description": "Placement ID (for BidMachine)"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "properties": {
         "slot_id": {
           "type": "string",
           "description": "Slot ID (for BigoAds, VKAds)"
