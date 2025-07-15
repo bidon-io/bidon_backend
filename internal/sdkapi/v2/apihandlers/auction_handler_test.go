@@ -91,6 +91,7 @@ func testHelperAuctionHandler() *apihandlers.AuctionHandler {
 				"placement_id": "123",
 			},
 		},
+
 		{
 			DemandID:   "applovin",
 			Label:      "Applovin",
@@ -197,6 +198,7 @@ func testHelperAuctionHandler() *apihandlers.AuctionHandler {
 					{
 						DemandID: "vungle",
 					},
+
 				},
 			}, nil
 		},
