@@ -7,4 +7,6 @@ type User struct {
 	IDG                         string         `json:"idg" validate:"uuid"`
 	Consent                     map[string]any `json:"consent"`
 	COPPA                       *bool          `json:"coppa"`
+	AppSetID                    string         `json:"app_set_id"`
+	AppSetIDScope               string         `json:"app_set_id_scope" validate:"omitempty,oneof=app developer"`
 }
