@@ -72,6 +72,7 @@ func newBaseRequest(request *schema.BaseRequest, geoData geocoder.GeoData) *AdEv
 		OsVersion:                   request.Device.OSVersion,
 		ConnectionType:              request.Device.ConnectionType,
 		DeviceType:                  string(request.Device.Type),
+		UserAgent:                   request.Device.UserAgent,
 		SessionID:                   request.Session.ID,
 		SessionUptime:               request.Session.Uptime(),
 		Bundle:                      request.App.Bundle,
@@ -84,6 +85,8 @@ func newBaseRequest(request *schema.BaseRequest, geoData geocoder.GeoData) *AdEv
 		IDG:                         request.User.IDG,
 		IDFV:                        request.User.IDFV,
 		TrackingAuthorizationStatus: request.User.TrackingAuthorizationStatus,
+		AppSetID:                    request.User.AppSetID,
+		AppSetIDScope:               request.User.AppSetIDScope,
 		COPPA:                       request.GetRegulations().COPPA,
 		GDPR:                        request.GetRegulations().GDPR,
 		CountryCode:                 geoData.CountryCode,
@@ -179,6 +182,7 @@ type AdEvent struct {
 	OsVersion                   string            `json:"os_version"`
 	ConnectionType              string            `json:"connection_type"`
 	DeviceType                  string            `json:"device_type"`
+	UserAgent                   string            `json:"user_agent"`
 	SessionID                   string            `json:"session_id"`
 	SessionUptime               int               `json:"session_uptime"`
 	Bundle                      string            `json:"bundle"`
@@ -191,6 +195,8 @@ type AdEvent struct {
 	IDG                         string            `json:"idg"`
 	IDFV                        string            `json:"idfv"`
 	TrackingAuthorizationStatus string            `json:"tracking_authorization_status"`
+	AppSetID                    string            `json:"app_set_id"`
+	AppSetIDScope               string            `json:"app_set_id_scope"`
 	COPPA                       bool              `json:"coppa"`
 	GDPR                        bool              `json:"gdpr"`
 	CountryCode                 string            `json:"country_code"`
