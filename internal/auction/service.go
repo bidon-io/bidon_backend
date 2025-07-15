@@ -166,6 +166,12 @@ var disabledFloorAuctionKeys = [...]string{
 	"1LOQ1LROG0000", // Inter
 	"1LOQ2BFG00000", // Banner
 	"1LOQ2KLES0400", // Rewarded
+	"1LPGM6QBC0000", // Banner
+	"1LPGMABLK0000", // Interstitial
+	"1LRBRTLCS0400", // Interstitial
+	"1LVHHK37O0400", // Banner
+	"1LVHHK51K0400", // Interstitial
+	"1LVHEVUJO0400", // Interstitial
 }
 
 func priceFloor(req *schema.AuctionRequest, auctionConfig *Config) float64 {
