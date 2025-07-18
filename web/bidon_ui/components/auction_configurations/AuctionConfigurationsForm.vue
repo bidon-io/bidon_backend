@@ -165,13 +165,10 @@ const timeout = useFieldModel("timeout");
 
 const demands = ref(resource.value.demands || []);
 const bidding = ref(resource.value.bidding || []);
-const demandAdUnitIds = ref([...(resource.value.adUnitIds || [])]);
-const biddingAdUnitIds = ref([...(resource.value.adUnitIds || [])]);
+const demandAdUnitIds = ref(resource.value.adUnitIds || []);
+const biddingAdUnitIds = ref(resource.value.adUnitIds || []);
 
 const showNetworks = computed(() => appId.value && adType.value);
-const adUnitIds = computed(() => [
-  ...new Set(demandAdUnitIds.value.concat(biddingAdUnitIds.value)),
-]);
 
 // App Demand Profile Validation
 const {
@@ -221,7 +218,7 @@ const validateSourceConfig = (sourceConfig) => {
   }
 };
 
-const updateFormFields = (sourceConfig) => {
+const updateFormFields = async (sourceConfig) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { name, isDefault, ...settings } = sourceConfig;
 
@@ -232,8 +229,8 @@ const updateFormFields = (sourceConfig) => {
 
   demands.value = settings.demands || [];
   bidding.value = settings.bidding || [];
-  demandAdUnitIds.value = [...(settings.adUnitIds || [])];
-  biddingAdUnitIds.value = [...(settings.adUnitIds || [])];
+  demandAdUnitIds.value = settings.adUnitIds || [];
+  biddingAdUnitIds.value = settings.adUnitIds || [];
 };
 
 const copySettings = async () => {
@@ -245,7 +242,7 @@ const copySettings = async () => {
   try {
     const sourceConfig = await fetchSourceConfig(copyAuctionKey.value);
     validateSourceConfig(sourceConfig);
-    updateFormFields(sourceConfig);
+    await updateFormFields(sourceConfig);
 
     copyAuctionKey.value = "";
     toast.add({
@@ -264,7 +261,9 @@ const copySettings = async () => {
 const onSubmit = handleSubmit((values) =>
   emit("submit", {
     ...values,
-    adUnitIds: adUnitIds.value,
+    adUnitIds: [
+      ...new Set([...demandAdUnitIds.value, ...biddingAdUnitIds.value]),
+    ],
     demands: demands.value,
     bidding: bidding.value,
   }),
