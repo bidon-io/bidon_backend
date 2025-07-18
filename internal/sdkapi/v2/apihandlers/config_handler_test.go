@@ -7,7 +7,9 @@ import (
 	"os"
 	"testing"
 
+	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
+	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event/engine"
@@ -49,6 +51,7 @@ func SetupConfigHandler() apihandlers.ConfigHandler {
 					SellerID:        "1",
 					Endpoint:        "x.appbaqend.com",
 					MediationConfig: []string{"one", "two"},
+					Placements:      map[string]string{},
 				},
 				&sdkapi.BigoAdsInitConfig{
 					AppID: fmt.Sprintf("bigo_app_%d", app.ID),
@@ -88,10 +91,26 @@ func SetupConfigHandler() apihandlers.ConfigHandler {
 		},
 	}
 
+	configFetcher := &mocks.ConfigFetcherMock{
+		FetchByUIDCachedFunc: func(ctx context.Context, appId int64, id, uid string) *auction.Config {
+			return nil
+		},
+		MatchFunc: func(ctx context.Context, appID int64, adType ad.Type, segmentID int64, version string) (*auction.Config, error) {
+			return nil, nil
+		},
+		FetchBidMachinePlacementsFunc: func(ctx context.Context, appID int64) (map[string]string, error) {
+			// Simulate fetching placements from line_items via auction_configurations
+			return map[string]string{
+				"1HVR32MFO0400": "b5d8f130-ef72-4b5d-9c60-2e35b68e5671",
+			}, nil
+		},
+	}
+
 	return apihandlers.ConfigHandler{
 		BaseHandler: &apihandlers.BaseHandler[schema.ConfigRequest, *schema.ConfigRequest]{
-			AppFetcher: AppFetcherMock(),
-			Geocoder:   GeocoderMock(),
+			AppFetcher:    AppFetcherMock(),
+			ConfigFetcher: configFetcher,
+			Geocoder:      GeocoderMock(),
 		},
 		EventLogger:               &event.Logger{Engine: &engine.Log{}},
 		SegmentMatcher:            segmentMatcher,

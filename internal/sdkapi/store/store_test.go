@@ -175,6 +175,7 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Valid(t *testing.T) {
 					SellerID:        "1",
 					Endpoint:        "x.appbaqend.com",
 					MediationConfig: []string{"one", "two"},
+					Placements:      map[string]string{},
 				},
 				&sdkapi.BigoAdsInitConfig{
 					AppID: fmt.Sprintf("bigoads_app_%d", apps[0].ID),

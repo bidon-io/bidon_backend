@@ -94,6 +94,9 @@ func (h *ConfigHandler) Handle(c echo.Context) error {
 	}
 	chardonnayHack := req.app.ID == 735400 || req.app.ID == 735401 || req.app.ID == 735402
 	adapters := make(map[adapter.Key]sdkapi.AdapterInitConfig, len(adapterInitConfigs))
+
+	var bidMachinePlacements map[string]string
+
 	for _, cfg := range adapterInitConfigs {
 		// Skip Amazon adapter for iOS devices with SDK version < 0.7.3
 		if isIOS && sdkapi.VersionLessThan073Constraint.Check(sdkVersion) && cfg.Key() == adapter.AmazonKey {
@@ -106,6 +109,22 @@ func (h *ConfigHandler) Handle(c echo.Context) error {
 		if chardonnayHack && cfg.Key() != adapter.BidmachineKey {
 			continue
 		}
+
+		if cfg.Key() == adapter.BidmachineKey {
+			placements, err := h.ConfigFetcher.FetchBidMachinePlacements(ctx, req.app.ID)
+			if err != nil {
+				sdkapi.LogError(c, fmt.Errorf("fetch bidmachine placements: %v", err))
+			} else {
+				bidMachinePlacements = placements
+			}
+		}
+
+		if cfg.Key() == adapter.BidmachineKey && bidMachinePlacements != nil {
+			if bmCfg, ok := cfg.(*sdkapi.BidmachineInitConfig); ok {
+				bmCfg.Placements = bidMachinePlacements
+			}
+		}
+
 		adapters[cfg.Key()] = cfg
 	}
 

@@ -131,3 +131,55 @@ func (m *ConfigFetcher) FetchByUID(ctx context.Context, appID int64, id, uid str
 
 	return config
 }
+
+// FetchBidMachinePlacements fetches auction configurations that include BidMachine in demands or bidding
+// and returns a map of auction_key to placement_id from line_items
+func (m *ConfigFetcher) FetchBidMachinePlacements(ctx context.Context, appID int64) (map[string]string, error) {
+	// Get all auction configuration IDs that include BidMachine in demands or bidding
+	var configIDs []int64
+	err := m.DB.
+		WithContext(ctx).
+		Model(&db.AuctionConfiguration{}).
+		Select("id").
+		Where("app_id = ? AND (? = ANY(demands) OR ? = ANY(bidding)) AND auction_key IS NOT NULL AND auction_key != ''", appID, "bidmachine", "bidmachine").
+		Pluck("id", &configIDs).
+		Error
+	if err != nil {
+		return nil, fmt.Errorf("fetch auction configuration IDs: %w", err)
+	}
+
+	if len(configIDs) == 0 {
+		return make(map[string]string), nil
+	}
+
+	// Get all line items that belong to BidMachine and are used in these auction configurations
+	type result struct {
+		AuctionKey string `gorm:"column:auction_key"`
+		Placement  string `gorm:"column:placement"`
+	}
+
+	var results []result
+	err = m.DB.
+		WithContext(ctx).
+		Table("line_items li").
+		Select("ac.auction_key, li.extra->>'placement' as placement").
+		Joins("JOIN auction_configurations ac ON li.id = ANY(ac.ad_unit_ids)").
+		Joins("JOIN demand_source_accounts dsa ON li.account_id = dsa.id").
+		Joins("JOIN demand_sources ds ON dsa.demand_source_id = ds.id").
+		Where("ac.id IN (?) AND ds.api_key = ? AND li.extra->>'placement' IS NOT NULL AND li.extra->>'placement' != ''", configIDs, "bidmachine").
+		Scan(&results).
+		Error
+	if err != nil {
+		return nil, fmt.Errorf("fetch bidmachine placements: %w", err)
+	}
+
+	// Build the map, using the first placement found for each auction_key
+	placements := make(map[string]string)
+	for _, result := range results {
+		if _, exists := placements[result.AuctionKey]; !exists {
+			placements[result.AuctionKey] = result.Placement
+		}
+	}
+
+	return placements, nil
+}

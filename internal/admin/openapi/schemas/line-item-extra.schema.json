@@ -41,9 +41,9 @@
     {
       "type": "object",
       "properties": {
-        "placement_id": {
+        "placement": {
           "type": "string",
-          "description": "Placement ID (for BidMachine)"
+          "description": "Placement (for BidMachine)"
         }
       }
     },
