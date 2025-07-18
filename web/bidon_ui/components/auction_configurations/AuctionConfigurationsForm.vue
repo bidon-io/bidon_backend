@@ -165,8 +165,8 @@ const timeout = useFieldModel("timeout");
 
 const demands = ref(resource.value.demands || []);
 const bidding = ref(resource.value.bidding || []);
-const demandAdUnitIds = ref(resource.value.adUnitIds || []);
-const biddingAdUnitIds = ref(resource.value.adUnitIds || []);
+const demandAdUnitIds = ref([...(resource.value.adUnitIds || [])]);
+const biddingAdUnitIds = ref([...(resource.value.adUnitIds || [])]);
 
 const showNetworks = computed(() => appId.value && adType.value);
 const adUnitIds = computed(() => [
@@ -232,8 +232,8 @@ const updateFormFields = (sourceConfig) => {
 
   demands.value = settings.demands || [];
   bidding.value = settings.bidding || [];
-  demandAdUnitIds.value = settings.adUnitIds || [];
-  biddingAdUnitIds.value = settings.adUnitIds || [];
+  demandAdUnitIds.value = [...(settings.adUnitIds || [])];
+  biddingAdUnitIds.value = [...(settings.adUnitIds || [])];
 };
 
 const copySettings = async () => {
