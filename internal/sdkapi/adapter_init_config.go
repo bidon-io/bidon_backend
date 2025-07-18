@@ -19,7 +19,9 @@ func NewAdapterInitConfig(key adapter.Key, setOrder bool) (AdapterInitConfig, er
 	case adapter.ApplovinKey:
 		config = new(ApplovinInitConfig)
 	case adapter.BidmachineKey:
-		config = new(BidmachineInitConfig)
+		config = &BidmachineInitConfig{
+			Placements: make(map[string]string),
+		}
 	case adapter.BigoAdsKey:
 		config = new(BigoAdsInitConfig)
 	case adapter.ChartboostKey:
@@ -86,10 +88,11 @@ func (a *ApplovinInitConfig) SetDefaultOrder() {
 }
 
 type BidmachineInitConfig struct {
-	SellerID        string   `json:"seller_id,omitempty"`
-	Endpoint        string   `json:"endpoint,omitempty"`
-	MediationConfig []string `json:"mediation_config,omitempty"`
-	Order           int      `json:"order"`
+	SellerID        string            `json:"seller_id,omitempty"`
+	Endpoint        string            `json:"endpoint,omitempty"`
+	MediationConfig []string          `json:"mediation_config,omitempty"`
+	Placements      map[string]string `json:"placements,omitempty"`
+	Order           int               `json:"order"`
 }
 
 func (a *BidmachineInitConfig) Key() adapter.Key {

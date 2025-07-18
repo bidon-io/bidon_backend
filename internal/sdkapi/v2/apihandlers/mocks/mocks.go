@@ -101,6 +101,9 @@ var _ apihandlers.ConfigFetcher = &ConfigFetcherMock{}
 //
 //		// make and configure a mocked apihandlers.ConfigFetcher
 //		mockedConfigFetcher := &ConfigFetcherMock{
+//			FetchBidMachinePlacementsFunc: func(ctx context.Context, appID int64) (map[string]string, error) {
+//				panic("mock out the FetchBidMachinePlacements method")
+//			},
 //			FetchByUIDCachedFunc: func(ctx context.Context, appId int64, id string, uid string) *auction.Config {
 //				panic("mock out the FetchByUIDCached method")
 //			},
@@ -114,6 +117,9 @@ var _ apihandlers.ConfigFetcher = &ConfigFetcherMock{}
 //
 //	}
 type ConfigFetcherMock struct {
+	// FetchBidMachinePlacementsFunc mocks the FetchBidMachinePlacements method.
+	FetchBidMachinePlacementsFunc func(ctx context.Context, appID int64) (map[string]string, error)
+
 	// FetchByUIDCachedFunc mocks the FetchByUIDCached method.
 	FetchByUIDCachedFunc func(ctx context.Context, appId int64, id string, uid string) *auction.Config
 
@@ -122,6 +128,13 @@ type ConfigFetcherMock struct {
 
 	// calls tracks calls to the methods.
 	calls struct {
+		// FetchBidMachinePlacements holds details about calls to the FetchBidMachinePlacements method.
+		FetchBidMachinePlacements []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// AppID is the appID argument value.
+			AppID int64
+		}
 		// FetchByUIDCached holds details about calls to the FetchByUIDCached method.
 		FetchByUIDCached []struct {
 			// Ctx is the ctx argument value.
@@ -147,8 +160,45 @@ type ConfigFetcherMock struct {
 			Version string
 		}
 	}
-	lockFetchByUIDCached sync.RWMutex
-	lockMatch            sync.RWMutex
+	lockFetchBidMachinePlacements sync.RWMutex
+	lockFetchByUIDCached          sync.RWMutex
+	lockMatch                     sync.RWMutex
+}
+
+// FetchBidMachinePlacements calls FetchBidMachinePlacementsFunc.
+func (mock *ConfigFetcherMock) FetchBidMachinePlacements(ctx context.Context, appID int64) (map[string]string, error) {
+	if mock.FetchBidMachinePlacementsFunc == nil {
+		panic("ConfigFetcherMock.FetchBidMachinePlacementsFunc: method is nil but ConfigFetcher.FetchBidMachinePlacements was just called")
+	}
+	callInfo := struct {
+		Ctx   context.Context
+		AppID int64
+	}{
+		Ctx:   ctx,
+		AppID: appID,
+	}
+	mock.lockFetchBidMachinePlacements.Lock()
+	mock.calls.FetchBidMachinePlacements = append(mock.calls.FetchBidMachinePlacements, callInfo)
+	mock.lockFetchBidMachinePlacements.Unlock()
+	return mock.FetchBidMachinePlacementsFunc(ctx, appID)
+}
+
+// FetchBidMachinePlacementsCalls gets all the calls that were made to FetchBidMachinePlacements.
+// Check the length with:
+//
+//	len(mockedConfigFetcher.FetchBidMachinePlacementsCalls())
+func (mock *ConfigFetcherMock) FetchBidMachinePlacementsCalls() []struct {
+	Ctx   context.Context
+	AppID int64
+} {
+	var calls []struct {
+		Ctx   context.Context
+		AppID int64
+	}
+	mock.lockFetchBidMachinePlacements.RLock()
+	calls = mock.calls.FetchBidMachinePlacements
+	mock.lockFetchBidMachinePlacements.RUnlock()
+	return calls
 }
 
 // FetchByUIDCached calls FetchByUIDCachedFunc.

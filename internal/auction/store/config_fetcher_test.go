@@ -386,3 +386,525 @@ func TestConfigFetcher_FetchByUIDCached(t *testing.T) {
 		}
 	}
 }
+
+func TestConfigFetcher_FetchBidMachinePlacements(t *testing.T) {
+	tx := testDB.Begin()
+	defer tx.Rollback()
+
+	// Create test apps
+	apps := make([]db.App, 3)
+	for i := range apps {
+		apps[i] = dbtest.CreateApp(t, tx)
+	}
+
+	// Create BidMachine demand source
+	bidmachineDemandSource := dbtest.CreateDemandSource(t, tx, func(source *db.DemandSource) {
+		source.APIKey = "bidmachine"
+		source.HumanName = "BidMachine"
+	})
+
+	// Create other demand source for negative testing
+	otherDemandSource := dbtest.CreateDemandSource(t, tx, func(source *db.DemandSource) {
+		source.APIKey = "other"
+		source.HumanName = "Other"
+	})
+
+	// Create demand source accounts
+	bidmachineAccount := dbtest.CreateDemandSourceAccount(t, tx, func(account *db.DemandSourceAccount) {
+		account.DemandSource = bidmachineDemandSource
+	})
+
+	otherAccount := dbtest.CreateDemandSourceAccount(t, tx, func(account *db.DemandSourceAccount) {
+		account.DemandSource = otherDemandSource
+	})
+
+	// Create line items with BidMachine placements
+	lineItem1 := dbtest.CreateLineItem(t, tx, func(item *db.LineItem) {
+		item.App = apps[0]
+		item.Account = bidmachineAccount
+		item.Extra = map[string]any{
+			"placement": "placement-1",
+		}
+	})
+
+	lineItem2 := dbtest.CreateLineItem(t, tx, func(item *db.LineItem) {
+		item.App = apps[0]
+		item.Account = bidmachineAccount
+		item.Extra = map[string]any{
+			"placement": "placement-2",
+		}
+	})
+
+	// Line item without placement
+	lineItem3 := dbtest.CreateLineItem(t, tx, func(item *db.LineItem) {
+		item.App = apps[1]
+		item.Account = bidmachineAccount
+		item.Extra = map[string]any{
+			"other_field": "value",
+		}
+	})
+
+	// Line item from different demand source
+	lineItem4 := dbtest.CreateLineItem(t, tx, func(item *db.LineItem) {
+		item.App = apps[1]
+		item.Account = otherAccount
+		item.Extra = map[string]any{
+			"placement": "other-placement",
+		}
+	})
+
+	// Create auction configurations
+	configs := []db.AuctionConfiguration{
+		// Config with BidMachine in demands
+		{
+			AppID:      apps[0].ID,
+			PublicUID:  sql.NullInt64{Int64: 1, Valid: true},
+			AdType:     db.BannerAdType,
+			AuctionKey: "auction-key-1",
+			Demands:    pq.StringArray{"bidmachine", "gam"},
+			AdUnitIds:  pq.Int64Array{lineItem1.ID},
+		},
+		// Config with BidMachine in bidding
+		{
+			AppID:      apps[0].ID,
+			PublicUID:  sql.NullInt64{Int64: 2, Valid: true},
+			AdType:     db.InterstitialAdType,
+			AuctionKey: "auction-key-2",
+			Bidding:    pq.StringArray{"bidmachine", "mintegral"},
+			AdUnitIds:  pq.Int64Array{lineItem2.ID},
+		},
+		// Config without BidMachine
+		{
+			AppID:      apps[1].ID,
+			PublicUID:  sql.NullInt64{Int64: 3, Valid: true},
+			AdType:     db.BannerAdType,
+			AuctionKey: "auction-key-3",
+			Demands:    pq.StringArray{"gam", "dtexchange"},
+			AdUnitIds:  pq.Int64Array{lineItem4.ID},
+		},
+		// Config with BidMachine but line item without placement
+		{
+			AppID:      apps[1].ID,
+			PublicUID:  sql.NullInt64{Int64: 4, Valid: true},
+			AdType:     db.RewardedAdType,
+			AuctionKey: "auction-key-4",
+			Demands:    pq.StringArray{"bidmachine"},
+			AdUnitIds:  pq.Int64Array{lineItem3.ID},
+		},
+
+	}
+
+	if err := tx.Create(&configs).Error; err != nil {
+		t.Fatalf("Error creating configs: %v", err)
+	}
+
+	testCases := []struct {
+		name   string
+		appID  int64
+		want   map[string]string
+		hasErr bool
+	}{
+		{
+			name:  "App with BidMachine placements",
+			appID: apps[0].ID,
+			want: map[string]string{
+				"auction-key-1": "placement-1",
+				"auction-key-2": "placement-2",
+			},
+			hasErr: false,
+		},
+		{
+			name:   "App without BidMachine placements",
+			appID:  apps[1].ID,
+			want:   map[string]string{},
+			hasErr: false,
+		},
+		{
+			name:   "App with no auction configurations",
+			appID:  apps[2].ID,
+			want:   map[string]string{},
+			hasErr: false,
+		},
+		{
+			name:   "Non-existent app",
+			appID:  99999,
+			want:   map[string]string{},
+			hasErr: false,
+		},
+	}
+
+	fetcher := &store.ConfigFetcher{DB: tx}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := fetcher.FetchBidMachinePlacements(context.Background(), tc.appID)
+
+			if tc.hasErr && err == nil {
+				t.Errorf("Expected error but got none")
+			}
+			if !tc.hasErr && err != nil {
+				t.Errorf("Unexpected error: %v", err)
+			}
+
+			if diff := cmp.Diff(tc.want, got); diff != "" {
+				t.Errorf("FetchBidMachinePlacements() mismatch (-want, +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestConfigFetcher_FetchBidMachinePlacements_MultipleLineItemsSameAuctionKey(t *testing.T) {
+	tx := testDB.Begin()
+	defer tx.Rollback()
+
+	// Create test app
+	app := dbtest.CreateApp(t, tx)
+
+	// Create BidMachine demand source
+	bidmachineDemandSource := dbtest.CreateDemandSource(t, tx, func(source *db.DemandSource) {
+		source.APIKey = "bidmachine"
+		source.HumanName = "BidMachine"
+	})
+
+	// Create demand source account
+	bidmachineAccount := dbtest.CreateDemandSourceAccount(t, tx, func(account *db.DemandSourceAccount) {
+		account.DemandSource = bidmachineDemandSource
+	})
+
+	// Create multiple line items with different placements
+	lineItem1 := dbtest.CreateLineItem(t, tx, func(item *db.LineItem) {
+		item.App = app
+		item.Account = bidmachineAccount
+		item.Extra = map[string]any{
+			"placement": "first-placement",
+		}
+	})
+
+	lineItem2 := dbtest.CreateLineItem(t, tx, func(item *db.LineItem) {
+		item.App = app
+		item.Account = bidmachineAccount
+		item.Extra = map[string]any{
+			"placement": "second-placement",
+		}
+	})
+
+	// Create auction configuration that uses both line items
+	config := db.AuctionConfiguration{
+		AppID:      app.ID,
+		PublicUID:  sql.NullInt64{Int64: 1, Valid: true},
+		AdType:     db.BannerAdType,
+		AuctionKey: "same-auction-key",
+		Demands:    pq.StringArray{"bidmachine"},
+		AdUnitIds:  pq.Int64Array{lineItem1.ID, lineItem2.ID},
+	}
+
+	if err := tx.Create(&config).Error; err != nil {
+		t.Fatalf("Error creating config: %v", err)
+	}
+
+	fetcher := &store.ConfigFetcher{DB: tx}
+	got, err := fetcher.FetchBidMachinePlacements(context.Background(), app.ID)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	// Should return only one placement (the first one found)
+	if len(got) != 1 {
+		t.Errorf("Expected 1 placement, got %d: %v", len(got), got)
+	}
+
+	placement, exists := got["same-auction-key"]
+	if !exists {
+		t.Errorf("Expected auction key 'same-auction-key' to exist in result")
+	}
+
+	// Should be one of the two placements (order depends on database query result)
+	if placement != "first-placement" && placement != "second-placement" {
+		t.Errorf("Expected placement to be 'first-placement' or 'second-placement', got %s", placement)
+	}
+}
+
+func TestConfigFetcher_FetchBidMachinePlacements_EdgeCases(t *testing.T) {
+	tx := testDB.Begin()
+	defer tx.Rollback()
+
+	// Create test app
+	app := dbtest.CreateApp(t, tx)
+
+	// Create BidMachine demand source
+	bidmachineDemandSource := dbtest.CreateDemandSource(t, tx, func(source *db.DemandSource) {
+		source.APIKey = "bidmachine"
+		source.HumanName = "BidMachine"
+	})
+
+	// Create demand source account
+	bidmachineAccount := dbtest.CreateDemandSourceAccount(t, tx, func(account *db.DemandSourceAccount) {
+		account.DemandSource = bidmachineDemandSource
+	})
+
+	// Create line item with empty placement
+	lineItem1 := dbtest.CreateLineItem(t, tx, func(item *db.LineItem) {
+		item.App = app
+		item.Account = bidmachineAccount
+		item.Extra = map[string]any{
+			"placement": "",
+		}
+	})
+
+	// Create line item with null placement
+	lineItem2 := dbtest.CreateLineItem(t, tx, func(item *db.LineItem) {
+		item.App = app
+		item.Account = bidmachineAccount
+		item.Extra = map[string]any{
+			"placement": nil,
+		}
+	})
+
+	// Create line item with valid placement
+	lineItem3 := dbtest.CreateLineItem(t, tx, func(item *db.LineItem) {
+		item.App = app
+		item.Account = bidmachineAccount
+		item.Extra = map[string]any{
+			"placement": "valid-placement",
+		}
+	})
+
+	// Create auction configurations
+	configs := []db.AuctionConfiguration{
+		// Config with line item having empty placement (should be ignored)
+		{
+			AppID:      app.ID,
+			PublicUID:  sql.NullInt64{Int64: 1, Valid: true},
+			AdType:     db.BannerAdType,
+			AuctionKey: "auction-key-empty",
+			Demands:    pq.StringArray{"bidmachine"},
+			AdUnitIds:  pq.Int64Array{lineItem1.ID},
+		},
+		// Config with line item having null placement (should be ignored)
+		{
+			AppID:      app.ID,
+			PublicUID:  sql.NullInt64{Int64: 2, Valid: true},
+			AdType:     db.InterstitialAdType,
+			AuctionKey: "auction-key-null",
+			Demands:    pq.StringArray{"bidmachine"},
+			AdUnitIds:  pq.Int64Array{lineItem2.ID},
+		},
+		// Config with valid placement
+		{
+			AppID:      app.ID,
+			PublicUID:  sql.NullInt64{Int64: 3, Valid: true},
+			AdType:     db.RewardedAdType,
+			AuctionKey: "auction-key-valid",
+			Demands:    pq.StringArray{"bidmachine"},
+			AdUnitIds:  pq.Int64Array{lineItem3.ID},
+		},
+	}
+
+	if err := tx.Create(&configs).Error; err != nil {
+		t.Fatalf("Error creating configs: %v", err)
+	}
+
+	fetcher := &store.ConfigFetcher{DB: tx}
+	got, err := fetcher.FetchBidMachinePlacements(context.Background(), app.ID)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	// Should only return the valid placement
+	want := map[string]string{
+		"auction-key-valid": "valid-placement",
+	}
+
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("FetchBidMachinePlacements() mismatch (-want, +got):\n%s", diff)
+	}
+}
+
+func TestConfigFetcher_FetchBidMachinePlacements_NoBidMachineConfigs(t *testing.T) {
+	tx := testDB.Begin()
+	defer tx.Rollback()
+
+	// Create test app
+	app := dbtest.CreateApp(t, tx)
+
+	// Create non-BidMachine demand sources
+	gamDemandSource := dbtest.CreateDemandSource(t, tx, func(source *db.DemandSource) {
+		source.APIKey = "gam"
+		source.HumanName = "Google Ad Manager"
+	})
+
+	dtexchangeDemandSource := dbtest.CreateDemandSource(t, tx, func(source *db.DemandSource) {
+		source.APIKey = "dtexchange"
+		source.HumanName = "DT Exchange"
+	})
+
+	// Create demand source accounts
+	gamAccount := dbtest.CreateDemandSourceAccount(t, tx, func(account *db.DemandSourceAccount) {
+		account.DemandSource = gamDemandSource
+	})
+
+	dtexchangeAccount := dbtest.CreateDemandSourceAccount(t, tx, func(account *db.DemandSourceAccount) {
+		account.DemandSource = dtexchangeDemandSource
+	})
+
+	// Create line items with placements (but not BidMachine)
+	lineItem1 := dbtest.CreateLineItem(t, tx, func(item *db.LineItem) {
+		item.App = app
+		item.Account = gamAccount
+		item.Extra = map[string]any{
+			"placement": "gam-placement",
+		}
+	})
+
+	lineItem2 := dbtest.CreateLineItem(t, tx, func(item *db.LineItem) {
+		item.App = app
+		item.Account = dtexchangeAccount
+		item.Extra = map[string]any{
+			"placement": "dtexchange-placement",
+		}
+	})
+
+	// Create auction configurations without BidMachine
+	configs := []db.AuctionConfiguration{
+		{
+			AppID:      app.ID,
+			PublicUID:  sql.NullInt64{Int64: 1, Valid: true},
+			AdType:     db.BannerAdType,
+			Demands:    pq.StringArray{"gam", "dtexchange"},
+			AdUnitIds:  pq.Int64Array{lineItem1.ID},
+		},
+		{
+			AppID:     app.ID,
+			PublicUID: sql.NullInt64{Int64: 2, Valid: true},
+			AdType:    db.InterstitialAdType,
+			Bidding:   pq.StringArray{"mintegral", "unityads"},
+			AdUnitIds: pq.Int64Array{lineItem2.ID},
+		},
+	}
+
+	if err := tx.Create(&configs).Error; err != nil {
+		t.Fatalf("Error creating configs: %v", err)
+	}
+
+	fetcher := &store.ConfigFetcher{DB: tx}
+	got, err := fetcher.FetchBidMachinePlacements(context.Background(), app.ID)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	// Should return empty map since no configurations contain BidMachine
+	want := map[string]string{}
+
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("FetchBidMachinePlacements() mismatch (-want, +got):\n%s", diff)
+	}
+}
+
+func TestConfigFetcher_FetchBidMachinePlacements_MissingPlacement(t *testing.T) {
+	tx := testDB.Begin()
+	defer tx.Rollback()
+
+	// Create test app
+	app := dbtest.CreateApp(t, tx)
+
+	// Create BidMachine demand source
+	bidmachineDemandSource := dbtest.CreateDemandSource(t, tx, func(source *db.DemandSource) {
+		source.APIKey = "bidmachine"
+		source.HumanName = "BidMachine"
+	})
+
+	// Create demand source account
+	bidmachineAccount := dbtest.CreateDemandSourceAccount(t, tx, func(account *db.DemandSourceAccount) {
+		account.DemandSource = bidmachineDemandSource
+	})
+
+	// Create line items with different placement scenarios
+	lineItemWithPlacement := dbtest.CreateLineItem(t, tx, func(item *db.LineItem) {
+		item.App = app
+		item.Account = bidmachineAccount
+		item.Extra = map[string]any{
+			"placement": "valid-placement",
+		}
+	})
+
+	lineItemWithoutPlacement := dbtest.CreateLineItem(t, tx, func(item *db.LineItem) {
+		item.App = app
+		item.Account = bidmachineAccount
+		item.Extra = map[string]any{
+			"other_field": "some_value",
+			// no placement field
+		}
+	})
+
+	lineItemWithEmptyExtra := dbtest.CreateLineItem(t, tx, func(item *db.LineItem) {
+		item.App = app
+		item.Account = bidmachineAccount
+		item.Extra = map[string]any{} // empty extra
+	})
+
+	// Create auction configurations
+	configs := []db.AuctionConfiguration{
+		// Config with line item that has placement
+		{
+			AppID:      app.ID,
+			PublicUID:  sql.NullInt64{Int64: 1, Valid: true},
+			AdType:     db.BannerAdType,
+			Demands:    pq.StringArray{"bidmachine"},
+			AdUnitIds:  pq.Int64Array{lineItemWithPlacement.ID},
+		},
+		// Config with line item that doesn't have placement (should be ignored)
+		{
+			AppID:      app.ID,
+			PublicUID:  sql.NullInt64{Int64: 2, Valid: true},
+			AdType:     db.InterstitialAdType,
+			Demands:    pq.StringArray{"bidmachine"},
+			AdUnitIds:  pq.Int64Array{lineItemWithoutPlacement.ID},
+		},
+		// Config with line item that has empty extra (should be ignored)
+		{
+			AppID:      app.ID,
+			PublicUID:  sql.NullInt64{Int64: 3, Valid: true},
+			AdType:     db.RewardedAdType,
+			Demands:    pq.StringArray{"bidmachine"},
+			AdUnitIds:  pq.Int64Array{lineItemWithEmptyExtra.ID},
+		},
+		// Config with multiple line items (mixed placement availability)
+		{
+			AppID:      app.ID,
+			PublicUID:  sql.NullInt64{Int64: 4, Valid: true},
+			AdType:     db.BannerAdType,
+			Bidding:    pq.StringArray{"bidmachine"},
+			AdUnitIds:  pq.Int64Array{lineItemWithPlacement.ID, lineItemWithoutPlacement.ID, lineItemWithEmptyExtra.ID},
+		},
+	}
+
+	if err := tx.Create(&configs).Error; err != nil {
+		t.Fatalf("Error creating configs: %v", err)
+	}
+
+	fetcher := &store.ConfigFetcher{DB: tx}
+	got, err := fetcher.FetchBidMachinePlacements(context.Background(), app.ID)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	// Should only return placements for line items that actually have placement field
+	// The auction_key values will be generated based on PublicUID, so we need to get them
+	var dbConfigs []db.AuctionConfiguration
+	if err := tx.Where("app_id = ? AND public_uid IN (?, ?)", app.ID, 1, 4).Find(&dbConfigs).Error; err != nil {
+		t.Fatalf("Error fetching configs: %v", err)
+	}
+
+	want := map[string]string{}
+	for _, config := range dbConfigs {
+		want[config.AuctionKey] = "valid-placement"
+	}
+
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("FetchBidMachinePlacements() mismatch (-want, +got):\n%s", diff)
+	}
+
+	// Verify that we got exactly 2 results (from configs with PublicUID 1 and 4)
+	if len(got) != 2 {
+		t.Errorf("Expected 2 placements, got %d: %v", len(got), got)
+	}
+}

@@ -552,7 +552,7 @@ func TestService_Run_BidmachineWithMediator(t *testing.T) {
 						Label:      "bidmachine",
 						PriceFloor: ptr(0.1),
 						BidType:    "CPM",
-						Extra:      map[string]any{"placement_id": "123"},
+						Extra:      map[string]any{"placement": "123"},
 					},
 				},
 				BiddingAuctionResult: &bidding.AuctionResult{
@@ -1127,7 +1127,7 @@ func TestBidmachineWithPlacementID(t *testing.T) {
 						PriceFloor: &priceFloor,
 						BidType:    schema.RTBBidType,
 						Extra: map[string]any{
-							"placement_id": placementID,
+							"placement": placementID,
 						},
 					},
 				},
@@ -1176,11 +1176,11 @@ func TestBidmachineWithPlacementID(t *testing.T) {
 		t.Errorf("Expected DemandID to be 'bidmachine', got '%s'", bidmachineAdUnit.DemandID)
 	}
 
-	// Check that placement_id is included in the ext object (from the Extra field)
-	if placementIDValue, exists := bidmachineAdUnit.Extra["placement_id"]; !exists {
-		t.Error("Expected placement_id to be present in ext object")
-	} else if placementIDValue != placementID {
-		t.Errorf("Expected placement_id to be '%s', got '%v'", placementID, placementIDValue)
+	// Check that placement is included in the ext object (from the Extra field)
+	if placementValue, exists := bidmachineAdUnit.Extra["placement"]; !exists {
+		t.Error("Expected placement to be present in ext object")
+	} else if placementValue != placementID {
+		t.Errorf("Expected placement to be '%s', got '%v'", placementID, placementValue)
 	}
 
 	// Check that payload is also present
