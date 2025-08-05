@@ -91,6 +91,7 @@
           :ad-type="adType"
           :app-id="appId"
           :is-bidding="false"
+          :initial-ad-unit-ids="resource.adUnitIds || []"
           @network-enabled="onNetworkEnabled"
           @network-disabled="onNetworkDisabled"
         />
@@ -102,6 +103,7 @@
           :ad-type="adType"
           :app-id="appId"
           :is-bidding="true"
+          :initial-ad-unit-ids="resource.adUnitIds || []"
           @network-enabled="onNetworkEnabled"
           @network-disabled="onNetworkDisabled"
         />
@@ -165,8 +167,8 @@ const timeout = useFieldModel("timeout");
 
 const demands = ref(resource.value.demands || []);
 const bidding = ref(resource.value.bidding || []);
-const demandAdUnitIds = ref(resource.value.adUnitIds || []);
-const biddingAdUnitIds = ref(resource.value.adUnitIds || []);
+const demandAdUnitIds = ref([]);
+const biddingAdUnitIds = ref([]);
 
 const showNetworks = computed(() => appId.value && adType.value);
 

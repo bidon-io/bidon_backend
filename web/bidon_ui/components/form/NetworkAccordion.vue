@@ -122,6 +122,10 @@ const props = defineProps({
     type: Array as PropType<number[]>,
     default: () => [],
   },
+  initialAdUnitIds: {
+    type: Array as PropType<number[]>,
+    default: () => [],
+  },
 });
 const emit = defineEmits([
   "update:networkKeys",
@@ -357,11 +361,15 @@ const updateNetworks = () => {
     const networkAdUnits = adUnits
       .filter((adUnit) => adUnit.networkKey === network.key)
       .sort((a, b) => a.pricefloor - b.pricefloor);
+    // Use initialAdUnitIds for first load, then use adUnitIds for updates
+    const idsToUse =
+      props.adUnitIds.length > 0 ? props.adUnitIds : props.initialAdUnitIds;
+
     return {
       ...network,
       enabled: props.networkKeys.includes(network.key),
       adUnits: networkAdUnits,
-      selectedAdUnitIds: props.adUnitIds.filter((id) =>
+      selectedAdUnitIds: idsToUse.filter((id) =>
         networkAdUnits.some((unit) => unit.id === id),
       ),
     };
@@ -371,7 +379,12 @@ const updateNetworks = () => {
 };
 
 watch(
-  [adUnitsData, () => props.networkKeys, () => props.adUnitIds],
+  [
+    adUnitsData,
+    () => props.networkKeys,
+    () => props.adUnitIds,
+    () => props.initialAdUnitIds,
+  ],
   () => {
     if (adUnitsData.value) {
       updateNetworks();
