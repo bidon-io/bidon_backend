@@ -14,6 +14,7 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/bidding"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
+	"github.com/bidon-io/bidon-backend/internal/bidding/adapters/bidmachine"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/geocoder"
@@ -230,10 +231,8 @@ func (s *Service) buildResponse(
 		if isCOPPA && adapter.IsDisabledForCOPPA(adapter.Key(adUnit.DemandID)) {
 			continue
 		}
-		if adUnit.DemandID == string(adapter.BidmachineKey) && req.GetMediator() != "" {
-			adUnit.Extra["custom_parameters"] = map[string]any{
-				"mediator": req.GetMediator(),
-			}
+		if adUnit.DemandID == string(adapter.BidmachineKey) {
+			adUnit.Extra["custom_parameters"] = bidmachine.ExtraParams(req)
 		}
 
 		response.AdUnits = append(response.AdUnits, adUnit)

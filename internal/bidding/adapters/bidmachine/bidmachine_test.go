@@ -96,6 +96,9 @@ func buildTestParams(imp schema.AdObject) createRequestTestParams {
 			Orientation: "PORTRAIT",
 		},
 		BaseRequest: schema.BaseRequest{
+			App: schema.App{
+				SDKVersion: "1.0.0",
+			},
 			Device: schema.Device{
 				Type: device.PhoneType,
 			},
@@ -125,6 +128,7 @@ func buildWantRequest(imp openrtb2.Imp) openrtb.BidRequest {
 		},
 		User: nil,
 		Cur:  []string{"USD"},
+		Ext:  json.RawMessage(`{"bidon_sdk_version":"1.0.0"}`),
 		Imp: []openrtb2.Imp{
 			{
 				ID:                "1",
@@ -507,5 +511,101 @@ func TestBidmachine_Builder(t *testing.T) {
 	}
 	if diff := cmp.Diff(wantBidder, bidder); diff != "" {
 		t.Errorf("builder(bmCfg, client) mismatch (-want, +got):\n%s", diff)
+	}
+}
+
+func TestBidmachine_ExtraParams(t *testing.T) {
+	testCases := []struct {
+		name     string
+		request  *schema.AuctionRequest
+		expected map[string]any
+	}{
+		{
+			name: "Empty SDK version",
+			request: &schema.AuctionRequest{
+				BaseRequest: schema.BaseRequest{
+					App: schema.App{
+						SDKVersion: "",
+					},
+				},
+			},
+			expected: map[string]any{
+				"bidon_sdk_version": "",
+			},
+		},
+		{
+			name: "With SDK version only",
+			request: &schema.AuctionRequest{
+				BaseRequest: schema.BaseRequest{
+					App: schema.App{
+						SDKVersion: "1.2.3",
+					},
+				},
+			},
+			expected: map[string]any{
+				"bidon_sdk_version": "1.2.3",
+			},
+		},
+		{
+			name: "With mediator only",
+			request: &schema.AuctionRequest{
+				BaseRequest: schema.BaseRequest{
+					App: schema.App{
+						SDKVersion: "1.0.0",
+					},
+					Ext: `{"mediator": "max"}`,
+				},
+			},
+			expected: map[string]any{
+				"bidon_sdk_version": "1.0.0",
+				"mediator":          "max",
+			},
+		},
+		{
+			name: "With nested ext data",
+			request: &schema.AuctionRequest{
+				BaseRequest: schema.BaseRequest{
+					App: schema.App{
+						SDKVersion: "2.0.0",
+					},
+					Ext: `{"ext": {"bidmachine": {"custom_param": "value", "another_param": 123}}}`,
+				},
+			},
+			expected: map[string]any{
+				"bidon_sdk_version": "2.0.0",
+				"custom_param":      "value",
+				"another_param":     float64(123), // JSON unmarshals numbers as float64
+			},
+		},
+		{
+			name: "With all parameters",
+			request: &schema.AuctionRequest{
+				BaseRequest: schema.BaseRequest{
+					App: schema.App{
+						SDKVersion: "3.0.0",
+					},
+					Ext: `{"mediator": "levelplay", "ext": {"bidmachine": {"test_mode": true, "placement_id": "test123"}}}`,
+				},
+			},
+			expected: map[string]any{
+				"bidon_sdk_version": "3.0.0",
+				"mediator":          "levelplay",
+				"test_mode":         true,
+				"placement_id":      "test123",
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			// Normalize the request to parse the Ext field
+			tc.request.NormalizeValues()
+
+			result := bidmachine.ExtraParams(tc.request)
+
+			if diff := cmp.Diff(tc.expected, result); diff != "" {
+				t.Errorf("ExtraParams() mismatch (-want, +got):\n%s", diff)
+			}
+		})
 	}
 }
