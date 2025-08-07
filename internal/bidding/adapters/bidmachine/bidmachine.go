@@ -112,6 +112,10 @@ func (a *BidmachineAdapter) rewarded(auctionRequest *schema.AuctionRequest) *ope
 func (a *BidmachineAdapter) CreateRequest(request openrtb.BidRequest, auctionRequest *schema.AuctionRequest) (openrtb.BidRequest, error) {
 	secure := int8(1)
 
+	x := ExtraParams(auctionRequest)
+	ext, _ := json.Marshal(x)
+	request.Ext = ext
+
 	var imp *openrtb2.Imp
 	switch auctionRequest.AdObject.Type() {
 	case ad.BannerType:
@@ -257,6 +261,22 @@ func Builder(cfg adapter.ProcessedConfigsMap, client *http.Client) (*adapters.Bi
 	}
 
 	return bidder, nil
+}
+
+func ExtraParams(req *schema.AuctionRequest) map[string]any {
+	customParameters := map[string]any{
+		"bidon_sdk_version": req.App.SDKVersion,
+	}
+	if req.GetMediator() != "" {
+		customParameters["mediator"] = req.GetMediator()
+	}
+	if existingExtra, ok := req.GetNestedExtData()["bidmachine"].(map[string]any); ok {
+		for key, value := range existingExtra {
+			customParameters[key] = value
+		}
+	}
+
+	return customParameters
 }
 
 var alpha3ToDcMapping = map[string]string{
