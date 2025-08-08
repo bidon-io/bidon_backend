@@ -92,7 +92,7 @@ func (h *ConfigHandler) Handle(c echo.Context) error {
 	if req.raw.Regulations != nil {
 		isCOPPA = req.raw.Regulations.COPPA
 	}
-	chardonnayHack := req.app.ID == 735400 || req.app.ID == 735401 || req.app.ID == 735402 || req.app.ID == 735370
+	chardonnayHack := req.app.ID == 735400 || req.app.ID == 735401 || req.app.ID == 735402 || req.app.ID == 735370 || req.app.ID == 735354
 	adapters := make(map[adapter.Key]sdkapi.AdapterInitConfig, len(adapterInitConfigs))
 
 	var bidMachinePlacements map[string]string
