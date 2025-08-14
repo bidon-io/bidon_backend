@@ -70,6 +70,11 @@ func buildBaseRequest() openrtb.BidRequest {
 		App: &openrtb2.App{
 			Publisher: &openrtb2.Publisher{},
 		},
+		Device: &openrtb2.Device{
+			Geo: &openrtb2.Geo{
+				Country: "USA", // Default to USA for existing tests (ISO-3166-1-alpha-3)
+			},
+		},
 	}
 }
 
@@ -112,6 +117,11 @@ func buildTestParams(adObject schema.AdObject) createRequestTestParams {
 func buildWantRequest(imp openrtb2.Imp) openrtb.BidRequest {
 	request := openrtb.BidRequest{
 		App: &openrtb2.App{Publisher: &openrtb2.Publisher{}},
+		Device: &openrtb2.Device{
+			Geo: &openrtb2.Geo{
+				Country: "USA",
+			},
+		},
 		User: &openrtb.User{
 			Data: []openrtb.Data{
 				{
@@ -279,6 +289,11 @@ func TestMobileFuseAdapter_ExecuteRequest(t *testing.T) {
 	})
 	request := openrtb.BidRequest{
 		ID: "test-request-id",
+		Device: &openrtb2.Device{
+			Geo: &openrtb2.Geo{
+				Country: "USA", // Valid country for testing
+			},
+		},
 	}
 
 	response := networkAdapter.ExecuteRequest(context.Background(), customClient, request)
@@ -300,6 +315,80 @@ func TestMobileFuseAdapter_ExecuteRequest(t *testing.T) {
 	}
 	if response.Status != http.StatusOK {
 		t.Errorf("Expected status code %d, but got %d", http.StatusOK, response.Status)
+	}
+}
+
+func TestMobileFuse_CreateRequest_CountryValidation(t *testing.T) {
+	testCases := []struct {
+		name        string
+		country     string
+		expectError bool
+		errorMsg    string
+	}{
+		{
+			name:        "USA country allowed",
+			country:     "USA",
+			expectError: false,
+		},
+		{
+			name:        "CAN country allowed",
+			country:     "CAN",
+			expectError: false,
+		},
+		{
+			name:        "DEU country rejected",
+			country:     "DEU",
+			expectError: true,
+			errorMsg:    "unsupported device: received 'DEU', expected 'USA' or 'CAN'",
+		},
+		{
+			name:        "Empty country rejected",
+			country:     "",
+			expectError: true,
+			errorMsg:    "unsupported device: received 'none', expected 'USA' or 'CAN'",
+		},
+		{
+			name:        "Invalid country code rejected",
+			country:     "XXX",
+			expectError: true,
+			errorMsg:    "unsupported device: received 'XXX', expected 'USA' or 'CAN'",
+		},
+	}
+
+	adapter := buildAdapter()
+	for _, tC := range testCases {
+		t.Run(tC.name, func(t *testing.T) {
+			params := buildTestParams(schema.AdObject{
+				Banner: &schema.BannerAdObject{
+					Format: ad.BannerFormat,
+				},
+			})
+
+			// Set the country in the bid request
+			params.BaseBidRequest.Device = &openrtb2.Device{
+				Geo: &openrtb2.Geo{
+					Country: tC.country,
+				},
+			}
+
+			_, err := adapter.CreateRequest(params.BaseBidRequest, params.AuctionRequest)
+
+			if tC.expectError {
+				if err == nil {
+					t.Errorf("Expected error for country %s, but got none", tC.country)
+				} else if err.Error() != tC.errorMsg {
+					t.Errorf("Expected error message '%s', but got '%s'", tC.errorMsg, err.Error())
+				}
+				// Verify that the error is the expected sentinel error
+				if !errors.Is(err, mobilefuse.ErrUnsupportedRegion) {
+					t.Errorf("Expected error to be ErrUnsupportedRegion, but errors.Is() returned false")
+				}
+			} else {
+				if err != nil {
+					t.Errorf("Expected no error for country %s, but got: %v", tC.country, err)
+				}
+			}
+		})
 	}
 }
 

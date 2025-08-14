@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"slices"
 	"strconv"
 
 	"github.com/gofrs/uuid/v5"
@@ -20,6 +21,24 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/bidding/openrtb"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 )
+
+var (
+	// ErrUnsupportedRegion indicates that the bid request is from a geographic region
+	// not supported by MobileFuse. According to OpenRTB specification, this corresponds
+	// to NoBidReason.UNSUPPORTED_DEVICE (code 6) for geographic restrictions.
+	ErrUnsupportedRegion = errors.New("unsupported device")
+)
+
+// supportedCountries defines the ISO-3166-1-alpha-3 country codes supported by MobileFuse
+var supportedCountries = []string{"USA", "CAN"}
+
+// newUnsupportedRegionError creates an enhanced error message with contextual information
+func newUnsupportedRegionError(received string) error {
+	if received == "" {
+		received = "none"
+	}
+	return fmt.Errorf("%w: received '%s', expected 'USA' or 'CAN'", ErrUnsupportedRegion, received)
+}
 
 type MobileFuseAdapter struct {
 	TagID string
@@ -73,6 +92,15 @@ func (a *MobileFuseAdapter) rewarded() *openrtb2.Imp {
 func (a *MobileFuseAdapter) CreateRequest(request openrtb.BidRequest, auctionRequest *schema.AuctionRequest) (openrtb.BidRequest, error) {
 	if a.TagID == "" {
 		return request, errors.New("TagID is empty")
+	}
+
+	country := ""
+	if request.Device != nil && request.Device.Geo != nil {
+		country = request.Device.Geo.Country
+	}
+
+	if !slices.Contains(supportedCountries, country) {
+		return request, newUnsupportedRegionError(country)
 	}
 
 	secure := int8(1)
