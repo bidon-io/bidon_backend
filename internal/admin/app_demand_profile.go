@@ -195,6 +195,10 @@ func (v *appDemandProfileAttrsValidator) dataRule(demandSource *DemandSource) v8
 		rule = v8n.Map(
 			v8n.Key("app_id", v8n.Required, isString),
 		)
+	case adapter.MolocoKey:
+		rule = v8n.Map(
+			v8n.Key("app_key", v8n.Required, isString),
+		)
 	case adapter.BigoAdsKey:
 		rule = v8n.Map(
 			v8n.Key("app_id", v8n.Required, isString),

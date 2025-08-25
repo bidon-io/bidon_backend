@@ -213,6 +213,10 @@ func (v *demandSourceAccountValidator) extraRule(demandSource *DemandSource) v8n
 		rule = v8n.Map(
 			v8n.Key("publisher_id", v8n.Required, isString),
 		)
+	case adapter.MolocoKey:
+		// Moloco configuration is handled via environment variables
+		// No additional validation required for extra fields
+		rule = v8n.Map()
 	case adapter.VungleKey:
 		rule = v8n.Map(
 			v8n.Key("account_id", v8n.Required, isString),

@@ -67,6 +67,9 @@
       required
     />
   </template>
+  <template v-if="apiKey === 'moloco'">
+    <VeeFormFieldWrapper field="extra.adUnitId" label="Ad Unit Id" required />
+  </template>
   <template v-if="apiKey === 'unityads'">
     <VeeFormFieldWrapper
       field="extra.placementId"
@@ -155,6 +158,9 @@ const dataSchemas = {
   }),
   mobilefuse: yup.object({
     placementId: yup.string().required().label("Placement Id"),
+  }),
+  moloco: yup.object({
+    adUnitId: yup.string().required().label("Ad Unit Id"),
   }),
   unityads: yup.object({
     placementId: yup.string().required().label("Placement Id"),

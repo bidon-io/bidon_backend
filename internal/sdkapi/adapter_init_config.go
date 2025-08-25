@@ -34,6 +34,8 @@ func NewAdapterInitConfig(key adapter.Key, setOrder bool) (AdapterInitConfig, er
 		config = new(MetaInitConfig)
 	case adapter.MintegralKey:
 		config = new(MintegralInitConfig)
+	case adapter.MolocoKey:
+		config = new(MolocoInitConfig)
 	case adapter.UnityAdsKey:
 		config = new(UnityAdsInitConfig)
 	case adapter.VKAdsKey:
@@ -182,6 +184,19 @@ func (a *MintegralInitConfig) Key() adapter.Key {
 
 func (a *MintegralInitConfig) SetDefaultOrder() {
 	a.Order = 3
+}
+
+type MolocoInitConfig struct {
+	AppKey string `json:"app_key,omitempty"`
+	Order  int    `json:"order"`
+}
+
+func (a *MolocoInitConfig) Key() adapter.Key {
+	return adapter.MolocoKey
+}
+
+func (a *MolocoInitConfig) SetDefaultOrder() {
+	a.Order = 0
 }
 
 type UnityAdsInitConfig struct {

@@ -115,6 +115,16 @@
         }
       },
       "required": ["placement_id", "unit_id"]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "ad_unit_id": {
+          "type": "string",
+          "description": "Ad Unit ID (for Moloco)"
+        }
+      },
+      "required": ["ad_unit_id"]
     }
   ],
   "additionalProperties": false
