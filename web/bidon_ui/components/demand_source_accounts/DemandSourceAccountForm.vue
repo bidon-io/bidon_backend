@@ -56,7 +56,7 @@ const extraSchema = ref(yup.object());
 
 const { currentUser } = useAuthStore();
 
-const { errors, meta, useFieldModel, handleSubmit } = useForm({
+const { errors, meta, useFieldModel, handleSubmit, validate } = useForm({
   validationSchema: computed(() => {
     const validationFields = {
       label: yup.string().required().label("Label"),
@@ -106,4 +106,5 @@ watch(
 );
 
 const onSubmit = handleSubmit((values) => emit("submit", values));
+watch([label], () => validate());
 </script>
