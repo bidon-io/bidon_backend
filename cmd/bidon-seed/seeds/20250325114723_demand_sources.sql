@@ -16,6 +16,7 @@ VALUES
 ('ironsource', 'ironSource', NOW(), NOW()),
 ('mintegral', 'Mintegral', NOW(), NOW()),
 ('mobilefuse', 'MobileFuse', NOW(), NOW()),
+('moloco', 'Moloco', NOW(), NOW()),
 ('vkads', 'VK Ads', NOW(), NOW()),
 ('vungle', 'Vungle', NOW(), NOW()),
 ('yandex', 'Yandex', NOW(), NOW())

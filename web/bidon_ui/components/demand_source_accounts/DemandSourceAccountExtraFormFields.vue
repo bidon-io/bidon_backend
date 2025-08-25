@@ -48,6 +48,10 @@
       required
     />
   </template>
+  <template v-if="apiKey === 'moloco'">
+    <!-- Moloco configuration is handled via environment variables -->
+    <!-- No additional form fields required -->
+  </template>
   <template v-if="apiKey === 'vungle'">
     <VeeFormFieldWrapper field="extra.accountId" label="Account ID" required />
   </template>
@@ -123,6 +127,9 @@ const dataSchemas = {
   }),
   mobilefuse: yup.object({
     publisherId: yup.string().required().label("Publisher Id"),
+  }),
+  moloco: yup.object({
+    // No additional validation required - API key handled via environment
   }),
   vungle: yup.object({
     accountId: yup.string().required().label("Account Id"),

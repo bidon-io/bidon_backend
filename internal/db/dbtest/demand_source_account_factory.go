@@ -94,6 +94,8 @@ func ValidDemandSourceAccountExtra(t *testing.T, key adapter.Key) []byte {
 		return []byte(`{"foo": "bar"}`)
 	case adapter.MintegralKey:
 		return []byte(`{"publisher_id": "1", "app_key": "mintegral", "foo": "bar"}`)
+	case adapter.MolocoKey:
+		return []byte(`{"foo": "bar"}`)
 	case adapter.UnityAdsKey:
 		return []byte(`{"foo": "bar"}`)
 	case adapter.VungleKey:

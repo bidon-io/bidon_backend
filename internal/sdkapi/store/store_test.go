@@ -216,6 +216,9 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Valid(t *testing.T) {
 					AppKey: "mintegral",
 				},
 				&sdkapi.MobileFuseInitConfig{},
+				&sdkapi.MolocoInitConfig{
+					AppKey: fmt.Sprintf("moloco_app_%d", apps[1].ID),
+				},
 				&sdkapi.UnityAdsInitConfig{
 					GameID: fmt.Sprintf("unityads_game_%d", apps[1].ID),
 				},
@@ -263,6 +266,10 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Valid(t *testing.T) {
 				},
 				&sdkapi.MobileFuseInitConfig{
 					Order: 3,
+				},
+				&sdkapi.MolocoInitConfig{
+					AppKey: fmt.Sprintf("moloco_app_%d", apps[1].ID),
+					Order:  0,
 				},
 				&sdkapi.UnityAdsInitConfig{
 					GameID: fmt.Sprintf("unityads_game_%d", apps[1].ID),

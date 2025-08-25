@@ -153,7 +153,6 @@ func (s *Service) Run(ctx context.Context, params *ExecutionParams) (*Response, 
 		}
 		return nil, err
 	}
-	params.Log(fmt.Sprintf("[AUCTION V2] auction: (%+v), err: (%s), took (%dms)", auctionResult, err, auctionResult.GetDuration()))
 
 	adUnitsMap = buildAdUnitsMap(auctionResult.AdUnits)
 

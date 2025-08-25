@@ -126,6 +126,7 @@ const formatNetworkName = (networkName) => {
     meta: "Meta",
     facebook: "Facebook",
     mobilefuse: "MobileFuse",
+    moloco: "Moloco",
     inmobi: "InMobi",
   };
 

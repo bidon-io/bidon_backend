@@ -27,6 +27,7 @@ const (
 	MetaKey       Key = "meta"
 	MintegralKey  Key = "mintegral"
 	MobileFuseKey Key = "mobilefuse"
+	MolocoKey     Key = "moloco"
 	UnityAdsKey   Key = "unityads"
 	VKAdsKey      Key = "vkads"
 	VungleKey     Key = "vungle"
@@ -47,6 +48,7 @@ var Keys = []Key{
 	MetaKey,
 	MintegralKey,
 	MobileFuseKey,
+	MolocoKey,
 	UnityAdsKey,
 	VKAdsKey,
 	VungleKey,

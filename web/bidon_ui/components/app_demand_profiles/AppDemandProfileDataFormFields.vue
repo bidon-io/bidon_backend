@@ -35,6 +35,9 @@
   <template v-if="accountType == 'DemandSourceAccount::Mintegral'">
     <VeeFormFieldWrapper field="data.appId" label="App Id" required />
   </template>
+  <template v-if="accountType == 'DemandSourceAccount::Moloco'">
+    <VeeFormFieldWrapper field="data.appKey" label="App Key" required />
+  </template>
   <template v-if="accountType == 'DemandSourceAccount::UnityAds'">
     <VeeFormFieldWrapper field="data.gameId" label="Game Id" required />
   </template>
@@ -97,6 +100,9 @@ const dataSchemas = {
   }),
   "DemandSourceAccount::Mintegral": yup.object({
     appId: yup.number().required().label("App Id"),
+  }),
+  "DemandSourceAccount::Moloco": yup.object({
+    appKey: yup.string().required().label("App Key"),
   }),
   "DemandSourceAccount::UnityAds": yup.object({
     gameId: yup.number().required().label("Game Id"),
