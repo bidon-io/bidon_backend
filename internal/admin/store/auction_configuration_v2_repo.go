@@ -51,7 +51,7 @@ func (r *AuctionConfigurationV2Repo) ListOwnedByUser(ctx context.Context, userID
 func (r *AuctionConfigurationV2Repo) FindOwnedByUser(ctx context.Context, userID int64, id int64) (*admin.AuctionConfigurationV2, error) {
 	return r.find(ctx, id, func(db *gorm.DB) *gorm.DB {
 		s := db.Session(&gorm.Session{NewDB: true})
-		return db.InnerJoins("App", s.Table("App").Where(map[string]any{"user_id": userID}).Where("settings->>'v2' = ?", "true"))
+		return db.InnerJoins("App", s.Table("App").Where(map[string]any{"user_id": userID})).Where("auction_configurations.settings->>'v2' = ?", "true")
 	})
 }
 
