@@ -221,9 +221,6 @@ func TestMoloco_ExecuteRequest_Success(t *testing.T) {
 		if req.Header.Get("Content-Type") != "application/json" {
 			t.Errorf("Expected Content-Type 'application/json', got '%s'", req.Header.Get("Content-Type"))
 		}
-		if req.Header.Get("X-OpenRTB-Version") != "2.6" {
-			t.Errorf("Expected X-OpenRTB-Version '2.6', got '%s'", req.Header.Get("X-OpenRTB-Version"))
-		}
 		if req.Header.Get("Authorization") != "test-api-key" {
 			t.Errorf("Expected Authorization 'test-api-key', got '%s'", req.Header.Get("Authorization"))
 		}
@@ -357,9 +354,6 @@ func TestMoloco_ParseBids_Success(t *testing.T) {
 		}
 		if result.Bid.Payload != "<html>test ad</html>" {
 			t.Errorf("Expected payload '<html>test ad</html>', got '%s'", result.Bid.Payload)
-		}
-		if result.Bid.Signaldata != "test-signal" {
-			t.Errorf("Expected signaldata 'test-signal', got '%s'", result.Bid.Signaldata)
 		}
 	}
 }

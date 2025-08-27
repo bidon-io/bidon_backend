@@ -58,21 +58,56 @@ func (a *MolocoAdapter) banner(auctionRequest *schema.AuctionRequest) *openrtb2.
 }
 
 // interstitial creates an interstitial impression for the bid request
-func (a *MolocoAdapter) interstitial() *openrtb2.Imp {
+func (a *MolocoAdapter) interstitial(auctionRequest *schema.AuctionRequest) *openrtb2.Imp {
+	size := adapters.FullscreenFormats[string(auctionRequest.Device.Type)]
+	w, h := size[0], size[1]
+	if !auctionRequest.AdObject.IsPortrait() {
+		w, h = h, w
+	}
 	return &openrtb2.Imp{
 		Instl: 1,
 		Banner: &openrtb2.Banner{
-			Pos: adcom1.PositionFullScreen.Ptr(),
+			W:     &w,
+			H:     &h,
+			BType: []openrtb2.BannerAdType{},
+			BAttr: []adcom1.CreativeAttribute{},
+			Pos:   adcom1.PositionFullScreen.Ptr(),
+		},
+		Video: &openrtb2.Video{
+			W:     w,
+			H:     h,
+			Pos:   adcom1.PositionFullScreen.Ptr(),
+			MIMEs: []string{"video/mp4", "video/3gpp", "video/3gpp2", "video/x-m4v", "video/quicktime"},
 		},
 	}
 }
 
 // rewarded creates a rewarded video impression for the bid request
-func (a *MolocoAdapter) rewarded() *openrtb2.Imp {
+func (a *MolocoAdapter) rewarded(auctionRequest *schema.AuctionRequest) *openrtb2.Imp {
+	size := adapters.FullscreenFormats[string(auctionRequest.Device.Type)]
+	w, h := size[0], size[1]
+	if !auctionRequest.AdObject.IsPortrait() {
+		w, h = h, w
+	}
+	skip := int8(1)
 	return &openrtb2.Imp{
-		Instl: 0,
+		Instl: 1,
+		Rwdd:  1,
+		Banner: &openrtb2.Banner{
+			W:     &w,
+			H:     &h,
+			BType: []openrtb2.BannerAdType{},
+			BAttr: []adcom1.CreativeAttribute{16},
+			Pos:   adcom1.PositionFullScreen.Ptr(),
+		},
 		Video: &openrtb2.Video{
-			MIMEs: []string{"video/mp4"},
+			W:         w,
+			H:         h,
+			BAttr:     []adcom1.CreativeAttribute{1, 2, 5, 8, 9, 14, 17},
+			Pos:       adcom1.PositionFullScreen.Ptr(),
+			MIMEs:     []string{"video/mp4", "video/x-m4v", "video/quicktime", "video/mpeg", "video/avi"},
+			Protocols: []adcom1.MediaCreativeSubtype{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14},
+			Skip:      &skip,
 		},
 	}
 }
@@ -86,9 +121,9 @@ func (a *MolocoAdapter) CreateRequest(request openrtb.BidRequest, auctionRequest
 	case ad.BannerType:
 		imp = a.banner(auctionRequest)
 	case ad.InterstitialType:
-		imp = a.interstitial()
+		imp = a.interstitial(auctionRequest)
 	case ad.RewardedType:
-		imp = a.rewarded()
+		imp = a.rewarded(auctionRequest)
 	default:
 		return request, errors.New("unknown impression type")
 	}
@@ -156,13 +191,14 @@ func (a *MolocoAdapter) ExecuteRequest(ctx context.Context, client *http.Client,
 		return dr
 	}
 	httpReq.Header.Add("Content-Type", "application/json")
-	httpReq.Header.Add("Accept-Encoding", "gzip")
-	httpReq.Header.Add("X-OpenRTB-Version", "2.6")
+	//httpReq.Header.Add("Accept-Encoding", "gzip")
 
-	// Add Authorization header with API key if configured
-	if a.APIKey != "" {
-		httpReq.Header.Add("Authorization", a.APIKey)
+	// Add Authorization header with API key
+	if a.APIKey == "" {
+		dr.Error = errors.New("moloco API key is empty")
+		return dr
 	}
+	httpReq.Header.Add("Authorization", a.APIKey)
 
 	httpResp, err := client.Do(httpReq)
 	if err != nil {
@@ -209,36 +245,23 @@ func (a *MolocoAdapter) ParseBids(dr *adapters.DemandResponse) (*adapters.Demand
 	}
 
 	if len(bidResponse.SeatBid) == 0 || len(bidResponse.SeatBid[0].Bid) == 0 {
-		return dr, nil
+		return dr, errors.New("no seatbid or bid in response")
 	}
 
 	seat := bidResponse.SeatBid[0]
 	bid := seat.Bid[0]
 
-	// Extract signaldata from bid extension if available
-	signaldata := ""
-	if bid.Ext != nil {
-		var extParam map[string]any
-		err = json.Unmarshal(bid.Ext, &extParam)
-		if err == nil {
-			if sd, ok := extParam["signaldata"].(string); ok {
-				signaldata = sd
-			}
-		}
-	}
-
 	dr.Bid = &adapters.BidDemandResponse{
-		ID:         bid.ID,
-		ImpID:      bid.ImpID,
-		Price:      bid.Price,
-		Payload:    bid.AdM,
-		Signaldata: signaldata,
-		DemandID:   adapter.MolocoKey,
-		AdID:       bid.AdID,
-		SeatID:     seat.Seat,
-		LURL:       bid.LURL,
-		NURL:       bid.NURL,
-		BURL:       bid.BURL,
+		ID:       bid.ID,
+		ImpID:    bid.ImpID,
+		Price:    bid.Price,
+		Payload:  bid.AdM,
+		DemandID: adapter.MolocoKey,
+		AdID:     bid.AdID,
+		SeatID:   seat.Seat,
+		LURL:     bid.LURL,
+		NURL:     bid.NURL,
+		BURL:     bid.BURL,
 	}
 
 	return dr, nil

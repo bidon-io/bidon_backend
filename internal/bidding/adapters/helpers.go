@@ -16,3 +16,8 @@ func CalculatePriceFloor(rtbRequest *openrtb.BidRequest, incomingRequest *schema
 		return incomingRequest.AdObject.GetBidFloorForBidding()
 	}
 }
+
+var FullscreenFormats = map[string][2]int64{
+	"PHONE":  {320, 480},
+	"TABLET": {768, 1024},
+}
