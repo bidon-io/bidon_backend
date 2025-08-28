@@ -159,8 +159,6 @@ func (s *Service) Run(ctx context.Context, params *ExecutionParams) (*Response, 
 	return s.buildResponse(req, auctionResult, adUnitsMap)
 }
 
-var customAdapters = [...]string{"max", "level_play"}
-
 // Auction keys that should have disabled price floors when using custom adapters
 var disabledFloorAuctionKeys = [...]string{
 	"1LOQ1LROG0000", // Inter
@@ -179,7 +177,7 @@ var disabledFloorAuctionKeys = [...]string{
 
 func priceFloor(req *schema.AuctionRequest, auctionConfig *Config) float64 {
 	// Check if price floor should be disabled for this auction key with custom adapter
-	isCustomAdapter := slices.Contains(customAdapters[:], req.GetMediator())
+	isCustomAdapter := slices.Contains(adapter.CustomAdapters[:], req.GetMediator())
 	if isCustomAdapter && slices.Contains(disabledFloorAuctionKeys[:], req.AdObject.AuctionKey) {
 		return 0 // Disable price floor for specified auction keys with custom adapters
 	}

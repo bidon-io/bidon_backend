@@ -55,6 +55,8 @@ var Keys = []Key{
 	YandexKey,
 }
 
+var CustomAdapters = [...]string{"max", "level_play"}
+
 var itemExists = struct{}{}
 
 // GetCommonAdapters returns the intersection of all the slices passed as arguments.
