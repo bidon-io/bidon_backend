@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"slices"
 	"strconv"
 
 	"github.com/gofrs/uuid/v5"
@@ -268,6 +269,13 @@ func ExtraParams(req *schema.AuctionRequest) map[string]any {
 	if existingExtra, ok := req.GetNestedExtData()["bidmachine"].(map[string]any); ok {
 		for key, value := range existingExtra {
 			customParameters[key] = value
+		}
+	}
+	if _, ok := customParameters["mediation_mode"]; !ok {
+		if slices.Contains(adapter.CustomAdapters[:], req.GetMediator()) {
+			customParameters["mediation_mode"] = "bidon_ca"
+		} else {
+			customParameters["mediation_mode"] = "bidon"
 		}
 	}
 

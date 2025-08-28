@@ -128,7 +128,7 @@ func buildWantRequest(imp openrtb2.Imp) openrtb.BidRequest {
 		},
 		User: nil,
 		Cur:  []string{"USD"},
-		Ext:  json.RawMessage(`{"bidon_sdk_version":"1.0.0"}`),
+		Ext:  json.RawMessage(`{"bidon_sdk_version":"1.0.0","mediation_mode":"bidon"}`),
 		Imp: []openrtb2.Imp{
 			{
 				ID:                "1",
@@ -531,6 +531,7 @@ func TestBidmachine_ExtraParams(t *testing.T) {
 			},
 			expected: map[string]any{
 				"bidon_sdk_version": "",
+				"mediation_mode":    "bidon",
 			},
 		},
 		{
@@ -544,6 +545,7 @@ func TestBidmachine_ExtraParams(t *testing.T) {
 			},
 			expected: map[string]any{
 				"bidon_sdk_version": "1.2.3",
+				"mediation_mode":    "bidon",
 			},
 		},
 		{
@@ -558,6 +560,7 @@ func TestBidmachine_ExtraParams(t *testing.T) {
 			},
 			expected: map[string]any{
 				"bidon_sdk_version": "1.0.0",
+				"mediation_mode":    "bidon_ca",
 				"mediator":          "max",
 			},
 		},
@@ -573,6 +576,7 @@ func TestBidmachine_ExtraParams(t *testing.T) {
 			},
 			expected: map[string]any{
 				"bidon_sdk_version": "2.0.0",
+				"mediation_mode":    "bidon",
 				"custom_param":      "value",
 				"another_param":     float64(123), // JSON unmarshals numbers as float64
 			},
@@ -589,6 +593,7 @@ func TestBidmachine_ExtraParams(t *testing.T) {
 			},
 			expected: map[string]any{
 				"bidon_sdk_version": "3.0.0",
+				"mediation_mode":    "bidon",
 				"mediator":          "levelplay",
 				"test_mode":         true,
 				"placement_id":      "test123",
