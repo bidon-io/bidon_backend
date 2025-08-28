@@ -95,6 +95,7 @@ services:
       - '7001-7003:7001-7003'
     environment:
       - REDIS_CLUSTER_START_PORT=7001
+      - REDIS_CLUSTER_ANNOUNCE_HOSTNAME=host.docker.internal
     volumes:
       - redis-data:/data
 
@@ -147,6 +148,39 @@ services:
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'kafka:29092'
       SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
 
+  copilot-postgres:
+    image: postgres:17-alpine
+    profiles: ['copilot']
+    ports:
+        - "5433:5432"
+    environment:
+        POSTGRES_DB: postgres
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: postgres
+    volumes:
+        - copilot-pgdata:/var/lib/postgresql/data
+    healthcheck:
+        test: pg_isready -U postgres
+        interval: 5s
+  
+  copilot-api:
+    image: copilot
+    profiles: ['copilot']
+    ports:
+      - "8123:8000"
+    depends_on:
+      copilot-postgres:
+          condition: service_healthy
+      redis:
+        condition: service_started
+    env_file:
+      - ./copilot/.env
+    environment:
+      REDIS_URI: redis://redis:7001
+      REDIS_CLUSTER: True
+      REDIS_KEY_PREFIX: "copilot:"
+      DATABASE_URI: postgres://postgres:postgres@copilot-postgres:5432/postgres?sslmode=disable
+
   rust-test:
     profiles: ['test']
     build:
@@ -166,10 +200,10 @@ volumes:
   gocache:
   gomodcache-precommit:
   gocache-precommit:
-  redisdata:
   cargo-cache:
   target-cache:
   redis-data:
+  copilot-pgdata:
 
 networks:
   precommit-network:
