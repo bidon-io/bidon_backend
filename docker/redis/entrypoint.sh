@@ -2,6 +2,7 @@
 
 PORT=${REDIS_CLUSTER_START_PORT:-7001}
 NODES=${REDIS_CLUSTER_NODES:-3}
+ANNOUNCE_HOST=${REDIS_CLUSTER_ANNOUNCE_HOSTNAME:-host.docker.internal}
 
 # Computed vars
 ENDPORT=$((PORT+NODES))
@@ -19,10 +20,12 @@ while [ $((PORT < ENDPORT)) != "0" ]; do
       --dbfilename dump-${PORT}.rdb \
       --logfile ${PORT}.log \
       --protected-mode no \
-      --cluster-announce-ip 0.0.0.0 \
+      --bind 0.0.0.0 \
+      --cluster-announce-hostname ${ANNOUNCE_HOST} \
+      --cluster-preferred-endpoint-type hostname \
       --cluster-announce-port ${PORT} \
       --daemonize yes
-    HOSTS="$HOSTS 127.0.0.1:$PORT"
+    HOSTS="$HOSTS ${ANNOUNCE_HOST}:$PORT"
     PORT=$((PORT+1))
 done
 

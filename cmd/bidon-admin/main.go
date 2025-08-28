@@ -7,6 +7,8 @@ import (
 	"io/fs"
 	"log"
 	"net/http"
+	"net/http/httputil"
+	"net/url"
 	"os"
 	"os/signal"
 	"runtime"
@@ -99,6 +101,12 @@ func main() {
 	serv := adminecho.NewServer(adminService, authService)
 	api.RegisterHandlers(g, serv)
 
+	// Register the LangGraph proxy routes - inherits authentication from the group
+	g.GET("/api/copilot/*", proxyToLangGraph)
+	g.POST("/api/copilot/*", proxyToLangGraph)
+	g.PUT("/api/copilot/*", proxyToLangGraph)
+	g.DELETE("/api/copilot/*", proxyToLangGraph)
+
 	e.Use(echoprometheus.NewMiddleware("admin"))   // adds middleware to gather metrics
 	e.GET("/metrics", echoprometheus.NewHandler()) // adds route to serve gathered metrics
 
@@ -176,4 +184,51 @@ func prepareSnowflakeNode() (*snowflake.Node, error) {
 	}
 
 	return node, nil
+}
+
+// proxyToLangGraph creates a reverse proxy handler that forwards requests to the LangGraph server
+// while preserving authentication middleware and supporting Server-Sent Events (SSE).
+func proxyToLangGraph(c echo.Context) error {
+	authCtx, ok := c.Get("authCtx").(admin.AuthContext)
+	if !ok || authCtx == nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "unauthorized").SetInternal(
+			fmt.Errorf("failed to get auth context from request"),
+		)
+	}
+
+	if authCtx.UserID() <= 0 {
+		return echo.NewHTTPError(http.StatusUnauthorized, "unauthorized").SetInternal(
+			fmt.Errorf("invalid user ID in auth context: %d", authCtx.UserID()),
+		)
+	}
+
+	langGraphURL := os.Getenv("COPILOT_API_URL")
+	if langGraphURL == "" {
+		return echo.NewHTTPError(http.StatusInternalServerError, "COPILOT_API_URL environment variable is not set")
+	}
+
+	if !strings.HasPrefix(langGraphURL, "http://") && !strings.HasPrefix(langGraphURL, "https://") {
+		langGraphURL = "http://" + langGraphURL
+	}
+
+	targetURL, err := url.Parse(langGraphURL)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("Invalid COPILOT_API_URL: %v", err))
+	}
+
+	proxy := httputil.NewSingleHostReverseProxy(targetURL)
+	proxy.FlushInterval = 50 * time.Millisecond
+
+	// Modify the request to strip the /api/copilot prefix
+	originalDirector := proxy.Director
+	proxy.Director = func(req *http.Request) {
+		originalDirector(req)
+		req.URL.Path = strings.TrimPrefix(req.URL.Path, "/api/copilot")
+		if req.URL.Path == "" {
+			req.URL.Path = "/"
+		}
+	}
+
+	proxy.ServeHTTP(c.Response(), c.Request())
+	return nil
 }
