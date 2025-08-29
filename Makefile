@@ -40,3 +40,10 @@ docker-build-push-prod-migrate: docker-build-push-prod
 
 docker-build-push-prod-proxy: override TARGET=bidon-proxy
 docker-build-push-prod-proxy: docker-build-push-prod
+
+docker-build-push-prod-copilot:
+	cd copilot && \
+	uv run langgraph dockerfile Dockerfile && \
+	docker buildx build --platform linux/amd64 --provenance=false \
+		--cache-to type=inline --cache-from $(REGISTRY)/copilot \
+		$(tags) --push .
