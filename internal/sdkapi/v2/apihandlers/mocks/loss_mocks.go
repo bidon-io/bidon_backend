@@ -5,6 +5,7 @@ package mocks
 
 import (
 	"context"
+	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/v2/apihandlers"
 	"sync"
@@ -20,7 +21,7 @@ var _ apihandlers.LossNotificationHandler = &LossNotificationHandlerMock{}
 //
 //		// make and configure a mocked apihandlers.LossNotificationHandler
 //		mockedLossNotificationHandler := &LossNotificationHandlerMock{
-//			HandleLossFunc: func(ctx context.Context, bid *schema.Bid) error {
+//			HandleLossFunc: func(ctx context.Context, bid *schema.Bid, externalWinner *schema.ExternalWinner, config *auction.Config, bundle string, adType string) error {
 //				panic("mock out the HandleLoss method")
 //			},
 //		}
@@ -31,7 +32,7 @@ var _ apihandlers.LossNotificationHandler = &LossNotificationHandlerMock{}
 //	}
 type LossNotificationHandlerMock struct {
 	// HandleLossFunc mocks the HandleLoss method.
-	HandleLossFunc func(ctx context.Context, bid *schema.Bid) error
+	HandleLossFunc func(ctx context.Context, bid *schema.Bid, externalWinner *schema.ExternalWinner, config *auction.Config, bundle string, adType string) error
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -41,27 +42,43 @@ type LossNotificationHandlerMock struct {
 			Ctx context.Context
 			// Bid is the bid argument value.
 			Bid *schema.Bid
+			// ExternalWinner is the externalWinner argument value.
+			ExternalWinner *schema.ExternalWinner
+			// Config is the config argument value.
+			Config *auction.Config
+			// Bundle is the bundle argument value.
+			Bundle string
+			// AdType is the adType argument value.
+			AdType string
 		}
 	}
 	lockHandleLoss sync.RWMutex
 }
 
 // HandleLoss calls HandleLossFunc.
-func (mock *LossNotificationHandlerMock) HandleLoss(ctx context.Context, bid *schema.Bid) error {
+func (mock *LossNotificationHandlerMock) HandleLoss(ctx context.Context, bid *schema.Bid, externalWinner *schema.ExternalWinner, config *auction.Config, bundle string, adType string) error {
 	if mock.HandleLossFunc == nil {
 		panic("LossNotificationHandlerMock.HandleLossFunc: method is nil but LossNotificationHandler.HandleLoss was just called")
 	}
 	callInfo := struct {
-		Ctx context.Context
-		Bid *schema.Bid
+		Ctx            context.Context
+		Bid            *schema.Bid
+		ExternalWinner *schema.ExternalWinner
+		Config         *auction.Config
+		Bundle         string
+		AdType         string
 	}{
-		Ctx: ctx,
-		Bid: bid,
+		Ctx:            ctx,
+		Bid:            bid,
+		ExternalWinner: externalWinner,
+		Config:         config,
+		Bundle:         bundle,
+		AdType:         adType,
 	}
 	mock.lockHandleLoss.Lock()
 	mock.calls.HandleLoss = append(mock.calls.HandleLoss, callInfo)
 	mock.lockHandleLoss.Unlock()
-	return mock.HandleLossFunc(ctx, bid)
+	return mock.HandleLossFunc(ctx, bid, externalWinner, config, bundle, adType)
 }
 
 // HandleLossCalls gets all the calls that were made to HandleLoss.
@@ -69,12 +86,20 @@ func (mock *LossNotificationHandlerMock) HandleLoss(ctx context.Context, bid *sc
 //
 //	len(mockedLossNotificationHandler.HandleLossCalls())
 func (mock *LossNotificationHandlerMock) HandleLossCalls() []struct {
-	Ctx context.Context
-	Bid *schema.Bid
+	Ctx            context.Context
+	Bid            *schema.Bid
+	ExternalWinner *schema.ExternalWinner
+	Config         *auction.Config
+	Bundle         string
+	AdType         string
 } {
 	var calls []struct {
-		Ctx context.Context
-		Bid *schema.Bid
+		Ctx            context.Context
+		Bid            *schema.Bid
+		ExternalWinner *schema.ExternalWinner
+		Config         *auction.Config
+		Bundle         string
+		AdType         string
 	}
 	mock.lockHandleLoss.RLock()
 	calls = mock.calls.HandleLoss

@@ -2,6 +2,7 @@ package notification_test
 
 import (
 	"context"
+	"errors"
 	"sync"
 	"testing"
 	"time"
@@ -75,7 +76,7 @@ func TestHandler_HandleStats_WinBid(t *testing.T) {
 	wg := &sync.WaitGroup{}
 	wg.Add(4) // We have 4 bid in the auction result, wait all
 
-	sender := &mocks.SenderMock{SendEventFunc: func(ctx context.Context, p notification.Params) {
+	sender := &mocks.SenderMock{SendEventFunc: func(_ context.Context, p notification.Params) {
 		defer wg.Done()
 
 		if p.FirstPrice != 7.89 {
@@ -148,7 +149,7 @@ func TestHandler_HandleStats_Loss(t *testing.T) {
 	wg := &sync.WaitGroup{}
 	wg.Add(1) // We have 1 bid in the auction result, should wait single goroutine to finish
 
-	sender := &mocks.SenderMock{SendEventFunc: func(ctx context.Context, p notification.Params) {
+	sender := &mocks.SenderMock{SendEventFunc: func(_ context.Context, p notification.Params) {
 		wg.Done()
 	}}
 
@@ -161,6 +162,756 @@ func TestHandler_HandleStats_Loss(t *testing.T) {
 
 	if waitTimeout(wg, 1*time.Second) {
 		t.Errorf("timeout waiting for events, sent event lower than expected")
+	}
+}
+
+func TestHandler_HandleWin_ExternalNotificationsEnabled(t *testing.T) {
+	ctx := context.Background()
+
+	bid := &schema.Bid{
+		AuctionID:               "test-auction-id",
+		AuctionConfigurationID:  123,
+		AuctionConfigurationUID: "test-config-uid",
+		DemandID:                "test-demand",
+		Price:                   5.0,
+		AuctionPriceFloor:       1.0,
+		BidType:                 schema.RTBBidType,
+	}
+
+	config := &auction.Config{ExternalWinNotifications: true}
+
+	auctionResult := &notification.AuctionResult{
+		AuctionID: "test-auction-id",
+		Bids: []notification.Bid{
+			{ID: "bid-1", Price: 5.0, NURL: "http://win-url-1", LURL: "http://loss-url-1"},
+			{ID: "bid-2", Price: 3.0, NURL: "http://win-url-2", LURL: "http://loss-url-2"},
+			{ID: "bid-3", Price: 2.0, NURL: "http://win-url-3", LURL: "http://loss-url-3"},
+		},
+	}
+
+	mockRepo := &mocks.AuctionResultRepoMock{
+		FindFunc: func(_ context.Context, auctionID string) (*notification.AuctionResult, error) {
+			if auctionID != "test-auction-id" {
+				t.Errorf("expected auction ID 'test-auction-id', got '%s'", auctionID)
+			}
+			return auctionResult, nil
+		},
+	}
+
+	wg := &sync.WaitGroup{}
+	wg.Add(3) // Expect 3 notifications (1 win + 2 loss)
+
+	var sentEvents []notification.Params
+	sender := &mocks.SenderMock{
+		SendEventFunc: func(_ context.Context, p notification.Params) {
+			defer wg.Done()
+			sentEvents = append(sentEvents, p)
+		},
+	}
+
+	handler := notification.Handler{
+		AuctionResultRepo: mockRepo,
+		Sender:            sender,
+	}
+
+	err := handler.HandleWin(ctx, bid, config, "test-bundle", "banner")
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+
+	if waitTimeout(wg, 1*time.Second) {
+		t.Errorf("timeout waiting for events")
+	}
+
+	// Verify we got the expected notifications
+	if len(sentEvents) != 3 {
+		t.Errorf("expected 3 events, got %d", len(sentEvents))
+	}
+
+	// Check that one event is NURL (win) and two are LURL (loss)
+	winCount := 0
+	lossCount := 0
+	for _, event := range sentEvents {
+		switch event.NotificationType {
+		case "NURL":
+			winCount++
+		case "LURL":
+			lossCount++
+		}
+	}
+
+	if winCount != 1 {
+		t.Errorf("expected 1 win notification, got %d", winCount)
+	}
+	if lossCount != 2 {
+		t.Errorf("expected 2 loss notifications, got %d", lossCount)
+	}
+}
+
+func TestHandler_HandleWin_ExternalNotificationsDisabled(t *testing.T) {
+	ctx := context.Background()
+
+	bid := &schema.Bid{
+		AuctionID:               "test-auction-id",
+		AuctionConfigurationID:  123,
+		AuctionConfigurationUID: "test-config-uid",
+		DemandID:                "test-demand",
+		Price:                   5.0,
+		BidType:                 schema.RTBBidType,
+	}
+
+	config := &auction.Config{ExternalWinNotifications: false}
+
+	mockRepo := &mocks.AuctionResultRepoMock{}
+	sender := &mocks.SenderMock{
+		SendEventFunc: func(_ context.Context, p notification.Params) {
+			t.Errorf("no events should be sent when external notifications are disabled")
+		},
+	}
+
+	handler := notification.Handler{
+		AuctionResultRepo: mockRepo,
+		Sender:            sender,
+	}
+
+	err := handler.HandleWin(ctx, bid, config, "test-bundle", "banner")
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+
+	// Give some time to ensure no events are sent
+	time.Sleep(100 * time.Millisecond)
+}
+
+func TestHandler_HandleWin_NonRTBBid(t *testing.T) {
+	ctx := context.Background()
+
+	bid := &schema.Bid{
+		AuctionID:               "test-auction-id",
+		AuctionConfigurationID:  123,
+		AuctionConfigurationUID: "test-config-uid",
+		DemandID:                "test-demand",
+		Price:                   5.0,
+		AuctionPriceFloor:       1.0,
+		BidType:                 schema.CPMBidType, // Non-RTB bid
+	}
+
+	config := &auction.Config{ExternalWinNotifications: true}
+
+	auctionResult := &notification.AuctionResult{
+		AuctionID: "test-auction-id",
+		Bids: []notification.Bid{
+			{ID: "bid-1", Price: 5.0, NURL: "http://win-url-1", LURL: "http://loss-url-1"},
+			{ID: "bid-2", Price: 3.0, NURL: "http://win-url-2", LURL: "http://loss-url-2"},
+		},
+	}
+
+	mockRepo := &mocks.AuctionResultRepoMock{
+		FindFunc: func(_ context.Context, auctionID string) (*notification.AuctionResult, error) {
+			return auctionResult, nil
+		},
+	}
+
+	wg := &sync.WaitGroup{}
+	wg.Add(2) // Expect 2 notifications (1 win + 1 loss) for all bids regardless of incoming bid type
+
+	var sentEvents []notification.Params
+	sender := &mocks.SenderMock{
+		SendEventFunc: func(_ context.Context, p notification.Params) {
+			defer wg.Done()
+			sentEvents = append(sentEvents, p)
+		},
+	}
+
+	handler := notification.Handler{
+		AuctionResultRepo: mockRepo,
+		Sender:            sender,
+	}
+
+	err := handler.HandleWin(ctx, bid, config, "test-bundle", "banner")
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+
+	if waitTimeout(wg, 1*time.Second) {
+		t.Errorf("timeout waiting for events")
+	}
+
+	// Verify we got the expected notifications
+	if len(sentEvents) != 2 {
+		t.Errorf("expected 2 events, got %d", len(sentEvents))
+	}
+
+	// Check that one event is NURL (win) and one is LURL (loss)
+	winCount := 0
+	lossCount := 0
+	for _, event := range sentEvents {
+		switch event.NotificationType {
+		case "NURL":
+			winCount++
+		case "LURL":
+			lossCount++
+		}
+	}
+
+	if winCount != 1 {
+		t.Errorf("expected 1 win notification, got %d", winCount)
+	}
+	if lossCount != 1 {
+		t.Errorf("expected 1 loss notification, got %d", lossCount)
+	}
+}
+
+func TestHandler_HandleLoss_ExternalNotificationsEnabled(t *testing.T) {
+	ctx := context.Background()
+
+	bid := &schema.Bid{
+		AuctionID:               "test-auction-id",
+		AuctionConfigurationID:  123,
+		AuctionConfigurationUID: "test-config-uid",
+		DemandID:                "test-demand",
+		Price:                   3.0,
+		AuctionPriceFloor:       1.0,
+		BidType:                 schema.RTBBidType,
+	}
+
+	externalWinner := &schema.ExternalWinner{
+		DemandID: "external-demand",
+		Price:    &[]float64{5.0}[0],
+	}
+
+	config := &auction.Config{ExternalWinNotifications: true}
+
+	auctionResult := &notification.AuctionResult{
+		AuctionID: "test-auction-id",
+		Bids: []notification.Bid{
+			{ID: "bid-1", Price: 3.0, LURL: "http://loss-url-1"},
+			{ID: "bid-2", Price: 2.0, LURL: "http://loss-url-2"},
+		},
+	}
+
+	mockRepo := &mocks.AuctionResultRepoMock{
+		FindFunc: func(ctx context.Context, auctionID string) (*notification.AuctionResult, error) {
+			return auctionResult, nil
+		},
+	}
+
+	wg := &sync.WaitGroup{}
+	wg.Add(2) // Expect 2 loss notifications
+
+	var sentEvents []notification.Params
+	sender := &mocks.SenderMock{
+		SendEventFunc: func(_ context.Context, p notification.Params) {
+			defer wg.Done()
+			sentEvents = append(sentEvents, p)
+
+			// Verify it's a loss notification
+			if p.NotificationType != "LURL" {
+				t.Errorf("expected LURL notification, got %s", p.NotificationType)
+			}
+
+			// Verify first price includes external winner
+			if p.FirstPrice != 5.0 {
+				t.Errorf("expected first price 5.0, got %f", p.FirstPrice)
+			}
+		},
+	}
+
+	handler := notification.Handler{
+		AuctionResultRepo: mockRepo,
+		Sender:            sender,
+	}
+
+	err := handler.HandleLoss(ctx, bid, externalWinner, config, "test-bundle", "banner")
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+
+	if waitTimeout(wg, 1*time.Second) {
+		t.Errorf("timeout waiting for events")
+	}
+
+	if len(sentEvents) != 2 {
+		t.Errorf("expected 2 events, got %d", len(sentEvents))
+	}
+}
+
+func TestHandler_HandleLoss_ExternalNotificationsDisabled(t *testing.T) {
+	ctx := context.Background()
+
+	bid := &schema.Bid{
+		AuctionID:               "test-auction-id",
+		AuctionConfigurationID:  123,
+		AuctionConfigurationUID: "test-config-uid",
+		DemandID:                "test-demand",
+		Price:                   3.0,
+		BidType:                 schema.RTBBidType,
+	}
+
+	externalWinner := &schema.ExternalWinner{
+		DemandID: "external-demand",
+		Price:    &[]float64{5.0}[0],
+	}
+
+	config := &auction.Config{ExternalWinNotifications: false}
+
+	mockRepo := &mocks.AuctionResultRepoMock{}
+	sender := &mocks.SenderMock{
+		SendEventFunc: func(_ context.Context, p notification.Params) {
+			t.Errorf("no events should be sent when external notifications are disabled")
+		},
+	}
+
+	handler := notification.Handler{
+		AuctionResultRepo: mockRepo,
+		Sender:            sender,
+	}
+
+	err := handler.HandleLoss(ctx, bid, externalWinner, config, "test-bundle", "banner")
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+
+	// Give some time to ensure no events are sent
+	time.Sleep(100 * time.Millisecond)
+}
+
+func TestHandler_HandleLoss_NonRTBBid(t *testing.T) {
+	ctx := context.Background()
+
+	bid := &schema.Bid{
+		AuctionID:               "test-auction-id",
+		AuctionConfigurationID:  123,
+		AuctionConfigurationUID: "test-config-uid",
+		DemandID:                "test-demand",
+		Price:                   3.0,
+		AuctionPriceFloor:       1.0,
+		BidType:                 schema.CPMBidType, // Non-RTB bid
+	}
+
+	externalWinner := &schema.ExternalWinner{
+		DemandID: "external-demand",
+		Price:    &[]float64{5.0}[0],
+	}
+
+	config := &auction.Config{ExternalWinNotifications: true}
+
+	auctionResult := &notification.AuctionResult{
+		AuctionID: "test-auction-id",
+		Bids: []notification.Bid{
+			{ID: "bid-1", Price: 3.0, LURL: "http://loss-url-1"},
+			{ID: "bid-2", Price: 2.0, LURL: "http://loss-url-2"},
+		},
+	}
+
+	mockRepo := &mocks.AuctionResultRepoMock{
+		FindFunc: func(_ context.Context, auctionID string) (*notification.AuctionResult, error) {
+			return auctionResult, nil
+		},
+	}
+
+	wg := &sync.WaitGroup{}
+	wg.Add(2) // Expect 2 loss notifications for all bids regardless of incoming bid type
+
+	var sentEvents []notification.Params
+	sender := &mocks.SenderMock{
+		SendEventFunc: func(_ context.Context, p notification.Params) {
+			defer wg.Done()
+			sentEvents = append(sentEvents, p)
+
+			// Verify it's a loss notification
+			if p.NotificationType != "LURL" {
+				t.Errorf("expected LURL notification, got %s", p.NotificationType)
+			}
+
+			// Verify first price includes external winner
+			if p.FirstPrice != 5.0 {
+				t.Errorf("expected first price 5.0, got %f", p.FirstPrice)
+			}
+		},
+	}
+
+	handler := notification.Handler{
+		AuctionResultRepo: mockRepo,
+		Sender:            sender,
+	}
+
+	err := handler.HandleLoss(ctx, bid, externalWinner, config, "test-bundle", "banner")
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+
+	if waitTimeout(wg, 1*time.Second) {
+		t.Errorf("timeout waiting for events")
+	}
+
+	if len(sentEvents) != 2 {
+		t.Errorf("expected 2 events, got %d", len(sentEvents))
+	}
+}
+
+func TestHandler_HandleWin_NilConfig(t *testing.T) {
+	ctx := context.Background()
+
+	bid := &schema.Bid{
+		AuctionID:               "test-auction-id",
+		AuctionConfigurationID:  123,
+		AuctionConfigurationUID: "test-config-uid",
+		DemandID:                "test-demand",
+		Price:                   5.0,
+		BidType:                 schema.RTBBidType,
+	}
+
+	mockRepo := &mocks.AuctionResultRepoMock{}
+	sender := &mocks.SenderMock{
+		SendEventFunc: func(_ context.Context, p notification.Params) {
+			t.Errorf("no events should be sent when config is nil")
+		},
+	}
+
+	handler := notification.Handler{
+		AuctionResultRepo: mockRepo,
+		Sender:            sender,
+	}
+
+	err := handler.HandleWin(ctx, bid, nil, "test-bundle", "banner")
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+}
+
+func TestHandler_HandleWin_AuctionResultNotFound(t *testing.T) {
+	ctx := context.Background()
+
+	bid := &schema.Bid{
+		AuctionID:               "test-auction-id",
+		AuctionConfigurationID:  123,
+		AuctionConfigurationUID: "test-config-uid",
+		DemandID:                "test-demand",
+		Price:                   5.0,
+		BidType:                 schema.RTBBidType,
+	}
+
+	config := &auction.Config{ExternalWinNotifications: true}
+
+	mockRepo := &mocks.AuctionResultRepoMock{
+		FindFunc: func(ctx context.Context, auctionID string) (*notification.AuctionResult, error) {
+			return nil, nil // Auction result not found
+		},
+	}
+
+	sender := &mocks.SenderMock{
+		SendEventFunc: func(_ context.Context, p notification.Params) {
+			t.Errorf("no events should be sent when auction result is not found")
+		},
+	}
+
+	handler := notification.Handler{
+		AuctionResultRepo: mockRepo,
+		Sender:            sender,
+	}
+
+	err := handler.HandleWin(ctx, bid, config, "test-bundle", "banner")
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+}
+
+func TestHandler_HandleLoss_NilConfig(t *testing.T) {
+	ctx := context.Background()
+
+	bid := &schema.Bid{
+		AuctionID:               "test-auction-id",
+		AuctionConfigurationID:  123,
+		AuctionConfigurationUID: "test-config-uid",
+		DemandID:                "test-demand",
+		Price:                   3.0,
+		BidType:                 schema.RTBBidType,
+	}
+
+	externalWinner := &schema.ExternalWinner{
+		DemandID: "external-demand",
+		Price:    &[]float64{5.0}[0],
+	}
+
+	mockRepo := &mocks.AuctionResultRepoMock{}
+	sender := &mocks.SenderMock{
+		SendEventFunc: func(_ context.Context, p notification.Params) {
+			t.Errorf("no events should be sent when config is nil")
+		},
+	}
+
+	handler := notification.Handler{
+		AuctionResultRepo: mockRepo,
+		Sender:            sender,
+	}
+
+	err := handler.HandleLoss(ctx, bid, externalWinner, nil, "test-bundle", "banner")
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+}
+
+func TestHandler_HandleLoss_AuctionResultNotFound(t *testing.T) {
+	ctx := context.Background()
+
+	bid := &schema.Bid{
+		AuctionID:               "test-auction-id",
+		AuctionConfigurationID:  123,
+		AuctionConfigurationUID: "test-config-uid",
+		DemandID:                "test-demand",
+		Price:                   3.0,
+		BidType:                 schema.RTBBidType,
+	}
+
+	externalWinner := &schema.ExternalWinner{
+		DemandID: "external-demand",
+		Price:    &[]float64{5.0}[0],
+	}
+
+	config := &auction.Config{ExternalWinNotifications: true}
+
+	mockRepo := &mocks.AuctionResultRepoMock{
+		FindFunc: func(ctx context.Context, auctionID string) (*notification.AuctionResult, error) {
+			return nil, nil // Auction result not found
+		},
+	}
+
+	sender := &mocks.SenderMock{
+		SendEventFunc: func(_ context.Context, p notification.Params) {
+			t.Errorf("no events should be sent when auction result is not found")
+		},
+	}
+
+	handler := notification.Handler{
+		AuctionResultRepo: mockRepo,
+		Sender:            sender,
+	}
+
+	err := handler.HandleLoss(ctx, bid, externalWinner, config, "test-bundle", "banner")
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+}
+
+func TestHandler_HandleStats_ExternalNotificationsEnabled(t *testing.T) {
+	ctx := context.Background()
+
+	stats := schema.Stats{
+		AuctionID:               "test-auction-id",
+		AuctionPricefloor:       1.0,
+		AuctionConfigurationID:  123,
+		AuctionConfigurationUID: "test-config-uid",
+		Result: schema.AuctionResult{
+			Status: "SUCCESS",
+			Price:  5.0,
+		},
+		AdUnits: []schema.AuctionAdUnitResult{
+			{Price: 5.0, Status: "WIN"},
+		},
+	}
+
+	config := &auction.Config{ExternalWinNotifications: true}
+
+	// Mock repo should not be called when external notifications are enabled
+	mockRepo := &mocks.AuctionResultRepoMock{
+		FindFunc: func(ctx context.Context, auctionID string) (*notification.AuctionResult, error) {
+			t.Errorf("Find should not be called when external notifications are enabled")
+			return nil, nil
+		},
+	}
+
+	sender := &mocks.SenderMock{
+		SendEventFunc: func(_ context.Context, p notification.Params) {
+			t.Errorf("no events should be sent when external notifications are enabled")
+		},
+	}
+
+	handler := notification.Handler{
+		AuctionResultRepo: mockRepo,
+		Sender:            sender,
+	}
+
+	handler.HandleStats(ctx, stats, config, "test-bundle", "banner")
+
+	// Give some time to ensure no events are sent
+	time.Sleep(100 * time.Millisecond)
+}
+
+func TestHandler_HandleWin_RepoError(t *testing.T) {
+	ctx := context.Background()
+
+	bid := &schema.Bid{
+		AuctionID:               "test-auction-id",
+		AuctionConfigurationID:  123,
+		AuctionConfigurationUID: "test-config-uid",
+		DemandID:                "test-demand",
+		Price:                   5.0,
+		BidType:                 schema.RTBBidType,
+	}
+
+	config := &auction.Config{ExternalWinNotifications: true}
+
+	mockRepo := &mocks.AuctionResultRepoMock{
+		FindFunc: func(ctx context.Context, auctionID string) (*notification.AuctionResult, error) {
+			return nil, errors.New("database error")
+		},
+	}
+
+	sender := &mocks.SenderMock{
+		SendEventFunc: func(_ context.Context, p notification.Params) {
+			t.Errorf("no events should be sent when repo returns error")
+		},
+	}
+
+	handler := notification.Handler{
+		AuctionResultRepo: mockRepo,
+		Sender:            sender,
+	}
+
+	err := handler.HandleWin(ctx, bid, config, "test-bundle", "banner")
+	if err == nil {
+		t.Errorf("expected error from repo, got nil")
+	}
+}
+
+func TestHandler_HandleLoss_RepoError(t *testing.T) {
+	ctx := context.Background()
+
+	bid := &schema.Bid{
+		AuctionID:               "test-auction-id",
+		AuctionConfigurationID:  123,
+		AuctionConfigurationUID: "test-config-uid",
+		DemandID:                "test-demand",
+		Price:                   3.0,
+		BidType:                 schema.RTBBidType,
+	}
+
+	externalWinner := &schema.ExternalWinner{
+		DemandID: "external-demand",
+		Price:    &[]float64{5.0}[0],
+	}
+
+	config := &auction.Config{ExternalWinNotifications: true}
+
+	mockRepo := &mocks.AuctionResultRepoMock{
+		FindFunc: func(ctx context.Context, auctionID string) (*notification.AuctionResult, error) {
+			return nil, errors.New("database error")
+		},
+	}
+
+	sender := &mocks.SenderMock{
+		SendEventFunc: func(_ context.Context, p notification.Params) {
+			t.Errorf("no events should be sent when repo returns error")
+		},
+	}
+
+	handler := notification.Handler{
+		AuctionResultRepo: mockRepo,
+		Sender:            sender,
+	}
+
+	err := handler.HandleLoss(ctx, bid, externalWinner, config, "test-bundle", "banner")
+	if err == nil {
+		t.Errorf("expected error from repo, got nil")
+	}
+}
+
+func TestHandler_HandleWin_EmptyPrices(t *testing.T) {
+	ctx := context.Background()
+
+	bid := &schema.Bid{
+		AuctionID:               "test-auction-id",
+		AuctionConfigurationID:  123,
+		AuctionConfigurationUID: "test-config-uid",
+		DemandID:                "test-demand",
+		Price:                   0.0, // Zero price
+		AuctionPriceFloor:       0.0, // Zero floor
+		BidType:                 schema.RTBBidType,
+	}
+
+	config := &auction.Config{ExternalWinNotifications: true}
+
+	auctionResult := &notification.AuctionResult{
+		AuctionID: "test-auction-id",
+		Bids:      []notification.Bid{}, // Empty bids
+	}
+
+	mockRepo := &mocks.AuctionResultRepoMock{
+		FindFunc: func(ctx context.Context, auctionID string) (*notification.AuctionResult, error) {
+			return auctionResult, nil
+		},
+	}
+
+	sender := &mocks.SenderMock{
+		SendEventFunc: func(_ context.Context, p notification.Params) {
+			t.Errorf("no events should be sent when no valid prices")
+		},
+	}
+
+	handler := notification.Handler{
+		AuctionResultRepo: mockRepo,
+		Sender:            sender,
+	}
+
+	err := handler.HandleWin(ctx, bid, config, "test-bundle", "banner")
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+}
+
+func TestHandler_HandleLoss_NilExternalWinner(t *testing.T) {
+	ctx := context.Background()
+
+	bid := &schema.Bid{
+		AuctionID:               "test-auction-id",
+		AuctionConfigurationID:  123,
+		AuctionConfigurationUID: "test-config-uid",
+		DemandID:                "test-demand",
+		Price:                   3.0,
+		AuctionPriceFloor:       1.0,
+		BidType:                 schema.RTBBidType,
+	}
+
+	config := &auction.Config{ExternalWinNotifications: true}
+
+	auctionResult := &notification.AuctionResult{
+		AuctionID: "test-auction-id",
+		Bids: []notification.Bid{
+			{ID: "bid-1", Price: 3.0, LURL: "http://loss-url-1"},
+		},
+	}
+
+	mockRepo := &mocks.AuctionResultRepoMock{
+		FindFunc: func(ctx context.Context, auctionID string) (*notification.AuctionResult, error) {
+			return auctionResult, nil
+		},
+	}
+
+	wg := &sync.WaitGroup{}
+	wg.Add(1) // Expect 1 loss notification
+
+	sender := &mocks.SenderMock{
+		SendEventFunc: func(_ context.Context, p notification.Params) {
+			defer wg.Done()
+			if p.NotificationType != "LURL" {
+				t.Errorf("expected LURL notification, got %s", p.NotificationType)
+			}
+		},
+	}
+
+	handler := notification.Handler{
+		AuctionResultRepo: mockRepo,
+		Sender:            sender,
+	}
+
+	err := handler.HandleLoss(ctx, bid, nil, config, "test-bundle", "banner") // nil external winner
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+
+	if waitTimeout(wg, 1*time.Second) {
+		t.Errorf("timeout waiting for events")
 	}
 }
 
