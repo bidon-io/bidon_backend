@@ -38,7 +38,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        component: [bidon-admin, bidon-sdkapi, bidon-migrate, bidon-proxy]
+        component: [bidon-admin, bidon-sdkapi, bidon-migrate, bidon-proxy, bidon-copilot]
     env:
       TARGET: ${{ matrix.component }}
     steps:
@@ -64,7 +64,20 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Install uv
+        if: ${{ matrix.component == 'bidon-copilot' }}
+        run: pip install uv
+
       - name: Build and push image
+        if: ${{ matrix.component == 'bidon-copilot' }}
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 12
+          max_attempts: 3
+          command: make docker-build-push-prod-copilot
+
+      - name: Build and push image
+        if: ${{ matrix.component != 'bidon-copilot' }}
         uses: nick-fields/retry@v3
         with:
           timeout_minutes: 12
