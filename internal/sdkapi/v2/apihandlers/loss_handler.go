@@ -8,6 +8,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 
+	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
@@ -21,7 +22,7 @@ type LossHandler struct {
 
 //go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/loss_mocks.go -pkg mocks . LossNotificationHandler
 type LossNotificationHandler interface {
-	HandleLoss(ctx context.Context, bid *schema.Bid) error
+	HandleLoss(ctx context.Context, bid *schema.Bid, externalWinner *schema.ExternalWinner, config *auction.Config, bundle, adType string) error
 }
 
 func (h *LossHandler) Handle(c echo.Context) error {
@@ -34,6 +35,13 @@ func (h *LossHandler) Handle(c echo.Context) error {
 	h.EventLogger.Log(adEvent, func(err error) {
 		sdkapi.LogError(c, fmt.Errorf("log loss event: %v", err))
 	})
+
+	// Call notification handler
+	bid := req.raw.Bid
+	err = h.NotificationHandler.HandleLoss(c.Request().Context(), bid, &req.raw.ExternalWinner, req.auctionConfig, req.raw.App.Bundle, string(req.raw.AdType))
+	if err != nil {
+		sdkapi.LogError(c, fmt.Errorf("handle loss notification: %v", err))
+	}
 
 	return c.JSON(http.StatusOK, map[string]any{"success": true})
 }

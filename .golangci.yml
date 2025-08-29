@@ -18,6 +18,11 @@ linters:
         - -SA1019
         - -SA5008
         - all
+    revive:
+      rules:
+        - name: unused-parameter
+          disabled: false
+          exclude: [ "**/*_test.go" ]
   exclusions:
     generated: lax
     presets:

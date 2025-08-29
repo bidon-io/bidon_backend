@@ -11,6 +11,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/bidon-io/bidon-backend/config"
+	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event/engine"
@@ -26,20 +27,19 @@ func SetupWinHandler() apihandlers.WinHandler {
 
 	// Create a mock WinNotificationHandler
 	mockHandler := &mocks.WinNotificationHandlerMock{}
-	mockHandler.HandleWinFunc = func(ctx context.Context, imp *schema.Bid) error {
+	mockHandler.HandleWinFunc = func(_ context.Context, _ *schema.Bid, _ *auction.Config, _, _ string) error {
 		return nil
 	}
 	appFetcher := &mocks.AppFetcherMock{
-		FetchCachedFunc: func(ctx context.Context, appKey string, appBundle string) (sdkapi.App, error) {
+		FetchCachedFunc: func(_ context.Context, _ string, _ string) (sdkapi.App, error) {
 			return app, nil
 		},
 	}
 	geocoder := &mocks.GeocoderMock{
-		LookupFunc: func(ctx context.Context, ipString string) (geocoder.GeoData, error) {
+		LookupFunc: func(_ context.Context, _ string) (geocoder.GeoData, error) {
 			return geodata, nil
 		},
 	}
-
 	// Create a new WinHandler instance
 	return apihandlers.WinHandler{
 		BaseHandler: &apihandlers.BaseHandler[schema.WinRequest, *schema.WinRequest]{

@@ -18,7 +18,7 @@ require (
 	github.com/go-redis/cache/v9 v9.0.0
 	github.com/go-redis/redismock/v9 v9.2.0
 	github.com/gofrs/uuid/v5 v5.3.1
-	github.com/golang-jwt/jwt/v5 v5.2.1
+	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/google/go-cmp v0.6.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
 	github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus v1.0.1
@@ -36,7 +36,7 @@ require (
 	github.com/prebid/openrtb/v19 v19.0.0
 	github.com/pressly/goose/v3 v3.24.1
 	github.com/prometheus/client_golang v1.20.5
-	github.com/redis/go-redis/v9 v9.7.0
+	github.com/redis/go-redis/v9 v9.7.3
 	github.com/shopspring/decimal v1.4.0
 	github.com/spazzymoto/echo-scs-session v1.0.0
 	github.com/twmb/franz-go v1.18.1

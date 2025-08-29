@@ -5,6 +5,7 @@ package mocks
 
 import (
 	"context"
+	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/notification"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	"sync"
@@ -207,5 +208,89 @@ func (mock *SenderMock) SendEventCalls() []struct {
 	mock.lockSendEvent.RLock()
 	calls = mock.calls.SendEvent
 	mock.lockSendEvent.RUnlock()
+	return calls
+}
+
+// Ensure, that ConfigFetcherMock does implement notification.ConfigFetcher.
+// If this is not the case, regenerate this file with moq.
+var _ notification.ConfigFetcher = &ConfigFetcherMock{}
+
+// ConfigFetcherMock is a mock implementation of notification.ConfigFetcher.
+//
+//	func TestSomethingThatUsesConfigFetcher(t *testing.T) {
+//
+//		// make and configure a mocked notification.ConfigFetcher
+//		mockedConfigFetcher := &ConfigFetcherMock{
+//			FetchByUIDCachedFunc: func(ctx context.Context, appID int64, id string, uid string) *auction.Config {
+//				panic("mock out the FetchByUIDCached method")
+//			},
+//		}
+//
+//		// use mockedConfigFetcher in code that requires notification.ConfigFetcher
+//		// and then make assertions.
+//
+//	}
+type ConfigFetcherMock struct {
+	// FetchByUIDCachedFunc mocks the FetchByUIDCached method.
+	FetchByUIDCachedFunc func(ctx context.Context, appID int64, id string, uid string) *auction.Config
+
+	// calls tracks calls to the methods.
+	calls struct {
+		// FetchByUIDCached holds details about calls to the FetchByUIDCached method.
+		FetchByUIDCached []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// AppID is the appID argument value.
+			AppID int64
+			// ID is the id argument value.
+			ID string
+			// UID is the uid argument value.
+			UID string
+		}
+	}
+	lockFetchByUIDCached sync.RWMutex
+}
+
+// FetchByUIDCached calls FetchByUIDCachedFunc.
+func (mock *ConfigFetcherMock) FetchByUIDCached(ctx context.Context, appID int64, id string, uid string) *auction.Config {
+	if mock.FetchByUIDCachedFunc == nil {
+		panic("ConfigFetcherMock.FetchByUIDCachedFunc: method is nil but ConfigFetcher.FetchByUIDCached was just called")
+	}
+	callInfo := struct {
+		Ctx   context.Context
+		AppID int64
+		ID    string
+		UID   string
+	}{
+		Ctx:   ctx,
+		AppID: appID,
+		ID:    id,
+		UID:   uid,
+	}
+	mock.lockFetchByUIDCached.Lock()
+	mock.calls.FetchByUIDCached = append(mock.calls.FetchByUIDCached, callInfo)
+	mock.lockFetchByUIDCached.Unlock()
+	return mock.FetchByUIDCachedFunc(ctx, appID, id, uid)
+}
+
+// FetchByUIDCachedCalls gets all the calls that were made to FetchByUIDCached.
+// Check the length with:
+//
+//	len(mockedConfigFetcher.FetchByUIDCachedCalls())
+func (mock *ConfigFetcherMock) FetchByUIDCachedCalls() []struct {
+	Ctx   context.Context
+	AppID int64
+	ID    string
+	UID   string
+} {
+	var calls []struct {
+		Ctx   context.Context
+		AppID int64
+		ID    string
+		UID   string
+	}
+	mock.lockFetchByUIDCached.RLock()
+	calls = mock.calls.FetchByUIDCached
+	mock.lockFetchByUIDCached.RUnlock()
 	return calls
 }

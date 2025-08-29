@@ -16,9 +16,10 @@ import (
 type Handler struct {
 	AuctionResultRepo AuctionResultRepo
 	Sender            Sender
+	ConfigFetcher     ConfigFetcher
 }
 
-//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/mocks.go -pkg mocks . AuctionResultRepo Sender
+//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/mocks.go -pkg mocks . AuctionResultRepo Sender ConfigFetcher
 
 type AuctionResultRepo interface {
 	CreateOrUpdate(ctx context.Context, adObject *schema.AdObject, bids []Bid) error
@@ -27,6 +28,10 @@ type AuctionResultRepo interface {
 
 type Sender interface {
 	SendEvent(ctx context.Context, p Params)
+}
+
+type ConfigFetcher interface {
+	FetchByUIDCached(ctx context.Context, appID int64, id, uid string) *auction.Config
 }
 
 // HandleBiddingRound is used to handle bidding round, it is called after all adapters have responded with bids or errors
@@ -97,6 +102,11 @@ func (h Handler) HandleBiddingRound(ctx context.Context, adObject *schema.AdObje
 func (h Handler) HandleStats(ctx context.Context, stats schema.Stats, config *auction.Config, bundle, adType string) {
 	if config == nil {
 		log.Printf("HandleStats: cannot find config: %v", stats.AuctionConfigurationID)
+		return
+	}
+
+	// If external_win_notification is enabled, do nothing - wait for /win or /loss request
+	if config.ExternalWinNotifications {
 		return
 	}
 
@@ -242,13 +252,159 @@ func (h Handler) HandleShow(ctx context.Context, impression *schema.Bid, bundle,
 // HandleWin is used to handle /win request
 // If external_win_notification is enabled - send win/loss notifications to demands
 // If external_win_notification is disabled - do nothing
-func (h Handler) HandleWin(ctx context.Context, bid *schema.Bid) error {
+func (h Handler) HandleWin(ctx context.Context, bid *schema.Bid, config *auction.Config, bundle, adType string) error {
+	if config == nil {
+		log.Printf("HandleWin: cannot find config: %v", bid.AuctionConfigurationID)
+		return nil
+	}
+
+	// If external_win_notification is disabled, do nothing (notifications already sent in HandleStats)
+	if !config.ExternalWinNotifications {
+		return nil
+	}
+
+	// Get AuctionResult from redis
+	auctionResult, err := h.AuctionResultRepo.Find(ctx, bid.AuctionID)
+	if err != nil {
+		log.Printf("HandleWin: AuctionResult exception: %s", err)
+		return err
+	}
+
+	if auctionResult == nil {
+		log.Printf("HandleWin: AuctionResult not found: %s", bid.AuctionID)
+		return nil
+	}
+
+	// Find the winning bid and send notifications
+	winningPrice := bid.GetPrice()
+	var prices []float64
+	prices = append(prices, winningPrice)
+
+	// Collect all bid prices to determine second price
+	for _, auctionBid := range auctionResult.Bids {
+		prices = append(prices, auctionBid.Price)
+	}
+
+	slices.Sort(prices)
+	var firstPrice, secondPrice float64
+
+	if len(prices) == 0 {
+		log.Printf("HandleWin: no valid prices: %s", bid.AuctionID)
+		return nil
+	} else if len(prices) == 1 {
+		firstPrice = prices[0]
+		secondPrice = prices[0]
+	} else {
+		firstPrice = prices[len(prices)-1]
+		secondPrice = prices[len(prices)-2]
+	}
+
+	// Send notifications for all bids stored in auctionResult, regardless of incoming bid type
+	for _, auctionBid := range auctionResult.Bids {
+		if auctionBid.Price == winningPrice {
+			// Send win notification
+			go h.Sender.SendEvent(ctx, Params{
+				Bundle:           bundle,
+				AdType:           adType,
+				AuctionID:        bid.AuctionID,
+				NotificationType: "NURL",
+				URL:              auctionBid.NURL,
+				Bid:              auctionBid,
+				Reason:           openrtb3.LossWon,
+				FirstPrice:       firstPrice,
+				SecondPrice:      secondPrice,
+			})
+		} else {
+			// Send loss notification
+			go h.Sender.SendEvent(ctx, Params{
+				Bundle:           bundle,
+				AdType:           adType,
+				AuctionID:        bid.AuctionID,
+				NotificationType: "LURL",
+				URL:              auctionBid.LURL,
+				Bid:              auctionBid,
+				Reason:           openrtb3.LossLostToHigherBid,
+				FirstPrice:       firstPrice,
+				SecondPrice:      secondPrice,
+			})
+		}
+	}
+
 	return nil
 }
 
 // HandleLoss is used to handle /loss request
 // If external_win_notification is enabled - send win/loss notifications to demands
 // If external_win_notification is disabled - do nothing
-func (h Handler) HandleLoss(ctx context.Context, bid *schema.Bid) error {
+func (h Handler) HandleLoss(ctx context.Context, bid *schema.Bid, externalWinner *schema.ExternalWinner, config *auction.Config, bundle, adType string) error {
+	if config == nil {
+		log.Printf("HandleLoss: cannot find config: %v", bid.AuctionConfigurationID)
+		return nil
+	}
+
+	// If external_win_notification is disabled, do nothing (notifications already sent in HandleStats)
+	if !config.ExternalWinNotifications {
+		return nil
+	}
+
+	// Get AuctionResult from redis
+	auctionResult, err := h.AuctionResultRepo.Find(ctx, bid.AuctionID)
+	if err != nil {
+		log.Printf("HandleLoss: AuctionResult exception: %s", err)
+		return err
+	}
+
+	if auctionResult == nil {
+		log.Printf("HandleLoss: AuctionResult not found: %s", bid.AuctionID)
+		return nil
+	}
+
+	// Calculate prices including external winner
+	var prices []float64
+	prices = append(prices, bid.GetPrice())
+
+	// Add external winner price if available
+	if externalWinner != nil {
+		externalPrice := externalWinner.GetPrice()
+		if externalPrice > 0 {
+			prices = append(prices, externalPrice)
+		}
+	}
+
+	// Collect all bid prices
+	for _, auctionBid := range auctionResult.Bids {
+		prices = append(prices, auctionBid.Price)
+	}
+
+	slices.Sort(prices)
+	var firstPrice, secondPrice float64
+
+	if len(prices) == 0 {
+		log.Printf("HandleLoss: no valid prices: %s", bid.AuctionID)
+		return nil
+	} else if len(prices) == 1 {
+		firstPrice = prices[0]
+		secondPrice = prices[0]
+	} else {
+		firstPrice = prices[len(prices)-1]
+		secondPrice = prices[len(prices)-2]
+	}
+
+	// Send loss notifications for all bids stored in auctionResult
+	// (since external winner won)
+	for _, auctionBid := range auctionResult.Bids {
+		go h.Sender.SendEvent(ctx, Params{
+			Bundle:           bundle,
+			AdType:           adType,
+			AuctionID:        bid.AuctionID,
+			NotificationType: "LURL",
+			URL:              auctionBid.LURL,
+			Bid:              auctionBid,
+			Reason:           openrtb3.LossLostToHigherBid,
+			FirstPrice:       firstPrice,
+			SecondPrice:      secondPrice,
+		})
+	}
+
 	return nil
 }

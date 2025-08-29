@@ -8,6 +8,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 
+	"github.com/bidon-io/bidon-backend/internal/auction"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/event"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
@@ -21,7 +22,7 @@ type WinHandler struct {
 
 //go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/win_mocks.go -pkg mocks . WinNotificationHandler
 type WinNotificationHandler interface {
-	HandleWin(ctx context.Context, bid *schema.Bid) error
+	HandleWin(ctx context.Context, bid *schema.Bid, config *auction.Config, bundle, adType string) error
 }
 
 func (h *WinHandler) Handle(c echo.Context) error {
@@ -34,6 +35,13 @@ func (h *WinHandler) Handle(c echo.Context) error {
 	h.EventLogger.Log(demandRequestEvent, func(err error) {
 		sdkapi.LogError(c, fmt.Errorf("log win event: %v", err))
 	})
+
+	// Call notification handler
+	bid := req.raw.Bid
+	err = h.NotificationHandler.HandleWin(c.Request().Context(), bid, req.auctionConfig, req.raw.App.Bundle, string(req.raw.AdType))
+	if err != nil {
+		sdkapi.LogError(c, fmt.Errorf("handle win notification: %v", err))
+	}
 
 	return c.JSON(http.StatusOK, map[string]any{"success": true})
 }
