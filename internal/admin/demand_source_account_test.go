@@ -154,6 +154,22 @@ func Test_demandSourceAccountValidator_ValidateWithContext(t *testing.T) {
 			false,
 		},
 		{
+			"valid InMobi",
+			&DemandSourceAccountAttrs{
+				DemandSourceID: 1,
+				Extra: map[string]any{
+					"account_id": "627b73f7023d420018e2f038",
+					"foo":        "bar",
+				},
+			},
+			&DemandSource{
+				DemandSourceAttrs: DemandSourceAttrs{
+					ApiKey: string(adapter.InmobiKey),
+				},
+			},
+			false,
+		},
+		{
 			"valid nil Extra",
 			&DemandSourceAccountAttrs{
 				DemandSourceID: 1,
