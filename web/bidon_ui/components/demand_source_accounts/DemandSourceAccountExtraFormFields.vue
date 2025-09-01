@@ -116,9 +116,6 @@ const dataSchemas = {
     endpoint: yup.string().url().required().label("Endpoint"),
   }),
   inmobi: yup.object({
-    networkCode: yup.string().required().label("Network Code"),
-  }),
-  inmobi: yup.object({
     accountId: yup.string().required().label("Account Id"),
   }),
   mintegral: yup.object({

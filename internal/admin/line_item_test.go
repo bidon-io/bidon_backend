@@ -158,6 +158,24 @@ func Test_lineItemAttrsValidator_ValidateWithContext(t *testing.T) {
 			false,
 		},
 		{
+			"valid InMobi",
+			&LineItemAttrs{
+				AccountID: 1,
+				Extra: map[string]any{
+					"placement_id": "1621323861540",
+					"foo":          "bar",
+				},
+			},
+			&DemandSourceAccount{
+				DemandSource: DemandSource{
+					DemandSourceAttrs: DemandSourceAttrs{
+						ApiKey: string(adapter.InmobiKey),
+					},
+				},
+			},
+			false,
+		},
+		{
 			"valid Meta",
 			&LineItemAttrs{
 				AccountID: 1,
