@@ -267,6 +267,14 @@ const networks = ref<Network[]>([
     selectedAdUnitIds: [],
   },
   {
+    label: "InMobi",
+    key: "inmobi",
+    isBidding: true,
+    enabled: false,
+    adUnits: [],
+    selectedAdUnitIds: [],
+  },
+  {
     label: "Meta",
     key: "meta",
     isBidding: true,
