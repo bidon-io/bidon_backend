@@ -29,6 +29,7 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
+    "@langgraph-js/sdk": "^1.10.3",
     "@nuxtjs/tailwindcss": "^6.7.0",
     "@pinia/nuxt": "^0.4.11",
     "@types/humps": "^2.0.4",

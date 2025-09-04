@@ -202,6 +202,13 @@ func proxyToLangGraph(c echo.Context) error {
 		)
 	}
 
+	// Restrict access to copilot to admin users only
+	if !authCtx.IsAdmin() {
+		return echo.NewHTTPError(http.StatusForbidden, "forbidden").SetInternal(
+			fmt.Errorf("admin access required for copilot"),
+		)
+	}
+
 	langGraphURL := os.Getenv("COPILOT_API_URL")
 	if langGraphURL == "" {
 		return echo.NewHTTPError(http.StatusInternalServerError, "COPILOT_API_URL environment variable is not set")

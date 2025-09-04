@@ -6,6 +6,9 @@ For detailed instructions on setting up a self-hosted instance of Bidon, visit o
 
 [Self-Hosted Deployment Guide](https://docs.bidon.org/docs/server/self-hosted)
 
+## Copilot (LangGraph) — Local Setup
+See the minimal setup guide at `copilot/README.md`.
+
 ## Set up development environment
 ```shell
 make local-init
