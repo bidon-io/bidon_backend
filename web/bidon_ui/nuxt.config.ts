@@ -6,6 +6,12 @@ export default defineNuxtConfig({
 
   ssr: false,
 
+  runtimeConfig: {
+    public: {
+      copilotBase: "/api/copilot",
+    },
+  },
+
   css: [
     "primevue/resources/themes/lara-light-blue/theme.css",
     "primevue/resources/primevue.css",

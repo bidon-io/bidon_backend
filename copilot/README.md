@@ -22,16 +22,24 @@ If you want to enable LangSmith tracing, add your LangSmith API key to the `.env
 ```text
 # .env
 LANGSMITH_API_KEY=lsv2...
+ANTHROPIC_API_KEY=...
+LANGSMITH_API_KEY=...
+LLAMA_INDEX_API_KEY=...
 ```
 
-3. Start the LangGraph Server.
+3. Start the LangGraph Server. (Or Docker-compose setup)
 
 ```shell
 uv run langgraph dev
 ```
 
-## Build own LangGraph Docker image
+4. Docker-compose setup
 
+- Build own LangGraph Docker image
 ```shell
 uv run langgraph build -t copilot
+```
+
+```shell
+docker-compose up --profile copilot
 ```
