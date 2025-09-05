@@ -209,9 +209,9 @@ func proxyToLangGraph(c echo.Context) error {
 		)
 	}
 
-	langGraphURL := os.Getenv("COPILOT_API_URL")
+	langGraphURL := os.Getenv("COPILOT_BASE_URL")
 	if langGraphURL == "" {
-		return echo.NewHTTPError(http.StatusInternalServerError, "COPILOT_API_URL environment variable is not set")
+		return echo.NewHTTPError(http.StatusInternalServerError, "COPILOT_BASE_URL environment variable is not set")
 	}
 
 	if !strings.HasPrefix(langGraphURL, "http://") && !strings.HasPrefix(langGraphURL, "https://") {
@@ -220,7 +220,7 @@ func proxyToLangGraph(c echo.Context) error {
 
 	targetURL, err := url.Parse(langGraphURL)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("Invalid COPILOT_API_URL: %v", err))
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("Invalid COPILOT_BASE_URL: %v", err))
 	}
 
 	proxy := httputil.NewSingleHostReverseProxy(targetURL)
