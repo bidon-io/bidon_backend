@@ -127,7 +127,7 @@ func TestService_Run(t *testing.T) {
 	t.Run("Successful Run", func(t *testing.T) {
 		params := &auction.ExecutionParams{
 			Req:     request,
-			AppID:   1,
+			App:     testApp(1),
 			Country: "US",
 			GeoData: geoData,
 			Log:     func(string) {},
@@ -147,7 +147,7 @@ func TestService_Run(t *testing.T) {
 		invalidRequest.AdObject.AuctionKey = "invalid_key"
 		params := &auction.ExecutionParams{
 			Req:     &invalidRequest,
-			AppID:   1,
+			App:     testApp(1),
 			Country: "US",
 			GeoData: geoData,
 			Log:     func(string) {},
@@ -165,7 +165,7 @@ func TestService_Run(t *testing.T) {
 		}
 		params := &auction.ExecutionParams{
 			Req:     request,
-			AppID:   1,
+			App:     testApp(1),
 			Country: "US",
 			GeoData: geoData,
 			Log:     func(string) {},
@@ -189,7 +189,7 @@ func TestService_Run(t *testing.T) {
 
 		params := &auction.ExecutionParams{
 			Req:     request,
-			AppID:   1,
+			App:     testApp(1),
 			Country: "US",
 			GeoData: geoData,
 			Log:     func(string) {},
@@ -247,7 +247,7 @@ func TestService_Run(t *testing.T) {
 
 		params := &auction.ExecutionParams{
 			Req:     &invalidRequest,
-			AppID:   1,
+			App:     testApp(1),
 			Country: "US",
 			GeoData: geoData,
 			Log:     func(string) {},
@@ -302,7 +302,7 @@ func TestService_Run(t *testing.T) {
 
 		params := &auction.ExecutionParams{
 			Req:     &noKeyRequest,
-			AppID:   1,
+			App:     testApp(1),
 			Country: "US",
 			GeoData: geoData,
 			Log:     func(string) {},
@@ -362,7 +362,7 @@ func TestService_Run(t *testing.T) {
 
 		params := &auction.ExecutionParams{
 			Req:     &noKeyRequest,
-			AppID:   1,
+			App:     testApp(1),
 			Country: "US",
 			GeoData: geoData,
 			Log:     func(string) {},
@@ -448,7 +448,7 @@ func TestService_Run(t *testing.T) {
 
 		params := &auction.ExecutionParams{
 			Req:     &noKeyRequest,
-			AppID:   1,
+			App:     testApp(1),
 			Country: "US",
 			GeoData: geoData,
 			Log:     func(string) {},
@@ -573,7 +573,7 @@ func TestService_Run_BidmachineWithMediator(t *testing.T) {
 
 	params := &auction.ExecutionParams{
 		Req:     request,
-		AppID:   1,
+		App:     testApp(1),
 		Country: "US",
 		GeoData: geoData,
 		Log:     func(string) {},
@@ -700,7 +700,7 @@ func TestService_Run_BiddingWithDemandExt(t *testing.T) {
 
 	params := &auction.ExecutionParams{
 		Req:     request,
-		AppID:   1,
+		App:     testApp(1),
 		Country: "US",
 		GeoData: geoData,
 		Log:     func(string) {},
@@ -816,7 +816,7 @@ func TestService_Run_BidmachineWithMediatorInBidding(t *testing.T) {
 
 	params := &auction.ExecutionParams{
 		Req:     request,
-		AppID:   1,
+		App:     testApp(1),
 		Country: "US",
 		GeoData: geoData,
 		Log:     func(string) {},
@@ -1010,7 +1010,7 @@ func TestService_Run_BuildDemandExtVariousAdapters(t *testing.T) {
 
 	params := &auction.ExecutionParams{
 		Req:     request,
-		AppID:   1,
+		App:     testApp(1),
 		Country: "US",
 		GeoData: geoData,
 		Log:     func(string) {},
@@ -1154,7 +1154,7 @@ func TestBidmachineWithPlacementID(t *testing.T) {
 
 	params := &auction.ExecutionParams{
 		Req:     request,
-		AppID:   1,
+		App:     testApp(1),
 		Country: "US",
 		GeoData: geoData,
 		Log:     func(string) {},

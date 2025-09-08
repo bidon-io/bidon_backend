@@ -47,6 +47,16 @@ const columns = [
       placeholder: "Search by package name",
     },
   },
+  {
+    field: "storeId",
+    header: "Store ID",
+    filter: {
+      field: "storeId",
+      type: "input",
+      matchMode: FilterMatchMode.CONTAINS,
+      placeholder: "Search by store ID",
+    },
+  },
   ResourceTableFields.Owner,
   {
     field: "",

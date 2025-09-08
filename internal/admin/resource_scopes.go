@@ -7,7 +7,7 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/admin/resource"
 )
 
-//go:generate go run -mod=mod github.com/matryer/moq@latest -out resource_scopes_mocks_test.go . AllResourceQuerier OwnedResourceQuerier OwnedOrSharedResourceQuerier
+//go:generate go run -mod=mod github.com/matryer/moq@v0.5.3 -out resource_scopes_mocks_test.go . AllResourceQuerier OwnedResourceQuerier OwnedOrSharedResourceQuerier
 
 // AllResourceQuerier defines the interface for querying all resources from persistence layer.
 // Resource repositories implement this interface.

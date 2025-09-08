@@ -14,7 +14,7 @@ type Handler interface {
 	Handle(c echo.Context) error
 }
 
-//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/mocks.go -pkg mocks . Handler
+//go:generate go run -mod=mod github.com/matryer/moq@v0.5.3 -out mocks/mocks.go -pkg mocks . Handler
 
 type Server struct {
 	AuctionHandler Handler

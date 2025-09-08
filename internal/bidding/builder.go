@@ -19,6 +19,7 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters/amazon"
 	"github.com/bidon-io/bidon-backend/internal/bidding/openrtb"
 	"github.com/bidon-io/bidon-backend/internal/device"
+	"github.com/bidon-io/bidon-backend/internal/sdkapi"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/geocoder"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 )
@@ -31,7 +32,7 @@ type Builder struct {
 
 var ErrNoAdaptersMatched = errors.New("no adapters matched")
 
-//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/mocks.go -pkg mocks . AdaptersBuilder NotificationHandler BidCacher
+//go:generate go run -mod=mod github.com/matryer/moq@v0.5.3 -out mocks/mocks.go -pkg mocks . AdaptersBuilder NotificationHandler BidCacher
 
 type AdaptersBuilder interface {
 	Build(adapterKey adapter.Key, cfg adapter.ProcessedConfigsMap) (*adapters.Bidder, error)
@@ -46,7 +47,7 @@ type BidCacher interface {
 }
 
 type BuildParams struct {
-	AppID           int64
+	App             *sdkapi.App
 	AuctionRequest  schema.AuctionRequest
 	GeoData         geocoder.GeoData
 	AdapterConfigs  adapter.ProcessedConfigsMap
@@ -93,14 +94,7 @@ func (b *Builder) HoldAuction(ctx context.Context, params *BuildParams) (Auction
 		Test: *bool2int(auctionRequest.Test),
 		AT:   1,
 		TMax: 2000,
-		App: &openrtb2.App{
-			Ver:    auctionRequest.App.Version,
-			Bundle: auctionRequest.App.Bundle,
-			ID:     strconv.FormatInt(params.AppID, 10),
-			Publisher: &openrtb2.Publisher{
-				ID: "SELLER_ID",
-			},
-		},
+		App: b.buildApp(auctionRequest.App, params),
 		Device: b.BuildDevice(auctionRequest.Device, auctionRequest.User, params.GeoData),
 		Imp: []openrtb2.Imp{
 			{
@@ -233,6 +227,35 @@ func (b *Builder) processAdapter(
 	demandResponse.Error = err
 
 	bids <- *demandResponse
+}
+
+func (b *Builder) buildApp(schemaApp schema.App, params *BuildParams) *openrtb2.App {
+	app := &openrtb2.App{
+		Ver:    schemaApp.Version,
+		Bundle: schemaApp.Bundle,
+		ID:     strconv.FormatInt(params.App.ID, 10),
+		Publisher: &openrtb2.Publisher{
+			ID: "SELLER_ID",
+		},
+	}
+
+	// Add store metadata if available
+	if params.App != nil {
+		if params.App.StoreID != "" {
+			// Use StoreID as Bundle if it's available and Bundle from schema is empty
+			if app.Bundle == "" {
+				app.Bundle = params.App.StoreID
+			}
+		}
+		if params.App.StoreURL != "" {
+			app.StoreURL = params.App.StoreURL
+		}
+		if len(params.App.Categories) > 0 {
+			app.Cat = params.App.Categories
+		}
+	}
+
+	return app
 }
 
 func (b *Builder) BuildDevice(device schema.Device, user schema.User, geo geocoder.GeoData) *openrtb2.Device {

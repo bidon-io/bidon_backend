@@ -21,7 +21,7 @@ type ConfigHandler struct {
 	EventLogger               *event.Logger
 }
 
-//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/config_mocks.go -pkg mocks . AdapterInitConfigsFetcher
+//go:generate go run -mod=mod github.com/matryer/moq@v0.5.3 -out mocks/config_mocks.go -pkg mocks . AdapterInitConfigsFetcher
 type AdapterInitConfigsFetcher interface {
 	FetchAdapterInitConfigs(ctx context.Context, appID int64, adapterKeys []adapter.Key, setAmazonSlots bool, setOrder bool) ([]sdkapi.AdapterInitConfig, error)
 }

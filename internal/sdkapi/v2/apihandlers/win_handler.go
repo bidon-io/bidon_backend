@@ -20,7 +20,7 @@ type WinHandler struct {
 	NotificationHandler WinNotificationHandler
 }
 
-//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/win_mocks.go -pkg mocks . WinNotificationHandler
+//go:generate go run -mod=mod github.com/matryer/moq@v0.5.3 -out mocks/win_mocks.go -pkg mocks . WinNotificationHandler
 type WinNotificationHandler interface {
 	HandleWin(ctx context.Context, bid *schema.Bid, config *auction.Config, bundle, adType string) error
 }

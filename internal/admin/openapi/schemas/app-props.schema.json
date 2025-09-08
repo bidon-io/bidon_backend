@@ -28,6 +28,21 @@
     "app_key": {
       "type": "string",
       "description": "A unique key for the app"
+    },
+    "store_id": {
+      "type": "string",
+      "description": "The unique identifier of the app in app stores (e.g., Apple App Store ID, Google Play Store ID)"
+    },
+    "store_url": {
+      "type": "string",
+      "description": "Direct URL to the app's store page"
+    },
+    "categories": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Array of IAB content categories describing the app"
     }
   }
 }

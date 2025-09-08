@@ -1,6 +1,6 @@
 package admin
 
-//go:generate go run -mod=mod github.com/matryer/moq@latest -out app_mocks_test.go . AppRepo
+//go:generate go run -mod=mod github.com/matryer/moq@v0.5.3 -out app_mocks_test.go . AppRepo
 
 import (
 	"context"
@@ -26,6 +26,9 @@ type AppAttrs struct {
 	PackageName string     `json:"package_name"`
 	UserID      int64      `json:"user_id"`
 	AppKey      string     `json:"app_key"`
+	StoreID     string     `json:"store_id"`
+	StoreURL    string     `json:"store_url"`
+	Categories  []string   `json:"categories"`
 }
 
 type PlatformID string

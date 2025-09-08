@@ -46,14 +46,14 @@ type Response struct {
 
 type ExecutionParams struct {
 	Req     *schema.AuctionRequest
-	AppID   int64
+	App     *sdkapi.App
 	Country string
 	GeoData geocoder.GeoData
 	Log     func(string)
 	LogErr  func(err error)
 }
 
-//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/service_mocks.go -pkg mocks . ConfigFetcher AuctionBuilder AdapterKeysFetcher
+//go:generate go run -mod=mod github.com/matryer/moq@v0.5.3 -out mocks/service_mocks.go -pkg mocks . ConfigFetcher AuctionBuilder AdapterKeysFetcher
 
 type ConfigFetcher interface {
 	Match(ctx context.Context, appID int64, adType ad.Type, segmentID int64, version string) (*Config, error)
@@ -90,7 +90,7 @@ func (s *Service) Run(ctx context.Context, params *ExecutionParams) (*Response, 
 	segmentParams := &segment.Params{
 		Country: params.Country,
 		Ext:     req.Segment.Ext,
-		AppID:   params.AppID,
+		AppID:   params.App.ID,
 	}
 
 	sgmnt := s.SegmentMatcher.Match(ctx, segmentParams)
@@ -104,7 +104,7 @@ func (s *Service) Run(ctx context.Context, params *ExecutionParams) (*Response, 
 		req.AdCache,
 	)
 
-	adapterKeys, err = s.AdapterKeysFetcher.FetchEnabledAdapterKeys(ctx, params.AppID, adapterKeys)
+	adapterKeys, err = s.AdapterKeysFetcher.FetchEnabledAdapterKeys(ctx, params.App.ID, adapterKeys)
 	if err != nil {
 		return nil, err
 	}
@@ -116,13 +116,13 @@ func (s *Service) Run(ctx context.Context, params *ExecutionParams) (*Response, 
 			return nil, err
 		}
 
-		auctionConfig = s.ConfigFetcher.FetchByUIDCached(ctx, params.AppID, "0", publicUID.String())
+		auctionConfig = s.ConfigFetcher.FetchByUIDCached(ctx, params.App.ID, "0", publicUID.String())
 		if auctionConfig == nil {
 			err = sdkapi.ErrInvalidAuctionKey
 			return nil, err
 		}
 	} else {
-		auctionConfig, err = s.ConfigFetcher.Match(ctx, params.AppID, req.AdType, sgmnt.ID, "v2")
+		auctionConfig, err = s.ConfigFetcher.Match(ctx, params.App.ID, req.AdType, sgmnt.ID, "v2")
 	}
 	if err != nil {
 		err = sdkapi.ErrNoAdsFound
@@ -133,7 +133,7 @@ func (s *Service) Run(ctx context.Context, params *ExecutionParams) (*Response, 
 	req.AdObject.PriceFloor = priceFloor(req, auctionConfig)
 
 	bp := &BuildParams{
-		AppID:                params.AppID,
+		App:                  params.App,
 		AdType:               req.AdType,
 		AdFormat:             req.AdObject.Format(),
 		DeviceType:           req.Device.Type,

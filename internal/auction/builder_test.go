@@ -12,8 +12,13 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/auction/mocks"
 	"github.com/bidon-io/bidon-backend/internal/bidding"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
+	"github.com/bidon-io/bidon-backend/internal/sdkapi"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 )
+
+func testApp(id int64) *sdkapi.App {
+	return &sdkapi.App{ID: id}
+}
 
 type BuilderMocks struct {
 	AdUnitsMatcher               *mocks.AdUnitsMatcherMock
@@ -132,6 +137,7 @@ func TestBuilder_Build(t *testing.T) {
 				},
 			})),
 			params: &auction.BuildParams{
+				App: testApp(1),
 				Adapters:             []adapter.Key{adapter.GAMKey, adapter.BidmachineKey},
 				AuctionRequest:       request,
 				PriceFloor:           0.02,
@@ -208,6 +214,7 @@ func TestBuilder_Build(t *testing.T) {
 				),
 			),
 			params: &auction.BuildParams{
+				App: testApp(1),
 				Adapters:             []adapter.Key{adapter.GAMKey, adapter.BidmachineKey},
 				AuctionRequest:       request,
 				PriceFloor:           0.02,
@@ -249,6 +256,7 @@ func TestBuilder_Build(t *testing.T) {
 				},
 			})),
 			params: &auction.BuildParams{
+				App: testApp(1),
 				Adapters:             []adapter.Key{adapter.GAMKey, adapter.BidmachineKey},
 				AuctionRequest:       request,
 				PriceFloor:           0.02,
@@ -304,6 +312,7 @@ func TestBuilder_Build(t *testing.T) {
 				}),
 			),
 			params: &auction.BuildParams{
+				App: testApp(1),
 				Adapters:             []adapter.Key{adapter.GAMKey, adapter.BidmachineKey},
 				AuctionRequest:       request,
 				PriceFloor:           0.01,
@@ -327,6 +336,7 @@ func TestBuilder_Build(t *testing.T) {
 				}),
 			),
 			params: &auction.BuildParams{
+				App: testApp(1),
 				Adapters:       []adapter.Key{adapter.GAMKey, adapter.BidmachineKey},
 				AuctionRequest: request,
 				PriceFloor:     0.01,
@@ -354,6 +364,7 @@ func TestBuilder_Build(t *testing.T) {
 				},
 			})),
 			params: &auction.BuildParams{
+				App: testApp(1),
 				AuctionKey:           "1ERNSV33K4000",
 				Adapters:             []adapter.Key{adapter.GAMKey, adapter.BidmachineKey},
 				AuctionRequest:       request,

@@ -2,7 +2,7 @@ package admin
 
 import "context"
 
-//go:generate go run -mod=mod github.com/matryer/moq@latest -out demand_source_mocks_test.go . DemandSourceRepo
+//go:generate go run -mod=mod github.com/matryer/moq@v0.5.3 -out demand_source_mocks_test.go . DemandSourceRepo
 
 const DemandSourceResourceKey = "demand_source"
 
