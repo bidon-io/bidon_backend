@@ -58,7 +58,7 @@ func BuildBiddingAdapters(client *http.Client) AdaptersBuilder {
 	}
 }
 
-//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/mocks.go -pkg mocks . ConfigurationFetcher
+//go:generate go run -mod=mod github.com/matryer/moq@v0.5.3 -out mocks/mocks.go -pkg mocks . ConfigurationFetcher
 
 type ConfigurationFetcher interface {
 	// FetchCached is used get one profile per adapter key, if present

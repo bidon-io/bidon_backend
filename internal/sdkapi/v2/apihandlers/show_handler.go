@@ -22,7 +22,7 @@ type ShowHandler struct {
 	AdUnitLookup        AdUnitLookup
 }
 
-//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/show_mocks.go -pkg mocks . ShowNotificationHandler AdUnitLookup
+//go:generate go run -mod=mod github.com/matryer/moq@v0.5.3 -out mocks/show_mocks.go -pkg mocks . ShowNotificationHandler AdUnitLookup
 type ShowNotificationHandler interface {
 	HandleShow(context.Context, *schema.Bid, string, string)
 }

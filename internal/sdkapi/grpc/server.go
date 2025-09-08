@@ -35,7 +35,7 @@ func NewServer(auctionService AuctionService, appFetcher AppFetcher, geoCoder Ge
 	}
 }
 
-//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/mocks.go -pkg mocks . AppFetcher AuctionService Geocoder
+//go:generate go run -mod=mod github.com/matryer/moq@v0.5.3 -out mocks/mocks.go -pkg mocks . AppFetcher AuctionService Geocoder
 
 type AppFetcher interface {
 	FetchCached(ctx context.Context, appKey, appBundle string) (sdkapi.App, error)
@@ -69,7 +69,7 @@ func (s *Server) Bid(ctx context.Context, o *v3.Openrtb) (*v3.Openrtb, error) {
 	logger := ctxzap.Extract(ctx)
 	params := &auction.ExecutionParams{
 		Req:     ar,
-		AppID:   app.ID,
+		App:     &app,
 		Country: geo.CountryCode,
 		GeoData: geo,
 		Log: func(s string) {

@@ -35,6 +35,9 @@ const fields = [
   { label: "App Name", key: "humanName" },
   { label: "Platform", key: "platformId" },
   { label: "Package Name", key: "packageName" },
+  { label: "Store ID", key: "storeId" },
+  { label: "Store URL", key: "storeUrl", type: "link" },
+  { label: "Categories", key: "categories", type: "array" },
   {
     key: "lineItems",
     label: "Line Items",

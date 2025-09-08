@@ -8,6 +8,7 @@ import (
 	"database/sql"
 	"time"
 
+	"github.com/lib/pq"
 	"gorm.io/gorm"
 )
 
@@ -26,6 +27,9 @@ type App struct {
 	UpdatedAt   time.Time      `gorm:"column:updated_at;type:timestamp(6) without time zone;not null" json:"updated_at"`
 	PublicUID   sql.NullInt64  `gorm:"column:public_uid;type:bigint;uniqueIndex:index_apps_on_public_uid,priority:1" json:"public_uid"`
 	DeletedAt   gorm.DeletedAt `gorm:"column:deleted_at;type:timestamp(6) without time zone" json:"deleted_at"`
+	StoreID     sql.NullString `gorm:"column:store_id;type:character varying" json:"store_id"`
+	StoreURL    sql.NullString `gorm:"column:store_url;type:character varying" json:"store_url"`
+	Categories  pq.StringArray `gorm:"column:categories;type:text[]" json:"categories"`
 	User        User           `json:"user"`
 }
 

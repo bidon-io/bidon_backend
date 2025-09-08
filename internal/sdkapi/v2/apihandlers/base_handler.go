@@ -19,7 +19,7 @@ type BaseHandler[T any, PT rawRequest[T]] struct {
 	Geocoder      Geocoder
 }
 
-//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/mocks.go -pkg mocks . AppFetcher ConfigFetcher Geocoder
+//go:generate go run -mod=mod github.com/matryer/moq@v0.5.3 -out mocks/mocks.go -pkg mocks . AppFetcher ConfigFetcher Geocoder
 
 type AppFetcher interface {
 	FetchCached(ctx context.Context, appKey, appBundle string) (sdkapi.App, error)

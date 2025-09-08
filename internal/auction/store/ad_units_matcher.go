@@ -43,7 +43,7 @@ func (m *AdUnitsMatcher) Match(ctx context.Context, params *auction.BuildParams)
 		WithContext(ctx).
 		Select("bid_floor", "line_items.human_name", "line_items.bidding", "line_items.extra", "line_items.public_uid").
 		Where(map[string]any{
-			"app_id":  params.AppID,
+			"app_id":  params.App.ID,
 			"ad_type": db.AdTypeFromDomain(params.AdType),
 		}).
 		InnerJoins("Account", m.DB.Select("id")).

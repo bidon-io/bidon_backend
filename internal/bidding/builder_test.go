@@ -13,8 +13,13 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters/bidmachine"
 	"github.com/bidon-io/bidon-backend/internal/bidding/mocks"
+	"github.com/bidon-io/bidon-backend/internal/sdkapi"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 )
+
+func testApp(id int64) *sdkapi.App {
+	return &sdkapi.App{ID: id}
+}
 
 func TestMain(m *testing.M) {
 	goleak.VerifyTestMain(m)
@@ -73,7 +78,7 @@ func TestBuilder_Build(t *testing.T) {
 			adaptersBuilder:     adaptersBuilder,
 			notificationHandler: notificationHandler,
 			buildParams: &bidding.BuildParams{
-				AppID: 1,
+				App: testApp(1),
 				AdapterConfigs: adapter.ProcessedConfigsMap{
 					adapter.BidmachineKey: {
 						"endpoint":  "https://example.com",
@@ -108,7 +113,7 @@ func TestBuilder_Build(t *testing.T) {
 			adaptersBuilder:     adaptersBuilder,
 			notificationHandler: notificationHandler,
 			buildParams: &bidding.BuildParams{
-				AppID: 1,
+				App: testApp(1),
 				AdapterConfigs: adapter.ProcessedConfigsMap{
 					adapter.BidmachineKey: {
 						"endpoint":  "https://example.com",
@@ -146,7 +151,7 @@ func TestBuilder_Build(t *testing.T) {
 			adaptersBuilder:     adaptersBuilder,
 			notificationHandler: notificationHandler,
 			buildParams: &bidding.BuildParams{
-				AppID: 1,
+				App: testApp(1),
 				AuctionRequest: schema.AuctionRequest{
 					AdObject: schema.AdObject{
 						Demands: map[adapter.Key]map[string]any{

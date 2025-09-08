@@ -20,7 +20,7 @@ type LossHandler struct {
 	NotificationHandler LossNotificationHandler
 }
 
-//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/loss_mocks.go -pkg mocks . LossNotificationHandler
+//go:generate go run -mod=mod github.com/matryer/moq@v0.5.3 -out mocks/loss_mocks.go -pkg mocks . LossNotificationHandler
 type LossNotificationHandler interface {
 	HandleLoss(ctx context.Context, bid *schema.Bid, externalWinner *schema.ExternalWinner, config *auction.Config, bundle, adType string) error
 }

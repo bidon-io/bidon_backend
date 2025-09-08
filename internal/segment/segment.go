@@ -47,7 +47,7 @@ type Matcher struct {
 	Fetcher Fetcher
 }
 
-//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/mocks.go -pkg mocks . Fetcher
+//go:generate go run -mod=mod github.com/matryer/moq@v0.5.3 -out mocks/mocks.go -pkg mocks . Fetcher
 
 type Fetcher interface {
 	FetchCached(ctx context.Context, appID int64) ([]Segment, error)

@@ -11,7 +11,7 @@ import (
 
 var ErrActionForbidden = errors.New("action forbidden")
 
-//go:generate go run -mod=mod github.com/matryer/moq@latest -out resource_mocks_test.go . ResourceManipulator AuthContext resourcePolicy resourceScope
+//go:generate go run -mod=mod github.com/matryer/moq@v0.5.3 -out resource_mocks_test.go . ResourceManipulator AuthContext resourcePolicy resourceScope
 
 type ResourceMeta struct {
 	Key         string              `json:"key"`

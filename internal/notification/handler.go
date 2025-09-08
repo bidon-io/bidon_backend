@@ -19,7 +19,7 @@ type Handler struct {
 	ConfigFetcher     ConfigFetcher
 }
 
-//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/mocks.go -pkg mocks . AuctionResultRepo Sender ConfigFetcher
+//go:generate go run -mod=mod github.com/matryer/moq@v0.5.3 -out mocks/mocks.go -pkg mocks . AuctionResultRepo Sender ConfigFetcher
 
 type AuctionResultRepo interface {
 	CreateOrUpdate(ctx context.Context, adObject *schema.AdObject, bids []Bid) error

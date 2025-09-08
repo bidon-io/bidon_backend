@@ -19,8 +19,13 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/db"
 	"github.com/bidon-io/bidon-backend/internal/db/dbtest"
 	"github.com/bidon-io/bidon-backend/internal/device"
+	"github.com/bidon-io/bidon-backend/internal/sdkapi"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 )
+
+func testApp(id int64) *sdkapi.App {
+	return &sdkapi.App{ID: id}
+}
 
 func TestAdUnitsMatcher_Match(t *testing.T) {
 	tx := testDB.Begin()
@@ -183,7 +188,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 	}{
 		{
 			params: &auction.BuildParams{
-				AppID:      apps[0].ID,
+				App:        testApp(apps[0].ID),
 				AdType:     ad.BannerType,
 				AdFormat:   ad.EmptyFormat,
 				DeviceType: device.PhoneType,
@@ -193,7 +198,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 		},
 		{
 			params: &auction.BuildParams{
-				AppID:      apps[0].ID,
+				App:        testApp(apps[0].ID),
 				AdType:     ad.BannerType,
 				AdFormat:   ad.AdaptiveFormat,
 				DeviceType: device.PhoneType,
@@ -226,7 +231,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 		},
 		{
 			params: &auction.BuildParams{
-				AppID:      apps[0].ID,
+				App:        testApp(apps[0].ID),
 				AdType:     ad.BannerType,
 				AdFormat:   ad.AdaptiveFormat,
 				DeviceType: device.TabletType,
@@ -259,7 +264,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 		},
 		{
 			params: &auction.BuildParams{
-				AppID:      apps[0].ID,
+				App:        testApp(apps[0].ID),
 				AdType:     ad.BannerType,
 				AdFormat:   ad.AdaptiveFormat,
 				DeviceType: device.UnknownType,
@@ -281,7 +286,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 		},
 		{
 			params: &auction.BuildParams{
-				AppID:      apps[0].ID,
+				App:        testApp(apps[0].ID),
 				AdType:     ad.BannerType,
 				AdFormat:   ad.BannerFormat,
 				DeviceType: device.TabletType,
@@ -314,7 +319,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 		},
 		{
 			params: &auction.BuildParams{
-				AppID:      apps[0].ID,
+				App:        testApp(apps[0].ID),
 				AdType:     ad.BannerType,
 				AdFormat:   ad.LeaderboardFormat,
 				DeviceType: device.TabletType,
@@ -347,7 +352,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 		},
 		{
 			params: &auction.BuildParams{
-				AppID:      apps[0].ID,
+				App:        testApp(apps[0].ID),
 				AdType:     ad.InterstitialType,
 				AdFormat:   ad.EmptyFormat,
 				DeviceType: device.PhoneType,
@@ -379,7 +384,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 		},
 		{
 			params: &auction.BuildParams{
-				AppID:      apps[1].ID,
+				App:        testApp(apps[1].ID),
 				AdType:     ad.BannerType,
 				AdFormat:   ad.MRECFormat,
 				DeviceType: device.PhoneType,
@@ -401,7 +406,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 		},
 		{
 			params: &auction.BuildParams{
-				AppID:      apps[0].ID,
+				App:        testApp(apps[0].ID),
 				AdType:     ad.BannerType,
 				AdFormat:   ad.AdaptiveFormat,
 				DeviceType: device.PhoneType,
@@ -424,7 +429,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 		},
 		{
 			params: &auction.BuildParams{
-				AppID:      apps[0].ID,
+				App:        testApp(apps[0].ID),
 				AdType:     ad.InterstitialType,
 				AdFormat:   ad.EmptyFormat,
 				DeviceType: device.PhoneType,
@@ -448,7 +453,7 @@ func TestAdUnitsMatcher_Match(t *testing.T) {
 		},
 		{
 			params: &auction.BuildParams{
-				AppID:      apps[0].ID,
+				App:        testApp(apps[0].ID),
 				AdType:     ad.InterstitialType,
 				AdFormat:   ad.EmptyFormat,
 				DeviceType: device.PhoneType,

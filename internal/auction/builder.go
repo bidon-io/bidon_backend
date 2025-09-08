@@ -10,6 +10,7 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/bidding"
 	"github.com/bidon-io/bidon-backend/internal/device"
+	"github.com/bidon-io/bidon-backend/internal/sdkapi"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/geocoder"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi/schema"
 	"github.com/bidon-io/bidon-backend/internal/segment"
@@ -24,7 +25,7 @@ type Builder struct {
 	BiddingAdaptersConfigBuilder BiddingAdaptersConfigBuilder
 }
 
-//go:generate go run -mod=mod github.com/matryer/moq@latest -out mocks/mocks.go -pkg mocks . AdUnitsMatcher BiddingBuilder BiddingAdaptersConfigBuilder
+//go:generate go run -mod=mod github.com/matryer/moq@v0.5.3 -out mocks/mocks.go -pkg mocks . AdUnitsMatcher BiddingBuilder BiddingAdaptersConfigBuilder
 type AdUnitsMatcher interface {
 	MatchCached(ctx context.Context, params *BuildParams) ([]AdUnit, error)
 }
@@ -38,7 +39,7 @@ type BiddingAdaptersConfigBuilder interface {
 }
 
 type BuildParams struct {
-	AppID                int64
+	App                  *sdkapi.App
 	AdType               ad.Type
 	AdFormat             ad.Format
 	DeviceType           device.Type
@@ -94,7 +95,7 @@ func (b *Builder) Build(ctx context.Context, params *BuildParams) (*Result, erro
 
 	adUnits, err := b.AdUnitsMatcher.MatchCached(ctx, &BuildParams{
 		Adapters:   params.Adapters,
-		AppID:      params.AppID,
+		App:        params.App,
 		AdType:     params.AdType,
 		AdFormat:   params.AdFormat,
 		DeviceType: params.DeviceType,
@@ -105,13 +106,13 @@ func (b *Builder) Build(ctx context.Context, params *BuildParams) (*Result, erro
 	}
 
 	adUnitsMap := buildAdUnitsMap(&adUnits)
-	adapterConfigs, err := b.BiddingAdaptersConfigBuilder.Build(ctx, params.AppID, params.Adapters, adUnitsMap)
+	adapterConfigs, err := b.BiddingAdaptersConfigBuilder.Build(ctx, params.App.ID, params.Adapters, adUnitsMap)
 	if err != nil {
 		return nil, err
 	}
 
 	biddingAuctionResult, err := b.BiddingBuilder.HoldAuction(ctx, &bidding.BuildParams{
-		AppID:           params.AppID,
+		App:             params.App,
 		AuctionRequest:  *params.AuctionRequest,
 		GeoData:         params.GeoData,
 		AdapterConfigs:  adapterConfigs,

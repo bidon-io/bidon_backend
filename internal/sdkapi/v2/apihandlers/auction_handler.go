@@ -45,7 +45,7 @@ func (h *AuctionHandler) Handle(c echo.Context) error {
 
 	params := &auction.ExecutionParams{
 		Req:     &req.raw,
-		AppID:   req.app.ID,
+		App:     &req.app,
 		Country: req.countryCode(),
 		GeoData: req.geoData,
 		Log: func(str string) {

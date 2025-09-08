@@ -39,6 +39,7 @@ func GenerateModels(db *sql.DB) {
 		gen.FieldGORMTag("settings", func(tag field.GormTag) field.GormTag {
 			return tag.Set("serializer", "json")
 		}),
+		gen.FieldType("categories", "pq.StringArray"),
 	)
 
 	demandSource := g.GenerateModel("demand_sources")

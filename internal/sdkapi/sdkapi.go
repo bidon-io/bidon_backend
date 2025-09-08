@@ -12,7 +12,10 @@ import (
 
 // App represents an app for the purposes of the SDK API
 type App struct {
-	ID int64
+	ID         int64
+	StoreID    string
+	StoreURL   string
+	Categories []string
 }
 
 func CheckBidonHeader(next echo.HandlerFunc) echo.HandlerFunc {

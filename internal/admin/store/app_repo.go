@@ -58,6 +58,18 @@ func (m appMapper) dbModel(a *admin.AppAttrs, id int64) *db.App {
 		appKey.Valid = true
 	}
 
+	storeID := sql.NullString{}
+	if a.StoreID != "" {
+		storeID.String = a.StoreID
+		storeID.Valid = true
+	}
+
+	storeURL := sql.NullString{}
+	if a.StoreURL != "" {
+		storeURL.String = a.StoreURL
+		storeURL.Valid = true
+	}
+
 	return &db.App{
 		ID:          id,
 		UserID:      a.UserID,
@@ -65,6 +77,9 @@ func (m appMapper) dbModel(a *admin.AppAttrs, id int64) *db.App {
 		HumanName:   a.HumanName,
 		PackageName: packageName,
 		AppKey:      appKey,
+		StoreID:     storeID,
+		StoreURL:    storeURL,
+		Categories:  a.Categories,
 	}
 }
 
@@ -85,6 +100,9 @@ func (m appMapper) resourceAttrs(a *db.App) admin.AppAttrs {
 		HumanName:   a.HumanName,
 		PackageName: a.PackageName.String,
 		AppKey:      a.AppKey.String,
+		StoreID:     a.StoreID.String,
+		StoreURL:    a.StoreURL.String,
+		Categories:  a.Categories,
 	}
 }
 
