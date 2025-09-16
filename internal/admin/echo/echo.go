@@ -46,7 +46,7 @@ func UseAuthorization(g *echo.Group, authService *auth.Service) {
 		}
 	})
 	g.Use(middleware.BasicAuthWithConfig(middleware.BasicAuthConfig{
-		Skipper: skipIfAny(skipIfWebAppOrAuth("Bearer"), skipIfAuthRoutes(), skipIfApiKey()),
+		Skipper: skipIfAny(skipIfWebAppOrAuth("Bearer"), skipIfAuthRoutes(), skipIfApiKey(), skipIfOpenAPISpec()),
 		Validator: func(username, password string, c echo.Context) (bool, error) {
 			if authService.IsSuperUser(username, password) {
 				c.Set("authCtx", stubAuthContext{})
@@ -58,7 +58,7 @@ func UseAuthorization(g *echo.Group, authService *auth.Service) {
 		},
 	}))
 	g.Use(echojwt.WithConfig(echojwt.Config{
-		Skipper: skipIfAny(skipIfWebAppOrAuth("Basic"), skipIfAuthRoutes(), skipIfApiKey()),
+		Skipper: skipIfAny(skipIfWebAppOrAuth("Basic"), skipIfAuthRoutes(), skipIfApiKey(), skipIfOpenAPISpec()),
 		SuccessHandler: func(c echo.Context) {
 			token := c.Get("user").(*jwt.Token)
 			claims := token.Claims.(*auth.JWTClaims)
@@ -73,12 +73,12 @@ func UseAuthorization(g *echo.Group, authService *auth.Service) {
 		},
 	}))
 	g.Use(session.LoadAndSaveWithConfig(session.SessionConfig{
-		Skipper:        skipIfAny(skipIfNotWebApp(), skipIfAuthRoutes()),
+		Skipper:        skipIfAny(skipIfNotWebApp(), skipIfAuthRoutes(), skipIfOpenAPISpec()),
 		SessionManager: sm,
 	}))
 	g.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			skipper := skipIfAny(skipIfNotWebApp(), skipIfAuthRoutes())
+			skipper := skipIfAny(skipIfNotWebApp(), skipIfAuthRoutes(), skipIfOpenAPISpec())
 			if skipper(c) {
 				return next(c)
 			}
@@ -307,6 +307,12 @@ func skipIfAuthIs(prefixes ...string) middleware.Skipper {
 func skipIfAuthRoutes() middleware.Skipper {
 	return func(c echo.Context) bool {
 		return strings.HasPrefix(c.Path(), "/auth")
+	}
+}
+
+func skipIfOpenAPISpec() middleware.Skipper {
+	return func(c echo.Context) bool {
+		return c.Path() == "/api/openapi.json"
 	}
 }
 
