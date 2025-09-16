@@ -226,7 +226,8 @@ func proxyToLangGraph(c echo.Context) error {
 	proxy := httputil.NewSingleHostReverseProxy(targetURL)
 	proxy.FlushInterval = 50 * time.Millisecond
 
-	// Modify the request to strip the /api/copilot prefix
+	// Modify the request to strip the /api/copilot prefix and forward minimal auth context
+	cookieVal := c.Request().Header.Get("Cookie")
 	originalDirector := proxy.Director
 	proxy.Director = func(req *http.Request) {
 		originalDirector(req)
@@ -234,6 +235,11 @@ func proxyToLangGraph(c echo.Context) error {
 		if req.URL.Path == "" {
 			req.URL.Path = "/"
 		}
+
+		if cookieVal != "" {
+			req.Header.Set("X-Admin-Session-Cookie", cookieVal)
+		}
+		req.Header.Del("Cookie")
 	}
 
 	proxy.ServeHTTP(c.Response(), c.Request())
