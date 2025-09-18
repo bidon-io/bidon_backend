@@ -25,7 +25,7 @@ from llama_index.indices.managed.llama_cloud import LlamaCloudIndex
 Settings.llm = None
 
 load_dotenv()
-BASE_URL = os.environ.get("API_BASE_URL", "https://app.bidon.com").rstrip("/")
+BASE_URL = os.environ.get("API_BASE_URL", "https://app.bidon.org").rstrip("/")
 SPEC_URL = f"{BASE_URL}/api/openapi.json"
 
 def fetch_spec() -> dict:
