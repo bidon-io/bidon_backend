@@ -7,7 +7,7 @@
   "image_distro": "wolfi",
   "http": {
     "configurable_headers": {
-      "include": ["X-Admin-Session-Cookie", "Cookie"]
+      "include": ["x-admin-session-cookie", "cookie", "x-bidon-app"]
     }
   }
 }

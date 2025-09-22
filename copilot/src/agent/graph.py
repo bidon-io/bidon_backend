@@ -17,6 +17,7 @@ from langchain_community.agent_toolkits.openapi import planner
 from langchain_community.agent_toolkits.openapi.spec import reduce_openapi_spec
 from langchain_community.utilities.requests import RequestsWrapper
 from langchain_core.runnables import RunnableConfig
+from langgraph.config import get_config
 from langchain_core.tools import tool
 from langgraph.prebuilt import create_react_agent
 from llama_index.core import Settings
@@ -67,12 +68,9 @@ def query_admin_api(task: str, config: RunnableConfig | None = None) -> str:
     spec.setdefault("servers", [{"url": BASE_URL}])
     spec = reduce_spec(filter_get_only(spec))
 
-    conf: Dict[str, Any] = {}
-    cookie = None
-    if config is not None:
-        conf = getattr(config, "configurable", None) or {}
-    cookie = (conf.get("X-Admin-Session-Cookie") or conf.get("Cookie"))
-
+    config = get_config() if config is None else config
+    conf = getattr(config, "configurable", None) or {}
+    cookie = conf.get("x-admin-session-cookie")
     if not cookie:
         return "Missing admin session cookie in config.configurable"
 
@@ -146,14 +144,14 @@ You have access to information-gathering tools:
 ### `query_admin_api` Tool
 Use this tool for:
 - Querying specific entities and their data
-- Fetching monetization setups and configurations  
+- Fetching monetization setups and configurations
 - Retrieving collections of entities (hint that collection endpoints are preferable when querying multiple items)
 - Any other entity-specific data retrieval
 # Example: Getting LineItems for app with name "Merge Block iOS"
 The admin_api tool accepts natural language task descriptions. You don't need to specify API endpoints - the underlying AI agent will resolve the appropriate endpoints automatically.
-If you got an HTTP error - fail fast and return the error message to the user. do not try to retry the request. 
+If you got an HTTP error - fail fast and return the error message to the user. do not try to retry the request.
 
-### `search_documentation` Tool  
+### `search_documentation` Tool
 Use this tool for:
 - Finding general information about platform features
 - Understanding concepts and terminology
@@ -186,13 +184,13 @@ Format your response using clear Markdown:
 If you need to query API data, you might say:
 "I'll check the admin API to get the current LineItems for your app to see the monetization setup."
 
-If you need documentation, you might say:  
+If you need documentation, you might say:
 "Let me search the documentation to understand how ad mediation waterfall works."
 
 Provide your final answer addressing the user's question directly, using the information gathered from the tools.
     """
     max_tool_calls = 10
-     # The recursion limit is set to 2 * max_tool_calls + 1 to account for the agent's reasoning steps:
+    # The recursion limit is set to 2 * max_tool_calls + 1 to account for the agent's reasoning steps:
     # Each tool call typically involves two steps (reasoning and acting), plus one final step for the answer.
     recursion_limit = 2 * max_tool_calls + 1
 
