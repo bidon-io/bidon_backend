@@ -29,16 +29,6 @@ load_dotenv()
 BASE_URL = os.environ.get("API_BASE_URL", "https://app.bidon.org").rstrip("/")
 SPEC_URL = f"{BASE_URL}/api/openapi.json"
 
-# Default assistant metadata that can be surfaced by UIs integrating with this graph.
-COPILOT_ASSISTANT_ID = "agent"
-COPILOT_GRAPH_METADATA: Dict[str, Any] = {
-    "assistant": {
-        "id": COPILOT_ASSISTANT_ID,
-        "display_name": "Bidon Copilot",
-        "capabilities": {"supports_cancel": True},
-    }
-}
-
 def fetch_spec() -> dict:
     r = requests.get(SPEC_URL, timeout=5)
     r.raise_for_status()
@@ -69,8 +59,7 @@ def query_admin_api(task: str, config: RunnableConfig | None = None) -> str:
     spec = reduce_spec(filter_get_only(spec))
 
     config = get_config() if config is None else config
-    conf = getattr(config, "configurable", None) or {}
-    cookie = conf.get("x-admin-session-cookie")
+    cookie = config["configurable"].get("x-admin-session-cookie")
     if not cookie:
         return "Missing admin session cookie in config.configurable"
 
@@ -198,10 +187,7 @@ Provide your final answer addressing the user's question directly, using the inf
         model=model,
         tools=tools,
         prompt=prompt,
-    ).with_config(
-        recursion_limit=recursion_limit,
-        metadata=COPILOT_GRAPH_METADATA,
-    )
+    ).with_config(recursion_limit=recursion_limit)
 
     return agent
 
