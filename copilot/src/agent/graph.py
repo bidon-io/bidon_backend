@@ -28,6 +28,16 @@ load_dotenv()
 BASE_URL = os.environ.get("API_BASE_URL", "https://app.bidon.org").rstrip("/")
 SPEC_URL = f"{BASE_URL}/api/openapi.json"
 
+# Default assistant metadata that can be surfaced by UIs integrating with this graph.
+COPILOT_ASSISTANT_ID = "agent"
+COPILOT_GRAPH_METADATA: Dict[str, Any] = {
+    "assistant": {
+        "id": COPILOT_ASSISTANT_ID,
+        "display_name": "Bidon Copilot",
+        "capabilities": {"supports_cancel": True},
+    }
+}
+
 def fetch_spec() -> dict:
     r = requests.get(SPEC_URL, timeout=5)
     r.raise_for_status()
@@ -181,16 +191,19 @@ If you need documentation, you might say:
 
 Provide your final answer addressing the user's question directly, using the information gathered from the tools.
     """
-    max_tool_calls = 3
-    # The recursion limit is set to 2 * max_tool_calls + 1 to account for the agent's reasoning steps:
+    max_tool_calls = 10
+     # The recursion limit is set to 2 * max_tool_calls + 1 to account for the agent's reasoning steps:
     # Each tool call typically involves two steps (reasoning and acting), plus one final step for the answer.
-    recursion_limit = 2 * max_tool_calls + 1 
+    recursion_limit = 2 * max_tool_calls + 1
 
     agent = create_react_agent(
         model=model,
         tools=tools,
         prompt=prompt,
-    ).with_config(recursion_limit=recursion_limit)
+    ).with_config(
+        recursion_limit=recursion_limit,
+        metadata=COPILOT_GRAPH_METADATA,
+    )
 
     return agent
 

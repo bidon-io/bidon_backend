@@ -58,12 +58,22 @@
             @keydown.enter.prevent="onSend"
           />
           <Button
+            v-if="!loading"
             :disabled="!canSend"
             data-testid="copilot-send"
             label="Send"
             icon="pi pi-send"
             class="shrink-0"
             @click="onSend"
+          />
+          <Button
+            v-else
+            data-testid="copilot-cancel"
+            label="Cancel"
+            icon="pi pi-stop"
+            severity="danger"
+            class="shrink-0"
+            @click="onCancel"
           />
         </div>
       </template>
@@ -112,6 +122,17 @@ function getErrorMessage(e: unknown): string {
   return typeof e === "string" ? e : "";
 }
 
+function isAbortError(e: unknown): boolean {
+  if (!e) return false;
+  if (typeof DOMException !== "undefined" && e instanceof DOMException)
+    return e.name === "AbortError";
+  return (
+    typeof e === "object" &&
+    "name" in (e as Record<string, unknown>) &&
+    (e as { name?: unknown }).name === "AbortError"
+  );
+}
+
 const config = useRuntimeConfig();
 const copilotBase = config.public.copilotBase || "/api/copilot";
 
@@ -123,8 +144,11 @@ const assistantId = ref<string | null>(null);
 const copilotStore = useCopilotStore();
 const threadId = computed(() => copilotStore.threadId as string | null);
 const toast = useToast();
+const runId = ref<string | null>(null);
+const activeAssistantIndex = ref<number | null>(null);
 
 let client: Client;
+let currentRunController: AbortController | null = null;
 
 onMounted(async () => {
   const apiUrl = new URL(copilotBase, window.location.origin).toString();
@@ -198,6 +222,7 @@ const canSend = computed(
 );
 
 async function onNewChat() {
+  if (loading.value) await onCancel();
   try {
     // Clear UI
     messages.value = [];
@@ -226,6 +251,32 @@ async function onNewChat() {
   }
 }
 
+async function onCancel() {
+  if (!loading.value) return;
+
+  if (currentRunController) {
+    currentRunController.abort();
+    currentRunController = null;
+  }
+
+  const idx = activeAssistantIndex.value;
+  if (idx != null && messages.value[idx]) {
+    if (!messages.value[idx].content.trim()) {
+      messages.value[idx].content = "Cancelled.";
+    }
+  }
+
+  const currentThreadId = threadId.value;
+  const currentRunId = runId.value;
+  if (!currentThreadId || !currentRunId) return;
+
+  try {
+    await client.runs.cancel(currentThreadId, currentRunId);
+  } catch (err: unknown) {
+    console.warn("[Copilot] run cancel failed", err);
+  }
+}
+
 async function onSend() {
   if (!canSend.value || !assistantId.value) return;
   const text = input.value.trim();
@@ -234,7 +285,12 @@ async function onSend() {
   messages.value.push({ role: "user", content: text });
   const assistantIndex =
     messages.value.push({ role: "assistant", content: "" }) - 1;
+  activeAssistantIndex.value = assistantIndex;
   loading.value = true;
+  runId.value = null;
+
+  const controller = new AbortController();
+  currentRunController = controller;
 
   try {
     // Threadless streaming run for a simple chat
@@ -242,6 +298,10 @@ async function onSend() {
       input: { messages: [{ role: "user", content: text }] },
       // messages-tuple returns [messageChunk, metadata]
       streamMode: "messages-tuple" as const,
+      signal: controller.signal,
+      onRunCreated: ({ run_id }: { run_id: string }) => {
+        runId.value = run_id;
+      },
     };
 
     let stream;
@@ -290,9 +350,16 @@ async function onSend() {
   } catch (err: unknown) {
     console.error("[Copilot stream error]", err);
     const detail = getErrorMessage(err) || "Failed to send message";
-    messages.value[assistantIndex].content = `Error: ${detail}`;
+    if (isAbortError(err)) {
+      messages.value[assistantIndex].content = "Cancelled.";
+    } else {
+      messages.value[assistantIndex].content = `Error: ${detail}`;
+    }
   } finally {
     loading.value = false;
+    runId.value = null;
+    activeAssistantIndex.value = null;
+    if (currentRunController === controller) currentRunController = null;
   }
 }
 </script>
