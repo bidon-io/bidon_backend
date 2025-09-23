@@ -128,6 +128,7 @@ const formatNetworkName = (networkName) => {
     mobilefuse: "MobileFuse",
     moloco: "Moloco",
     inmobi: "InMobi",
+    taurusx: "TaurusX",
   };
 
   const lowerName = networkName.toLowerCase();

@@ -112,6 +112,8 @@ func ValidDemandSourceAccountExtra(t *testing.T, key adapter.Key) []byte {
 		return []byte(`{"oauth_token": "yandex"}`)
 	case adapter.IronSourceKey:
 		return []byte(`{"app_key": "ironsource"}`)
+	case adapter.TaurusXKey:
+		return []byte(`{"foo": "bar"}`)
 	default:
 		t.Fatalf("Invalid adapter key or missing valid ACCOUNT config for adapter %q", key)
 		return nil

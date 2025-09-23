@@ -208,7 +208,7 @@ func main() {
 		},
 		demandCfg,
 	)
-	lineItemsCache := config.NewRedisCacheOf[[]auction.LineItem](rdb, 10*time.Minute, "line_items")
+	lineItemsCache := config.NewRedisCacheOf[[]dbpkg.LineItem](rdb, 10*time.Minute, "line_items")
 	err = lineItemsCache.Monitor(meter)
 	if err != nil {
 		log.Fatalf("Unable to register observer for lineItemsCache: %v", err)
@@ -223,7 +223,8 @@ func main() {
 	if err != nil {
 		log.Fatalf("Unable to register observer for amazonSlotsCache: %v", err)
 	}
-	adapterInitConfigsFetcher := &sdkapistore.AdapterInitConfigsFetcher{DB: db, ProfilesCache: profilesCache, AmazonSlotsCache: amazonSlotsCache}
+
+	adapterInitConfigsFetcher := &sdkapistore.AdapterInitConfigsFetcher{DB: db, ProfilesCache: profilesCache, AmazonSlotsCache: amazonSlotsCache, LineItemsCache: lineItemsCache}
 	configsCache := config.NewRedisCacheOf[adapter.RawConfigsMap](rdb, 10*time.Minute, "configs")
 	err = configsCache.Monitor(meter)
 	if err != nil {

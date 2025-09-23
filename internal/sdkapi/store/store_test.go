@@ -144,7 +144,8 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Valid(t *testing.T) {
 
 	profilesCache := config.NewRedisCacheOf[[]db.AppDemandProfile](rdb, 10*time.Minute, "app_demand_profiles")
 	amazonSlotsCache := config.NewRedisCacheOf[[]sdkapi.AmazonSlot](rdb, 10*time.Minute, "amazon_slots")
-	fetcher := &AdapterInitConfigsFetcher{DB: tx, ProfilesCache: profilesCache, AmazonSlotsCache: amazonSlotsCache}
+	lineItemsCache := config.NewRedisCacheOf[[]db.LineItem](rdb, 10*time.Minute, "line_items")
+	fetcher := &AdapterInitConfigsFetcher{DB: tx, ProfilesCache: profilesCache, AmazonSlotsCache: amazonSlotsCache, LineItemsCache: lineItemsCache}
 
 	tests := []struct {
 		name           string
@@ -219,6 +220,9 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Valid(t *testing.T) {
 				&sdkapi.MolocoInitConfig{
 					AppKey: fmt.Sprintf("moloco_app_%d", apps[1].ID),
 				},
+				&sdkapi.TaurusXInitConfig{
+					AppID: fmt.Sprintf("taurusx_app_%d", apps[1].ID),
+				},
 				&sdkapi.UnityAdsInitConfig{
 					GameID: fmt.Sprintf("unityads_game_%d", apps[1].ID),
 				},
@@ -270,6 +274,10 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Valid(t *testing.T) {
 				&sdkapi.MolocoInitConfig{
 					AppKey: fmt.Sprintf("moloco_app_%d", apps[1].ID),
 					Order:  0,
+				},
+				&sdkapi.TaurusXInitConfig{
+					AppID: fmt.Sprintf("taurusx_app_%d", apps[1].ID),
+					Order: 0,
 				},
 				&sdkapi.UnityAdsInitConfig{
 					GameID: fmt.Sprintf("unityads_game_%d", apps[1].ID),
@@ -373,7 +381,8 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Amazon(t *testing.T) 
 
 	profilesCache := config.NewRedisCacheOf[[]db.AppDemandProfile](rdb, 10*time.Minute, "app_demand_profiles")
 	amazonSlotsCache := config.NewRedisCacheOf[[]sdkapi.AmazonSlot](rdb, 10*time.Minute, "amazon_slots")
-	fetcher := &AdapterInitConfigsFetcher{DB: tx, ProfilesCache: profilesCache, AmazonSlotsCache: amazonSlotsCache}
+	lineItemsCache := config.NewRedisCacheOf[[]db.LineItem](rdb, 10*time.Minute, "line_items")
+	fetcher := &AdapterInitConfigsFetcher{DB: tx, ProfilesCache: profilesCache, AmazonSlotsCache: amazonSlotsCache, LineItemsCache: lineItemsCache}
 
 	tests := []struct {
 		name           string
@@ -481,7 +490,9 @@ func TestAdapterInitConfigsFetcher_FetchEnabledAdapterKeys(t *testing.T) {
 	}
 
 	profilesCache := config.NewRedisCacheOf[[]db.AppDemandProfile](rdb, 10*time.Minute, "app_demand_profiles")
-	fetcher := &AdapterInitConfigsFetcher{DB: tx, ProfilesCache: profilesCache}
+	amazonSlotsCache := config.NewRedisCacheOf[[]sdkapi.AmazonSlot](rdb, 10*time.Minute, "amazon_slots")
+	lineItemsCache := config.NewRedisCacheOf[[]db.LineItem](rdb, 10*time.Minute, "line_items")
+	fetcher := &AdapterInitConfigsFetcher{DB: tx, ProfilesCache: profilesCache, AmazonSlotsCache: amazonSlotsCache, LineItemsCache: lineItemsCache}
 
 	tests := []struct {
 		name           string
@@ -528,4 +539,92 @@ func containsKey(keys []adapter.Key, key adapter.Key) *bool {
 
 func ptr[T any](v T) *T {
 	return &v
+}
+
+func TestAdapterInitConfigsFetcher_FetchTaurusXPlacements(t *testing.T) {
+	tx := testDB.Begin()
+	defer tx.Rollback()
+
+	// Create app
+	app := dbtest.CreateApp(t, tx)
+
+	// Create TaurusX demand source and account
+	taurusxDemandSource := dbtest.CreateDemandSource(t, tx, func(ds *db.DemandSource) {
+		ds.APIKey = "taurusx"
+	})
+	taurusxAccount := dbtest.CreateDemandSourceAccount(t, tx, func(account *db.DemandSourceAccount) {
+		account.DemandSource = taurusxDemandSource
+		account.DemandSourceID = taurusxDemandSource.ID
+	})
+
+	// Create line item with placement_id
+	dbtest.CreateLineItem(t, tx, func(item *db.LineItem) {
+		item.AppID = app.ID
+		item.AccountID = taurusxAccount.ID
+		item.Extra = map[string]any{
+			"placement_id": "test-placement-123",
+		}
+	})
+
+	// Test fetchTaurusXPlacements method
+	rdb, _ := redismock.NewClusterMock()
+	lineItemsCache := config.NewRedisCacheOf[[]db.LineItem](rdb, 10*time.Minute, "line_items")
+	fetcher := &AdapterInitConfigsFetcher{DB: tx, LineItemsCache: lineItemsCache}
+
+	placements, err := fetcher.fetchTaurusXPlacements(context.Background(), app.ID)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	// Now it's an array of placement_ids
+	expectedValue := "test-placement-123"
+
+	if len(placements) != 1 {
+		t.Fatalf("Expected 1 placement, got %d", len(placements))
+	}
+
+	if placements[0] != expectedValue {
+		t.Errorf("Expected placement value %s, got %s", expectedValue, placements[0])
+	}
+}
+
+func TestAdapterInitConfigsFetcher_FetchTaurusXPlacements_MissingPlacementID(t *testing.T) {
+	tx := testDB.Begin()
+	defer tx.Rollback()
+
+	// Create app
+	app := dbtest.CreateApp(t, tx)
+
+	// Create TaurusX demand source and account
+	taurusxDemandSource := dbtest.CreateDemandSource(t, tx, func(ds *db.DemandSource) {
+		ds.APIKey = "taurusx"
+	})
+	taurusxAccount := dbtest.CreateDemandSourceAccount(t, tx, func(account *db.DemandSourceAccount) {
+		account.DemandSource = taurusxDemandSource
+		account.DemandSourceID = taurusxDemandSource.ID
+	})
+
+	// Create line item WITHOUT placement_id
+	dbtest.CreateLineItem(t, tx, func(item *db.LineItem) {
+		item.AppID = app.ID
+		item.AccountID = taurusxAccount.ID
+		item.Extra = map[string]any{
+			"other_field": "some_value",
+		}
+	})
+
+	// Test fetchTaurusXPlacements method should return error
+	rdb, _ := redismock.NewClusterMock()
+	lineItemsCache := config.NewRedisCacheOf[[]db.LineItem](rdb, 10*time.Minute, "line_items")
+	fetcher := &AdapterInitConfigsFetcher{DB: tx, LineItemsCache: lineItemsCache}
+
+	_, err := fetcher.fetchTaurusXPlacements(context.Background(), app.ID)
+	if err == nil {
+		t.Fatal("Expected error when placement_id is missing, got nil")
+	}
+
+	expectedError := "placement_id is either missing or not a string"
+	if err.Error() != expectedError {
+		t.Errorf("Expected error '%s', got '%s'", expectedError, err.Error())
+	}
 }

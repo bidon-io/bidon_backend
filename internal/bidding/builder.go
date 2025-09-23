@@ -90,12 +90,13 @@ func (b *Builder) HoldAuction(ctx context.Context, params *BuildParams) (Auction
 		return emptyResponse, fmt.Errorf("cannot generate Bid UUID: %s", err)
 	}
 	baseBidRequest := openrtb.BidRequest{
-		ID:   bidID.String(),
-		Test: *bool2int(auctionRequest.Test),
-		AT:   1,
-		TMax: 2000,
-		App: b.buildApp(auctionRequest.App, params),
+		ID:     bidID.String(),
+		Test:   *bool2int(auctionRequest.Test),
+		AT:     1,
+		TMax:   2000,
+		App:    b.buildApp(auctionRequest.App, params),
 		Device: b.BuildDevice(auctionRequest.Device, auctionRequest.User, params.GeoData),
+
 		Imp: []openrtb2.Imp{
 			{
 				BidFloor: auctionRequest.AdObject.GetBidFloorForBidding(),
@@ -242,10 +243,7 @@ func (b *Builder) buildApp(schemaApp schema.App, params *BuildParams) *openrtb2.
 	// Add store metadata if available
 	if params.App != nil {
 		if params.App.StoreID != "" {
-			// Use StoreID as Bundle if it's available and Bundle from schema is empty
-			if app.Bundle == "" {
-				app.Bundle = params.App.StoreID
-			}
+			app.Bundle = params.App.StoreID
 		}
 		if params.App.StoreURL != "" {
 			app.StoreURL = params.App.StoreURL

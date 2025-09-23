@@ -191,7 +191,7 @@ func (v *appDemandProfileAttrsValidator) dataRule(demandSource *DemandSource) v8
 	var rule v8n.MapRule
 
 	switch adapter.Key(demandSource.ApiKey) {
-	case adapter.AdmobKey, adapter.DTExchangeKey, adapter.MintegralKey, adapter.VungleKey, adapter.VKAdsKey:
+	case adapter.AdmobKey, adapter.DTExchangeKey, adapter.MintegralKey, adapter.VungleKey, adapter.VKAdsKey, adapter.TaurusXKey:
 		rule = v8n.Map(
 			v8n.Key("app_id", v8n.Required, isString),
 		)

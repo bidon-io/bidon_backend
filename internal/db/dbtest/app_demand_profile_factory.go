@@ -103,6 +103,8 @@ func ValidAppDemandProfileData(t *testing.T, key adapter.Key, appID int64) []byt
 		return []byte(fmt.Sprintf(`{"metrica_id": "yandex_metrica_%d"}`, appID))
 	case adapter.IronSourceKey:
 		return []byte(fmt.Sprintf(`{"app_key": "ironsource_app_%d"}`, appID))
+	case adapter.TaurusXKey:
+		return []byte(fmt.Sprintf(`{"app_id": "taurusx_app_%d", "foo": "bar"}`, appID))
 	default:
 		t.Fatalf("Invalid adapter key or missing valid APP config for adapter %q", key)
 		return nil

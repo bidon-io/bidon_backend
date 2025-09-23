@@ -63,6 +63,7 @@ const options = ref([
   { label: "Mintegral", value: "DemandSourceAccount::Mintegral" },
   { label: "MobileFuse", value: "DemandSourceAccount::MobileFuse" },
   { label: "Moloco", value: "DemandSourceAccount::Moloco" },
+  { label: "TaurusX", value: "DemandSourceAccount::TaurusX" },
   { label: "UnityAds", value: "DemandSourceAccount::UnityAds" },
   { label: "Vungle", value: "DemandSourceAccount::Vungle" },
   { label: "VKAds", value: "DemandSourceAccount::VKAds" },

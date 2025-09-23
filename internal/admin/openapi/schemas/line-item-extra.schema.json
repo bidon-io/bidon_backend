@@ -77,7 +77,7 @@
       "properties": {
         "placement_id": {
           "type": "string",
-          "description": "Placement ID (for Meta, UnityAds, Vungle, MobileFuse)"
+          "description": "Placement ID (for Meta, UnityAds, Vungle, MobileFuse, TaurusX)"
         }
       },
       "required": ["placement_id"]
