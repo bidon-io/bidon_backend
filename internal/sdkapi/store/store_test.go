@@ -221,7 +221,8 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Valid(t *testing.T) {
 					AppKey: fmt.Sprintf("moloco_app_%d", apps[1].ID),
 				},
 				&sdkapi.TaurusXInitConfig{
-					AppID: fmt.Sprintf("taurusx_app_%d", apps[1].ID),
+					AppID:   fmt.Sprintf("taurusx_app_%d", apps[1].ID),
+					Channel: "bidon",
 				},
 				&sdkapi.UnityAdsInitConfig{
 					GameID: fmt.Sprintf("unityads_game_%d", apps[1].ID),
@@ -276,8 +277,9 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Valid(t *testing.T) {
 					Order:  0,
 				},
 				&sdkapi.TaurusXInitConfig{
-					AppID: fmt.Sprintf("taurusx_app_%d", apps[1].ID),
-					Order: 0,
+					AppID:   fmt.Sprintf("taurusx_app_%d", apps[1].ID),
+					Channel: "bidon",
+					Order:   0,
 				},
 				&sdkapi.UnityAdsInitConfig{
 					GameID: fmt.Sprintf("unityads_game_%d", apps[1].ID),
@@ -557,34 +559,54 @@ func TestAdapterInitConfigsFetcher_FetchTaurusXPlacements(t *testing.T) {
 		account.DemandSourceID = taurusxDemandSource.ID
 	})
 
-	// Create line item with placement_id
+	// Create line items with placement_id and different ad types
 	dbtest.CreateLineItem(t, tx, func(item *db.LineItem) {
 		item.AppID = app.ID
 		item.AccountID = taurusxAccount.ID
+		item.AdType = db.InterstitialAdType
 		item.Extra = map[string]any{
-			"placement_id": "test-placement-123",
+			"placement_id": "placement1",
+		}
+	})
+	dbtest.CreateLineItem(t, tx, func(item *db.LineItem) {
+		item.AppID = app.ID
+		item.AccountID = taurusxAccount.ID
+		item.AdType = db.RewardedAdType
+		item.Extra = map[string]any{
+			"placement_id": "placement2",
 		}
 	})
 
 	// Test fetchTaurusXPlacements method
 	rdb, _ := redismock.NewClusterMock()
 	lineItemsCache := config.NewRedisCacheOf[[]db.LineItem](rdb, 10*time.Minute, "line_items")
-	fetcher := &AdapterInitConfigsFetcher{DB: tx, LineItemsCache: lineItemsCache}
+	fetcher := &AdapterInitConfigsFetcher{
+		DB:             tx,
+		LineItemsCache: lineItemsCache,
+	}
 
 	placements, err := fetcher.fetchTaurusXPlacements(context.Background(), app.ID)
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	// Now it's an array of placement_ids
-	expectedValue := "test-placement-123"
-
-	if len(placements) != 1 {
-		t.Fatalf("Expected 1 placement, got %d", len(placements))
+	// Verify the placements
+	if len(placements) != 2 {
+		t.Fatalf("Expected 2 placements, got %d", len(placements))
 	}
 
-	if placements[0] != expectedValue {
-		t.Errorf("Expected placement value %s, got %s", expectedValue, placements[0])
+	expectedPlacements := []sdkapi.TaurusXPlacement{
+		{PlacementID: "placement1", Format: "INTERSTITIAL"},
+		{PlacementID: "placement2", Format: "REWARDED"},
+	}
+
+	for i, expected := range expectedPlacements {
+		if placements[i].PlacementID != expected.PlacementID {
+			t.Errorf("Expected placement ID %s, got %s", expected.PlacementID, placements[i].PlacementID)
+		}
+		if placements[i].Format != expected.Format {
+			t.Errorf("Expected format %s, got %s", expected.Format, placements[i].Format)
+		}
 	}
 }
 
@@ -608,6 +630,7 @@ func TestAdapterInitConfigsFetcher_FetchTaurusXPlacements_MissingPlacementID(t *
 	dbtest.CreateLineItem(t, tx, func(item *db.LineItem) {
 		item.AppID = app.ID
 		item.AccountID = taurusxAccount.ID
+		item.AdType = db.InterstitialAdType
 		item.Extra = map[string]any{
 			"other_field": "some_value",
 		}
@@ -616,7 +639,10 @@ func TestAdapterInitConfigsFetcher_FetchTaurusXPlacements_MissingPlacementID(t *
 	// Test fetchTaurusXPlacements method should return error
 	rdb, _ := redismock.NewClusterMock()
 	lineItemsCache := config.NewRedisCacheOf[[]db.LineItem](rdb, 10*time.Minute, "line_items")
-	fetcher := &AdapterInitConfigsFetcher{DB: tx, LineItemsCache: lineItemsCache}
+	fetcher := &AdapterInitConfigsFetcher{
+		DB:             tx,
+		LineItemsCache: lineItemsCache,
+	}
 
 	_, err := fetcher.fetchTaurusXPlacements(context.Background(), app.ID)
 	if err == nil {
