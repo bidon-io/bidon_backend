@@ -10,6 +10,7 @@ import (
 
 	"gorm.io/gorm"
 
+	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/db"
 	"github.com/bidon-io/bidon-backend/internal/sdkapi"
@@ -97,11 +98,10 @@ func (f *AdapterInitConfigsFetcher) FetchAdapterInitConfigs(ctx context.Context,
 			}
 		}
 
-		// Set TaurusX placements
 		if adapterKey == adapter.TaurusXKey {
 			taurusxConfig, ok := config.(*sdkapi.TaurusXInitConfig)
 			if ok {
-				taurusxConfig.Placements, err = f.fetchTaurusXPlacements(ctx, appID)
+				taurusxConfig.PlacementIDs, err = f.fetchTaurusXPlacements(ctx, appID)
 				if err != nil {
 					return nil, fmt.Errorf("fetch taurusx placements: %v", err)
 				}
@@ -201,7 +201,7 @@ func (f *AdapterInitConfigsFetcher) fetchAmazonSlots(ctx context.Context, appID 
 	return slots, nil
 }
 
-func (f *AdapterInitConfigsFetcher) fetchTaurusXPlacements(ctx context.Context, appID int64) ([]string, error) {
+func (f *AdapterInitConfigsFetcher) fetchTaurusXPlacements(ctx context.Context, appID int64) ([]sdkapi.TaurusXPlacement, error) {
 	lineItems, err := f.fetchLineItemsCached(ctx, appID, adapter.TaurusXKey)
 	if err != nil {
 		return nil, fmt.Errorf("fetch line items: %v", err)
@@ -211,16 +211,39 @@ func (f *AdapterInitConfigsFetcher) fetchTaurusXPlacements(ctx context.Context, 
 		return nil, nil
 	}
 
-	placements := make([]string, 0, len(lineItems))
+	placements := make([]sdkapi.TaurusXPlacement, 0, len(lineItems))
 	for _, lineItem := range lineItems {
 		placementID, ok := lineItem.Extra["placement_id"].(string)
 		if !ok {
 			return nil, fmt.Errorf("placement_id is either missing or not a string")
 		}
-		placements = append(placements, placementID)
+
+		format := f.convertAdTypeToFormat(lineItem)
+
+		placements = append(placements, sdkapi.TaurusXPlacement{
+			PlacementID: placementID,
+			Format:      format,
+		})
 	}
 
 	return placements, nil
+}
+
+func (f *AdapterInitConfigsFetcher) convertAdTypeToFormat(lineItem db.LineItem) string {
+	domainType := lineItem.AdType.Domain()
+	switch domainType {
+	case ad.BannerType:
+		if lineItem.Format.Valid && lineItem.Format.String == "MREC" {
+			return "MREC"
+		}
+		return "BANNER"
+	case ad.InterstitialType:
+		return "INTERSTITIAL"
+	case ad.RewardedType:
+		return "REWARDED"
+	default:
+		return "BANNER"
+	}
 }
 
 func (f *AdapterInitConfigsFetcher) fetchLineItemsCached(ctx context.Context, appID int64, adapterKey adapter.Key) ([]db.LineItem, error) {
@@ -236,7 +259,7 @@ func (f *AdapterInitConfigsFetcher) fetchLineItems(ctx context.Context, appID in
 
 	err := f.DB.
 		WithContext(ctx).
-		Select("line_items.id, line_items.public_uid, line_items.extra, line_items.bid_floor").
+		Select("line_items.id, line_items.public_uid, line_items.extra, line_items.bid_floor, line_items.ad_type, line_items.format").
 		Where("app_id", appID).
 		InnerJoins("Account", f.DB.Select("id")).
 		InnerJoins("Account.DemandSource", f.DB.Select("api_key").Where("api_key", adapterKey)).
