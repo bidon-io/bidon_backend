@@ -59,6 +59,7 @@ type AdapterInitConfigsFetcher struct {
 	DB               *db.DB
 	ProfilesCache    cache[[]db.AppDemandProfile]
 	AmazonSlotsCache cache[[]sdkapi.AmazonSlot]
+	LineItemsCache   cache[[]db.LineItem]
 }
 
 func (f *AdapterInitConfigsFetcher) FetchAdapterInitConfigs(ctx context.Context, appID int64, adapterKeys []adapter.Key, setAmazonSlots bool, setOrder bool) ([]sdkapi.AdapterInitConfig, error) {
@@ -92,6 +93,17 @@ func (f *AdapterInitConfigsFetcher) FetchAdapterInitConfigs(ctx context.Context,
 				amazonConfig.Slots, err = f.fetchAmazonSlotsCached(ctx, appID)
 				if err != nil {
 					return nil, fmt.Errorf("fetch amazon slots: %v", err)
+				}
+			}
+		}
+
+		// Set TaurusX placements
+		if adapterKey == adapter.TaurusXKey {
+			taurusxConfig, ok := config.(*sdkapi.TaurusXInitConfig)
+			if ok {
+				taurusxConfig.Placements, err = f.fetchTaurusXPlacements(ctx, appID)
+				if err != nil {
+					return nil, fmt.Errorf("fetch taurusx placements: %v", err)
 				}
 			}
 		}
@@ -189,6 +201,56 @@ func (f *AdapterInitConfigsFetcher) fetchAmazonSlots(ctx context.Context, appID 
 	return slots, nil
 }
 
+func (f *AdapterInitConfigsFetcher) fetchTaurusXPlacements(ctx context.Context, appID int64) ([]string, error) {
+	lineItems, err := f.fetchLineItemsCached(ctx, appID, adapter.TaurusXKey)
+	if err != nil {
+		return nil, fmt.Errorf("fetch line items: %v", err)
+	}
+
+	if len(lineItems) == 0 {
+		return nil, nil
+	}
+
+	placements := make([]string, 0, len(lineItems))
+	for _, lineItem := range lineItems {
+		placementID, ok := lineItem.Extra["placement_id"].(string)
+		if !ok {
+			return nil, fmt.Errorf("placement_id is either missing or not a string")
+		}
+		placements = append(placements, placementID)
+	}
+
+	return placements, nil
+}
+
+func (f *AdapterInitConfigsFetcher) fetchLineItemsCached(ctx context.Context, appID int64, adapterKey adapter.Key) ([]db.LineItem, error) {
+	cacheKey := f.lineItemsCacheKey(appID, adapterKey)
+
+	return f.LineItemsCache.Get(ctx, cacheKey, func(ctx context.Context) ([]db.LineItem, error) {
+		return f.fetchLineItems(ctx, appID, adapterKey)
+	})
+}
+
+func (f *AdapterInitConfigsFetcher) fetchLineItems(ctx context.Context, appID int64, adapterKey adapter.Key) ([]db.LineItem, error) {
+	var lineItems []db.LineItem
+
+	err := f.DB.
+		WithContext(ctx).
+		Select("line_items.id, line_items.public_uid, line_items.extra, line_items.bid_floor").
+		Where("app_id", appID).
+		InnerJoins("Account", f.DB.Select("id")).
+		InnerJoins("Account.DemandSource", f.DB.Select("api_key").Where("api_key", adapterKey)).
+		Order("line_items.id").
+		Find(&lineItems).
+		Error
+
+	if err != nil {
+		return nil, fmt.Errorf("find line items: %v", err)
+	}
+
+	return lineItems, nil
+}
+
 func (f *AdapterInitConfigsFetcher) profilesCacheKey(appID int64, adapterKeys []adapter.Key) ([]byte, error) {
 	// Sort adapter keys to get deterministic cache key
 	sort.Slice(adapterKeys, func(i, j int) bool {
@@ -213,4 +275,8 @@ func (f *AdapterInitConfigsFetcher) profilesCacheKey(appID int64, adapterKeys []
 
 func (f *AdapterInitConfigsFetcher) amazonSlotsCacheKey(appID int64) []byte {
 	return []byte(fmt.Sprintf("amazon_slots:%d", appID))
+}
+
+func (f *AdapterInitConfigsFetcher) lineItemsCacheKey(appID int64, adapterKey adapter.Key) []byte {
+	return []byte(fmt.Sprintf("line_items:%d:%s", appID, adapterKey))
 }

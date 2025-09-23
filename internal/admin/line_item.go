@@ -854,7 +854,7 @@ func (v *lineItemAttrsValidator) extraRule(account *DemandSourceAccount) v8n.Rul
 			v8n.Key("ad_location", v8n.Required, isString),
 			v8n.Key("mediation", v8n.NilOrNotEmpty, isString).Optional(),
 		)
-	case adapter.MetaKey, adapter.UnityAdsKey, adapter.VungleKey, adapter.MobileFuseKey:
+	case adapter.MetaKey, adapter.UnityAdsKey, adapter.VungleKey, adapter.MobileFuseKey, adapter.TaurusXKey:
 		rule = v8n.Map(
 			v8n.Key("placement_id", v8n.Required, isString),
 		)

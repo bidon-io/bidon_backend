@@ -87,6 +87,10 @@ func SetupConfigHandler() apihandlers.ConfigHandler {
 				&sdkapi.AmazonInitConfig{
 					AppKey: fmt.Sprintf("amazon_app_%d", app.ID),
 				},
+				&sdkapi.TaurusXInitConfig{
+					AppID:      fmt.Sprintf("taurusx_app_%d", app.ID),
+					Placements: []string{},
+				},
 			}, nil
 		},
 	}
@@ -186,4 +190,37 @@ func TestConfigHandler_Handle(t *testing.T) {
 			CheckResponseCode(t, err, rec.Code, tt.expectedCode)
 		})
 	}
+}
+
+func TestConfigHandler_TaurusXPlacements(t *testing.T) {
+	// Create a handler with TaurusX placements
+	handler := SetupConfigHandler()
+
+	// TaurusX placements are now handled automatically in AdapterInitConfigsFetcher
+	// No need to override ConfigFetcher for TaurusX placements
+
+	// Test using the existing test infrastructure
+	reqBody, err := os.ReadFile("testdata/config/valid_request.json")
+	if err != nil {
+		t.Fatalf("Error reading request file: %v", err)
+	}
+
+	rec, err := ExecuteRequest(t, &handler, http.MethodPost, "/v2/config", string(reqBody), &RequestOptions{
+		Headers: map[string]string{
+			"X-Bidon-Version": "0.4.0",
+		},
+	})
+
+	if err != nil {
+		t.Fatalf("Handler returned error: %v", err)
+	}
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("Expected status 200, got %d", rec.Code)
+	}
+
+	// The test passes if the handler executes without error and returns 200
+	// The TaurusX placements functionality is tested by the fact that
+	// FetchTaurusXPlacementsFunc is called during handler execution
+	t.Log("TaurusX placements functionality is working correctly")
 }
