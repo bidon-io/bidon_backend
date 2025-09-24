@@ -7,8 +7,10 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/prebid/openrtb/v19/adcom1"
@@ -160,6 +162,40 @@ func (a *TaurusXAdapter) extractPlacementToken(tokenData, placementID string) (s
 	return "", fmt.Errorf("no token found for placement ID: %s", placementID)
 }
 
+// logCurlCommand logs the HTTP request as a readable CURL command for debugging purposes
+func logCurlCommand(req *http.Request, body []byte) {
+	var curlCmd strings.Builder
+	curlCmd.WriteString("curl -X ")
+	curlCmd.WriteString(req.Method)
+
+	// Add headers
+	for name, values := range req.Header {
+		for _, value := range values {
+			curlCmd.WriteString(" -H '")
+			curlCmd.WriteString(name)
+			curlCmd.WriteString(": ")
+			curlCmd.WriteString(value)
+			curlCmd.WriteString("'")
+		}
+	}
+
+	// Add body if present
+	if len(body) > 0 {
+		curlCmd.WriteString(" -d '")
+		// Escape single quotes in JSON body
+		bodyStr := strings.ReplaceAll(string(body), "'", "'\"'\"'")
+		curlCmd.WriteString(bodyStr)
+		curlCmd.WriteString("'")
+	}
+
+	// Add URL
+	curlCmd.WriteString(" '")
+	curlCmd.WriteString(req.URL.String())
+	curlCmd.WriteString("'")
+
+	log.Printf("[TaurusX Debug] CURL Command: %s", curlCmd.String())
+}
+
 func (a *TaurusXAdapter) ExecuteRequest(ctx context.Context, client *http.Client, request openrtb.BidRequest) *adapters.DemandResponse {
 	dr := &adapters.DemandResponse{
 		DemandID:  adapter.TaurusXKey,
@@ -192,6 +228,9 @@ func (a *TaurusXAdapter) ExecuteRequest(ctx context.Context, client *http.Client
 	}
 	httpReq.Header.Add("Content-Type", "application/json")
 	httpReq.Header.Add("X-OpenRTB-Version", "2.5")
+
+	// Log CURL command for debugging
+	logCurlCommand(httpReq, requestBody)
 
 	httpResp, err := client.Do(httpReq)
 	if err != nil {
