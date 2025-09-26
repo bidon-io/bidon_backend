@@ -360,42 +360,42 @@ func TestGetEndpoint(t *testing.T) {
 		{
 			name:     "US region - USA",
 			alpha3:   "USA",
-			expected: "https://sdkus.ssp.taxssp.com/ssp/v1/bidding_ad/bidon",
+			expected: "http://test-sdk.ssp.taxssp.com/ssp/v1/bidding_ad/testing",
 		},
 		{
 			name:     "US region - Canada",
 			alpha3:   "CAN",
-			expected: "https://sdkus.ssp.taxssp.com/ssp/v1/bidding_ad/bidon",
+			expected: "http://test-sdk.ssp.taxssp.com/ssp/v1/bidding_ad/testing",
 		},
 		{
 			name:     "EU region - Germany",
 			alpha3:   "DEU",
-			expected: "https://sdkeu.ssp.taxssp.com/ssp/v1/bidding_ad/bidon",
+			expected: "http://test-sdk.ssp.taxssp.com/ssp/v1/bidding_ad/testing",
 		},
 		{
 			name:     "EU region - United Kingdom",
 			alpha3:   "GBR",
-			expected: "https://sdkeu.ssp.taxssp.com/ssp/v1/bidding_ad/bidon",
+			expected: "http://test-sdk.ssp.taxssp.com/ssp/v1/bidding_ad/testing",
 		},
 		{
 			name:     "Asia region - Singapore",
 			alpha3:   "SGP",
-			expected: "https://sdksg.ssp.taxssp.com/ssp/v1/bidding_ad/bidon",
+			expected: "http://test-sdk.ssp.taxssp.com/ssp/v1/bidding_ad/testing",
 		},
 		{
 			name:     "Asia region - Japan",
 			alpha3:   "JPN",
-			expected: "https://sdksg.ssp.taxssp.com/ssp/v1/bidding_ad/bidon",
+			expected: "http://test-sdk.ssp.taxssp.com/ssp/v1/bidding_ad/testing",
 		},
 		{
 			name:     "Unknown country - defaults to US",
 			alpha3:   "XXX",
-			expected: "https://sdkus.ssp.taxssp.com/ssp/v1/bidding_ad/bidon",
+			expected: "http://test-sdk.ssp.taxssp.com/ssp/v1/bidding_ad/testing",
 		},
 		{
 			name:     "Empty country - defaults to US",
 			alpha3:   "",
-			expected: "https://sdkus.ssp.taxssp.com/ssp/v1/bidding_ad/bidon",
+			expected: "http://test-sdk.ssp.taxssp.com/ssp/v1/bidding_ad/testing",
 		},
 	}
 
