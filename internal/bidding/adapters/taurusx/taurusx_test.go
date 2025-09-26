@@ -3,6 +3,7 @@ package taurusx
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/prebid/openrtb/v19/openrtb2"
@@ -65,7 +66,6 @@ func TestTaurusXAdapter_CreateRequest(t *testing.T) {
 		t.Errorf("Expected currency 'USD', got %v", request.Cur)
 	}
 
-	// Verify token is in request extension
 	var reqExt map[string]interface{}
 	if err := json.Unmarshal(request.Ext, &reqExt); err != nil {
 		t.Errorf("Failed to unmarshal request extension: %v", err)
@@ -76,7 +76,6 @@ func TestTaurusXAdapter_CreateRequest(t *testing.T) {
 		t.Errorf("Expected token 'test-placement-specific-token' in request extension, got '%v'", reqExt["token"])
 	}
 
-	// Verify app ID is set correctly
 	if request.App == nil || request.App.ID != "test-app-id" {
 		t.Errorf("Expected app.id 'test-app-id', got '%v'", request.App.ID)
 	}
@@ -87,7 +86,7 @@ func TestTaurusXAdapter_ParseBids_Success(t *testing.T) {
 
 	dr := &adapters.DemandResponse{
 		Status:      http.StatusOK,
-		RawResponse: `{"id":"test-response","seatbid":[{"bid":[{"id":"test-bid","impid":"test-imp","price":1.5,"adm":"<html>test ad</html>","adid":"test-ad","nurl":"http://win.url","lurl":"http://loss.url"}],"seat":"test-seat"}]}`,
+		RawResponse: `{"id":"test-response","seatbid":[{"bid":[{"id":"test-bid","impid":"test-imp","price":1.5,"adid":"test-ad","nurl":"http://win.url","lurl":"http://loss.url"}],"seat":"test-seat"}],"ext":{"payload":"<html>test ad</html>"}}`,
 	}
 
 	result, err := taurusxAdapter.ParseBids(dr)
@@ -146,6 +145,198 @@ func TestTaurusXAdapter_ParseBids_Error(t *testing.T) {
 	_, err := taurusxAdapter.ParseBids(dr)
 	if err == nil {
 		t.Error("Expected error for bad request status")
+	}
+}
+
+func TestTaurusXAdapter_ParseBids_WithoutPayload(t *testing.T) {
+	taurusxAdapter := buildAdapter()
+
+	dr := &adapters.DemandResponse{
+		Status:      http.StatusOK,
+		RawResponse: `{"id":"test-response","seatbid":[{"bid":[{"id":"test-bid","impid":"test-imp","price":1.5,"adid":"test-ad","nurl":"http://win.url","lurl":"http://loss.url"}],"seat":"test-seat"}]}`,
+	}
+
+	result, err := taurusxAdapter.ParseBids(dr)
+	if err != nil {
+		t.Errorf("ParseBids() error = %v", err)
+		return
+	}
+
+	if result.Bid == nil {
+		t.Error("Expected bid to be present")
+		return
+	}
+
+	if result.Bid.Payload != "" {
+		t.Errorf("Expected empty payload when ext.payload is not present, got '%s'", result.Bid.Payload)
+	}
+}
+
+func TestTaurusXAdapter_ParseBids_InvalidExtJSON(t *testing.T) {
+	taurusxAdapter := buildAdapter()
+
+	dr := &adapters.DemandResponse{
+		Status:      http.StatusOK,
+		RawResponse: `{"id":"test-response","seatbid":[{"bid":[{"id":"test-bid","impid":"test-imp","price":1.5,"adid":"test-ad"}],"seat":"test-seat"}],"ext":{"invalid":"json"}}`,
+	}
+
+	// This should work fine since the ext JSON is valid, just doesn't have payload
+	result, err := taurusxAdapter.ParseBids(dr)
+	if err != nil {
+		t.Errorf("ParseBids() error = %v", err)
+		return
+	}
+
+	if result.Bid == nil {
+		t.Error("Expected bid to be present")
+		return
+	}
+
+	if result.Bid.Payload != "" {
+		t.Errorf("Expected empty payload when ext.payload is not present, got '%s'", result.Bid.Payload)
+	}
+}
+
+func TestTaurusXAdapter_ParseBids_MalformedBidResponseJSON(t *testing.T) {
+	taurusxAdapter := buildAdapter()
+
+	// Create a response with malformed JSON in the overall response
+	dr := &adapters.DemandResponse{
+		Status:      http.StatusOK,
+		RawResponse: `{"id":"test-response","seatbid":[{"bid":[{"id":"test-bid","impid":"test-imp","price":1.5,"adid":"test-ad"}],"seat":"test-seat"}],"ext":{"malformed":json}}`,
+	}
+
+	_, err := taurusxAdapter.ParseBids(dr)
+	if err == nil {
+		t.Error("Expected error for malformed JSON")
+		return
+	}
+
+	if !strings.Contains(err.Error(), "invalid character") {
+		t.Errorf("Expected error message to contain 'invalid character', got: %v", err)
+	}
+}
+
+func TestTaurusXAdapter_ParseBids_MalformedExtJSON(t *testing.T) {
+	taurusxAdapter := buildAdapter()
+
+	dr := &adapters.DemandResponse{
+		Status:      http.StatusOK,
+		RawResponse: `{"id":"test-response","seatbid":[{"bid":[{"id":"test-bid","impid":"test-imp","price":1.5,"adid":"test-ad"}],"seat":"test-seat"}],"ext":"{\"malformed\":json}"}`,
+	}
+
+	_, err := taurusxAdapter.ParseBids(dr)
+	if err == nil {
+		t.Error("Expected error for malformed ext JSON")
+		return
+	}
+
+	if !strings.Contains(err.Error(), "failed to unmarshal bid response ext") {
+		t.Errorf("Expected error message to contain 'failed to unmarshal bid response ext', got: %v", err)
+	}
+}
+
+func TestTaurusXAdapter_ParseBids_PayloadNotString(t *testing.T) {
+	taurusxAdapter := buildAdapter()
+
+	dr := &adapters.DemandResponse{
+		Status:      http.StatusOK,
+		RawResponse: `{"id":"test-response","seatbid":[{"bid":[{"id":"test-bid","impid":"test-imp","price":1.5,"adid":"test-ad"}],"seat":"test-seat"}],"ext":{"payload":123}}`,
+	}
+
+	result, err := taurusxAdapter.ParseBids(dr)
+	if err != nil {
+		t.Errorf("ParseBids() error = %v", err)
+		return
+	}
+
+	if result.Bid == nil {
+		t.Error("Expected bid to be present")
+		return
+	}
+
+	if result.Bid.Payload != "" {
+		t.Errorf("Expected empty payload when ext.payload is not a string, got '%s'", result.Bid.Payload)
+	}
+}
+
+func TestTaurusXAdapter_ParseBids_RealTaurusXResponse(t *testing.T) {
+	taurusxAdapter := buildAdapter()
+
+	dr := &adapters.DemandResponse{
+		Status: http.StatusOK,
+		RawResponse: `{
+			"id":"ea3abdd1-191b-4b30-9b0b-f35276bd3bc9",
+			"bidid":"ea3abdd1-191b-4b30-9b0b-f35276bd3bc9",
+			"cur":"USD",
+			"seatbid":[
+				{
+					"seat":"taurusx",
+					"bid":[
+						{
+							"id":"1",
+							"impid":"1",
+							"price":0.11654588088605387,
+							"w":320,
+							"h":480,
+							"lurl":"https://notice-eu.ssp.taxssp.com/v1/loss",
+							"nurl":"https://notice-eu.ssp.taxssp.com/v1/win",
+							"bundle":"",
+							"cid":"a12933122763264",
+							"adid":"",
+							"crid":"2r_m13840221289921",
+							"cat":[],
+							"adomain":["allegro.pl"],
+							"attr":[],
+							"ext":{}
+						}
+					]
+				}
+			],
+			"ext":{
+				"payload":"SotHTdNillA6/ljMOKkJ6cVyKmNvYVamCjtWqgJtRzV9IMwyR5BoBmZujUzf7DfD"
+			}
+		}`,
+	}
+
+	result, err := taurusxAdapter.ParseBids(dr)
+	if err != nil {
+		t.Errorf("ParseBids() error = %v", err)
+		return
+	}
+
+	if result.Bid == nil {
+		t.Error("Expected bid to be present")
+		return
+	}
+
+	if result.Bid.Price != 0.11654588088605387 {
+		t.Errorf("Expected price 0.11654588088605387, got %f", result.Bid.Price)
+	}
+
+	expectedPayload := "SotHTdNillA6/ljMOKkJ6cVyKmNvYVamCjtWqgJtRzV9IMwyR5BoBmZujUzf7DfD"
+	if result.Bid.Payload != expectedPayload {
+		t.Errorf("Expected payload '%s', got '%s'", expectedPayload, result.Bid.Payload)
+	}
+
+	if result.Bid.ID != "1" {
+		t.Errorf("Expected bid ID '1', got '%s'", result.Bid.ID)
+	}
+
+	if result.Bid.ImpID != "1" {
+		t.Errorf("Expected imp ID '1', got '%s'", result.Bid.ImpID)
+	}
+
+	if result.Bid.SeatID != "taurusx" {
+		t.Errorf("Expected seat ID 'taurusx', got '%s'", result.Bid.SeatID)
+	}
+
+	if result.Bid.NURL != "https://notice-eu.ssp.taxssp.com/v1/win" {
+		t.Errorf("Expected NURL 'https://notice-eu.ssp.taxssp.com/v1/win', got '%s'", result.Bid.NURL)
+	}
+
+	if result.Bid.LURL != "https://notice-eu.ssp.taxssp.com/v1/loss" {
+		t.Errorf("Expected LURL 'https://notice-eu.ssp.taxssp.com/v1/loss', got '%s'", result.Bid.LURL)
 	}
 }
 
@@ -329,12 +520,10 @@ func TestTaurusXAdapter_CreateRequest_WithoutToken(t *testing.T) {
 		return
 	}
 
-	// Should still work without token
 	if len(request.Imp) != 1 {
 		t.Errorf("Expected 1 impression, got %d", len(request.Imp))
 	}
 
-	// Verify request extension has no token when not provided
 	var reqExt map[string]interface{}
 	if err := json.Unmarshal(request.Ext, &reqExt); err != nil {
 		t.Errorf("Failed to unmarshal request extension: %v", err)
@@ -345,7 +534,6 @@ func TestTaurusXAdapter_CreateRequest_WithoutToken(t *testing.T) {
 		t.Error("Expected no token in request extension when token is not provided")
 	}
 
-	// Verify app ID is still set correctly
 	if request.App == nil || request.App.ID != "test-app-id" {
 		t.Errorf("Expected app.id 'test-app-id', got '%v'", request.App.ID)
 	}
@@ -487,7 +675,7 @@ func TestTaurusXAdapter_CreateRequest_WithPlacementTokenNotFound(t *testing.T) {
 			},
 			Demands: map[adapter.Key]map[string]any{
 				adapter.TaurusXKey: {
-					"token": `{"different-placement-id":"some-token"}`, // Token for different placement
+					"token": `{"different-placement-id":"some-token"}`,
 				},
 			},
 		},
@@ -510,12 +698,10 @@ func TestTaurusXAdapter_CreateRequest_WithPlacementTokenNotFound(t *testing.T) {
 		return
 	}
 
-	// Should still work without token for this placement
 	if len(request.Imp) != 1 {
 		t.Errorf("Expected 1 impression, got %d", len(request.Imp))
 	}
 
-	// Verify request extension has no token when placement token is not found
 	var reqExt map[string]interface{}
 	if err := json.Unmarshal(request.Ext, &reqExt); err != nil {
 		t.Errorf("Failed to unmarshal request extension: %v", err)

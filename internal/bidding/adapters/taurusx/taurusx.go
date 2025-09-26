@@ -247,11 +247,24 @@ func (a *TaurusXAdapter) ParseBids(dr *adapters.DemandResponse) (*adapters.Deman
 	seat := bidResponse.SeatBid[0]
 	bid := seat.Bid[0]
 
+	payload := ""
+	if bidResponse.Ext != nil {
+		var extData map[string]interface{}
+		if err := json.Unmarshal(bidResponse.Ext, &extData); err != nil {
+			return dr, fmt.Errorf("failed to unmarshal bid response ext: %v", err)
+		}
+		if payloadValue, exists := extData["payload"]; exists {
+			if payloadStr, ok := payloadValue.(string); ok {
+				payload = payloadStr
+			}
+		}
+	}
+
 	dr.Bid = &adapters.BidDemandResponse{
 		ID:       bid.ID,
 		ImpID:    bid.ImpID,
 		Price:    bid.Price,
-		Payload:  bid.AdM,
+		Payload:  payload,
 		DemandID: adapter.TaurusXKey,
 		AdID:     bid.AdID,
 		SeatID:   seat.Seat,
