@@ -3,7 +3,7 @@ module github.com/bidon-io/bidon-backend
 go 1.24
 
 require (
-	github.com/Masterminds/semver/v3 v3.3.1
+	github.com/Masterminds/semver/v3 v3.4.0
 	github.com/alexedwards/scs/gormstore v0.0.0-20250212122300-421ef1d8611c
 	github.com/alexedwards/scs/v2 v2.8.0
 	github.com/bool64/cache v0.4.8
@@ -27,8 +27,8 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/jszwec/csvutil v1.10.0
 	github.com/labstack/echo-contrib v0.17.2
-	github.com/labstack/echo-jwt/v4 v4.3.0
-	github.com/labstack/echo/v4 v4.13.3
+	github.com/labstack/echo-jwt/v4 v4.3.1
+	github.com/labstack/echo/v4 v4.13.4
 	github.com/lib/pq v1.10.9
 	github.com/oapi-codegen/oapi-codegen/v2 v2.4.1
 	github.com/oapi-codegen/runtime v1.1.1
@@ -52,7 +52,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.34.0
 	go.uber.org/goleak v1.3.0
 	go.uber.org/zap v1.27.0
-	golang.org/x/crypto v0.36.0
+	golang.org/x/crypto v0.38.0
 	golang.org/x/exp v0.0.0-20250210185358-939b2ce775ac
 	google.golang.org/grpc v1.70.0
 	google.golang.org/protobuf v1.36.5
@@ -118,11 +118,11 @@ require (
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/mod v0.23.0 // indirect
-	golang.org/x/net v0.38.0 // indirect
-	golang.org/x/sync v0.12.0 // indirect
-	golang.org/x/sys v0.31.0 // indirect
-	golang.org/x/text v0.23.0 // indirect
-	golang.org/x/time v0.10.0 // indirect
+	golang.org/x/net v0.40.0 // indirect
+	golang.org/x/sync v0.14.0 // indirect
+	golang.org/x/sys v0.33.0 // indirect
+	golang.org/x/text v0.25.0 // indirect
+	golang.org/x/time v0.11.0 // indirect
 	golang.org/x/tools v0.30.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250212204824-5a70512c5d8b // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
