@@ -4,7 +4,7 @@ import "github.com/bidon-io/bidon-backend/internal/device"
 
 type Device struct {
 	Geo             *Geo        `json:"geo"`
-	UserAgent       string      `json:"ua" validate:"required"`
+	UserAgent       string      `json:"ua"`
 	Manufacturer    string      `json:"make" validate:"required"`
 	Model           string      `json:"model" validate:"required"`
 	OS              string      `json:"os" validate:"required"`
