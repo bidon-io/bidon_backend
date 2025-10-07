@@ -54,6 +54,36 @@
           IAB content categories for better ad targeting (comma-separated)
         </small>
       </FormField>
+      <FormField label="Blocked Advertiser Domains" :error="errors.badv">
+        <Textarea
+          v-model="badv"
+          rows="3"
+          placeholder="example.com, advertiser.net (comma-separated)"
+        />
+        <small class="p-text-secondary">
+          OpenRTB blocked advertiser domains (comma-separated)
+        </small>
+      </FormField>
+      <FormField label="Blocked Categories" :error="errors.bcat">
+        <Textarea
+          v-model="bcat"
+          rows="3"
+          placeholder="IAB25, IAB26 (comma-separated)"
+        />
+        <small class="p-text-secondary">
+          OpenRTB blocked advertiser categories (comma-separated)
+        </small>
+      </FormField>
+      <FormField label="Blocked Apps" :error="errors.bapp">
+        <Textarea
+          v-model="bapp"
+          rows="3"
+          placeholder="com.example.app, com.another.app (comma-separated)"
+        />
+        <small class="p-text-secondary">
+          OpenRTB blocked apps (comma-separated)
+        </small>
+      </FormField>
       <FormSubmitButton />
     </FormCard>
   </form>
@@ -84,6 +114,9 @@ let validationFields = {
   storeId: yup.string().label("Store ID"),
   storeUrl: yup.string().label("Store URL"),
   categories: yup.array().of(yup.string()).label("Categories"),
+  badv: yup.string().label("Blocked Advertiser Domains"),
+  bcat: yup.string().label("Blocked Categories"),
+  bapp: yup.string().label("Blocked Apps"),
 };
 
 if (currentUser.isAdmin) {
@@ -102,6 +135,9 @@ const { errors, useFieldModel, handleSubmit } = useForm({
     storeId: resource.value.storeId || "",
     storeUrl: resource.value.storeUrl || "",
     categories: resource.value.categories || [],
+    badv: resource.value.badv || "",
+    bcat: resource.value.bcat || "",
+    bapp: resource.value.bapp || "",
   },
 });
 
@@ -112,6 +148,9 @@ const userId = useFieldModel("userId");
 const storeId = useFieldModel("storeId");
 const storeUrl = useFieldModel("storeUrl");
 const categories = useFieldModel("categories");
+const badv = useFieldModel("badv");
+const bcat = useFieldModel("bcat");
+const bapp = useFieldModel("bapp");
 
 // Convert categories array to/from comma-separated string
 const categoriesText = computed({

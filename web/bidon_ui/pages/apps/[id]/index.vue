@@ -36,8 +36,11 @@ const fields = [
   { label: "Platform", key: "platformId" },
   { label: "Package Name", key: "packageName" },
   { label: "Store ID", key: "storeId" },
-  { label: "Store URL", key: "storeUrl", type: "link" },
-  { label: "Categories", key: "categories", type: "array" },
+  { label: "Store URL", key: "storeUrl" },
+  { label: "Categories", key: "categories" },
+  { label: "Blocked Advertiser Domains", key: "badv" },
+  { label: "Blocked Categories", key: "bcat" },
+  { label: "Blocked Apps", key: "bapp" },
   {
     key: "lineItems",
     label: "Line Items",

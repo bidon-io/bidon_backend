@@ -30,6 +30,9 @@ type App struct {
 	StoreID     sql.NullString `gorm:"column:store_id;type:character varying" json:"store_id"`
 	StoreURL    sql.NullString `gorm:"column:store_url;type:character varying" json:"store_url"`
 	Categories  pq.StringArray `gorm:"column:categories;type:text[]" json:"categories"`
+	Badv        sql.NullString `gorm:"column:badv;type:text" json:"badv"`
+	Bcat        sql.NullString `gorm:"column:bcat;type:text" json:"bcat"`
+	Bapp        sql.NullString `gorm:"column:bapp;type:text" json:"bapp"`
 	User        User           `json:"user"`
 }
 
