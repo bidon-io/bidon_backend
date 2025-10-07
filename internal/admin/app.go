@@ -29,6 +29,9 @@ type AppAttrs struct {
 	StoreID     string     `json:"store_id"`
 	StoreURL    string     `json:"store_url"`
 	Categories  []string   `json:"categories"`
+	Badv        string     `json:"badv"`
+	Bcat        string     `json:"bcat"`
+	Bapp        string     `json:"bapp"`
 }
 
 type PlatformID string

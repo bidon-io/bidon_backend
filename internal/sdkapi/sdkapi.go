@@ -16,6 +16,9 @@ type App struct {
 	StoreID    string
 	StoreURL   string
 	Categories []string
+	Badv       string
+	Bcat       string
+	Bapp       string
 }
 
 func CheckBidonHeader(next echo.HandlerFunc) echo.HandlerFunc {
