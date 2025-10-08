@@ -376,6 +376,9 @@ func prepareAuctionRequestEvent(
 		ECPM:                    0,
 		PriceFloor:              req.AdObject.PriceFloor,
 		Error:                   errorMsg,
+		Badv:                    params.App.GetBadv(),
+		Bcat:                    params.App.GetBcat(),
+		Bapp:                    params.App.GetBapp(),
 	}
 
 	return event.NewAdEvent(&req.BaseRequest, adRequestParams, params.GeoData)
@@ -426,6 +429,9 @@ func prepareBiddingEvents(
 				"bid":   {result.StartTS, result.EndTS},
 				"token": {result.Token.StartTS, result.Token.EndTS},
 			},
+			Badv: params.App.GetBadv(),
+			Bcat: params.App.GetBcat(),
+			Bapp: params.App.GetBapp(),
 		}
 		events = append(events, event.NewAdEvent(&req.BaseRequest, adRequestParams, params.GeoData))
 		if result.IsBid() {
