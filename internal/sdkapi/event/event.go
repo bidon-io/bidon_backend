@@ -46,6 +46,9 @@ func NewAdEvent(request *schema.BaseRequest, adRequestParams AdRequestParams, ge
 	}
 	requestEvent.ExternalWinnerDemandID = adRequestParams.ExternalWinnerDemandID
 	requestEvent.ExternalWinnerEcpm = adRequestParams.ExternalWinnerEcpm
+	requestEvent.Badv = adRequestParams.Badv
+	requestEvent.Bcat = adRequestParams.Bcat
+	requestEvent.Bapp = adRequestParams.Bapp
 
 	return requestEvent
 }
@@ -143,6 +146,9 @@ type AdRequestParams struct {
 	TimingMap               TimingMap
 	ExternalWinnerDemandID  string
 	ExternalWinnerEcpm      float64
+	Badv                    string
+	Bcat                    string
+	Bapp                    string
 }
 
 const (
@@ -209,6 +215,9 @@ type AdEvent struct {
 	Session                     Session           `json:"session"`
 	MediationMode               string            `json:"mediation_mode"`
 	Mediator                    string            `json:"mediator"`
+	Badv                        string            `json:"badv,omitempty"`
+	Bcat                        string            `json:"bcat,omitempty"`
+	Bapp                        string            `json:"bapp,omitempty"`
 }
 
 type Session struct {

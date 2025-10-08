@@ -21,6 +21,52 @@ type App struct {
 	Bapp       string
 }
 
+func (a *App) GetBadv() string {
+	if a == nil {
+		return ""
+	}
+	return a.Badv
+}
+
+func (a *App) GetBcat() string {
+	if a == nil {
+		return ""
+	}
+	return a.Bcat
+}
+
+func (a *App) GetBapp() string {
+	if a == nil {
+		return ""
+	}
+	return a.Bapp
+}
+
+func GetBlockedAdvertisersList(app *App) []string {
+	return parseCommaSeparatedList(app.GetBadv())
+}
+
+func GetBlockedCategoriesList(app *App) []string {
+	return parseCommaSeparatedList(app.GetBcat())
+}
+
+func GetBlockedAppsList(app *App) []string {
+	return parseCommaSeparatedList(app.GetBapp())
+}
+
+func parseCommaSeparatedList(s string) []string {
+	if s == "" {
+		return nil
+	}
+	var result []string
+	for part := range strings.SplitSeq(s, ",") {
+		if trimmed := strings.TrimSpace(part); trimmed != "" {
+			result = append(result, trimmed)
+		}
+	}
+	return result
+}
+
 func CheckBidonHeader(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		skipper := skipIfUtilRoutes()

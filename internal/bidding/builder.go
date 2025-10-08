@@ -106,6 +106,9 @@ func (b *Builder) HoldAuction(ctx context.Context, params *BuildParams) (Auction
 			COPPA: *bool2int(auctionRequest.GetRegulations().COPPA),
 			GDPR:  bool2int(auctionRequest.GetRegulations().GDPR),
 		},
+		BAdv: sdkapi.GetBlockedAdvertisersList(params.App),
+		BCat: sdkapi.GetBlockedCategoriesList(params.App),
+		BApp: sdkapi.GetBlockedAppsList(params.App),
 	}
 
 	var adapterKeys []adapter.Key
