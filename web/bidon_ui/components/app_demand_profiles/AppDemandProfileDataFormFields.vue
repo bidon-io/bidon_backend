@@ -38,6 +38,9 @@
   <template v-if="accountType == 'DemandSourceAccount::Moloco'">
     <VeeFormFieldWrapper field="data.appKey" label="App Key" required />
   </template>
+  <template v-if="accountType == 'DemandSourceAccount::StartIO'">
+    <VeeFormFieldWrapper field="data.appId" label="App Id" required />
+  </template>
   <template v-if="accountType == 'DemandSourceAccount::TaurusX'">
     <VeeFormFieldWrapper field="data.appId" label="App Id" required />
   </template>
@@ -106,6 +109,9 @@ const dataSchemas = {
   }),
   "DemandSourceAccount::Moloco": yup.object({
     appKey: yup.string().required().label("App Key"),
+  }),
+  "DemandSourceAccount::StartIO": yup.object({
+    appId: yup.string().required().label("App Id"),
   }),
   "DemandSourceAccount::TaurusX": yup.object({
     appId: yup.string().required().label("App Id"),

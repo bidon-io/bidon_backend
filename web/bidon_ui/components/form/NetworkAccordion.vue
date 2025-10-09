@@ -307,6 +307,14 @@ const networks = ref<Network[]>([
     selectedAdUnitIds: [],
   },
   {
+    label: "Start.io",
+    key: "startio",
+    isBidding: true,
+    enabled: false,
+    adUnits: [],
+    selectedAdUnitIds: [],
+  },
+  {
     label: "TaurusX",
     key: "taurusx",
     isBidding: true,

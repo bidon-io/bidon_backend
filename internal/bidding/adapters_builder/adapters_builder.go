@@ -16,6 +16,7 @@ import (
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters/mintegral"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters/mobilefuse"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters/moloco"
+	"github.com/bidon-io/bidon-backend/internal/bidding/adapters/startio"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters/taurusx"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters/vkads"
 	"github.com/bidon-io/bidon-backend/internal/bidding/adapters/vungle"
@@ -30,6 +31,7 @@ var biddingAdapters = map[adapter.Key]adapters.Builder{
 	adapter.MintegralKey:  mintegral.Builder,
 	adapter.MobileFuseKey: mobilefuse.Builder,
 	adapter.MolocoKey:     moloco.Builder,
+	adapter.StartIOKey:    startio.Builder,
 	adapter.TaurusXKey:    taurusx.Builder,
 	adapter.VKAdsKey:      vkads.Builder,
 	adapter.VungleKey:     vungle.Builder,
@@ -167,6 +169,14 @@ func (b *AdaptersConfigBuilder) Build(ctx context.Context, appID int64, adapterK
 			adUnit, _ := adUnitsMap.First(key, schema.RTBBidType)
 			if adUnit != nil {
 				adaptersMap[key]["tag_id"] = adUnit.Extra["ad_unit_id"]
+			}
+		case adapter.StartIOKey:
+			adaptersMap[key]["app_id"] = appData["app_id"]
+			adaptersMap[key]["account"] = extra["account"]
+
+			adUnit, _ := adUnitsMap.First(key, schema.RTBBidType)
+			if adUnit != nil {
+				adaptersMap[key]["tag_id"] = adUnit.Extra["tag_id"]
 			}
 		case adapter.TaurusXKey:
 			adaptersMap[key]["app_id"] = appData["app_id"]

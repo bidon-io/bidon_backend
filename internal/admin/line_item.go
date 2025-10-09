@@ -875,6 +875,10 @@ func (v *lineItemAttrsValidator) extraRule(account *DemandSourceAccount) v8n.Rul
 		rule = v8n.Map(
 			v8n.Key("ad_unit_id", v8n.Required, isString),
 		)
+	case adapter.StartIOKey:
+		rule = v8n.Map(
+			v8n.Key("tag_id", v8n.Required, isString),
+		)
 	case adapter.VKAdsKey:
 		rule = v8n.Map(
 			v8n.Key("slot_id", v8n.Required, isString),

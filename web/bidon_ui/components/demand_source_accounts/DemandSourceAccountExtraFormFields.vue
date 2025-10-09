@@ -52,6 +52,9 @@
     <!-- Moloco configuration is handled via environment variables -->
     <!-- No additional form fields required -->
   </template>
+  <template v-if="apiKey === 'startio'">
+    <VeeFormFieldWrapper field="extra.account" label="Account" required />
+  </template>
   <template v-if="apiKey === 'vungle'">
     <VeeFormFieldWrapper field="extra.accountId" label="Account ID" required />
   </template>
@@ -127,6 +130,9 @@ const dataSchemas = {
   }),
   moloco: yup.object({
     // No additional validation required - API key handled via environment
+  }),
+  startio: yup.object({
+    account: yup.string().required().label("Account"),
   }),
   vungle: yup.object({
     accountId: yup.string().required().label("Account Id"),
