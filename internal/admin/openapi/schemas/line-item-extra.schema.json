@@ -125,6 +125,16 @@
         }
       },
       "required": ["ad_unit_id"]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "tag_id": {
+          "type": "string",
+          "description": "Tag ID (for StartIO)"
+        }
+      },
+      "required": ["tag_id"]
     }
   ],
   "additionalProperties": false

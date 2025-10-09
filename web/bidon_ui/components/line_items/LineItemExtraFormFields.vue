@@ -70,6 +70,9 @@
   <template v-if="apiKey === 'moloco'">
     <VeeFormFieldWrapper field="extra.adUnitId" label="Ad Unit Id" required />
   </template>
+  <template v-if="apiKey === 'startio'">
+    <VeeFormFieldWrapper field="extra.tagId" label="Tag Id" required />
+  </template>
   <template v-if="apiKey === 'taurusx'">
     <VeeFormFieldWrapper
       field="extra.placementId"
@@ -168,6 +171,9 @@ const dataSchemas = {
   }),
   moloco: yup.object({
     adUnitId: yup.string().required().label("Ad Unit Id"),
+  }),
+  startio: yup.object({
+    tagId: yup.string().required().label("Tag Id"),
   }),
   taurusx: yup.object({
     placementId: yup.string().required().label("Placement Id"),

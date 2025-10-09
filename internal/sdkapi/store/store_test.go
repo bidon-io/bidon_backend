@@ -220,6 +220,9 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Valid(t *testing.T) {
 				&sdkapi.MolocoInitConfig{
 					AppKey: fmt.Sprintf("moloco_app_%d", apps[1].ID),
 				},
+				&sdkapi.StartIOInitConfig{
+					AppID: fmt.Sprintf("startio_app_%d", apps[1].ID),
+				},
 				&sdkapi.TaurusXInitConfig{
 					AppID:   fmt.Sprintf("taurusx_app_%d", apps[1].ID),
 					Channel: "bidon",
@@ -275,6 +278,10 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Valid(t *testing.T) {
 				&sdkapi.MolocoInitConfig{
 					AppKey: fmt.Sprintf("moloco_app_%d", apps[1].ID),
 					Order:  0,
+				},
+				&sdkapi.StartIOInitConfig{
+					AppID: fmt.Sprintf("startio_app_%d", apps[1].ID),
+					Order: 0,
 				},
 				&sdkapi.TaurusXInitConfig{
 					AppID:   fmt.Sprintf("taurusx_app_%d", apps[1].ID),
