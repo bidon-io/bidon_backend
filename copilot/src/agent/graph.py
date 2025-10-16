@@ -67,7 +67,7 @@ def query_admin_api(task: str, config: RunnableConfig | None = None) -> str:
     requests_wrapper = RequestsWrapper(headers=headers)
 
     llm = ChatAnthropic(
-        model="claude-3-5-haiku-latest",
+        model="claude-sonnet-4-5-20250929",
         api_key=os.getenv("ANTHROPIC_API_KEY"),
         temperature=0,
     )
@@ -117,7 +117,7 @@ def create_agent():
         Configured LangGraph agent ready for use
     """
     model = ChatAnthropic(
-        model="claude-3-7-sonnet-latest",
+        model="claude-sonnet-4-5-20250929",
         api_key=os.getenv("ANTHROPIC_API_KEY"),
         temperature=0
     )
