@@ -82,7 +82,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from "vue";
+import { onMounted, nextTick } from "vue";
 import { Client } from "@langgraph-js/sdk";
 import { useToast } from "primevue/usetoast";
 
@@ -344,7 +344,14 @@ async function onSend() {
       }
 
       if (delta) {
-        messages.value[assistantIndex].content += delta;
+        // Use reactive reference instead of direct mutation to ensure Vue reactivity
+        messages.value = messages.value.map((msg, idx) =>
+          idx === assistantIndex
+            ? { ...msg, content: msg.content + delta }
+            : msg,
+        );
+        // Force Vue to update DOM after each chunk
+        await nextTick();
       }
     }
   } catch (err: unknown) {
