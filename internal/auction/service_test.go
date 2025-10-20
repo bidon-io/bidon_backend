@@ -932,6 +932,14 @@ func TestService_Run_BuildDemandExtVariousAdapters(t *testing.T) {
 					Extra:    map[string]any{"test_key": "test_value"},
 				},
 				{
+					DemandID: string(adapter.YandexKey),
+					UID:      "yandex_unit_123",
+					Label:    "yandex_test",
+					BidType:  schema.RTBBidType,
+					Timeout:  30000,
+					Extra:    map[string]any{"test_key": "test_value"},
+				},
+				{
 					DemandID: string(adapter.VKAdsKey),
 					UID:      "vkads_unit_123",
 					Label:    "vkads_test",
@@ -973,6 +981,16 @@ func TestService_Run_BuildDemandExtVariousAdapters(t *testing.T) {
 								Price:      0.13,
 								Payload:    "mobilefuse_payload",
 								Signaldata: "mobilefuse_signal",
+							},
+						},
+						{
+							DemandID: adapter.YandexKey,
+							Bid: &adapters.BidDemandResponse{
+								ID:         "yandex_bid",
+								ImpID:      "yandex_imp",
+								Price:      0.15,
+								Payload:    "yandex_payload",
+								Signaldata: "yandex_signal",
 							},
 						},
 						{
@@ -1028,6 +1046,7 @@ func TestService_Run_BuildDemandExtVariousAdapters(t *testing.T) {
 
 	amazonFound := false
 	mobilefuseFound := false
+	yandexFound := false
 	vkadsFound := false
 	unknownFound := false
 
@@ -1038,6 +1057,10 @@ func TestService_Run_BuildDemandExtVariousAdapters(t *testing.T) {
 		case string(adapter.MobileFuseKey):
 			if signaldata, ok := adUnit.Extra["signaldata"].(string); ok && signaldata == "mobilefuse_signal" {
 				mobilefuseFound = true
+			}
+		case string(adapter.YandexKey):
+			if signaldata, ok := adUnit.Extra["signaldata"].(string); ok && signaldata == "yandex_signal" {
+				yandexFound = true
 			}
 		case string(adapter.VKAdsKey):
 			if bidID, ok := adUnit.Extra["bid_id"].(string); ok && bidID == "vkads_bid_123" {
@@ -1055,6 +1078,9 @@ func TestService_Run_BuildDemandExtVariousAdapters(t *testing.T) {
 	}
 	if !mobilefuseFound {
 		t.Error("Expected MobileFuse ad unit to have signaldata")
+	}
+	if !yandexFound {
+		t.Error("Expected Yandex ad unit to have signaldata")
 	}
 	if !vkadsFound {
 		t.Error("Expected VKAds ad unit to have bid_id")

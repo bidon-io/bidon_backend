@@ -221,6 +221,8 @@ func (v *appDemandProfileAttrsValidator) dataRule(demandSource *DemandSource) v8
 		rule = v8n.Map(
 			v8n.Key("game_id", v8n.Required, isString),
 		)
+	case adapter.YandexKey:
+		rule = v8n.Map()
 	}
 
 	return rule.AllowExtraKeys()

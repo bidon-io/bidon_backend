@@ -99,7 +99,7 @@
     <VeeFormFieldWrapper field="extra.mediation" label="Mediation" />
   </template>
   <template v-if="apiKey === 'yandex'">
-    <VeeFormFieldWrapper field="extra.adUnitId" label="Ad Unit Id" />
+    <VeeFormFieldWrapper field="extra.adUnitId" label="Ad Unit Id" required />
   </template>
 </template>
 
@@ -189,7 +189,7 @@ const dataSchemas = {
     mediation: yup.string().label("Mediation"),
   }),
   yandex: yup.object({
-    adUnitId: yup.string().label("Ad Unit Id"),
+    adUnitId: yup.string().required().label("Ad Unit Id"),
   }),
 };
 
