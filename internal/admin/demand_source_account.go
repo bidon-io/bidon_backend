@@ -226,9 +226,10 @@ func (v *demandSourceAccountValidator) extraRule(demandSource *DemandSource) v8n
 			v8n.Key("account_id", v8n.Required, isString),
 		)
 	case adapter.YandexKey:
-		rule = v8n.Map(
-			v8n.Key("oauth_token", v8n.Required, isString),
-		)
+		// Yandex doesn't require extra fields for bidding
+		// Authentication is via ssp-id in endpoint URL
+		// oauth_token field exists in UI but is optional (for reporting APIs)
+		rule = v8n.Map()
 	}
 
 	return rule.AllowExtraKeys()

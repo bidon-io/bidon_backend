@@ -126,7 +126,7 @@ const dataSchemas = {
     appKey: yup.string().required().label("App Key"),
   }),
   "DemandSourceAccount::Yandex": yup.object({
-    metricaId: yup.string().required().label("Metrica ID"),
+    metricaId: yup.string().label("Metrica ID"),
   }),
 };
 

@@ -489,6 +489,10 @@ func buildDemandExt(req *schema.AuctionRequest, demandResponse adapters.DemandRe
 		return map[string]any{
 			"signaldata": demandResponse.Bid.Signaldata,
 		}
+	case adapter.YandexKey:
+		return map[string]any{
+			"signaldata": demandResponse.Bid.Signaldata,
+		}
 	case adapter.VKAdsKey:
 		return map[string]any{
 			"bid_id": demandResponse.Bid.ID,
