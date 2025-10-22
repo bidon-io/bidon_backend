@@ -3,7 +3,12 @@
     <AmazonPricePointsForm />
   </template>
   <template v-if="apiKey === 'applovin'">
-    <VeeFormFieldWrapper field="extra.sdkKey" label="SDK Key" required />
+    <VeeFormFieldWrapper
+      field="extra.sdkKey"
+      label="SDK Key"
+      placeholder="Returned as 'app_key' in SDK API"
+      required
+    />
   </template>
   <template v-if="apiKey === 'bidmachine'">
     <VeeFormFieldWrapper field="extra.sellerId" label="Seller ID" required />
