@@ -7,6 +7,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
+
 	"github.com/bidon-io/bidon-backend/internal/ad"
 	"github.com/bidon-io/bidon-backend/internal/adapter"
 	"github.com/bidon-io/bidon-backend/internal/auction"
@@ -1178,9 +1180,14 @@ func TestBidmachineWithPlacementID(t *testing.T) {
 		EventLogger:        eventLogger,
 	}
 
+	app := testApp(1)
+	app.Badv = "advertiser1.com, advertiser2.com"
+	app.Bcat = "IAB25-1, IAB26-2"
+	app.Bapp = "com.blocked.app1, com.blocked.app2"
+
 	params := &auction.ExecutionParams{
 		Req:     request,
-		App:     testApp(1),
+		App:     app,
 		Country: "US",
 		GeoData: geoData,
 		Log:     func(string) {},
@@ -1202,17 +1209,12 @@ func TestBidmachineWithPlacementID(t *testing.T) {
 		t.Errorf("Expected DemandID to be 'bidmachine', got '%s'", bidmachineAdUnit.DemandID)
 	}
 
-	// Check that placement is included in the ext object (from the Extra field)
-	if placementValue, exists := bidmachineAdUnit.Extra["placement"]; !exists {
-		t.Error("Expected placement to be present in ext object")
-	} else if placementValue != placementID {
-		t.Errorf("Expected placement to be '%s', got '%v'", placementID, placementValue)
+	want := map[string]any{
+		"placement": placementID,
+		"payload":   "test_payload",
 	}
 
-	// Check that payload is also present
-	if payload, exists := bidmachineAdUnit.Extra["payload"]; !exists {
-		t.Error("Expected payload to be present in ext object")
-	} else if payload != "test_payload" {
-		t.Errorf("Expected payload to be 'test_payload', got '%v'", payload)
+	if diff := cmp.Diff(want, bidmachineAdUnit.Extra); diff != "" {
+		t.Errorf("Extra mismatch (-want +got):\n%s", diff)
 	}
 }

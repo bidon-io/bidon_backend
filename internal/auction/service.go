@@ -156,7 +156,7 @@ func (s *Service) Run(ctx context.Context, params *ExecutionParams) (*Response, 
 
 	adUnitsMap = buildAdUnitsMap(auctionResult.AdUnits)
 
-	return s.buildResponse(req, auctionResult, adUnitsMap)
+	return s.buildResponse(req, auctionResult, adUnitsMap, params.App)
 }
 
 // Auction keys that should have disabled price floors when using custom adapters
@@ -203,6 +203,7 @@ func (s *Service) buildResponse(
 	req *schema.AuctionRequest,
 	auctionResult *Result,
 	adUnitsMap *AdUnitsMap,
+	app *sdkapi.App,
 ) (*Response, error) {
 	adObject := req.AdObject
 	response := Response{
@@ -230,6 +231,7 @@ func (s *Service) buildResponse(
 		}
 		if adUnit.DemandID == string(adapter.BidmachineKey) {
 			adUnit.Extra["custom_parameters"] = bidmachine.ExtraParams(req)
+			addBlockingFields(adUnit.Extra, app)
 		}
 
 		response.AdUnits = append(response.AdUnits, adUnit)
@@ -511,6 +513,18 @@ func buildDemandExt(req *schema.AuctionRequest, demandResponse adapters.DemandRe
 		return map[string]any{
 			"payload": demandResponse.Bid.Payload,
 		}
+	}
+}
+
+func addBlockingFields(ext map[string]any, app *sdkapi.App) {
+	if app.Badv != "" {
+		ext["badv"] = app.Badv
+	}
+	if app.Bcat != "" {
+		ext["bcat"] = app.Bcat
+	}
+	if app.Bapp != "" {
+		ext["bapp"] = app.Bapp
 	}
 }
 
