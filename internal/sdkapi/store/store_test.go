@@ -171,6 +171,7 @@ func TestAdapterInitConfigsFetcher_FetchAdapterInitConfigs_Valid(t *testing.T) {
 				},
 				&sdkapi.ApplovinInitConfig{
 					SDKKey: "applovin",
+					AppKey: "applovin",
 				},
 				&sdkapi.BidmachineInitConfig{
 					SellerID:        "1",

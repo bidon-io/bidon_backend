@@ -85,6 +85,7 @@ func (a *AdmobInitConfig) SetDefaultOrder() {
 
 type ApplovinInitConfig struct {
 	SDKKey string `json:"sdk_key,omitempty"`
+	AppKey string `json:"app_key,omitempty"` // app_key is a copy of sdk_key for SDK API compatibility
 	Order  int    `json:"order"`
 }
 
