@@ -125,6 +125,41 @@ func (h *ConfigHandler) Handle(c echo.Context) error {
 			}
 		}
 
+		// TODO: Move AppLovin experimental configuration to models level
+		if cfg.Key() == adapter.ApplovinKey {
+			if applovinCfg, ok := cfg.(*sdkapi.ApplovinInitConfig); ok {
+				// Hardcoded experimental configuration for specific apps
+				switch req.app.ID {
+				case 735385: // JoinBlocks iOS
+					applovinCfg.AdUnitIDs = []string{
+						"dbadb46cdb8dcbc4",
+						"162430caf838b573",
+						"af144a6470c71e42",
+						"3a06357bdab4ee6b",
+						"75401a0c835c12af",
+						"8aacc527c3b5be39",
+						"1638c8cee4745fa0",
+						"48077ec3fc1fc3ec",
+						"3ed4466ff294569a",
+					}
+					applovinCfg.Mediator = "Bidon"
+				case 735379: // JoinBlocks Android
+					applovinCfg.AdUnitIDs = []string{
+						"062983d4dd0358e2",
+						"4cbcf418b2f994e2",
+						"280987aff5690161",
+						"1cdd6eb52418c959",
+						"e264b1821be63bc9",
+						"065b4f0d1977d97d",
+						"ce39f0751a52990f",
+						"926fb917d86ee946",
+						"13407842c572a710",
+					}
+					applovinCfg.Mediator = "Bidon"
+				}
+			}
+		}
+
 		adapters[cfg.Key()] = cfg
 	}
 
