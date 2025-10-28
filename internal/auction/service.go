@@ -517,14 +517,14 @@ func buildDemandExt(req *schema.AuctionRequest, demandResponse adapters.DemandRe
 }
 
 func addBlockingFields(ext map[string]any, app *sdkapi.App) {
-	if app.Badv != "" {
-		ext["badv"] = app.Badv
+	if badv := sdkapi.GetBlockedAdvertisersList(app); len(badv) > 0 {
+		ext["badv"] = badv
 	}
-	if app.Bcat != "" {
-		ext["bcat"] = app.Bcat
+	if bcat := sdkapi.GetBlockedCategoriesList(app); len(bcat) > 0 {
+		ext["bcat"] = bcat
 	}
-	if app.Bapp != "" {
-		ext["bapp"] = app.Bapp
+	if bapp := sdkapi.GetBlockedAppsList(app); len(bapp) > 0 {
+		ext["bapp"] = bapp
 	}
 }
 
