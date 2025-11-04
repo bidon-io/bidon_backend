@@ -58,16 +58,16 @@ func (m *AdUnitsMatcher) Match(ctx context.Context, params *auction.BuildParams)
 	}
 
 	if params.AdType != ad.BannerType {
-		return m.find(query)
+		return m.find(query, params.App.ID)
 	}
 
 	adFormats := m.selectAdFormats(params)
 	query = query.Where(map[string]any{"format": adFormats})
 
-	return m.find(query)
+	return m.find(query, params.App.ID)
 }
 
-func (m *AdUnitsMatcher) find(query *gorm.DB) ([]auction.AdUnit, error) {
+func (m *AdUnitsMatcher) find(query *gorm.DB, appID int64) ([]auction.AdUnit, error) {
 	var dbLineItems []db.LineItem
 	if err := query.Find(&dbLineItems).Error; err != nil {
 		return nil, err
@@ -91,7 +91,7 @@ func (m *AdUnitsMatcher) find(query *gorm.DB) ([]auction.AdUnit, error) {
 			adUnits[i].PriceFloor = &pf
 		}
 		adUnits[i].Extra = dbLineItem.Extra
-		adUnits[i].Timeout = m.timeout(adUnits[i].DemandID)
+		adUnits[i].Timeout = m.timeout(adUnits[i].DemandID, appID)
 	}
 
 	return adUnits, nil
@@ -130,7 +130,12 @@ func (m *AdUnitsMatcher) selectAdFormats(params *auction.BuildParams) []ad.Forma
 }
 
 // timeout 6 seconds for all adapters except admob, which is 10 seconds
-func (m *AdUnitsMatcher) timeout(demandID string) int32 {
+func (m *AdUnitsMatcher) timeout(demandID string, appID int64) int32 {
+	// TODO: temporary override for JoinBlocks Android and JoinBlocks iOS
+	if appID == 735379 || appID == 735385 {
+		return 10_000
+	}
+
 	if demandID == string(adapter.AdmobKey) {
 		return 10_000
 	}
