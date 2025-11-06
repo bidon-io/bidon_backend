@@ -24,56 +24,48 @@
         </span>
       </template>
       <Fieldset legend="Ad Units" class="p-fieldset">
-        <!-- For Waterfall Networks -->
-        <template v-if="!network.isBidding">
-          <div class="flex flex-col gap-2">
-            <div
-              v-for="(adUnit, index) in network.adUnits"
-              :key="adUnit.id"
-              class="flex items-center p-2"
-              :class="{
-                'border-b border-gray-200':
-                  index !== network.adUnits.length - 1,
-              }"
-            >
-              <Checkbox
-                v-model="network.selectedAdUnitIds"
-                :value="adUnit.id"
-                class="mr-3"
-              />
-              <div class="flex-grow">
-                {{ adUnit.label }} -
+        <div class="flex flex-col gap-2">
+          <div
+            v-for="(adUnit, index) in network.adUnits"
+            :key="adUnit.id"
+            class="flex items-start p-2"
+            :class="{
+              'border-b border-gray-200': index !== network.adUnits.length - 1,
+            }"
+          >
+            <Checkbox
+              v-model="network.selectedAdUnitIds"
+              :value="adUnit.id"
+              class="mr-3 mt-1"
+            />
+            <div class="flex-grow">
+              <NuxtLink
+                :to="`/line_items/${adUnit.id}`"
+                class="text-blue-600 hover:text-blue-800 hover:underline font-medium"
+              >
+                {{ adUnit.label }}
+              </NuxtLink>
+              <div v-if="!network.isBidding" class="text-sm text-gray-600 mt-1">
                 <span class="font-medium"
-                  >${{ adUnit.pricefloor.toFixed(2) }}</span
+                  >Floor: ${{ adUnit.pricefloor.toFixed(2) }}</span
                 >
               </div>
-            </div>
-          </div>
-        </template>
-
-        <!-- For Bidding Networks -->
-        <template v-else>
-          <div class="flex flex-col gap-2">
-            <div
-              v-for="(adUnit, index) in network.adUnits"
-              :key="adUnit.id"
-              class="flex items-center p-2"
-              :class="{
-                'border-b border-gray-200':
-                  index !== network.adUnits.length - 1,
-              }"
-            >
-              <Checkbox
-                v-model="network.selectedAdUnitIds"
-                :value="adUnit.id"
-                class="mr-3"
-              />
-              <div class="flex-grow">
-                {{ adUnit.label }}
+              <div
+                v-if="Object.keys(adUnit.extra).length > 0"
+                class="text-sm text-gray-600 mt-1"
+              >
+                <div
+                  v-for="field in getExtraFields(adUnit.extra)"
+                  :key="field.key"
+                  class="mt-0.5"
+                >
+                  <span class="font-medium">{{ field.label }}:</span>
+                  {{ field.value }}
+                </div>
               </div>
             </div>
           </div>
-        </template>
+        </div>
       </Fieldset>
     </AccordionTab>
   </Accordion>
@@ -81,6 +73,7 @@
 
 <script lang="ts" setup>
 import axios from "@/services/ApiService";
+import { formatLabel } from "@/utils/jsonToFields";
 
 type Network = {
   label: string;
@@ -99,6 +92,20 @@ type AdUnit = {
   isBidding: boolean;
   pricefloor: number;
   account: string;
+  extra: Record<string, string | number | boolean>;
+};
+
+// Helper function to convert extra JSON fields to formatted fields
+const getExtraFields = (extra: Record<string, string | number | boolean>) => {
+  if (!extra) {
+    return [];
+  }
+
+  return Object.keys(extra).map((key) => ({
+    key,
+    label: formatLabel(key),
+    value: extra[key],
+  }));
 };
 
 const props = defineProps({
@@ -374,6 +381,7 @@ const {
           adUnit.accountId
         })`,
         isBidding: adUnit.isBidding,
+        extra: adUnit.extra || {},
       }),
     ) as AdUnit[];
   },
