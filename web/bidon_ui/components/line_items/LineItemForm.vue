@@ -70,7 +70,7 @@
         :ad-type="adType"
         :ad-type-with-format="adTypeWithFormat"
       />
-      <FormSubmitButton :disabled="!meta.valid" />
+      <FormSubmitButton />
     </FormCard>
   </form>
 </template>
@@ -99,36 +99,39 @@ const adTypeWithFormat = ref({
   adType: resource.value.adType,
   format: resource.value.format,
 });
-const { errors, meta, useFieldModel, handleSubmit } = useForm({
-  validationSchema: computed(() =>
-    yup.object({
-      humanName: yup.string().required().label("Label"),
-      appId: yup.number().required().label("App Id"),
-      bidFloor:
-        auctionType.value !== "bidding"
-          ? yup.number().positive().required().label("Bid Floor")
-          : yup.number().nullable(true).label("Bid Floor"),
-      adType: yup.string().required().label("AdType"),
-      format: yup
-        .string()
-        .nullable(true)
-        .when("adType", {
-          is: "banner",
-          then: (schema) =>
-            schema.required("Format is required for Banner Ad Type"),
-        }),
-      accountId: yup.number().required().label("Account Id"),
-      accountType: yup.string().required().label("Demand Source"),
-      isBidding: yup.boolean(),
-      extra: extraSchema.value,
-    }),
-  ),
+
+const validationSchema = computed(() =>
+  yup.object({
+    humanName: yup.string().required().label("Label"),
+    appId: yup.number().required().label("App Id"),
+    bidFloor:
+      auctionType.value !== "bidding"
+        ? yup.number().required().positive().label("Bid Floor")
+        : yup.number().nullable(true).label("Bid Floor"),
+    adType: yup.string().required().label("AdType"),
+    format: yup
+      .string()
+      .nullable(true)
+      .when("adType", {
+        is: "banner",
+        then: (schema) =>
+          schema.required("Format is required for Banner Ad Type"),
+      }),
+    accountId: yup.number().required().label("Account Id"),
+    accountType: yup.string().required().label("Demand Source"),
+    isBidding: yup.boolean(),
+    extra: yup.lazy(() => extraSchema.value),
+  }),
+);
+
+const { errors, useFieldModel, handleSubmit } = useForm({
+  validationSchema,
   initialValues: {
     humanName: resource.value.humanName || "",
     appId: resource.value.appId || null,
     bidFloor: resource.value.bidFloor
       ? parseFloat(resource.value.bidFloor)
-      : null,
+      : 0.0,
     adType: resource.value.adType || "",
     format: resource.value.format || "",
     accountId: resource.value.accountId || null,
