@@ -16,6 +16,7 @@ const columns = [
   ResourceTableFields.App,
   ResourceTableFields.BidType,
   ResourceTableFields.AdTypeWithFormat,
+  ResourceTableFields.DemandSourceType,
   ResourceTableFields.DemandSourceAccount,
 ];
 const resourcesPath = "/line_items";
