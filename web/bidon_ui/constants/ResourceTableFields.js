@@ -1,5 +1,6 @@
 import { FilterMatchMode } from "primevue/api";
 import { AdTypeEnum } from "~/types";
+import { DEMAND_SOURCE_OPTIONS } from "./DemandSourceOptions";
 
 /**
  * Utility function to get a formatted label for ad type and format combinations
@@ -264,6 +265,31 @@ export const ResourceTableFields = {
                 account?.label ? account?.label : `#${account?.id}`
               }`,
               value: String(account?.id),
+            },
+          ]),
+        ).values(),
+      ],
+    },
+  },
+  DemandSourceType: {
+    field: "accountType",
+    header: "Demand Source",
+    customBody: (rowData) => {
+      return rowData.accountType?.split("::")[1] || "";
+    },
+    filter: {
+      field: "accountType",
+      type: "select",
+      matchMode: FilterMatchMode.EQUALS,
+      placeholder: "Demand Source",
+      loadOptions: async () => DEMAND_SOURCE_OPTIONS,
+      extractOptions: (records) => [
+        ...new Map(
+          records.map(({ accountType }) => [
+            accountType,
+            {
+              label: accountType?.split("::")[1] || "",
+              value: accountType,
             },
           ]),
         ).values(),
