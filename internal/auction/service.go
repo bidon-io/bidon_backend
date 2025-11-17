@@ -524,7 +524,7 @@ func addBlockingFields(ext map[string]any, app *sdkapi.App) {
 		ext["bcat"] = bcat
 	}
 	if bapp := sdkapi.GetBlockedAppsList(app); len(bapp) > 0 {
-		ext["bapp"] = bapp
+		ext["bapps"] = bapp
 	}
 }
 
