@@ -167,6 +167,7 @@ func (a *Adapter) CreateRequest(request openrtb.BidRequest, auctionRequest *sche
 		request.App = &openrtb2.App{}
 	}
 	request.App.ID = a.AppID
+	request.App.Publisher = &openrtb2.Publisher{}
 
 	demandData, ok := auctionRequest.AdObject.Demands[adapter.StartIOKey]
 	if !ok {
